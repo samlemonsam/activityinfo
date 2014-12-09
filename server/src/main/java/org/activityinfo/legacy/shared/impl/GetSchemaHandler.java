@@ -98,12 +98,18 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         }
 
         public Promise<Void> loadLocationTypes() {
-            return execute(SqlQuery.select("locationTypeId",
+            SqlQuery query = SqlQuery.select("locationTypeId",
                     "name",
                     "boundAdminLevelId",
                     "countryId",
                     "workflowId",
-                    "databaseId").from("locationtype"), new RowHandler() {
+                    "databaseId").from("locationtype");
+
+            if (context.isRemote()) {
+                query.where("DateDeleted IS NULL");
+            }
+
+            return execute(query, new RowHandler() {
 
                 @Override
                 public void handleRow(SqlResultSetRow row) {
