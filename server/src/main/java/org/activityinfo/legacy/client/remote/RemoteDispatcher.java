@@ -29,7 +29,9 @@ import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.SessionUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +61,9 @@ public class RemoteDispatcher extends AbstractDispatcher {
                     new AsyncCallback<List<CommandResult>>() {
                         @Override
                         public void onFailure(Throwable throwable) {
+                            if (throwable instanceof InvalidAuthTokenException) {
+                                SessionUtil.logout();
+                            }
                             callback.onFailure(throwable);
                         }
 

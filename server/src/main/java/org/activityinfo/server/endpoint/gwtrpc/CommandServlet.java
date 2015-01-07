@@ -172,13 +172,14 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             authProvider.set(AuthenticatedUser.getAnonymous());
         } else {
 
-            // TODO(alex): renable this check once the authToken has been
+            // 1. TODO(alex): renable this check once the authToken has been
             // removed from the host page
 
+            // 2. todo (yuriy) : renable check to fix AI-837. Do we need to fix something on host page?
             // user is already authenticated, but ensure that the authTokens match
-            // if(!authToken.equals(authProvider.get().getAuthToken())) {
-            // throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
-            // }
+            if (!authToken.equals(authProvider.get().getAuthToken())) {
+                throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
+            }
         }
         return true;
     }
