@@ -69,7 +69,7 @@ public class Jackson {
 
     public static void writeMap(JsonGenerator json, String fieldName, Map<String, Object> mapValue) throws IOException {
         json.writeObjectFieldStart(fieldName);
-        for (Map.Entry<String, Object> entry : mapValue.entrySet()) {
+        for (Map.Entry<Striwebng, Object> entry : mapValue.entrySet()) {
             final Object value = entry.getValue();
             if (value instanceof Boolean) {
                 json.writeBooleanField(entry.getKey(), (Boolean) value);
