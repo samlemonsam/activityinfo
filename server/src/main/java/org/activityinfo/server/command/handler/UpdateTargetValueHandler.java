@@ -55,11 +55,19 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
         Map<String, Object> changes = cmd.getChanges().getTransientMap();
         new PropertyMap(changes);
 
+        Object value = cmd.getChanges().get("value");
+        Double doubleValue = null;
+        if (value instanceof Double) {
+            doubleValue = (Double) value;
+        } else if (value instanceof String) {
+            doubleValue = Double.valueOf((String) value);
+        }
+
         try {
             TargetValue targetValue = entityManager().find(TargetValue.class,
                     new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
-            if (cmd.getChanges().get("value") != null) {
-                targetValue.setValue((Double.valueOf((String) cmd.getChanges().get("value"))));
+            if (value != null) {
+                targetValue.setValue(doubleValue);
                 entityManager().persist(targetValue);
 
                 return new VoidResult();
@@ -76,7 +84,7 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
 
         TargetValue targetValue = new TargetValue();
         targetValue.setId(new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
-        targetValue.setValue((Double.valueOf((String) cmd.getChanges().get("value"))));
+        targetValue.setValue(doubleValue);
         targetValue.setTarget(target);
         targetValue.setIndicator(indicator);
 
