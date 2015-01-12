@@ -47,6 +47,11 @@ public class FormSection extends FormElement implements FormElementContainer {
         return this;
     }
 
+    public FormSection insertElement(int index, FormElement element) {
+        elements.add(index, element);
+        return this;
+    }
+
     @Override
     public Record asRecord() {
         Record record = new Record();

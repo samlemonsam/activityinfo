@@ -74,7 +74,7 @@ public class DropControllerRegistry {
     }
 
     public DropControllerExtended register(ResourceId resourceId, FlowPanel dropTarget, FormDesigner formDesigner) {
-        DropPanelDropController dropController = new DropPanelDropController(dropTarget, formDesigner);
+        DropPanelDropController dropController = new DropPanelDropController(resourceId, dropTarget, formDesigner);
         register(resourceId, dropController);
         return dropController;
     }

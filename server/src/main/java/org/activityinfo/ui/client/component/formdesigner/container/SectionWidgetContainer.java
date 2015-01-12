@@ -28,6 +28,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormSection;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -40,10 +41,12 @@ public class SectionWidgetContainer implements WidgetContainer {
     private FormDesigner formDesigner;
     private FormSection formSection;
     private final SectionPanel sectionPanel;
+    private final ResourceId parentId;
 
-    public SectionWidgetContainer(final FormDesigner formDesigner, final FormSection formSection) {
+    public SectionWidgetContainer(final FormDesigner formDesigner, final FormSection formSection, ResourceId parentId) {
         this.formDesigner = formDesigner;
         this.formSection = formSection;
+        this.parentId = parentId;
 
         sectionPanel = new SectionPanel(formDesigner);
         sectionPanel.getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
@@ -71,6 +74,10 @@ public class SectionWidgetContainer implements WidgetContainer {
 
         sectionPanel.getPanel().getWidgetContainer().add(createDropPanel());
         syncWithModel();
+    }
+
+    public ResourceId getParentId() {
+        return parentId;
     }
 
     private Widget createDropPanel() {

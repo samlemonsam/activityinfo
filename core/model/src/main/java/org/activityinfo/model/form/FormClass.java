@@ -61,6 +61,26 @@ public class FormClass implements IsResource, FormElementContainer {
         setOwnerId(resourceId);
     }
 
+    public FormElementContainer getElementContainer(ResourceId elementId) {
+        return getElementContainerImpl(this, elementId);
+    }
+
+    private static FormElementContainer getElementContainerImpl(FormElementContainer container, final ResourceId elementId) {
+        if (container.getId().equals(elementId)) {
+            return container;
+        }
+
+        for (FormElement elem : container.getElements()) {
+            if (elem instanceof FormElementContainer) {
+                FormElementContainer result = getElementContainerImpl((FormElementContainer) elem, elementId);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
     public FormElementContainer getParent(FormElement childElement) {
         return getContainerElementsImpl(this, childElement);
     }

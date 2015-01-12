@@ -31,8 +31,10 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormElement;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormSection;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -53,11 +55,14 @@ import java.util.List;
 public class DropPanelDropController extends FlowPanelDropController implements DropControllerExtended {
 
     private final Positioner positioner = new Positioner();
+    private final ResourceId resourceId;
     private FormDesigner formDesigner;
     private FlowPanel dropTarget;
 
-    public DropPanelDropController(FlowPanel dropTarget, FormDesigner formDesigner) {
+
+    public DropPanelDropController(ResourceId resourceId, FlowPanel dropTarget, FormDesigner formDesigner) {
         super(dropTarget);
+        this.resourceId = resourceId;
         this.formDesigner = formDesigner;
         this.dropTarget = dropTarget;
     }
@@ -90,7 +95,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 @Nullable
                 @Override
                 public Void apply(@Nullable FormFieldWidget formFieldWidget) {
-                    final FieldWidgetContainer fieldWidgetContainer = new FieldWidgetContainer(formDesigner, formFieldWidget, formField);
+                    final FieldWidgetContainer fieldWidgetContainer = new FieldWidgetContainer(formDesigner, formFieldWidget, formField, resourceId);
 
                     drop(fieldWidgetContainer, context, formField);
 
@@ -99,8 +104,15 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             });
         } else if (template instanceof SectionTemplate) {
             final FormSection formSection = ((SectionTemplate)template).create();
-
-            SectionWidgetContainer widgetContainer = new SectionWidgetContainer(formDesigner, formSection);
+            if (getElementContainer() instanceof FormSection) {
+                // we are not going to handle nested FormSection in FormDesigner
+                // It should be enough to handle one level of FormSections:
+                // 1. on selection FormSection container is selected by blue color
+                // 2. on formField selection highlight it with green color
+                // nested FormSection brings higher complexity without comparative value.
+                throw new VetoDragException();
+            }
+            SectionWidgetContainer widgetContainer = new SectionWidgetContainer(formDesigner, formSection, resourceId);
             drop(widgetContainer, context, formSection);
         }
 
@@ -128,13 +140,19 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             public void execute() {
                 int widgetIndex = dropTarget.getWidgetIndex(widgetContainer.asWidget());
 
+                FormElementContainer elementContainer = getElementContainer();
+
                 // update model
-                formDesigner.getFormClass().insertElement(widgetIndex, formElement);
+                elementContainer.insertElement(widgetIndex, formElement);
                 formDesigner.getDragController().makeDraggable(widgetContainer.asWidget(), widgetContainer.getDragHandle());
 
                 removePositioner();
             }
         });
+    }
+
+    private FormElementContainer getElementContainer() {
+        return formDesigner.getFormClass().getElementContainer(resourceId);
     }
 
     @Override

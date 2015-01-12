@@ -31,6 +31,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
@@ -52,11 +53,13 @@ public class FieldWidgetContainer implements WidgetContainer {
     private FormFieldWidget formFieldWidget;
     private FormField formField;
     private final FieldPanel fieldPanel;
+    private final ResourceId parentId;
 
-    public FieldWidgetContainer(final FormDesigner formDesigner, FormFieldWidget formFieldWidget, final FormField formField) {
+    public FieldWidgetContainer(final FormDesigner formDesigner, FormFieldWidget formFieldWidget, final FormField formField, ResourceId parentId) {
         this.formDesigner = formDesigner;
         this.formFieldWidget = formFieldWidget;
         this.formField = formField;
+        this.parentId = parentId;
 
         fieldPanel = new FieldPanel(formDesigner);
         fieldPanel.getWidgetContainer().add(formFieldWidget);
@@ -86,6 +89,11 @@ public class FieldWidgetContainer implements WidgetContainer {
         // drag and drop
         fieldPanel.asWidget().getElement().setAttribute(FormDesignerConstants.DATA_FIELD_ID, formField.getId().asString());
         syncWithModel();
+    }
+
+    @Override
+    public ResourceId getParentId() {
+        return parentId;
     }
 
     public void syncWithModel() {

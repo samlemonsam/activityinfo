@@ -78,6 +78,7 @@ public class SubFormType implements ParametrizedFieldType {
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
+
     private ReferenceType classReference;
     private EnumValue selector;
 

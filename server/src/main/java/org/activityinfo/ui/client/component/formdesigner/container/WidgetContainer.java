@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  */
 
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 
 /**
@@ -34,4 +35,6 @@ public interface WidgetContainer {
     public Widget getDragHandle();
 
     public FormDesigner getFormDesigner();
+
+    public ResourceId getParentId();
 }

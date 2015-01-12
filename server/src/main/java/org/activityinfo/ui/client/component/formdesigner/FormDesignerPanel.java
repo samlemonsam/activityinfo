@@ -164,7 +164,9 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                         if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
                             Widget widget = widgetContainer.asWidget();
                             formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
-                            dropPanel.add(widget);
+
+                            FlowPanel parentDropPanel = (FlowPanel) formDesigner.getDropControllerRegistry().getDropController(widgetContainer.getParentId()).getDropTarget();
+                            parentDropPanel.add(widget);
                         }
                     }
                 } else if (element instanceof FormSection) {
@@ -191,11 +193,11 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         return fieldIds;
     }
 
-    private void buildWidgetContainers(final FormDesigner formDesigner, FormElementContainer container, int depth, List<Promise<Void>> promises) {
+    private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, int depth, List<Promise<Void>> promises) {
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 FormSection formSection = (FormSection) element;
-                containerMap.put(formSection.getId(), new SectionWidgetContainer(formDesigner, formSection));
+                containerMap.put(formSection.getId(), new SectionWidgetContainer(formDesigner, formSection, container.getId()));
                 buildWidgetContainers(formDesigner, formSection, depth + 1, promises);
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
@@ -203,7 +205,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                     @Nullable
                     @Override
                     public Void apply(@Nullable FormFieldWidget input) {
-                        containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField));
+                        containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField, container.getId()));
                         return null;
                     }
                 });
