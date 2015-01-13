@@ -27,6 +27,8 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.TableModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
@@ -43,8 +45,13 @@ import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.store.query.impl.ColumnCache;
+import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
+import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.store.mysql.collections.UserDatabaseMapping;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -249,5 +256,38 @@ public class GetSchemaTest extends CommandTestCase2 {
         }
 
         assertThat(children.size(), equalTo(2));
+    }
+
+    @Test
+    public void queryExecutor() {
+
+        HibernateQueryExecutor executor = injector.getInstance(HibernateQueryExecutor.class);
+        executor.doWork(new HibernateQueryExecutor.StoreSession<Void>() {
+            @Override
+            public Void execute(CollectionCatalog catalog) {
+
+                TableModel model = new TableModel(UserDatabaseMapping.FORM_CLASS_ID);
+                model.selectField("label");
+                model.selectExpr("administrator.name");
+
+
+                ColumnSetBuilder builder = new ColumnSetBuilder(catalog, ColumnCache.NULL);
+                ColumnSet columnSet = builder.build(model);
+
+                assertThat(columnSet.getColumnView("label").getString(0), equalTo("PEAR"));
+                assertThat(columnSet.getColumnView("administrator.name").getString(0), equalTo("Alex"));
+
+
+//                CollectionAccessor databases = catalog.getCollection(UserDatabaseMapping.FORM_CLASS_ID);
+//                CursorBuilder cursorBuilder = databases.newCursor();
+//                CursorField label = cursorBuilder.addField(new SymbolExpr("label"));
+//                CursorField owner = cursorBuilder.addField(ExprParser.parse("administrator"));
+//                ResourceCursor cursor = cursorBuilder.open();
+//                while(cursor.next()) {
+//                    System.out.println(label.read() + ", " + owner.read());
+//                }
+                return null;
+            }
+        });
     }
 }

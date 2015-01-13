@@ -26,7 +26,16 @@
       <artifactId>activityinfo-services</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.activityinfo</groupId>
+      <artifactId>activityinfo-query-executor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activityinfo</groupId>
+      <artifactId>activityinfo-mysql-store</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.activityinfo.io</groupId>
       <artifactId>activityinfo-xform</artifactId>

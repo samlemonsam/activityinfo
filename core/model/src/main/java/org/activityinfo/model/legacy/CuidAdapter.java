@@ -257,4 +257,8 @@ public class CuidAdapter {
     public static ResourceId generateSiteCuid() {
         return cuid(SITE_DOMAIN, new KeyGenerator().generateInt());
     }
+
+    public static ResourceId countryId(int id) {
+        return cuid(COUNTRY_DOMAIN, id);
+    }
 }

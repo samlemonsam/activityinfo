@@ -164,6 +164,32 @@ public class FormTree {
         }
 
 
+        public boolean hasChildren() {
+            return !children.isEmpty();
+        }
+
+        public FormClass getRootFormClass() {
+            if(isRoot()) {
+                return getDefiningFormClass();
+            } else {
+                return getParent().getRootFormClass();
+            }
+        }
+
+        public List<Node> getSelfAndAncestors() {
+            LinkedList<Node> list = Lists.newLinkedList();
+            Node node = this;
+            while(!node.isRoot()) {
+                list.addFirst(node);
+                node = node.getParent();
+            }
+            list.addFirst(node);
+            return list;
+        }
+
+        public boolean isLinked() {
+            return parent != null && (parent.isLinked() || parent.getType() instanceof ReferenceType);
+        }
     }
 
     public enum SearchOrder {

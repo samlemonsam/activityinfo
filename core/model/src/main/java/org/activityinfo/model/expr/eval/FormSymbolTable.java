@@ -10,6 +10,7 @@ import org.activityinfo.model.expr.diagnostic.SymbolNotFoundException;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class FormSymbolTable {
     private Multimap<String, FormField> labelMap = HashMultimap.create();
 
 
-    public FormSymbolTable(FormClass formClass) {
+    public FormSymbolTable(@Nonnull FormClass formClass) {
         for (FormField field : formClass.getFields()) {
 
             // ID has first priority
@@ -37,7 +38,9 @@ public class FormSymbolTable {
             }
 
             // And finally labels, if they're unique
-            labelMap.put(field.getLabel().toLowerCase(), field);
+            if(field.getLabel() != null) {
+                labelMap.put(field.getLabel().toLowerCase(), field);
+            }
         }
     }
 

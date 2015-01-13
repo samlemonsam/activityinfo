@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@JsonAutoDetect(JsonMethod.NONE)
 public final class ActivityDTO extends BaseModelData implements EntityDTO, ProvidesKey,
         LockedPeriodDTO.HasLockedPeriod, IsActivityDTO {
 
