@@ -26,6 +26,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.LIElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -47,6 +50,7 @@ import org.activityinfo.ui.client.component.formdesigner.drop.NullValueUpdater;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldPalette;
+import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPanel;
 import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPanel;
 import org.activityinfo.ui.client.page.HasNavigationCallback;
 import org.activityinfo.ui.client.page.NavigationCallback;
@@ -97,6 +101,20 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     HTML spacer;
     @UiField
     HTML paletteSpacer;
+    @UiField
+    HTMLPanel containerPropertiesTab;
+    @UiField
+    ContainerPropertiesPanel containerPropertiesPanel;
+    @UiField
+    Anchor containerPropertiesTabLink;
+    @UiField
+    Anchor propertiesTabLink;
+    @UiField
+    HTMLPanel propertiesTab;
+    @UiField
+    LIElement containerPropertiesTabLi;
+    @UiField
+    LIElement propertiesTabLi;
 
     /**
      * Panel must be created via FormDesigner
@@ -147,6 +165,35 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 calcSpacerHeight();
             }
         });
+
+        propertiesTabLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setPropertiesTabSelected();
+            }
+        });
+        containerPropertiesTabLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setContainerPropertiesTabSelected();
+            }
+        });
+    }
+
+    public void setContainerPropertiesTabSelected() {
+        containerPropertiesTabLi.addClassName("active");
+        propertiesTabLi.removeClassName("active");
+
+        containerPropertiesTab.setVisible(true);
+        propertiesTab.setVisible(false);
+    }
+
+    public void setPropertiesTabSelected() {
+        propertiesTabLi.addClassName("active");
+        containerPropertiesTabLi.removeClassName("active");
+
+        propertiesTab.setVisible(true);
+        containerPropertiesTab.setVisible(false);
     }
 
     private void fillPanel(final FormClass formClass, final FormDesigner formDesigner) {
@@ -257,6 +304,10 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         return headerPanel;
     }
 
+    public ContainerPropertiesPanel getContainerPropertiesPanel() {
+        return containerPropertiesPanel;
+    }
+
     public FieldPalette getFieldPalette() {
         return fieldPalette;
     }
@@ -283,4 +334,5 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
             savedGuard.navigate(callback);
         }
     }
+
 }

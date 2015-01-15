@@ -42,7 +42,7 @@ public class HeaderPresenter {
     private final HeaderPanel headerPanel;
     private final FormClass formClass;
 
-    public HeaderPresenter(FormDesigner formDesigner) {
+    public HeaderPresenter(final FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
         this.headerPanel = formDesigner.getFormDesignerPanel().getHeaderPanel();
         this.formClass = formDesigner.getFormClass();
@@ -70,6 +70,10 @@ public class HeaderPresenter {
     }
 
     private void onClick() {
+        formDesigner.getContainerPresenter().show(formDesigner.getFormClass());
+        formDesigner.getFormDesignerPanel().setContainerPropertiesTabSelected();
+        formDesigner.getPropertiesPresenter().reset();
+
         formDesigner.getEventBus().fireEvent(new HeaderSelectionEvent(this));
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override

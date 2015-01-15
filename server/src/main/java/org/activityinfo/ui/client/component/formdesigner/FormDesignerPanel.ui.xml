@@ -16,16 +16,36 @@
       <div class="col-xs-4">
         <g:HTMLPanel height="100%">
           <g:HTML ui:field="spacer" width="100%" height="0px"/>
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <b>
-                <ui:text from='{i18n.properties}'/>
-              </b>
-            </div>
+          <ul class="nav nav-tabs">
+            <li role="presentation" class="active" ui:field="propertiesTabLi">
+              <g:Anchor href="#" ui:field="propertiesTabLink">
+                <b>
+                  <ui:text from='{i18n.fieldProperties}'/>
+                </b>
+              </g:Anchor>
+            </li>
+            <li role="presentation" ui:field="containerPropertiesTabLi">
+              <g:Anchor href="#" ui:field="containerPropertiesTabLink">
+                <b>
+                  <ui:text from='{i18n.containerProperties}'/>
+                </b>
+              </g:Anchor>
+            </li>
+          </ul>
+
+          <!-- Field properties tab-->
+          <g:HTMLPanel ui:field="propertiesTab" addStyleNames="panel panel-default">
             <div class="panel-body">
               <properties:PropertiesPanel ui:field="propertiesPanel"/>
             </div>
-          </div>
+          </g:HTMLPanel>
+
+          <!-- Container properties tab-->
+          <g:HTMLPanel ui:field="containerPropertiesTab" addStyleNames="panel panel-default" visible="false">
+            <div class="panel-body">
+              <properties:ContainerPropertiesPanel ui:field="containerPropertiesPanel"/>
+            </div>
+          </g:HTMLPanel>
         </g:HTMLPanel>
       </div>
 

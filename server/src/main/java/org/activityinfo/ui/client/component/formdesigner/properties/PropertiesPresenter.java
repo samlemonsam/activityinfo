@@ -34,7 +34,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
@@ -50,9 +49,7 @@ import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
-import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
 import org.activityinfo.ui.client.component.formdesigner.skip.SkipDialog;
 
 import java.util.List;
@@ -76,9 +73,9 @@ public class PropertiesPresenter {
     private HandlerRegistration relevanceEnabledValueHandler;
     private HandlerRegistration relevanceEnabledIfValueHandler;
 
-    public PropertiesPresenter(PropertiesPanel view, FormDesigner formDesigner) {
-        this.view = view;
+    public PropertiesPresenter(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
+        this.view = formDesigner.getFormDesignerPanel().getPropertiesPanel();
 
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
@@ -89,12 +86,7 @@ public class PropertiesPresenter {
                 }
             }
         });
-        formDesigner.getEventBus().addHandler(HeaderSelectionEvent.TYPE, new HeaderSelectionEvent.Handler() {
-            @Override
-            public void handle(HeaderSelectionEvent event) {
-                show(event.getSelectedItem());
-            }
-        });
+
         reset();
     }
 
@@ -102,7 +94,10 @@ public class PropertiesPresenter {
         return view;
     }
 
-    private void reset() {
+    public void reset() {
+
+        formDesigner.getContainerPresenter().reset();
+
         if (currentDesignWidget != null) {
             view.getPanel().remove(currentDesignWidget);
             currentDesignWidget = null;
@@ -145,6 +140,8 @@ public class PropertiesPresenter {
 
     private void show(final FieldWidgetContainer fieldWidgetContainer) {
         reset();
+
+        formDesigner.getFormDesignerPanel().setPropertiesTabSelected();
 
         final FormField formField = fieldWidgetContainer.getFormField();
 
@@ -279,7 +276,10 @@ public class PropertiesPresenter {
         } else {
             currentDesignWidget.asWidget().setVisible(false);
         }
+
         view.getPanel().add(currentDesignWidget);
+
+        formDesigner.getContainerPresenter().show(formDesigner.getElementContainer(fieldWidgetContainer.getParentId()));
     }
 
     /**
@@ -347,28 +347,4 @@ public class PropertiesPresenter {
 //        }
     }
 
-    public void show(final HeaderPresenter headerPresenter) {
-        reset();
-
-        final FormClass formClass = headerPresenter.getFormClass();
-
-        view.setVisible(true);
-        view.getLabel().setValue(Strings.nullToEmpty(formClass.getLabel()));
-        view.getDescription().setValue(Strings.nullToEmpty(formClass.getDescription()));
-        labelKeyUpHandler = view.getLabel().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                formClass.setLabel(view.getLabel().getValue());
-                headerPresenter.show();
-            }
-        });
-
-        descriptionKeyUpHandler = view.getDescription().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                formClass.setDescription(view.getDescription().getValue());
-                headerPresenter.show();
-            }
-        });
-    }
 }

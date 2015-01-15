@@ -31,12 +31,14 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerRegistry;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
+import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPresenter;
 import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPresenter;
 
 import javax.annotation.Nonnull;
@@ -52,6 +54,7 @@ public class FormDesigner {
     private final ResourceLocator resourceLocator;
     private final FormClass formClass;
     private final PropertiesPresenter propertiesPresenter;
+    private final ContainerPropertiesPresenter containerPresenter;
     private final HeaderPresenter headerPresenter;
     private final FormDesignerPanel formDesignerPanel;
     private final FormFieldWidgetFactory formFieldWidgetFactory;
@@ -67,7 +70,8 @@ public class FormDesigner {
         this.formDesignerPanel = new FormDesignerPanel(resourceLocator, formClass, this);
         this.formDesignerPanel.getFieldPalette().makeDraggable(dropControllerRegistry.getDragController());
 
-        propertiesPresenter = new PropertiesPresenter(formDesignerPanel.getPropertiesPanel(), this);
+        containerPresenter = new ContainerPropertiesPresenter(this);
+        propertiesPresenter = new PropertiesPresenter(this);
 
         formFieldWidgetFactory = new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.DESIGN);
 
@@ -117,6 +121,22 @@ public class FormDesigner {
 
     public PickupDragController getDragController() {
         return dropControllerRegistry.getDragController();
+    }
+
+    public ContainerPropertiesPresenter getContainerPresenter() {
+        return containerPresenter;
+    }
+
+    public PropertiesPresenter getPropertiesPresenter() {
+        return propertiesPresenter;
+    }
+
+    public HeaderPresenter getHeaderPresenter() {
+        return headerPresenter;
+    }
+
+    public FormElementContainer getElementContainer(ResourceId resourceId) {
+        return getFormClass().getElementContainer(resourceId);
     }
 
     public void updateFieldOrder() {

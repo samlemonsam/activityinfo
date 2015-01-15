@@ -104,7 +104,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             });
         } else if (template instanceof SectionTemplate) {
             final FormSection formSection = ((SectionTemplate)template).create();
-            if (getElementContainer() instanceof FormSection) {
+            if (formDesigner.getElementContainer(resourceId) instanceof FormSection) {
                 // we are not going to handle nested FormSection in FormDesigner
                 // It should be enough to handle one level of FormSections:
                 // 1. on selection FormSection container is selected by blue color
@@ -140,7 +140,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             public void execute() {
                 int widgetIndex = dropTarget.getWidgetIndex(widgetContainer.asWidget());
 
-                FormElementContainer elementContainer = getElementContainer();
+                FormElementContainer elementContainer = formDesigner.getElementContainer(resourceId);
 
                 // update model
                 elementContainer.insertElement(widgetIndex, formElement);
@@ -149,10 +149,6 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 removePositioner();
             }
         });
-    }
-
-    private FormElementContainer getElementContainer() {
-        return formDesigner.getFormClass().getElementContainer(resourceId);
     }
 
     @Override

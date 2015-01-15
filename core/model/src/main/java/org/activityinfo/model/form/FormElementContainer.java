@@ -14,4 +14,8 @@ public interface FormElementContainer {
     FormElementContainer addElement(FormElement element);
 
     FormElementContainer insertElement(int index, FormElement element);
+
+    String getLabel();
+
+    FormElementContainer setLabel(String label);
 }
