@@ -48,7 +48,7 @@ public class SectionWidgetContainer implements WidgetContainer {
         this.formSection = formSection;
         this.parentId = parentId;
 
-        sectionPanel = new SectionPanel(formDesigner);
+        sectionPanel = new SectionPanel(formDesigner, parentId);
         sectionPanel.getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

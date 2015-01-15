@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  */
 
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 
@@ -31,10 +32,12 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 public class SectionPanel implements WidgetContainer {
 
     private final FormDesigner formDesigner;
-    private FieldPanel panel;
+    private final ResourceId parentId;
+    private final FieldPanel panel;
 
-    public SectionPanel(FormDesigner formDesigner) {
+    public SectionPanel(FormDesigner formDesigner, ResourceId parentId) {
         this.formDesigner = formDesigner;
+        this.parentId = parentId;
         this.panel = new FieldPanel(formDesigner) {
             @Override
             public String getSelectedClassName() {
@@ -42,6 +45,11 @@ public class SectionPanel implements WidgetContainer {
             }
         };
         this.panel.getLabel().addStyleName(FormDesignerStyles.INSTANCE.sectionLabel());
+    }
+
+    @Override
+    public ResourceId getParentId() {
+        return parentId;
     }
 
     public FieldPanel getPanel() {
