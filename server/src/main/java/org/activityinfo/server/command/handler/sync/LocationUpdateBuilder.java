@@ -130,6 +130,11 @@ public class LocationUpdateBuilder implements UpdateBuilder {
 
         List<Long> longs = SqlQueryUtil.queryLongList(em, query);
 
+        if (longs.isEmpty()) {
+            update.setComplete(true);
+            return localState.lastDate;
+        }
+
         // our intention is to reduce batch, so we cut versions into chunks
         if (longs.size() > chunkSize) {
             longs = longs.subList(0, chunkSize);
