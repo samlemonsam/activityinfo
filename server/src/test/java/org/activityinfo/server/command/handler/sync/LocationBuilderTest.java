@@ -38,6 +38,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
@@ -52,7 +53,7 @@ public class LocationBuilderTest {
 
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void test() throws Exception {
+    public void sqlBuilding() throws Exception {
 
         EntityManager em = emf.createEntityManager();
 
@@ -69,6 +70,31 @@ public class LocationBuilderTest {
         assertThat(update.getSql(), containsString("locationadminlink"));
         assertThat(update.getSql(), containsString("Shabunda"));
         assertThat(update.getSql(), containsString("12,7")); // admin level for Shabunda
+
+    }
+
+    @Test
+    @OnDataSet("/dbunit/sites-simple1.db.xml")
+    public void cutting() throws Exception {
+
+        EntityManager em = emf.createEntityManager();
+
+        int chunkSize = 2;
+        LocationUpdateBuilder builder = new LocationUpdateBuilder(em, chunkSize);
+
+        GetSyncRegionUpdates request = new GetSyncRegionUpdates("location/" + 1, null);
+        SyncRegionUpdate update = builder.build(new User(), request);
+
+        assertThat(update.isComplete(), equalTo(false));
+        assertThat(update.getVersion(), equalTo("2")); // first chunk
+        assertThat(update.getSql(), containsString("Ngshwe"));
+
+        request.setLocalVersion(update.getVersion());
+        update = builder.build(new User(), request);
+
+        assertThat(update.isComplete(), equalTo(true));
+        assertThat(update.getVersion(), equalTo("500")); // second chunk
+        assertThat(update.getSql(), containsString("Boga"));
 
     }
 
