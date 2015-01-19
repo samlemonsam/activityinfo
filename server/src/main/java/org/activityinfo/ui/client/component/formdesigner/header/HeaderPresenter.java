@@ -28,15 +28,17 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FocusPanel;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 /**
  * @author yuriyz on 7/11/14.
  */
-public class HeaderPresenter {
+public class HeaderPresenter implements FieldsHolder {
 
     private final FormDesigner formDesigner;
     private final HeaderPanel headerPanel;
@@ -70,9 +72,9 @@ public class HeaderPresenter {
     }
 
     private void onClick() {
-        formDesigner.getContainerPresenter().show(formDesigner.getFormClass());
-        formDesigner.getFormDesignerPanel().setContainerPropertiesTabSelected();
         formDesigner.getPropertiesPresenter().reset();
+        formDesigner.getContainerPresenter().show(this);
+        formDesigner.getFormDesignerPanel().setContainerPropertiesTabSelected();
 
         formDesigner.getEventBus().fireEvent(new HeaderSelectionEvent(this));
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -90,5 +92,15 @@ public class HeaderPresenter {
         } else {
             focusPanel.removeStyleName(FormDesignerStyles.INSTANCE.widgetContainerSelected());
         }
+    }
+
+    @Override
+    public FormElementContainer getElementContainer() {
+        return formClass;
+    }
+
+    @Override
+    public void updateUi() {
+        show();
     }
 }

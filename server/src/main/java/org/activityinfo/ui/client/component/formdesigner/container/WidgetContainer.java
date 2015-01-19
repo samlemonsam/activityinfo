@@ -37,4 +37,6 @@ public interface WidgetContainer {
     public FormDesigner getFormDesigner();
 
     public ResourceId getParentId();
+
+    public void syncWithModel();
 }

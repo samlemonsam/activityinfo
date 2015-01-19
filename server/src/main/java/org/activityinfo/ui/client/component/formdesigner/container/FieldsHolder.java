@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.formdesigner.drop;
+package org.activityinfo.ui.client.component.formdesigner.container;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,18 +21,15 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
  * #L%
  */
 
-import com.allen_sauer.gwt.dnd.client.drop.DropController;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
-
-import java.util.Map;
+import org.activityinfo.model.form.FormElementContainer;
 
 /**
- * @author yuriyz on 11/13/2014.
+ * @author yuriyz on 01/16/2015.
  */
-public interface DropControllerExtended extends DropController {
+public interface FieldsHolder {
 
-    void setPositionerToEnd();
+    FormElementContainer getElementContainer();
 
-    Map<ResourceId, WidgetContainer> getContainerMap();
+    void updateUi();
+
 }

@@ -34,6 +34,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
@@ -48,6 +49,7 @@ import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.skip.SkipDialog;
@@ -279,7 +281,17 @@ public class PropertiesPresenter {
 
         view.getPanel().add(currentDesignWidget);
 
-        formDesigner.getContainerPresenter().show(formDesigner.getElementContainer(fieldWidgetContainer.getParentId()));
+        formDesigner.getContainerPresenter().show(new FieldsHolder() {
+            @Override
+            public FormElementContainer getElementContainer() {
+                return formDesigner.getElementContainer(fieldWidgetContainer.getParentId());
+            }
+
+            @Override
+            public void updateUi() {
+                formDesigner.getWidgetContainer(fieldWidgetContainer.getParentId()).syncWithModel();
+            }
+        });
     }
 
     /**

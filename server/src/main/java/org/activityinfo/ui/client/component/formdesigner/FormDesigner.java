@@ -36,6 +36,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
+import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerRegistry;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
 import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPresenter;
@@ -137,6 +138,14 @@ public class FormDesigner {
 
     public FormElementContainer getElementContainer(ResourceId resourceId) {
         return getFormClass().getElementContainer(resourceId);
+    }
+
+    public WidgetContainer getWidgetContainer(ResourceId resourceId) {
+        Map<ResourceId, WidgetContainer> map = getFormDesignerPanel().getContainerMap();
+        if (map.containsKey(resourceId)) {
+            return map.get(resourceId);
+        }
+        return dropControllerRegistry.getDropController(resourceId).getContainerMap().get(resourceId);
     }
 
     public void updateFieldOrder() {

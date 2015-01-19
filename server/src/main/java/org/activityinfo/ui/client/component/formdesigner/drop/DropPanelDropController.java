@@ -26,6 +26,7 @@ import com.allen_sauer.gwt.dnd.client.VetoDragException;
 import com.allen_sauer.gwt.dnd.client.drop.FlowPanelDropController;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -48,6 +49,7 @@ import org.activityinfo.ui.client.component.formdesigner.palette.Template;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 07/07/2014.
@@ -58,7 +60,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
     private final ResourceId resourceId;
     private FormDesigner formDesigner;
     private FlowPanel dropTarget;
-
+    private final Map<ResourceId, WidgetContainer> containerMap = Maps.newHashMap();
 
     public DropPanelDropController(ResourceId resourceId, FlowPanel dropTarget, FormDesigner formDesigner) {
         super(dropTarget);
@@ -96,7 +98,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 @Override
                 public Void apply(@Nullable FormFieldWidget formFieldWidget) {
                     final FieldWidgetContainer fieldWidgetContainer = new FieldWidgetContainer(formDesigner, formFieldWidget, formField, resourceId);
-
+                    containerMap.put(formField.getId(), fieldWidgetContainer);
                     drop(fieldWidgetContainer, context, formField);
 
                     return null;
@@ -113,6 +115,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 throw new VetoDragException();
             }
             SectionWidgetContainer widgetContainer = new SectionWidgetContainer(formDesigner, formSection, resourceId);
+            containerMap.put(resourceId, widgetContainer);
             drop(widgetContainer, context, formSection);
         }
 
@@ -167,5 +170,9 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         if (currentIndex != -1) {
             dropTarget.remove(currentIndex);
         }
+    }
+
+    public Map<ResourceId, WidgetContainer> getContainerMap() {
+        return containerMap;
     }
 }

@@ -52,6 +52,11 @@ public class SectionPanel implements WidgetContainer {
         return parentId;
     }
 
+    @Override
+    public void syncWithModel() {
+        // do nothing
+    }
+
     public FieldPanel getPanel() {
         return panel;
     }

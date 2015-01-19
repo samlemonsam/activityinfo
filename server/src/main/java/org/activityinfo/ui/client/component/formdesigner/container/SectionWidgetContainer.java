@@ -27,6 +27,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
@@ -36,10 +37,10 @@ import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSe
 /**
  * @author yuriyz on 7/14/14.
  */
-public class SectionWidgetContainer implements WidgetContainer {
+public class SectionWidgetContainer implements WidgetContainer, FieldsHolder {
 
-    private FormDesigner formDesigner;
-    private FormSection formSection;
+    private final FormDesigner formDesigner;
+    private final FormSection formSection;
     private final SectionPanel sectionPanel;
     private final ResourceId parentId;
 
@@ -59,6 +60,7 @@ public class SectionWidgetContainer implements WidgetContainer {
         sectionPanel.getPanel().setClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                formDesigner.getContainerPresenter().show(SectionWidgetContainer.this);
                 formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(SectionWidgetContainer.this));
             }
         });
@@ -104,5 +106,15 @@ public class SectionWidgetContainer implements WidgetContainer {
 
     public FormDesigner getFormDesigner() {
         return formDesigner;
+    }
+
+    @Override
+    public FormElementContainer getElementContainer() {
+        return formSection;
+    }
+
+    @Override
+    public void updateUi() {
+        syncWithModel();
     }
 }
