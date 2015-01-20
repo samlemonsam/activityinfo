@@ -55,6 +55,7 @@ import org.activityinfo.ui.client.local.LocalModuleStub;
 import org.activityinfo.ui.client.local.sync.pipeline.InstallPipeline;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -413,6 +414,58 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         newRequest();
         installer.start();
         localDatabase.processEventQueue();
+
+        assertThat(localDatabase.selectString("select Name from Location where LocationId=7"),
+                equalTo("Shabunda"));
+
+        assertThat(localDatabase.selectString(adminEntityBy(7, 1)),
+                equalTo("3"));
+
+        assertThat(localDatabase.selectString(adminEntityBy(7, 2)),
+                equalTo("12"));
+    }
+
+    // AI-864, create 50k locations and try to sync them
+    // Check response time (must be less than 5seconds)
+    @Test
+    @Ignore // we don't want to kill our build time, please run it manually
+    @OnDataSet("/dbunit/sites-simple-with-unicode.db.xml")
+    public void syncWithHugeLocationsCount() throws SQLException, InterruptedException {
+
+        final TestSqliteDatabase localDatabase = new TestSqliteDatabase("target/localdbtest"
+                + new java.util.Date().getTime());
+        EntityManager em = serverEntityManagerFactory.createEntityManager();
+
+        // before sync, fill in db with locations
+        int generatedLocationCount = 50000;
+        em.getTransaction().begin();
+        for (int i = 0; i < generatedLocationCount; i++) {
+            Location loc = new Location();
+            loc.setId(i + 10);
+            loc.setTimeEdited(new Date().getTime() + i);
+            loc.setName("GeneratedLocation_" + i);
+            loc.setLocationType(em.find(LocationType.class, 1));
+            em.persist(loc);
+        }
+        em.getTransaction().commit();
+
+        Dispatcher remoteDispatcher = new RemoteDispatcherStub(servlet, 5);
+
+        Injector clientSideInjector = Guice.createInjector(new LocalModuleStub(
+                AuthenticationModuleStub.getCurrentUser(),
+                localDatabase,
+                remoteDispatcher));
+
+        final InstallPipeline installer = clientSideInjector.getInstance(InstallPipeline.class);
+
+        // sync
+        newRequest();
+        installer.start();
+        localDatabase.processEventQueue();
+
+        int locationCountInDataSet = 7;
+        assertThat(localDatabase.selectInt("select count(*) from Location"),
+                equalTo(generatedLocationCount + locationCountInDataSet));
 
         assertThat(localDatabase.selectString("select Name from Location where LocationId=7"),
                 equalTo("Shabunda"));

@@ -25,6 +25,7 @@ package org.activityinfo.legacy.shared.command;
 import com.bedatadriven.rebar.async.AsyncPipeline;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcDatabase;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
+import com.google.common.base.Stopwatch;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Guice;
@@ -55,6 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.replay;
@@ -159,10 +161,17 @@ public abstract class LocalHandlerTestCase {
     public static class RemoteDispatcherStub extends AbstractDispatcher {
 
         private CommandServlet servlet;
+        private int maximumCommandExecutionTimeInSeconds;
 
         public RemoteDispatcherStub(CommandServlet servlet) {
-            this.servlet = servlet;
+            this(servlet, 15);
         }
+
+        public RemoteDispatcherStub(CommandServlet servlet, int maximumCommandExecutionTimeInSeconds) {
+            this.servlet = servlet;
+            this.maximumCommandExecutionTimeInSeconds = maximumCommandExecutionTimeInSeconds;
+        }
+
 
         @Override
         public <T extends CommandResult> void execute(final Command<T> command,
@@ -173,10 +182,19 @@ public abstract class LocalHandlerTestCase {
                 @Override
                 public void execute() {
 
+                    Stopwatch stopwatch = Stopwatch.createStarted();
                     List<CommandResult> results = servlet
                             .handleCommands(Collections
                                     .<Command>singletonList(command));
                     CommandResult result = results.get(0);
+
+                    long elapsedSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
+                    if (elapsedSeconds > maximumCommandExecutionTimeInSeconds) {
+                        throw new RuntimeException("Command execution takes too long. Takes: " + elapsedSeconds + " seconds, "
+                        + ", maximum allowed execution time: " + maximumCommandExecutionTimeInSeconds + " seconds, command: " + command);
+                    } else {
+                        //System.out.println("Command " + command + " takes: " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms.");
+                    }
 
                     if (result instanceof SyncRegionUpdate) {
                         System.out.println(((SyncRegionUpdate) result).getSql());
