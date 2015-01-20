@@ -30,6 +30,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.exception.IncompleteFormException;
 import org.activityinfo.server.login.model.ChangePasswordPageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
+import org.activityinfo.server.login.model.PageModel;
 import org.activityinfo.server.util.logging.LogException;
 
 import javax.inject.Provider;
@@ -44,7 +45,10 @@ import java.io.IOException;
 
 @Path(ChangePasswordController.ENDPOINT)
 public class ChangePasswordController {
+
     public static final String ENDPOINT = "/changePassword";
+
+    public static final int MINIMUM_PASSWORD_LENGTH = 6;
 
     private final Provider<UserDAO> userDAO;
     private final AuthTokenProvider authTokenProvider;
@@ -69,12 +73,22 @@ public class ChangePasswordController {
     @POST @LogException(emailAlert = true)
     public Response changePassword(@Context UriInfo uri,
                                    @FormParam("key") String key,
-                                   @FormParam("password") String password) throws IOException, ServletException {
+                                   @FormParam("password") String password,
+                                   @FormParam("password2") String password2) throws IOException, ServletException {
+
         User user = null;
         try {
             user = userDAO.get().findUserByChangePasswordKey(key);
         } catch (NoResultException e) {
-            return Response.ok().entity(new InvalidInvitePageModel().asViewable()).type(MediaType.TEXT_HTML).build();
+            return ok(new InvalidInvitePageModel());
+        }
+
+        if (password == null || password.length() < MINIMUM_PASSWORD_LENGTH) {
+            return ok(new ChangePasswordPageModel(user).setPasswordLengthInvalid(true));
+        }
+
+        if (!password.equals(password2)) {
+            return ok(new ChangePasswordPageModel(user).setPasswordsNotMatched(true));
         }
 
         changePassword(user, password);
@@ -88,5 +102,9 @@ public class ChangePasswordController {
     protected void changePassword(User user, String newPassword) throws IncompleteFormException {
         user.changePassword(newPassword);
         user.clearChangePasswordKey();
+    }
+
+    public static Response ok(PageModel model) {
+        return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
     }
 }

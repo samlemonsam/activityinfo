@@ -259,14 +259,12 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
     }
 
     private SqlQuery locationToAdminTable(int adminLevelId) {
-        SqlQuery query = SqlQuery
+        return SqlQuery
                 .select("k.locationId", "e.name")
                 .from(Tables.LOCATION_ADMIN_LINK, "k")
                 .leftJoin(Tables.ADMIN_ENTITY, "e")
                 .on("k.adminentityid = e.adminentityid")
-                .whereTrue("e.adminlevelid = ?");
-        query.appendParameter(adminLevelId);
-        return query;
+                .whereTrue("e.adminlevelid = " + adminLevelId);
     }
 
     private boolean locationJoinRequired(GetSites command) {

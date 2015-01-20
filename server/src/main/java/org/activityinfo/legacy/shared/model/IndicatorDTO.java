@@ -112,6 +112,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     /**
      * Sets the Indicator's units, for example, "household" or "%"
      */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
     public void setUnits(String units) {
         set("units", units);
     }
@@ -167,7 +168,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("expression", expression);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty("code") @JsonView(DTOViews.Schema.class)
     public String getNameInExpression() {
         return get("nameInExpression");
     }
