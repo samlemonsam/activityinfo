@@ -8,15 +8,12 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.service.store.*;
 import org.activityinfo.store.query.impl.builders.*;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMapBuilder;
-import org.activityinfo.service.store.CollectionAccessor;
-import org.activityinfo.service.store.Cursor;
-import org.activityinfo.service.store.CursorBuilder;
-import org.activityinfo.service.store.CursorObserver;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -31,7 +28,7 @@ public class CollectionScan {
     private static final String PK_COLUMN_KEY = "__id";
 
     private final CollectionAccessor collection;
-    private final CursorBuilder cursorBuilder;
+    private final ColumnQueryBuilder queryBuilder;
 
     private ColumnCache cache;
 
@@ -44,7 +41,7 @@ public class CollectionScan {
     public CollectionScan(CollectionAccessor collection, ColumnCache cache) {
         this.collection = collection;
         this.cache = cache;
-        this.cursorBuilder = collection.newCursor();
+        this.queryBuilder = collection.newColumnQuery();
     }
 
 
@@ -71,7 +68,7 @@ public class CollectionScan {
 
         if(!primaryKeyMapBuilder.isPresent()) {
             PrimaryKeyMapBuilder builder = new PrimaryKeyMapBuilder();
-            cursorBuilder.addResourceId(builder);
+            queryBuilder.addResourceId(builder);
             primaryKeyMapBuilder = Optional.of(builder);
         }
         return primaryKeyMapBuilder.get();
@@ -117,7 +114,7 @@ public class CollectionScan {
                 "Column " + columnKey + " has unsupported type: " + field.getType());
 
 
-        cursorBuilder.addField(field.getId(), (CursorObserver<FieldValue>)builder);
+        queryBuilder.addField(field.getId(), (CursorObserver<FieldValue>) builder);
         columnMap.put(columnKey, builder);
         return builder;
     }
@@ -133,7 +130,7 @@ public class CollectionScan {
         ForeignKeyBuilder builder = foreignKeyMap.get(fieldName);
         if(builder == null) {
             builder = new ForeignKeyBuilder();
-            cursorBuilder.addField(ResourceId.valueOf(fieldName), builder);
+            queryBuilder.addField(ResourceId.valueOf(fieldName), builder);
             foreignKeyMap.put(fieldName, builder);
         }
         return builder;
@@ -147,21 +144,17 @@ public class CollectionScan {
         // First try to retrieve as much as we can from the cache
         if(!resolveFromCache()) {
 
-            int rowCount = 0;
 
             // Run the query
-            Cursor cursor = cursorBuilder.open();
-            while (cursor.next()) {
-                rowCount++;
-            }
+            queryBuilder.execute();
 
             // put to cache
             // TODO: cache.put(collection.getId(), columnMap);
 
             // update row count
-            if(this.rowCount.isPresent()) {
-                this.rowCount.get().set(rowCount);
-            }
+//            if(this.rowCount.isPresent()) {
+//                this.rowCount.get().set(rowCount);
+//            }
         }
     }
 

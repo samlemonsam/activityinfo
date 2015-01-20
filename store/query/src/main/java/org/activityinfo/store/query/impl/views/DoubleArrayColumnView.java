@@ -66,9 +66,22 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public String toString() {
-        if(numRows() > 10) {
-            return "[ double, num rows =  " + numRows() + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(int i=0;i!=Math.min(10, values.length);++i) {
+            if(i > 0) {
+                sb.append(", ");
+            }
+            if(Double.isNaN(values[i])) {
+                sb.append("NaN");
+            } else {
+                sb.append(values[i]);
+            }
         }
-        return Arrays.toString(values);
+        if(numRows() > 10) {
+            sb.append("... total rows = ").append(numRows());
+        }
+        sb.append(" ]");
+        return sb.toString();
     }
 }

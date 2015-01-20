@@ -17,6 +17,7 @@ import org.activityinfo.store.mysql.mapping.PrimaryKeyExtractor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 
 import java.sql.ResultSet;
+import java.util.Iterator;
 
 
 public class MySqlCursorBuilder implements CursorBuilder {
@@ -33,6 +34,8 @@ public class MySqlCursorBuilder implements CursorBuilder {
         this.tableMapping = tableMapping;
         this.executor = executor;
         this.query = new SqlBuilder(tableMapping.getBaseTable());
+        this.query.where(tableMapping.getBaseFilter());
+        this.query.orderBy(tableMapping.getPrimaryKey().getColumnName());
         this.evaluator = new PartialEvaluator<>(tableMapping.getFormClass(), readerFactory);
         this.cursor = new MySqlCursor();
         this.cursor.primaryKey = primaryKeyExtractor();
@@ -97,13 +100,24 @@ public class MySqlCursorBuilder implements CursorBuilder {
 
     private FieldReader<ResultSet> createFieldReader(ResourceId fieldId) {
         FieldMapping mapping = tableMapping.getMapping(fieldId);
-        int columnIndex = query.select(mapping.getColumnName());
-        return new ResultSetFieldReader(columnIndex, mapping.getValueExtractor(), mapping.getFormField().getType());
+
+        // Add all columns required for this field
+        Iterator<String> it = mapping.getColumnNames().iterator();
+
+        int startIndex = query.select(mapping.getJoin(), it.next());
+        while(it.hasNext()) {
+            query.select(mapping.getJoin(), it.next());
+        }
+
+        return new ResultSetFieldReader(startIndex, mapping.getValueExtractor(), mapping.getFormField().getType());
     }
 
     @Override
     public Cursor open() {
         String sql = query.buildSQL();
+
+        System.out.println(sql);
+
         try {
             cursor.resultSet = executor.query(sql);
         } catch(Exception e) {

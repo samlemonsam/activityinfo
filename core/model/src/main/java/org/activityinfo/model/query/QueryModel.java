@@ -11,7 +11,7 @@ import java.util.List;
  * Describes a Table to be constructed from a
  * FormTree.
  */
-public class TableModel {
+public class QueryModel {
 
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
@@ -19,14 +19,14 @@ public class TableModel {
     private ExprValue filter;
 
 
-    public TableModel() {
+    public QueryModel() {
     }
 
     /**
      * Creates a new TableModel using the given {@code classId} as the
      * root FormClassId
      */
-    public TableModel(ResourceId classId) {
+    public QueryModel(ResourceId classId) {
         rowSources.add(new RowSource(classId));
     }
 

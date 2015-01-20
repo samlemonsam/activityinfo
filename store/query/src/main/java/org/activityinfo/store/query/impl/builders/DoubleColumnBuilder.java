@@ -15,7 +15,7 @@ public class DoubleColumnBuilder implements ColumnViewBuilder, CursorObserver<Fi
 
     private DoubleReader reader;
 
-    private PendingSlot<ColumnView> result;
+    private PendingSlot<ColumnView> result = new PendingSlot<>();
 
     public DoubleColumnBuilder(DoubleReader reader) {
         this.reader = reader;
@@ -27,7 +27,7 @@ public class DoubleColumnBuilder implements ColumnViewBuilder, CursorObserver<Fi
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
 
         double array[] = new double[values.size()];
         for(int i=0;i!=array.length;++i) {

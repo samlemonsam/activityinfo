@@ -3689,5 +3689,11 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Quantity field contains invalid value. Please enter valid double value (e.g. 1, 1.3)")
     String quantityFieldInvalidValue();
+
+    @DefaultStringValue("ISO 3166-1 alpha-2 Country Code")
+    String countryCodeDescription();
+
+    @DefaultStringValue("Boundary")
+    String boundaries();
 }
 

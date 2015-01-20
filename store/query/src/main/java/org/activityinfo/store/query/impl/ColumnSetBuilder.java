@@ -10,7 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.TableModel;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 import org.activityinfo.service.store.CollectionCatalog;
@@ -32,7 +32,7 @@ public class ColumnSetBuilder {
         this.formTreeService = new FormTreeBuilder(resourceStore);
     }
 
-    public ColumnSet build(TableModel table) {
+    public ColumnSet build(QueryModel table) {
 
         LOGGER.info("TableBuilder starting.");
 

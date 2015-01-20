@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
@@ -114,7 +113,7 @@ public class CollectionScanBatch {
      */
     public Slot<ColumnView> addEmptyColumn(FormClass formClass) {
         Slot<Integer> rowCount = getTable(formClass).addCount();
-        return new ConstantColumnBuilder(rowCount, ColumnType.STRING);
+        return new ConstantColumnBuilder(rowCount, null);
     }
 
     /**

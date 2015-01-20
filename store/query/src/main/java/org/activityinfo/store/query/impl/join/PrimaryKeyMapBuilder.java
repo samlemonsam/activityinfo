@@ -24,7 +24,7 @@ public class PrimaryKeyMapBuilder implements CursorObserver<ResourceId>, Slot<Pr
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         result.set(new PrimaryKeyMap(map));
     }
 

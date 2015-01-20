@@ -28,7 +28,7 @@ public class DateColumnBuilder implements ColumnViewBuilder, CursorObserver<Fiel
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         result.set(new DateArrayColumnView(values));
     }
 

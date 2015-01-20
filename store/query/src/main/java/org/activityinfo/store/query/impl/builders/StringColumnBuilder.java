@@ -38,7 +38,7 @@ public class StringColumnBuilder implements ColumnViewBuilder, CursorObserver<Fi
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         if(stats.isEmpty()) {
             result.set(new EmptyColumnView(values.size(), ColumnType.STRING));
 

@@ -20,7 +20,7 @@ public class IdColumnBuilder implements ColumnViewBuilder, CursorObserver<Resour
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         result.set(new StringArrayColumnView(ids));
     }
 

@@ -10,7 +10,6 @@ import org.activityinfo.model.expr.eval.FormTreeSymbolTable;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.expr.ExprValue;
@@ -50,13 +49,8 @@ public class QueryEvaluator {
             return expr.accept(columnVisitor);
 
         } catch(SymbolNotFoundException e) {
-            // TODO: I think we should be stricter here but we have unit tests that rely on
-            // unmatched symbols mapping to empty columns
-            LOGGER.warning("Could not find symbol " + e.getMessage() + " in expression '" + expression + "' " +
-                "in root form class " + rootFormClass.getId());
-            FormTreePrettyPrinter.print(tree);
 
-            return batch.addEmptyColumn(rootFormClass);
+            throw new SymbolNotFoundException(expression);
         }
     }
 

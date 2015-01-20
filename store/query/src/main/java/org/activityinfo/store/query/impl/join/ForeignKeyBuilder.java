@@ -29,7 +29,7 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue>, Slot<Forei
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         result.set(new ForeignKeyMap(rowIndex, keys));
     }
 

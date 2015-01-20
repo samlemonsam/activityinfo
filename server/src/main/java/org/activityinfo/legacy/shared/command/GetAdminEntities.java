@@ -129,6 +129,7 @@ public class GetAdminEntities extends GetListCommand<AdminEntityResult> {
 
         return true;
     }
+    
 
     @Override
     public int hashCode() {

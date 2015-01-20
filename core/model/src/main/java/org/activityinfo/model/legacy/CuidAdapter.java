@@ -32,6 +32,8 @@ public class CuidAdapter {
 
     public static final char MONTHLY_REPORT = 'm';
 
+    public static final char MONTHLY_REPORT_FORM_CLASS = 'M';
+
     public static final char ATTRIBUTE_DOMAIN = 't';
 
     public static final char DATABASE_DOMAIN = 'd';
@@ -260,5 +262,9 @@ public class CuidAdapter {
 
     public static ResourceId countryId(int id) {
         return cuid(COUNTRY_DOMAIN, id);
+    }
+
+    public static ResourceId reportingPeriodFormClass(int activityId) {
+        return cuid(MONTHLY_REPORT_FORM_CLASS, activityId);
     }
 }

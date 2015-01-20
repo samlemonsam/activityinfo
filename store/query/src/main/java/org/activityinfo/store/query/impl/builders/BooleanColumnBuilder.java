@@ -29,7 +29,7 @@ public class BooleanColumnBuilder implements ColumnViewBuilder, CursorObserver<F
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         int numRows = index;
         if(missing.isEmpty()) {
             result.set(new BitSetColumnView(numRows, values));

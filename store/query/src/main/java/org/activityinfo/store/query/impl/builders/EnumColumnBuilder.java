@@ -61,7 +61,7 @@ public class EnumColumnBuilder implements ColumnViewBuilder, CursorObserver<Fiel
     }
 
     @Override
-    public void onClosed() {
+    public void done() {
         result.set(new DiscreteStringColumnView(labels, createIndexArray()));
     }
 

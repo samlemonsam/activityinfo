@@ -15,6 +15,6 @@ public interface CursorObserver<T> {
     /**
      * Called when the cursor is closed.
      */
-    void onClosed();
+    void done();
 
 }

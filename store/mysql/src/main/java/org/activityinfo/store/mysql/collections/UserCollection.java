@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -11,30 +10,25 @@ import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 
-public class UserMapping implements MappingProvider {
+public class UserCollection implements MappingProvider {
 
     private static final String TABLE_NAME = "userlogin";
 
-    public static final ResourceId FORM_CLASS_ID = ResourceId.valueOf("_users");
-
-    public static final ResourceId NAME_FIELD_ID = ResourceId.valueOf("_users_name");
-    public static final ResourceId EMAIL_FIELD_ID = ResourceId.valueOf("_email_field_id");
+    public static final ResourceId FORM_CLASS_ID = ResourceId.valueOf("FF8081814AE2C808014AE2DEE2270009");
+    public static final ResourceId NAME_FIELD_ID = ResourceId.valueOf("FF8081814AE2C808014AE2DEFDAB000A");
 
     private final TableMapping mapping;
 
-
-    public UserMapping() {
+    public UserCollection() {
 
         FormField nameField = new FormField(NAME_FIELD_ID);
         nameField.setLabel("Name");
         nameField.setType(TextType.INSTANCE);
+        nameField.setRequired(true);
 
-        FormClass formClass = new FormClass(FORM_CLASS_ID);
-        formClass.setOwnerId(ResourceId.ROOT_ID);
-        formClass.addElement(nameField);
-
-        TableMappingBuilder mapping = TableMappingBuilder.newMapping(TABLE_NAME);
-        mapping.setFormClass(formClass);
+        TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
+        mapping.setOwnerId(ResourceId.ROOT_ID);
+        
         mapping.setPrimaryKeyMapping(CuidAdapter.USER_DOMAIN, "UserId");
         mapping.addTextField(nameField, "name");
         this.mapping = mapping.build();

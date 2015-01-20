@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl.views;
 
+import com.google.common.base.Strings;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 
@@ -29,7 +30,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.type = ColumnType.STRING;
         this.doubleValue = Double.NaN;
         this.stringValue = value;
-        this.booleanValue = (value.length() > 0);
+        this.booleanValue = Strings.isNullOrEmpty(value);
         this.numRows = numRows;
     }
 
@@ -89,5 +90,10 @@ public class ConstantColumnView implements ColumnView, Serializable {
     @Override
     public int getBoolean(int row) {
         return booleanValue ? 1 : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "[ " + get(0) + " x " + numRows + " rows ]";
     }
 }

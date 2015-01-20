@@ -18,4 +18,16 @@ public class Join {
         this.key = key;
         this.joinExpr = joinExpr;
     }
+
+    public Join getParent() {
+        return parent;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getJoinExpr() {
+        return joinExpr;
+    }
 }

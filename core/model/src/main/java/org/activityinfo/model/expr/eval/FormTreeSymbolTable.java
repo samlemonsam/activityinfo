@@ -33,13 +33,13 @@ public class FormTreeSymbolTable {
     }
 
     public SymbolBinding resolveCompoundExpr(List<FormTree.Node> fields, CompoundExpr expr) {
-        if(expr.getValue() instanceof SymbolExpr) {
+        if (expr.getValue() instanceof SymbolExpr) {
             SymbolBinding parentField = match(((SymbolExpr) expr.getValue()).getName(), fields);
-            Iterable children = Iterables.filter(fields, parentField.getChildPredicate());
+            Iterable<FormTree.Node> children = Iterables.filter(parentField.getField().getChildren(), parentField.getChildPredicate());
 
             return match(expr.getField().getName(), children);
 
-        } else if(expr.getValue() instanceof CompoundExpr) {
+        } else if (expr.getValue() instanceof CompoundExpr) {
             return resolveCompoundExpr(fields, (CompoundExpr) expr.getValue());
 
         } else {
@@ -51,14 +51,14 @@ public class FormTreeSymbolTable {
     /**
      * Matches a symbol against the fields that are present.
      *
-     * @param name the symbol name to resolve
+     * @param name   the symbol name to resolve
      * @param fields the fields that are present at this level in the tree
      */
     private SymbolBinding match(String name, Iterable<FormTree.Node> fields) {
 
         // first try to resolve by id.
-        for(FormTree.Node rootField : fields) {
-            if(rootField.getFieldId().asString().equals(name)) {
+        for (FormTree.Node rootField : fields) {
+            if (rootField.getFieldId().asString().equals(name)) {
                 return new SymbolBinding(rootField);
             }
         }
@@ -67,10 +67,10 @@ public class FormTreeSymbolTable {
         List<SymbolBinding> matching = Lists.newArrayList();
         collectMatching(name, fields, matching);
 
-        if(matching.size() == 1) {
+        if (matching.size() == 1) {
             return matching.get(0);
 
-        } else if(matching.isEmpty()) {
+        } else if (matching.isEmpty()) {
             throw new SymbolNotFoundException(name);
 
         } else {
@@ -84,16 +84,16 @@ public class FormTreeSymbolTable {
      */
     private void collectMatching(String symbolName, Iterable<FormTree.Node> fields, List<SymbolBinding> matching) {
         boolean matched = false;
-        for(FormTree.Node fieldNode : fields) {
+        for (FormTree.Node fieldNode : fields) {
             SymbolBinding match = matches(symbolName, fieldNode);
-            if(match != null) {
+            if (match != null) {
                 matching.add(match);
                 matched = true;
             }
         }
         // if we do not have a direct match, consider descendants
-        if(!matched) {
-            for(FormTree.Node field : fields) {
+        if (!matched) {
+            for (FormTree.Node field : fields) {
                 collectMatching(symbolName, field.getChildren(), matching);
             }
         }
@@ -102,32 +102,30 @@ public class FormTreeSymbolTable {
     private SymbolBinding matches(String symbolName, FormTree.Node fieldNode) {
 
         // Match against label and code case insensitively
-        if(symbolName.equalsIgnoreCase(fieldNode.getField().getCode()) ||
+        if (symbolName.equalsIgnoreCase(fieldNode.getField().getCode()) ||
                 symbolName.equalsIgnoreCase(fieldNode.getField().getLabel())) {
             return new SymbolBinding(fieldNode);
         }
         // Require exact match with the field id
-        if(symbolName.equals(fieldNode.getFieldId().asString())) {
+        if (symbolName.equals(fieldNode.getFieldId().asString())) {
             return new SymbolBinding(fieldNode);
         }
 
         // Check for super properties defined on the FormClass
-        for(ResourceId superProperty : fieldNode.getField().getSuperProperties()) {
-            if(symbolName.equals(superProperty.asString())) {
+        for (ResourceId superProperty : fieldNode.getField().getSuperProperties()) {
+            if (symbolName.equals(superProperty.asString())) {
                 return new SymbolBinding(fieldNode);
             }
         }
 
-        if(fieldNode.getType() instanceof ReferenceType) {
+        if (fieldNode.getType() instanceof ReferenceType) {
             ReferenceType fieldType = (ReferenceType) fieldNode.getType();
-            for(ResourceId formClassId : fieldType.getRange()) {
-                if(formClassId.asString().equals(symbolName)) {
+            for (ResourceId formClassId : fieldType.getRange()) {
+                if (formClassId.asString().equals(symbolName)) {
                     return new SymbolBinding(fieldNode, formClassId);
                 }
             }
         }
         return null;
     }
-
-
 }

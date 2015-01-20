@@ -24,14 +24,7 @@ public interface CollectionAccessor {
     FormClass getFormClass();
 
 
-    CursorBuilder newCursor();
-
-    /**
-     * Opens a cursor over a list of ALL instances belong to a FormClass.
-     * Authorization is NOT applied to this cursor, the table builder should
-     * add the authorization expression as part of the filter.
-     */
-    Cursor openCursor(ResourceId formClassId) throws Exception;
+    ColumnQueryBuilder newColumnQuery();
 
 
 }

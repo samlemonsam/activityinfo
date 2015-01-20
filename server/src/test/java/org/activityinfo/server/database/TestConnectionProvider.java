@@ -89,6 +89,7 @@ public class TestConnectionProvider implements Provider<Connection> {
             LOGGER.info("Opening test database at " + URL);
             Class.forName("com.mysql.jdbc.Driver");
             return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

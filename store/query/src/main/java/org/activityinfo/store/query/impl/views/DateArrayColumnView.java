@@ -4,6 +4,7 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -48,5 +49,10 @@ public class DateArrayColumnView implements ColumnView, Serializable {
     @Override
     public int getBoolean(int row) {
         return NA;
+    }
+
+    @Override
+    public String toString() {
+        return values.toString();
     }
 }
