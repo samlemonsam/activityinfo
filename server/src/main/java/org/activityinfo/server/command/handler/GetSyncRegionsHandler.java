@@ -90,7 +90,7 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
         if (CollectionUtil.isNotEmpty(countryIds)) {
             List<Object[]> regions = entityManager.createNativeQuery("SELECT loc.LocationTypeId, MAX(loc.timeEdited) " +
                     "FROM location loc " +
-                    "INNER JOIN locationType t ON loc.LocationTypeId = t.LocationTypeId " +
+                    "INNER JOIN locationtype t ON loc.LocationTypeId = t.LocationTypeId " +
                     "WHERE loc.LocationId IN (SELECT LocationId FROM site WHERE dateDeleted is null) " +
                     " AND t.countryId IN (:countries) " +
                     "GROUP BY loc.LocationTypeId")

@@ -183,7 +183,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
         assertThat(
                 Integer.valueOf(queryString("select count(*) from Location")),
-                equalTo(220));
+                equalTo(221));
 
         // update a location on the server
         serverEm.getTransaction().begin();
