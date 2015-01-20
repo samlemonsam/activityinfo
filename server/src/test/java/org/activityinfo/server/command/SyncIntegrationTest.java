@@ -438,21 +438,8 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         EntityManager em = serverEntityManagerFactory.createEntityManager();
 
         // before sync, fill in db with locations
-        final List<Integer> locationIds = Lists.newArrayList();
         int generatedLocationCount = 50000;
-        em.getTransaction().begin();
-        for (int i = 0; i < generatedLocationCount; i++) {
-            int id = i + 10;
-
-            Location loc = new Location();
-            loc.setId(id);
-            loc.setTimeEdited(new Date().getTime() + i);
-            loc.setName("GeneratedLocation_" + i);
-            loc.setLocationType(em.find(LocationType.class, 1));
-            em.persist(loc);
-            locationIds.add(id);
-        }
-        em.getTransaction().commit();
+        final List<Integer> locationIds = addLocationsToServerDatabase(generatedLocationCount);
 
         Dispatcher remoteDispatcher = new RemoteDispatcherStub(servlet, 5);
 
@@ -528,16 +515,19 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
                 equalTo(35));
     }
 
-    private void addLocationsToServerDatabase(int count) {
+    private List<Integer> addLocationsToServerDatabase(int count) {
 
         nowIsh = new Date().getTime();
+
+        final List<Integer> locationIds = Lists.newArrayList();
 
         EntityManager entityManager = serverEntityManagerFactory
                 .createEntityManager();
         entityManager.getTransaction().begin();
         for (int i = 1; i <= count; ++i) {
+
             Location loc = new Location();
-            loc.setId(i);
+            loc.setId(i + 10); // first 10 ids are used by data set
             loc.setTimeEdited(nowIsh += 15000);
             loc.setName("Penekusu " + i);
             loc.getAdminEntities().add(
@@ -548,10 +538,13 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
             entityManager.persist(loc);
             entityManager.flush();
 
+            locationIds.add(loc.getId());
             assertTrue(loc.getId() != 0);
+            locationIds.add(loc.getId());
         }
         entityManager.getTransaction().commit();
         entityManager.close();
+        return locationIds;
     }
 
     private String queryString(String sql) throws SQLException {
