@@ -25,12 +25,7 @@
   <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
 
-  <!-- REMOVE AFTER AI-864 fix-->
-  <set-property name="gwt.logging.enabled" value="TRUE"/>
-  <set-property name="gwt.logging.logLevel" value="FINEST"/>
-  <set-property name="compiler.stackMode" value="emulated"/>
-  <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
-  <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
+  <set-property name="gwt.logging.enabled" value="FALSE"/>
 
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 

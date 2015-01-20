@@ -511,7 +511,6 @@
           <port>9090</port>
           <extraJvmArgs>-Xmx2048M -Xss1M</extraJvmArgs>
           <workDir>${project.build.directory}/gwt-work</workDir>
-          <style>DETAILED</style>
         </configuration>
 
         <executions>
