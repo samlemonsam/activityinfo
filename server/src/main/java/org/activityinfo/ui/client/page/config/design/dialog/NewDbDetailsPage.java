@@ -23,6 +23,8 @@ package org.activityinfo.ui.client.page.config.design.dialog;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -41,6 +43,7 @@ import org.activityinfo.legacy.shared.command.GetCountries;
 import org.activityinfo.legacy.shared.command.result.CountryResult;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.ui.client.util.GwtUtil;
+import org.activityinfo.ui.client.widget.Button;
 import org.activityinfo.ui.client.widget.CheckBox;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.dialog.WizardDialog;
@@ -81,6 +84,8 @@ public class NewDbDetailsPage extends WizardPageAdapter {
     TextBox name;
     @UiField
     TextBox description;
+    @UiField
+    Button loadCountries;
 
     public NewDbDetailsPage(Dispatcher dispatcher, NewDbDialogData dialogData) {
         this.dispatcher = dispatcher;
@@ -116,17 +121,30 @@ public class NewDbDetailsPage extends WizardPageAdapter {
                 }
             }
         });
+        loadCountries.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                loadCountries();
+            }
+        });
     }
 
     private void loadCountries() {
+        loadCountries.setEnabled(false);
+        countryField.setShowValidationMessage(false);
+
         dispatcher.execute(new GetCountries(), new AsyncCallback<CountryResult>() {
             @Override
             public void onFailure(Throwable caught) {
+                loadCountries.setEnabled(true);
                 countryField.showValidationMessage(I18N.CONSTANTS.failedToLoadCountries());
+                loadCountries.setVisible(true);
             }
 
             @Override
             public void onSuccess(CountryResult result) {
+                loadCountries.setVisible(false);
+
                 for (CountryDTO countryDTO : result.getData()) {
                     country.addItem(countryDTO.getName(), Integer.toString(countryDTO.getId()));
                 }

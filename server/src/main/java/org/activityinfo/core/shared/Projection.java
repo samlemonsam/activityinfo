@@ -54,15 +54,14 @@ public class Projection {
 
     public Set<ResourceId> getReferenceValue(FieldPath path) {
         Object value = values.get(path);
-        if (value == null) {
-            return Collections.emptySet();
+        if (value instanceof ResourceId) {
+            return Collections.singleton((ResourceId) value);
         } else if (value instanceof ReferenceValue) {
             return ((ReferenceValue) value).getResourceIds();
         } else if (value instanceof EnumValue) {
             return ((EnumValue) value).getResourceIds();
-        } else {
-            return Collections.singleton((ResourceId) value);
         }
+        return Collections.emptySet();
     }
 
 

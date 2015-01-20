@@ -297,6 +297,16 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         return null;
     }
 
+    public AttributeGroupDTO getAttributeGroupByAttributeId(int id) {
+        for (AttributeGroupDTO group : attributeGroups) {
+            AttributeDTO attribute = SchemaDTO.getById(group.getAttributes(), id);
+            if (attribute != null) {
+                return group;
+            }
+        }
+        return null;
+    }
+
     /**
      * Searches this Activity's list of Indicators for the IndicatorDTO with the
      * given id.

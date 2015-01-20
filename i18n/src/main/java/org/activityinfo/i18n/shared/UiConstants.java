@@ -663,7 +663,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Unfortunately things didn't go as planned and you've encountered a bug. We're going to try " +
             "to send a report to the engineering team, but if you're really stuck and need a quick response, email " +
-            "help@activityinfo.org")
+            "support@activityinfo.org")
     String unexpectedExceptionExplanation();
 
     /**
@@ -3629,7 +3629,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please select the country")
     String selectCountryWelcome();
 
-    @DefaultStringValue("Failed to load country list (please report issue on help@activityinfo.org)")
+    @DefaultStringValue("Failed to load country list")
     String failedToLoadCountries();
 
     @DefaultStringValue("Failed to create database.")
@@ -3695,5 +3695,11 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Boundary")
     String boundaries();
+
+    @DefaultStringValue("Load")
+    String load();
+
+    @DefaultStringValue("Please specify 'From' date before 'To' date.")
+    String fromDateIsBeforeToDate();
 }
 

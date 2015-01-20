@@ -19,7 +19,7 @@ public class SiteProjector implements Function<ListResult<SiteDTO>, List<Project
     private final List<ProjectionUpdater<PartnerDTO>> partnerProjectors = Lists.newArrayList();
     private final List<IndicatorProjectionUpdater> indicatorProjectors = Lists.newArrayList();
     private final List<ProjectionUpdater<SiteDTO>> siteProjectors = Lists.newArrayList();
-    private final List<ProjectionUpdater<AttributeDTO>> attributeProjectors = Lists.newArrayList();
+    private final List<AttributeProjectionUpdater> attributeProjectors = Lists.newArrayList();
     private final List<ProjectionUpdater<ProjectDTO>> projectProjectors = Lists.newArrayList();
 
     private final ActivityFormDTO activity;
@@ -84,8 +84,11 @@ public class SiteProjector implements Function<ListResult<SiteDTO>, List<Project
                         site.get(propertyName) == Boolean.TRUE) {
                     final AttributeDTO attributeById = activity.getAttributeById(AttributeDTO.idForPropertyName(
                             propertyName));
-                    for (ProjectionUpdater<AttributeDTO> projector : attributeProjectors) {
-                        projector.update(projection, attributeById);
+                    AttributeGroupDTO attributeGroup = activity.getAttributeGroupByAttributeId(attributeById.getId());
+                    for (AttributeProjectionUpdater projector : attributeProjectors) {
+                        if (CuidAdapter.getLegacyIdFromCuid(projector.getAttributeGroupId()) == attributeGroup.getId()) {
+                            projector.update(projection, attributeById);
+                        }
                     }
                 }
             }

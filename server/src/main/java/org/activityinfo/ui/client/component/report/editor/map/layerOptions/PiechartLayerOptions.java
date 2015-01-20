@@ -44,7 +44,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.*;
@@ -53,7 +52,6 @@ import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer;
@@ -71,12 +69,10 @@ import java.util.Map;
  * Displays a list of options to configure a PiechartMapLayer
  */
 public class PiechartLayerOptions extends LayoutContainer implements LayerOptionsWidget<PiechartMapLayer> {
+
     private Dispatcher service;
     private PiechartMapLayer piechartMapLayer;
-    private EditorGrid<NamedSlice> indicatorOptionGrid;
     private ListStore<NamedSlice> indicatorsStore = new ListStore<NamedSlice>();
-    private SliderField sliderfieldMinSize;
-    private SliderField sliderfieldMaxSize;
     private Slider sliderMinSize = new Slider();
     private Slider sliderMaxSize = new Slider();
     private Timer timerMinSlider;
@@ -91,8 +87,6 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
         this.service = service;
 
         initializeComponent();
-
-        loadData();
 
         createMinMaxSliders();
 
@@ -119,9 +113,9 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
         sliderMinSize.setValue(16);
         sliderMaxSize.setValue(48);
 
-        sliderfieldMinSize = new SliderField(sliderMinSize);
+        SliderField sliderfieldMinSize = new SliderField(sliderMinSize);
         sliderfieldMinSize.setFieldLabel(I18N.CONSTANTS.radiusMinimum());
-        sliderfieldMaxSize = new SliderField(sliderMaxSize);
+        SliderField sliderfieldMaxSize = new SliderField(sliderMaxSize);
         sliderfieldMaxSize.setFieldLabel(I18N.CONSTANTS.radiusMaximum());
         panel.add(sliderfieldMinSize, formData);
         panel.add(sliderfieldMaxSize, formData);
@@ -172,7 +166,7 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
 
         ColumnModel columnmodelIndicators = new ColumnModel(columnConfigs);
 
-        indicatorOptionGrid = new EditorGrid<NamedSlice>(indicatorsStore, columnmodelIndicators);
+        EditorGrid<NamedSlice> indicatorOptionGrid = new EditorGrid<NamedSlice>(indicatorsStore, columnmodelIndicators);
         indicatorOptionGrid.setBorders(false);
         indicatorOptionGrid.setAutoExpandColumn("name");
         indicatorOptionGrid.setAutoWidth(true);
@@ -193,7 +187,11 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
         panel.add(indicatorOptionGrid);
     }
 
-    private void loadData() {
+    private Promise loadIndicatorLabels() {
+        if (piechartMapLayer == null || indicatorLabels != null) {
+            return Promise.done();
+        }
+
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.Indicator, piechartMapLayer.getIndicatorIds());
 
@@ -203,26 +201,26 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
         query.setDimensions(formDimension);
         query.setValueType(PivotSites.ValueType.DIMENSION);
 
-        service.execute(query)
-        .join(new Function<PivotSites.PivotResult, Promise<BatchResult>>() {
-            @Override
-            public Promise<BatchResult> apply(PivotSites.PivotResult input) {
-                BatchCommand batchFetch = new BatchCommand();
-                for (Bucket bucket : input.getBuckets()) {
-                    EntityCategory activity = (EntityCategory) bucket.getCategory(formDimension);
-                    batchFetch.add(new GetActivityForm(activity.getId()));
-                }
-                return service.execute(batchFetch);
-            }
-        })
-        .then(new Function<BatchResult, Void>() {
+        Promise<BatchResult> promise = service.execute(query)
+                .join(new Function<PivotSites.PivotResult, Promise<BatchResult>>() {
+                    @Override
+                    public Promise<BatchResult> apply(PivotSites.PivotResult input) {
+                        BatchCommand batchFetch = new BatchCommand();
+                        for (Bucket bucket : input.getBuckets()) {
+                            EntityCategory activity = (EntityCategory) bucket.getCategory(formDimension);
+                            batchFetch.add(new GetActivityForm(activity.getId()));
+                        }
+                        return service.execute(batchFetch);
+                    }
+                });
+        promise.then(new Function<BatchResult, Void>() {
             @Nullable
             @Override
             public Void apply(@Nullable BatchResult input) {
                 indicatorLabels = Maps.newHashMap();
-                for(CommandResult result : input.getResults()) {
+                for (CommandResult result : input.getResults()) {
                     ActivityFormDTO form = (ActivityFormDTO) result;
-                    for(IndicatorDTO indicator : form.getIndicators()) {
+                    for (IndicatorDTO indicator : form.getIndicators()) {
                         indicatorLabels.put(indicator.getId(), indicator.getName());
                     }
                 }
@@ -230,17 +228,31 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
                 return null;
             }
         });
+        return promise;
     }
 
     private void populateColorPickerWidget() {
         indicatorsStore.removeAll();
-        if (piechartMapLayer != null &&
-            piechartMapLayer.getIndicatorIds() != null &&
-            piechartMapLayer.getIndicatorIds().size() > 0) {
-            for (Slice slice : piechartMapLayer.getSlices()) {
-                String name = indicatorLabels.get(slice.getIndicatorId());
-                indicatorsStore.add(new NamedSlice(slice.getColor(), slice.getIndicatorId(), name, slice));
+        if (piechartMapLayer != null && !piechartMapLayer.getIndicatorIds().isEmpty()) {
+            if (indicatorLabels != null) {
+                addSlices();
+            } else {
+                loadIndicatorLabels().then(new Function() {
+                    @Override
+                    public Object apply(Object input) {
+                        addSlices();
+                        return null;
+                    }
+                });
             }
+        }
+    }
+
+    // call only when indicatorLabels are initialized
+    private void addSlices() {
+        for (Slice slice : piechartMapLayer.getSlices()) {
+            String name = indicatorLabels.get(slice.getIndicatorId());
+            indicatorsStore.add(new NamedSlice(slice.getColor(), slice.getIndicatorId(), name, slice));
         }
         layout(true);
     }

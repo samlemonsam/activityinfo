@@ -135,7 +135,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
         private int activityId;
 
         private ActivityFormDTO activity;
-        private Map<Integer, AdminLevelDTO> adminLevels = new HashMap<>();
         private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<Integer, AttributeGroupDTO>();
 
         private SqlTransaction tx;
@@ -272,7 +271,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             if (type.isAdminLevel()) {
                 // if this activity is bound to an administrative
                 // level, then we need only as far down as this goes
-                return getAncestors(type);
+                return getRootAdminLevel(adminLevels, type);
 
             } else if(type.isNationwide()) {
                 return Lists.newArrayList();
@@ -281,12 +280,18 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 return new ArrayList<>(adminLevels.values());
             }
         }
-        private List<AdminLevelDTO> getAncestors(LocationTypeDTO type) {
+
+        /**
+         * Must be called only by location type that has admin level bound!
+         * @param type location type
+         * @return root admin level
+         */
+        private List<AdminLevelDTO> getRootAdminLevel(Map<Integer, AdminLevelDTO> adminLevels, LocationTypeDTO type) {
             List<AdminLevelDTO> ancestors = new ArrayList<AdminLevelDTO>();
             AdminLevelDTO level = adminLevels.get(type.getBoundAdminLevelId());
 
             if (level == null) {
-                return new ArrayList<>();
+                throw new IllegalStateException("Unable to find any admin level however in locationtype is marked to bound to admin level.");
             }
 
             while (true) {

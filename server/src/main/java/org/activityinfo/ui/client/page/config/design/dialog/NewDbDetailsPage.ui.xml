@@ -27,6 +27,7 @@
                  validationStateType="ERROR" validationMessage="{i18n.selectCountryWelcome}" showValidationMessage="false">
       <chzn:ChosenListBox ui:field="country" visibleItemCount="10" multipleSelect="false"
                           width="100%" allowSingleDeselect="true"/>
+      <a:Button style="DEFAULT" ui:field="loadCountries" text="{i18n.load}" visible="false"/>
     </f:FormGroup>
 
     <g:HTMLPanel ui:field="optionsContainer">

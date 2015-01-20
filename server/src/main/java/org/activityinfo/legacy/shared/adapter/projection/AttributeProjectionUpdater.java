@@ -21,11 +21,16 @@ package org.activityinfo.legacy.shared.adapter.projection;
  * #L%
  */
 
+import com.google.common.collect.Sets;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
+
+import java.util.Set;
 
 /**
  * @author yuriyz on 5/6/14.
@@ -38,8 +43,20 @@ public class AttributeProjectionUpdater implements ProjectionUpdater<AttributeDT
         this.path = path;
     }
 
+    public ResourceId getAttributeGroupId() {
+        return path.getLeafId();
+    }
+
     @Override
     public void update(Projection projection, AttributeDTO value) {
-        projection.setValue(path, new EnumValue(CuidAdapter.attributeId(value.getId())));
+        FieldValue fieldValue = projection.getValue(path);
+        ResourceId attributeId = CuidAdapter.attributeId(value.getId());
+        if (fieldValue == null) {
+            projection.setValue(path, new EnumValue(attributeId));
+        } else {
+            Set<ResourceId> current = Sets.newHashSet(((EnumValue) fieldValue).getResourceIds());
+            current.add(attributeId);
+            projection.setValue(path, new EnumValue(current));
+        }
     }
 }
