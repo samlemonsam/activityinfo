@@ -9,24 +9,28 @@ import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.mysql.side.SideColumnBuilder;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
     
     private final Activity activity;
     private final TableMapping tableMapping;
+    private QueryExecutor executor;
     private final MySqlCursorBuilder baseCursor;
-    private final IndicatorColumnBuilder indicators;
+    private final SideColumnBuilder indicators;
+    private final SideColumnBuilder attributes;
 
     private Map<ResourceId, ActivityField> fieldMap = Maps.newHashMap();
     
     public SiteColumnQueryBuilder(Activity activity, TableMapping tableMapping, QueryExecutor executor) {
         this.activity = activity;
         this.tableMapping = tableMapping;
+        this.executor = executor;
         this.baseCursor = new MySqlCursorBuilder(tableMapping, executor);
-        this.indicators = new IndicatorColumnBuilder(activity, "site", executor);
+        this.indicators = new SideColumnBuilder();
+        this.attributes = new SideColumnBuilder();
         
         for(ActivityField field : activity.getFields()) {
             fieldMap.put(field.getResourceId(), field);
@@ -49,21 +53,29 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
             if(field.isIndicator()) {
                 indicators.add(field, observer);
             } else {
-                throw new UnsupportedOperationException("todo: attributes");
+                attributes.add(field, observer);
             }
         }
     }
 
     @Override
-    public void execute() throws SQLException {
+    public void execute() {
         
-        // Run base table
-        Cursor cursor = baseCursor.open();
-        while(cursor.next()) {}
-        
-        // Run indicator loop
-        if(!indicators.isEmpty()) {
-            indicators.execute();
+        try {
+            // Run base table
+            Cursor cursor = baseCursor.open();
+            while (cursor.next()) {
+            }
+
+            // Run indicator loop
+            if (!indicators.isEmpty()) {
+                indicators.sitesIndicators(activity.getId(), executor);
+            }
+            if (!attributes.isEmpty()) {
+                attributes.attributes(activity.getId(), executor);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

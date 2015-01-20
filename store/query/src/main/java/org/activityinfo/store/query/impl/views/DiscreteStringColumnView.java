@@ -58,4 +58,9 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
     public int getBoolean(int row) {
         return NA;
     }
+
+    @Override
+    public String toString() {  
+        return ColumnViewToString.toString(this);
+    }
 }
