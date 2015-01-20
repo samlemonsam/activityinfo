@@ -55,6 +55,7 @@ import org.activityinfo.ui.client.local.LocalModuleStub;
 import org.activityinfo.ui.client.local.sync.pipeline.InstallPipeline;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -428,7 +429,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     // AI-864, create 50k locations and try to sync them
     // Check response time (must be less than 5seconds)
     @Test
-    //@Ignore // we don't want to kill our build time, please run it manually
+    @Ignore // we don't want to kill our build time, please run it manually
     @OnDataSet("/dbunit/sites-simple-with-unicode.db.xml")
     public void syncWithHugeLocationsCount() throws SQLException, InterruptedException {
 
@@ -438,7 +439,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
         // before sync, fill in db with locations
         final List<Integer> locationIds = Lists.newArrayList();
-        int generatedLocationCount = 10000;
+        int generatedLocationCount = 50000;
         em.getTransaction().begin();
         for (int i = 0; i < generatedLocationCount; i++) {
             int id = i + 10;
