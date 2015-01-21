@@ -209,10 +209,18 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         calcSpacerHeight();
     }
 
+    int previousVerticalScrollPosition = 0;
     private void calcSpacerHeight() {
         int verticalScrollPosition = scrollAncestor.getVerticalScrollPosition();
         if (verticalScrollPosition > Metrics.MAX_VERTICAL_SCROLL_POSITION) {
             int height = verticalScrollPosition - Metrics.MAX_VERTICAL_SCROLL_POSITION;
+
+            int panelHeight = dropPanel.getOffsetHeight();
+            int propertiesColumnHeight = propertiesPanel.getOffsetHeight() + spacer.getOffsetHeight();
+            if (propertiesColumnHeight > panelHeight && verticalScrollPosition > previousVerticalScrollPosition) {
+                // AI-924 : avoid never ending scrolls
+                return;
+            }
 
 //            int selectedWidgetTop = 0;
 //            if (selectedWidgetContainer != null) {
@@ -229,6 +237,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
             spacer.setHeight("0px");
             paletteSpacer.setHeight("0px");
         }
+        previousVerticalScrollPosition = verticalScrollPosition;
     }
 
     public Map<ResourceId, WidgetContainer> getContainerMap() {
