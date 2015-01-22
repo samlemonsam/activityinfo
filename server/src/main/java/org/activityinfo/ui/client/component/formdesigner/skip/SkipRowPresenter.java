@@ -123,7 +123,7 @@ public class SkipRowPresenter {
     private void initFormFieldBox() {
         view.getFormfield().clear();
 
-        List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getFormClass().getFields());
+        List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getRootFormClass().getFields());
         formFields.remove(fieldWidgetContainer.getFormField()); // remove selected field
 
         for (FormField formField : formFields) {
@@ -143,7 +143,7 @@ public class SkipRowPresenter {
 
     public FormField getSelectedFormField() {
         String formFieldId = view.getFormfield().getValue(view.getFormfield().getSelectedIndex());
-        return fieldWidgetContainer.getFormDesigner().getFormClass().getField(ResourceId.valueOf(formFieldId));
+        return fieldWidgetContainer.getFormDesigner().getRootFormClass().getField(ResourceId.valueOf(formFieldId));
     }
 
     // depends on selected field type

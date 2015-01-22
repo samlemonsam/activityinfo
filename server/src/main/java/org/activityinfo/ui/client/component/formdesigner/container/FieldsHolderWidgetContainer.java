@@ -27,6 +27,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
@@ -37,45 +38,67 @@ import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSe
 /**
  * @author yuriyz on 7/14/14.
  */
-public class SectionWidgetContainer implements WidgetContainer, FieldsHolder {
+public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolder {
 
     private final FormDesigner formDesigner;
-    private final FormSection formSection;
-    private final SectionPanel sectionPanel;
+    private final FormElementContainer elementContainer;
+    private final FieldsHolderPanel panel;
     private final ResourceId parentId;
 
-    public SectionWidgetContainer(final FormDesigner formDesigner, final FormSection formSection, ResourceId parentId) {
+    protected FieldsHolderWidgetContainer(final FormDesigner formDesigner, final FormElementContainer elementContainer, ResourceId parentId) {
         this.formDesigner = formDesigner;
-        this.formSection = formSection;
+        this.elementContainer = elementContainer;
         this.parentId = parentId;
 
-        sectionPanel = new SectionPanel(formDesigner, parentId);
-        sectionPanel.getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
+        panel = new FieldsHolderPanel(formDesigner, parentId);
+        panel.getPanel().setClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                formDesigner.getFormClass().remove(formSection);
-                formDesigner.getDropControllerRegistry().unregister(formSection.getId());
-            }
-        });
-        sectionPanel.getPanel().setClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                formDesigner.getContainerPresenter().show(SectionWidgetContainer.this);
-                formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(SectionWidgetContainer.this));
+                formDesigner.getContainerPresenter().show(FieldsHolderWidgetContainer.this);
+                formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(FieldsHolderWidgetContainer.this));
             }
         });
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
                 WidgetContainer selectedItem = event.getSelectedItem();
-                if (selectedItem instanceof SectionWidgetContainer) {
-                    sectionPanel.getPanel().setSelected(selectedItem.asWidget().equals(sectionPanel.asWidget()));
+                if (selectedItem instanceof FieldsHolderWidgetContainer) {
+                    panel.getPanel().setSelected(selectedItem.asWidget().equals(panel.asWidget()));
                 }
             }
         });
 
-        sectionPanel.getPanel().getWidgetContainer().add(createDropPanel());
+        panel.getPanel().getWidgetContainer().add(createDropPanel());
         syncWithModel();
+    }
+
+    public static FieldsHolderWidgetContainer section(final FormDesigner formDesigner, final FormSection formSection, ResourceId parentId) {
+        FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formSection, parentId);
+        container.getPanel().getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                formDesigner.getRootFormClass().remove(formSection);
+                formDesigner.getDropControllerRegistry().unregister(formSection.getId());
+            }
+        });
+        return container;
+    }
+
+    public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass formClass, ResourceId parentId) {
+        FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formClass, parentId);
+        container.getPanel().getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // todo!!!
+                formDesigner.getModel().removeSubform(formClass);
+                formDesigner.getDropControllerRegistry().unregister(formClass.getId());
+            }
+        });
+        return container;
+    }
+
+    public FieldsHolderPanel getPanel() {
+        return panel;
     }
 
     public ResourceId getParentId() {
@@ -86,22 +109,22 @@ public class SectionWidgetContainer implements WidgetContainer, FieldsHolder {
         FlowPanel dropPanel = new FlowPanel();
         dropPanel.addStyleName(FormDesignerStyles.INSTANCE.sectionWidgetContainer());
 
-        formDesigner.getDropControllerRegistry().register(formSection.getId(), dropPanel, formDesigner);
+        formDesigner.getDropControllerRegistry().register(elementContainer.getId(), dropPanel, formDesigner);
 
         return dropPanel ;
     }
 
     public void syncWithModel() {
-        sectionPanel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(formSection.getLabel())).asString() + "</h3>");
+        panel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(elementContainer.getLabel())).asString() + "</h3>");
     }
 
     public Widget asWidget() {
-        return sectionPanel.asWidget();
+        return panel.asWidget();
     }
 
     @Override
     public Widget getDragHandle() {
-        return sectionPanel.getDragHandle();
+        return panel.getDragHandle();
     }
 
     public FormDesigner getFormDesigner() {
@@ -110,7 +133,7 @@ public class SectionWidgetContainer implements WidgetContainer, FieldsHolder {
 
     @Override
     public FormElementContainer getElementContainer() {
-        return formSection;
+        return elementContainer;
     }
 
     @Override

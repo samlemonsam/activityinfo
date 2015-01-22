@@ -31,21 +31,15 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.model.form.FormElement;
-import org.activityinfo.model.form.FormElementContainer;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormSection;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.container.SectionWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.PanelUpdatedEvent;
-import org.activityinfo.ui.client.component.formdesigner.palette.DnDLabel;
-import org.activityinfo.ui.client.component.formdesigner.palette.FieldTemplate;
-import org.activityinfo.ui.client.component.formdesigner.palette.SectionTemplate;
-import org.activityinfo.ui.client.component.formdesigner.palette.Template;
+import org.activityinfo.ui.client.component.formdesigner.palette.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -81,7 +75,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             Scheduler.get().scheduleDeferred(new Command() {
                 @Override
                 public void execute() {
-                    formDesigner.updateFieldOrder();
+                    formDesigner.getModel().updateFieldOrder(formDesigner.getFormDesignerPanel());
                     removePositioner();
                 }
             });
@@ -93,7 +87,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         if (template instanceof FieldTemplate) {
             final FormField formField = ((FieldTemplate)template).create();
 
-            formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+            formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getRootFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
                 @Nullable
                 @Override
                 public Void apply(@Nullable FormFieldWidget formFieldWidget) {
@@ -106,7 +100,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             });
         } else if (template instanceof SectionTemplate) {
             final FormSection formSection = ((SectionTemplate)template).create();
-            if (formDesigner.getElementContainer(resourceId) instanceof FormSection) {
+            if (formDesigner.getModel().getElementContainer(resourceId) instanceof FormSection) {
                 // we are not going to handle nested FormSection in FormDesigner
                 // It should be enough to handle one level of FormSections:
                 // 1. on selection FormSection container is selected by blue color
@@ -114,9 +108,15 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 // nested FormSection brings higher complexity without comparative value.
                 throw new VetoDragException();
             }
-            SectionWidgetContainer widgetContainer = new SectionWidgetContainer(formDesigner, formSection, resourceId);
+            FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.section(formDesigner, formSection, resourceId);
             containerMap.put(resourceId, widgetContainer);
             drop(widgetContainer, context, formSection);
+        } else if (template instanceof SubformTemplate) {
+            final FormField formField = ((FieldTemplate)template).create();
+
+//            FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, formSection, resourceId);
+//            containerMap.put(resourceId, widgetContainer);
+//            drop(widgetContainer, context, formSection);
         }
 
 
@@ -143,7 +143,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             public void execute() {
                 int widgetIndex = dropTarget.getWidgetIndex(widgetContainer.asWidget());
 
-                FormElementContainer elementContainer = formDesigner.getElementContainer(resourceId);
+                FormElementContainer elementContainer = formDesigner.getModel().getElementContainer(resourceId);
 
                 // update model
                 elementContainer.insertElement(widgetIndex, formElement);

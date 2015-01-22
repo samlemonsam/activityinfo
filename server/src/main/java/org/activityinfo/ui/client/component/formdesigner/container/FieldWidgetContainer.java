@@ -66,7 +66,7 @@ public class FieldWidgetContainer implements WidgetContainer {
         fieldPanel.getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                formDesigner.getFormClass().remove(formField);
+                formDesigner.getRootFormClass().remove(formField);
             }
         });
         fieldPanel.setClickHandler(new ClickHandler() {

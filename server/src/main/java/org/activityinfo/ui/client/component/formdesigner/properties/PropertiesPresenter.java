@@ -261,7 +261,7 @@ public class PropertiesPresenter {
         if (formField.getType() instanceof ParametrizedFieldType) {
             ParametrizedFieldType parametrizedType = (ParametrizedFieldType) formField.getType();
             currentDesignWidget.asWidget().setVisible(true);
-            currentDesignWidget.setValidationFormClass(fieldWidgetContainer.getFormDesigner().getFormClass());
+            currentDesignWidget.setValidationFormClass(fieldWidgetContainer.getFormDesigner().getRootFormClass());
             currentDesignWidget.show(Resources.createResource(parametrizedType.getParameters())).then(new AsyncCallback<Void>() {
 
 
@@ -284,7 +284,7 @@ public class PropertiesPresenter {
         formDesigner.getContainerPresenter().show(new FieldsHolder() {
             @Override
             public FormElementContainer getElementContainer() {
-                return formDesigner.getElementContainer(fieldWidgetContainer.getParentId());
+                return formDesigner.getModel().getElementContainer(fieldWidgetContainer.getParentId());
             }
 
             @Override
@@ -312,7 +312,7 @@ public class PropertiesPresenter {
         } else {
 
             // check whether code is unique
-            List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getFormClass().getFields());
+            List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getRootFormClass().getFields());
             formFields.remove(fieldWidgetContainer.getFormField());
 
             for (FormField formField : formFields) {

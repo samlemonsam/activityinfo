@@ -29,13 +29,13 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 /**
  * @author yuriyz on 12/30/2014.
  */
-public class SectionPanel implements WidgetContainer {
+public class FieldsHolderPanel implements WidgetContainer {
 
     private final FormDesigner formDesigner;
     private final ResourceId parentId;
     private final FieldPanel panel;
 
-    public SectionPanel(FormDesigner formDesigner, ResourceId parentId) {
+    public FieldsHolderPanel(FormDesigner formDesigner, ResourceId parentId) {
         this.formDesigner = formDesigner;
         this.parentId = parentId;
         this.panel = new FieldPanel(formDesigner) {

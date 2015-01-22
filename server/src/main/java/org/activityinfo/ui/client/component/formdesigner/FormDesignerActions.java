@@ -52,7 +52,7 @@ public class FormDesignerActions {
         formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saving());
         formDesignerPanel.getSaveButton().setEnabled(false);
 
-        Promise<Void> promise = formDesigner.getResourceLocator().persist(formDesigner.getFormClass());
+        Promise<Void> promise = formDesigner.getResourceLocator().persist(formDesigner.getRootFormClass());
         promise.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {

@@ -44,6 +44,7 @@ public class Templates {
  //       items.add(new TypeClassTemplate(ImageType.TYPE_CLASS));
         items.add(new TypeClassTemplate(CalculatedFieldType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeCalculated()));
         items.add(new SectionTemplate());
+        items.add(new SubformTemplate());
 
         return items;
     }

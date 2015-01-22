@@ -44,7 +44,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.container.SectionWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.drop.NullValueUpdater;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -244,11 +244,11 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 FormSection formSection = (FormSection) element;
-                containerMap.put(formSection.getId(), new SectionWidgetContainer(formDesigner, formSection, container.getId()));
+                containerMap.put(formSection.getId(), FieldsHolderWidgetContainer.section(formDesigner, formSection, container.getId()));
                 buildWidgetContainers(formDesigner, formSection, depth + 1, promises);
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
-                Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+                Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getRootFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
                     @Nullable
                     @Override
                     public Void apply(@Nullable FormFieldWidget input) {

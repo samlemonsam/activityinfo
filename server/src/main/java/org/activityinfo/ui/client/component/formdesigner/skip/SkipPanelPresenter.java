@@ -43,7 +43,7 @@ public class SkipPanelPresenter {
 
     public SkipPanelPresenter(final FieldWidgetContainer fieldWidgetContainer) {
         this.fieldWidgetContainer = fieldWidgetContainer;
-        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getFormClass());
+        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getRootFormClass());
 
         if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {
             List<RowData> build = rowDataBuilder.build(fieldWidgetContainer.getFormField().getRelevanceConditionExpression());
@@ -105,7 +105,7 @@ public class SkipPanelPresenter {
     private List<RowData> createRowDataList() {
         final List<RowData> result = Lists.newArrayList();
         final int widgetCount = view.getRootPanel().getWidgetCount();
-        final FormClass formClass = fieldWidgetContainer.getFormDesigner().getFormClass();
+        final FormClass formClass = fieldWidgetContainer.getFormDesigner().getRootFormClass();
 
         for (int i = 0; i < widgetCount; i++) {
             SkipRow skipRow = (SkipRow) view.getRootPanel().getWidget(i);

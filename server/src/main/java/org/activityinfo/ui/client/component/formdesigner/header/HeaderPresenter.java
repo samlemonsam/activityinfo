@@ -47,7 +47,7 @@ public class HeaderPresenter implements FieldsHolder {
     public HeaderPresenter(final FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
         this.headerPanel = formDesigner.getFormDesignerPanel().getHeaderPanel();
-        this.formClass = formDesigner.getFormClass();
+        this.formClass = formDesigner.getRootFormClass();
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
@@ -67,8 +67,8 @@ public class HeaderPresenter implements FieldsHolder {
     }
 
     public void show() {
-        headerPanel.getLabel().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getFormClass().getLabel())));
-        headerPanel.getDescription().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getFormClass().getDescription())));
+        headerPanel.getLabel().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getRootFormClass().getLabel())));
+        headerPanel.getDescription().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getRootFormClass().getDescription())));
     }
 
     private void onClick() {

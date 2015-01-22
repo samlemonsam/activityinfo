@@ -97,7 +97,7 @@ public class DropControllerRegistry {
     }
 
     public DropControllerExtended getRootDropController() {
-        return getDropController(formDesigner.getFormClass().getId());
+        return getDropController(formDesigner.getRootFormClass().getId());
     }
 
     public DropControllerExtended getDropController(Widget dropTarget) {

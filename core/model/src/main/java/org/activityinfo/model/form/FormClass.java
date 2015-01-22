@@ -109,6 +109,10 @@ public class FormClass implements IsResource, FormElementContainer {
         }
     }
 
+    public void removeField(ResourceId formElementId) {
+        remove(getField(formElementId));
+    }
+
     public void remove(final FormElement formElement) {
         traverse(this, new TraverseFunction() {
             @Override
