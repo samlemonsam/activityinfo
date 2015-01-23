@@ -31,7 +31,7 @@
     <meta name="application-name" content="ActivityInfo"/>
     <meta name="description" content="ActivityInfo"/>
     <meta name="application-url" content="${appUrl}"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
 
     <#if newUI>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
