@@ -58,7 +58,12 @@ public class SchemaUpdateBuilderTest {
     protected EntityManagerFactory emFactory;
 
     @Test
-    public void test() throws JSONException {
+    public void optimizationTest() throws JSONException {
+
+//        HibernateEntityManagerFactory hibernateFactory = (HibernateEntityManagerFactory) emFactory;
+//        Statistics statistics = hibernateFactory.getSessionFactory().getStatistics();
+//        statistics.setStatisticsEnabled(true);
+
         EntityManager em = emFactory.createEntityManager();
         User user = em.find(User.class, USER_ID);
 
@@ -66,6 +71,14 @@ public class SchemaUpdateBuilderTest {
         SchemaUpdateBuilder b = new SchemaUpdateBuilder(emFactory);
         SyncRegionUpdate build = b.build(user, new GetSyncRegionUpdates());
         System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
+
+//        System.out.println("Number of queries: " + statistics.getQueries().length + " (was: 59)");
+//        for (String q : statistics.getQueries()) {
+//            System.out.println("   query: " + q);
+//        }
+//        System.out.println(statistics.getConnectCount());
+//        System.out.println(statistics.getEntityFetchCount());
+//        System.out.println(statistics.getSessionOpenCount());
 
     }
 }
