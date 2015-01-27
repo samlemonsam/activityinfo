@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.pageView;
 
 import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.ui.client.page.instance.InstancePlace;
 
 public class InstanceViewModel {
     private FormInstance instance;
@@ -8,7 +9,7 @@ public class InstanceViewModel {
 
     public InstanceViewModel(FormInstance instance, String path) {
         this.instance = instance;
-        this.path = path;
+        this.path = path != null ? path : InstancePlace.DEFAULT_VIEW;
     }
 
     public FormInstance getInstance() {

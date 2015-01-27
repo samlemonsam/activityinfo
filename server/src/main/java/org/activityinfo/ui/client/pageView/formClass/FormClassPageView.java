@@ -3,10 +3,10 @@ package org.activityinfo.ui.client.pageView.formClass;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.LIElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.model.form.FormClass;
@@ -41,6 +41,10 @@ public class FormClassPageView implements InstancePageView {
 
     @UiField AnchorElement designTab;
     @UiField AnchorElement tableTab;
+    @UiField
+    LIElement designTabContainer;
+    @UiField
+    LIElement tableTabContainer;
 
     private Map<String, AnchorElement> tabs = Maps.newHashMap();
 
@@ -65,7 +69,19 @@ public class FormClassPageView implements InstancePageView {
             tabs.get(tab).setHref(InstancePlace.safeUri(view.getInstance().getId(), tab));
         }
 
+        setTabSelected(view.getPath());
+
         return tabView.show(view.getInstance());
+    }
+
+    private void setTabSelected(String path) {
+        designTabContainer.removeClassName("active");
+        tableTabContainer.removeClassName("active");
+        if (path.equals("design")) {
+            designTabContainer.addClassName("active");
+        } else {
+            tableTabContainer.addClassName("active");
+        }
     }
 
     @Override
