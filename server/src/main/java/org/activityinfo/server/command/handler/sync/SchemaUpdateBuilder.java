@@ -301,6 +301,9 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
 
     @SuppressWarnings("unchecked") // query indicator links with one call
     private void findIndicatorLinks() {
+        if (indicators.isEmpty()) {// nothing to handle
+            return;
+        }
         List<Integer> indicatorIdList = Lists.newArrayList();
         for (Indicator indicator : indicators) {
             indicatorIdList.add(indicator.getId());
