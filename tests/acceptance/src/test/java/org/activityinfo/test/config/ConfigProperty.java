@@ -24,6 +24,21 @@ public class ConfigProperty {
     }
 
 
+    public boolean isPresent() {
+        String value = System.getProperty(propertyKey);
+        return !Strings.isNullOrEmpty(value);
+    }
+    
+    public String getOr(String defaultValue) {
+        String path = System.getProperty(propertyKey);
+        if(Strings.isNullOrEmpty(path)) {
+            return defaultValue;
+        }
+        return path;
+    }
+    
+
+
     public File getFile() {
         String path = get();
 

@@ -1,4 +1,4 @@
-package org.activityinfo.test.device;
+package org.activityinfo.test.webdriver;
 
 public enum OperatingSystem {
     WINDOWS_8_1("Windows 8.1"),

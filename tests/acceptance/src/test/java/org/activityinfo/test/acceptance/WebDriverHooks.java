@@ -3,26 +3,28 @@ package org.activityinfo.test.acceptance;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
-import org.activityinfo.test.harness.TestReporter;
+import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.webdriver.WebDriverSession;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 
+
+@ScenarioScoped
 public class WebDriverHooks {
 
+
+    @Inject
+    private WebDriverSession session;
+    
     @Inject
     private WebDriver webDriver;
 
-    @Inject
-    private TestReporter reporter;
-
     @Before
     public void starting() {
-        if(reporter != null) {
-            reporter.testStarting();
-        }
+        
     }
 
     @After
@@ -32,10 +34,6 @@ public class WebDriverHooks {
             scenario.embed(screenshot, "image/png");
         }
 
-        if(reporter != null) {
-            reporter.testFinished(scenario);
-        }
-
-        webDriver.quit();
+        session.finished(!scenario.isFailed());
     }
 }

@@ -3,25 +3,23 @@ package org.activityinfo.test.acceptance;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.Dashboard;
 import org.activityinfo.test.pageobject.web.LoginPage;
-import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.sut.Accounts;
-import org.activityinfo.test.sut.SystemUnderTest;
+import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
-import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
 
-
+@ScenarioScoped
 public class LoginSteps {
 
     @Inject
-    private SystemUnderTest server;
+    private Server server;
 
     @Inject
     private PageBinder binder;

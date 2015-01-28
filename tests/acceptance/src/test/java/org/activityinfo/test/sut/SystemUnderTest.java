@@ -1,39 +1,18 @@
 package org.activityinfo.test.sut;
 
-/**
- * Provides information about and access to the deployment of the
- * server currently under test
- */
-public class SystemUnderTest {
+import com.google.inject.AbstractModule;
+import org.activityinfo.test.config.ConfigProperty;
 
-    private final String rootUrl;
+import static org.activityinfo.test.sut.PredefinedAccounts.fromResource;
 
-    public SystemUnderTest(String rootUrl) {
-        this.rootUrl = rootUrl;
-    }
 
-    public String getRootUrl() {
-        return path("");
-    }
+public class SystemUnderTest extends AbstractModule {
 
-    public String path(String path) {
-        String url = rootUrl;
-        if(!url.endsWith("/")) {
-            url += "/";
-        }
-        if(path.startsWith("/")) {
-            url += path.substring(1);
-        } else {
-            url += path;
-        }
-        return url;
-    }
+    public static final ConfigProperty TEST_URL = new ConfigProperty("test.url", "Root URL to Test");
 
-    /**
-     *
-     * @return the URL of the application
-     */
-    public String appUrl() {
-        return path("");
+    @Override
+    protected void configure() {
+        bind(Server.class).toInstance(new Server(TEST_URL.get()));
+        bind(Accounts.class).toInstance(fromResource(getClass(), "devserver-credentials.properties"));
     }
 }

@@ -1,7 +1,8 @@
 package org.activityinfo.test.pageobject.api;
 
 import com.google.inject.Injector;
-import org.activityinfo.test.sut.SystemUnderTest;
+import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.sut.Server;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
@@ -10,14 +11,15 @@ import org.openqa.selenium.support.pagefactory.FieldDecorator;
 
 import javax.inject.Inject;
 
+@ScenarioScoped
 public class PageBinder {
 
     private final Injector injector;
     private final WebDriver webDriver;
-    private final SystemUnderTest systemUnderTest;
+    private final Server systemUnderTest;
 
     @Inject
-    public PageBinder(Injector injector, WebDriver webDriver, SystemUnderTest systemUnderTest) {
+    public PageBinder(Injector injector, WebDriver webDriver, Server systemUnderTest) {
         this.injector = injector;
         this.webDriver = webDriver;
         this.systemUnderTest = systemUnderTest;

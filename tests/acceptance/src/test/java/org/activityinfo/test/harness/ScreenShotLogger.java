@@ -2,6 +2,7 @@ package org.activityinfo.test.harness;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
+@ScenarioScoped
 public class ScreenShotLogger {
 
     public static int SCREENSHOT_SEQUENCE_NUMBER = 1;

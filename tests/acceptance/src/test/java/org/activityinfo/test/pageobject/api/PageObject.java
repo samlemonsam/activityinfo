@@ -3,7 +3,7 @@ package org.activityinfo.test.pageobject.api;
 import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import org.activityinfo.test.harness.ScreenShotLogger;
-import org.activityinfo.test.sut.SystemUnderTest;
+import org.activityinfo.test.sut.Server;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class PageObject {
 
     @Inject
-    protected SystemUnderTest server;
+    protected Server server;
 
     @Inject
     protected WebDriver driver;
