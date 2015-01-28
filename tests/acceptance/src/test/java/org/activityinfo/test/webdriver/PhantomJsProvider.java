@@ -1,6 +1,7 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Preconditions;
+import cucumber.api.Scenario;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
@@ -55,7 +56,7 @@ public class PhantomJsProvider implements WebDriverProvider {
         }
 
         @Override
-        public void finished(boolean passed) {
+        public void finished(Scenario scenario) {
             driver.quit();
         }
     }

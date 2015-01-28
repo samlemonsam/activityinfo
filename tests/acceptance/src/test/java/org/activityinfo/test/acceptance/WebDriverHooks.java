@@ -22,11 +22,6 @@ public class WebDriverHooks {
     @Inject
     private WebDriver webDriver;
 
-    @Before
-    public void starting() {
-        
-    }
-
     @After
     public void after(Scenario scenario) {
         if(webDriver instanceof TakesScreenshot) {
@@ -34,6 +29,6 @@ public class WebDriverHooks {
             scenario.embed(screenshot, "image/png");
         }
 
-        session.finished(!scenario.isFailed());
+        session.finished(scenario);
     }
 }

@@ -3,6 +3,7 @@ package org.activityinfo.test.webdriver;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import cucumber.api.Profile;
+import cucumber.api.Scenario;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.WebDriver;
 

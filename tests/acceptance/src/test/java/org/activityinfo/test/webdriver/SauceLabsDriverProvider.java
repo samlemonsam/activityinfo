@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.saucelabs.common.Utils;
 import com.saucelabs.saucerest.SauceREST;
+import cucumber.api.Scenario;
 import gherkin.deps.com.google.gson.Gson;
 import gherkin.deps.com.google.gson.JsonParser;
 import gherkin.deps.com.google.gson.annotations.SerializedName;
@@ -152,11 +153,12 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         }
 
         @Override
-        public void finished(boolean passed) {
+        public void finished(Scenario scenario) {
             
             SauceREST sauceClient = new SauceREST(userName, apiKey);
             Map<String, Object> updates = new HashMap<>();
-            updates.put("passed", passed);
+            updates.put("passed", !scenario.isFailed());
+            updates.put("name", scenario.getName());
 
             Utils.addBuildNumberToUpdate(updates);
 

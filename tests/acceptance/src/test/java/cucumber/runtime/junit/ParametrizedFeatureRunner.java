@@ -3,10 +3,7 @@ package cucumber.runtime.junit;
 import cucumber.api.Profile;
 import cucumber.runtime.CucumberException;
 import cucumber.runtime.Runtime;
-import cucumber.runtime.model.CucumberFeature;
-import cucumber.runtime.model.CucumberScenario;
-import cucumber.runtime.model.CucumberScenarioOutline;
-import cucumber.runtime.model.CucumberTagStatement;
+import cucumber.runtime.model.*;
 import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.Step;
@@ -23,12 +20,12 @@ public class ParametrizedFeatureRunner extends ParentRunner<ParentRunner> {
     private final List<ParentRunner> children = new ArrayList<ParentRunner>();
 
     private final CucumberFeature cucumberFeature;
-    private final ParametrizedJunitReporter jUnitReporter;
+    private final JUnitReporter jUnitReporter;
     private List<ParametrizedRuntime> parameters;
     private Map<Profile, Runtime> profiles;
     private Description description;
 
-    public ParametrizedFeatureRunner(CucumberFeature cucumberFeature, ParametrizedJunitReporter jUnitReporter,
+    public ParametrizedFeatureRunner(CucumberFeature cucumberFeature, JUnitReporter jUnitReporter,
                                      List<ParametrizedRuntime> parameters) throws InitializationError {
         super(null);
         this.cucumberFeature = cucumberFeature;
@@ -85,8 +82,8 @@ public class ParametrizedFeatureRunner extends ParentRunner<ParentRunner> {
                 try {
                     ParentRunner featureElementRunner;
                     if (cucumberTagStatement instanceof CucumberScenario) {
-                        featureElementRunner = new ParametrizedExecutionUnitRunner(parameter,
-                                (CucumberScenario) cucumberTagStatement, jUnitReporter);
+                        featureElementRunner = new ExecutionUnitRunner(parameter.getRuntime(),
+                                fork(parameter, (CucumberScenario) cucumberTagStatement), jUnitReporter);
                     } else {
                         throw new UnsupportedOperationException("todo: ScenarioOutline");
 //                        featureElementRunner = new ParametrizedScenarioOutlineRunner(parameter,
@@ -98,5 +95,44 @@ public class ParametrizedFeatureRunner extends ParentRunner<ParentRunner> {
                 }
             }
         }
+    }
+
+    private CucumberScenario fork(ParametrizedRuntime parameter, CucumberScenario scenario) {
+        CucumberScenario copy = new CucumberScenario(cucumberFeature, 
+                clone(scenario.getCucumberBackground()), 
+                fork(parameter, (Scenario)scenario.getGherkinModel()));
+
+        for (Step step : scenario.getSteps()) {
+            copy.step(clone(step));
+        }
+        return copy;
+    }
+
+    private Scenario fork(ParametrizedRuntime parameter, Scenario scenario) {
+        return new Scenario(
+                scenario.getComments(), 
+                scenario.getTags(), 
+                scenario.getKeyword(), 
+                parameter.decorateName(scenario.getName()),
+                scenario.getDescription(), 
+                scenario.getLine(),
+                scenario.getId());
+    }
+
+
+    private Step clone(Step step) {
+        return new Step(
+                step.getComments(),
+                step.getKeyword(),
+                step.getName(),
+                step.getLine(),
+                step.getRows(),
+                step.getDocString()
+        );
+    }
+    
+    private CucumberBackground clone(CucumberBackground background) {
+        // TODO:
+        return background;
     }
 }

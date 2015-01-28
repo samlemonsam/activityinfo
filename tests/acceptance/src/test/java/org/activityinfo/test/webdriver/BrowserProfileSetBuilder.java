@@ -4,18 +4,15 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
-import javax.annotation.Nullable;
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.*;
 
 /**
- * Created by alex on 28-1-15.
+ * Creates a set of Browser profiles to test against
  */
 public class BrowserProfileSetBuilder {
 
@@ -62,8 +59,7 @@ public class BrowserProfileSetBuilder {
             return Predicates.alwaysFalse();
         }
     }
-
-
+    
     public static Predicate<BrowserProfile> withBrowser(final BrowserVendor vendor, final int versionNumber) {
         final Version version = new Version(versionNumber);
         return new Predicate<BrowserProfile>() {
@@ -73,7 +69,6 @@ public class BrowserProfileSetBuilder {
             }
         };
     }
-
 
     public Iterable<BrowserProfile> select(Predicate<BrowserProfile>... criteria) {
         return Iterables.filter(supported, Predicates.and(criteria));
