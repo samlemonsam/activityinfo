@@ -1,20 +1,33 @@
 package org.activityinfo.test.webdriver;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.saucelabs.common.Utils;
 import com.saucelabs.saucerest.SauceREST;
+import gherkin.deps.com.google.gson.Gson;
+import gherkin.deps.com.google.gson.JsonParser;
+import gherkin.deps.com.google.gson.annotations.SerializedName;
 import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.config.ConfigurationError;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,7 +40,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
     public static final ConfigProperty SAUCE_USERNAME = new ConfigProperty("sauce.username", "Sauce.io username");
     public static final ConfigProperty SAUCE_ACCESS_KEY = new ConfigProperty("sauce.accessKey", "Sauce.io access key");
-
+    
     /**
      * Capability parameter that defines the test name
      */
@@ -71,6 +84,15 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     }
 
     @Override
+    public List<BrowserProfile> getSupportedProfiles() {
+        try {
+            return SaucePlatforms.fetchBrowsers();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not fetch supported browser", e);
+        }
+    }
+
+    @Override
     public boolean supports(DeviceProfile profile) {
         return profile instanceof BrowserProfile;
     }
@@ -82,10 +104,23 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         }
         BrowserProfile browser = (BrowserProfile) device;
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability(CapabilityType.BROWSER_NAME, browser.getVendor().sauceId());
-        capabilities.setCapability(CapabilityType.PLATFORM, browser.getOS().sauceId());
+        capabilities.setCapability(CapabilityType.BROWSER_NAME, browser.getType().sauceId());
+        capabilities.setCapability(CapabilityType.PLATFORM, osName(browser));
 
         return new Session(new RemoteWebDriver(getRemoteAddress(), capabilities));
+    }
+
+    private String osName(BrowserProfile browser) {
+        switch(browser.getOS().getType()) {
+            case WINDOWS:
+                return "Windows " + browser.getOS().getVersion();
+            case OSX:
+                return "OS X " + browser.getOS().getVersion();
+            case LINUX:
+                return "Linux";
+            default:
+                return null;
+        }
     }
 
     public class Session implements WebDriverSession {
@@ -128,4 +163,5 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             sauceClient.updateJobInfo(sessionId, updates);
         }
     }
+    
 }

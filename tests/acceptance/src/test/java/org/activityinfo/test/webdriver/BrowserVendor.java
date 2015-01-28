@@ -6,7 +6,8 @@ package org.activityinfo.test.webdriver;
 public enum BrowserVendor {
     INTERNET_EXPLORER("internet explorer", "ie"),
     SAFARI("safari"),
-    CHROME("chrome");
+    CHROME("chrome"),
+    FIREFOX("firefox");
 
     private String sauceId;
     private String tag;

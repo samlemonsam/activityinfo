@@ -40,7 +40,7 @@ import static java.util.Collections.singleton;
  * @see cucumber.api.CucumberOptions
  */
 public class ParametrizedCucumber extends ParentRunner<ParametrizedFeatureRunner>  {
-    private final JUnitReporter jUnitReporter;
+    private final ParametrizedJunitReporter jUnitReporter;
     
     private final List<ParametrizedFeatureRunner> children = new ArrayList<ParametrizedFeatureRunner>();
     private final List<ParametrizedRuntime> runtimes = Lists.newArrayList();
@@ -64,7 +64,7 @@ public class ParametrizedCucumber extends ParentRunner<ParametrizedFeatureRunner
 
         final List<CucumberFeature> cucumberFeatures = runtimeOptions.cucumberFeatures(resourceLoader);
         
-        jUnitReporter = new JUnitReporter(runtimeOptions.reporter(classLoader), 
+        jUnitReporter = new ParametrizedJunitReporter(runtimeOptions.reporter(classLoader), 
                 runtimeOptions.formatter(classLoader), runtimeOptions.isStrict());
         
         createParametrizedRuntimes(runtimeOptions, classLoader, resourceLoader);

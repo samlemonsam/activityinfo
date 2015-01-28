@@ -100,7 +100,7 @@
     <profiles>
         <!-- Runs acceptance tests on a staging server prior to going live -->
         <profile>
-            <id>pre-release-tests</id>
+            <id>acceptance-tests</id>
             <build>
                 <plugins>
                     <plugin>

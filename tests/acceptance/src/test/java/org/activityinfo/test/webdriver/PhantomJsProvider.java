@@ -4,9 +4,18 @@ import com.google.common.base.Preconditions;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.remote.BrowserType;
+
+import java.util.Collections;
+import java.util.List;
 
 
 public class PhantomJsProvider implements WebDriverProvider {
+
+    @Override
+    public List<BrowserProfile> getSupportedProfiles() {
+        return Collections.singletonList(new BrowserProfile(OperatingSystem.host(), BrowserVendor.CHROME, "phantom.js"));
+    }
 
     @Override
     public boolean supports(DeviceProfile profile) {
@@ -14,7 +23,7 @@ public class PhantomJsProvider implements WebDriverProvider {
             return false;
         }
         BrowserProfile browser = (BrowserProfile) profile;
-        switch(browser.getVendor()) {
+        switch(browser.getType()) {
             case CHROME:
             case SAFARI:
                 return true;

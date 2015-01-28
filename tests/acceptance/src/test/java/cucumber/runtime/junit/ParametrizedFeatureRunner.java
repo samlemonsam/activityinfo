@@ -23,12 +23,12 @@ public class ParametrizedFeatureRunner extends ParentRunner<ParentRunner> {
     private final List<ParentRunner> children = new ArrayList<ParentRunner>();
 
     private final CucumberFeature cucumberFeature;
-    private final JUnitReporter jUnitReporter;
+    private final ParametrizedJunitReporter jUnitReporter;
     private List<ParametrizedRuntime> parameters;
     private Map<Profile, Runtime> profiles;
     private Description description;
 
-    public ParametrizedFeatureRunner(CucumberFeature cucumberFeature, JUnitReporter jUnitReporter,
+    public ParametrizedFeatureRunner(CucumberFeature cucumberFeature, ParametrizedJunitReporter jUnitReporter,
                                      List<ParametrizedRuntime> parameters) throws InitializationError {
         super(null);
         this.cucumberFeature = cucumberFeature;
@@ -86,10 +86,11 @@ public class ParametrizedFeatureRunner extends ParentRunner<ParentRunner> {
                     ParentRunner featureElementRunner;
                     if (cucumberTagStatement instanceof CucumberScenario) {
                         featureElementRunner = new ParametrizedExecutionUnitRunner(parameter,
-                                clone((CucumberScenario) cucumberTagStatement), jUnitReporter);
+                                (CucumberScenario) cucumberTagStatement, jUnitReporter);
                     } else {
-                        featureElementRunner = new ParametrizedScenarioOutlineRunner(parameter,
-                                (CucumberScenarioOutline) cucumberTagStatement, jUnitReporter);
+                        throw new UnsupportedOperationException("todo: ScenarioOutline");
+//                        featureElementRunner = new ParametrizedScenarioOutlineRunner(parameter,
+//                                (CucumberScenarioOutline) cucumberTagStatement, jUnitReporter);
                     }
                     children.add(featureElementRunner);
                 } catch (InitializationError e) {
@@ -97,25 +98,5 @@ public class ParametrizedFeatureRunner extends ParentRunner<ParentRunner> {
                 }
             }
         }
-    }
-
-    private CucumberScenario clone(CucumberScenario scenario) {
-        Scenario gherkinScenario = (Scenario) scenario.getGherkinModel();
-        CucumberScenario copy = new CucumberScenario(cucumberFeature, scenario.getCucumberBackground(), gherkinScenario);
-        for (Step step : scenario.getSteps()) {
-            copy.step(copyStep(step));
-        }
-        return copy;
-    }
-
-    private Step copyStep(Step backgroundStep) {
-        return new Step(
-                backgroundStep.getComments(),
-                backgroundStep.getKeyword(),
-                backgroundStep.getName(),
-                backgroundStep.getLine(),
-                backgroundStep.getRows(),
-                backgroundStep.getDocString()
-        );
     }
 }

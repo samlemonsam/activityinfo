@@ -3,14 +3,17 @@ package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import org.openqa.selenium.remote.BrowserType;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 public class BrowserProfile implements DeviceProfile, Serializable {
-
+    
+    
     @Nonnull
     private final OperatingSystem os;
 
@@ -18,26 +21,26 @@ public class BrowserProfile implements DeviceProfile, Serializable {
     private final BrowserVendor browser;
 
     @Nonnull
-    private final String browserVersion;
+    private final Version browserVersion;
 
     private final Set<String> tags;
     
-    public BrowserProfile(OperatingSystem os, BrowserVendor browser, String browserVersion) {
+    public BrowserProfile(@Nonnull OperatingSystem os, @Nonnull BrowserVendor browser, @Nonnull String browserVersion) {
         this.os = os;
         this.browser = browser;
-        this.browserVersion = browserVersion;
-        this.tags = ImmutableSet.of(browser.tag());
+        this.browserVersion = new Version(browserVersion);
+        this.tags = Collections.emptySet();
     }
 
     public OperatingSystem getOS() {
         return os;
     }
 
-    public BrowserVendor getVendor() {
+    public BrowserVendor getType() {
         return browser;
     }
 
-    public String getBrowserVersion() {
+    public Version getVersion() {
         return browserVersion;
     }
 
@@ -48,7 +51,7 @@ public class BrowserProfile implements DeviceProfile, Serializable {
 
     @Override
     public String getName() {
-        return Joiner.on(" ").join(Arrays.asList(os.name(), browser, browserVersion));
+        return Joiner.on(" ").join(Arrays.asList(os.toString(), browser, browserVersion));
     }
 
     @Override
@@ -76,5 +79,15 @@ public class BrowserProfile implements DeviceProfile, Serializable {
         result = 31 * result + browser.hashCode();
         result = 31 * result + browserVersion.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "BrowserProfile{" +
+                "os=" + os +
+                ", browser=" + browser +
+                ", browserVersion='" + browserVersion + '\'' +
+                ", tags=" + tags +
+                '}';
     }
 }

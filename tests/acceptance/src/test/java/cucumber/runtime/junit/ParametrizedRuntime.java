@@ -21,4 +21,8 @@ public class ParametrizedRuntime {
     public Profile getProfile() {
         return profile;
     }
+
+    public String decorateName(String visualName) {
+        return String.format("%s [%s]", visualName, profile.getName());
+    }
 }

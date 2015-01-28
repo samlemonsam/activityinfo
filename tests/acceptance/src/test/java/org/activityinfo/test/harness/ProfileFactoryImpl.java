@@ -1,6 +1,7 @@
 package org.activityinfo.test.harness;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -30,11 +31,18 @@ public class ProfileFactoryImpl implements ProfileFactory {
     
     @Override
     public List<Profile> getProfiles() {
-        return Arrays.<Profile>asList(
-                new BrowserProfile(OperatingSystem.LINUX, BrowserVendor.CHROME, "31"),
-                new BrowserProfile(OperatingSystem.MOUNTAIN_LION, BrowserVendor.SAFARI, "11"));
+
+        List<? extends DeviceProfile> supportedDevices = injector
+                .getInstance(WebDriverProvider.class)
+                .getSupportedProfiles();
         
-        //return Collections.<Profile>singletonList(new BrowserProfile(OperatingSystem.LINUX, BrowserVendor.CHROME, "31"));
+        BrowserProfileSetBuilder browsers = new BrowserProfileSetBuilder(Iterables.filter(supportedDevices, BrowserProfile.class));
+        browsers.addLatest();
+        
+        List<Profile> profiles = Lists.newArrayList();
+        profiles.addAll(browsers.selected());
+        
+        return profiles;
     }
 
     @Override
