@@ -21,9 +21,17 @@ public class WebDriverHooks {
     
     @Inject
     private WebDriver webDriver;
+    
+    @Before
+    public void before(Scenario scenario) {
+        System.out.println(String.format("Scenario %s starts on thread %s", scenario.getId(), Thread.currentThread().getName()));
+    }
+    
 
     @After
     public void after(Scenario scenario) {
+        System.out.println(String.format("Scenario %s finishes on thread %s", scenario.getId(), Thread.currentThread().getName()));
+
         if(webDriver instanceof TakesScreenshot) {
             byte[] screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
             scenario.embed(screenshot, "image/png");

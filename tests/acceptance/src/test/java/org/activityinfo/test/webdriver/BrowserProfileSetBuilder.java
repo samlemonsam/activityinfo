@@ -122,6 +122,8 @@ public class BrowserProfileSetBuilder {
         Iterables.addAll(selected, Iterables.limit(latest, 1));
     }
     
+    
+    
     public static Predicate<BrowserProfile> stable() {
         return new Predicate<BrowserProfile>() {
             @Override
@@ -139,6 +141,12 @@ public class BrowserProfileSetBuilder {
         addIEVersionFromLatestOS(9);
         addIEVersionFromLatestOS(10);
         addIEVersionFromLatestOS(11);
+    }
+    
+    public void addLight() {
+        addLatest(BrowserVendor.CHROME, Optional.of(OperatingSystemType.WINDOWS.version("7")));
+//        addLatest(BrowserVendor.FIREFOX, Optional.of(OperatingSystemType.WINDOWS.version("7")));
+//        addIEVersionFromLatestOS(9);
     }
 
 

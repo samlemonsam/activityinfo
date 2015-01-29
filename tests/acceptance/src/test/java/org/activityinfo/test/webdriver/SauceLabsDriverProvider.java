@@ -42,13 +42,10 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     public static final ConfigProperty SAUCE_USERNAME = new ConfigProperty("sauce.username", "Sauce.io username");
     public static final ConfigProperty SAUCE_ACCESS_KEY = new ConfigProperty("sauce.accessKey", "Sauce.io access key");
     
-    /**
-     * Capability parameter that defines the test name
-     */
-    private static final String TEST_NAME = "name";
 
     private String userName;
     private String apiKey;
+    
 
     public static boolean isEnabled() {
         return !Strings.isNullOrEmpty(System.getenv(JENKINS_SAUCE_USER_NAME)) ||
@@ -139,6 +136,9 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             this.driver = driver;
             this.sessionId = driver.getSessionId().toString();
 
+            System.out.println(String.format("Session %s starts on thread %s", sessionId, Thread.currentThread().getName()));
+
+
             buildJobName = Strings.emptyToNull(System.getenv("JOB_NAME"));
             if(buildJobName != null) {
                 // Output information used by the Jenkins Sauce Labs Plugin
@@ -163,6 +163,10 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             Utils.addBuildNumberToUpdate(updates);
 
             sauceClient.updateJobInfo(sessionId, updates);
+
+            System.out.println(String.format("Session %s for scenario %s finishes on thread %s", sessionId, scenario.getId(), Thread.currentThread().getName()));
+        
+            driver.quit();
         }
     }
     

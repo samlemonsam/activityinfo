@@ -38,6 +38,7 @@ public class ProfileFactoryImpl implements ProfileFactory {
         
         BrowserProfileSetBuilder browsers = new BrowserProfileSetBuilder(Iterables.filter(supportedDevices, BrowserProfile.class));
         browsers.addLatest();
+        //browsers.addLight();
         
         List<Profile> profiles = Lists.newArrayList();
         profiles.addAll(browsers.selected());
