@@ -89,7 +89,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         container.getPanel().getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // todo!!!
                 formDesigner.getModel().removeSubform(formClass);
                 formDesigner.getDropControllerRegistry().unregister(formClass.getId());
             }

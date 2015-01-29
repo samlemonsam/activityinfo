@@ -55,6 +55,13 @@ public class FormDesignerModel {
         return rootFormClass;
     }
 
+    public FormClass registerNewSubform(ResourceId formFieldId) {
+        final FormClass formClass = new FormClass(ResourceId.generateId());
+        formClass.setOwnerId(rootFormClass.getId());
+        registerSubform(formFieldId, formClass);
+        return formClass;
+    }
+
     public FormDesignerModel registerSubform(ResourceId formFieldId, FormClass formClass) {
         Preconditions.checkNotNull(formFieldId);
         Preconditions.checkNotNull(formClass);

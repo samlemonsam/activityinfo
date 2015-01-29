@@ -1,4 +1,4 @@
-package org.activityinfo.model.resource;
+package org.activityinfo.model.type.subform;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,26 +21,14 @@ package org.activityinfo.model.resource;
  * #L%
  */
 
+import org.activityinfo.model.form.FormClass;
+
 /**
- * @author yuriyz on 7/21/14.
+ * @author yuriyz on 01/27/2015.
  */
-public enum ResourceIdPrefixType {
-    TYPE("_type"),
-    SUBFORM("_subform");
+public interface SubFormKind {
 
-    public static final String SEPARATOR = ":";
+    String getId();
 
-    private final String type;
-
-    ResourceIdPrefixType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public ResourceId id(String suffix) {
-        return ResourceId.valueOf(type + SEPARATOR + suffix);
-    }
+    FormClass getDefinition();
 }

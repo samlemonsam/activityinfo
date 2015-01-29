@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -112,11 +113,23 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             containerMap.put(resourceId, widgetContainer);
             drop(widgetContainer, context, formSection);
         } else if (template instanceof SubformTemplate) {
-            final FormField formField = ((FieldTemplate)template).create();
+            final FormField formField = ((SubformTemplate)template).create();
 
-//            FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, formSection, resourceId);
-//            containerMap.put(resourceId, widgetContainer);
-//            drop(widgetContainer, context, formSection);
+            FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
+            subForm.setLabel(formField.getLabel());
+
+            SubFormType type = (SubFormType) formField.getType();
+            type.getClassReference().setRange(subForm.getId());
+
+            final FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, subForm, formField.getId());
+            containerMap.put(formField.getId(), widgetContainer);
+
+            drop(widgetContainer.asWidget(), context);
+
+            formDesigner.getEventBus().fireEvent(new PanelUpdatedEvent(widgetContainer, PanelUpdatedEvent.EventType.ADDED));
+            formDesigner.getDragController().makeDraggable(widgetContainer.asWidget(), widgetContainer.getDragHandle());
+
+            removePositioner();
         }
 
 

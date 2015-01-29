@@ -1,4 +1,4 @@
-package org.activityinfo.model.resource;
+package org.activityinfo.model.type.period;
 /*
  * #%L
  * ActivityInfo Server
@@ -22,25 +22,29 @@ package org.activityinfo.model.resource;
  */
 
 /**
- * @author yuriyz on 7/21/14.
+ * @author yuriyz on 01/27/2015.
  */
-public enum ResourceIdPrefixType {
-    TYPE("_type"),
-    SUBFORM("_subform");
+public enum PredefinedPeriods {
 
-    public static final String SEPARATOR = ":";
+    YEARLY(new PeriodValue().setYear(1)),
+    MONTHLY(new PeriodValue().setMonth(1)),
+    BI_WEEKLY(new PeriodValue().setWeek(2)),
+    WEEKLY(new PeriodValue().setWeek(1)),
+    DAILY(new PeriodValue().setDay(1)),
+    HOURLY(new PeriodValue().setHour(1));
 
-    private final String type;
+    private final PeriodValue period;
+    private String label;
 
-    ResourceIdPrefixType(String type) {
-        this.type = type;
+    PredefinedPeriods(PeriodValue period) {
+        this.period = period;
     }
 
-    public String getType() {
-        return type;
+    public PeriodValue getPeriod() {
+        return period;
     }
 
-    public ResourceId id(String suffix) {
-        return ResourceId.valueOf(type + SEPARATOR + suffix);
+    public String getLabel() {
+        return label;
     }
 }

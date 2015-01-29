@@ -33,6 +33,8 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 
+import java.util.Collections;
+
 /**
  * @author yuriyz on 12/03/2014.
  */
@@ -62,10 +64,10 @@ public class SubFormType implements ParametrizedFieldType {
         @Override
         public FormClass getParameterFormClass() {
             final FormField selector = new FormField(ResourceId.valueOf("_selector"))
-                    .setLabel("Selector for subform (time period, territory)")
+                    .setLabel("Select subform type")
                     .setType(new EnumType(Cardinality.SINGLE, Lists.newArrayList(
-                            new EnumItem(ResourceId.valueOf("_selector_monthly"), "Monthly"),
-                            new EnumItem(ResourceId.valueOf("_selector_weekly"), "Weekly")
+                            new EnumItem(ResourceId.valueOf("_selector_period"), "Period"),
+                            new EnumItem(ResourceId.valueOf("_selector_location"), "Location")
                     )));
             return new FormClass(ResourceIdPrefixType.TYPE.id("subform"))
                     .addElement(selector);
@@ -79,8 +81,8 @@ public class SubFormType implements ParametrizedFieldType {
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
-    private ReferenceType classReference;
-    private EnumValue selector;
+    private ReferenceType classReference = new ReferenceType();
+    private EnumValue selector = new EnumValue(Collections.<ResourceId>emptySet());
 
     public SubFormType() {
     }

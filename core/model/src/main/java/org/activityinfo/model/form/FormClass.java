@@ -206,6 +206,10 @@ public class FormClass implements IsResource, FormElementContainer {
         return this;
     }
 
+    public FormField addField() {
+        return addField(ResourceId.generateId());
+    }
+
 
     public FormField addField(ResourceId fieldId) {
         FormField field = new FormField(fieldId);

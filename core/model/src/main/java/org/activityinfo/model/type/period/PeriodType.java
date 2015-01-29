@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.formdesigner.palette;
+package org.activityinfo.model.type.period;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,26 +21,39 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
  * #L%
  */
 
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.type.*;
 
 /**
- * @author yuriyz on 01/21/2015.
+ * @author yuriyz on 01/27/2015.
  */
-public class SubformTemplate implements Template<FormField> {
+public class PeriodType implements FieldType {
 
-    @Override
-    public String getLabel() {
-        return "Sub Form";
+    public static final PeriodType INSTANCE = new PeriodType();
+
+    public static final FieldTypeClass TYPE_CLASS = new RecordFieldTypeClass() {
+        @Override
+        public String getId() {
+            return "PERIOD";
+        }
+
+        @Override
+        public FieldType createType() {
+            return INSTANCE;
+        }
+
+        @Override
+        public FieldValue deserialize(Record record) {
+            return PeriodValue.fromRecord(record);
+        }
+    };
+
+    public PeriodType() {
     }
 
     @Override
-    public FormField create() {
-        FormField field = new FormField(ResourceId.generateFieldId(SubFormType.TYPE_CLASS));
-        field.setLabel("Sub Form");
-        field.setType(new SubFormType());
-
-        return field;
+    public FieldTypeClass getTypeClass() {
+        return TYPE_CLASS;
     }
+
 }
