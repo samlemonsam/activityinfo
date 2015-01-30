@@ -4,10 +4,8 @@ package org.activityinfo.test.webdriver;
 import com.google.common.base.Preconditions;
 import cucumber.api.Scenario;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
@@ -34,16 +32,15 @@ public class WebDriverSession {
         return proxy;
     }
 
-    public void start(String browser, String browserVersion, String os) {
+    public void start(String testName, BrowserProfile profile) {
         Preconditions.checkState(driver == null, "WebDriver is already started");
-        this.driver = provider.start(browser, browserVersion, os);
+        
+        this.driver = provider.start(testName, profile);
     }
 
-
-    public void start(BrowserVendor browserVendor) {
-        start(browserVendor.sauceId(), null, null);
+    public void start(String testName) {
+        start(testName, null);
     }
-
 
     public BrowserVendor getBrowserType() {
         RemoteWebDriver remoteDriver = (RemoteWebDriver) driver;
@@ -53,7 +50,7 @@ public class WebDriverSession {
             case "chrome":
                 return BrowserVendor.CHROME;
             case "internet explorer":
-                return BrowserVendor.INTERNET_EXPLORER;
+                return BrowserVendor.IE;
             case "firefox":
                 return BrowserVendor.FIREFOX;
             case "safari":
@@ -61,16 +58,15 @@ public class WebDriverSession {
         }
         throw new UnsupportedOperationException("browserName: " + browserName);
     }
-
-
-
-    public void start() {
-        start(null, null, null);
-
+    
+    public boolean isRunning() {
+        return driver != null;
     }
+    
     public void finished(Scenario scenario) {
         if(driver != null) {
             driver.quit();
+            driver = null;
         }
     }
 

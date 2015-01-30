@@ -3,6 +3,7 @@ package org.activityinfo.test.pageobject.api;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -47,8 +48,11 @@ public class WaitBuilder {
     public boolean isError(WebDriver driver) {
         // Stop early if we find an error condition
         for (Predicate<WebDriver> errorCondition : errorConditions) {
-            if(errorCondition.apply(driver)) {
-                return true;
+            try {
+                if (errorCondition.apply(driver)) {
+                    return true;
+                }
+            } catch(StaleElementReferenceException ignored) {
             }
         }
         return false;

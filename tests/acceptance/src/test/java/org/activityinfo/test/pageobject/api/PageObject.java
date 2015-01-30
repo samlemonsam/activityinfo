@@ -111,5 +111,13 @@ public abstract class PageObject {
     }
 
 
+    protected final Predicate<WebDriver> urlContains(final String text) {
+        return new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return input.getCurrentUrl().toLowerCase().contains(text);
+            }
+        };
+    }
     
 }

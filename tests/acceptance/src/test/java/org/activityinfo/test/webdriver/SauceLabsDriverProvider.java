@@ -1,21 +1,10 @@
 package org.activityinfo.test.webdriver;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import com.saucelabs.common.Utils;
 import com.saucelabs.saucerest.SauceREST;
-import cucumber.api.Scenario;
-import gherkin.deps.com.google.gson.Gson;
-import gherkin.deps.com.google.gson.JsonParser;
-import gherkin.deps.com.google.gson.annotations.SerializedName;
 import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.config.ConfigurationError;
-import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
@@ -24,15 +13,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Singleton
@@ -112,13 +95,18 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     }
 
     @Override
-    public WebDriver start(String browserType, String browserVersion, String platform) {
+    public WebDriver start(String testName, BrowserProfile profile) {
+        
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        if(browserType != null) {
-            capabilities.setCapability(CapabilityType.BROWSER_NAME, browserType);
+        if(profile != null) {
+            capabilities.setCapability(CapabilityType.BROWSER_NAME, profile.getType().sauceId());
+            capabilities.setCapability(CapabilityType.VERSION, profile.getVersion().toString());
+            capabilities.setCapability(CapabilityType.PLATFORM, osName(profile));
+            capabilities.setCapability("name", testName);
+        } else {
+            capabilities.setCapability(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
+            capabilities.setCapability("name", testName);
         }
-        capabilities.setCapability(CapabilityType.VERSION, browserVersion);
-        capabilities.setCapability(CapabilityType.PLATFORM, platform);
         return new RemoteWebDriver(getRemoteAddress(), capabilities);
     }
 

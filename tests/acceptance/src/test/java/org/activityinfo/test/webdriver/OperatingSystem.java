@@ -1,6 +1,7 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.collect.Lists;
+import org.openqa.selenium.Platform;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;

@@ -22,7 +22,8 @@ public class LoginPage extends PageObject {
     @FindBy(id="loginButton")
     private WebElement loginButton;
 
-    private static final By ERROR_MESSAGE = By.id("loginAlert");
+    private static final By LOGIN_ERROR_MESSAGE = By.id("loginAlert");
+
 
     public LoginPage loginAs(UserAccount account) {
         emailInput.sendKeys(account.getEmail());
@@ -33,12 +34,14 @@ public class LoginPage extends PageObject {
 
     public void andExpectSuccess() {
         waitFor(navigationTo(ApplicationPage.class)
-                .butCheckForErrorMessage(ERROR_MESSAGE));
+                .butCheckForErrorMessage(LOGIN_ERROR_MESSAGE)
+                .butFailIf(urlContains("unsupportedBrowser")));
     }
 
 
     public void assertErrorMessageIsVisible() {
-        waitFor(anyElement(ERROR_MESSAGE)
+        waitFor(anyElement(LOGIN_ERROR_MESSAGE)
                 .butFailIf(browserNavigatesAway()));
     }
+    
 }

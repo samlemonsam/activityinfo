@@ -4,7 +4,7 @@ package org.activityinfo.test.webdriver;
 * Created by alex on 26-1-15.
 */
 public enum BrowserVendor {
-    INTERNET_EXPLORER("internet explorer", "ie"),
+    IE("internet explorer", "ie"),
     SAFARI("safari"),
     CHROME("chrome"),
     FIREFOX("firefox");

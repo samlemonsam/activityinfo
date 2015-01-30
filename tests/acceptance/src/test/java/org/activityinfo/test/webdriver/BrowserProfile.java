@@ -32,6 +32,10 @@ public class BrowserProfile implements DeviceProfile, Serializable {
         this.tags = Collections.emptySet();
     }
 
+    public BrowserProfile(OperatingSystem os, BrowserVendor browser) {
+        this(os, browser, Version.UNKNOWN.toString());
+    }
+
     public OperatingSystem getOS() {
         return os;
     }

@@ -108,7 +108,7 @@ public class BrowserProfileSetBuilder {
 
 
     private void addIEVersionFromLatestOS(int version) {
-        Iterable<BrowserProfile> browsers = select(withBrowser(BrowserVendor.INTERNET_EXPLORER, version));
+        Iterable<BrowserProfile> browsers = select(withBrowser(BrowserVendor.IE, version));
         addAll(Iterables.limit(browsers, 1));
 
     }

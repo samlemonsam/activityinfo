@@ -1,7 +1,6 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import gherkin.deps.com.google.gson.Gson;
 import gherkin.deps.com.google.gson.annotations.SerializedName;
@@ -9,10 +8,8 @@ import gherkin.deps.com.google.gson.annotations.SerializedName;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 
@@ -81,7 +78,7 @@ public class SaucePlatforms {
                 case "safari":
                     return BrowserVendor.SAFARI;
                 case "internet explorer":
-                    return BrowserVendor.INTERNET_EXPLORER;
+                    return BrowserVendor.IE;
                 default:
                     return null;
             }
