@@ -26,18 +26,19 @@ package org.activityinfo.model.type.period;
  */
 public enum PredefinedPeriods {
 
-    YEARLY(new PeriodValue().setYear(1)),
-    MONTHLY(new PeriodValue().setMonth(1)),
-    BI_WEEKLY(new PeriodValue().setWeek(2)),
-    WEEKLY(new PeriodValue().setWeek(1)),
-    DAILY(new PeriodValue().setDay(1)),
-    HOURLY(new PeriodValue().setHour(1));
+    YEARLY(new PeriodValue().setYear(1), "Yearly"),
+    MONTHLY(new PeriodValue().setMonth(1), "Monthly"),
+    BI_WEEKLY(new PeriodValue().setWeek(2), "Each two weeks"),
+    WEEKLY(new PeriodValue().setWeek(1), "Weekly"),
+    DAILY(new PeriodValue().setDay(1), "Daily"),
+    HOURLY(new PeriodValue().setHour(1), "Hourly");
 
     private final PeriodValue period;
-    private String label;
+    private final String label;
 
-    PredefinedPeriods(PeriodValue period) {
+    PredefinedPeriods(PeriodValue period, String label) {
         this.period = period;
+        this.label = label;
     }
 
     public PeriodValue getPeriod() {

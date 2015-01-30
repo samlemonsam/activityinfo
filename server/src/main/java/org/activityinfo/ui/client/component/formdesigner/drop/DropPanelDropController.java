@@ -125,6 +125,8 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             containerMap.put(formField.getId(), widgetContainer);
 
             drop(widgetContainer.asWidget(), context);
+            int widgetIndex = dropTarget.getWidgetIndex(widgetContainer.asWidget());
+            formDesigner.getModel().getElementContainer(resourceId).insertElement(widgetIndex, formField);
 
             formDesigner.getEventBus().fireEvent(new PanelUpdatedEvent(widgetContainer, PanelUpdatedEvent.EventType.ADDED));
             formDesigner.getDragController().makeDraggable(widgetContainer.asWidget(), widgetContainer.getDragHandle());

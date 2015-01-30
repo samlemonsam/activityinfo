@@ -16,5 +16,9 @@
       <a:TextBox ui:field="label" width="100%"/>
     </f:FormGroup>
 
+    <!-- Subform kind -->
+    <f:FormGroup ui:field="subformKindGroup" label="{i18n.type}" columnLabelWidth="4" visible="false">
+      <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformKind"/>
+    </f:FormGroup>
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -50,6 +50,10 @@ public class SubFormKindRegistry {
         return INSTANCE;
     }
 
+    public SubFormKind getKind(String id) {
+        return kinds.get(id);
+    }
+
     public List<SubFormKind> getKinds() {
         return Lists.newArrayList(kinds.values());
     }

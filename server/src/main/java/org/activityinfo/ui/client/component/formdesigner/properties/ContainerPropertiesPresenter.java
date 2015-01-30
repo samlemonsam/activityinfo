@@ -22,9 +22,16 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.common.base.Strings;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElementContainer;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.type.subform.SubFormKind;
+import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 
@@ -59,12 +66,36 @@ public class ContainerPropertiesPresenter {
                 }
             }
         });
+
+        if (isSubform(fieldsHolder)) {
+            view.getSubformKindGroup().setVisible(true);
+            view.getSubformKind().addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent event) {
+                    String selectedValue = view.getSubformKind().getValue(view.getSubformKind().getSelectedIndex());
+                    subformKindChanged(SubFormKindRegistry.get().getKind(selectedValue));
+                }
+            });
+            FormClass subForm = (FormClass) fieldsHolder.getElementContainer();
+            FormField subformOwnerField = formDesigner.getModel().getSubformOwnerField(subForm);
+            // todo
+        }
+    }
+
+    private boolean isSubform(FieldsHolder fieldsHolder) {
+        FormElementContainer elementContainer = fieldsHolder.getElementContainer();
+        return elementContainer instanceof FormClass && !elementContainer.equals(formDesigner.getRootFormClass());
+    }
+
+    private void subformKindChanged(SubFormKind newKind) {
+        // todo
     }
 
     public void reset() {
         if (labelKeyUpHandler != null) {
             labelKeyUpHandler.removeHandler();
         }
+        view.getSubformKindGroup().setVisible(false);
     }
 
     /**

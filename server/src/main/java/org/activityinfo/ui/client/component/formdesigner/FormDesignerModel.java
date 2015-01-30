@@ -75,7 +75,20 @@ public class FormDesignerModel {
     }
 
     public FormElementContainer getElementContainer(ResourceId resourceId) {
-        return getRootFormClass().getElementContainer(resourceId);
+        FormElementContainer fromRoot = getRootFormClass().getElementContainer(resourceId); // try root first
+        if (fromRoot != null) {
+            return fromRoot;
+        }
+        for (FormClass subform : formFieldToSubFormClass.values()) {
+            if (subform.getId().equals(resourceId)) {
+                return subform;
+            }
+            FormElementContainer fromSubform = subform.getElementContainer(resourceId);
+            if (fromSubform != null) {
+                return fromSubform;
+            }
+        }
+        return null;
     }
 
     public void updateFieldOrder(FormDesignerPanel formDesignerPanel) {
@@ -102,5 +115,10 @@ public class FormDesignerModel {
         ResourceId formFieldId = formFieldToSubFormClass.inverse().get(subForm);
         formFieldToSubFormClass.remove(formFieldId);
         rootFormClass.removeField(formFieldId);
+    }
+
+    public FormField getSubformOwnerField(FormClass subform) {
+        ResourceId ownerFieldId = formFieldToSubFormClass.inverse().get(subform);
+        return rootFormClass.getField(ownerFieldId);
     }
 }

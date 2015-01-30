@@ -25,7 +25,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.type.subform.SubFormKind;
+import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 
@@ -43,9 +46,20 @@ public class ContainerPropertiesPanel extends Composite {
     TextBox label;
     @UiField
     FormGroup labelGroup;
+    @UiField
+    ListBox subformKind;
+    @UiField
+    FormGroup subformKindGroup;
 
     public ContainerPropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
+        initSubformCombobox();
+    }
+
+    private void initSubformCombobox() {
+        for (SubFormKind kind : SubFormKindRegistry.get().getKinds()) {
+            subformKind.addItem(kind.getDefinition().getLabel(), kind.getId());
+        }
     }
 
     public TextBox getLabel() {
@@ -54,5 +68,13 @@ public class ContainerPropertiesPanel extends Composite {
 
     public FormGroup getLabelGroup() {
         return labelGroup;
+    }
+
+    public ListBox getSubformKind() {
+        return subformKind;
+    }
+
+    public FormGroup getSubformKindGroup() {
+        return subformKindGroup;
     }
 }
