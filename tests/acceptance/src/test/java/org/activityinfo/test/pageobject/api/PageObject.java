@@ -129,7 +129,7 @@ public abstract class PageObject {
         waitFor("navigation to " + getClass().getSimpleName(), 30, new Callable<Optional<PageObject>>() {
             @Override
             public Optional<PageObject> call() throws Exception {
-                String currentUrl = driver.getCurrentUrl();
+                String currentUrl = PageBinder.withoutTarget(driver.getCurrentUrl());
                 if(binder.pageUrl(PageObject.this.getClass()).equals(currentUrl)) {
                     return Optional.of(PageObject.this);
                 }
