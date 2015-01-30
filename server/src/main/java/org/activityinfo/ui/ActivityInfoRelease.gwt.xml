@@ -27,9 +27,6 @@
 
   <set-property name="gwt.logging.enabled" value="FALSE"/>
 
-  <!-- Include a permutation for IE6 -->
-  <extend-property name="user.agent" values="ie6" />
-
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
 </module>

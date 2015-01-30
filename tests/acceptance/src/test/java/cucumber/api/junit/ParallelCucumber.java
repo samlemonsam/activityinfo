@@ -39,7 +39,7 @@ import java.util.concurrent.ForkJoinPool;
  *
  * @see cucumber.api.CucumberOptions
  */
-public class ParametrizedCucumber extends Runner implements Node {
+public class ParallelCucumber extends Runner implements Node {
     
     
     private final Description description;
@@ -55,7 +55,7 @@ public class ParametrizedCucumber extends Runner implements Node {
      * @throws java.io.IOException                         if there is a problem
      * @throws org.junit.runners.model.InitializationError if there is another problem
      */
-    public ParametrizedCucumber(Class testClass) throws InitializationError, IOException {
+    public ParallelCucumber(Class testClass) throws InitializationError, IOException {
         classLoader = testClass.getClassLoader();
         Assertions.assertNoCucumberAnnotatedMethods(testClass);
 

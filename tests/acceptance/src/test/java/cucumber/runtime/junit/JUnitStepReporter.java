@@ -14,7 +14,7 @@ import java.util.Iterator;
 import static cucumber.runtime.Runtime.isPending;
 
 
-public class StepInterceptor implements Reporter {
+public class JUnitStepReporter implements Reporter {
     
     private final Reporter reporter;
     private RunNotifier runNotifier;
@@ -26,7 +26,7 @@ public class StepInterceptor implements Reporter {
     private boolean strict = false;
     private boolean ignoredStep;
 
-    public StepInterceptor(RunNotifier runNotifier, Description description, Reporter reporterProxy) {
+    public JUnitStepReporter(RunNotifier runNotifier, Description description, Reporter reporterProxy) {
         this.runNotifier = runNotifier;
         this.runnerSteps = description.getChildren().iterator();
         this.reporter = reporterProxy;
