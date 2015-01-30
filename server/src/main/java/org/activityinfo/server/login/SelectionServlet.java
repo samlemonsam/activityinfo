@@ -53,7 +53,6 @@ public class SelectionServlet extends DefaultSelectionServlet {
         super();
         registerProvider("locale", new LocaleProvider(entityManager));
         registerProvider("gwt.logging.logLevel", new LogLevelProvider());
-        registerProvider("user.agent", new RestrictedUserAgentProvider());
     }
 
     private class LocaleProvider implements PropertyProvider {
@@ -80,22 +79,6 @@ public class SelectionServlet extends DefaultSelectionServlet {
                 }
             }
             throw new UserNotAuthenticatedException("No authToken cookie");
-        }
-    }
-
-    private class RestrictedUserAgentProvider implements PropertyProvider {
-        private final UserAgentProvider delegate = new UserAgentProvider();
-
-        @Override
-        public String get(HttpServletRequest request) {
-            String userAgent = delegate.get(request);
-            switch(userAgent) {
-                case "ie10":
-                case "ie11":
-                    return "ie9";
-                default:
-                    return userAgent;
-            }
         }
     }
 

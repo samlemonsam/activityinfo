@@ -34,7 +34,6 @@ public class JUnitRecursiveRunner extends RecursiveAction {
         }
     }
 
-
     private void runBranchWithNotifications() {
         EachTestNotifier testNotifier = new EachTestNotifier(runNotifier, node.getDescription());
         testNotifier.fireTestStarted();

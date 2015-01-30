@@ -1,5 +1,6 @@
-package org.activityinfo.test.acceptance;
+package org.activityinfo.test.acceptance.web;
 
+import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -65,5 +66,12 @@ public class LoginSteps {
     @Then("^I should see an error alert$")
     public void I_should_see_an_error_alert() throws Throwable {
         loginPage.assertErrorMessageIsVisible();
+    }
+
+    @Given("^that I am logged in as \"([^\"]*)\"$")
+    public void that_I_am_logged_in_as(String email) throws Throwable {
+        UserAccount account = accounts.ensureAccountExists(email);
+        loginPage = binder.navigateTo(LoginPage.class);
+        loginPage.loginAs(account).andExpectSuccess();
     }
 }

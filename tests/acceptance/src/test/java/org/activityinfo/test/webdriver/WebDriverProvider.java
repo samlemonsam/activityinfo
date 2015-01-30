@@ -1,6 +1,10 @@
 package org.activityinfo.test.webdriver;
 
 
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.BrowserType;
+
 import java.util.List;
 
 public interface WebDriverProvider {
@@ -8,6 +12,7 @@ public interface WebDriverProvider {
     List<? extends DeviceProfile> getSupportedProfiles();
     
     boolean supports(DeviceProfile profile);
-    
-    WebDriverSession start(DeviceProfile profile);
+
+    WebDriver start(String browserType, String browserVersion, String os);
+
 }

@@ -1,6 +1,7 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
@@ -14,7 +15,9 @@ import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.config.ConfigurationError;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -95,19 +98,6 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         return profile instanceof BrowserProfile;
     }
 
-    @Override
-    public WebDriverSession start(DeviceProfile device) {
-        if(!(device instanceof BrowserProfile)) {
-            throw new UnsupportedOperationException("Only supports " + BrowserProfile.class.getName());
-        }
-        BrowserProfile browser = (BrowserProfile) device;
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability(CapabilityType.BROWSER_NAME, browser.getType().sauceId());
-        capabilities.setCapability(CapabilityType.PLATFORM, osName(browser));
-
-        return new Session(new RemoteWebDriver(getRemoteAddress(), capabilities));
-    }
-
     private String osName(BrowserProfile browser) {
         switch(browser.getOS().getType()) {
             case WINDOWS:
@@ -121,53 +111,19 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         }
     }
 
-    public class Session implements WebDriverSession {
-
-        private RemoteWebDriver driver;
-        private String sessionId;
-
-        /**
-         * The name of the Build Job, if we are running under Jenkins
-         */
-        private String buildJobName;
-
-        @Inject
-        public Session(RemoteWebDriver driver) {
-            this.driver = driver;
-            this.sessionId = driver.getSessionId().toString();
-
-            System.out.println(String.format("Session %s starts on thread %s", sessionId, Thread.currentThread().getName()));
-
-
-            buildJobName = Strings.emptyToNull(System.getenv("JOB_NAME"));
-            if(buildJobName != null) {
-                // Output information used by the Jenkins Sauce Labs Plugin
-                // See https://wiki.jenkins-ci.org/display/JENKINS/Sauce+OnDemand+Plugin
-                System.out.println(String.format("SauceOnDemandSessionID=%s job-name=%s", sessionId, buildJobName));
-            }
+    @Override
+    public WebDriver start(String browserType, String browserVersion, String platform) {
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        if(browserType != null) {
+            capabilities.setCapability(CapabilityType.BROWSER_NAME, browserType);
         }
-   
-        @Override
-        public WebDriver getDriver() {
-            return driver;
-        }
-
-        @Override
-        public void finished(Scenario scenario) {
-            
-            SauceREST sauceClient = new SauceREST(userName, apiKey);
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("passed", !scenario.isFailed());
-            updates.put("name", scenario.getName());
-
-            Utils.addBuildNumberToUpdate(updates);
-
-            sauceClient.updateJobInfo(sessionId, updates);
-
-            System.out.println(String.format("Session %s for scenario %s finishes on thread %s", sessionId, scenario.getId(), Thread.currentThread().getName()));
-        
-            driver.quit();
-        }
+        capabilities.setCapability(CapabilityType.VERSION, browserVersion);
+        capabilities.setCapability(CapabilityType.PLATFORM, platform);
+        return new RemoteWebDriver(getRemoteAddress(), capabilities);
     }
-    
+
+
+    public SauceREST getRestClient() {
+        return new SauceREST(userName, apiKey);
+    }
 }

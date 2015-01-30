@@ -3,9 +3,13 @@ package org.activityinfo.test.webdriver;
 import com.google.common.base.Preconditions;
 import cucumber.api.Scenario;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.BrowserType;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,30 +38,12 @@ public class PhantomJsProvider implements WebDriverProvider {
     }
 
     @Override
-    public WebDriverSession start(DeviceProfile device) {
-        Preconditions.checkArgument(supports(device));
-        
-        PhantomJSDriver driver = new PhantomJSDriver();
+    public WebDriver start(String browserType, String browserVersion, String platform) {
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        WebDriver driver = new PhantomJSDriver();
         driver.manage().window().setSize(new Dimension(1400,1000));
 
-        return new Session(driver);
+        return driver;
     }
 
-    private class Session implements WebDriverSession {
-        private final PhantomJSDriver driver;
-
-        public Session(PhantomJSDriver driver) {
-            this.driver = driver;
-        }
-
-        @Override
-        public WebDriver getDriver() {
-            return driver;
-        }
-
-        @Override
-        public void finished(Scenario scenario) {
-            driver.quit();
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.api;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import org.activityinfo.test.harness.ScreenShotLogger;
@@ -7,6 +8,7 @@ import org.activityinfo.test.sut.Server;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,6 +39,29 @@ public abstract class PageObject {
                     "@" + Path.class.getSimpleName() + " annotation");
         }
         return path.value();
+    }
+    
+    protected final <T> T waitFor(String what, int timeoutInSeconds, Callable<Optional<T>> locator) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        while(stopwatch.elapsed(TimeUnit.SECONDS) < timeoutInSeconds) {
+            try {
+                Optional<T> value = locator.call();
+                if(value.isPresent()) {
+                    return value.get();
+                }
+            } catch (Exception e) {
+                throw new AssertionError(String.format("Error while waiting for '%s'",
+                         what));            
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new AssertionError(String.format("Interrupted while waiting for '%s'",
+                        what));
+            }
+        }
+        logger.snapshot();
+        throw new AssertionError(String.format("Timed out after waiting %d seconds for '%s'", timeoutInSeconds, what));
     }
 
     protected final void waitFor(WaitBuilder spec) {
@@ -85,4 +110,6 @@ public abstract class PageObject {
         });
     }
 
+
+    
 }

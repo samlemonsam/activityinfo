@@ -57,7 +57,7 @@ public class ProfileFactoryImpl implements ProfileFactory {
             DeviceProfile device = (DeviceProfile) profile;
             WebDriverProvider webDriverProvider = injector.getInstance(WebDriverProvider.class);
             if(webDriverProvider.supports(device)) {
-                modules.add(new WebDriverProfileModule(webDriverProvider, (DeviceProfile) profile));
+               // modules.add(new WebDriverProfileModule((DeviceProfile) profile));
             }
         }
         
