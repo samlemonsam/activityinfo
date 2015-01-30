@@ -24,6 +24,8 @@ package org.activityinfo.model.type.subform;
 import org.activityinfo.model.form.FormClass;
 
 /**
+ * Subform kind.
+ *
  * @author yuriyz on 01/27/2015.
  */
 public interface SubFormKind {
