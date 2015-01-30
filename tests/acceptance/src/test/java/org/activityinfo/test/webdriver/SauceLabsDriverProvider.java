@@ -21,6 +21,12 @@ import java.util.List;
 @Singleton
 public class SauceLabsDriverProvider implements WebDriverProvider {
 
+    /**
+     * Used to receive information from SauceReporter, 
+     * which is not instantiated by Guice
+     */
+    static SauceLabsDriverProvider INSTANCE = null;
+
     public static final String JENKINS_SAUCE_USER_NAME = "SAUCE_USER_NAME";
     public static final String JENKINS_SAUCE_API_KEY = "SAUCE_API_KEY";
     public static final String JENKINS_STARTING_URL = "SELENIUM_STARTING_URL";
@@ -41,6 +47,8 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     @Inject
     public SauceLabsDriverProvider() {
 
+        INSTANCE = this;
+        
         // Provided by the Jenkins plugin
         userName = System.getenv(JENKINS_SAUCE_USER_NAME);
         apiKey = System.getenv(JENKINS_SAUCE_API_KEY);
@@ -95,18 +103,18 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     }
 
     @Override
-    public WebDriver start(String testName, BrowserProfile profile) {
+    public WebDriver start(String name, BrowserProfile profile) {
         
         DesiredCapabilities capabilities = new DesiredCapabilities();
         if(profile != null) {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, profile.getType().sauceId());
             capabilities.setCapability(CapabilityType.VERSION, profile.getVersion().toString());
             capabilities.setCapability(CapabilityType.PLATFORM, osName(profile));
-            capabilities.setCapability("name", testName);
         } else {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
-            capabilities.setCapability("name", testName);
         }
+        capabilities.setCapability("name", name);
+        
         return new RemoteWebDriver(getRemoteAddress(), capabilities);
     }
 

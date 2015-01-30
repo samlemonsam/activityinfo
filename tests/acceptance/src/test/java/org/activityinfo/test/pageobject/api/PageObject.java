@@ -119,5 +119,26 @@ public abstract class PageObject {
             }
         };
     }
+
+    /**
+     * Wait until we have navigated to the right URL
+     */
+    public final void waitFor() {
+        final String initialUrl = driver.getCurrentUrl();
     
+        waitFor("navigation to " + getClass().getSimpleName(), 30, new Callable<Optional<PageObject>>() {
+            @Override
+            public Optional<PageObject> call() throws Exception {
+                String currentUrl = driver.getCurrentUrl();
+                if(binder.pageUrl(PageObject.this.getClass()).equals(currentUrl)) {
+                    return Optional.of(PageObject.this);
+                }
+                if(!currentUrl.equals(initialUrl)) {
+                    throw new AssertionError("Expected navigation to " + getPageUrl() + " but browser navigated" +
+                            " to " + driver.getCurrentUrl() + " from " + initialUrl);
+                }
+                return Optional.absent();
+            }
+        });
+    }
 }

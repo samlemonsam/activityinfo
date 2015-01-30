@@ -1,6 +1,5 @@
 package org.activityinfo.test.acceptance.web;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -58,7 +57,7 @@ public class LoginSteps {
 
     @Then("^my dashboard should open$")
     public void my_dashboard_should_open() throws Throwable {
-        ApplicationPage app = binder.assertIsOpen(ApplicationPage.class);
+        ApplicationPage app = binder.waitFor(ApplicationPage.class);
         Dashboard dashboard = app.assertCurrentPageIs(Dashboard.class);
         dashboard.assertThatAtLeastOnePortletIsVisible();
     }

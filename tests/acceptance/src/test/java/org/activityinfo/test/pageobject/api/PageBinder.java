@@ -40,7 +40,7 @@ public class PageBinder {
         if(!isCurrentPage(pageObjectClass)) {
             webDriver.navigate().to(pageUrl(pageObjectClass));
         }
-        return assertIsOpen(pageObjectClass);
+        return waitFor(pageObjectClass);
     }
 
     public <T extends PageObject> boolean isCurrentPage(Class<T> pageClass) {
@@ -68,9 +68,10 @@ public class PageBinder {
      * @return a fully initialized PageObject
      * @throws java.lang.AssertionError if the PageObject's elements cannot be found
      */
-    public <T extends PageObject> T assertIsOpen(Class<T> pageObjectClass) {
+    public <T extends PageObject> T waitFor(Class<T> pageObjectClass) {
         T instance = injector.getInstance(pageObjectClass);
         bind(injector.getInstance(WebDriver.class), instance);
+        instance.waitFor();
         return instance;
     }
 

@@ -1,10 +1,10 @@
 package org.activityinfo.test.pageobject.web;
 
 import com.google.common.base.Optional;
-import org.activityinfo.test.harness.ScreenShotLogger;
 import org.activityinfo.test.pageobject.api.PageObject;
 import org.activityinfo.test.pageobject.api.Path;
 import org.activityinfo.test.pageobject.gxt.Gxt;
+import org.activityinfo.test.webdriver.SessionReporter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -29,20 +29,20 @@ public class ApplicationPage extends PageObject {
     private WebElement pageContainer;
 
     @Inject
-    private ScreenShotLogger logger;
+    private SessionReporter logger;
 
     public <T> T assertCurrentPageIs(Class<T> applicationPageClass) {
         return binder.create(pageContainer,  applicationPageClass);
     }
     
     public SettingsMenu openSettingsMenu() {
-        logger.snapshot();
+        logger.screenshot();
         try {
             settingsButton.click();
         } catch(Exception ignored) {
             
         }
-        return binder.assertIsOpen(SettingsMenu.class);
+        return binder.waitFor(SettingsMenu.class);
     }
     
     public OfflineMode getOfflineMode() {

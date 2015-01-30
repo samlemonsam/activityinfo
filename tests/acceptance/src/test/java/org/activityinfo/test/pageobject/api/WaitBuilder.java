@@ -67,7 +67,12 @@ public class WaitBuilder {
 
         @Override
         public boolean apply(WebDriver webDriver) {
-            List<WebElement> elements = webDriver.findElements(by);
+            List<WebElement> elements;
+            try {
+                elements = webDriver.findElements(by);
+            } catch (Exception ignored) {
+                return false;
+            }
             if(!elements.isEmpty()) {
                 WebElement element = elements.get(0);
                 if(element.isDisplayed()) {

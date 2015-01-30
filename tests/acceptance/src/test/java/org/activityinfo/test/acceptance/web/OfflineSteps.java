@@ -10,8 +10,6 @@ import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.OfflineMode;
 import org.activityinfo.test.webdriver.*;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
 
@@ -32,14 +30,9 @@ public class OfflineSteps {
     private ScreenShotLogger logger;
 
 
-    @Given("^my browser supports offline mode$")
-    public void my_browser_supports_offline_mode() throws Throwable {
-        session.start(null, new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME));
-    }
-
     @Given("^offline mode is not enabled$")
     public void offline_mode_is_not_enabled() throws Throwable {
-        ApplicationPage page = pages.assertIsOpen(ApplicationPage.class);
+        ApplicationPage page = pages.waitFor(ApplicationPage.class);
 
         assertThat(page.getOfflineMode(), equalTo(OfflineMode.ONLINE));
     }
@@ -47,7 +40,7 @@ public class OfflineSteps {
 
     @When("^I enable offline mode$")
     public void I_enable_offline_mode() throws Throwable {
-        pages.assertIsOpen(ApplicationPage.class)
+        pages.waitFor(ApplicationPage.class)
                 .openSettingsMenu()
                 .enableOfflineMode();
 
@@ -62,7 +55,7 @@ public class OfflineSteps {
 
     @Then("^offline mode should be enabled$")
     public void offline_mode_should_be_enabled() throws Throwable {
-        ApplicationPage page = pages.assertIsOpen(ApplicationPage.class);
+        ApplicationPage page = pages.waitFor(ApplicationPage.class);
         page.assertOfflineModeLoads();
     }
 }

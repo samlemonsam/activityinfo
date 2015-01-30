@@ -7,6 +7,7 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.SessionId;
 
 import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
@@ -19,6 +20,7 @@ public class WebDriverSession {
     private final WebDriverProvider provider;
     private WebDriver driver;
     private WebDriver proxy;
+    private Scenario scenario;
 
     @Inject
     public WebDriverSession(WebDriverProvider provider) {
@@ -32,14 +34,21 @@ public class WebDriverSession {
         return proxy;
     }
 
-    public void start(String testName, BrowserProfile profile) {
+    public void start(Scenario scenario, BrowserProfile profile) {
         Preconditions.checkState(driver == null, "WebDriver is already started");
         
-        this.driver = provider.start(testName, profile);
+        this.scenario = scenario;
+        this.driver = provider.start(scenario.getId(), profile);
     }
 
-    public void start(String testName) {
-        start(testName, null);
+    public void start(Scenario scenario) {
+        start(scenario, null);
+    }
+    
+    public SessionId getSessionId() {
+        Preconditions.checkState(driver != null, "WebDriver is not started");
+        RemoteWebDriver remoteWebDriver = (RemoteWebDriver) driver;
+        return remoteWebDriver.getSessionId();
     }
 
     public BrowserVendor getBrowserType() {
@@ -63,7 +72,7 @@ public class WebDriverSession {
         return driver != null;
     }
     
-    public void finished(Scenario scenario) {
+    public void stop() {
         if(driver != null) {
             driver.quit();
             driver = null;

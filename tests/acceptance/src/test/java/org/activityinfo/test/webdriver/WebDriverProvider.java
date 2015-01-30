@@ -13,6 +13,6 @@ public interface WebDriverProvider {
     
     boolean supports(DeviceProfile profile);
 
-    WebDriver start(String testName, BrowserProfile profile);
+    WebDriver start(String name, BrowserProfile profile);
 
 }

@@ -4,48 +4,62 @@ import com.google.inject.Inject;
 import com.saucelabs.common.Utils;
 import com.saucelabs.saucerest.SauceREST;
 import cucumber.api.Scenario;
-import cucumber.runtime.java.guice.ScenarioScoped;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import javax.annotation.Nullable;
-import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
 
-@ScenarioScoped
-public class SauceReporter {
+public class SauceReporter implements SessionReporter {
 
-    private Provider<SauceLabsDriverProvider> provider;
-    private WebDriverSession session;
 
+    private final WebDriverSession session;
+    private final SauceLabsDriverProvider sauce;
+    private Scenario scenario;
 
     @Inject
-    public SauceReporter(Provider<SauceLabsDriverProvider> provider, WebDriverSession session) {
-        this.provider = provider;
+    public SauceReporter(WebDriverSession session, SauceLabsDriverProvider sauce) {
         this.session = session;
+        this.sauce = sauce;
+    }
+
+    @Override
+    public void start(Scenario scenario) {
+        this.scenario = scenario;
+    }
+
+    @Override
+    public void screenshot() {
+        try {
+            TakesScreenshot driver = (TakesScreenshot) session.getDriver();
+            byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
+            scenario.embed(screenshot, "image/png");
+        } catch(Exception e) {
+            scenario.write("Screenshot capture failed: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     public void finished(Scenario scenario) {
+        
+        
+        String sessionId = session.getSessionId().toString();
 
+        SauceREST sauceClient = sauce.getRestClient();
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("passed", !scenario.isFailed());
+        updates.put("name", scenario.getName());
 
-        SauceLabsDriverProvider sauce;
-        try {
-            sauce = provider.get();
-        } catch(Exception e) {
-            sauce = null;
+        Utils.addBuildNumberToUpdate(updates);
+
+        sauceClient.updateJobInfo(sessionId, updates);
+        
+        String jobName = System.getenv("JOB_NAME");
+        if(jobName != null) {
+            System.out.println(String.format("SauceOnDemandSessionID=%s job-name=%s", sessionId, jobName));
         }
-        if(sauce != null) {
-            RemoteWebDriver driver = (RemoteWebDriver) session.getDriver();
-            String sessionId = driver.getSessionId().toString();
-
-            SauceREST sauceClient = sauce.getRestClient();
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("passed", !scenario.isFailed());
-            updates.put("name", scenario.getName());
-
-            Utils.addBuildNumberToUpdate(updates);
-
-            sauceClient.updateJobInfo(sessionId, updates);
-        }
+        
+        // Add URL of Job to Cucumber output
+        scenario.write("Sauce URL: https://saucelabs.com/tests/" + sessionId);
     }
 }
