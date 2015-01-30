@@ -38,6 +38,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     private String userName;
     private String apiKey;
     
+    private boolean fast = false;
 
     public static boolean isEnabled() {
         return !Strings.isNullOrEmpty(System.getenv(JENKINS_SAUCE_USER_NAME)) ||
@@ -114,6 +115,11 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
         }
         capabilities.setCapability("name", name);
+        
+        if(fast) {
+            capabilities.setCapability("record-video", false);
+            capabilities.setCapability("record-screenshots", false);
+        }
         
         return new RemoteWebDriver(getRemoteAddress(), capabilities);
     }

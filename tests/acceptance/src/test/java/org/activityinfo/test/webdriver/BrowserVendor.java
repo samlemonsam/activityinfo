@@ -7,7 +7,8 @@ public enum BrowserVendor {
     IE("internet explorer", "ie"),
     SAFARI("safari"),
     CHROME("chrome"),
-    FIREFOX("firefox");
+    FIREFOX("firefox"),
+    OPERA("opera");
 
     private String sauceId;
     private String tag;

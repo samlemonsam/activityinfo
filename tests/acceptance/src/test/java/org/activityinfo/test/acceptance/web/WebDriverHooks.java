@@ -5,7 +5,6 @@ import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.harness.ScreenShotLogger;
 import org.activityinfo.test.webdriver.*;
 
 import javax.inject.Inject;
@@ -94,6 +93,8 @@ public class WebDriverHooks {
             }
         } else if(os.contains("linux")) {
             return OperatingSystemType.LINUX.unknownVersion();
+        } else if(os.contains("mac") || os.contains("os x") || os.contains("osx")) {
+            return OperatingSystemType.OSX.version(extractVersion(os));
         }
         throw new IllegalArgumentException(os);
     }

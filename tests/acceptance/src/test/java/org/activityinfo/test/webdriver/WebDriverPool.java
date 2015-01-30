@@ -1,7 +1,6 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Function;
-import org.activityinfo.test.webdriver.BrowserProfile;
 import org.apache.commons.pool2.KeyedPooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -12,7 +11,6 @@ import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 public class WebDriverPool {
     
-    private String testName;
     private GenericKeyedObjectPool<BrowserProfile, WebDriver> pool;
     private Function<BrowserProfile, WebDriver> creator;
 
@@ -28,10 +26,6 @@ public class WebDriverPool {
     public void setMaxTotalSize(int size) {
         pool.setMaxTotal(size);
         pool.setMaxIdlePerKey(size);
-    }
-
-    public void setTestName(String testName) {
-        this.testName = testName;
     }
 
     public void setCreator(Function<BrowserProfile, WebDriver> creator) {

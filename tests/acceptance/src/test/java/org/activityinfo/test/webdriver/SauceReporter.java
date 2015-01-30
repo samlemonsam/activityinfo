@@ -6,7 +6,6 @@ import com.saucelabs.saucerest.SauceREST;
 import cucumber.api.Scenario;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,25 +40,24 @@ public class SauceReporter implements SessionReporter {
     }
 
     public void finished(Scenario scenario) {
-        
-        
+
+
         String sessionId = session.getSessionId().toString();
 
         SauceREST sauceClient = sauce.getRestClient();
         Map<String, Object> updates = new HashMap<>();
         updates.put("passed", !scenario.isFailed());
-        updates.put("name", scenario.getName());
 
         Utils.addBuildNumberToUpdate(updates);
 
         sauceClient.updateJobInfo(sessionId, updates);
-        
+
         String jobName = System.getenv("JOB_NAME");
-        if(jobName != null) {
+        if (jobName != null) {
             System.out.println(String.format("SauceOnDemandSessionID=%s job-name=%s", sessionId, jobName));
         }
-        
+
         // Add URL of Job to Cucumber output
-        scenario.write("Sauce URL: https://saucelabs.com/tests/" + sessionId);
+        scenario.write(String.format("<a href=\"https://saucelabs.com/tests/%s\">Sauce Job Page</a>\n", sessionId));
     }
 }

@@ -8,9 +8,11 @@ import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.Dashboard;
 import org.activityinfo.test.pageobject.web.LoginPage;
+import org.activityinfo.test.pageobject.web.UnsupportedBrowserPage;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
+import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 
@@ -20,6 +22,9 @@ public class LoginSteps {
 
     @Inject
     private Server server;
+    
+    @Inject 
+    private WebDriver driver;
 
     @Inject
     private PageBinder binder;
@@ -72,5 +77,10 @@ public class LoginSteps {
         UserAccount account = accounts.ensureAccountExists(email);
         loginPage = binder.navigateTo(LoginPage.class);
         loginPage.loginAs(account).andExpectSuccess();
+    }
+
+    @Then("^I should receive a message that my browser is not unsupported$")
+    public void I_should_receive_a_message_that_my_browser_is_unsupported() throws Throwable {
+        binder.waitFor(UnsupportedBrowserPage.class);
     }
 }
