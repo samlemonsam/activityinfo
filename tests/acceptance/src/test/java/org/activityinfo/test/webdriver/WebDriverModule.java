@@ -23,7 +23,8 @@ public class WebDriverModule extends AbstractModule {
 
     }
 
-    @ScenarioScoped @Provides
+    @ScenarioScoped 
+    @Provides
     public WebDriver provideDriver(WebDriverSession session) {
         return session.getDriver();
     }

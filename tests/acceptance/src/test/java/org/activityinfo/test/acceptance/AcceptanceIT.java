@@ -5,7 +5,9 @@ import cucumber.api.junit.Cucumber;
 import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(format = {"pretty", "html:target/cucumber-html-report", "json:target/cucumber-report.json"})
+@CucumberOptions(
+        format = {"pretty", "html:target/cucumber-html-report", "json:target/cucumber-report.json"},
+        tags = "~@ignore, ~@manual")
 public class AcceptanceIT {
 
 

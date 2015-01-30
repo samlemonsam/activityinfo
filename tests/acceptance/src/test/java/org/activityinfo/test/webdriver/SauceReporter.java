@@ -30,12 +30,14 @@ public class SauceReporter implements SessionReporter {
 
     @Override
     public void screenshot() {
-        try {
-            TakesScreenshot driver = (TakesScreenshot) session.getDriver();
-            byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
-            scenario.embed(screenshot, "image/png");
-        } catch(Exception e) {
-            scenario.write("Screenshot capture failed: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        if(scenario != null) {
+            try {
+                TakesScreenshot driver = (TakesScreenshot) session.getDriver();
+                byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
+                scenario.embed(screenshot, "image/png");
+            } catch (Exception e) {
+                scenario.write("Screenshot capture failed: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
         }
     }
 
