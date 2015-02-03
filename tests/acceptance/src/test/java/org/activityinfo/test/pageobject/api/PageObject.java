@@ -134,10 +134,6 @@ public abstract class PageObject {
                 if(binder.pageUrl(PageObject.this.getClass()).equals(currentUrl)) {
                     return Optional.of(PageObject.this);
                 }
-                if(!currentUrl.equals(initialUrl)) {
-                    throw new AssertionError("Expected navigation to " + getPageUrl() + " but browser navigated" +
-                            " to " + currentUrl + " from " + initialUrl);
-                }
                 return Optional.absent();
             }
         });

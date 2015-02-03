@@ -13,6 +13,8 @@ import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.inject.Inject;
 
@@ -81,6 +83,7 @@ public class LoginSteps {
 
     @Then("^I should receive a message that my browser is not unsupported$")
     public void I_should_receive_a_message_that_my_browser_is_unsupported() throws Throwable {
-        binder.waitFor(UnsupportedBrowserPage.class);
+        WebDriverWait wait = new WebDriverWait(driver, 30);
+        wait.until(ExpectedConditions.titleIs("Unsupported Browser"));
     }
 }
