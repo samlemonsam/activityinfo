@@ -16,12 +16,12 @@ import java.util.concurrent.RecursiveAction;
  * Runs a scenario, or a "synthetic" scenario derived from an Examples row.
  */
 public class ExecutionUnit implements Node {
-    private final Parameter parameter;
+    private RuntimePool runtimePool;
     private final CucumberScenario cucumberScenario;
     private final Description description;
     
-    public ExecutionUnit(Parameter parameter, CucumberScenario cucumberScenario) throws InitializationError {
-        this.parameter = parameter;
+    public ExecutionUnit(RuntimePool runtimePool, CucumberScenario cucumberScenario) throws InitializationError {
+        this.runtimePool = runtimePool;
         this.cucumberScenario = cucumberScenario;
 
         this.description = Description.createSuiteDescription(cucumberScenario.getVisualName(), cucumberScenario.getGherkinModel());
@@ -54,7 +54,7 @@ public class ExecutionUnit implements Node {
 
     @Override
     public void start(Reporter reporter, Formatter formatter) {
-        cucumberScenario.run(formatter, reporter, parameter.getRuntime());
+        cucumberScenario.run(formatter, reporter, runtimePool.get());
     }
 
     @Override

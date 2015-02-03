@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import cucumber.runtime.CucumberException;
 import cucumber.runtime.model.CucumberFeature;
 import cucumber.runtime.model.CucumberScenario;
+import cucumber.runtime.model.CucumberScenarioOutline;
 import cucumber.runtime.model.CucumberTagStatement;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
@@ -21,21 +22,19 @@ public class FeatureNode implements Node {
     private List<Node> branches = Lists.newArrayList();
 
     public FeatureNode(CucumberFeature cucumberFeature,
-                       List<Parameter> parameters) throws InitializationError {
+                       RuntimePool runtimePool) throws InitializationError {
         
         this.cucumberFeature = cucumberFeature;
         this.description = Description.createSuiteDescription(getName(), cucumberFeature.getGherkinFeature());
 
         for (CucumberTagStatement cucumberTagStatement : cucumberFeature.getFeatureElements()) {
-            for(Parameter parameter : parameters) {
-                try {
-                    Node child = createBranch(cucumberTagStatement, parameter);
-                    description.addChild(child.getDescription());
-                    branches.add(child);
+            try {
+                Node child = createBranch(cucumberTagStatement, runtimePool);
+                description.addChild(child.getDescription());
+                branches.add(child);
 
-                } catch (InitializationError e) {
-                    throw new CucumberException("Failed to create scenario node", e);
-                }
+            } catch (InitializationError e) {
+                throw new CucumberException("Failed to create scenario node", e);
             }
         }
     }
@@ -50,18 +49,13 @@ public class FeatureNode implements Node {
     }
     
 
-    private Node createBranch(CucumberTagStatement cucumberTagStatement, Parameter parameter) throws InitializationError {
+    private Node createBranch(CucumberTagStatement cucumberTagStatement, RuntimePool runtime) throws InitializationError {
 
         if (cucumberTagStatement instanceof CucumberScenario) {
-
-            return new ExecutionUnit(
-                    parameter,
-                    Gherkin.parametrize(cucumberFeature, (CucumberScenario) cucumberTagStatement, parameter));
+            return new ExecutionUnit(runtime, (CucumberScenario) cucumberTagStatement);
 
         } else {
-            throw new UnsupportedOperationException("todo: ScenarioOutline");
-//                        featureElementRunner = new ParametrizedScenarioOutlineRunner(parameter,
-//                                (CucumberScenarioOutline) cucumberTagStatement, jUnitReporter);
+            return new OutlineNode(runtime, (CucumberScenarioOutline) cucumberTagStatement);
         }
     }
 

@@ -70,7 +70,7 @@ public class JUnitRecursiveRunner extends RecursiveAction {
         
         // Wrap the reporter proxy so that we can fire events to JUnit
         // in real time
-        StepInterceptor jUnitReporter = new StepInterceptor(runNotifier, 
+        JUnitStepReporter jUnitReporter = new JUnitStepReporter(runNotifier, 
                 node.getDescription(), reporter.getReporterProxy());
         
         node.start(jUnitReporter, reporter.getFormatterProxy());
