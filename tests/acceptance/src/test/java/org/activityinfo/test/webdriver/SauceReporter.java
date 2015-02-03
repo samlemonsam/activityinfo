@@ -46,17 +46,21 @@ public class SauceReporter implements SessionReporter {
 
         String sessionId = session.getSessionId().toString();
 
-        SauceREST sauceClient = sauce.getRestClient();
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("passed", !scenario.isFailed());
+        try {
+            SauceREST sauceClient = sauce.getRestClient();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("passed", !scenario.isFailed());
 
-        Utils.addBuildNumberToUpdate(updates);
+            Utils.addBuildNumberToUpdate(updates);
 
-        sauceClient.updateJobInfo(sessionId, updates);
+            sauceClient.updateJobInfo(sessionId, updates);
 
-        String jobName = System.getenv("JOB_NAME");
-        if (jobName != null) {
-            System.out.println(String.format("SauceOnDemandSessionID=%s job-name=%s", sessionId, jobName));
+            String jobName = System.getenv("JOB_NAME");
+            if (jobName != null) {
+                System.out.println(String.format("SauceOnDemandSessionID=%s job-name=%s", sessionId, jobName));
+            }
+        } catch(Exception e) {
+            System.out.println("Failed to update sauce job status: " + e.getMessage());
         }
 
         // Add URL of Job to Cucumber output
