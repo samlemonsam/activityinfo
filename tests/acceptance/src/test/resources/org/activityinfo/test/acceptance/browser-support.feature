@@ -11,7 +11,6 @@ Scenario Outline: Supported Browsers
     | IE 9       | Windows 7   |
     | IE 10      | Windows 7   |
     | IE 10      | Windows 8   |
-    | IE 11      | Windows 8   |
     | IE 11      | Windows 8.1 |
     | Chrome     | Windows 7   |
     | Chrome     | Windows 8   |
@@ -27,7 +26,6 @@ Scenario Outline: Supported Browsers
     | Firefox 10 | Windows XP  |
     | Firefox 10 | Linux       |
     | Firefox 35 | OS X 10.10  |
-    | Opera      | Windows 7   |
 
 Scenario Outline: Unsupported browsers
   Given I am using <browser> on <os>
@@ -38,3 +36,5 @@ Scenario Outline: Unsupported browsers
     | browser    | os          |
     | IE 6       | Windows XP  |
     | IE 7       | Windows XP  |
+    | Opera      | Windows 7   |
+  
