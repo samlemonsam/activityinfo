@@ -1,12 +1,12 @@
 package cucumber.api.junit;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import cucumber.api.Profile;
 import cucumber.runtime.*;
+import cucumber.runtime.Runtime;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
+import cucumber.runtime.java.JavaBackend;
 import cucumber.runtime.java.ObjectFactory;
 import cucumber.runtime.junit.*;
 import cucumber.runtime.parallel.*;
@@ -63,43 +63,29 @@ public class ParallelCucumber extends Runner implements Node {
         runtimeOptions = runtimeOptionsFactory.create();
         resourceLoader = new MultiLoader(classLoader);
 
-        List<Parameter> parameters = createParametrizedRuntimes(resourceLoader, classLoader, runtimeOptions);
+        RuntimePool runtimePool = createRuntimePool(resourceLoader, classLoader, runtimeOptions);
         
         description = Description.createSuiteDescription(testClass);
 
         for(CucumberFeature feature : runtimeOptions.cucumberFeatures(resourceLoader)) {
-            FeatureNode featureNode = new FeatureNode(feature, parameters);
+            FeatureNode featureNode = new FeatureNode(feature, runtimePool);
             description.addChild(featureNode.getDescription());
             branches.add(featureNode);
         }      
     }
 
-    private ArrayList<Parameter> createParametrizedRuntimes(ResourceLoader resourceLoader, ClassLoader classLoader, 
-                                                            RuntimeOptions runtimeOptions) throws InitializationError {
+    private RuntimePool createRuntimePool(ResourceLoader resourceLoader, ClassLoader classLoader,
+                                                   RuntimeOptions runtimeOptions) throws InitializationError {
         ArrayList<Parameter> parameters = Lists.newArrayList();
 
-        ProfileFactory profileFactory = new ProfileFactoryImpl();
         ClassFinder classFinder = new ResourceLoaderClassFinder(resourceLoader, classLoader);
-
-        for (Profile profile : profileFactory.getProfiles()) {
-
-            Optional<ObjectFactory> objectFactory = profileFactory.createObjectFactory(profile);
-            if(objectFactory.isPresent()) {
-
-                // Create a specific runtime for this execution profile
-
-                Parameter parameter = new Parameter(profile, new RuntimePool(runtimeOptions,
+        ObjectFactory objectFactory = JavaBackend.loadObjectFactory(classFinder);
+        
+        return new RuntimePool(runtimeOptions,
                         resourceLoader,
                         classLoader,
                         classFinder,
-                        objectFactory.get()
-                ));
-                
-                parameters.add(parameter);
-            }
-        }
-        
-        return parameters;
+                        objectFactory);
     }
     
     @Override
