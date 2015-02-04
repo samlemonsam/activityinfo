@@ -35,17 +35,17 @@ import com.google.gwt.user.client.ui.Widget;
 public class SubFormTabs extends Composite {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
+
+    interface OurUiBinder extends UiBinder<Widget, SubFormTabs> {
+    }
+
     @UiField
     HTMLPanel subformTabs;
     @UiField
     UListElement subformTabsUl;
 
-    interface OurUiBinder extends UiBinder<Widget, SubFormTabs> {
-    }
-
     public SubFormTabs() {
         initWidget(uiBinder.createAndBindUi(this));
-//        "<li role=\"presentation\"><a href=\"#\">Profile</a></li>";
     }
 
     public HTMLPanel getSubformTabs() {

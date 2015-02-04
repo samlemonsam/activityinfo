@@ -115,6 +115,7 @@ public class ContainerPropertiesPresenter {
         SubFormKind kind = SubFormKindRegistry.get().getKind(selectedValue);
         if (kind != null) {
             subFormType.setRange(kind.getDefinition().getId());
+            forceSubformRerender(subForm);
             return;
         }
 
