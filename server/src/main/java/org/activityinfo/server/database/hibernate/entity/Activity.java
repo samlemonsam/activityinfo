@@ -23,6 +23,7 @@ package org.activityinfo.server.database.hibernate.entity;
  */
 
 import org.activityinfo.legacy.shared.model.Published;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -44,6 +45,8 @@ import java.util.Set;
 @Entity @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
 @NamedQuery(name = "queryMaxSortOrder", query = "select max(e.sortOrder) from Activity e where e.database.id = ?1")
 public class Activity implements Serializable, Deleteable, Orderable {
+
+    private static final int DEFAULT_BATCH_SIZE = 100;
 
     private int id;
     private LocationType locationType;
@@ -219,6 +222,7 @@ public class Activity implements Serializable, Deleteable, Orderable {
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "activity")
+    @BatchSize(size = DEFAULT_BATCH_SIZE)
     public Set<LockedPeriod> getLockedPeriods() {
         return lockedPeriods;
     }
