@@ -56,6 +56,8 @@ public class FieldPanel {
     SimplePanel widgetContainer;
     @UiField
     Label dragHandle;
+    @UiField
+    SubFormTabs subformTabs;
 
     public FieldPanel(FormDesigner formDesigner) {
         uiBinder.createAndBindUi(this);
@@ -106,6 +108,10 @@ public class FieldPanel {
 
     public SimplePanel getWidgetContainer() {
         return widgetContainer;
+    }
+
+    public SubFormTabs getSubformTabs() {
+        return subformTabs;
     }
 
     public String getSelectedClassName() {

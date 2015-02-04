@@ -2,14 +2,16 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import org.activityinfo.core.client.NotFoundException;
-import org.activityinfo.legacy.shared.command.GetFormClass;
-import org.activityinfo.legacy.shared.command.result.FormClassResult;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.ApplicationClassProvider;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.result.FormClassResult;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormKind;
+import org.activityinfo.model.type.subform.SubFormKindRegistry;
+import org.activityinfo.promise.Promise;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 
@@ -52,6 +54,10 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
             // is that a location_type form class isn't treated specially by the application, while we are going
             // to have a small number of *different* form classes that ARE treated specially...
             case '_':
+                SubFormKind subFormKind = SubFormKindRegistry.get().getKind(classId);
+                if (subFormKind != null) {
+                    return Promise.resolved(subFormKind.getDefinition());
+                }
                 return Promise.resolved(systemClassProvider.get(classId));
 
 

@@ -21,15 +21,16 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
@@ -69,16 +70,15 @@ public class ContainerPropertiesPresenter {
 
         if (isSubform(fieldsHolder)) {
             view.getSubformKindGroup().setVisible(true);
+
+            final FormClass subForm = (FormClass) fieldsHolder.getElementContainer();
             view.getSubformKind().addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {
-                    String selectedValue = view.getSubformKind().getValue(view.getSubformKind().getSelectedIndex());
-                    subformKindChanged(SubFormKindRegistry.get().getKind(selectedValue));
+                    subformKindChanged(view.getSubformKind().getValue(view.getSubformKind().getSelectedIndex()), subForm);
                 }
             });
-            FormClass subForm = (FormClass) fieldsHolder.getElementContainer();
-            FormField subformOwnerField = formDesigner.getModel().getSubformOwnerField(subForm);
-            // todo
+
         }
     }
 
@@ -87,8 +87,52 @@ public class ContainerPropertiesPresenter {
         return elementContainer instanceof FormClass && !elementContainer.equals(formDesigner.getRootFormClass());
     }
 
-    private void subformKindChanged(SubFormKind newKind) {
-        // todo
+    private void subformKindChanged(String selectedValue, final FormClass subForm) {
+        Preconditions.checkState(selectedValue != null && selectedValue.startsWith("_"),
+                "Value is not valid, it must not be null and start with '_' character.");
+
+        final ReferenceType subFormType = (ReferenceType) subForm.getField(FormClass.TYPE_FIELD_ID).getType();
+
+        if (SubFormKindRegistry.getUserDefinedId().asString().equals(selectedValue)) {
+            final SelectSubformTypeDialog dialog = new SelectSubformTypeDialog();
+            dialog.setHideHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    ResourceId selectedClassId = dialog.getSelectedClassId();
+                    if (selectedClassId == null) { // user simply canceled selection
+                        selectedClassId = PredefinedPeriods.MONTHLY.getResourceId();
+                        view.getSubformKind().setSelectedIndex(getKindIndex(selectedClassId));
+                    }
+
+                    subFormType.setRange(selectedClassId);
+                    forceSubformRerender(subForm);
+                }
+            });
+            dialog.show();
+            return;
+        }
+
+        SubFormKind kind = SubFormKindRegistry.get().getKind(selectedValue);
+        if (kind != null) {
+            subFormType.setRange(kind.getDefinition().getId());
+            return;
+        }
+
+        throw new UnsupportedOperationException("Subform type is not supported, type: " + selectedValue);
+    }
+
+    private void forceSubformRerender(FormClass subForm) {
+        FormField subformOwnerField = formDesigner.getModel().getSubformOwnerField(subForm);
+        formDesigner.getWidgetContainer(subformOwnerField.getId()).syncWithModel();
+    }
+
+    private int getKindIndex(ResourceId valueId) {
+        for (int i = 0; i < view.getSubformKind().getVisibleItemCount(); i++) {
+            if (view.getSubformKind().getValue(i).equals(valueId.asString())) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Value is unknown, value:" + valueId);
     }
 
     public void reset() {

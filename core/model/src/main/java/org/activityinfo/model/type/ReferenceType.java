@@ -53,7 +53,7 @@ public class ReferenceType implements ParametrizedFieldType {
             FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("ref"));
             return formClass;
         }
-    };
+    }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
@@ -85,16 +85,18 @@ public class ReferenceType implements ParametrizedFieldType {
     }
 
 
-    public void setRange(ResourceId formClassId) {
+    public ReferenceType setRange(ResourceId formClassId) {
         this.range = Collections.singleton(formClassId);
+        return this;
     }
 
-    private void setRange(List<String> range) {
+    private ReferenceType setRange(List<String> range) {
         Set<ResourceId> formClassIds = Sets.newHashSet();
         for(String id : range) {
             formClassIds.add(ResourceId.valueOf(id));
         }
         setRange(formClassIds);
+        return this;
     }
 
 

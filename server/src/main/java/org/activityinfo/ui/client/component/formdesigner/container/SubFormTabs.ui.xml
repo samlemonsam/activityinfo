@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="style" type="org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles"/>
+
+  <g:HTMLPanel ui:field="subformTabs">
+    <ul class="nav nav-tabs" ui:field="subformTabsUl">
+      <li role="presentation" class="active"><a href="#">Tab 1</a></li>
+      <li role="presentation"><a href="#">Tab 2</a></li>
+      <li role="presentation"><a href="#">Tab 3</a></li>
+    </ul>
+  </g:HTMLPanel>
+</ui:UiBinder>

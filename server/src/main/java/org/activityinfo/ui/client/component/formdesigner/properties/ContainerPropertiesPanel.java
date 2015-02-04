@@ -58,7 +58,7 @@ public class ContainerPropertiesPanel extends Composite {
 
     private void initSubformCombobox() {
         for (SubFormKind kind : SubFormKindRegistry.get().getKinds()) {
-            subformKind.addItem(kind.getDefinition().getLabel(), kind.getId());
+            subformKind.addItem(kind.getDefinition().getLabel(), kind.getDefinition().getId().asString());
         }
     }
 

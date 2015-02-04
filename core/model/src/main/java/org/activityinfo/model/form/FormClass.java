@@ -28,9 +28,16 @@ public class FormClass implements IsResource, FormElementContainer {
     /**
      * Instances of FormClass have one FormField: a label, which has its own
      * FormField id. It is defined at the application level to be a subproperty of
-                                     * {@code _label}
-                                     */
+     * {@code _label}
+     */
     public static final String LABEL_FIELD_ID = "_class_label";
+
+
+    /**
+     * In subform case we need to keep type of FormClass. Since we want to keep FormClass to model SubForms
+     * solution is to store type via FormField that keeps reference on FormClass that describes type (e.g. Period or Territory)
+     */
+    public static final ResourceId TYPE_FIELD_ID = ResourceId.valueOf("_class_type");
 
 
     @NotNull

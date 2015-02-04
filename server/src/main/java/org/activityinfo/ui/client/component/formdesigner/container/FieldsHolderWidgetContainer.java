@@ -21,19 +21,29 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  * #L%
  */
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.subform.PeriodSubFormKind;
+import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -44,6 +54,8 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     private final FormElementContainer elementContainer;
     private final FieldsHolderPanel panel;
     private final ResourceId parentId;
+    private final SubFormTabsPresenter subFormTabsPresenter;
+    private boolean isSubform = false;
 
     protected FieldsHolderWidgetContainer(final FormDesigner formDesigner, final FormElementContainer elementContainer, ResourceId parentId) {
         this.formDesigner = formDesigner;
@@ -58,6 +70,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
                 formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(FieldsHolderWidgetContainer.this));
             }
         });
+        subFormTabsPresenter = new SubFormTabsPresenter(panel.getPanel().getSubformTabs(), formDesigner);
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
@@ -86,6 +99,8 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
     public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass formClass, ResourceId parentId) {
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formClass, parentId);
+        container.isSubform = true;
+        container.getPanel().getPanel().getSubformTabs().setVisible(true);
         container.getPanel().getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -115,6 +130,26 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
     public void syncWithModel() {
         panel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(elementContainer.getLabel())).asString() + "</h3>");
+
+        if (isSubform) {
+            FormClass subForm = (FormClass) elementContainer;
+            ReferenceType type = (ReferenceType) subForm.getField(FormClass.TYPE_FIELD_ID).getType();
+            ResourceId typeClassId = type.getRange().iterator().next();
+
+            if (PredefinedPeriods.isPeriodId(typeClassId)) {
+                subFormTabsPresenter.generate(((PeriodSubFormKind)SubFormKindRegistry.get().getKind(typeClassId)).getPeriod());
+            } else {
+                // fetch FormInstances from server
+                formDesigner.getResourceLocator().queryInstances(new ClassCriteria(typeClassId)).then(new Function<List<FormInstance>, Object>() {
+                    @Nullable
+                    @Override
+                    public Object apply(List<FormInstance> input) {
+                        subFormTabsPresenter.set(input);
+                        return null;
+                    }
+                });
+            }
+        }
     }
 
     public Widget asWidget() {
@@ -128,6 +163,10 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
     public FormDesigner getFormDesigner() {
         return formDesigner;
+    }
+
+    public SubFormTabsPresenter getSubFormTabsPresenter() {
+        return subFormTabsPresenter;
     }
 
     @Override

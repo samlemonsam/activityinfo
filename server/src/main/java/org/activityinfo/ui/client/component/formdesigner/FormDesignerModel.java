@@ -33,6 +33,9 @@ import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.period.PredefinedPeriods;
 
 import java.util.List;
 import java.util.Map;
@@ -58,6 +61,14 @@ public class FormDesignerModel {
     public FormClass registerNewSubform(ResourceId formFieldId) {
         final FormClass formClass = new FormClass(ResourceId.generateId());
         formClass.setOwnerId(rootFormClass.getId());
+
+        FormField type = formClass.addField(FormClass.TYPE_FIELD_ID);
+        type.setVisible(false);
+        type.setType(new ReferenceType()
+                .setCardinality(Cardinality.SINGLE)
+                .setRange(PredefinedPeriods.MONTHLY.getResourceId())
+        );
+
         registerSubform(formFieldId, formClass);
         return formClass;
     }

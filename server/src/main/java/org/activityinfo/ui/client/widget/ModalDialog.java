@@ -26,6 +26,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -71,9 +72,13 @@ public class ModalDialog  {
     @UiField
     InlineLabel statusLabel;
 
-    @UiField Button backButton;
+    @UiField
+    Button backButton;
+
     @UiField
     DivElement dialogDiv;
+
+    private ClickHandler hideHandler;
 
     public ModalDialog() {
         BaseStylesheet.INSTANCE.ensureInjected();
@@ -124,8 +129,18 @@ public class ModalDialog  {
         }
         dialog.removeStyleName("modal-open");
         dialog.getElement().getStyle().setDisplay(Style.Display.NONE);
+        if (hideHandler != null) {
+            hideHandler.onClick(null);
+        }
     }
 
+    public ClickHandler getHideHandler() {
+        return hideHandler;
+    }
+
+    public void setHideHandler(ClickHandler hideHandler) {
+        this.hideHandler = hideHandler;
+    }
 
     public void setDialogTitle(String dialogTitle) {
         this.title.setInnerHTML(dialogTitle);

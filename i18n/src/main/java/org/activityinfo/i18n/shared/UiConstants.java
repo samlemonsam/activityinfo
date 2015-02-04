@@ -3661,6 +3661,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Checkboxes")
     String checkboxes();
 
+    @DefaultStringValue("Please select type")
+    String selectType();
+
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
 
@@ -3694,6 +3697,5 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Load")
     String load();
-
 }
 

@@ -1,4 +1,4 @@
-package org.activityinfo.model.type.subform;
+package org.activityinfo.ui.client.component.formdesigner.container;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,14 +21,31 @@ package org.activityinfo.model.type.subform;
  * #L%
  */
 
-import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.type.period.PeriodValue;
+import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
+
+import java.util.List;
 
 /**
- * Subform kind.
- *
- * @author yuriyz on 01/27/2015.
+ * @author yuriyz on 02/04/2015.
  */
-public interface SubFormKind {
+public class SubFormTabsPresenter {
 
-    FormClass getDefinition();
+    private final SubFormTabs view;
+    private final FormDesigner formDesigner;
+
+    public SubFormTabsPresenter(SubFormTabs view, FormDesigner formDesigner) {
+        this.view = view;
+        this.formDesigner = formDesigner;
+    }
+
+    public void set(List<FormInstance> instances) {
+        // todo
+    }
+
+
+    public void generate(PeriodValue period) {
+        // todo
+    }
 }

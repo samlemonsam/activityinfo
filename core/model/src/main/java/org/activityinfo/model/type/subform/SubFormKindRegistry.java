@@ -23,6 +23,9 @@ package org.activityinfo.model.type.subform;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 
 import java.util.List;
@@ -35,15 +38,33 @@ public class SubFormKindRegistry {
 
     private static final SubFormKindRegistry INSTANCE = new SubFormKindRegistry();
 
-    private final Map<String, SubFormKind> kinds = Maps.newHashMap();
+    private static ResourceId USER_DEFINED_ID = ResourceIdPrefixType.SUBFORM.id("_user_defined");
+
+    private final Map<ResourceId, SubFormKind> kinds = Maps.newHashMap();
 
     private SubFormKindRegistry() {
+        USER_DEFINED_ID = ResourceIdPrefixType.SUBFORM.id("_user_defined");
         register(new PeriodSubFormKind(PredefinedPeriods.MONTHLY));
         register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
+        register(userDefinedKind());
+    }
+
+    public static ResourceId getUserDefinedId() {
+        return USER_DEFINED_ID;
+    }
+
+    private SubFormKind userDefinedKind() {
+        return new SubFormKind() {
+            @Override
+            public FormClass getDefinition() {
+                FormClass formClass = new FormClass(USER_DEFINED_ID);
+                return formClass.setLabel("Select type");
+            }
+        };
     }
 
     private void register(SubFormKind kind) {
-        kinds.put(kind.getId(), kind);
+        kinds.put(kind.getDefinition().getId(), kind);
     }
 
     public static SubFormKindRegistry get() {
@@ -51,6 +72,10 @@ public class SubFormKindRegistry {
     }
 
     public SubFormKind getKind(String id) {
+        return getKind(ResourceId.valueOf(id));
+    }
+
+    public SubFormKind getKind(ResourceId id) {
         return kinds.get(id);
     }
 

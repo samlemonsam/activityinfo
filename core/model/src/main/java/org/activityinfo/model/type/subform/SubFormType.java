@@ -21,19 +21,12 @@ package org.activityinfo.model.type.subform;
 * #L%
 */
 
-import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.enumerated.EnumItem;
-import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-
-import java.util.Collections;
+import org.activityinfo.model.type.period.PredefinedPeriods;
 
 /**
  * @author yuriyz on 12/03/2014.
@@ -41,6 +34,7 @@ import java.util.Collections;
 public class SubFormType implements ParametrizedFieldType {
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
+
         private TypeClass() {
         }
 
@@ -57,20 +51,12 @@ public class SubFormType implements ParametrizedFieldType {
         @Override
         public SubFormType deserializeType(Record typeParameters) {
             return new SubFormType()
-                    .setClassReference((ReferenceType) ReferenceType.TYPE_CLASS.deserializeType(typeParameters.getRecord("classReference")))
-                    .setSelector((EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("selector")));
+                    .setClassReference((ReferenceType) ReferenceType.TYPE_CLASS.deserializeType(typeParameters.getRecord("classReference")));
         }
 
         @Override
         public FormClass getParameterFormClass() {
-            final FormField selector = new FormField(ResourceId.valueOf("_selector"))
-                    .setLabel("Select subform type")
-                    .setType(new EnumType(Cardinality.SINGLE, Lists.newArrayList(
-                            new EnumItem(ResourceId.valueOf("_selector_period"), "Period"),
-                            new EnumItem(ResourceId.valueOf("_selector_location"), "Location")
-                    )));
-            return new FormClass(ResourceIdPrefixType.TYPE.id("subform"))
-                    .addElement(selector);
+            return new FormClass(ResourceIdPrefixType.TYPE.id("subform"));
         }
 
         @Override
@@ -81,15 +67,16 @@ public class SubFormType implements ParametrizedFieldType {
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
-    private ReferenceType classReference = new ReferenceType();
-    private EnumValue selector = new EnumValue(Collections.<ResourceId>emptySet());
+    private ReferenceType classReference;
 
     public SubFormType() {
+        this(new ReferenceType()
+                .setCardinality(Cardinality.SINGLE)
+                .setRange(PredefinedPeriods.MONTHLY.getResourceId()));
     }
 
-    public SubFormType(ReferenceType classReference, EnumValue selector) {
+    public SubFormType(ReferenceType classReference) {
         this.classReference = classReference;
-        this.selector = selector;
     }
 
     public ReferenceType getClassReference() {
@@ -98,15 +85,6 @@ public class SubFormType implements ParametrizedFieldType {
 
     public SubFormType setClassReference(ReferenceType classReference) {
         this.classReference = classReference;
-        return this;
-    }
-
-    public EnumValue getSelector() {
-        return selector;
-    }
-
-    public SubFormType setSelector(EnumValue selector) {
-        this.selector = selector;
         return this;
     }
 
@@ -119,8 +97,7 @@ public class SubFormType implements ParametrizedFieldType {
     public Record getParameters() {
         return new Record()
                 .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("classReference", classReference.getParameters())
-                .set("selector", selector.asRecord());
+                .set("classReference", classReference.getParameters());
     }
 
     @Override

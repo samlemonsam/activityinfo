@@ -21,6 +21,9 @@ package org.activityinfo.model.type.period;
  * #L%
  */
 
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.ResourceIdPrefixType;
+
 /**
  * @author yuriyz on 01/27/2015.
  */
@@ -47,5 +50,13 @@ public enum PredefinedPeriods {
 
     public String getLabel() {
         return label;
+    }
+
+    public ResourceId getResourceId() {
+        return ResourceIdPrefixType.SUBFORM.id("_period_" + this.name());
+    }
+
+    public static boolean isPeriodId(ResourceId resourceId) {
+        return resourceId != null && resourceId.asString().startsWith(ResourceIdPrefixType.SUBFORM.id("_period_").asString());
     }
 }

@@ -23,7 +23,7 @@ package org.activityinfo.model.type.subform;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PeriodType;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
@@ -33,23 +33,18 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
  */
 public class PeriodSubFormKind implements SubFormKind {
 
-    private final String id;
+    private final ResourceId classId;
     private final String label;
     private final PeriodValue period;
 
     public PeriodSubFormKind(PredefinedPeriods predefinedPeriods) {
-        this(predefinedPeriods.name(), predefinedPeriods.getPeriod(), predefinedPeriods.getLabel());
+        this(predefinedPeriods.getResourceId(), predefinedPeriods.getPeriod(), predefinedPeriods.getLabel());
     }
 
-    public PeriodSubFormKind(String id, PeriodValue period, String label) {
-        this.id = id;
+    public PeriodSubFormKind(ResourceId classId, PeriodValue period, String label) {
+        this.classId = classId;
         this.period = period;
         this.label = label;
-    }
-
-    @Override
-    public String getId() {
-        return id;
     }
 
     public PeriodValue getPeriod() {
@@ -58,7 +53,7 @@ public class PeriodSubFormKind implements SubFormKind {
 
     @Override
     public FormClass getDefinition() {
-        FormClass formClass = new FormClass(ResourceIdPrefixType.SUBFORM.id(getId()));
+        FormClass formClass = new FormClass(classId);
         formClass.setLabel(label);
 
         FormField formField = formClass.addField();
