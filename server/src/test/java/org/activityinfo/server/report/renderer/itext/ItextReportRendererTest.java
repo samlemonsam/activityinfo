@@ -124,7 +124,7 @@ public class ItextReportRendererTest {
 
         TileBaseMap baseMap = new TileBaseMap();
         baseMap
-                .setTileUrlPattern("http://mt{s}.aimaps.net/nordkivu.cd/v1/z{z}/{x}x{y}.png");
+                .setTileUrlPattern("http://www.activityinfo.org/resources/tile/nordkivu.cd/v1/z{z}/{x}x{y}.png");
 
         MapContent mapContent = new MapContent();
         mapContent.setFilterDescriptions(Collections.EMPTY_LIST);
