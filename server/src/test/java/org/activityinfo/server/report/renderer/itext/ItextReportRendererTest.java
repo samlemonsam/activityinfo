@@ -23,6 +23,7 @@ package org.activityinfo.server.report.renderer.itext;
  */
 
 import com.google.common.collect.Lists;
+import com.teklabs.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.model.BaseMap;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
@@ -45,6 +46,7 @@ import org.activityinfo.server.report.renderer.excel.ExcelReportRenderer;
 import org.activityinfo.server.report.renderer.image.ImageMapRenderer;
 import org.activityinfo.server.report.renderer.ppt.PPTMapRenderer;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.*;
@@ -54,6 +56,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class ItextReportRendererTest {
+    
+    @BeforeClass
+    public static void initLocale() {
+        LocaleProxy.initialize();
+    }
 
     private Comparator<PivotTableData.Axis> comparator = new Comparator<PivotTableData.Axis>() {
 
@@ -124,7 +131,7 @@ public class ItextReportRendererTest {
 
         TileBaseMap baseMap = new TileBaseMap();
         baseMap
-                .setTileUrlPattern("http://mt{s}.aimaps.net/nordkivu.cd/v1/z{z}/{x}x{y}.png");
+                .setTileUrlPattern("http://www.activityinfo.org/resources/tile/nordkivu.cd/v1/z{z}/{x}x{y}.png");
 
         MapContent mapContent = new MapContent();
         mapContent.setFilterDescriptions(Collections.EMPTY_LIST);
