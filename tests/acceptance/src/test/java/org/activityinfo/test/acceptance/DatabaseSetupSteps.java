@@ -44,13 +44,14 @@ public class DatabaseSetupSteps {
         driver.submitForm(formName, values);
     }
 
-    @When("^I create a target for database \"([^\"]*)\" with:$")
-    public void I_create_a_target_for_database_with(String databaseName, List<FieldValue> values) throws Throwable {
-        driver.createTarget(databaseName, property("name", "TargetName"));
-    }
 
     @And("^I have added partner \"([^\"]*)\" to \"([^\"]*)\"$")
     public void I_have_added_partner_to(String partnerName, String databaseName) throws Throwable {
         driver.addPartner(partnerName, databaseName);
+    }
+
+    @When("^I create a target named \"([^\"]*)\" for database \"([^\"]*)\"$")
+    public void I_create_a_target_named_for_database_with(String targetName, String databaseName) throws Throwable {
+        driver.createTarget(property("database", databaseName), property("name", targetName));
     }
 }

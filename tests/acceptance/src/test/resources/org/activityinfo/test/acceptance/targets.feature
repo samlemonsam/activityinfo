@@ -14,6 +14,8 @@ Feature: Indicator Targets
         | % enrolled  | 50%    |
     
   Scenario: 
-    When I create a target for database "EMIS" with:
-        | field       | value |
-        | % enrolled  | 50%   |
+    When I create a target named "Goals" for database "EMIS"
+    Then the target "Goals" should be present in the list of targets for database "EMIS"
+    When I set the targets of "Goals" to
+      | field       | value |
+      | % enrolled  | 50%   |
