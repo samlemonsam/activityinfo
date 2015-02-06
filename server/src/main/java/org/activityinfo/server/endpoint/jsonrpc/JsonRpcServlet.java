@@ -11,7 +11,6 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import javax.servlet.ServletException;
@@ -70,8 +69,13 @@ public class JsonRpcServlet extends HttpServlet {
             return;
             
         }
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("application/json");
-        objectMapper.writeValue(resp.getOutputStream(), result);
+        try {
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("application/json");
+            objectMapper.writeValue(resp.getOutputStream(), result);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Command exception", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        }
     }
 }

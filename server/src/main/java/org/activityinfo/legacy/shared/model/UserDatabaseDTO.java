@@ -204,7 +204,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * {@link org.activityinfo.server.database.hibernate.entity.UserPermission#setAllowViewAll(boolean)}
      */
     public boolean isViewAllAllowed() {
-        return (Boolean) get("viewAllAllowed");
+        return (Boolean) get("viewAllAllowed", false);
     }
 
     /**
@@ -221,7 +221,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public boolean isEditAllowed() {
-        return (Boolean) get("editAllowed");
+        return get("editAllowed", false);
     }
 
     /**
@@ -238,7 +238,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public boolean isDesignAllowed() {
-        return (Boolean) get("designAllowed");
+        return get("designAllowed", false);
     }
 
     /**
@@ -255,7 +255,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public boolean isEditAllAllowed() {
-        return (Boolean) get("editAllAllowed");
+        return get("editAllAllowed", false);
     }
 
     /**
@@ -263,7 +263,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * permissions on behalf of the Partner to which they belong
      */
     public boolean isManageUsersAllowed() {
-        return (Boolean) get("manageUsersAllowed");
+        return get("manageUsersAllowed", false);
     }
 
     /**
@@ -280,7 +280,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * permissions on behalf of all Partners in this UserDatabase
      */
     public boolean isManageAllUsersAllowed() {
-        return (Boolean) get("manageAllUsersAllowed");
+        return get("manageAllUsersAllowed", false);
     }
 
     /**
@@ -321,7 +321,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      */
     @JsonProperty("owned") @JsonView(DTOViews.Schema.class)
     public boolean getAmOwner() {
-        return (Boolean) get("amOwner");
+        return get("amOwner", false);
     }
 
     /**

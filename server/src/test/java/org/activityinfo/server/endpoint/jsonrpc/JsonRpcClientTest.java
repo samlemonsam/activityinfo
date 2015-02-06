@@ -24,6 +24,7 @@ package org.activityinfo.server.endpoint.jsonrpc;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
+import org.activityinfo.legacy.shared.command.GetTargets;
 import org.junit.Test;
 
 /**
@@ -36,23 +37,42 @@ public class JsonRpcClientTest {
     @Test
     public void getSites() {
         try {
-//            String endpoint = "https://ai-dev.appspot.com/command";
-//            String username = "test@test.org";
-//            String password = "testing123";
-
-            String endpoint = "http://127.0.0.1:8888/command";
-            String username = "test@test.org";
-            String password = "testing123";
-
             Filter filter = new Filter();
             filter.addRestriction(DimensionType.Activity, ACTIVITY_ID);
 
             GetSites getSites = new GetSites();
             getSites.setFilter(filter);
 
-            JsonRpcClient client = JsonRpcClientBuilder.builder().
-                    endpoint(endpoint).username(username).password(password).build();
-            Object response = client.execute(getSites);
+            Object response = testClient().execute(getSites);
+            System.out.println(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static JsonRpcClient testClient() {
+        //            String endpoint = "https://ai-dev.appspot.com/command";
+//            String username = "test@test.org";
+//            String password = "testing123";
+
+        String endpoint = "http://127.0.0.1:8886/command";
+        String username = "lisa@solidarites";
+        String password = "xyz";
+
+        return JsonRpcClientBuilder.builder().
+                endpoint(endpoint).username(username).password(password).build();
+    }
+
+    @Test
+    public void getTargets() {
+        try {
+
+            Filter filter = new Filter();
+            filter.addRestriction(DimensionType.Activity, ACTIVITY_ID);
+
+            GetTargets getTargets = new GetTargets();
+            getTargets.setDatabaseId(1);
+            String response = testClient().execute(getTargets);
             System.out.println(response);
         } catch (Exception e) {
             e.printStackTrace();

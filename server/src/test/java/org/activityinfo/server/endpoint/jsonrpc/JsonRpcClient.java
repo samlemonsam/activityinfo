@@ -73,9 +73,9 @@ public class JsonRpcClient {
         uri = UriBuilder.fromUri(endpoint).build();
     }
 
-    public Object execute(Command command) throws IOException {
+    public String execute(Command command) throws IOException {
         String entity = objectMapper.writeValueAsString(new CommandRequest(command));
         System.out.println(entity);
-        return client.resource(uri).entity(entity, MediaType.APPLICATION_JSON_TYPE).post(Object.class);
+        return client.resource(uri).entity(entity, MediaType.APPLICATION_JSON_TYPE).post(String.class);
     }
 }
