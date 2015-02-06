@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.Date;
 import java.util.List;
@@ -47,7 +48,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
 
     @Override
     public int getId() {
-        return (Integer) get("id");
+        return get("id", 0);
     }
 
     public void setId(int id) {
@@ -108,7 +109,16 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
 
     public Date getDate1() {
-        return (Date) get("date1");
+        return deserializeDate("date1");
+    }
+
+    private Date deserializeDate(String property) {
+        Object date = get(property);
+        // ai-936: json rpc servlet jackson objectmapper deserialize it to long instead of date, missed provider?
+        if (date instanceof Long) {
+            return new Date((Long) date);
+        }
+        return (Date) date;
     }
 
     public void setDate2(Date date2) {
@@ -116,7 +126,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
 
     public Date getDate2() {
-        return (Date) get("date2");
+        return deserializeDate("date2");
     }
 
     public void setArea(String area) {
@@ -140,6 +150,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         return getName();
     }
 
+    @JsonIgnore
     @Override
     public String getEntityName() {
         return entityName;

@@ -21,11 +21,11 @@ package org.activityinfo.server.endpoint.jsonrpc;
  * #L%
  */
 
-import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.legacy.shared.command.GetSites;
-import org.activityinfo.legacy.shared.command.GetTargets;
+import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.junit.Test;
+
+import java.util.Date;
 
 /**
  * @author yuriyz on 6/24/14.
@@ -66,10 +66,6 @@ public class JsonRpcClientTest {
     @Test
     public void getTargets() {
         try {
-
-            Filter filter = new Filter();
-            filter.addRestriction(DimensionType.Activity, ACTIVITY_ID);
-
             GetTargets getTargets = new GetTargets();
             getTargets.setDatabaseId(1);
             String response = testClient().execute(getTargets);
@@ -78,4 +74,25 @@ public class JsonRpcClientTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void addTargets() {
+        try {
+            TargetDTO targetDTO = new TargetDTO();
+            targetDTO.setName("Target3");
+            targetDTO.setDescription("Description of new target");
+            targetDTO.setDate1(new Date());
+            targetDTO.setDate2(new Date());
+
+            AddTarget addTarget = new AddTarget();
+            addTarget.setDatabaseId(1);
+            addTarget.setTargetDTO(targetDTO);
+
+            String response = testClient().execute(addTarget);
+            System.out.println(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

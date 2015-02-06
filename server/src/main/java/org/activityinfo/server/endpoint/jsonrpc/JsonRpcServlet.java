@@ -52,6 +52,7 @@ public class JsonRpcServlet extends HttpServlet {
             String json = new String(ByteStreams.toByteArray(req.getInputStream()));
             command = objectMapper.readValue(json, Command.class);
         } catch (BadRpcRequest e) {
+            LOGGER.log(Level.SEVERE, "Failed to deserialize command", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             return;
             
