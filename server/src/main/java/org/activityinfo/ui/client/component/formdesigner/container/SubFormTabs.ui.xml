@@ -7,10 +7,27 @@
   <ui:with field="style" type="org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles"/>
 
   <g:HTMLPanel ui:field="subformTabs">
-    <ul class="nav nav-tabs" ui:field="subformTabsUl">
-      <li role="presentation" class="active"><a href="#">Tab 1</a></li>
-      <li role="presentation"><a href="#">Tab 2</a></li>
-      <li role="presentation"><a href="#">Tab 3</a></li>
-    </ul>
+    <nav>
+      <ul class="pager" ui:field="subformTabsUl">
+        <li>
+          <a href="#previous">&laquo;</a>
+        </li>
+        <li class="active">
+          <a href="#">Tab 1</a>
+        </li>
+        <li>
+          <a href="#">Tab 2</a>
+        </li>
+        <li>
+          <a href="#">Tab 3</a>
+        </li>
+        <li>
+          <a href="#">Tab 4</a>
+        </li>
+        <li>
+          <a href="#next">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
   </g:HTMLPanel>
 </ui:UiBinder>

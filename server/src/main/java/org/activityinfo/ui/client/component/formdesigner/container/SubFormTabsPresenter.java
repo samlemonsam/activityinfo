@@ -21,8 +21,9 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  * #L%
  */
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.type.period.PeriodValue;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 
 import java.util.List;
@@ -41,11 +42,13 @@ public class SubFormTabsPresenter {
     }
 
     public void set(List<FormInstance> instances) {
-        // todo
-    }
+        String safeHtml = "";
+        for (FormInstance instance : instances) {
+            String escapedLabel = SafeHtmlUtils.fromString(FormInstanceLabeler.getLabel(instance)).asString();
+            safeHtml = safeHtml + "<li><a href='#" + escapedLabel + "'>" + escapedLabel + "</a></li>";
+        }
 
-
-    public void generate(PeriodValue period) {
-        // todo
+        view.getSubformTabsUl().removeAllChildren();
+        view.getSubformTabsUl().setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(safeHtml));
     }
 }

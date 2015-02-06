@@ -35,6 +35,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
@@ -43,6 +44,7 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 import javax.annotation.Nullable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -137,7 +139,8 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             ResourceId typeClassId = type.getRange().iterator().next();
 
             if (PredefinedPeriods.isPeriodId(typeClassId)) {
-                subFormTabsPresenter.generate(((PeriodSubFormKind)SubFormKindRegistry.get().getKind(typeClassId)).getPeriod());
+                PeriodValue period = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
+                subFormTabsPresenter.set(new InstanceGenerator(subForm.getId()).generate(period, new Date(), InstanceGenerator.Direction.BACK, 5));
             } else {
                 // fetch FormInstances from server
                 formDesigner.getResourceLocator().queryInstances(new ClassCriteria(typeClassId)).then(new Function<List<FormInstance>, Object>() {
