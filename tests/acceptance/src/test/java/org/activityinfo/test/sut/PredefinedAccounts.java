@@ -60,4 +60,9 @@ public class PredefinedAccounts implements Accounts {
         }
         return new UserAccount(email, password);
     }
+
+    @Override
+    public UserAccount any() {
+        return ensureAccountExists("qa@bedatadriven.com");
+    }
 }

@@ -1,18 +1,27 @@
 package org.activityinfo.server.endpoint.jsonrpc;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.deser.std.StdDeserializer;
+import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.codehaus.jackson.node.ObjectNode;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommandDeserializer extends StdDeserializer<Command> {
 
+    private static final Logger LOGGER = Logger.getLogger(CommandDeserializer.class.getName());
+    
     public CommandDeserializer() {
         super(Command.class);
     }
@@ -23,9 +32,26 @@ public class CommandDeserializer extends StdDeserializer<Command> {
         ObjectNode root = (ObjectNode) mapper.readTree(jp);
 
         String typeName = root.path("type").asText();
-        Class commandClass = lookupCommandClass(typeName);
-
-        return (Command) mapper.readValue(root.path("command"), commandClass);
+        if(Strings.isNullOrEmpty(typeName)) {
+            throw new BadRpcRequest("Expected 'type' property on root object. You must specify a command type.");
+        }
+        Class commandClass;
+        try {
+            commandClass = lookupCommandClass(typeName);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to find command class for " + typeName, e);
+            throw new BadRpcRequest("Invalid command type '%s'", typeName);
+        }
+        JsonNode command = root.path("command");
+        if(!command.isObject()) {
+            throw new BadRpcRequest("Expected 'command' root object property.");
+        }
+        try {
+            return (Command) mapper.readValue(command, commandClass);
+        } catch(UnrecognizedPropertyException e) {
+            throw new BadRpcRequest("Unexpected property '%s' at %s", e.getUnrecognizedPropertyName(), 
+                    e.getLocation().toString());
+        }
     }
 
     protected Class<?> lookupCommandClass(String type) {

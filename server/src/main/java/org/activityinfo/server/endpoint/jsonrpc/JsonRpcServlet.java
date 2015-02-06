@@ -6,10 +6,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.DispatcherSync;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import javax.servlet.ServletException;
@@ -50,13 +52,24 @@ public class JsonRpcServlet extends HttpServlet {
         try {
             String json = new String(ByteStreams.toByteArray(req.getInputStream()));
             command = objectMapper.readValue(json, Command.class);
+        } catch (BadRpcRequest e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            return;
+            
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to deserialize command", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        CommandResult result = dispatcher.execute(command);
-
+        CommandResult result;
+        try {
+            result = dispatcher.execute(command);
+        } catch (CommandException e) {
+            LOGGER.log(Level.SEVERE, "Command exception", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            return;
+            
+        }
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType("application/json");
         objectMapper.writeValue(resp.getOutputStream(), result);
