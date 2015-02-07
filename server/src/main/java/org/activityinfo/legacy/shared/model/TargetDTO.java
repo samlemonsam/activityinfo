@@ -25,8 +25,10 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class TargetDTO extends BaseModelData implements EntityDTO {
 
@@ -53,6 +55,18 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
 
     public void setId(int id) {
         set("id", id);
+    }
+
+    @JsonIgnore
+    @Override
+    public Map<String, Object> getProperties() {
+        return super.getProperties();
+    }
+
+    @JsonIgnore
+    @Override
+    public Collection<String> getPropertyNames() {
+        return super.getPropertyNames();
     }
 
     @Override

@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.*;
 
@@ -576,6 +577,18 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
     public boolean hasAttributeDisplayMap() {
         return attributeDisplayMap != null && !attributeDisplayMap.isEmpty();
+    }
+
+    @JsonIgnore
+    @Override
+    public Map<String, Object> getProperties() {
+        return super.getProperties();
+    }
+
+    @JsonIgnore
+    @Override
+    public Collection<String> getPropertyNames() {
+        return super.getPropertyNames();
     }
 
 }

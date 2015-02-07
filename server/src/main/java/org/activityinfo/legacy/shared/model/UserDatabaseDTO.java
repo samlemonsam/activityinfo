@@ -25,14 +25,12 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO.HasLockedPeriod;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * One-to-one DTO of the
@@ -406,5 +404,17 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         } else {
             return false;
         }
+    }
+
+    @JsonIgnore
+    @Override
+    public Map<String, Object> getProperties() {
+        return super.getProperties();
+    }
+
+    @JsonIgnore
+    @Override
+    public Collection<String> getPropertyNames() {
+        return super.getPropertyNames();
     }
 }
