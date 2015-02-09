@@ -22,6 +22,8 @@ package org.activityinfo.server.endpoint.jsonrpc;
  */
 
 import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.junit.Test;
 
@@ -78,11 +80,19 @@ public class JsonRpcClientTest {
     @Test
     public void addTargets() {
         try {
+            PartnerDTO partnerDTO = new PartnerDTO();
+            partnerDTO.setId(1);
+
+            ProjectDTO projectDTO = new ProjectDTO();
+            projectDTO.setId(1);
+
             TargetDTO targetDTO = new TargetDTO();
-            targetDTO.setName("Target3");
+            targetDTO.setName("Target8");
             targetDTO.setDescription("Description of new target");
             targetDTO.setDate1(new Date());
             targetDTO.setDate2(new Date());
+            targetDTO.setPartner(partnerDTO);
+            targetDTO.setProject(projectDTO);
 
             AddTarget addTarget = new AddTarget();
             addTarget.setDatabaseId(1);
@@ -90,6 +100,7 @@ public class JsonRpcClientTest {
 
             String response = testClient().execute(addTarget);
             System.out.println(response);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

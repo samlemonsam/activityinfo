@@ -51,11 +51,15 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         Partner partner = null;
         if (form.get("partnerId") != null) {
             partner = em.find(Partner.class, form.get("partnerId"));
+        } else if (form.getPartner() != null) {
+            partner = em.find(Partner.class, form.getPartner().getId());
         }
 
         Project project = null;
         if (form.get("projectId") != null) {
             project = em.find(Project.class, form.get("projectId"));
+        } else if (form.getProject() != null) {
+            project = em.find(Project.class, form.getProject().getId());
         }
 
         AdminEntity adminEntity = null;
