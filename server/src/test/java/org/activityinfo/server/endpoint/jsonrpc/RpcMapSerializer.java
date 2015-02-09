@@ -22,7 +22,6 @@ package org.activityinfo.server.endpoint.jsonrpc;
  */
 
 import com.extjs.gxt.ui.client.data.RpcMap;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.*;
@@ -33,15 +32,13 @@ import org.codehaus.jackson.type.JavaType;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
 /**
  * @author yuriyz on 02/09/2015.
  */
-public class RpcMapSerializer extends ContainerSerializerBase<RpcMap>
-        implements ResolvableSerializer {
+public class RpcMapSerializer extends ContainerSerializerBase<RpcMap> implements ResolvableSerializer {
 
     /**
      * Map-valued property being serialized with this instance
@@ -100,11 +97,11 @@ public class RpcMapSerializer extends ContainerSerializerBase<RpcMap>
      */
     protected PropertySerializerMap _dynamicValueSerializers;
 
-    protected RpcMapSerializer() {
+    public RpcMapSerializer() {
         this(null, null, null, false, null, null, null, null);
     }
 
-    protected RpcMapSerializer(HashSet<String> ignoredEntries,
+    public RpcMapSerializer(HashSet<String> ignoredEntries,
                                JavaType keyType, JavaType valueType, boolean valueTypeIsStatic,
                                TypeSerializer vts,
                                JsonSerializer<Object> keySerializer, JsonSerializer<Object> valueSerializer,
@@ -129,15 +126,6 @@ public class RpcMapSerializer extends ContainerSerializerBase<RpcMap>
             ms._valueSerializer = _valueSerializer;
         }
         return ms;
-    }
-
-    private static HashSet<String> toSet(String[] ignoredEntries) {
-        if (ignoredEntries == null || ignoredEntries.length == 0) {
-            return null;
-        }
-        HashSet<String> result = new HashSet<String>(ignoredEntries.length);
-        Collections.addAll(result, ignoredEntries);
-        return result;
     }
 
     /*
@@ -185,8 +173,7 @@ public class RpcMapSerializer extends ContainerSerializerBase<RpcMap>
     /**
      * Method called to serialize fields, when the value type is not statically known.
      */
-    public void serializeFields(Map<?, ?> value, JsonGenerator jgen, SerializerProvider provider)
-            throws IOException, JsonGenerationException {
+    public void serializeFields(Map<?, ?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
         // If value type needs polymorphic type handling, some more work needed:
         if (_valueTypeSerializer != null) {
             serializeTypedFields(value, jgen, provider);
@@ -246,7 +233,7 @@ public class RpcMapSerializer extends ContainerSerializerBase<RpcMap>
      */
     protected void serializeFieldsUsing(Map<?, ?> value, JsonGenerator jgen, SerializerProvider provider,
                                         JsonSerializer<Object> ser)
-            throws IOException, JsonGenerationException {
+            throws IOException {
         final JsonSerializer<Object> keySerializer = _keySerializer;
         final HashSet<String> ignored = _ignoredEntries;
         final TypeSerializer typeSer = _valueTypeSerializer;
@@ -282,7 +269,7 @@ public class RpcMapSerializer extends ContainerSerializerBase<RpcMap>
     }
 
     protected void serializeTypedFields(Map<?, ?> value, JsonGenerator jgen, SerializerProvider provider)
-            throws IOException, JsonGenerationException {
+            throws IOException {
         final JsonSerializer<Object> keySerializer = _keySerializer;
         JsonSerializer<Object> prevValueSerializer = null;
         Class<?> prevValueClass = null;
