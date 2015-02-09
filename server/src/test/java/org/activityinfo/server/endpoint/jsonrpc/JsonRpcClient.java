@@ -58,6 +58,7 @@ public class JsonRpcClient {
         SimpleModule module = new SimpleModule("Command", new Version(1, 0, 0, null));
         module.addDeserializer(Command.class, new CommandDeserializer());
         module.addDeserializer(RpcMap.class, new RpcMapDeserializer());
+        module.addSerializer(RpcMap.class, new RpcMapSerializer());
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(module);
