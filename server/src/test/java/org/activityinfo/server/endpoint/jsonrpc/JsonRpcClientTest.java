@@ -21,6 +21,7 @@ package org.activityinfo.server.endpoint.jsonrpc;
  * #L%
  */
 
+import com.google.common.collect.Maps;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
@@ -28,6 +29,7 @@ import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author yuriyz on 6/24/14.
@@ -101,6 +103,24 @@ public class JsonRpcClientTest {
             String response = testClient().execute(addTarget);
             System.out.println(response);
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void updateTargetValue() {
+        try {
+            Map<String,Double> changes = Maps.newHashMap();
+            changes.put("value", 22d);
+
+            UpdateTargetValue value = new UpdateTargetValue();
+            value.setTargetId(1);
+            value.setIndicatorId(1);
+            value.setChanges(changes);
+
+            String response = testClient().execute(value);
+            System.out.println(response);
         } catch (Exception e) {
             e.printStackTrace();
         }
