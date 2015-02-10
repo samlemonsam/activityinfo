@@ -2888,6 +2888,10 @@ public interface UiConstants extends Constants {
     @Key("type")
     String type();
 
+    @DefaultStringValue("Tab count")
+    @Key("tabCount")
+    String tabCount();
+
     /**
      * Translated "Type to filter".
      *

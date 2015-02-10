@@ -49,7 +49,7 @@ public class QuantityType implements ParametrizedFieldType {
         public FieldValue deserialize(Record record) {
             return Quantity.fromRecord(record);
         }
-    };
+    }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 

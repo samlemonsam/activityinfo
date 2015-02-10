@@ -29,6 +29,7 @@ import org.activityinfo.ui.client.component.formdesigner.container.InstanceGener
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +42,7 @@ public class InstanceGeneratorTest {
     @Test
     public void monthlyBack() {
 
-        InstanceGenerator generator = new InstanceGenerator(ResourceId.generateId());
+        InstanceGenerator generator = jvmGenerator();
         List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 4);
 
         Assert.assertEquals(instances.size(), 4);
@@ -56,7 +57,7 @@ public class InstanceGeneratorTest {
     @Test
     public void monthlyForward() {
 
-        InstanceGenerator generator = new InstanceGenerator(ResourceId.generateId());
+        InstanceGenerator generator = jvmGenerator();
         List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.FORWARD, 4);
 
         Assert.assertEquals(instances.size(), 4);
@@ -71,7 +72,7 @@ public class InstanceGeneratorTest {
     @Test
     public void yearlyBack() {
 
-        InstanceGenerator generator = new InstanceGenerator(ResourceId.generateId());
+        InstanceGenerator generator = jvmGenerator();
         List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 3);
 
         Assert.assertEquals(instances.size(), 3);
@@ -85,7 +86,7 @@ public class InstanceGeneratorTest {
     @Test
     public void yearlyForward() {
 
-        InstanceGenerator generator = new InstanceGenerator(ResourceId.generateId());
+        InstanceGenerator generator = jvmGenerator();
         List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.FORWARD, 3);
 
         Assert.assertEquals(instances.size(), 3);
@@ -94,6 +95,15 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "2018");
 
         print(instances);
+    }
+
+    private InstanceGenerator jvmGenerator() {
+        return new InstanceGenerator(ResourceId.generateId(), new InstanceGenerator.Formatter() {
+            @Override
+            public String format(String pattern, Date date) {
+                return new SimpleDateFormat(pattern).format(date);
+            }
+        });
     }
 
     private Date fixedDate() {

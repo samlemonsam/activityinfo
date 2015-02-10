@@ -24,15 +24,19 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
+import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 
@@ -45,6 +49,8 @@ public class ContainerPropertiesPresenter {
     private final ContainerPropertiesPanel view;
 
     private HandlerRegistration labelKeyUpHandler;
+    private HandlerRegistration subformKindChangeHandler;
+    private HandlerRegistration subformTabCountHandler;
 
     public ContainerPropertiesPresenter(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
@@ -69,16 +75,32 @@ public class ContainerPropertiesPresenter {
         });
 
         if (isSubform(fieldsHolder)) {
-            view.getSubformKindGroup().setVisible(true);
+            view.getSubformGroup().setVisible(true);
 
             final FormClass subForm = (FormClass) fieldsHolder.getElementContainer();
-            view.getSubformKind().addChangeHandler(new ChangeHandler() {
+            subformKindChangeHandler = view.getSubformKind().addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {
                     subformKindChanged(view.getSubformKind().getValue(view.getSubformKind().getSelectedIndex()), subForm);
                 }
             });
 
+            subformTabCountHandler = view.getSubformTabCount().addValueChangeHandler(new ValueChangeHandler<Double>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Double> event) {
+                    final QuantityType tabCount = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
+                    tabCount.setUnits(view.getSubformTabCount().getValue().toString());
+                    forceSubformRerender(subForm);
+                }
+            });
+
+            // kind
+            ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+            view.getSubformKind().setSelectedIndex(getKindIndex(typeClass.getRange().iterator().next()));
+
+            // tabs count
+            QuantityType tabCount = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
+            view.getSubformTabCount().setValue(Double.parseDouble(tabCount.getUnits()));
         }
     }
 
@@ -91,7 +113,7 @@ public class ContainerPropertiesPresenter {
         Preconditions.checkState(selectedValue != null && selectedValue.startsWith("_"),
                 "Value is not valid, it must not be null and start with '_' character.");
 
-        final ReferenceType subFormType = (ReferenceType) subForm.getField(FormClass.TYPE_FIELD_ID).getType();
+        final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
 
         if (SubFormKindRegistry.getUserDefinedId().asString().equals(selectedValue)) {
             final SelectSubformTypeDialog dialog = new SelectSubformTypeDialog();
@@ -128,7 +150,7 @@ public class ContainerPropertiesPresenter {
     }
 
     private int getKindIndex(ResourceId valueId) {
-        for (int i = 0; i < view.getSubformKind().getVisibleItemCount(); i++) {
+        for (int i = 0; i < view.getSubformKind().getItemCount(); i++) {
             if (view.getSubformKind().getValue(i).equals(valueId.asString())) {
                 return i;
             }
@@ -140,7 +162,13 @@ public class ContainerPropertiesPresenter {
         if (labelKeyUpHandler != null) {
             labelKeyUpHandler.removeHandler();
         }
-        view.getSubformKindGroup().setVisible(false);
+        if (subformKindChangeHandler != null) {
+            subformKindChangeHandler.removeHandler();
+        }
+        if (subformTabCountHandler != null) {
+            subformTabCountHandler.removeHandler();
+        }
+        view.getSubformGroup().setVisible(false);
     }
 
     /**

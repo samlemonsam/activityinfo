@@ -35,10 +35,12 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
+import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -72,7 +74,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
                 formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(FieldsHolderWidgetContainer.this));
             }
         });
-        subFormTabsPresenter = new SubFormTabsPresenter(panel.getPanel().getSubformTabs(), formDesigner);
+        subFormTabsPresenter = new SubFormTabsPresenter(panel.getPanel().getSubformTabs());
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
@@ -110,6 +112,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
                 formDesigner.getDropControllerRegistry().unregister(formClass.getId());
             }
         });
+        container.syncWithModel(); // force ui update
         return container;
     }
 
@@ -135,12 +138,15 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
         if (isSubform) {
             FormClass subForm = (FormClass) elementContainer;
-            ReferenceType type = (ReferenceType) subForm.getField(FormClass.TYPE_FIELD_ID).getType();
-            ResourceId typeClassId = type.getRange().iterator().next();
+            ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+            ResourceId typeClassId = typeClass.getRange().iterator().next();
+            QuantityType tabsCountType = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
+
+            subFormTabsPresenter.setTabCount((int) Double.parseDouble(tabsCountType.getUnits()));
 
             if (PredefinedPeriods.isPeriodId(typeClassId)) {
                 PeriodValue period = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
-                subFormTabsPresenter.set(new InstanceGenerator(subForm.getId()).generate(period, new Date(), InstanceGenerator.Direction.BACK, 5));
+                subFormTabsPresenter.set(new InstanceGenerator(subForm.getId()).generate(period, new Date(), InstanceGenerator.Direction.BACK, subFormTabsPresenter.getTabCount()));
             } else {
                 // fetch FormInstances from server
                 formDesigner.getResourceLocator().queryInstances(new ClassCriteria(typeClassId)).then(new Function<List<FormInstance>, Object>() {

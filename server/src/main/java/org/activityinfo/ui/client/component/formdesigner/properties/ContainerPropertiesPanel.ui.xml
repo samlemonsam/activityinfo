@@ -17,8 +17,15 @@
     </f:FormGroup>
 
     <!-- Subform kind -->
-    <f:FormGroup ui:field="subformKindGroup" label="{i18n.type}" columnLabelWidth="4" visible="false">
-      <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformKind"/>
-    </f:FormGroup>
+    <g:HTMLPanel ui:field="subformGroup">
+      <f:FormGroup ui:field="subformKindGroup" label="{i18n.type}" columnLabelWidth="4" visible="false">
+        <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformKind"/>
+      </f:FormGroup>
+
+      <!-- Subform tab count -->
+      <f:FormGroup ui:field="subformTabCountGroup" label="{i18n.tabCount}" columnLabelWidth="4" visible="false">
+        <g:DoubleBox addStyleNames="form-control" ui:field="subformTabCount"/>
+      </f:FormGroup>
+    </g:HTMLPanel>
   </g:HTMLPanel>
 </ui:UiBinder>

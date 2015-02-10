@@ -35,7 +35,9 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.subform.SubformConstants;
 
 import java.util.List;
 import java.util.Map;
@@ -62,12 +64,15 @@ public class FormDesignerModel {
         final FormClass formClass = new FormClass(ResourceId.generateId());
         formClass.setOwnerId(rootFormClass.getId());
 
-        FormField type = formClass.addField(FormClass.TYPE_FIELD_ID);
+        FormField type = formClass.addField(SubformConstants.TYPE_FIELD_ID);
         type.setVisible(false);
         type.setType(new ReferenceType()
                 .setCardinality(Cardinality.SINGLE)
                 .setRange(PredefinedPeriods.MONTHLY.getResourceId())
         );
+
+        FormField tabCount = formClass.addField(SubformConstants.TAB_COUNT_FIELD_ID);
+        tabCount.setType(new QuantityType().setUnits(Integer.toString(SubformConstants.DEFAULT_TAB_COUNT)));
 
         registerSubform(formFieldId, formClass);
         return formClass;

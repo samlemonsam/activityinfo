@@ -10,22 +10,28 @@
     <nav>
       <ul class="pager" ui:field="subformTabsUl">
         <li>
-          <a href="#previous">&laquo;</a>
+          <a href='javascript:' id="_fullprevious">&laquo;</a>
+        </li>
+        <li>
+          <a href='javascript:' id="_previous">&lt;</a>
         </li>
         <li class="active">
-          <a href="#">Tab 1</a>
+          <a href='javascript:'>Tab 1</a>
         </li>
         <li>
-          <a href="#">Tab 2</a>
+          <a href='javascript:'>Tab 2</a>
         </li>
         <li>
-          <a href="#">Tab 3</a>
+          <a href='javascript:'>Tab 3</a>
         </li>
         <li>
-          <a href="#">Tab 4</a>
+          <a href='javascript:'>Tab 4</a>
         </li>
         <li>
-          <a href="#next">&raquo;</a>
+          <a href='javascript:' id="_next">&gt;</a>
+        </li>
+        <li>
+          <a href='javascript:' id="_fullnext">&raquo;</a>
         </li>
       </ul>
     </nav>

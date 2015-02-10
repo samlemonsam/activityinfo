@@ -24,9 +24,7 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.ui.client.widget.TextBox;
@@ -50,6 +48,12 @@ public class ContainerPropertiesPanel extends Composite {
     ListBox subformKind;
     @UiField
     FormGroup subformKindGroup;
+    @UiField
+    FormGroup subformTabCountGroup;
+    @UiField
+    DoubleBox subformTabCount;
+    @UiField
+    HTMLPanel subformGroup;
 
     public ContainerPropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -76,5 +80,17 @@ public class ContainerPropertiesPanel extends Composite {
 
     public FormGroup getSubformKindGroup() {
         return subformKindGroup;
+    }
+
+    public FormGroup getSubformTabCountGroup() {
+        return subformTabCountGroup;
+    }
+
+    public DoubleBox getSubformTabCount() {
+        return subformTabCount;
+    }
+
+    public HTMLPanel getSubformGroup() {
+        return subformGroup;
     }
 }

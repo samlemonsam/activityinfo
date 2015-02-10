@@ -40,5 +40,6 @@
   <source path="type"/>
   <source path="system"/>
   <source path="legacy"/>
+  <source path="date"/>
 
 </module>

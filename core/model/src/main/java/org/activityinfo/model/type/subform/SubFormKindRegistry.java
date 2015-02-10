@@ -44,6 +44,7 @@ public class SubFormKindRegistry {
 
     private SubFormKindRegistry() {
         USER_DEFINED_ID = ResourceIdPrefixType.SUBFORM.id("_user_defined");
+        register(new PeriodSubFormKind(PredefinedPeriods.YEARLY));
         register(new PeriodSubFormKind(PredefinedPeriods.MONTHLY));
         register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
         register(userDefinedKind());

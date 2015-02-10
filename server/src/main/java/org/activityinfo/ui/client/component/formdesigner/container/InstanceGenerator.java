@@ -21,8 +21,8 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  * #L%
  */
 
-import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
@@ -34,7 +34,6 @@ import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -49,10 +48,25 @@ public class InstanceGenerator {
         BACK, FORWARD
     }
 
+    public static interface Formatter {
+        String format(String pattern, Date date);
+    }
+
     private final ResourceId classId;
+    private final Formatter formatter;
 
     public InstanceGenerator(ResourceId classId) {
+        this(classId, new Formatter() {
+            @Override
+            public String format(String pattern, Date date) {
+                return DateTimeFormat.getFormat(pattern).format(date);
+            }
+        });
+    }
+
+    public InstanceGenerator(ResourceId classId, Formatter formatter) {
         this.classId = classId;
+        this.formatter = formatter;
     }
 
     public List<FormInstance> generate(PeriodValue period, Date startDate, Direction direction, int count) {
@@ -90,23 +104,15 @@ public class InstanceGenerator {
 
     private String format(Date date, PeriodValue period) {
         if (PredefinedPeriods.YEARLY.getPeriod().equals(period)) {
-            return format("yyyy", date);
+            return formatter.format("yyyy", date);
         } else if (PredefinedPeriods.MONTHLY.getPeriod().equals(period)) {
-            return format("MMM yyyy", date);
+            return formatter.format("MMM yyyy", date);
         } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {
-            return format("dd MMM yyyy", date);
+            return formatter.format("dd MMM yyyy", date);
         }
 
         throw new UnsupportedOperationException("Period is not supported yet, period: " + period);
         //return DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).format(date);
-    }
-
-    private String format(String pattern, Date date) {
-        if (!GWT.isClient()) {
-            return new SimpleDateFormat(pattern).format(date);
-        }
-        return DateTimeFormat.getFormat(pattern).format(date);
-
     }
 
     private DateRange generateDateRange(PeriodValue period, Date startDate, Direction direction) {
