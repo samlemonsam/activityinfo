@@ -3,9 +3,11 @@ package org.activityinfo.test.driver;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import cucumber.runtime.java.guice.ScenarioScoped;
 
 import java.util.Random;
 
+@ScenarioScoped
 public class AliasTable {
     /**
      * Maps test/user-friendly names to unique names that we really use
@@ -46,6 +48,19 @@ public class AliasTable {
     }
 
     public int generateId() {
-        return random.nextInt();
+        return random.nextInt(Integer.MAX_VALUE-1);
+    }
+
+    /**
+     * Maps a "real" name to its server-generated ID
+     */
+    public void mapNameToId(String name, int id) {
+        String alias = nameMap.inverse().get(name);
+        idMap.put(alias, id);
+        
+    }
+
+    public String getName(String alias) {
+        return nameMap.get(alias);
     }
 }

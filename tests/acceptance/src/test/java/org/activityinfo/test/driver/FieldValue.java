@@ -1,9 +1,16 @@
 package org.activityinfo.test.driver;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class FieldValue {
+    
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^[-\\d\\.,+]+");
+    
     private String field;
     private String value;
-
+    
+    
     public String getField() {
         return field;
     }
@@ -22,9 +29,22 @@ public class FieldValue {
 
     public Object maybeNumberValue() {
         try {
-            return Double.parseDouble(value);
+            Matcher matcher = NUMBER_PATTERN.matcher(value);
+            if(matcher.find()) {
+                return Double.parseDouble(matcher.group());
+            } 
         } catch (NumberFormatException ignored) {
-            return value;
+        }
+        return value;
+    }
+    
+    public Double asDouble() {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(String.format(
+                    "The property '%s' with value '%s' is not an number: %s",
+                    field, value, e.getMessage()), e);
         }
     }
 }

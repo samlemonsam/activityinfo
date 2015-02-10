@@ -1,5 +1,7 @@
 package org.activityinfo.test.driver;
 
+import java.util.Properties;
+
 public class Property {
     private String key;
     private Object value;
@@ -21,7 +23,8 @@ public class Property {
         return new Property("name", name);
     }
 
-    public static Property property(String key, String value) {
+    public static Property property(String key, Object value) {
         return new Property(key, value);
     }
+    
 }

@@ -1,3 +1,4 @@
+@web @api
 Feature: Indicator Targets
   As an analyst
   I want to be able to define target indicator values
@@ -15,7 +16,17 @@ Feature: Indicator Targets
     
   Scenario: 
     When I create a target named "Goals" for database "EMIS"
-    Then the target "Goals" should be present in the list of targets for database "EMIS"
-    When I set the targets of "Goals" to
+     And I set the targets of "Goals" to:
       | field       | value |
-      | % enrolled  | 50%   |
+      | % enrolled  | 75    |
+    Then aggregating the indicator "% enrolled" by Realized / Targeted should yield:
+      | Realized / Targeted | Value |
+      | Realized            |    50 |
+      | Targeted            |    75 |
+#    
+#    
+#  Scenario: Defining Targets by Partner
+#    When I create a target named "Unicef Goals" for partner UNICEF in database EMIS
+#     And I set the targets of "Unicef Goals" to:
+#       | field       | value |
+#       | % enrolled  | 75    |
