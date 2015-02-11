@@ -23,7 +23,6 @@ package org.activityinfo.ui.client.component.formdesigner.container;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 import org.activityinfo.model.date.DateRange;
@@ -33,7 +32,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 
-import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -85,6 +84,10 @@ public class InstanceGenerator {
             DateRange dateRange = generateDateRange(period, pointToCalculate, direction);
             pointToCalculate = getPointToCalculate(dateRange, direction);
             result.add(createInstance(dateRange, period, direction));
+        }
+
+        if (direction == Direction.BACK) {
+            Collections.reverse(result);
         }
 
         return result;

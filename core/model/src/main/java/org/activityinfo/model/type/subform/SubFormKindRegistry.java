@@ -40,13 +40,13 @@ public class SubFormKindRegistry {
 
     private static ResourceId USER_DEFINED_ID = ResourceIdPrefixType.SUBFORM.id("_user_defined");
 
-    private final Map<ResourceId, SubFormKind> kinds = Maps.newHashMap();
+    private final Map<ResourceId, SubFormKind> kinds = Maps.newLinkedHashMap();
 
     private SubFormKindRegistry() {
         USER_DEFINED_ID = ResourceIdPrefixType.SUBFORM.id("_user_defined");
         register(new PeriodSubFormKind(PredefinedPeriods.YEARLY));
         register(new PeriodSubFormKind(PredefinedPeriods.MONTHLY));
-        register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
+//        register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
         register(userDefinedKind());
     }
 

@@ -33,6 +33,7 @@ import com.google.gwt.user.client.EventListener;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.type.subform.SubformConstants;
+import org.activityinfo.ui.client.widget.ClickHandler;
 
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,41 @@ import java.util.Map;
  */
 public class SubFormTabsPresenter {
 
+    public static enum ButtonType {
+        FULL_PREVIOUS("_fullprevious"),
+        PREVIOUS("_previous"),
+        NEXT("_next"),
+        FULL_NEXT("_fullnext");
+
+        private final String value;
+
+        ButtonType(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static ButtonType fromValue(String value) {
+            for (ButtonType type : values()) {
+                if (type.getValue().equals(value)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
+
     private final SubFormTabs view;
 
     private int tabCount = SubformConstants.DEFAULT_TAB_COUNT;
 
     private final Map<String, FormInstance> formInstances = Maps.newHashMap();
     private final List<HandlerRegistration> clickHandlers = Lists.newArrayList();
+
+    private ClickHandler<ButtonType> moveButtonClickHandler;
+    private ClickHandler<FormInstance> instanceTabClickHandler;
 
     public SubFormTabsPresenter(SubFormTabs view) {
         this.view = view;
@@ -81,10 +111,9 @@ public class SubFormTabsPresenter {
     private void bindClickHandlers() {
 
         // predefined buttons
-        addClickHandlerToElementById("_fullprevious");
-        addClickHandlerToElementById("_previous");
-        addClickHandlerToElementById("_next");
-        addClickHandlerToElementById("_fullnext");
+        for (ButtonType buttonType : ButtonType.values()) {
+            addClickHandlerToElementById(buttonType.getValue());
+        }
 
         // tabs
         for (String id : formInstances.keySet()) {
@@ -106,38 +135,26 @@ public class SubFormTabsPresenter {
     }
 
     private void onButtonClick(String elementId) {
-        if ("_fullprevious".equals(elementId)) {
-            onFullPrevious();
-        } else if ("_previous".equals(elementId)) {
-            onPrevious();
-        } else if ("_next".equals(elementId)) {
-            onNext();
-        }else if ("_fullnext".equals(elementId)) {
-            onFullNext();
+        ButtonType buttonType = ButtonType.fromValue(elementId);
+        if (buttonType != null) {
+            if (moveButtonClickHandler != null) {
+                moveButtonClickHandler.onClick(buttonType);
+            }
         } else {
-            onInstanceClick(formInstances.get(elementId));
+            FormInstance instance = formInstances.get(elementId);
+            Preconditions.checkNotNull(instance);
+            if (instanceTabClickHandler != null) {
+                instanceTabClickHandler.onClick(instance);
+            }
         }
     }
 
-    private void onInstanceClick(FormInstance instance) {
-        Preconditions.checkNotNull(instance);
-        // todo
+    public void setMoveButtonClickHandler(ClickHandler<ButtonType> moveButtonClickHandler) {
+        this.moveButtonClickHandler = moveButtonClickHandler;
     }
 
-    private void onFullNext() {
-        // todo
-    }
-
-    private void onNext() {
-        // todo
-    }
-
-    private void onPrevious() {
-        // todo
-    }
-
-    private void onFullPrevious() {
-        // todo
+    public void setInstanceTabClickHandler(ClickHandler<FormInstance> instanceTabClickHandler) {
+        this.instanceTabClickHandler = instanceTabClickHandler;
     }
 
     private String perviousButtons() {
@@ -154,7 +171,26 @@ public class SubFormTabsPresenter {
         return tabCount;
     }
 
+    public void setTabCountSafely(String tabCount) {
+        try {
+            setTabCountSafely((int) Double.parseDouble(tabCount));
+        } catch (Exception e) {
+            setTabCountSafely(SubformConstants.DEFAULT_TAB_COUNT);
+        }
+    }
+
+    public void setTabCountSafely(int tabCount) {
+        if (tabCount < SubformConstants.MIN_TAB_COUNT) {
+            tabCount = SubformConstants.MIN_TAB_COUNT;
+        }
+        if (tabCount > SubformConstants.MAX_TAB_COUNT) {
+            tabCount = SubformConstants.MAX_TAB_COUNT;
+        }
+        setTabCount(tabCount);
+    }
+
     public void setTabCount(int tabCount) {
+        Preconditions.checkState(tabCount >= SubformConstants.MIN_TAB_COUNT && tabCount <= SubformConstants.MAX_TAB_COUNT);
         this.tabCount = tabCount;
     }
 }

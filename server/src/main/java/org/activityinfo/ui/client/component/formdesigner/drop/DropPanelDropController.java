@@ -110,7 +110,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 throw new VetoDragException();
             }
             FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.section(formDesigner, formSection, resourceId);
-            containerMap.put(resourceId, widgetContainer);
+            containerMap.put(resourceId, widgetContainer); // parent drop container
             drop(widgetContainer, context, formSection);
         } else if (template instanceof SubformTemplate) {
             final FormField formField = ((SubformTemplate)template).create();
@@ -122,7 +122,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             type.getClassReference().setRange(subForm.getId());
 
             final FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, subForm, formField.getId());
-            containerMap.put(formField.getId(), widgetContainer);
+            containerMap.put(formField.getId(), widgetContainer); // parent drop container
 
             drop(widgetContainer.asWidget(), context);
             int widgetIndex = dropTarget.getWidgetIndex(widgetContainer.asWidget());

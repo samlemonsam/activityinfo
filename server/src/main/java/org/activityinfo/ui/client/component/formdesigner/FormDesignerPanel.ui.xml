@@ -18,14 +18,14 @@
           <g:HTML ui:field="spacer" width="100%" height="0px"/>
           <ul class="nav nav-tabs">
             <li role="presentation" class="active" ui:field="propertiesTabLi">
-              <g:Anchor href="#" ui:field="propertiesTabLink">
+              <g:Anchor href="javascript:" ui:field="propertiesTabLink">
                 <b>
                   <ui:text from='{i18n.fieldProperties}'/>
                 </b>
               </g:Anchor>
             </li>
             <li role="presentation" ui:field="containerPropertiesTabLi">
-              <g:Anchor href="#" ui:field="containerPropertiesTabLink">
+              <g:Anchor href="javascript:" ui:field="containerPropertiesTabLink">
                 <b>
                   <ui:text from='{i18n.containerProperties}'/>
                 </b>

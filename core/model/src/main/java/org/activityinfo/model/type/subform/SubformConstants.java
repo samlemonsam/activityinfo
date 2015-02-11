@@ -40,6 +40,8 @@ public class SubformConstants {
     public static final ResourceId TAB_COUNT_FIELD_ID = ResourceId.valueOf("_subform_tab_count");
 
     public static final int DEFAULT_TAB_COUNT = 4;
+    public static final int MIN_TAB_COUNT = 1;
+    public static final int MAX_TAB_COUNT = 100;
 
     private SubformConstants() {
     }

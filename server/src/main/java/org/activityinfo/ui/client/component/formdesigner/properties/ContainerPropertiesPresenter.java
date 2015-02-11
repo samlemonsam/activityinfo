@@ -24,12 +24,9 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -60,6 +57,7 @@ public class ContainerPropertiesPresenter {
     public void show(final FieldsHolder fieldsHolder) {
         reset();
 
+        view.getLabelGroup().setVisible(true);
         view.getLabel().setValue(Strings.nullToEmpty(fieldsHolder.getElementContainer().getLabel()));
 
         validateLabel();
@@ -85,9 +83,9 @@ public class ContainerPropertiesPresenter {
                 }
             });
 
-            subformTabCountHandler = view.getSubformTabCount().addValueChangeHandler(new ValueChangeHandler<Double>() {
+            subformTabCountHandler = view.getSubformTabCount().addChangeHandler(new ChangeHandler() {
                 @Override
-                public void onValueChange(ValueChangeEvent<Double> event) {
+                public void onChange(ChangeEvent event) {
                     final QuantityType tabCount = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
                     tabCount.setUnits(view.getSubformTabCount().getValue().toString());
                     forceSubformRerender(subForm);
@@ -145,8 +143,7 @@ public class ContainerPropertiesPresenter {
     }
 
     private void forceSubformRerender(FormClass subForm) {
-        FormField subformOwnerField = formDesigner.getModel().getSubformOwnerField(subForm);
-        formDesigner.getWidgetContainer(subformOwnerField.getId()).syncWithModel();
+        formDesigner.getWidgetContainer(subForm.getId()).syncWithModel();
     }
 
     private int getKindIndex(ResourceId valueId) {
@@ -168,6 +165,7 @@ public class ContainerPropertiesPresenter {
         if (subformTabCountHandler != null) {
             subformTabCountHandler.removeHandler();
         }
+        view.getLabelGroup().setVisible(false);
         view.getSubformGroup().setVisible(false);
     }
 

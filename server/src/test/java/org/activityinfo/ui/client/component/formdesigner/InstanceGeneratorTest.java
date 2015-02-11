@@ -46,10 +46,10 @@ public class InstanceGeneratorTest {
         List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 4);
 
         Assert.assertEquals(instances.size(), 4);
-        assertLabel(instances.get(0), "Dec 2014");
-        assertLabel(instances.get(1), "Nov 2014");
-        assertLabel(instances.get(2), "Oct 2014");
-        assertLabel(instances.get(3), "Sep 2014");
+        assertLabel(instances.get(0), "Sep 2014");
+        assertLabel(instances.get(1), "Oct 2014");
+        assertLabel(instances.get(2), "Nov 2014");
+        assertLabel(instances.get(3), "Dec 2014");
 
         print(instances);
     }
@@ -76,9 +76,9 @@ public class InstanceGeneratorTest {
         List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 3);
 
         Assert.assertEquals(instances.size(), 3);
-        assertLabel(instances.get(0), "2014");
+        assertLabel(instances.get(0), "2012");
         assertLabel(instances.get(1), "2013");
-        assertLabel(instances.get(2), "2012");
+        assertLabel(instances.get(2), "2014");
 
         print(instances);
     }

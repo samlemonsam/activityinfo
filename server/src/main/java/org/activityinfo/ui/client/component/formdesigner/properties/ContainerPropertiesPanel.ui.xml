@@ -12,19 +12,19 @@
 
     <!-- Label -->
     <f:FormGroup ui:field="labelGroup" label="{i18n.label}" columnLabelWidth="4"
-                 validationStateType="ERROR" validationMessage="{i18n.invalidLabel}">
+                 validationStateType="ERROR" validationMessage="{i18n.invalidLabel}" visible="false">
       <a:TextBox ui:field="label" width="100%"/>
     </f:FormGroup>
 
     <!-- Subform kind -->
     <g:HTMLPanel ui:field="subformGroup">
-      <f:FormGroup ui:field="subformKindGroup" label="{i18n.type}" columnLabelWidth="4" visible="false">
+      <f:FormGroup ui:field="subformKindGroup" label="{i18n.type}" columnLabelWidth="4">
         <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformKind"/>
       </f:FormGroup>
 
       <!-- Subform tab count -->
-      <f:FormGroup ui:field="subformTabCountGroup" label="{i18n.tabCount}" columnLabelWidth="4" visible="false">
-        <g:DoubleBox addStyleNames="form-control" ui:field="subformTabCount"/>
+      <f:FormGroup ui:field="subformTabCountGroup" label="{i18n.tabCount}" columnLabelWidth="4">
+        <a:DoubleBox ui:field="subformTabCount"/>
       </f:FormGroup>
     </g:HTMLPanel>
   </g:HTMLPanel>
