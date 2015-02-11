@@ -23,6 +23,7 @@ package org.activityinfo.model.type.subform;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.number.Quantity;
@@ -81,6 +82,10 @@ public class SubFormType implements ParametrizedFieldType {
 
     public ReferenceType getClassReference() {
         return classReference;
+    }
+
+    public ResourceId getClassId() {
+        return classReference != null && !classReference.getRange().isEmpty() ? classReference.getRange().iterator().next() : null;
     }
 
     public SubFormType setClassReference(ReferenceType classReference) {

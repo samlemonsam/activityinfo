@@ -22,14 +22,10 @@ package org.activityinfo.server.database.hibernate.entity;
  * #L%
  */
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.model.Published;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Blob;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +43,7 @@ import java.util.Set;
  */
 @Entity @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
 @NamedQuery(name = "queryMaxSortOrder", query = "select max(e.sortOrder) from Activity e where e.database.id = ?1")
-public class Activity implements Serializable, Deleteable, Orderable {
+public class Activity implements Serializable, Deleteable, Orderable, HasFormClassJson {
 
     private int id;
     private LocationType locationType;

@@ -35,6 +35,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
+
 public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
     private static final int MIN_GZIP_BYTES = 1024 * 5;
@@ -52,23 +54,45 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
     @Override
     public CommandResult execute(UpdateFormClass cmd, User user) throws CommandException {
+        char domain = ResourceId.valueOf(cmd.getFormClassId()).getDomain();
+        FormClass formClass = validateFormClass(cmd.getJson());
 
+        if (domain == ACTIVITY_DOMAIN) {
+            updateActivityFormClass(cmd, user, formClass);
+        } else {
+
+            org.activityinfo.server.database.hibernate.entity.FormClass hibernateFormClass = new org.activityinfo.server.database.hibernate.entity.FormClass();
+
+            hibernateFormClass.setId(formClass.getId().asString());
+            hibernateFormClass.setOwnerId(formClass.getOwnerId().asString());
+            updateWithJson(hibernateFormClass, cmd.getJson());
+
+            entityManager.get().persist(hibernateFormClass);
+        }
+
+        return new VoidResult();
+    }
+
+    private void updateWithJson(HasFormClassJson hasFormClassJson, String json) {
+
+        if(json.length() > MIN_GZIP_BYTES) {
+            hasFormClassJson.setGzFormClass(compressJson(json));
+            hasFormClassJson.setFormClass(null);
+        } else {
+            hasFormClassJson.setFormClass(json);
+            hasFormClassJson.setGzFormClass(null);
+        }
+
+    }
+
+    private void updateActivityFormClass(UpdateFormClass cmd, User user, FormClass formClass) {
         int activityId = CuidAdapter.getLegacyIdFromCuid(cmd.getFormClassId());
         Activity activity = entityManager.get().find(Activity.class, activityId);
 
         permissionOracle.assertDesignPrivileges(activity.getDatabase(), user);
 
-        FormClass formClass = validateFormClass(cmd.getJson());
-
         // Update the activity table with the JSON value
-        String json = cmd.getJson();
-        if(json.length() > MIN_GZIP_BYTES) {
-            activity.setGzFormClass(compressJson(json));
-            activity.setFormClass(null);
-        } else {
-            activity.setFormClass(json);
-            activity.setGzFormClass(null);
-        }
+        updateWithJson(activity, cmd.getJson());
 
         // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
 //        activity.setClassicView(false);
@@ -78,8 +102,6 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         } else {
             entityManager.get().persist(activity);
         }
-
-        return new VoidResult();
     }
 
     private byte[] compressJson(String json) {
@@ -101,8 +123,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private FormClass validateFormClass(String json) {
         try {
             Resource resource = Resources.fromJson(json);
-            FormClass formClass = FormClass.fromResource(resource);
-            return formClass;
+            return FormClass.fromResource(resource);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormClass json: " + e.getMessage(), e);
             throw new CommandException();

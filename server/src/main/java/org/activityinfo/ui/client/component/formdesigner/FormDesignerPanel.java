@@ -41,6 +41,7 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -240,7 +241,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         return fieldIds;
     }
 
-    private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, int depth, List<Promise<Void>> promises) {
+    private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, final int depth, final List<Promise<Void>> promises) {
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 FormSection formSection = (FormSection) element;
@@ -248,15 +249,32 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 buildWidgetContainers(formDesigner, formSection, depth + 1, promises);
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
-                Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getRootFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
-                    @Nullable
-                    @Override
-                    public Void apply(@Nullable FormFieldWidget input) {
-                        containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField, container.getId()));
-                        return null;
-                    }
-                });
-                promises.add(promise);
+                if (formField.getType() instanceof SubFormType) { // subform
+                    SubFormType subform = (SubFormType) formField.getType();
+
+                    Promise<Void> promise = formDesigner.getResourceLocator().getFormClass(subform.getClassId()).then(new Function<FormClass, Void>() {
+                        @Nullable
+                        @Override
+                        public Void apply(@Nullable FormClass subform) {
+                            FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
+                            containerMap.put(formField.getId(), FieldsHolderWidgetContainer.subform(formDesigner, subform, container.getId()));
+                            buildWidgetContainers(formDesigner, subForm, depth + 1, promises);
+                            return null;
+                        }
+                    });
+                    promises.add(promise);
+
+                } else { // regular formfield
+                    Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getRootFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+                        @Nullable
+                        @Override
+                        public Void apply(@Nullable FormFieldWidget input) {
+                            containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField, container.getId()));
+                            return null;
+                        }
+                    });
+                    promises.add(promise);
+                }
             }
         }
     }

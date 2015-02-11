@@ -11,12 +11,15 @@ import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.AiLatLng;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -38,6 +41,7 @@ import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNam
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
@@ -270,6 +274,28 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         List<FormInstance> levels = assertResolves(adapter.queryInstances(isChildOf(rdc.getId())));
         System.out.println(levels);
+
+    }
+
+    @Test
+    public void persistFormClass() {
+        FormClass formClass = new FormClass(ResourceId.generateId());
+        formClass.setOwnerId(ResourceId.generateId());
+        FormField formField = formClass.addField(ResourceId.generateId());
+        formField.setLabel("label1");
+        formField.setType(TextType.INSTANCE);
+
+        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
+
+        assertResolves(locator.persist(formClass));
+
+        FormClass resolvedFormClass = assertResolves(locator.getFormClass(formClass.getId()));
+        assertEquals(resolvedFormClass.getId(), formClass.getId());
+        assertEquals(resolvedFormClass.getOwnerId(), formClass.getOwnerId());
+
+        FormField resolvedField = resolvedFormClass.getField(formField.getId());
+        assertNotNull(resolvedField);
+        assertEquals(resolvedField.getLabel(), formField.getLabel());
 
     }
 

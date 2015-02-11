@@ -1,6 +1,7 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.NotFoundException;
 import org.activityinfo.core.shared.application.ApplicationClassProvider;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -16,6 +17,7 @@ import org.activityinfo.promise.Promise;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 
 public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
+
     private final Dispatcher dispatcher;
     private final ApplicationClassProvider systemClassProvider = new ApplicationClassProvider();
 
@@ -24,7 +26,7 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
     }
 
     @Override
-    public Promise<FormClass> apply(ResourceId classId) {
+    public Promise<FormClass> apply(final ResourceId classId) {
         switch (classId.getDomain()) {
             case ACTIVITY_DOMAIN:
                 return dispatcher.execute(new GetFormClass(classId)).then(new Function<FormClassResult, FormClass>() {
@@ -62,7 +64,19 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
 
 
             default:
-                return Promise.rejected(new NotFoundException(classId));
+                final Promise<FormClass> promise = new Promise<>();
+                dispatcher.execute(new GetFormClass(classId)).then(new AsyncCallback<FormClassResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        promise.onFailure(new NotFoundException(classId));
+                    }
+
+                    @Override
+                    public void onSuccess(FormClassResult result) {
+                        promise.onSuccess(result.getFormClass());
+                    }
+                });
+                return promise;
         }
     }
 
