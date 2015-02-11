@@ -33,7 +33,7 @@ public class DatabaseSetupSteps {
     
     @After
     public final void cleanUp() throws Exception {
-       // driver.cleanup();
+        driver.cleanup();
     }
     
     @Given("I have created a database \"(.*)\"")
