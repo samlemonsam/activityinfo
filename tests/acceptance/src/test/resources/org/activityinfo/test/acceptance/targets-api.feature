@@ -18,10 +18,8 @@ Feature: Indicator Targets API
         databaseId: $PAKA
         target:
           name: Pakistan
-          partner:
-            id: ${UNHCR PESHAWAR}
-          project:
-            id: ${Direct - HCR Peshawar}
+          partnerId: ${UNHCR PESHAWAR}
+          projectId: ${Direct - HCR Peshawar}
           startDate: 2014-01-01
           endDate: 2014-12-31
       """
@@ -49,12 +47,14 @@ Feature: Indicator Targets API
       """
       - id: $Pakistan
         name: Pakistan
+        startDate: 2014-01-01
+        endDate: 2014-12-31
         partner:
           id: ${UNHCR PESHAWAR}
-          name: UNHCR PESHAWAR
+          name: ~UNHCR PESHAWAR
         project:
           id: ${Direct - HCR Peshawar}
-          name: Direct - HCR Peshawar
+          name: ~Direct - HCR Peshawar
         targetValues:
           - indicatorId: ${Advocacy conducted USD}
             value: 11996

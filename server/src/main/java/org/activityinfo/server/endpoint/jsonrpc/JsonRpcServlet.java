@@ -1,9 +1,11 @@
 package org.activityinfo.server.endpoint.jsonrpc;
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.RpcMap;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sun.jersey.server.impl.container.servlet.Include;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -11,6 +13,7 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import javax.servlet.ServletException;
@@ -36,12 +39,19 @@ public class JsonRpcServlet extends HttpServlet {
         SimpleModule module = new SimpleModule("Command", new Version(1, 0, 0, null));
         module.addDeserializer(Command.class, new CommandDeserializer());
         module.addDeserializer(RpcMap.class, new RpcMapDeserializer());
+        module.addSerializer(LocalDate.class, new LocalDateSerializer());
+        module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(module);
 
         // to ensure that VoidResult is handled without error
         objectMapper.disable(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS);
+        
+        // Don't write out 'null' properties
+        objectMapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+
     }
 
     @Override

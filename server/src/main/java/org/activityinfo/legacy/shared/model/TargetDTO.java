@@ -22,11 +22,10 @@ package org.activityinfo.legacy.shared.model;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.codehaus.jackson.annotate.JsonProperty;
+import org.activityinfo.server.database.hibernate.entity.Project;
+import org.codehaus.jackson.annotate.*;
 
 import java.util.Collection;
 import java.util.Date;
@@ -95,16 +94,28 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         this.userDatabase = database;
     }
 
-    @JsonProperty
     public UserDatabaseDTO getUserDatabase() {
         return userDatabase;
     }
+
 
     @JsonProperty
     public ProjectDTO getProject() {
         return get("project");
     }
-
+    
+    
+    @JsonSetter
+    public void setProjectId(Integer id) {
+        if(id == null) {
+            setProject(null);
+        } else {
+            ProjectDTO project = new ProjectDTO();
+            project.setId(id);
+            setProject(project);
+        }
+    }
+    
     public void setProject(ProjectDTO value) {
         set("project", value);
     }
@@ -113,7 +124,18 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     public PartnerDTO getPartner() {
         return get("partner");
     }
-
+        
+    @JsonSetter
+    public void setPartnerId(Integer id) {
+        if(id == null) {
+            setPartner(null);
+        } else {
+            PartnerDTO partner = new PartnerDTO();
+            partner.setId(id);
+            setPartner(partner);
+        }
+    }
+    
     public void setPartner(PartnerDTO value) {
         set("partner", value);
     }
@@ -129,28 +151,35 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     public void setDate1(Date date1) {
         set("date1", date1);
     }
-
-    @JsonProperty("startDate")
-    public Date getDate1() {
-        return deserializeDate("date1");
+    
+    @JsonProperty
+    public LocalDate getStartDate() {
+        return new LocalDate(getDate1());
     }
-
-    private Date deserializeDate(String property) {
-        Object date = get(property);
-        // ai-936: json rpc servlet jackson objectmapper deserialize it to long instead of date, missed provider?
-        if (date instanceof Long) {
-            return new Date((Long) date);
-        }
-        return (Date) date;
+    
+    public void setStartDate(LocalDate date) {
+        setDate1(date.atMidnightInMyTimezone());
+    }
+    
+    @JsonProperty
+    public LocalDate getEndDate() {
+        return new LocalDate(getDate2());
+    }
+    
+    public void setEndDate(LocalDate date) {
+        setDate2(date.atMidnightInMyTimezone());
+    }
+    
+    public Date getDate1() {
+        return get("date1");
     }
 
     public void setDate2(Date date2) {
         set("date2", date2);
     }
 
-    @JsonProperty("endDate")
     public Date getDate2() {
-        return deserializeDate("date2");
+        return get("date2");
     }
 
     public void setArea(String area) {

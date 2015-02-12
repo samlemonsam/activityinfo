@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Wrapper around a ClientResponse to simplify accessing the entity multiple times.
@@ -31,6 +32,10 @@ public class ApiResponse {
     public JsonNode getJson() throws IOException {
         if(responseEntity == null) {
             responseEntity = response.getEntity(String.class);
+        }
+        if(!isSuccess()) {
+            throw new AssertionError(String.format("Request failed with status code %d:\n%s", response.getStatus(),
+                    responseEntity));
         }
         return objectMapper.readTree(responseEntity);
     }

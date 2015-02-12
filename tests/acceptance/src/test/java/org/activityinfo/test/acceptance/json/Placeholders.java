@@ -20,7 +20,8 @@ import java.util.Map;
 
 public class Placeholders {
 
-    public static final String PLACEHOLDER_PREFIX = "$";
+    public static final String ID_PREFIX = "$";
+    public static final java.lang.String ALIAS_PREFIX = "~";
 
     private final AliasTable aliasTable;
     private final JsonNodeFactory factory;
@@ -78,8 +79,13 @@ public class Placeholders {
     }
 
     private JsonNode resolveText(TextNode node) {
-        if(isPlaceholder(node.getTextValue())) {
-            return factory.numberNode(resolveId(node.getTextValue()));    
+        String text = node.getTextValue();
+        if(isPlaceholder(text)) {
+            if(text.startsWith(ID_PREFIX)) {
+                return factory.numberNode(resolveId(text));
+            } else {
+                return factory.textNode(aliasTable.getName(text));
+            }
         } else {
             return node;
         }
@@ -94,7 +100,7 @@ public class Placeholders {
     }
 
     public boolean isPlaceholder(String textValue) {
-        return textValue.startsWith(PLACEHOLDER_PREFIX);
+        return textValue.startsWith(ID_PREFIX) || textValue.startsWith(ALIAS_PREFIX);
     }
 
     public String parseName(String placeholder) {
@@ -109,5 +115,10 @@ public class Placeholders {
 
     public void bind(String alias, int id) {
         aliasTable.bindId(alias, id);
+    }
+
+    public String resolveName(JsonNode expected) {
+        String alias = parseName(expected.asText());
+        return aliasTable.getName(alias);
     }
 }
