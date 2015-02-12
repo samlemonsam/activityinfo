@@ -16,14 +16,14 @@ Feature: Indicator Targets API
       type: AddTarget
       command:
         databaseId: $PAKA
-        targetDTO:
+        target:
           name: Pakistan
           partner:
             id: ${UNHCR PESHAWAR}
           project:
             id: ${Direct - HCR Peshawar}
-          date1: 2014-01-01
-          date2: 2014-12-31
+          startDate: 2014-01-01
+          endDate: 2014-12-31
       """
     Then the response should be:
       """

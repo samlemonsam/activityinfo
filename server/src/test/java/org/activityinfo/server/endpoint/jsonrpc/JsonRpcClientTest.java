@@ -98,7 +98,7 @@ public class JsonRpcClientTest {
 
             AddTarget addTarget = new AddTarget();
             addTarget.setDatabaseId(1);
-            addTarget.setTargetDTO(targetDTO);
+            addTarget.setTarget(targetDTO);
 
             String response = testClient().execute(addTarget);
             System.out.println(response);

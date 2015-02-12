@@ -45,7 +45,7 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
     @Override
     public CommandResult execute(AddTarget cmd, User user) throws CommandException {
 
-        TargetDTO form = cmd.getTargetDTO();
+        TargetDTO form = cmd.getTarget();
         UserDatabase db = em.find(UserDatabase.class, cmd.getDatabaseId());
 
         Partner partner = null;

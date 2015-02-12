@@ -23,13 +23,17 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@JsonAutoDetect(JsonMethod.NONE)
 public class TargetDTO extends BaseModelData implements EntityDTO {
 
     private UserDatabaseDTO userDatabase;
@@ -49,6 +53,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
 
     @Override
+    @JsonProperty
     public int getId() {
         return get("id", 0);
     }
@@ -57,19 +62,18 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         set("id", id);
     }
 
-    @JsonIgnore
     @Override
     public Map<String, Object> getProperties() {
         return super.getProperties();
     }
 
-    @JsonIgnore
     @Override
     public Collection<String> getPropertyNames() {
         return super.getPropertyNames();
     }
 
     @Override
+    @JsonProperty
     public String getName() {
         return (String) get("name");
     }
@@ -82,6 +86,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         set("description", description);
     }
 
+    @JsonProperty
     public String getDescription() {
         return (String) get("description");
     }
@@ -90,10 +95,12 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         this.userDatabase = database;
     }
 
+    @JsonProperty
     public UserDatabaseDTO getUserDatabase() {
         return userDatabase;
     }
 
+    @JsonProperty
     public ProjectDTO getProject() {
         return get("project");
     }
@@ -102,6 +109,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         set("project", value);
     }
 
+    @JsonProperty
     public PartnerDTO getPartner() {
         return get("partner");
     }
@@ -122,6 +130,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         set("date1", date1);
     }
 
+    @JsonProperty("startDate")
     public Date getDate1() {
         return deserializeDate("date1");
     }
@@ -139,6 +148,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         set("date2", date2);
     }
 
+    @JsonProperty("endDate")
     public Date getDate2() {
         return deserializeDate("date2");
     }
@@ -151,6 +161,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         return get("area");
     }
 
+    @JsonProperty
     public List<TargetValueDTO> getTargetValues() {
         return targetValues;
     }
@@ -164,7 +175,6 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         return getName();
     }
 
-    @JsonIgnore
     @Override
     public String getEntityName() {
         return entityName;

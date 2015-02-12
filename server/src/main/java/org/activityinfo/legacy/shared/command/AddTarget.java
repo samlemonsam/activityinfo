@@ -28,19 +28,18 @@ import org.activityinfo.legacy.shared.model.TargetDTO;
 /*
  * The user wants to add a Target to a UserDatabase
  */
-
 public class AddTarget implements MutatingCommand<CreateResult> {
     private int databaseId;
-    private TargetDTO targetDTO;
+    private TargetDTO target;
 
     public AddTarget() {
         super();
     }
 
-    public AddTarget(int databaseId, TargetDTO targetDTO) {
+    public AddTarget(int databaseId, TargetDTO target) {
         super();
         this.databaseId = databaseId;
-        this.targetDTO = targetDTO;
+        this.target = target;
     }
 
     public int getDatabaseId() {
@@ -51,11 +50,11 @@ public class AddTarget implements MutatingCommand<CreateResult> {
         this.databaseId = databaseId;
     }
 
-    public TargetDTO getTargetDTO() {
-        return targetDTO;
+    public TargetDTO getTarget() {
+        return target;
     }
 
-    public void setTargetDTO(TargetDTO targetDTO) {
-        this.targetDTO = targetDTO;
+    public void setTarget(TargetDTO target) {
+        this.target = target;
     }
 }
