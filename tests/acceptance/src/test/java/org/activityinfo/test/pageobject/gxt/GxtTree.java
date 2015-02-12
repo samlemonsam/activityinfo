@@ -2,6 +2,7 @@ package org.activityinfo.test.pageobject.gxt;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -14,6 +15,7 @@ import org.openqa.selenium.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
@@ -192,21 +194,22 @@ public class GxtTree {
         }
 
         public void ensureExpanded() {
-            if(!isExpanded()) {
+
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            while(stopwatch.elapsed(TimeUnit.SECONDS) < 90) {
+                if(isExpanded() || isLeaf()) {
+                    break;
+                }
                 expand();
-            }
-            // Sometimes have to wait for event handler to be attached
-            if(!isExpanded()) {
-                sleep(1000);
-                expand();
-            }
-            
-            if(!isExpanded()) {
-                sleep(1000);
-                expand();
-            }
-            if(!isExpanded()) {
-                waitUntilExpanded();
+
+                int checksRemaining = 5;
+                while(checksRemaining > 0) {
+                    sleep(250);
+                    if(isExpanded() || isLeaf()) {
+                        break;
+                    }
+                    checksRemaining --;
+                }
             }
         }
 
