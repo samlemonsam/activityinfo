@@ -153,20 +153,20 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
     
     @JsonProperty
-    public LocalDate getStartDate() {
+    public LocalDate getFromDate() {
         return new LocalDate(getDate1());
     }
     
-    public void setStartDate(LocalDate date) {
+    public void setFromDate(LocalDate date) {
         setDate1(date.atMidnightInMyTimezone());
     }
     
     @JsonProperty
-    public LocalDate getEndDate() {
+    public LocalDate getToDate() {
         return new LocalDate(getDate2());
     }
     
-    public void setEndDate(LocalDate date) {
+    public void setToDate(LocalDate date) {
         setDate2(date.atMidnightInMyTimezone());
     }
     

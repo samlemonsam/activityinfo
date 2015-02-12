@@ -20,8 +20,8 @@ Feature: Indicator Targets API
           name: Pakistan
           partnerId: ${UNHCR PESHAWAR}
           projectId: ${Direct - HCR Peshawar}
-          startDate: 2014-01-01
-          endDate: 2014-12-31
+          fromDate: 2014-01-01
+          toDate: 2014-12-31
       """
     Then the response should be:
       """
@@ -47,8 +47,8 @@ Feature: Indicator Targets API
       """
       - id: $Pakistan
         name: Pakistan
-        startDate: 2014-01-01
-        endDate: 2014-12-31
+        fromDate: 2014-01-01
+        toDate: 2014-12-31
         partner:
           id: ${UNHCR PESHAWAR}
           name: ~UNHCR PESHAWAR
