@@ -32,7 +32,7 @@ public class AliasTable {
         return name;
     }
 
-    public void mapId(String alias, int newId) {
+    public void bindId(String alias, int newId) {
         idMap.put(alias, newId);   
     }
 

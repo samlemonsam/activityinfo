@@ -157,7 +157,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         
         int partnerId = response.getInt("newId");
 
-        aliases.mapId(partnerName, partnerId);
+        aliases.bindId(partnerName, partnerId);
     }
 
 
@@ -180,7 +180,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         
         int projectId = response.getInt("newId");
         
-        aliases.mapId(alias, projectId);
+        aliases.bindId(alias, projectId);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         JSONObject response = executeCommand("CreateEntity", object);
 
         int newId = response.getInt("newId");
-        aliases.mapId(alias, newId);
+        aliases.bindId(alias, newId);
     }
 
     private JSONObject executeCommand(String type, JSONObject command) throws JSONException {
