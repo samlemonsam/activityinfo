@@ -1,5 +1,10 @@
-./target/
+/out
+target
+build
+.gradle
+phantomjsdriver.log
 .metadata/
+build.log
 RemoteSystemsTempFiles/
 .settings
 .project
