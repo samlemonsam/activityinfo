@@ -9,6 +9,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
+import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
 import org.openqa.selenium.*;
 
@@ -31,6 +32,19 @@ public class GxtTree {
         findNode(labels).select();
     }
 
+
+    /**
+     * Finds a specific node, following the given path
+     * @param path the path of nodes from root node, to child, to child, etc.
+     * @return the GxtNode
+     */
+    public GxtNode findNode(String... path) {
+        NavigatingVisitor visitor = new NavigatingVisitor(Arrays.asList(path));
+        accept(visitor);
+        
+        return visitor.get();
+    }
+    
     /**
      * Searches, breadth-first, through the tree for a node with the given label.
      *
@@ -75,16 +89,6 @@ public class GxtTree {
         return selected;
     }
 
-    private GxtNode findNode(String[] labels) {
-        Iterator<String> path = Arrays.asList(labels).iterator();
-
-        GxtNode node = findNode(findRootNodes(), path.next());
-        while(path.hasNext()) {
-            node.ensureExpanded();
-            node = findNode(node.children(), path.next());
-        }
-        return node;
-    }
     
     private Optional<GxtNode> findSelected() {
         Optional<FluentElement> element = container.find().div(withClass("x-ftree2-selected")).parent().div().firstIfPresent();
