@@ -2,6 +2,7 @@ package org.activityinfo.test.driver;
 
 
 import com.google.inject.ImplementedBy;
+import cucumber.api.DataTable;
 import org.activityinfo.test.sut.UserAccount;
 import org.json.JSONException;
 
@@ -40,7 +41,7 @@ public interface ApplicationDriver {
 
     void createProject(Property... properties) throws Exception;
 
-    void pivotTable(String measure, String rowDimension);
+    DataTable pivotTable(String measure, List<String> rowDimensions);
     
     void cleanup() throws Exception;
 }

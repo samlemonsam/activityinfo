@@ -1,11 +1,12 @@
 package org.activityinfo.test.pageobject.web.reports;
 
 import com.google.common.collect.Iterables;
+import cucumber.api.DataTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
-import org.activityinfo.test.pageobject.web.components.GridData;
+import org.activityinfo.test.driver.TableData;
 
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class PivotTableEditor {
         dimensionTree().setChecked(Iterables.concat(rowDimensions, columnDimensions));
     }
     
-    public GridData extractData() {
+    public DataTable extractData() {
 
         try {
             Thread.sleep(2000);
@@ -48,8 +49,6 @@ public class PivotTableEditor {
         }
 
         GxtGrid grid = dataTable();
-        GridData data = grid.extractData();
-        System.out.println(data);
-        return data;
+        return grid.extractData();
     }
 }

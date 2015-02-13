@@ -1,4 +1,4 @@
-package org.activityinfo.test.pageobject.web.components;
+package org.activityinfo.test.driver;
 
 
 import com.google.common.base.Joiner;
@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class GridData {
+public class TableData {
     
     public class Row {
         private List<String> cells;

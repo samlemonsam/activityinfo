@@ -172,7 +172,11 @@ public class GxtTree {
             if(!joint.isPresent()) {
                 return false;
             }
-            return !joint.get().style().hasValue("background");
+            try {
+                return !joint.get().style().hasValue("background");
+            } catch(StaleElementReferenceException e) {
+                return isLeaf();
+            }
         }
         
         private FluentIterable<GxtNode> children() {

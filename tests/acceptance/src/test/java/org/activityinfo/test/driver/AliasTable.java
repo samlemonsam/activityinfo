@@ -3,8 +3,12 @@ package org.activityinfo.test.driver;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import gherkin.formatter.model.DataTableRow;
 
+import java.util.List;
 import java.util.Random;
 
 @ScenarioScoped
@@ -62,5 +66,34 @@ public class AliasTable {
 
     public String getName(String alias) {
         return nameMap.get(alias);
+    }
+
+    /**
+     * Replaces strongly named objects in the given table with their 
+     * test-facing aliases. 
+     * 
+     * <p>For example, if your test has a partner called "NRC", the the
+     * test driver will actually create a partner called something like
+     * "NRC_5e9823d88d563417" to ensure that any existing state does not
+     * interfere with the current test run.
+     * 
+     * <p>This method will replace "NRC_5e9823d88d563417" with "NRC" so that
+     * the output can be presented back to the user.</p>
+     */
+    public DataTable alias(DataTable table) {
+        List<List<String>> rows = Lists.newArrayList();
+        for (DataTableRow row : table.getGherkinRows()) {
+            List<String> cells = Lists.newArrayList();
+            for (String cell : row.getCells()) {
+                if(nameMap.inverse().containsKey(cell)) {
+                    String alias = nameMap.inverse().get(cell);
+                    cells.add(alias);
+                } else {
+                    cells.add(cell.trim());
+                }
+            }
+            rows.add(cells);
+        }
+        return DataTable.create(rows);
     }
 }

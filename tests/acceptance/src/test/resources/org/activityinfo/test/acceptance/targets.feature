@@ -5,28 +5,41 @@ Feature: Indicator Targets
   So I can measure actual results against our plans
   
   Background: 
-    Given I have created a database "EMIS"
-      And I have added partner "UNICEF" to "EMIS"
-      And I have created a form named "School Attendance" in "EMIS"
-      And I have created a quantity field "% enrolled" in "School Attendance"
-      And I have submitted a "School Attendance" form with:
+    Given I have created a database "RRMP"
+      And I have added partner "CRS" to "RRMP"
+      And I have added partner "NRC" to "RRMP"
+      And I have created a form named "NFI Distribution" in "RRMP"
+      And I have created a quantity field "nb. kits" in "NFI Distribution"
+      And I have submitted a "NFI Distribution" form with:
         | field       | value  |
-        | partner     | UNICEF |
-        | % enrolled  | 50%    |
+        | partner     | CRS    |
+        | nb. kits    | 1000   |
+      And I have submitted a "NFI Distribution" form with:
+        | field       | value  |
+        | partner     | NRC    |
+        | nb. kits    | 800    |
     
-  Scenario: 
-    When I create a target named "Goals" for database "EMIS"
-     And I set the targets of "Goals" to:
+  Scenario: Global target
+    When I create a target with values:
       | field       | value |
-      | % enrolled  | 75    |
-    Then aggregating the indicator "% enrolled" by Realized / Targeted should yield:
-      | Realized / Targeted | Value |
-      | Realized            |    50 |
-      | Targeted            |    75 |
-#    
-#    
-#  Scenario: Defining Targets by Partner
-#    When I create a target named "Unicef Goals" for partner UNICEF in database EMIS
-#     And I set the targets of "Unicef Goals" to:
-#       | field       | value |
-#       | % enrolled  | 75    |
+      | nb. kits    | 3000  |
+    Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
+      |                     | Value |
+      | Realized            | 1,800 |
+      | Targeted            | 3,000 |
+  
+  Scenario: Partner target
+    When I create a target for partner NRC with values:
+      | field       | value |
+      | nb. kits    | 1000  |
+    And I create a target for partner CRS with values:
+      | field       | value |
+      | nb. kits    | 1500  |
+    And aggregating the indicator "nb. kits" by Partner and Realized / Targeted should yield:
+      |             | Value |
+      | CRS         |       |
+      |   Realized  | 1,000 |
+      |   Targeted  | 1,500 |
+      | NRC         |       |
+      |   Realized  |   800 |
+      |   Targeted  | 1,000 |

@@ -1,5 +1,6 @@
 package org.activityinfo.test.driver;
 
+import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.pageobject.api.PageBinder;
@@ -13,7 +14,6 @@ import org.joda.time.LocalDate;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -136,15 +136,14 @@ public class UiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
-    public void pivotTable(String measure, String rowDimension) {
+    public DataTable pivotTable(String measure, List<String> rowDimension) {
         PivotTableEditor pivotTable = applicationPage
                 .navigateToReportsTab()
                 .createPivotTable();
         
         pivotTable.selectMeasure(aliasTable.getName(measure));
-        pivotTable.selectDimensions(Arrays.asList(rowDimension), Collections.<String>emptyList());
-        System.out.println(pivotTable);
-        // TODO: verify output
+        pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
+        return pivotTable.extractData();
     }
 
     @Override

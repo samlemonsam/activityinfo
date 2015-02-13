@@ -31,6 +31,8 @@ public class DatabaseSetupSteps {
     
     private String currentDatabase;
     
+    private int targetIndex = 1;
+    
     @After
     public final void cleanUp() throws Exception {
         driver.cleanup();
@@ -118,5 +120,23 @@ public class DatabaseSetupSteps {
     public void I_set_the_targets_of_to(String targetName, List<FieldValue> values) throws Throwable {
         driver.setTargetValues(targetName, values);
     }
-    
+
+    @When("^I create a target with values:$")
+    public void I_create_a_target(List<FieldValue> targetValues) throws Throwable {
+        String targetName = "target" + (targetIndex++);
+        driver.createTarget(
+                property("database", getCurrentDatabase()),
+                property("name", targetName));
+        driver.setTargetValues(targetName, targetValues);
+    }
+
+    @When("^I create a target for partner (.*) with values:$")
+    public void I_create_for_partner(String partnerName, List<FieldValue> targetValues) throws Throwable {
+        String targetName = "target" + (targetIndex++);
+        driver.createTarget(
+                property("database", getCurrentDatabase()),
+                property("partner", partnerName),
+                property("name", targetName));
+        driver.setTargetValues(targetName, targetValues);
+    }
 }

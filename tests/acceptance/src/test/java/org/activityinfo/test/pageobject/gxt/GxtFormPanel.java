@@ -51,10 +51,12 @@ public class GxtFormPanel extends Form {
         FluentElements items = list.findElements(By.className("x-combo-list-item"));
         List<String> itemLabels = Lists.newArrayList();
         for (FluentElement element : items) {
-            if(element.text().equals(itemLabel)) {
+            String text = element.text();
+            itemLabels.add(text);
+            if(text.equals(itemLabel)) {
                 element.click();
+                return;
             }
-            itemLabels.add(element.text());
         }
 
         // Report nice error message
