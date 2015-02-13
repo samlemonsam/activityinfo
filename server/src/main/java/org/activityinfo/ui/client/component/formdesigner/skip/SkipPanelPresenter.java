@@ -43,6 +43,8 @@ public class SkipPanelPresenter {
 
     public SkipPanelPresenter(final FieldWidgetContainer fieldWidgetContainer) {
         this.fieldWidgetContainer = fieldWidgetContainer;
+
+        // todo this will not work with subforms!!!
         this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getRootFormClass());
 
         if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {

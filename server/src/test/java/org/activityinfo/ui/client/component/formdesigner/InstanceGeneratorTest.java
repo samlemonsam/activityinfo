@@ -25,7 +25,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PredefinedPeriods;
-import org.activityinfo.ui.client.component.formdesigner.container.InstanceGenerator;
+import org.activityinfo.ui.client.component.form.subform.InstanceGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 

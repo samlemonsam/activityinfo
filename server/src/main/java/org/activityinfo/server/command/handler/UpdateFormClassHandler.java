@@ -67,10 +67,18 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
             hibernateFormClass.setOwnerId(formClass.getOwnerId().asString());
             updateWithJson(hibernateFormClass, cmd.getJson());
 
-            entityManager.get().persist(hibernateFormClass);
+            if (!exists(hibernateFormClass.getId())) {
+                entityManager.get().persist(hibernateFormClass);
+            } else {
+                entityManager.get().merge(hibernateFormClass);
+            }
         }
 
         return new VoidResult();
+    }
+
+    private boolean exists(String formClassId) {
+        return entityManager.get().find(org.activityinfo.server.database.hibernate.entity.FormClass.class, formClassId) != null;
     }
 
     private void updateWithJson(HasFormClassJson hasFormClassJson, String json) {

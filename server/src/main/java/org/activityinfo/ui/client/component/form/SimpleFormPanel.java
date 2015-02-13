@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.component.form;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -17,10 +18,12 @@ import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
+import org.activityinfo.ui.client.component.form.subform.SubFormTabs;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 
 import javax.annotation.Nullable;
@@ -53,15 +56,9 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
      */
     private FormInstance workingInstance;
 
-    private FormClass formClass;
-    private ResourceLocator locator;
+    private final FormModel model;
+    private final ResourceLocator locator;
     private RelevanceHandler relevanceHandler;
-
-    // validation form class is used to refer to "top-level" form class.
-    // For example "Properties panel" renders current type-formClass but in order to validate expression we need
-    // reference to formClass that is currently editing on FormDesigner.
-    // it can be null.
-    private FormClass validationFormClass = null;
 
     public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory) {
@@ -72,7 +69,12 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
                            FormFieldWidgetFactory widgetFactory, boolean withScroll) {
         FormPanelStyles.INSTANCE.ensureInjected();
 
+        Preconditions.checkNotNull(locator);
+        Preconditions.checkNotNull(containerFactory);
+        Preconditions.checkNotNull(widgetFactory);
+
         this.locator = locator;
+        this.model = new FormModel(locator);
         this.containerFactory = containerFactory;
         this.widgetFactory = widgetFactory;
         this.withScroll = withScroll;
@@ -92,6 +94,10 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
                 showFieldMessage(event);
             }
         });
+    }
+
+    public FormModel getModel() {
+        return model;
     }
 
     private void showFieldMessage(FieldMessageEvent event) {
@@ -114,27 +120,26 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
 
     public Promise<Void> show(final Resource instance) {
         this.instance = instance;
-        return locator.getFormClass(instance.getResourceId("classId")).join(new Function<FormClass, Promise<Void>>() {
-            @Nullable
-            @Override
-            public Promise<Void> apply(@Nullable FormClass formClass) {
-                return buildForm(formClass);
-            }
-        }).join(new Function<Void, Promise<Void>>() {
+        return model.loadFormClassWithDependentSubForms(instance.getResourceId("classId")).then(new Function<Void, Promise<Void>>() {
             @Nullable
             @Override
             public Promise<Void> apply(@Nullable Void input) {
+                return buildForm(model.getRootFormClass());
+            }
+        }).join(new Function<Promise<Void>, Promise<Void>>() {
+            @Nullable
+            @Override
+            public Promise<Void> apply(@Nullable Promise<Void> input) {
                 return setValue(instance);
             }
         });
     }
 
     private Promise<Void> buildForm(final FormClass formClass) {
-        this.formClass = formClass;
         this.relevanceHandler.formClassChanged();
 
         try {
-            return createWidgets().then(new Function<Void, Void>() {
+            return createWidgets(formClass).then(new Function<Void, Void>() {
                 @Nullable
                 @Override
                 public Void apply(@Nullable Void input) {
@@ -148,7 +153,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         }
     }
 
-    private Promise<Void> createWidgets() {
+    private Promise<Void> createWidgets(final FormClass formClass) {
         final String resourceId = instance.getId().asString();
         return Promise.forEach(formClass.getFields(), new Function<FormField, Promise<Void>>() {
             @Override
@@ -156,12 +161,17 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
                 if (!field.isVisible()) {
                     return Promise.resolved(null); // we have join inside forEach, must return promise
                 } else {
+
+                    if (field.getType() instanceof SubFormType) {
+                        return buildForm(model.getSubFormByFormFieldId(field.getId()));
+                    }
+
                     return widgetFactory.createWidget(resourceId, formClass, field, new ValueUpdater<FieldValue>() {
                         @Override
                         public void update(FieldValue value) {
                             onFieldUpdated(field, value);
                         }
-                    }, validationFormClass, eventBus).then(new Function<FormFieldWidget, Void>() {
+                    }, model.getValidationFormClass(), eventBus).then(new Function<FormFieldWidget, Void>() {
                         @Override
                         public Void apply(@Nullable FormFieldWidget widget) {
                             containers.put(field.getId(), containerFactory.createContainer(field, widget, 4));
@@ -209,7 +219,13 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             } else if (element instanceof FormField) {
                 FormField formField = (FormField) element;
                 if (formField.isVisible()) {
-                    panel.add(containers.get(formField.getId()));
+                    if (formField.getType() instanceof SubFormType) {
+                        // todo : subforms handling here
+                        SubFormTabs subFormTabs = new SubFormTabs();
+                        panel.add(subFormTabs.asWidget());
+                    } else {
+                        panel.add(containers.get(formField.getId()));
+                    }
                 }
             }
         }
@@ -266,10 +282,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         return withScroll ? scrollPanel : panel;
     }
 
-    public FormClass getFormClass() {
-        return formClass;
-    }
-
     public FieldContainer getFieldContainer(ResourceId fieldId) {
         return containers.get(fieldId);
     }
@@ -280,14 +292,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
 
     public Map<ResourceId, FieldContainer> getContainers() {
         return containers;
-    }
-
-    public void setValidationFormClass(FormClass validationFormClass) {
-        this.validationFormClass = validationFormClass;
-    }
-
-    public FormClass getValidationFormClass() {
-        return validationFormClass;
     }
 
 }

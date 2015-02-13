@@ -95,7 +95,11 @@ public class SchemaCache implements DispatchListener {
 
         } else if (command instanceof UpdateFormClass) {
             String formClassId = ((UpdateFormClass) command).getFormClassId();
-            activityMap.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
+            try {
+                activityMap.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
+            } catch (NumberFormatException e) {
+                // ignore, we may have generated FormClass -> SubFormClass
+            }
 
         } else if (command instanceof BatchCommand) {
             for (Command element : ((BatchCommand) command).getCommands()) {

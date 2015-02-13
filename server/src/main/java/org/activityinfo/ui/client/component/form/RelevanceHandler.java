@@ -55,14 +55,14 @@ public class RelevanceHandler {
             ExprParser parser = new ExprParser(lexer);
             ExprNode expr = parser.parse();
             FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
-            fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
+            fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getModel().getRootFormClass(), simpleFormPanel.getInstance())));
         }
     }
 
     public void formClassChanged() {
         fieldsWithSkipExpression = Lists.newArrayList();
 
-        for (FormField formField : simpleFormPanel.getFormClass().getFields()) {
+        for (FormField formField : simpleFormPanel.getModel().getAllFormsFields()) {
             if (formField.hasRelevanceConditionExpression()) {
                 fieldsWithSkipExpression.add(formField);
             }

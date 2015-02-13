@@ -67,15 +67,20 @@ public class FormDesignerModel {
         FormField type = formClass.addField(SubformConstants.TYPE_FIELD_ID);
         type.setVisible(false);
         type.setType(new ReferenceType()
-                .setCardinality(Cardinality.SINGLE)
-                .setRange(PredefinedPeriods.MONTHLY.getResourceId())
+                        .setCardinality(Cardinality.SINGLE)
+                        .setRange(PredefinedPeriods.MONTHLY.getResourceId())
         );
 
         FormField tabCount = formClass.addField(SubformConstants.TAB_COUNT_FIELD_ID);
+        tabCount.setVisible(false);
         tabCount.setType(new QuantityType().setUnits(Integer.toString(SubformConstants.DEFAULT_TAB_COUNT)));
 
         registerSubform(formFieldId, formClass);
         return formClass;
+    }
+
+    public List<FormClass> getSubforms() {
+        return Lists.newArrayList(formFieldToSubFormClass.values());
     }
 
     public FormDesignerModel registerSubform(ResourceId formFieldId, FormClass formClass) {
@@ -88,6 +93,10 @@ public class FormDesignerModel {
 
     public FormClass getSubform(ResourceId formFieldId) {
         return formFieldToSubFormClass.get(formFieldId);
+    }
+
+    public FormClass getFormClass(ResourceId formClassId) {
+        return (FormClass) getElementContainer(formClassId);
     }
 
     public FormElementContainer getElementContainer(ResourceId resourceId) {
@@ -136,5 +145,18 @@ public class FormDesignerModel {
     public FormField getSubformOwnerField(FormClass subform) {
         ResourceId ownerFieldId = formFieldToSubFormClass.inverse().get(subform);
         return rootFormClass.getField(ownerFieldId);
+    }
+
+    /**
+     * Returns formfields of root formclass and all subforms.
+     *
+     * @return formfields of root formclass and all subforms
+     */
+    public List<FormField> getAllFormsFields() {
+        List<FormField> formFields = Lists.newArrayList(getRootFormClass().getFields());
+        for (FormClass subForm : getSubforms()) {
+            formFields.addAll(subForm.getFields());
+        }
+        return formFields;
     }
 }

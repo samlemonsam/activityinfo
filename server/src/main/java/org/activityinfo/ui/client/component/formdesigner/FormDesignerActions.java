@@ -21,12 +21,16 @@ package org.activityinfo.ui.client.component.formdesigner;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.promise.Promise;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -52,8 +56,14 @@ public class FormDesignerActions {
         formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saving());
         formDesignerPanel.getSaveButton().setEnabled(false);
 
-        Promise<Void> promise = formDesigner.getResourceLocator().persist(formDesigner.getRootFormClass());
-        promise.then(new AsyncCallback<Void>() {
+        List<Promise<Void>> promises = Lists.newArrayList();
+        for (FormClass subForm : formDesigner.getModel().getSubforms()) {
+            promises.add(formDesigner.getResourceLocator().persist(subForm));
+        }
+
+        promises.add(formDesigner.getResourceLocator().persist(formDesigner.getRootFormClass()));
+        Promise<Void> voidPromise = Promise.waitAll();
+        voidPromise.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 showFailureDelayed(caught);
@@ -67,7 +77,7 @@ public class FormDesignerActions {
                 formDesigner.getSavedGuard().setSaved(true);
             }
         });
-        return promise;
+        return voidPromise;
     }
 
     private void showFailureDelayed(final Throwable caught) {

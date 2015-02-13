@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.formdesigner.container;
+package org.activityinfo.ui.client.component.form.subform;
 /*
  * #%L
  * ActivityInfo Server

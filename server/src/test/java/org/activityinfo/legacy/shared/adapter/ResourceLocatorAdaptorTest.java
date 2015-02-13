@@ -289,6 +289,9 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         assertResolves(locator.persist(formClass));
 
+        formField.setLabel("label2"); // update and persist second time
+        assertResolves(locator.persist(formClass));
+
         FormClass resolvedFormClass = assertResolves(locator.getFormClass(formClass.getId()));
         assertEquals(resolvedFormClass.getId(), formClass.getId());
         assertEquals(resolvedFormClass.getOwnerId(), formClass.getOwnerId());

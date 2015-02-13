@@ -30,6 +30,8 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -55,7 +57,7 @@ public class FieldWidgetContainer implements WidgetContainer {
     private final FieldPanel fieldPanel;
     private final ResourceId parentId;
 
-    public FieldWidgetContainer(final FormDesigner formDesigner, FormFieldWidget formFieldWidget, final FormField formField, ResourceId parentId) {
+    public FieldWidgetContainer(final FormDesigner formDesigner, FormFieldWidget formFieldWidget, final FormField formField, final ResourceId parentId) {
         this.formDesigner = formDesigner;
         this.formFieldWidget = formFieldWidget;
         this.formField = formField;
@@ -63,12 +65,14 @@ public class FieldWidgetContainer implements WidgetContainer {
 
         fieldPanel = new FieldPanel(formDesigner);
         fieldPanel.getWidgetContainer().add(formFieldWidget);
-        fieldPanel.getRemoveButton().addClickHandler(new ClickHandler() {
+        fieldPanel.setOnRemoveConfirmationCallback(new SuccessCallback<Object>() {
             @Override
-            public void onClick(ClickEvent event) {
-                formDesigner.getRootFormClass().remove(formField);
+            public void onSuccess(Object result) {
+                FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
+                formClass.remove(formField);
             }
         });
+
         fieldPanel.setClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

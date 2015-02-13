@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -261,7 +260,7 @@ public class PropertiesPresenter {
         if (formField.getType() instanceof ParametrizedFieldType) {
             ParametrizedFieldType parametrizedType = (ParametrizedFieldType) formField.getType();
             currentDesignWidget.asWidget().setVisible(true);
-            currentDesignWidget.setValidationFormClass(fieldWidgetContainer.getFormDesigner().getRootFormClass());
+            currentDesignWidget.getModel().setValidationFormClass(fieldWidgetContainer.getFormDesigner().getRootFormClass());
             currentDesignWidget.show(Resources.createResource(parametrizedType.getParameters())).then(new AsyncCallback<Void>() {
 
 
@@ -312,7 +311,7 @@ public class PropertiesPresenter {
         } else {
 
             // check whether code is unique
-            List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getRootFormClass().getFields());
+            List<FormField> formFields = fieldWidgetContainer.getFormDesigner().getModel().getAllFormsFields();
             formFields.remove(fieldWidgetContainer.getFormField());
 
             for (FormField formField : formFields) {

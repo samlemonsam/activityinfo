@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:c="urn:import:org.activityinfo.ui.client.component.formdesigner.container"
+             xmlns:c="urn:import:org.activityinfo.ui.client.component.form.subform"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>

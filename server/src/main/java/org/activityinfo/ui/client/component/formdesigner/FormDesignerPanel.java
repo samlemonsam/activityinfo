@@ -37,11 +37,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -118,12 +118,12 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     LIElement propertiesTabLi;
 
     /**
-     * Panel must be created via FormDesigner
+     * Main FormDesigner panel. It must be created via FormDesigner only.
      *
-     * @param resourceLocator resource locator
-     * @param formClass form class
+     * @param formClass    form class
+     * @param formDesigner form designer
      */
-    protected FormDesignerPanel(final ResourceLocator resourceLocator, @Nonnull final FormClass formClass, final FormDesigner formDesigner) {
+    protected FormDesignerPanel(@Nonnull final FormClass formClass, final FormDesigner formDesigner) {
         FormDesignerStyles.INSTANCE.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         propertiesPanel.setVisible(false);
@@ -140,7 +140,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
             public void execute() {
                 savedGuard = formDesigner.getSavedGuard();
                 List<Promise<Void>> promises = Lists.newArrayList();
-                buildWidgetContainers(formDesigner, formClass, 0, promises);
+                buildWidgetContainers(formDesigner, formClass, formClass, 0, promises);
                 Promise.waitAll(promises).then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -216,6 +216,11 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                             FlowPanel parentDropPanel = (FlowPanel) formDesigner.getDropControllerRegistry().getDropController(widgetContainer.getParentId()).getDropTarget();
                             parentDropPanel.add(widget);
                         }
+                        if (formField.getType() instanceof SubFormType) {
+                            ResourceId subFormId = ((SubFormType) formField.getType()).getClassId();
+                            FormClass subForm = (FormClass) formDesigner.getModel().getElementContainer(subFormId);
+                            fillPanel(subForm, formDesigner);
+                        }
                     }
                 } else if (element instanceof FormSection) {
                     FormSection section = (FormSection) element;
@@ -238,15 +243,17 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.COMMENT_FIELD));
         fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PARTNER_FIELD));
         fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PROJECT_FIELD));
+        fieldIds.add(SubformConstants.TYPE_FIELD_ID);
+        fieldIds.add(SubformConstants.TAB_COUNT_FIELD_ID);
         return fieldIds;
     }
 
-    private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, final int depth, final List<Promise<Void>> promises) {
+    private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, final FormClass owner, final int depth, final List<Promise<Void>> promises) {
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 FormSection formSection = (FormSection) element;
                 containerMap.put(formSection.getId(), FieldsHolderWidgetContainer.section(formDesigner, formSection, container.getId()));
-                buildWidgetContainers(formDesigner, formSection, depth + 1, promises);
+                buildWidgetContainers(formDesigner, formSection, owner, depth + 1, promises);
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
                 if (formField.getType() instanceof SubFormType) { // subform
@@ -256,16 +263,16 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                         @Nullable
                         @Override
                         public Void apply(@Nullable FormClass subform) {
-                            FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
+                            formDesigner.getModel().registerSubform(formField.getId(), subform);
                             containerMap.put(formField.getId(), FieldsHolderWidgetContainer.subform(formDesigner, subform, container.getId()));
-                            buildWidgetContainers(formDesigner, subForm, depth + 1, promises);
+                            buildWidgetContainers(formDesigner, subform, subform, depth + 1, promises);
                             return null;
                         }
                     });
                     promises.add(promise);
 
                 } else { // regular formfield
-                    Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getRootFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+                    Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(owner, formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
                         @Nullable
                         @Override
                         public Void apply(@Nullable FormFieldWidget input) {

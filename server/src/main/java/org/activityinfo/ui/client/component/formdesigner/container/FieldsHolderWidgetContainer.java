@@ -29,6 +29,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormInstance;
@@ -41,6 +42,8 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
+import org.activityinfo.ui.client.component.form.subform.InstanceGenerator;
+import org.activityinfo.ui.client.component.form.subform.SubFormTabsPresenter;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerExtended;
@@ -94,15 +97,16 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         syncWithModel();
     }
 
-    public static FieldsHolderWidgetContainer section(final FormDesigner formDesigner, final FormSection formSection, ResourceId parentId) {
+    public static FieldsHolderWidgetContainer section(final FormDesigner formDesigner, final FormSection formSection, final ResourceId parentId) {
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formSection, parentId);
-        container.getPanel().getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
+        container.getPanel().getPanel().setOnRemoveConfirmationCallback(new SuccessCallback<Object>() {
             @Override
-            public void onClick(ClickEvent event) {
-                formDesigner.getRootFormClass().remove(formSection);
+            public void onSuccess(Object result) {
+                formDesigner.getModel().getFormClass(parentId).remove(formSection);
                 formDesigner.getDropControllerRegistry().unregister(formSection.getId());
             }
         });
+
         return container;
     }
 
@@ -110,13 +114,14 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formClass, parentId);
         container.isSubform = true;
         container.getPanel().getPanel().getSubformTabs().setVisible(true);
-        container.getPanel().getPanel().getRemoveButton().addClickHandler(new ClickHandler() {
+        container.getPanel().getPanel().setOnRemoveConfirmationCallback(new SuccessCallback<Object>() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void onSuccess(Object result) {
                 formDesigner.getModel().removeSubform(formClass);
                 formDesigner.getDropControllerRegistry().unregister(formClass.getId());
             }
         });
+
         container.syncWithModel(); // force ui update
         return container;
     }

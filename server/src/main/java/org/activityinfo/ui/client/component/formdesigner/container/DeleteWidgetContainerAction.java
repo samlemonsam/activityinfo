@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.component.formdesigner.container;
 
 import com.google.gwt.user.client.ui.FocusPanel;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.style.ElementStyle;
@@ -37,6 +38,7 @@ public class DeleteWidgetContainerAction implements ConfirmDialog.Action {
 
     private final FocusPanel focusPanel;
     private final FormDesigner formDesigner;
+    private SuccessCallback<Object> successCallback = null;
 
     public DeleteWidgetContainerAction(FocusPanel focusPanel, FormDesigner formDesigner) {
         this.focusPanel = focusPanel;
@@ -75,7 +77,15 @@ public class DeleteWidgetContainerAction implements ConfirmDialog.Action {
     @Override
     public Promise<Void> execute() {
         focusPanel.removeFromParent();
-        return Promise.resolved(null);
+        Promise<Void> promise = Promise.resolved(null);
+        if (successCallback != null) {
+            promise.then(successCallback);
+        }
+        return promise;
+    }
+
+    public void setSuccessCallback(SuccessCallback<Object> successCallback) {
+        this.successCallback = successCallback;
     }
 
     @Override

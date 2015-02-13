@@ -28,6 +28,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
+import org.activityinfo.ui.client.component.form.subform.SubFormTabs;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
@@ -40,10 +42,12 @@ public class FieldPanel {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
+
     interface OurUiBinder extends UiBinder<Widget, FieldPanel> {
     }
 
     private final FormDesigner formDesigner;
+    private final DeleteWidgetContainerAction action;
     private ClickHandler clickHandler;
 
     @UiField
@@ -76,14 +80,24 @@ public class FieldPanel {
                 FieldPanel.this.onClick();
             }
         });
+        this.action = new DeleteWidgetContainerAction(focusPanel, formDesigner);
     }
 
     @UiHandler("removeButton")
     public void onRemove(ClickEvent clickEvent) {
-        ConfirmDialog.confirm(new DeleteWidgetContainerAction(focusPanel, formDesigner));
+        ConfirmDialog.confirm(action);
     }
 
-    public Button getRemoveButton() {
+    public void setOnRemoveConfirmationCallback(SuccessCallback<Object> onRemoveConfirmationCallback) {
+        action.setSuccessCallback(onRemoveConfirmationCallback);
+    }
+
+    /**
+     * Actual removing must be done only via remove confirmation callback.
+     * @see this.setOnRemoveConfirmationCallback
+     * @return remove button
+     */
+    private Button getRemoveButton() {
         return removeButton;
     }
 

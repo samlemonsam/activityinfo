@@ -99,7 +99,8 @@ public class SkipRowPresenter {
             }
         };
 
-        widgetFactory.createWidget(new FormClass(ResourceId.generateId()), getSelectedFormField(), valueUpdater).then(new AsyncCallback<FormFieldWidget>() {
+        FormField selectedFormField = getSelectedFormField();
+        widgetFactory.createWidget(new FormClass(ResourceId.generateId()), selectedFormField, valueUpdater).then(new AsyncCallback<FormFieldWidget>() {
             @Override
             public void onFailure(Throwable caught) {
                 caught.printStackTrace();
@@ -123,7 +124,7 @@ public class SkipRowPresenter {
     private void initFormFieldBox() {
         view.getFormfield().clear();
 
-        List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getRootFormClass().getFields());
+        List<FormField> formFields = fieldWidgetContainer.getFormDesigner().getModel().getAllFormsFields();
         formFields.remove(fieldWidgetContainer.getFormField()); // remove selected field
 
         for (FormField formField : formFields) {
