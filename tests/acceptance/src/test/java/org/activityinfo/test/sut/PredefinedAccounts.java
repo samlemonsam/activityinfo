@@ -63,6 +63,6 @@ public class PredefinedAccounts implements Accounts {
 
     @Override
     public UserAccount any() {
-        return ensureAccountExists("qa@bedatadriven.com");
+        return ensureAccountExists("auto.qa@bedatadriven.com");
     }
 }
