@@ -22,11 +22,9 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -35,6 +33,7 @@ import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -73,23 +72,23 @@ public class SubFormTabsPresenter {
 
     private int tabCount = SubformConstants.DEFAULT_TAB_COUNT;
 
-    private final Map<String, FormInstance> formInstances = Maps.newHashMap();
-    private final List<HandlerRegistration> clickHandlers = Lists.newArrayList();
+    private final Map<String, FormInstance> instancesMap = Maps.newHashMap();
+    private List<FormInstance> instances = null;
 
     private ClickHandler<ButtonType> moveButtonClickHandler;
     private ClickHandler<FormInstance> instanceTabClickHandler;
 
-    public SubFormTabsPresenter(SubFormTabs view) {
+    public SubFormTabsPresenter(@NotNull SubFormTabs view) {
         this.view = view;
     }
 
     public void set(List<FormInstance> instances) {
-        formInstances.clear();
-        clickHandlers.clear();
+        this.instances = instances;
+        instancesMap.clear();
 
         String safeHtml = perviousButtons();
         for (FormInstance instance : instances) {
-            formInstances.put(instance.getId().asString(), instance);
+            instancesMap.put(instance.getId().asString(), instance);
 
             String escapedLabel = SafeHtmlUtils.fromString(FormInstanceLabeler.getLabel(instance)).asString();
             safeHtml = safeHtml + "<li><a href='javascript:' id='" + instance.getId().asString() + "'>" + escapedLabel + "</a></li>";
@@ -116,7 +115,7 @@ public class SubFormTabsPresenter {
         }
 
         // tabs
-        for (String id : formInstances.keySet()) {
+        for (String id : instancesMap.keySet()) {
             addClickHandlerToElementById(id);
         }
     }
@@ -141,7 +140,7 @@ public class SubFormTabsPresenter {
                 moveButtonClickHandler.onClick(buttonType);
             }
         } else {
-            FormInstance instance = formInstances.get(elementId);
+            FormInstance instance = instancesMap.get(elementId);
             Preconditions.checkNotNull(instance);
             if (instanceTabClickHandler != null) {
                 instanceTabClickHandler.onClick(instance);
@@ -192,5 +191,13 @@ public class SubFormTabsPresenter {
     public void setTabCount(int tabCount) {
         Preconditions.checkState(tabCount >= SubformConstants.MIN_TAB_COUNT && tabCount <= SubformConstants.MAX_TAB_COUNT);
         this.tabCount = tabCount;
+    }
+
+    public SubFormTabs getView() {
+        return view;
+    }
+
+    public List<FormInstance> getInstances() {
+        return instances;
     }
 }

@@ -40,7 +40,7 @@ import java.util.List;
 public class InstanceGeneratorTest {
 
     @Test
-    public void monthlyBack() {
+    public void monthlyFirstBack() {
 
         InstanceGenerator generator = jvmGenerator();
         List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 4);
@@ -52,6 +52,51 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(3), "Dec 2014");
 
         print(instances);
+
+        instances = generator.next(); // Direction.FORWARD
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Oct 2014");
+        assertLabel(instances.get(1), "Nov 2014");
+        assertLabel(instances.get(2), "Dec 2014");
+        assertLabel(instances.get(3), "Jan 2015");
+
+        print(instances);
+
+        instances = generator.previous(); // Direction.BACK
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Sep 2014");
+        assertLabel(instances.get(1), "Oct 2014");
+        assertLabel(instances.get(2), "Nov 2014");
+        assertLabel(instances.get(3), "Dec 2014");
+
+        print(instances);
+
+        instances = generator.fullNext(); // Direction.NEXT full
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Jan 2015");
+        assertLabel(instances.get(1), "Feb 2015");
+        assertLabel(instances.get(2), "Mar 2015");
+        assertLabel(instances.get(3), "Apr 2015");
+
+        print(instances);
+
+        instances = generator.fullPrevious(); // Direction.PREVIOUS full
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Sep 2014");
+        assertLabel(instances.get(1), "Oct 2014");
+        assertLabel(instances.get(2), "Nov 2014");
+        assertLabel(instances.get(3), "Dec 2014");
+
+        print(instances);
+
     }
 
     @Test
@@ -81,6 +126,79 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "2014");
 
         print(instances);
+
+        instances = generator.next(); // Direction.FORWARD
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2013");
+        assertLabel(instances.get(1), "2014");
+        assertLabel(instances.get(2), "2015");
+
+        print(instances);
+
+        instances = generator.next(); // Direction.FORWARD
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2014");
+        assertLabel(instances.get(1), "2015");
+        assertLabel(instances.get(2), "2016");
+
+        print(instances);
+
+        instances = generator.previous(); // Direction.BACK
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2013");
+        assertLabel(instances.get(1), "2014");
+        assertLabel(instances.get(2), "2015");
+
+        print(instances);
+
+        instances = generator.previous(); // Direction.BACK
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2012");
+        assertLabel(instances.get(1), "2013");
+        assertLabel(instances.get(2), "2014");
+
+        print(instances);
+
+        instances = generator.next(); // Direction.NEXT
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2013");
+        assertLabel(instances.get(1), "2014");
+        assertLabel(instances.get(2), "2015");
+
+        print(instances);
+
+        instances = generator.fullNext(); // Direction.FORWARD full
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2016");
+        assertLabel(instances.get(1), "2017");
+        assertLabel(instances.get(2), "2018");
+
+        print(instances);
+
+        instances = generator.fullPrevious(); // Direction.BACK full
+
+        Assert.assertEquals(instances.size(), 3);
+
+        assertLabel(instances.get(0), "2013");
+        assertLabel(instances.get(1), "2014");
+        assertLabel(instances.get(2), "2015");
+
+
+        print(instances);
+
+
     }
 
     @Test

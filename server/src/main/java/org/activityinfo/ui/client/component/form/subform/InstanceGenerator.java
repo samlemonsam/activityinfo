@@ -31,6 +31,7 @@ import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.Collections;
 import java.util.Date;
@@ -43,6 +44,9 @@ public class InstanceGenerator {
 
     private static final int MAXIMUM_SIZE = 100000;
 
+    public static final ResourceId PERIOD_START_DATE_ID = ResourceId.valueOf("_period_start_date");
+    public static final ResourceId PERIOD_END_DATE_ID = ResourceId.valueOf("_period_end_date");
+
     public static enum Direction {
         BACK, FORWARD
     }
@@ -53,6 +57,11 @@ public class InstanceGenerator {
 
     private final ResourceId classId;
     private final Formatter formatter;
+
+    private List<FormInstance> lastGeneratedList;
+    private PeriodValue lastPeriod;
+    private int lastCount = 1;
+    private Direction lastDirection;
 
     public InstanceGenerator(ResourceId classId) {
         this(classId, new Formatter() {
@@ -69,6 +78,10 @@ public class InstanceGenerator {
     }
 
     public List<FormInstance> generate(PeriodValue period, Date startDate, Direction direction, int count) {
+        return generate(period, startDate, direction, count, true);
+    }
+
+    private List<FormInstance> generate(PeriodValue period, Date startDate, Direction direction, int count, boolean saveState) {
         Preconditions.checkNotNull(period);
         Preconditions.checkNotNull(startDate);
         Preconditions.checkNotNull(direction);
@@ -89,18 +102,75 @@ public class InstanceGenerator {
         if (direction == Direction.BACK) {
             Collections.reverse(result);
         }
-
+        if (saveState) {
+            lastGeneratedList = result;
+            lastPeriod = period;
+            lastCount = count;
+            lastDirection = direction;
+        }
         return result;
+    }
+
+    public List<FormInstance> next() {
+        assertState();
+        int size = lastGeneratedList.size();
+        FormInstance lastInstance = lastGeneratedList.get(size - 1);
+        DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
+        Date point = getPointToCalculate(lastDateRange, lastDirection);
+        List<FormInstance> next = generate(lastPeriod, point, Direction.FORWARD, 1, false);
+        lastGeneratedList.remove(0); // remove first
+        lastGeneratedList.add(size - 1, next.get(0)); // add next at the end
+        lastDirection = Direction.FORWARD;
+        return lastGeneratedList;
+    }
+
+    public List<FormInstance> fullNext() {
+        assertState();
+        int size = lastGeneratedList.size();
+        FormInstance lastInstance = lastGeneratedList.get(size - 1);
+        DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
+        return generate(lastPeriod, getPointToCalculate(lastDateRange, lastDirection), Direction.FORWARD, lastCount, true);
+    }
+
+    public List<FormInstance> previous() {
+        assertState();
+        lastDirection = Direction.BACK;
+        int size = lastGeneratedList.size();
+        FormInstance firstInstance = lastGeneratedList.get(0);
+        DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
+        List<FormInstance> previous = generate(lastPeriod, getPointToCalculate(firstDateRange, lastDirection), Direction.BACK, 1, false);
+        lastGeneratedList.remove(size - 1); // remove last
+        lastGeneratedList.add(0, previous.get(0)); // add next at the beginning
+        return lastGeneratedList;
+    }
+
+    public List<FormInstance> fullPrevious() {
+        assertState();
+        FormInstance firstInstance = lastGeneratedList.get(0);
+        DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
+        return generate(lastPeriod, getPointToCalculate(firstDateRange, lastDirection), Direction.BACK, lastCount, true);
+    }
+
+    private void assertState() {
+        Preconditions.checkState(lastGeneratedList != null && !lastGeneratedList.isEmpty(),
+                "There are no generated instances. Please generate instances first");
+        Preconditions.checkNotNull(lastPeriod);
     }
 
     private static Date getPointToCalculate(DateRange range, Direction direction) {
         return direction == Direction.BACK ? range.getStart() : range.getEnd();
     }
 
+    private static DateRange getDateRangeFromInstance(FormInstance instance) {
+        LocalDate startDate = instance.getDate(PERIOD_START_DATE_ID);
+        LocalDate endDate = instance.getDate(PERIOD_END_DATE_ID);
+        return new DateRange(startDate.atMidnightInMyTimezone(), endDate.atMidnightInMyTimezone());
+    }
+
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
         FormInstance instance = new FormInstance(ResourceId.generateId(), classId);
-        instance.set(ResourceId.valueOf("_period_start_date"), range.getStart());
-        instance.set(ResourceId.valueOf("_period_end_date"), range.getEnd());
+        instance.set(PERIOD_START_DATE_ID, range.getStart());
+        instance.set(PERIOD_END_DATE_ID, range.getEnd());
         FormInstanceLabeler.setLabel(instance, format(getPointToCalculate(range, direction), period));
         return instance;
     }

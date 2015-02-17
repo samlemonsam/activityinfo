@@ -21,37 +21,22 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  * #L%
  */
 
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.period.PeriodValue;
-import org.activityinfo.model.type.period.PredefinedPeriods;
-import org.activityinfo.model.type.subform.PeriodSubFormKind;
-import org.activityinfo.model.type.subform.SubFormKindRegistry;
-import org.activityinfo.model.type.subform.SubformConstants;
-import org.activityinfo.ui.client.component.form.subform.InstanceGenerator;
-import org.activityinfo.ui.client.component.form.subform.SubFormTabsPresenter;
+import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerExtended;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
-
-import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -62,7 +47,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     private final FormElementContainer elementContainer;
     private final FieldsHolderPanel panel;
     private final ResourceId parentId;
-    private final SubFormTabsPresenter subFormTabsPresenter;
     private boolean isSubform = false;
     private DropControllerExtended dropController;
 
@@ -79,7 +63,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
                 formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(FieldsHolderWidgetContainer.this));
             }
         });
-        subFormTabsPresenter = new SubFormTabsPresenter(panel.getPanel().getSubformTabs());
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
@@ -145,40 +128,9 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
         if (isSubform) {
             FormClass subForm = (FormClass) elementContainer;
-            ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
-            ResourceId typeClassId = typeClass.getRange().iterator().next();
-            QuantityType tabsCountType = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
-
-            subFormTabsPresenter.setTabCountSafely(tabsCountType.getUnits());
-
-            if (PredefinedPeriods.isPeriodId(typeClassId)) {
-                generateFormInstanceForPeriod(subForm, typeClassId);
-            } else {
-                queryFormInstances(typeClassId);
-            }
+            new SubFormTabsManipulator(formDesigner.getResourceLocator(), panel.getPanel().getSubformTabs())
+                    .show(subForm);
         }
-    }
-
-    private void generateFormInstanceForPeriod(FormClass subForm, ResourceId typeClassId) {
-        PeriodValue period = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
-        subFormTabsPresenter.set(new InstanceGenerator(subForm.getId()).generate(period, new Date(), InstanceGenerator.Direction.BACK, subFormTabsPresenter.getTabCount()));
-        subFormTabsPresenter.setMoveButtonClickHandler(new org.activityinfo.ui.client.widget.ClickHandler<SubFormTabsPresenter.ButtonType>() {
-            @Override
-            public void onClick(SubFormTabsPresenter.ButtonType buttonType) {
-                // todo
-            }
-        });
-    }
-
-    private void queryFormInstances(ResourceId typeClassId) {
-        formDesigner.getResourceLocator().queryInstances(new ClassCriteria(typeClassId)).then(new Function<List<FormInstance>, Object>() {
-            @Nullable
-            @Override
-            public Object apply(List<FormInstance> input) {
-                subFormTabsPresenter.set(input);
-                return null;
-            }
-        });
     }
 
     public Widget asWidget() {
@@ -192,10 +144,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
     public FormDesigner getFormDesigner() {
         return formDesigner;
-    }
-
-    public SubFormTabsPresenter getSubFormTabsPresenter() {
-        return subFormTabsPresenter;
     }
 
     @Override

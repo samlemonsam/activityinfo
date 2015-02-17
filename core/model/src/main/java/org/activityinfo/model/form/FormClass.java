@@ -8,6 +8,8 @@ import org.activityinfo.model.resource.*;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -257,6 +259,29 @@ public class FormClass implements IsResource, FormElementContainer {
         resource.set(LABEL_FIELD_ID, label);
         resource.set("elements", FormElement.asRecordList(elements));
         return resource;
+    }
+
+
+    /**
+     * Normalized FormFields order. Puts built-in formfields at the end of the list.
+     * Not super smart, one day (when we don't need built-in formfields encoded via id) we have to remove this method.
+     * (todo: ask Alex whether it's ok or it's better to put it at the beginning of the list)
+     */
+    public void reorderFormFields() {
+        Collections.sort(elements, new Comparator<FormElement>() {
+            @Override
+            public int compare(FormElement o1, FormElement o2) {
+                boolean isBuitIn1 = o1.getId().asString().startsWith(getId().asString());
+                boolean isBuitIn2 = o2.getId().asString().startsWith(getId().asString());
+                if (isBuitIn1 && !isBuitIn2) {
+                    return -1;
+                } else if (!isBuitIn1 && isBuitIn2) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+
     }
 
 }

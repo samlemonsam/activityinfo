@@ -47,6 +47,7 @@ public class SubFormKindRegistry {
         register(new PeriodSubFormKind(PredefinedPeriods.YEARLY));
         register(new PeriodSubFormKind(PredefinedPeriods.MONTHLY));
 //        register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
+        register(new PeriodSubFormKind(PredefinedPeriods.DAILY));
         register(userDefinedKind());
     }
 

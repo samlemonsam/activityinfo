@@ -25,9 +25,13 @@ import com.google.common.base.Function;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
@@ -42,6 +46,7 @@ import java.util.List;
 public class FormModel {
 
     private final ResourceLocator locator;
+    private final EventBus eventBus = new SimpleEventBus();
     private final BiMap<ResourceId, FormClass> formFieldToSubFormClass = HashBiMap.create();
 
     private FormClass rootFormClass;
@@ -51,6 +56,17 @@ public class FormModel {
     // reference to formClass that is currently editing on FormDesigner.
     // it can be null.
     private FormClass validationFormClass = null;
+
+    /**
+     * The original, unmodified instance
+     */
+    private Resource instance;
+
+    /**
+     * A new version of the instance, being updated by the user
+     */
+    private FormInstance workingInstance;
+
 
     public FormModel(ResourceLocator locator) {
         this.locator = locator;
@@ -97,6 +113,10 @@ public class FormModel {
         return formFields;
     }
 
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
     public FormClass getSubFormByFormFieldId(ResourceId formFieldId) {
         return formFieldToSubFormClass.get(formFieldId);
     }
@@ -119,5 +139,21 @@ public class FormModel {
 
     public void setValidationFormClass(FormClass validationFormClass) {
         this.validationFormClass = validationFormClass;
+    }
+
+    public Resource getInstance() {
+        return instance;
+    }
+
+    public void setInstance(Resource instance) {
+        this.instance = instance;
+    }
+
+    public FormInstance getWorkingInstance() {
+        return workingInstance;
+    }
+
+    public void setWorkingInstance(FormInstance workingInstance) {
+        this.workingInstance = workingInstance;
     }
 }

@@ -58,10 +58,10 @@ public class FormDesignerActions {
 
         List<Promise<Void>> promises = Lists.newArrayList();
         for (FormClass subForm : formDesigner.getModel().getSubforms()) {
-            promises.add(formDesigner.getResourceLocator().persist(subForm));
+            promises.add(persist(subForm));
         }
 
-        promises.add(formDesigner.getResourceLocator().persist(formDesigner.getRootFormClass()));
+        promises.add(persist(formDesigner.getRootFormClass()));
         Promise<Void> voidPromise = Promise.waitAll();
         voidPromise.then(new AsyncCallback<Void>() {
             @Override
@@ -78,6 +78,11 @@ public class FormDesignerActions {
             }
         });
         return voidPromise;
+    }
+
+    private Promise<Void> persist(FormClass formClass) {
+        formClass.reorderFormFields();
+        return formDesigner.getResourceLocator().persist(formClass);
     }
 
     private void showFailureDelayed(final Throwable caught) {
