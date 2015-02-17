@@ -42,6 +42,9 @@ public interface ApplicationDriver {
     void createProject(Property... properties) throws Exception;
 
     DataTable pivotTable(String measure, List<String> rowDimensions);
-    
+
+    void grantPermission(Property... properties) throws Exception;
+
     void cleanup() throws Exception;
+
 }

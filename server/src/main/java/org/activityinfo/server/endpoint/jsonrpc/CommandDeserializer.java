@@ -1,5 +1,6 @@
 package org.activityinfo.server.endpoint.jsonrpc;
 
+import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -7,6 +8,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.deser.std.StdDeserializer;
 import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
@@ -15,6 +17,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,9 +52,24 @@ public class CommandDeserializer extends StdDeserializer<Command> {
         try {
             return (Command) mapper.readValue(command, commandClass);
         } catch(UnrecognizedPropertyException e) {
-            throw new BadRpcRequest("Unexpected property '%s' at %s", e.getUnrecognizedPropertyName(), 
-                    e.getLocation().toString());
+            throw new BadRpcRequest("Unexpected property '%s'", formatPath(e.getPath()));
         }
+    }
+
+    private String formatPath(List<JsonMappingException.Reference> path) {
+        StringBuilder s = new StringBuilder();
+        for (JsonMappingException.Reference reference : path) {
+            if(reference.getFieldName() != null) {
+                if(s.length() > 0) {
+                    s.append(".");
+                }
+                s.append(reference.getFieldName());
+            } else if(reference.getIndex() != -1) {
+                s.append("[").append(reference.getIndex()).append("]");
+            } 
+        }
+        return s.toString();
+        
     }
 
     protected Class<?> lookupCommandClass(String type) {

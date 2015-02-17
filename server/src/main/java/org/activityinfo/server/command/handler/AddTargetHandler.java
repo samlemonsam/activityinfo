@@ -61,7 +61,7 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         } else if (form.getProject() != null) {
             project = em.find(Project.class, form.getProject().getId());
         }
-
+        
         AdminEntity adminEntity = null;
         // if(form.getAdminEntity() != null){
         // adminEntity = em.find(AdminEntity.class,

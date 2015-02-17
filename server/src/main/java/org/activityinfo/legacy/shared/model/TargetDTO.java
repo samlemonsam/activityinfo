@@ -24,8 +24,12 @@ package org.activityinfo.legacy.shared.model;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.server.database.hibernate.entity.Project;
-import org.codehaus.jackson.annotate.*;
+import org.activityinfo.server.endpoint.jsonrpc.Required;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonSetter;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.Collection;
 import java.util.Date;
@@ -72,7 +76,9 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
 
     @Override
+    @Required
     @JsonProperty
+    @Length(max = 255)
     public String getName() {
         return (String) get("name");
     }
@@ -148,36 +154,55 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         set("adminEntity", value);
     }
 
-    public void setDate1(Date date1) {
-        set("date1", date1);
-    }
+
     
+    @Required
     @JsonProperty
+    @SuppressWarnings("deprecation")
     public LocalDate getFromDate() {
-        return new LocalDate(getDate1());
+        if(getDate1() == null) {
+            return null;
+        } else {
+            return new LocalDate(getDate1());
+        }
     }
     
     public void setFromDate(LocalDate date) {
         setDate1(date.atMidnightInMyTimezone());
     }
-    
+
+    @Required
     @JsonProperty
+    @SuppressWarnings("deprecation")
     public LocalDate getToDate() {
-        return new LocalDate(getDate2());
+        if(getDate2() == null) {
+            return null;
+        } else {
+            return new LocalDate(getDate2());
+        }
     }
     
+    @SuppressWarnings("deprecation")
     public void setToDate(LocalDate date) {
         setDate2(date.atMidnightInMyTimezone());
     }
     
+    @Deprecated
     public Date getDate1() {
         return get("date1");
     }
 
+    @Deprecated
+    public void setDate1(Date date1) {
+        set("date1", date1);
+    }
+
+    @Deprecated
     public void setDate2(Date date2) {
         set("date2", date2);
     }
 
+    @Deprecated
     public Date getDate2() {
         return get("date2");
     }

@@ -4,6 +4,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jna.platform.win32.Netapi32Util;
 import cucumber.api.PendingException;
 import cucumber.api.Scenario;
 import cucumber.api.java.Before;
@@ -20,12 +21,10 @@ import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import org.yaml.snakeyaml.nodes.Node;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
+import javax.ws.rs.core.Response;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,8 +32,6 @@ import static org.junit.Assert.assertTrue;
 
 @ScenarioScoped
 public class JsonApiSteps {
-
-    private Client client;
     
     @Inject
     private Accounts accounts;
@@ -47,7 +44,6 @@ public class JsonApiSteps {
     
     private Scenario scenario;
     
-    private WebResource root;
     private ObjectMapper objectMapper;
     private PsuedoJsonParser jsonParser;
 
@@ -55,38 +51,47 @@ public class JsonApiSteps {
     
     @Inject
     private Placeholders placeholders;
-    
-    
+    private UserAccount currentAccount;
+
+
     @Before
     public void setUpClient(Scenario scenario) {
         
         this.scenario = scenario;
         
-        this.client = new Client();
+    
         this.objectMapper = new ObjectMapper();
         this.jsonParser = new PsuedoJsonParser(objectMapper);
-        
-        UserAccount account = accounts.any();
-        client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
 
-        root = client.resource(server.getRootUrl());
+        this.currentAccount = accounts.any();
     }
 
     @When("^I execute the command:$")
     public void I_execute_the_command(String requestBody) throws Throwable {
+        execute(currentAccount, requestBody);
+    }
+
+    @When("([^ ]+) executes the command:$")
+    public void user_executes_the_command(String accountEmail, String requestBody) throws Throwable {
+        UserAccount user = accounts.ensureAccountExists(accountEmail);
         
+        execute(user, requestBody);
+    }
+
+    private void execute(UserAccount account, String requestBody) {
         JsonNode request = placeholders.resolve(jsonParser.parse(requestBody));
-        
+
         System.out.println(request.toString());
-        
-        recordResponse(root.path("/command")
+
+        recordResponse(root(account)
+                .path("/command")
                 .entity(request.toString(), MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class));
     }
 
     @When("^I request (.*)$")
     public void I_request(String path) throws Throwable {
-        WebResource resource = root.path(placeholders.resolvePath(path));
+        WebResource resource = root(currentAccount).path(placeholders.resolvePath(path));
 
         scenario.write(String.format("<code><pre>GET %s</pre></code>", resource.getURI().toString()));
 
@@ -96,9 +101,15 @@ public class JsonApiSteps {
 
     }
     
-    @Then("^the response should have status code (\\d+)$")
-    public void the_response_should_have_status_code(int statusCode) throws Throwable {
+    @Then("^the response should be (\\d+) ([A-Za-z ]+)$")
+    public void the_response_should_have_status_code(int statusCode, String statusCodeName) throws Throwable {
+        assertConsistentStatusArguments(statusCode, statusCodeName);
+
         response.assertStatusCodeIs(statusCode);
+        
+        if(statusCode == Response.Status.NO_CONTENT.getStatusCode()) {
+            response.assertBodyIsEmpty();
+        }
     }
 
     @Then("^the response should be:$")
@@ -112,16 +123,35 @@ public class JsonApiSteps {
         
     }
 
-    @Then("^the response should include:$")
-    public void the_response_should_include(String expectedResponse) throws Throwable {
-        throw new PendingException();
+    @Then("^the response should fail with (\\d+) ([A-Za-z ]+) and mention \"([^\"]*)\"$")
+    public void the_response_should_fail_with_Bad_Request_and_mention(int statusCode,
+                                                                      String statusPhrase, 
+                                                                      String errorMessage) throws Throwable {
+        assertConsistentStatusArguments(statusCode, statusPhrase);
+        
+        response.assertStatusCodeIs(statusCode);
+        response.assertErrorMessageContains(errorMessage);
+
     }
+
+    private WebResource root(UserAccount account) {
+        Client client = new Client();
+        client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
+
+        return client.resource(server.getRootUrl());
+    }
+
 
     private void recordResponse(ClientResponse response) {
         this.response = new ApiResponse(response, objectMapper);
     }
 
-    private String prettyPrint(JsonNode node) throws IOException {
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+    private void assertConsistentStatusArguments(int statusCode, String statusCodeName) {
+        Response.Status status = Response.Status.fromStatusCode(statusCode);
+        if(!status.getReasonPhrase().equalsIgnoreCase(statusCodeName)) {
+            throw new IllegalArgumentException(String.format("Status code/name mismatch. Did you mean %d %s",
+                    statusCode, status.getReasonPhrase()));
+        }
     }
+
 }

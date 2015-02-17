@@ -1,7 +1,9 @@
 package org.activityinfo.test.acceptance;
 
 import com.google.common.base.Preconditions;
+import cucumber.api.PendingException;
 import cucumber.api.java.After;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
@@ -107,6 +109,13 @@ public class DatabaseSetupSteps {
                 property("partner", partnerName),
                 property("name", targetName));
     }
+    
+    @Given("^I have created a target named \"([^\"]*)\" for database \"([^\"]*)\"$")
+    public void I_have_created_a_target_named_for_database(String targetName, String database) throws Throwable {
+        driver.createTarget(
+                property("database", database),
+                property("name", targetName));
+    }
 
     @When("^I create a target named \"([^\"]*)\" for partner \"([^\"]*)\" and project \"([^\"]*)\"$")
     public void I_create_a_target_named_for_partner_and_project(String target, String partner, String project) throws Throwable {
@@ -138,5 +147,14 @@ public class DatabaseSetupSteps {
                 property("partner", partnerName),
                 property("name", targetName));
         driver.setTargetValues(targetName, targetValues);
+    }
+
+    @Given("^I have granted ([^ ]+) permission to (.+) on behalf of (.*)+$")
+    public void I_have_granted_permission(String accountEmail, String permission, String partner) throws Throwable {
+        driver.setup().grantPermission(
+                property("database", getCurrentDatabase()),
+                property("user", accountEmail),
+                property("permissions", permission),
+                property("partner", partner));    
     }
 }

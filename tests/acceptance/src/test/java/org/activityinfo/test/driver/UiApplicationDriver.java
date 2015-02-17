@@ -147,6 +147,11 @@ public class UiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
+    public void grantPermission(Property... properties) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void delete(String objectType, String name) throws Exception {
         throw new PendingException();
     }

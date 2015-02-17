@@ -1,9 +1,11 @@
 package org.activityinfo.test.driver;
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import cucumber.api.DataTable;
 import org.activityinfo.test.sut.*;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
@@ -11,6 +13,7 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 public class ApiApplicationDriver implements ApplicationDriver {
@@ -104,8 +107,8 @@ public class ApiApplicationDriver implements ApplicationDriver {
         properties.put("locationId", 50529); // TODO: dehard code
         properties.put("id", aliases.generateId());
         properties.put("reportingPeriodId", aliases.generateId());
-        properties.put("date1", "2014-01-01");
-        properties.put("date2", "2014-02-01");
+        properties.put("fromDate", "2014-01-01");
+        properties.put("toDate", "2014-02-01");
         
         for(FieldValue value : values) {
             if(value.getField().equals("partner")) {
@@ -153,7 +156,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         command.put("databaseId", databaseId);
         command.put("partner", partner);
 
-        JSONObject response = executeCommand("AddPartner", command);
+        JSONObject response = executeCommand("AddPartner", command).get();
         
         int partnerId = response.getInt("newId");
 
@@ -176,7 +179,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         command.put("databaseId", databaseId);
         command.put("project", project);
         
-        JSONObject response = executeCommand("AddProject", command);
+        JSONObject response = executeCommand("AddProject", command).get();
         
         int projectId = response.getInt("newId");
         
@@ -184,8 +187,50 @@ public class ApiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
-    public void pivotTable(String measure, String rowDimension) {
+    public DataTable pivotTable(String measure, List<String> rowDimension) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void grantPermission(Property... arguments) throws Exception {
+        TestObject properties = new TestObject(arguments);
+        
+        JSONObject model = new JSONObject();
+        model.put("name", "A User");
+        model.put("email", properties.getString("user"));
+        model.put("partnerId", properties.getString("partner"));
+        
+        for(String permission : properties.getStringList("permissions")) {
+            switch (permission) {
+                case "View":
+                    model.put("allowView", true);
+                    break;
+                case "View All":
+                    model.put("allowViewAll", true);
+                    break;
+                case "Edit":
+                    model.put("allowEdit", true);
+                    break;
+                case "Edit All":
+                    model.put("allowEditAll", true);
+                    break;
+                case "Manage Users":
+                    model.put("allowManageUsers", true);
+                    break;
+                case "Manage All Users":
+                    model.put("allowManageAllUsers", true);
+                    break;
+                case "Design":
+                    model.put("allowDesign", true);
+                    break;
+            }
+        }
+        
+        JSONObject command = new JSONObject();
+        command.put("databaseId", aliases.getId(properties.getString("database")));
+        command.put("model", model);
+        
+        executeCommand("UpdateUserPermissions", command);
     }
 
     @Override
@@ -203,14 +248,14 @@ public class ApiApplicationDriver implements ApplicationDriver {
         
         JSONObject target = new JSONObject();
         target.put("name", name);
-        target.put("date1", properties.getDate("date1", new LocalDate(1900,1,1)));
-        target.put("date2", properties.getDate("date2", new LocalDate(2050,1,1)));
+        target.put("fromDate", properties.getDate("fromDate", new LocalDate(1900,1,1)));
+        target.put("toDate", properties.getDate("toDate", new LocalDate(2050,1,1)));
 
         JSONObject addTarget = new JSONObject();
         addTarget.put("databaseId", aliases.getId(properties.getString("database")));
         addTarget.put("target", target);
 
-        JSONObject response = executeCommand("AddTarget", addTarget);
+        JSONObject response = executeCommand("AddTarget", addTarget).get();
         
         int id = response.getInt("newId");
         aliases.mapNameToId(name, id);
@@ -239,13 +284,13 @@ public class ApiApplicationDriver implements ApplicationDriver {
         object.put("entityName", entityType);
         object.put("properties", properties);
 
-        JSONObject response = executeCommand("CreateEntity", object);
+        JSONObject response = executeCommand("CreateEntity", object).get();
 
         int newId = response.getInt("newId");
         aliases.bindId(alias, newId);
     }
 
-    private JSONObject executeCommand(String type, JSONObject command) throws JSONException {
+    private Optional<JSONObject> executeCommand(String type, JSONObject command) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("type", type);
         request.put("command", command);
@@ -255,9 +300,15 @@ public class ApiApplicationDriver implements ApplicationDriver {
         String response = null;
         try {
             response = commandEndpoint().type(MediaType.APPLICATION_JSON_TYPE).post(String.class, json);
+            return Optional.of(new JSONObject(response));
+            
         } catch (UniformInterfaceException e) {
-            throw new RuntimeException("400: " + e.getResponse().getEntity(String.class));
+            if(e.getResponse().getClientResponseStatus() == ClientResponse.Status.NO_CONTENT) {
+                return Optional.absent();
+            } else {
+                throw new RuntimeException(e.getResponse().getStatus() + ": "
+                        + e.getResponse().getEntity(String.class));
+            }
         } 
-        return new JSONObject(response);
     }
 }

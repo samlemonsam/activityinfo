@@ -1,12 +1,16 @@
 package org.activityinfo.test.acceptance.json;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
+import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.client.ClientResponse;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -30,14 +34,18 @@ public class ApiResponse {
     }
     
     public JsonNode getJson() throws IOException {
+        if(!isSuccess()) {
+            throw new AssertionError(String.format("Request failed with status code %d:\n%s", response.getStatus(),
+                    getResponseEntity()));
+        }
+        return objectMapper.readTree(getResponseEntity());
+    }
+
+    private String getResponseEntity() {
         if(responseEntity == null) {
             responseEntity = response.getEntity(String.class);
         }
-        if(!isSuccess()) {
-            throw new AssertionError(String.format("Request failed with status code %d:\n%s", response.getStatus(),
-                    responseEntity));
-        }
-        return objectMapper.readTree(responseEntity);
+        return responseEntity;
     }
 
     public void assertStatusCodeIs(int statusCode) {
@@ -50,5 +58,26 @@ public class ApiResponse {
         }
     }
 
+    public void assertBodyIsEmpty() throws IOException {
+        if(response.hasEntity()) {
+            byte[] bytes;
+            try (InputStream in = response.getEntityInputStream()) {
+                bytes = ByteStreams.toByteArray(in);
+            }
+            if(bytes.length > 0) {
+                String content = new String(bytes, Charsets.UTF_8);
+
+                throw new AssertionError(String.format("Expected empty response, found: [%s]", content));
+            }
+        }
+    }
+
+    public void assertErrorMessageContains(String errorMessage) {
+        String message = getResponseEntity();
+        if(!message.toLowerCase().contains(errorMessage.toLowerCase())) {
+            throw new AssertionError(String.format("Expected an error message containing the phrase '%s' but received:\n%s",
+                    errorMessage, message));
+        }
+    }
 }
 

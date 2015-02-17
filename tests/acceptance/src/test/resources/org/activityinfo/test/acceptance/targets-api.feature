@@ -36,7 +36,7 @@ Feature: Indicator Targets API
         changes:
           value: 11996
       """
-    Then the response should have status code 200
+    Then the response should be 204 No Content
     When I execute the command:
       """
       type: GetTargets
@@ -60,3 +60,42 @@ Feature: Indicator Targets API
             value: 11996
       """
     
+    Scenario: Deleting Targets
+      Given I have created a target named "Goals" for database "PAKA"
+      When I execute the command:
+      """
+        type: Delete
+        command:
+          entityName: Target
+          id: $Goals
+      """
+      Then the response should be 204 No Content
+      
+      
+    Scenario: Invalid command with missing dates
+      When I execute the command:
+      """
+      type: AddTarget
+      command:
+        databaseId: $PAKA
+        target:
+          name: Pakistan
+      """
+      Then the response should fail with 400 Bad Request and mention "date"
+
+      
+    Scenario: Deleting a target requires design privileges
+      Given I have created a target named "Goals" for database "PAKA"
+        And I have granted bob@bedatadriven.com permission to View All on behalf of "UNHCR PESHAWAR"
+       When bob@bedatadriven.com executes the command:
+       """
+      type: AddTarget
+      command:
+        databaseId: $PAKA
+        target:
+          name: Pakistan
+          fromDate: 2014-01-01
+          toDate: 2014-12-31
+      """
+      Then the response should be 403 Forbidden
+      
