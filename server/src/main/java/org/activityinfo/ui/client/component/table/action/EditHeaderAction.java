@@ -32,6 +32,8 @@ import org.activityinfo.ui.client.component.form.FormDialogCallback;
 import org.activityinfo.ui.client.component.table.InstanceTable;
 import org.activityinfo.ui.client.style.Icons;
 
+import java.util.List;
+
 /**
  * @author yuriyz on 4/8/14.
  */
@@ -52,7 +54,7 @@ public class EditHeaderAction implements TableHeaderAction {
         dialog.setDialogTitle(I18N.CONSTANTS.editInstance());
         dialog.show(selectedProjection.getRootInstanceId(), new FormDialogCallback() {
             @Override
-            public void onPersisted(FormInstance instance) {
+            public void onPersisted(List<FormInstance> instance) {
                 table.reload();
             }
         });

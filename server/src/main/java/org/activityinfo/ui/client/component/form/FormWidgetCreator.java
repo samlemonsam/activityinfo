@@ -73,12 +73,12 @@ public class FormWidgetCreator {
     }
 
     public Promise<Void> createWidgets(final FormClass formClass, final FieldUpdated fieldUpdated) {
-        final String resourceId = model.getInstance().getId().asString();
+        final String resourceId = model.getWorkingRootInstance().getId().asString();
         List<Promise<Void>> promises = Lists.newArrayList();
         for (final FormField field : formClass.getFields()) {
             if (field.isVisible()) {
                 if (field.getType() instanceof SubFormType) {
-                    Promise<Void> subFormWidgetsPromise = createWidgets(model.getSubFormByFormFieldId(field.getId()), fieldUpdated);
+                    Promise<Void> subFormWidgetsPromise = createWidgets(model.getSubFormByOwnerFieldId(field.getId()), fieldUpdated);
                     promises.add(subFormWidgetsPromise);
                 } else {
 

@@ -22,16 +22,17 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
@@ -39,15 +40,52 @@ import org.activityinfo.promise.Promise;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 02/13/2015.
  */
 public class FormModel {
 
+    /**
+     * Key for subform value instance.
+     */
+    public static class SubformValueKey {
+
+        private final FormClass subForm;
+        private final FormInstance selectedTab;
+
+        private SubformValueKey(FormClass subForm, FormInstance selectedTab) {
+            this.subForm = subForm;
+            this.selectedTab = selectedTab;
+        }
+
+        public FormClass getSubForm() {
+            return subForm;
+        }
+
+        public FormInstance getSelectedTab() {
+            return selectedTab;
+        }
+    }
+
     private final ResourceLocator locator;
     private final EventBus eventBus = new SimpleEventBus();
-    private final BiMap<ResourceId, FormClass> formFieldToSubFormClass = HashBiMap.create();
+
+    /**
+     * FormField.SubFormType -> sub FormClass referenced in SubFormType
+     */
+    private final Map<ResourceId, FormClass> ownerFormFieldToSubFormClass = HashBiMap.create();
+
+    /**
+     * Keeps formfieldId to owner FormClass
+     */
+    private final Map<ResourceId, FormClass> formFieldToFormClass = Maps.newHashMap();
+
+    /**
+     * Keeps selected instance (tab) for given sub form class.
+     */
+    private final BiMap<FormClass, FormInstance> selectedInstances = HashBiMap.create();
 
     private FormClass rootFormClass;
 
@@ -60,12 +98,17 @@ public class FormModel {
     /**
      * The original, unmodified instance
      */
-    private Resource instance;
+    private FormInstance originalRootInstance;
 
     /**
-     * A new version of the instance, being updated by the user
+     * A new version of the root instance, being updated by the user
      */
-    private FormInstance workingInstance;
+    private FormInstance workingRootInstance;
+
+    /**
+     * Keeps reporting instance to value instance (e.g. Period instance to values of subform for this period).
+     */
+    private final BiMap<SubformValueKey, FormInstance> subFormInstances = HashBiMap.create();
 
 
     public FormModel(ResourceLocator locator) {
@@ -78,6 +121,9 @@ public class FormModel {
             @Override
             public FormClass apply(@Nullable FormClass input) {
                 FormModel.this.rootFormClass = input;
+                for (FormField formField : input.getFields()) {
+                    formFieldToFormClass.put(formField.getId(), input);
+                }
                 return input;
             }
         }).join(new Function<FormClass, Promise<Void>>() {
@@ -93,7 +139,10 @@ public class FormModel {
                             @Nullable
                             @Override
                             public Object apply(@Nullable FormClass subForm) {
-                                formFieldToSubFormClass.put(formField.getId(), subForm);
+                                ownerFormFieldToSubFormClass.put(formField.getId(), subForm);
+                                for (FormField field : subForm.getFields()) {
+                                    formFieldToFormClass.put(field.getId(), subForm);
+                                }
                                 return null;
                             }
                         });
@@ -107,18 +156,26 @@ public class FormModel {
 
     public List<FormField> getAllFormsFields() {
         List<FormField> formFields = Lists.newArrayList(getRootFormClass().getFields());
-        for (FormClass subForm : formFieldToSubFormClass.values()) {
+        for (FormClass subForm : ownerFormFieldToSubFormClass.values()) {
             formFields.addAll(subForm.getFields());
         }
         return formFields;
+    }
+
+    public FormClass getClassByField(ResourceId formFieldId) {
+        FormClass formClass = formFieldToFormClass.get(formFieldId);
+        if (formClass == null) {
+            throw new RuntimeException("Unknown field, id:" + formFieldId);
+        }
+        return formClass;
     }
 
     public EventBus getEventBus() {
         return eventBus;
     }
 
-    public FormClass getSubFormByFormFieldId(ResourceId formFieldId) {
-        return formFieldToSubFormClass.get(formFieldId);
+    public FormClass getSubFormByOwnerFieldId(ResourceId formFieldId) {
+        return ownerFormFieldToSubFormClass.get(formFieldId);
     }
 
     public ResourceLocator getLocator() {
@@ -141,19 +198,63 @@ public class FormModel {
         this.validationFormClass = validationFormClass;
     }
 
-    public Resource getInstance() {
+    public FormInstance getWorkingRootInstance() {
+        return workingRootInstance;
+    }
+
+    public void setWorkingRootInstance(FormInstance workingRootInstance) {
+        this.originalRootInstance = workingRootInstance.copy();
+        this.workingRootInstance = workingRootInstance;
+    }
+
+    public FormInstance getWorkingInstance(ResourceId formFieldId) {
+        FormClass classByField = getClassByField(formFieldId);
+        if (classByField.equals(rootFormClass)) {
+            return getWorkingRootInstance();
+        }
+        FormInstance selectedTab = selectedInstances.get(classByField);
+
+        Preconditions.checkNotNull(selectedTab, "Tab is not selected. Wrong usage of code! Please make sure tab is selected.");
+
+        SubformValueKey key = new SubformValueKey(classByField, selectedTab);
+        FormInstance subFormInstance = subFormInstances.get(key);
+        if (subFormInstance == null) {
+            return createSubFormInstanceValue(key);
+        }
+        return subFormInstance;
+    }
+
+    public BiMap<SubformValueKey, FormInstance> getSubFormInstances() {
+        return subFormInstances;
+    }
+
+    /**
+     * Returns list of tabs mentioned in subFormInstances map. Or in other words involved in interaction by user during the session.
+     *
+     * @return list of tabs mentioned in subFormInstances map
+     */
+    public List<FormInstance> getSubformPresentTabs() {
+        List<FormInstance> result = Lists.newArrayList();
+
+        for (SubformValueKey key : subFormInstances.keySet()) {
+            result.add(key.getSelectedTab());
+        }
+        return result;
+    }
+
+    public void setSelectedInstance(FormInstance tabInstance, FormClass subForm) {
+        selectedInstances.put(subForm, tabInstance);
+        createSubFormInstanceValue(new SubformValueKey(subForm, tabInstance));
+    }
+
+    private FormInstance createSubFormInstanceValue(SubformValueKey key) {
+        FormInstance instance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
+        instance.setOwnerId(key.getSelectedTab().getId());
+        subFormInstances.put(key, instance);
         return instance;
     }
 
-    public void setInstance(Resource instance) {
-        this.instance = instance;
-    }
-
-    public FormInstance getWorkingInstance() {
-        return workingInstance;
-    }
-
-    public void setWorkingInstance(FormInstance workingInstance) {
-        this.workingInstance = workingInstance;
+    public FormInstance getOriginalRootInstance() {
+        return originalRootInstance;
     }
 }

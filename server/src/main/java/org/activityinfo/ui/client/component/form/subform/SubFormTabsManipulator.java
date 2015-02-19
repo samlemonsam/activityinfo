@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.model.form.FormClass;
@@ -34,6 +35,8 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
+import org.activityinfo.ui.client.component.form.FormModel;
+import org.activityinfo.ui.client.widget.ClickHandler;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -48,7 +51,11 @@ public class SubFormTabsManipulator {
     private final SubFormTabsPresenter presenter;
     private final ResourceLocator resourceLocator;
 
+    @Nullable
     private PeriodValue periodValue = null; // if not null then period instance generator is in use
+
+    private FormClass subForm;
+    private FormModel formModel;
 
     public SubFormTabsManipulator(@NotNull ResourceLocator resourceLocator) {
         this(resourceLocator, new SubFormTabs());
@@ -59,7 +66,14 @@ public class SubFormTabsManipulator {
         this.presenter = new SubFormTabsPresenter(tabs);
     }
 
-    public SubFormTabsManipulator show(FormClass subForm) {
+    public SubFormTabsManipulator show(@NotNull FormClass subForm, @NotNull FormModel formModel) {
+
+        Preconditions.checkNotNull(subForm);
+        Preconditions.checkNotNull(formModel);
+
+        this.subForm = subForm;
+        this.formModel = formModel;
+
         ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
         ResourceId typeClassId = typeClass.getRange().iterator().next();
         QuantityType tabsCountType = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
@@ -86,6 +100,16 @@ public class SubFormTabsManipulator {
                 onPeriodMoveButtonClick(buttonType, instanceGenerator);
             }
         });
+        presenter.setInstanceTabClickHandler(new ClickHandler<FormInstance>() {
+            @Override
+            public void onClick(FormInstance instance) {
+                onPeriodInstanceTabClick(instance);
+            }
+        });
+    }
+
+    private void onPeriodInstanceTabClick(FormInstance instance) {
+        formModel.setSelectedInstance(instance, subForm);
     }
 
     private void onPeriodMoveButtonClick(SubFormTabsPresenter.ButtonType buttonType, InstanceGenerator instanceGenerator) {
@@ -119,7 +143,13 @@ public class SubFormTabsManipulator {
         presenter.setMoveButtonClickHandler(new org.activityinfo.ui.client.widget.ClickHandler<SubFormTabsPresenter.ButtonType>() {
             @Override
             public void onClick(SubFormTabsPresenter.ButtonType buttonType) {
-                // todo
+                // todo : support user-defined form classes
+            }
+        });
+        presenter.setInstanceTabClickHandler(new ClickHandler<FormInstance>() {
+            @Override
+            public void onClick(FormInstance instance) {
+                // todo : support user-defined form classes
             }
         });
     }
@@ -127,4 +157,5 @@ public class SubFormTabsManipulator {
     public SubFormTabsPresenter getPresenter() {
         return presenter;
     }
+
 }

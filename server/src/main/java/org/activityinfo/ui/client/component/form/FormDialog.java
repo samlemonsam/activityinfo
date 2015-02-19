@@ -21,14 +21,15 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -40,6 +41,7 @@ import org.activityinfo.ui.client.widget.loading.ExceptionOracle;
 import org.activityinfo.ui.client.widget.loading.PageLoadingPanel;
 
 import javax.inject.Provider;
+import java.util.List;
 
 /**
  * @author yuriyz on 3/28/14.
@@ -122,7 +124,7 @@ public class FormDialog {
 
         dialog.getStatusLabel().setText(I18N.CONSTANTS.saving());
         dialog.getPrimaryButton().setEnabled(false);
-        resourceLocator.persist(formPanel.getInstance()).then(new AsyncCallback<Void>() {
+        formPanel.getFormActions().save().then(new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -134,7 +136,10 @@ public class FormDialog {
             @Override
             public void onSuccess(Void result) {
                 dialog.hide();
-                callback.onPersisted(formPanel.getInstance());
+                List<FormInstance> callbackList = Lists.newArrayList(formPanel.getModel().getWorkingRootInstance());
+                callbackList.addAll(formPanel.getModel().getSubFormInstances().values());
+                callbackList.addAll(formPanel.getModel().getSubformPresentTabs());
+                callback.onPersisted(callbackList);
             }
         });
     }

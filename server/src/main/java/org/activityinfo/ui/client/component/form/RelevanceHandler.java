@@ -55,7 +55,8 @@ public class RelevanceHandler {
             ExprParser parser = new ExprParser(lexer);
             ExprNode expr = parser.parse();
             FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
-            fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getModel().getRootFormClass(), simpleFormPanel.getInstance())));
+            // todo yuriy: revisit it, it will not work with subforms
+            fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getModel().getRootFormClass(), simpleFormPanel.getModel().getWorkingRootInstance())));
         }
     }
 

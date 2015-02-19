@@ -44,6 +44,8 @@ import org.activityinfo.ui.client.component.form.FormDialog;
 import org.activityinfo.ui.client.component.form.FormDialogCallback;
 import org.activityinfo.ui.client.page.entry.location.LocationDialog;
 
+import java.util.List;
+
 public class SiteDialogLauncher {
 
     private final Dispatcher dispatcher;
@@ -127,7 +129,7 @@ public class SiteDialogLauncher {
         dialog.setDialogTitle(formName, h2Title);
         dialog.show(instance, new FormDialogCallback() {
             @Override
-            public void onPersisted(FormInstance instance) {
+            public void onPersisted(List<FormInstance> instance) {
                 callback.onSaved();
             }
         });

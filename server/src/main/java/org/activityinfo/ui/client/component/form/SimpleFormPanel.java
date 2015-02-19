@@ -36,6 +36,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
     private final FormWidgetCreator widgetCreator;
+    private final FormActions formActions;
 
     public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory) {
@@ -56,27 +57,24 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.relevanceHandler = new RelevanceHandler(this);
         this.widgetCreator = new FormWidgetCreator(model, containerFactory, widgetFactory);
 
-        panel = new FlowPanel();
-        panel.setStyleName(FormPanelStyles.INSTANCE.formPanel());
-        scrollPanel = new ScrollPanel(panel);
+        this.panel = new FlowPanel();
+        this.panel.setStyleName(FormPanelStyles.INSTANCE.formPanel());
+        this.scrollPanel = new ScrollPanel(panel);
+        this.formActions = new FormActions(locator, this);
     }
 
     public FormModel getModel() {
         return model;
     }
 
-    public FormInstance getInstance() {
-        return model.getWorkingInstance();
+    public Promise<Void> show(final Resource instance) {
+        return show(FormInstance.fromResource(instance));
     }
 
     @Override
     public Promise<Void> show(final FormInstance instance) {
-        return show(instance.asResource());
-    }
-
-    public Promise<Void> show(final Resource instance) {
-        model.setInstance(instance);
-        return model.loadFormClassWithDependentSubForms(instance.getResourceId("classId")).then(new Function<Void, Promise<Void>>() {
+        model.setWorkingRootInstance(instance);
+        return model.loadFormClassWithDependentSubForms(instance.getClassId()).then(new Function<Void, Promise<Void>>() {
             @Nullable
             @Override
             public Promise<Void> apply(@Nullable Void input) {
@@ -110,17 +108,16 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
 
-    public Promise<Void> setValue(Resource instance) {
-        model.setInstance(instance);
-        model.setWorkingInstance(FormInstance.fromResource(instance));
+    public Promise<Void> setValue(FormInstance instance) {
+        model.setWorkingRootInstance(instance);
 
         List<Promise<Void>> tasks = Lists.newArrayList();
 
         for (FieldContainer container : widgetCreator.getContainers().values()) {
             FormField field = container.getField();
-            FieldValue value = model.getWorkingInstance().get(field.getId(), field.getType());
+            FieldValue value = model.getWorkingRootInstance().get(field.getId(), field.getType());
 
-            if(value != null && value.getTypeClass() == field.getType().getTypeClass()) {
+            if (value != null && value.getTypeClass() == field.getType().getTypeClass()) {
                 tasks.add(container.getFieldWidget().setValue(value));
             } else {
                 container.getFieldWidget().clearValue();
@@ -147,12 +144,13 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 FormField formField = (FormField) element;
                 if (formField.isVisible()) {
                     if (formField.getType() instanceof SubFormType) {
-                        FormClass subForm = getModel().getSubFormByFormFieldId(formField.getId());
+                        FormClass subForm = getModel().getSubFormByOwnerFieldId(formField.getId());
                         final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(locator);
 
                         panel.add(createHeader(depth, subForm.getLabel()));
                         panel.add(subFormTabsManipulator.getPresenter().getView());
-                        subFormTabsManipulator.show(subForm);
+
+                        subFormTabsManipulator.show(subForm, model);
                         addFormElements(subForm, depth + 1);
                     } else {
                         panel.add(widgetCreator.get(formField.getId()));
@@ -163,8 +161,9 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     public void onFieldUpdated(FormField field, FieldValue newValue) {
-        if (!Objects.equals(model.getWorkingInstance().get(field.getId()), newValue)) {
-            model.getWorkingInstance().set(field.getId(), newValue);
+        FormInstance workingInstance = model.getWorkingInstance(field.getId());
+        if (!Objects.equals(workingInstance.get(field.getId()), newValue)) {
+            workingInstance.set(field.getId(), newValue);
             relevanceHandler.onValueChange(); // skip handler must be applied after workingInstance is updated
         }
         validateField(widgetCreator.get(field.getId()));
@@ -196,7 +195,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     private FieldValue getCurrentValue(FormField field) {
-        return model.getWorkingInstance().get(field.getId());
+        return model.getWorkingInstance(field.getId()).get(field.getId());
     }
 
     private static Widget createHeader(int depth, String header) {
@@ -217,4 +216,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         return locator;
     }
 
+    public FormActions getFormActions() {
+        return formActions;
+    }
 }

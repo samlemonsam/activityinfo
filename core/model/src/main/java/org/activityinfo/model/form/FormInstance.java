@@ -315,7 +315,8 @@ public class FormInstance implements IsResource {
         return "FormInstance{" +
                 "id=" + id +
                 ", classId=" + classId +
-                ", valueMap=" + propertyBag +
+                ", ownerId=" + ownerId +
+                ", propertyBag=" + propertyBag +
                 '}';
     }
 

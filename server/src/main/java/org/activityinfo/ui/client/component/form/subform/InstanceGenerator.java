@@ -168,7 +168,8 @@ public class InstanceGenerator {
     }
 
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        FormInstance instance = new FormInstance(ResourceId.generateId(), classId);
+        String instanceId = "period_" + range.getStart().getTime() + "_"+ range.getEnd().getTime();
+        FormInstance instance = new FormInstance(ResourceId.valueOf(instanceId), classId);
         instance.set(PERIOD_START_DATE_ID, range.getStart());
         instance.set(PERIOD_END_DATE_ID, range.getEnd());
         FormInstanceLabeler.setLabel(instance, format(getPointToCalculate(range, direction), period));
@@ -189,6 +190,8 @@ public class InstanceGenerator {
     }
 
     private DateRange generateDateRange(PeriodValue period, Date startDate, Direction direction) {
+        // make sure start date is reset, instanceId depends on start/end date of range.
+        CalendarUtil.resetTime(startDate);
         Date result = CalendarUtil.copyDate(startDate);
         if (PredefinedPeriods.YEARLY.getPeriod().equals(period)) {
             CalendarUtil.addMonthsToDate(result, direction == Direction.BACK ? -12 : 12);

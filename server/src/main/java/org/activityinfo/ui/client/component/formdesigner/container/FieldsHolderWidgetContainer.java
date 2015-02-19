@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.formdesigner.container;
 import com.google.common.base.Strings;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -32,6 +33,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
@@ -127,9 +129,19 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         panel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(elementContainer.getLabel())).asString() + "</h3>");
 
         if (isSubform) {
-            FormClass subForm = (FormClass) elementContainer;
-            new SubFormTabsManipulator(formDesigner.getResourceLocator(), panel.getPanel().getSubformTabs())
-                    .show(subForm);
+            final FormClass subForm = (FormClass) elementContainer;
+            final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner.getResourceLocator(), panel.getPanel().getSubformTabs());
+
+            if (panel.getPanel().getSubformTabs().isAttached()) {
+                tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()));
+            } else {
+                panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
+                    @Override
+                    public void onAttachOrDetach(AttachEvent event) {
+                        tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()));
+                    }
+                });
+            }
         }
     }
 
