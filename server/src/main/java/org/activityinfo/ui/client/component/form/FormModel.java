@@ -37,7 +37,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +118,7 @@ public class FormModel {
         return locator.getFormClass(rootClassId).then(new Function<FormClass, FormClass>() {
             @Nullable
             @Override
-            public FormClass apply(@Nullable FormClass input) {
+            public FormClass apply(FormClass input) {
                 FormModel.this.rootFormClass = input;
                 for (FormField formField : input.getFields()) {
                     formFieldToFormClass.put(formField.getId(), input);
@@ -129,7 +128,7 @@ public class FormModel {
         }).join(new Function<FormClass, Promise<Void>>() {
             @Nullable
             @Override
-            public Promise<Void> apply(@Nullable FormClass rootFormClass) {
+            public Promise<Void> apply(FormClass rootFormClass) {
                 List<Promise<FormClass>> promises = Lists.newArrayList();
                 for (final FormField formField : rootFormClass.getFields()) {
                     if (formField.getType() instanceof SubFormType) {
@@ -138,7 +137,7 @@ public class FormModel {
                         promise.then(new Function<FormClass, Object>() {
                             @Nullable
                             @Override
-                            public Object apply(@Nullable FormClass subForm) {
+                            public Object apply(FormClass subForm) {
                                 ownerFormFieldToSubFormClass.put(formField.getId(), subForm);
                                 for (FormField field : subForm.getFields()) {
                                     formFieldToFormClass.put(field.getId(), subForm);
@@ -164,9 +163,9 @@ public class FormModel {
 
     public FormClass getClassByField(ResourceId formFieldId) {
         FormClass formClass = formFieldToFormClass.get(formFieldId);
-        if (formClass == null) {
-            throw new RuntimeException("Unknown field, id:" + formFieldId);
-        }
+
+        Preconditions.checkNotNull(formClass, "Unknown field, id:" + formFieldId);
+
         return formClass;
     }
 
@@ -186,8 +185,8 @@ public class FormModel {
         return rootFormClass;
     }
 
-    public void setRootFormClass(@Nonnull FormClass rootFormClass) {
-        this.rootFormClass = rootFormClass;
+    private void setRootFormClass(FormClass rootFormClass) {
+        throw new RuntimeException("Root form class must be loaded in order to load subforms.");
     }
 
     public FormClass getValidationFormClass() {
