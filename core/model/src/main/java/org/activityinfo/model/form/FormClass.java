@@ -14,10 +14,9 @@ import java.util.List;
 
 /**
  * The FormClass defines structure and semantics for {@code Resource}s.
- *
+ * <p/>
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
-
  */
 public class FormClass implements IsResource, FormElementContainer {
 
@@ -56,7 +55,9 @@ public class FormClass implements IsResource, FormElementContainer {
         return this;
     }
 
-    public ResourceId getParentId() { return ownerId; }
+    public ResourceId getParentId() {
+        return ownerId;
+    }
 
     public void setParentId(ResourceId resourceId) {
         setOwnerId(resourceId);
@@ -194,8 +195,8 @@ public class FormClass implements IsResource, FormElementContainer {
     }
 
     public FormField getField(ResourceId fieldId) {
-        for(FormField field : getFields()) {
-            if(field.getId().equals(fieldId)) {
+        for (FormField field : getFields()) {
+            if (field.getId().equals(fieldId)) {
                 return field;
             }
         }
@@ -238,8 +239,8 @@ public class FormClass implements IsResource, FormElementContainer {
 
     private static List<FormElement> fromRecords(List<Record> elementArray) {
         List<FormElement> elements = Lists.newArrayList();
-        for(Record elementRecord : elementArray) {
-            if("section".equals(elementRecord.isString("type"))) {
+        for (Record elementRecord : elementArray) {
+            if ("section".equals(elementRecord.isString("type"))) {
                 FormSection section = new FormSection(ResourceId.valueOf(elementRecord.getString("id")));
                 section.setLabel(elementRecord.getString("label"));
                 section.getElements().addAll(fromRecords(elementRecord.getRecordList("elements")));

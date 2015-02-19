@@ -87,7 +87,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         final Template template = ((DnDLabel) context.draggable).getTemplate();
         if (template instanceof FieldTemplate) {
             final FormField formField = ((FieldTemplate)template).create();
-            FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(resourceId);
+            FormClass formClass = formDesigner.getModel().getFormClassByElementId(resourceId);
             formDesigner.getFormFieldWidgetFactory().createWidget(formClass, formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
                 @Nullable
                 @Override

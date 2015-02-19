@@ -21,8 +21,12 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.promise.Promise;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 02/18/2015.
@@ -38,8 +42,11 @@ public class FormActions {
     }
 
     public Promise<Void> save() {
-        // todo persist subform instances !
-        return locator.persist(panel.getModel().getWorkingRootInstance());
+        List<IsResource> toPersist = Lists.newArrayList();
+        toPersist.addAll(panel.getModel().getSubformPresentTabs()); // tab instances
+        toPersist.addAll(panel.getModel().getSubFormInstances().values()); // subform values (binded to tab instances)
+        toPersist.add(panel.getModel().getWorkingRootInstance()); // root instance
+        return locator.persist(toPersist);
     }
 
 

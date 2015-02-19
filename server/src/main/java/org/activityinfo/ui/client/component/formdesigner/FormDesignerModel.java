@@ -99,6 +99,23 @@ public class FormDesignerModel {
         return (FormClass) getElementContainer(formClassId);
     }
 
+    public FormClass getFormClassByElementId(ResourceId elementId) {
+        FormElementContainer fromRoot = getRootFormClass().getElementContainer(elementId); // try root first
+        if (fromRoot != null) {
+            return getRootFormClass();
+        }
+        for (FormClass subform : formFieldToSubFormClass.values()) {
+            if (subform.getId().equals(elementId)) {
+                return subform;
+            }
+            FormElementContainer fromSubform = subform.getElementContainer(elementId);
+            if (fromSubform != null) {
+                return subform;
+            }
+        }
+        return null;
+    }
+
     public FormElementContainer getElementContainer(ResourceId resourceId) {
         FormElementContainer fromRoot = getRootFormClass().getElementContainer(resourceId); // try root first
         if (fromRoot != null) {
