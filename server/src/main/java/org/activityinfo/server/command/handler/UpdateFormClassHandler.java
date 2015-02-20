@@ -24,6 +24,7 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
@@ -238,6 +239,12 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
         } else if (field.getType() instanceof BarcodeType) {
             indicator.setType(TextType.TYPE_CLASS.getId());
+
+        } else if (field.getType() instanceof SubFormType) {
+            SubFormType subFormType = (SubFormType) field.getType();
+
+            indicator.setType(SubFormType.TYPE_CLASS.getId());
+            indicator.setTypeJson(Resources.toJsonObject(subFormType.getParameters()).toString());
 
         } else {
             indicator.setType(field.getType().getTypeClass().getId());

@@ -33,6 +33,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Map;
 import java.util.Set;
@@ -95,12 +96,9 @@ public class SchemaCache implements DispatchListener {
 
         } else if (command instanceof UpdateFormClass) {
             String formClassId = ((UpdateFormClass) command).getFormClassId();
-            try {
+            if (ResourceId.valueOf(formClassId).getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
                 activityMap.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
-            } catch (NumberFormatException e) {
-                // ignore, we may have generated FormClass -> SubFormClass
             }
-
         } else if (command instanceof BatchCommand) {
             for (Command element : ((BatchCommand) command).getCommands()) {
                 beforeDispatched(element);

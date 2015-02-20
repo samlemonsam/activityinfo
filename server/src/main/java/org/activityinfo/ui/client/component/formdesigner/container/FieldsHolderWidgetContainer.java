@@ -171,4 +171,8 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     public DropControllerExtended getDropController() {
         return dropController;
     }
+
+    public boolean isSubform() {
+        return isSubform;
+    }
 }

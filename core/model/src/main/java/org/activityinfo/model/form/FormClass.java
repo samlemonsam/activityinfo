@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.*;
 
 import javax.annotation.Nullable;
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The FormClass defines structure and semantics for {@code Resource}s.
@@ -153,6 +155,26 @@ public class FormClass implements IsResource, FormElementContainer {
 
     public List<FormElement> getElements() {
         return elements;
+    }
+
+    public FormElement getElement(ResourceId elementId) {
+        for (FormElement element : getAllElementsIncludingNested()) {
+            if (element.getId().equals(elementId)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public Set<FormElement> getAllElementsIncludingNested() {
+        final Set<FormElement> result = Sets.newHashSet(elements);
+        traverse(this, new TraverseFunction() {
+            @Override
+            public void apply(FormElement element, FormElementContainer container) {
+                result.add(element);
+            }
+        });
+        return result;
     }
 
     public List<FormField> getFields() {

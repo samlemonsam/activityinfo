@@ -89,8 +89,6 @@ public class FieldWidgetContainer implements WidgetContainer {
             }
         });
 
-        // Workaround(alex): store field id with widget so we can update model order after
-        // drag and drop
         fieldPanel.asWidget().getElement().setAttribute(FormDesignerConstants.DATA_FIELD_ID, formField.getId().asString());
         syncWithModel();
     }

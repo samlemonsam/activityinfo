@@ -49,5 +49,13 @@
       <column name="gzJson" type="longblob"/>
     </addColumn>
   </changeSet>
+  <changeSet author="yuriyz" id="032-03">
+    <comment>
+      added type json to indicator table
+    </comment>
+    <addColumn tableName="indicator">
+      <column name="typeJson" type="VARCHAR(999)"/>
+    </addColumn>
+  </changeSet>
 
 </databaseChangeLog>

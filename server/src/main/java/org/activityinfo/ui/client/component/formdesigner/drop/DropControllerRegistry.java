@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
  */
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
+import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -32,6 +33,7 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
 import org.activityinfo.ui.client.component.formdesigner.drag.DragMonitor;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -123,5 +125,9 @@ public class DropControllerRegistry {
         dragController.unregisterDropController(dropControllerMap.get(resourceId));
         dropControllerMap.remove(resourceId);
 
+    }
+
+    public List<DropControllerExtended> getDropControllers() {
+        return Lists.newArrayList(dropControllerMap.values());
     }
 }

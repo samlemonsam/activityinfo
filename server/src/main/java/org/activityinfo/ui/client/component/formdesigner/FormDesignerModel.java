@@ -25,9 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormElementContainer;
@@ -40,7 +37,6 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubformConstants;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz on 01/21/2015.
@@ -100,7 +96,11 @@ public class FormDesignerModel {
     }
 
     public FormClass getFormClassByElementId(ResourceId elementId) {
-        FormElementContainer fromRoot = getRootFormClass().getElementContainer(elementId); // try root first
+        FormElementContainer rootContainer = getRootFormClass().getElementContainer(elementId); // try root first
+        if (rootContainer != null) {
+            return getRootFormClass();
+        }
+        FormElement fromRoot = getRootFormClass().getElement(elementId); // try root first
         if (fromRoot != null) {
             return getRootFormClass();
         }
@@ -110,6 +110,10 @@ public class FormDesignerModel {
             }
             FormElementContainer fromSubform = subform.getElementContainer(elementId);
             if (fromSubform != null) {
+                return subform;
+            }
+            FormElement subformElement = subform.getElement(elementId);
+            if (subformElement != null) {
                 return subform;
             }
         }
@@ -131,26 +135,6 @@ public class FormDesignerModel {
             }
         }
         return null;
-    }
-
-    public void updateFieldOrder(FormDesignerPanel formDesignerPanel) {
-
-        Map<ResourceId, FormField> fieldMap = Maps.newHashMap();
-        for (FormField field : rootFormClass.getFields()) {
-            fieldMap.put(field.getId(), field);
-        }
-
-        // update the order of the model
-        List<FormElement> elements = Lists.newArrayList();
-        FlowPanel panel = formDesignerPanel.getDropPanel();
-        for (int i = 0; i != panel.getWidgetCount(); ++i) {
-            Widget widget = panel.getWidget(i);
-            String fieldId = widget.getElement().getAttribute(FormDesignerConstants.DATA_FIELD_ID);
-            elements.add(fieldMap.get(ResourceId.valueOf(fieldId)));
-        }
-
-        rootFormClass.getElements().clear();
-        rootFormClass.getElements().addAll(elements);
     }
 
     public void removeSubform(FormClass subForm) {

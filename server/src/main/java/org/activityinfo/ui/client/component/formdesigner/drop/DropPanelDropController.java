@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
 
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.VetoDragException;
+import com.allen_sauer.gwt.dnd.client.drop.DropController;
 import com.allen_sauer.gwt.dnd.client.drop.FlowPanelDropController;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -43,6 +44,7 @@ import org.activityinfo.ui.client.component.formdesigner.event.PanelUpdatedEvent
 import org.activityinfo.ui.client.component.formdesigner.palette.*;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +67,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
     }
 
     @Override
-    public void onPreviewDrop(DragContext context) throws VetoDragException {
+    public void onPreviewDrop(final DragContext context) throws VetoDragException {
         super.onPreviewDrop(context); // important ! - calculates drop index
 
         if (context.draggable instanceof DnDLabel) {
@@ -73,14 +75,66 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         } else {
             drop(context.draggable, context);
 
+            // update model
             Scheduler.get().scheduleDeferred(new Command() {
                 @Override
                 public void execute() {
-                    formDesigner.getModel().updateFieldOrder(formDesigner.getFormDesignerPanel());
+                    updateModel(context.selectedWidgets.get(0), context.finalDropController != null ? context.finalDropController : context.dropController);
                     removePositioner();
                 }
             });
         }
+    }
+
+    private void updateModel(Widget draggable, DropController dropController) {
+        DropPanelDropController panelDropController = (DropPanelDropController) dropController;
+
+        List<WidgetContainer> containers = new ArrayList<>(containerMap.values());
+        containers.addAll(formDesigner.getFormDesignerPanel().getContainerMap().values());
+        for (DropControllerExtended c : formDesigner.getDropControllerRegistry().getDropControllers()) {
+            containers.addAll(c.getContainerMap().values());
+        }
+
+        for (WidgetContainer container : containers) {
+            if (draggable.equals(container.asWidget())) {
+                if (container instanceof FieldWidgetContainer) {
+                    FormField formField = ((FieldWidgetContainer) container).getFormField();
+                    FormClass sourceFormClass = formDesigner.getModel().getFormClassByElementId(formField.getId());
+                    sourceFormClass.remove(formField);
+
+                    insertIntoTargetFormClass(panelDropController, container, formField);
+
+                } else if (container instanceof FieldsHolderWidgetContainer) {
+
+                    FieldsHolderWidgetContainer fieldsHolderContainer = (FieldsHolderWidgetContainer) container;
+
+                    if (fieldsHolderContainer.isSubform()) { // subform
+                        FormClass subForm = (FormClass) fieldsHolderContainer.getElementContainer();
+                        FormField subformOwnerField = formDesigner.getModel().getSubformOwnerField(subForm);
+                        subForm.remove(subformOwnerField);
+                        insertIntoTargetFormClass(panelDropController, container, subformOwnerField);
+
+                    } else { // form section
+                        FormSection formSection = (FormSection) fieldsHolderContainer.getElementContainer();
+                        FormClass sourceFormClass = formDesigner.getModel().getFormClassByElementId(formSection.getId());
+                        sourceFormClass.remove(formSection);
+
+                        insertIntoTargetFormClass(panelDropController, container, formSection);
+                    }
+
+                }
+            }
+        }
+    }
+
+    private void insertIntoTargetFormClass(DropPanelDropController panelDropController, WidgetContainer container, FormElement formElement) {
+        int widgetIndex = panelDropController.getDropTarget().getWidgetIndex(container.asWidget());
+
+        // target form class
+        FormElementContainer elementContainer = formDesigner.getModel().getElementContainer(panelDropController.getResourceId());
+
+        // update model
+        elementContainer.insertElement(widgetIndex, formElement);
     }
 
     private void previewDropNewWidget(final DragContext context) throws VetoDragException {
@@ -189,5 +243,14 @@ public class DropPanelDropController extends FlowPanelDropController implements 
 
     public Map<ResourceId, WidgetContainer> getContainerMap() {
         return containerMap;
+    }
+
+    public ResourceId getResourceId() {
+        return resourceId;
+    }
+
+    @Override
+    public FlowPanel getDropTarget() {
+        return dropTarget;
     }
 }

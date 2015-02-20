@@ -56,6 +56,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
     private int sortOrder;
     private String listHeader;
     private String type = FieldTypeClass.QUANTITY.getId();
+    private String typeJson;
     private String expression;
     private String skipExpression;
     private String nameInExpression;
@@ -79,6 +80,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
         this.sortOrder = indicator.sortOrder;
         this.listHeader = indicator.listHeader;
         this.type = indicator.type;
+        this.typeJson = indicator.typeJson;
         this.expression = indicator.expression;
         this.skipExpression = indicator.skipExpression;
         this.nameInExpression = indicator.nameInExpression;
@@ -114,6 +116,15 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
 
     public void setExpression(String expression) {
         this.expression = expression;
+    }
+
+    @Column(name = "typeJson", nullable = true, length = 999)
+    public String getTypeJson() {
+        return typeJson;
+    }
+
+    public void setTypeJson(String typeJson) {
+        this.typeJson = typeJson;
     }
 
     @Column(name = "skipExpression", nullable = true, length = 999)
