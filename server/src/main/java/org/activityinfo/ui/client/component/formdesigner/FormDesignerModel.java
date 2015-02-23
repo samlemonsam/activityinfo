@@ -36,6 +36,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubformConstants;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -77,6 +78,17 @@ public class FormDesignerModel {
 
     public List<FormClass> getSubforms() {
         return Lists.newArrayList(formFieldToSubFormClass.values());
+    }
+
+    public boolean isSubform(@Nullable ResourceId subformId) {
+        if (subformId != null) {
+            for (FormClass subform : formFieldToSubFormClass.values()) {
+                if (subform.getId().equals(subformId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public FormDesignerModel registerSubform(ResourceId formFieldId, FormClass formClass) {

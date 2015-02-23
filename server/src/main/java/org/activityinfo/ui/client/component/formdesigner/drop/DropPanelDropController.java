@@ -155,19 +155,16 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             });
         } else if (template instanceof SectionTemplate) {
             final FormSection formSection = ((SectionTemplate)template).create();
-            if (formDesigner.getModel().getElementContainer(resourceId) instanceof FormSection) {
-                // we are not going to handle nested FormSection in FormDesigner
-                // It should be enough to handle one level of FormSections:
-                // 1. on selection FormSection container is selected by blue color
-                // 2. on formField selection highlight it with green color
-                // nested FormSection brings higher complexity without comparative value.
-                throw new VetoDragException();
-            }
+
+            vetoDropIfNeeded();
+
             FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.section(formDesigner, formSection, resourceId);
             containerMap.put(resourceId, widgetContainer); // parent drop container
             drop(widgetContainer, context, formSection);
         } else if (template instanceof SubformTemplate) {
             final FormField formField = ((SubformTemplate)template).create();
+
+            vetoDropIfNeeded();
 
             FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
             subForm.setLabel(formField.getLabel());
@@ -191,6 +188,18 @@ public class DropPanelDropController extends FlowPanelDropController implements 
 
         // forbid drop of source control widget
         throw new VetoDragException();
+    }
+
+    private void vetoDropIfNeeded() throws VetoDragException {
+        if (formDesigner.getModel().getElementContainer(resourceId) instanceof FormSection ||
+                formDesigner.getModel().isSubform(formDesigner.getModel().getElementContainer(resourceId).getId())) {
+            // we are not going to handle nested FormSection or nested SubForms in FormDesigner
+            // It should be enough to handle one level of FormSections and SubForms:
+            // 1. on selection FormSection/SubForm container is selected by blue color
+            // 2. on formField selection highlight it with green color
+            // nested FormSection/SubForm brings higher complexity without comparative value.
+            throw new VetoDragException();
+        }
     }
 
     private void drop(final Widget widget, DragContext context) {
