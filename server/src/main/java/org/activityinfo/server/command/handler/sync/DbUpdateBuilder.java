@@ -23,7 +23,9 @@ package org.activityinfo.server.command.handler.sync;
  */
 
 import com.bedatadriven.rebar.sync.server.JpaUpdateBuilder;
-import com.google.api.client.util.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
@@ -34,40 +36,41 @@ import org.json.JSONException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class SchemaUpdateBuilder implements UpdateBuilder {
+public class DbUpdateBuilder implements UpdateBuilder {
+
+    private static final String REGION_PREFIX = "db/";
 
     private final UserDatabaseDAO userDatabaseDAO;
     private final EntityManager entityManager;
 
-    private final Set<Integer> countryIds = new HashSet<Integer>();
-    private final List<Country> countries = new ArrayList<Country>();
-    private final List<AdminLevel> adminLevels = new ArrayList<AdminLevel>();
+    private final Set<Integer> countryIds = Sets.newHashSet();
+    private final List<Country> countries = Lists.newArrayList();
+    private final List<AdminLevel> adminLevels = Lists.newArrayList();
 
-    private List<UserDatabase> databases = new ArrayList<UserDatabase>();
+    private UserDatabase database = null;
 
-    private final Set<Integer> partnerIds = new HashSet<Integer>();
-    private final List<Partner> partners = new ArrayList<Partner>();
+    private final Set<Integer> partnerIds = Sets.newHashSet();
+    private final List<Partner> partners = Lists.newArrayList();
 
-    private final List<Activity> activities = new ArrayList<Activity>();
-    private final List<Indicator> indicators = new ArrayList<Indicator>();
-    private final Set<IndicatorLinkEntity> indicatorLinks = new HashSet<IndicatorLinkEntity>();
+    private final List<Activity> activities = Lists.newArrayList();
+    private final List<Indicator> indicators = Lists.newArrayList();
+    private final Set<IndicatorLinkEntity> indicatorLinks = new HashSet<>();
 
-    private final Set<Integer> attributeGroupIds = new HashSet<Integer>();
-    private final List<AttributeGroup> attributeGroups = new ArrayList<AttributeGroup>();
-    private final List<Attribute> attributes = new ArrayList<Attribute>();
+    private final Set<Integer> attributeGroupIds = Sets.newHashSet();
+    private final List<AttributeGroup> attributeGroups = Lists.newArrayList();
+    private final List<Attribute> attributes = Lists.newArrayList();
 
-    private final Set<Integer> userIds = new HashSet<Integer>();
-    private final List<User> users = new ArrayList<User>();
-    private final List<LocationType> locationTypes = new ArrayList<LocationType>();
+    private final Set<Integer> userIds = Sets.newHashSet();
+    private final List<User> users = Lists.newArrayList();
+    private final List<LocationType> locationTypes = Lists.newArrayList();
     private List<UserPermission> userPermissions;
 
-    private static final Logger LOGGER = Logger.getLogger(SchemaUpdateBuilder.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DbUpdateBuilder.class.getName());
 
     private final Class[] schemaClasses = new Class[]{Country.class,
             AdminLevel.class,
@@ -82,11 +85,11 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
             UserPermission.class,
             LockedPeriod.class,
             Project.class};
-    private final List<LockedPeriod> allLockedPeriods = new ArrayList<LockedPeriod>();
-    private final List<Project> projects = new ArrayList<Project>();
+    private final List<LockedPeriod> allLockedPeriods = Lists.newArrayList();
+    private final List<Project> projects = Lists.newArrayList();
 
     @Inject
-    public SchemaUpdateBuilder(EntityManagerFactory entityManagerFactory) {
+    public DbUpdateBuilder(EntityManagerFactory entityManagerFactory) {
         // create a new, unfiltered entity manager so we can see deleted records
         this.entityManager = entityManagerFactory.createEntityManager();
         this.userDatabaseDAO = HibernateDAOProvider.makeImplementation(UserDatabaseDAO.class,
@@ -106,10 +109,14 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
 
             DomainFilters.applyUserFilter(user, entityManager);
 
-            databases = userDatabaseDAO.queryAllUserDatabasesAlphabetically();
+            int dbId = parseDbId(request);
+
+            database = userDatabaseDAO.findById(dbId);
+
+            Preconditions.checkNotNull(database, "Failed to fetch database by id:" + dbId + ", region: " + request);
 
             long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
-            long serverVersion = getCurrentSchemaVersion();
+            long serverVersion = getCurrentDbVersion();
 
             LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
 
@@ -127,32 +134,42 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
         }
     }
 
+    private int parseDbId(GetSyncRegionUpdates request) {
+        if (!request.getRegionId().startsWith(REGION_PREFIX)) {
+            throw new AssertionError("Expected region prefixed by '" + REGION_PREFIX +
+                    "', got '" + request.getRegionId() + "'");
+        }
+        return Integer.parseInt(request.getRegionId().substring(REGION_PREFIX.length()));
+    }
+
     private String buildSql() throws JSONException {
         JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
         for (Class schemaClass : schemaClasses) {
             builder.createTableIfNotExists(schemaClass);
 
+            // we never clear data becase now we handle data per database
             // Special case: we never delete partners, only add them. This way we always have a label for Partners
             // See : LocalSiteCreateTest.siteRemovePartnerConflict
-            if (!schemaClass.equals(Partner.class)) {
-                builder.deleteAll(schemaClass);
-            }
+//            if (!schemaClass.equals(Partner.class)) {
+//                builder.deleteAll(schemaClass);
+//            }
         }
 
-        builder.insert(Country.class, countries);
-        builder.insert(AdminLevel.class, adminLevels);
-        builder.insert(UserDatabase.class, databases);
+        builder.insert(" or replace ", Country.class, countries);
+        builder.insert(" or replace ", AdminLevel.class, adminLevels);
+        builder.insert(" or replace ", UserDatabase.class, Lists.newArrayList(database));
         builder.insert(" or replace ", Partner.class, partners);
-        builder.insert(Activity.class, activities);
-        builder.insert(Indicator.class, indicators);
-        builder.insert(AttributeGroup.class, attributeGroups);
-        builder.insert(Attribute.class, attributes);
-        builder.insert(LocationType.class, locationTypes);
-        builder.insert(User.class, users);
-        builder.insert(UserPermission.class, userPermissions);
-        builder.insert(Project.class, projects);
-        builder.insert(LockedPeriod.class, allLockedPeriods);
+
+        builder.insert(" or replace ", Activity.class, activities);
+        builder.insert(" or replace ", Indicator.class, indicators);
+        builder.insert(" or replace ", AttributeGroup.class, attributeGroups);
+        builder.insert(" or replace ", Attribute.class, attributes);
+        builder.insert(" or replace ", LocationType.class, locationTypes);
+        builder.insert(" or replace ", User.class, users);
+        builder.insert(" or replace ", UserPermission.class, userPermissions);
+        builder.insert(" or replace ", Project.class, projects);
+        builder.insert(" or replace ", LockedPeriod.class, allLockedPeriods);
 
         // TODO: this needs to be actually synchronized
         builder.executeStatement(
@@ -175,11 +192,12 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
     private void createAndSyncIndicatorlinks(JpaUpdateBuilder builder) throws JSONException {
         builder.executeStatement(
                 "create table if not exists IndicatorLink (SourceIndicatorId int, DestinationIndicatorId int) ");
-        builder.executeStatement("delete from IndicatorLink");
+        // do not clear table, now we handle data per db
+        //builder.executeStatement("delete from IndicatorLink");
 
         if (!indicatorLinks.isEmpty()) {
             builder.beginPreparedStatement(
-                    "insert into IndicatorLink (SourceIndicatorId, DestinationIndicatorId) values (?, ?) ");
+                    "insert or replace into IndicatorLink (SourceIndicatorId, DestinationIndicatorId) values (?, ?) ");
             for (IndicatorLinkEntity il : indicatorLinks) {
                 builder.addExecution(il.getId().getSourceIndicatorId(), il.getId().getDestinationIndicatorId());
             }
@@ -189,14 +207,14 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
 
     private void createAndSyncPartnerInDatabase(JpaUpdateBuilder builder) throws JSONException {
         builder.executeStatement("create table if not exists PartnerInDatabase (DatabaseId integer, PartnerId int)");
-        builder.executeStatement("delete from PartnerInDatabase");
+        // do not clear table, now we handle data per db
+//        builder.executeStatement("delete from PartnerInDatabase");
 
         if (anyPartners()) {
-            builder.beginPreparedStatement("insert into PartnerInDatabase (DatabaseId, PartnerId) values (?, ?) ");
-            for (UserDatabase db : databases) {
-                for (Partner partner : db.getPartners()) {
-                    builder.addExecution(db.getId(), partner.getId());
-                }
+            builder.beginPreparedStatement("insert or replace into PartnerInDatabase (DatabaseId, PartnerId) values (?, ?) ");
+
+            for (Partner partner : database.getPartners()) {
+                builder.addExecution(database.getId(), partner.getId());
             }
             builder.finishPreparedStatement();
         }
@@ -205,91 +223,84 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
     private void createAndSyncAttributeGroupInActivity(JpaUpdateBuilder builder) throws JSONException {
         builder.executeStatement(
                 "create table if not exists AttributeGroupInActivity (ActivityId integer, AttributeGroupId integer)");
-        builder.executeStatement("delete from AttributeGroupInActivity");
+        // do not clear table, now we handle data per db
+//        builder.executeStatement("delete from AttributeGroupInActivity");
 
         if (anyAttributes()) {
             builder.beginPreparedStatement(
-                    "insert into AttributeGroupInActivity (ActivityId, AttributeGroupId) values (?,?)");
-            for (UserDatabase db : databases) {
-                for (Activity activity : db.getActivities()) {
-                    for (AttributeGroup group : activity.getAttributeGroups()) {
-                        builder.addExecution(activity.getId(), group.getId());
-                    }
+                    "insert or replace into AttributeGroupInActivity (ActivityId, AttributeGroupId) values (?,?)");
+
+            for (Activity activity : database.getActivities()) {
+                for (AttributeGroup group : activity.getAttributeGroups()) {
+                    builder.addExecution(activity.getId(), group.getId());
                 }
             }
+
             builder.finishPreparedStatement();
         }
     }
 
     private boolean anyPartners() {
-        for (UserDatabase db : databases) {
-            if (!db.getPartners().isEmpty()) {
+        return !database.getPartners().isEmpty();
+    }
+
+    private boolean anyAttributes() {
+        for (Activity activity : database.getActivities()) {
+            if (!activity.getAttributeGroups().isEmpty()) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean anyAttributes() {
-        for (UserDatabase db : databases) {
-            for (Activity activity : db.getActivities()) {
-                if (!activity.getAttributeGroups().isEmpty()) {
-                    return true;
-                }
+    private void makeEntityLists() {
+
+        if (!userIds.contains(database.getOwner().getId())) {
+            User u = database.getOwner();
+            // don't send hashed password to client
+            // EEK i think hibernate will persist this to the database
+            // automatically if we change it here!!
+            // u.setHashedPassword("");
+            users.add(u);
+            userIds.add(u.getId());
+        }
+
+        if (!countryIds.contains(database.getCountry().getId())) {
+            countries.add(database.getCountry());
+            adminLevels.addAll(database.getCountry().getAdminLevels());
+            countryIds.add(database.getCountry().getId());
+            for (org.activityinfo.server.database.hibernate.entity.LocationType l : database.getCountry()
+                    .getLocationTypes()) {
+                locationTypes.add(l);
             }
         }
-        return false;
-    }
-
-    private void makeEntityLists() {
-        for (UserDatabase database : databases) {
-            if (!userIds.contains(database.getOwner().getId())) {
-                User u = database.getOwner();
-                // don't send hashed password to client
-                // EEK i think hibernate will persist this to the database
-                // automatically if we change it here!!
-                // u.setHashedPassword("");
-                users.add(u);
-                userIds.add(u.getId());
+        for (Partner partner : database.getPartners()) {
+            if (!partnerIds.contains(partner.getId())) {
+                partners.add(partner);
+                partnerIds.add(partner.getId());
             }
+        }
 
-            if (!countryIds.contains(database.getCountry().getId())) {
-                countries.add(database.getCountry());
-                adminLevels.addAll(database.getCountry().getAdminLevels());
-                countryIds.add(database.getCountry().getId());
-                for (org.activityinfo.server.database.hibernate.entity.LocationType l : database.getCountry()
-                                                                                                .getLocationTypes()) {
-                    locationTypes.add(l);
-                }
+        projects.addAll(Lists.newArrayList(database.getProjects()));
+
+        allLockedPeriods.addAll(database.getLockedPeriods());
+        for (Project project : database.getProjects()) {
+            allLockedPeriods.addAll(project.getLockedPeriods());
+        }
+
+        for (Activity activity : database.getActivities()) {
+            allLockedPeriods.addAll(activity.getLockedPeriods());
+
+            activities.add(activity);
+            for (Indicator indicator : activity.getIndicators()) {
+                indicators.add(indicator);
             }
-            for (Partner partner : database.getPartners()) {
-                if (!partnerIds.contains(partner.getId())) {
-                    partners.add(partner);
-                    partnerIds.add(partner.getId());
-                }
-            }
-
-            projects.addAll(new ArrayList<Project>(database.getProjects()));
-
-            allLockedPeriods.addAll(database.getLockedPeriods());
-            for (Project project : database.getProjects()) {
-                allLockedPeriods.addAll(project.getLockedPeriods());
-            }
-
-            for (Activity activity : database.getActivities()) {
-                allLockedPeriods.addAll(activity.getLockedPeriods());
-
-                activities.add(activity);
-                for (Indicator indicator : activity.getIndicators()) {
-                    indicators.add(indicator);
-                }
-                for (AttributeGroup g : activity.getAttributeGroups()) {
-                    if (!attributeGroupIds.contains(g.getId())) {
-                        attributeGroups.add(g);
-                        attributeGroupIds.add(g.getId());
-                        for (Attribute a : g.getAttributes()) {
-                            attributes.add(a);
-                        }
+            for (AttributeGroup g : activity.getAttributeGroups()) {
+                if (!attributeGroupIds.contains(g.getId())) {
+                    attributeGroups.add(g);
+                    attributeGroupIds.add(g.getId());
+                    for (Attribute a : g.getAttributes()) {
+                        attributes.add(a);
                     }
                 }
             }
@@ -320,13 +331,8 @@ public class SchemaUpdateBuilder implements UpdateBuilder {
         }
     }
 
-    public long getCurrentSchemaVersion() {
-        long currentVersion = 1;
-        for (UserDatabase db : databases) {
-            if (db.getVersion() > currentVersion) {
-                currentVersion = db.getVersion();
-            }
-        }
+    public long getCurrentDbVersion() {
+        long currentVersion = database.getVersion();
         for (UserPermission perm : userPermissions) {
             if (perm.getVersion() > currentVersion) {
                 currentVersion = perm.getVersion();

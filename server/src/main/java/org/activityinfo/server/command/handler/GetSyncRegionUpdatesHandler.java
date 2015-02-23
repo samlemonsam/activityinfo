@@ -51,8 +51,8 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
 
         UpdateBuilder builder;
 
-        if (cmd.getRegionId().equals("schema")) {
-            builder = injector.getInstance(SchemaUpdateBuilder.class);
+        if (cmd.getRegionId().startsWith("db/")) {
+            builder = injector.getInstance(DbUpdateBuilder.class);
 
         } else if (cmd.getRegionId().startsWith("admin/")) {
             builder = injector.getInstance(AdminUpdateBuilder.class);

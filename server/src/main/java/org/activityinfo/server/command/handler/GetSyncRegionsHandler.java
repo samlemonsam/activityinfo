@@ -23,6 +23,7 @@ package org.activityinfo.server.command.handler;
  */
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegions;
@@ -36,10 +37,7 @@ import org.activityinfo.server.command.handler.sync.SiteTableUpdateBuilder;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
 
@@ -60,32 +58,42 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
                                                              "LEFT JOIN db.userPermissions p " +
                                                              "GROUP BY db.id").getResultList();
 
-        List<Integer> databaseIds = Lists.newArrayList();
+        Map<Integer, Long> databaseIdToVerions = Maps.newHashMap();
         Set<Integer> countryIds = Sets.newHashSet();
-        long schemaVersion = 1;
+
         for (Object[] db : databases) {
-            databaseIds.add((Integer) db[0]);
-            countryIds.add((Integer) db[1]);
+            long version = 1;
             if (db[2] != null) {
-                schemaVersion = Math.max(schemaVersion, (Long) db[2]);
+                version = (Long) db[2];
             }
-            if (db[3] != null) {
-                schemaVersion = Math.max(schemaVersion, (Long) db[3]);
+            if (db[3] != null && (Long) db[3] > version) {
+                version = (Long) db[3];
             }
+
+            databaseIdToVerions.put((Integer) db[0], version);
+            countryIds.add((Integer) db[1]);
         }
 
-        List<SyncRegion> regions = new ArrayList<SyncRegion>();
-        regions.add(new SyncRegion("schema", Long.toString(schemaVersion)));
+        List<SyncRegion> regions = Lists.newArrayList();
+        regions.addAll(listDbs(databaseIdToVerions));
         regions.addAll(listAdminRegions(countryIds));
-        regions.addAll(listLocations(databaseIds));
-        regions.addAll(listSiteRegions(databaseIds));
+        regions.addAll(listLocations(databaseIdToVerions.keySet()));
+        regions.addAll(listSiteRegions(databaseIdToVerions.keySet()));
         return new SyncRegions(regions);
     }
 
-    @SuppressWarnings("unchecked")
-    private Collection<? extends SyncRegion> listLocations(List<Integer> databases) {
+    private Collection<? extends SyncRegion> listDbs(Map<Integer, Long> databaseIdToVerions) {
+        List<SyncRegion> dbRegions = Lists.newArrayList();
+        for (Map.Entry<Integer, Long> entry : databaseIdToVerions.entrySet()) {
+            dbRegions.add(new SyncRegion("db/" + entry.getKey(), entry.getValue().toString()));
+        }
+        return dbRegions;
+    }
 
-        List<SyncRegion> locationRegions = new ArrayList<SyncRegion>();
+    @SuppressWarnings("unchecked")
+    private Collection<? extends SyncRegion> listLocations(Collection<Integer> databases) {
+
+        List<SyncRegion> locationRegions = Lists.newArrayList();
 
         if (CollectionUtil.isNotEmpty(databases)) {
             List<Object[]> regions = entityManager.createQuery("SELECT " +
@@ -108,7 +116,7 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
     @SuppressWarnings("unchecked")
     private Collection<? extends SyncRegion> listAdminRegions(Set<Integer> countryIds) {
 
-        List<SyncRegion> adminRegions = new ArrayList<SyncRegion>();
+        List<SyncRegion> adminRegions = Lists.newArrayList();
 
         if (CollectionUtil.isNotEmpty(countryIds)) {
             List<Integer> levels = entityManager.createQuery("SELECT " +
@@ -131,8 +139,8 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
      * because we may be given permission to view data at different times.
      */
     @SuppressWarnings("unchecked")
-    private Collection<? extends SyncRegion> listSiteRegions(List<Integer> databases) {
-        List<SyncRegion> siteRegions = new ArrayList<SyncRegion>();
+    private Collection<? extends SyncRegion> listSiteRegions(Collection<Integer> databases) {
+        List<SyncRegion> siteRegions = Lists.newArrayList();
 
         // our initial sync region manages the table schema
         siteRegions.add(new SyncRegion("site-tables", SiteTableUpdateBuilder.CURRENT_VERSION));
