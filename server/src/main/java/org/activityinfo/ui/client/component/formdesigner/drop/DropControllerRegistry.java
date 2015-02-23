@@ -22,8 +22,8 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
  */
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
-import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;

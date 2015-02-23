@@ -9,8 +9,6 @@ import org.activityinfo.model.resource.*;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -284,6 +282,16 @@ public class FormClass implements IsResource, FormElementContainer {
         return resource;
     }
 
+    public List<FormElement> getBuiltInElements() {
+        List<FormElement> builtIn = Lists.newArrayList();
+        for (FormElement elem : elements) {
+            if (elem.getId().asString().startsWith(getId().asString())) {
+                builtIn.add(elem);
+            }
+        }
+        return builtIn;
+    }
+
 
     /**
      * Normalized FormFields order. Puts built-in formfields at the end of the list.
@@ -291,20 +299,9 @@ public class FormClass implements IsResource, FormElementContainer {
      * (todo: ask Alex whether it's ok or it's better to put it at the beginning of the list)
      */
     public void reorderFormFields() {
-        Collections.sort(elements, new Comparator<FormElement>() {
-            @Override
-            public int compare(FormElement o1, FormElement o2) {
-                boolean isBuitIn1 = o1.getId().asString().startsWith(getId().asString());
-                boolean isBuitIn2 = o2.getId().asString().startsWith(getId().asString());
-                if (isBuitIn1 && !isBuitIn2) {
-                    return -1;
-                } else if (!isBuitIn1 && isBuitIn2) {
-                    return 1;
-                }
-                return 0;
-            }
-        });
-
+        List<FormElement> builtInElements = getBuiltInElements();
+        elements.removeAll(builtInElements); // remove
+        elements.addAll(builtInElements); // add to the end
     }
 
 }
