@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.*;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +33,7 @@ public class FormClass implements IsResource, FormElementContainer {
      */
     public static final String LABEL_FIELD_ID = "_class_label";
 
-    @NotNull
+    @Nonnull
     private ResourceId id;
     private ResourceId ownerId;
 

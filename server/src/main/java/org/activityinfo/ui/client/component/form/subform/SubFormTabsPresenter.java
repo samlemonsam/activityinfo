@@ -33,7 +33,7 @@ import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +78,7 @@ public class SubFormTabsPresenter {
     private ClickHandler<ButtonType> moveButtonClickHandler;
     private ClickHandler<FormInstance> instanceTabClickHandler;
 
-    public SubFormTabsPresenter(@NotNull SubFormTabs view) {
+    public SubFormTabsPresenter(@Nonnull SubFormTabs view) {
         this.view = view;
     }
 

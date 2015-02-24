@@ -33,14 +33,36 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 public class Positioner implements IsWidget {
 
     private final HTML widget = new HTML();
+    private boolean forbidded = false;
 
     public Positioner() {
         widget.addStyleName(FormDesignerStyles.INSTANCE.spacer());
         widget.setHeight(FormDesignerConstants.SOURCE_CONTROL_HEIGHT_PX + "px");
     }
 
+    private void setStyle() {
+
+        widget.removeStyleName(FormDesignerStyles.INSTANCE.spacerNormal());
+        widget.removeStyleName(FormDesignerStyles.INSTANCE.spacerForbidden());
+
+        if (forbidded) {
+            widget.addStyleName(FormDesignerStyles.INSTANCE.spacerForbidden());
+        } else {
+            widget.addStyleName(FormDesignerStyles.INSTANCE.spacerNormal());
+        }
+    }
+
     @Override
     public Widget asWidget() {
         return widget;
+    }
+
+    public boolean isForbidded() {
+        return forbidded;
+    }
+
+    public void setForbidded(boolean forbidded) {
+        this.forbidded = forbidded;
+        setStyle();
     }
 }

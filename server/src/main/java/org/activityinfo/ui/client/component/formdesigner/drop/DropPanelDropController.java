@@ -156,7 +156,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         } else if (template instanceof SectionTemplate) {
             final FormSection formSection = ((SectionTemplate)template).create();
 
-            vetoDropIfNeeded();
+            vetoDropIfNeeded(context);
 
             FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.section(formDesigner, formSection, resourceId);
             containerMap.put(resourceId, widgetContainer); // parent drop container
@@ -164,7 +164,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         } else if (template instanceof SubformTemplate) {
             final FormField formField = ((SubformTemplate)template).create();
 
-            vetoDropIfNeeded();
+            vetoDropIfNeeded(context);
 
             FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
             subForm.setLabel(formField.getLabel());
@@ -190,7 +190,11 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         throw new VetoDragException();
     }
 
-    private void vetoDropIfNeeded() throws VetoDragException {
+    private void vetoDropIfNeeded(DragContext context) throws VetoDragException {
+        final Template template = ((DnDLabel) context.draggable).getTemplate();
+        if (template instanceof FieldTemplate) {
+            return;
+        }
         if (formDesigner.getModel().getElementContainer(resourceId) instanceof FormSection ||
                 formDesigner.getModel().isSubform(formDesigner.getModel().getElementContainer(resourceId).getId())) {
             // we are not going to handle nested FormSection or nested SubForms in FormDesigner
@@ -247,6 +251,19 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         int currentIndex = dropTarget.getWidgetIndex(positioner);
         if (currentIndex != -1) {
             dropTarget.remove(currentIndex);
+        }
+    }
+
+    @Override
+    public void onEnter(DragContext context) {
+        super.onEnter(context);
+
+        try {
+            positioner.setForbidded(false);
+            vetoDropIfNeeded(context);
+
+        } catch (VetoDragException e) {
+            positioner.setForbidded(true);
         }
     }
 

@@ -42,6 +42,12 @@ public interface FormDesignerStyles extends Stylesheet{
     @ClassName("spacer")
     String spacer();
 
+    @ClassName("spacer-normal")
+    String spacerNormal();
+
+    @ClassName("spacer-forbidden")
+    String spacerForbidden();
+
     @ClassName("header-container")
     String headerContainer();
 

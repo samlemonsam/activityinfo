@@ -38,8 +38,8 @@ import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -57,16 +57,16 @@ public class SubFormTabsManipulator {
     private FormClass subForm;
     private FormModel formModel;
 
-    public SubFormTabsManipulator(@NotNull ResourceLocator resourceLocator) {
+    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator) {
         this(resourceLocator, new SubFormTabs());
     }
 
-    public SubFormTabsManipulator(@NotNull ResourceLocator resourceLocator, @NotNull SubFormTabs tabs) {
+    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator, @Nonnull SubFormTabs tabs) {
         this.resourceLocator = resourceLocator;
         this.presenter = new SubFormTabsPresenter(tabs);
     }
 
-    public SubFormTabsManipulator show(@NotNull FormClass subForm, @NotNull FormModel formModel) {
+    public SubFormTabsManipulator show(@Nonnull FormClass subForm, @Nonnull FormModel formModel) {
 
         Preconditions.checkNotNull(subForm);
         Preconditions.checkNotNull(formModel);
