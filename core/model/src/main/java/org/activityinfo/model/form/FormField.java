@@ -4,9 +4,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.TypeRegistry;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Set;
 
@@ -46,7 +48,7 @@ public class FormField extends FormElement {
 
     public String getName() { return name; }
 
-    @NotNull
+    @Nonnull
     public String getLabel() {
         return label;
     }
@@ -60,7 +62,7 @@ public class FormField extends FormElement {
      * @return an extended description of this field, presented to be
      * presented to the user during data entry
      */
-    @NotNull
+    @Nonnull
     public String getDescription() {
         return description;
     }
