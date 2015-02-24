@@ -198,7 +198,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         JSONObject model = new JSONObject();
         model.put("name", "A User");
         model.put("email", properties.getString("user"));
-        model.put("partnerId", properties.getString("partner"));
+        model.put("partnerId", aliases.getId(properties.getString("partner")));
         
         for(String permission : properties.getStringList("permissions")) {
             switch (permission) {

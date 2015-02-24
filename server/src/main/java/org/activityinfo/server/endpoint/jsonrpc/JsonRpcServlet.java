@@ -9,6 +9,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.HttpStatusCode;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.server.command.DispatcherSync;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -84,6 +85,11 @@ public class JsonRpcServlet {
         CommandResult result;
         try {
             result = dispatcher.execute(command);
+            
+        } catch (IllegalAccessCommandException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+            
         } catch (CommandException e) {
             LOGGER.log(Level.SEVERE, "Command exception", e);
             throw new BadRpcRequest(e.getMessage());

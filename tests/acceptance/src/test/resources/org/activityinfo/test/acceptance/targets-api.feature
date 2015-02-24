@@ -84,9 +84,8 @@ Feature: Indicator Targets API
       Then the response should fail with 400 Bad Request and mention "date"
 
       
-    Scenario: Deleting a target requires design privileges
-      Given I have created a target named "Goals" for database "PAKA"
-        And I have granted bob@bedatadriven.com permission to View All on behalf of "UNHCR PESHAWAR"
+    Scenario Outline: Creating a target requires design privileges 
+       Given I have granted bob@bedatadriven.com permission to <role> on behalf of "UNHCR PESHAWAR"
        When bob@bedatadriven.com executes the command:
        """
       type: AddTarget
@@ -97,5 +96,33 @@ Feature: Indicator Targets API
           fromDate: 2014-01-01
           toDate: 2014-12-31
       """
-      Then the response should be 403 Forbidden
+      Then the response should be <code> <status>
+  
+      Examples:
+        | role     | code | status     |
+        | Design   | 201  | Created    |
+        | View     | 403  | Forbidden  |
       
+
+      
+    Scenario Outline: Deleting a target requires design privileges
+      Given I have created a target named "Goals" for database "PAKA"
+        And I have granted bob@bedatadriven.com permission to <role> on behalf of "UNHCR PESHAWAR"
+      When bob@bedatadriven.com executes the command:
+      """
+        type: Delete
+        command:  
+          entityName: Target
+          id: $Goals
+        """
+      Then the response should be <code> <status>
+      
+      Examples:
+      | role     | code | status     |
+      | Design   | 204  | No Content |
+      | View     | 403  | Forbidden  |
+      | View All | 403  | Forbidden  |
+      | Edit     | 403  | Forbidden  |
+      | Edit All | 403  | Forbidden  |
+      
+   

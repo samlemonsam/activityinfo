@@ -14,7 +14,14 @@ public class SystemUnderTest extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(Server.class).toInstance(new Server(TEST_URL.getOr(PRODUCTION_URL)));
-        bind(Accounts.class).toInstance(fromResource(getClass(), "devserver-credentials.properties"));
+        String url = TEST_URL.getOr(PRODUCTION_URL);
+        
+        bind(Server.class).toInstance(new Server(url));
+        
+        if(url.startsWith("http://localhost:")) {
+            bind(Accounts.class).to(DevServerAccounts.class);
+        } else {
+            bind(Accounts.class).toInstance(fromResource(getClass(), "devserver-credentials.properties"));
+        }
     }
 }
