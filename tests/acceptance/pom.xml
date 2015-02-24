@@ -11,8 +11,7 @@
     </parent>
 
     <artifactId>activityinfo-ui-tests</artifactId>
-    <name>ActivityInfo UI Tests</name>
-    <description>ActivityInfo WebDriver UI Tests</description>
+    <name>ActivityInfo Acceptance Tests</name>
 
     <properties>
         <cucumber.version>1.2.2</cucumber.version>
@@ -31,6 +30,11 @@
             <artifactId>selenium-java</artifactId>
             <version>2.43.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.27</version>
         </dependency>
         <dependency>
             <groupId>com.saucelabs</groupId>
