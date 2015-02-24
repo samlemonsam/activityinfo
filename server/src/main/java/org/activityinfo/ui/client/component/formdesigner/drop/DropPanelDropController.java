@@ -86,16 +86,29 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         }
     }
 
-    private void updateModel(Widget draggable, DropController dropController) {
-        DropPanelDropController panelDropController = (DropPanelDropController) dropController;
-
+    private List<WidgetContainer> getAllContainers() {
         List<WidgetContainer> containers = new ArrayList<>(containerMap.values());
         containers.addAll(formDesigner.getFormDesignerPanel().getContainerMap().values());
         for (DropControllerExtended c : formDesigner.getDropControllerRegistry().getDropControllers()) {
             containers.addAll(c.getContainerMap().values());
         }
+        return containers;
+    }
 
-        for (WidgetContainer container : containers) {
+    private boolean isField(Widget draggable) {
+        for (WidgetContainer container : getAllContainers()) {
+            if (draggable.equals(container.asWidget()) && container instanceof FieldWidgetContainer) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void updateModel(Widget draggable, DropController dropController) {
+        DropPanelDropController panelDropController = (DropPanelDropController) dropController;
+
+
+        for (WidgetContainer container : getAllContainers()) {
             if (draggable.equals(container.asWidget())) {
                 if (container instanceof FieldWidgetContainer) {
                     FormField formField = ((FieldWidgetContainer) container).getFormField();
@@ -191,10 +204,14 @@ public class DropPanelDropController extends FlowPanelDropController implements 
     }
 
     private void vetoDropIfNeeded(DragContext context) throws VetoDragException {
-        final Template template = ((DnDLabel) context.draggable).getTemplate();
-        if (template instanceof FieldTemplate) {
+        // DnDLabel then drop is always allowed
+        if (context.draggable instanceof DnDLabel && ((DnDLabel) context.draggable).getTemplate() instanceof FieldTemplate) {
             return;
         }
+        if (isField(context.selectedWidgets.get(0))) { // field is moved
+            return;
+        }
+
         if (formDesigner.getModel().getElementContainer(resourceId) instanceof FormSection ||
                 formDesigner.getModel().isSubform(formDesigner.getModel().getElementContainer(resourceId).getId())) {
             // we are not going to handle nested FormSection or nested SubForms in FormDesigner
