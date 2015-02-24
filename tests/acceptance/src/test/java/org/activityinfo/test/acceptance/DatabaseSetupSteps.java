@@ -89,6 +89,13 @@ public class DatabaseSetupSteps {
                 property("database", getCurrentDatabase()));
     }
 
+    @Given("^I have created a target named \"([^\"]*)\" for database \"([^\"]*)\"$")
+    public void I_have_created_a_target_named_for_database(String targetName, String database) throws Throwable {
+        driver.setup().createTarget(
+                property("database", database),
+                property("name", targetName));
+    }
+
     private String getCurrentDatabase() {
         Preconditions.checkState(currentDatabase != null, "There has been no database mentioned yet");
         return currentDatabase;
@@ -109,13 +116,7 @@ public class DatabaseSetupSteps {
                 property("partner", partnerName),
                 property("name", targetName));
     }
-    
-    @Given("^I have created a target named \"([^\"]*)\" for database \"([^\"]*)\"$")
-    public void I_have_created_a_target_named_for_database(String targetName, String database) throws Throwable {
-        driver.createTarget(
-                property("database", database),
-                property("name", targetName));
-    }
+   
 
     @When("^I create a target named \"([^\"]*)\" for partner \"([^\"]*)\" and project \"([^\"]*)\"$")
     public void I_create_a_target_named_for_partner_and_project(String target, String partner, String project) throws Throwable {
@@ -149,7 +150,7 @@ public class DatabaseSetupSteps {
         driver.setTargetValues(targetName, targetValues);
     }
 
-    @Given("^I have granted ([^ ]+) permission to (.+) on behalf of (.*)+$")
+    @Given("^I have granted ([^ ]+) permission to (.+) on behalf of \"(.+)\"$")
     public void I_have_granted_permission(String accountEmail, String permission, String partner) throws Throwable {
         driver.setup().grantPermission(
                 property("database", getCurrentDatabase()),
