@@ -30,6 +30,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
@@ -59,6 +60,7 @@ public class SubFormTabsPresenter {
         }
 
         public static ButtonType fromValue(String value) {
+            value = value.substring(0, value.lastIndexOf("_")); // cut off suffix
             for (ButtonType type : values()) {
                 if (type.getValue().equals(value)) {
                     return type;
@@ -74,6 +76,12 @@ public class SubFormTabsPresenter {
 
     private final Map<String, FormInstance> instancesMap = Maps.newHashMap();
     private List<FormInstance> instances = null;
+
+    /**
+     * Id suffix is required to support multiple subforms on the same FormClass.
+     * We have to differentiate predefined buttons between different forms.
+     */
+    private ResourceId idSuffix = ResourceId.generateId();
 
     private ClickHandler<ButtonType> moveButtonClickHandler;
     private ClickHandler<FormInstance> instanceTabClickHandler;
@@ -111,7 +119,7 @@ public class SubFormTabsPresenter {
 
         // predefined buttons
         for (ButtonType buttonType : ButtonType.values()) {
-            addClickHandlerToElementById(buttonType.getValue());
+            addClickHandlerToElementById(buttonType.getValue() + "_" + idSuffix.asString());
         }
 
         // tabs
@@ -157,13 +165,13 @@ public class SubFormTabsPresenter {
     }
 
     private String perviousButtons() {
-        return "<li><a href='javascript:;' id='_fullprevious'>&laquo;</a></li>\n" +
-                "<li><a href='javascript:;' id='_previous'>&lt;</a></li>";
+        return "<li><a href='javascript:;' id='_fullprevious_"  + idSuffix.asString() + "'>&laquo;</a></li>\n" +
+                "<li><a href='javascript:;' id='_previous_"  + idSuffix.asString() + "'>&lt;</a></li>";
     }
 
     private String nextButtons() {
-        return "<li><a href='javascript:;' id='_next'>&gt;</a></li>\n" +
-                "<li><a href='javascript:;' id='_fullnext'>&raquo;</a></li>";
+        return "<li><a href='javascript:;' id='_next_"  + idSuffix.asString() + "'>&gt;</a></li>\n" +
+                "<li><a href='javascript:;' id='_fullnext_"  + idSuffix.asString() + "'>&raquo;</a></li>";
     }
 
     public int getTabCount() {

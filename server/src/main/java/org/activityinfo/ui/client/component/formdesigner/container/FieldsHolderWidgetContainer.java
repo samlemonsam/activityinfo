@@ -138,7 +138,9 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
                 panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
                     @Override
                     public void onAttachOrDetach(AttachEvent event) {
-                        tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()));
+                        if (event.isAttached()) {
+                            tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()));
+                        }
                     }
                 });
             }
