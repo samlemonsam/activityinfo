@@ -2,6 +2,7 @@ package org.activityinfo.test.sut;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
+import cucumber.api.PendingException;
 import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.config.ConfigurationError;
 import org.junit.internal.AssumptionViolatedException;
@@ -56,7 +57,7 @@ public class PredefinedAccounts implements Accounts {
     public UserAccount ensureAccountExists(String email) {
         String password = credentials.getProperty(email);
         if(Strings.isNullOrEmpty(password)) {
-            throw new AssumptionViolatedException(String.format("The user account %s does not exist.", email));
+            throw new PendingException(String.format("The user account %s does not exist.", email));
         }
         return new UserAccount(email, password);
     }
