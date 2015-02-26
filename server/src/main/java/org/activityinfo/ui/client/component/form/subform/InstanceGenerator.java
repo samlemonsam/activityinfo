@@ -25,7 +25,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.DateRange;
+import org.activityinfo.model.date.EpiWeek;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
@@ -116,7 +119,7 @@ public class InstanceGenerator {
         int size = lastGeneratedList.size();
         FormInstance lastInstance = lastGeneratedList.get(size - 1);
         DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
-        Date point = getPointToCalculate(lastDateRange, lastDirection);
+        Date point = getPointToCalculate(lastDateRange, Direction.FORWARD);
         List<FormInstance> next = generate(lastPeriod, point, Direction.FORWARD, 1, false);
         lastGeneratedList.remove(0); // remove first
         lastGeneratedList.add(size - 1, next.get(0)); // add next at the end
@@ -129,7 +132,7 @@ public class InstanceGenerator {
         int size = lastGeneratedList.size();
         FormInstance lastInstance = lastGeneratedList.get(size - 1);
         DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
-        return generate(lastPeriod, getPointToCalculate(lastDateRange, lastDirection), Direction.FORWARD, lastCount, true);
+        return generate(lastPeriod, getPointToCalculate(lastDateRange, Direction.FORWARD), Direction.FORWARD, lastCount, true);
     }
 
     public List<FormInstance> previous() {
@@ -138,7 +141,7 @@ public class InstanceGenerator {
         int size = lastGeneratedList.size();
         FormInstance firstInstance = lastGeneratedList.get(0);
         DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
-        List<FormInstance> previous = generate(lastPeriod, getPointToCalculate(firstDateRange, lastDirection), Direction.BACK, 1, false);
+        List<FormInstance> previous = generate(lastPeriod, getPointToCalculate(firstDateRange, Direction.BACK), Direction.BACK, 1, false);
         lastGeneratedList.remove(size - 1); // remove last
         lastGeneratedList.add(0, previous.get(0)); // add next at the beginning
         return lastGeneratedList;
@@ -148,7 +151,7 @@ public class InstanceGenerator {
         assertState();
         FormInstance firstInstance = lastGeneratedList.get(0);
         DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
-        return generate(lastPeriod, getPointToCalculate(firstDateRange, lastDirection), Direction.BACK, lastCount, true);
+        return generate(lastPeriod, getPointToCalculate(firstDateRange, Direction.BACK), Direction.BACK, lastCount, true);
     }
 
     private void assertState() {
@@ -168,12 +171,30 @@ public class InstanceGenerator {
     }
 
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        String instanceId = "period_" + range.getStart().getTime() + "_"+ range.getEnd().getTime();
+        String instanceId = "period_" + range.getStart().getTime() + "_" + range.getEnd().getTime();
         FormInstance instance = new FormInstance(ResourceId.valueOf(instanceId), classId);
         instance.set(PERIOD_START_DATE_ID, range.getStart());
         instance.set(PERIOD_END_DATE_ID, range.getEnd());
-        FormInstanceLabeler.setLabel(instance, format(getPointToCalculate(range, direction), period));
+        FormInstanceLabeler.setLabel(instance, getLabel(range, period, direction));
         return instance;
+    }
+
+    private String getLabel(DateRange range, PeriodValue period, Direction direction) {
+        if (period.equals(PredefinedPeriods.WEEKLY.getPeriod())) {
+            EpiWeek epiWeek = CalendarUtils.epiWeek(range.midDate());
+            return I18N.CONSTANTS.week() + " " + epiWeek.getWeekInYear() + " " + epiWeek.getYear();
+        }
+        return format(getDateForLabel(range, period, direction), period);
+    }
+
+    private Date getDateForLabel(DateRange range, PeriodValue period, Direction direction) {
+        if (period.equals(PredefinedPeriods.MONTHLY.getPeriod())) {
+            return range.midDate();
+        } else if (period.equals(PredefinedPeriods.YEARLY.getPeriod())) {
+//            return direction == Direction.BACK ? range.getEnd() : range.getStart();
+            return range.getStart();
+        }
+        return getPointToCalculate(range, direction);
     }
 
     private String format(Date date, PeriodValue period) {
@@ -198,7 +219,8 @@ public class InstanceGenerator {
         } else if (PredefinedPeriods.MONTHLY.getPeriod().equals(period)) {
             CalendarUtil.addMonthsToDate(result, direction == Direction.BACK ? -1 : 1);
         } else if (PredefinedPeriods.WEEKLY.getPeriod().equals(period)) {
-            CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -7 : 7);
+            //CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -7 : 7);
+            return CalendarUtils.rangeByEpiWeekFromDate(startDate);
         } else if (PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period)) {
             CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -14 : 14);
         } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {

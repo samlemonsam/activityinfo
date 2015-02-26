@@ -3659,6 +3659,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Barcode")
     String fieldTypeBarcode();
 
+    @DefaultStringValue("Week")
+    String week();
+
     @DefaultStringValue("Calculated")
     String fieldTypeCalculated();
 

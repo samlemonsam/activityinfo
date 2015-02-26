@@ -40,10 +40,72 @@ import java.util.List;
 public class InstanceGeneratorTest {
 
     @Test
+    public void monthlyStateBugWithNextNextBack() {
+        InstanceGenerator generator = jvmGenerator();
+
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(Calendar.FEBRUARY), InstanceGenerator.Direction.BACK, 4);
+
+        print(instances, "Monthly BACK 4");
+
+        Assert.assertEquals(instances.size(), 4);
+        assertLabel(instances.get(0), "Oct 2014");
+        assertLabel(instances.get(1), "Nov 2014");
+        assertLabel(instances.get(2), "Dec 2014");
+        assertLabel(instances.get(3), "Jan 2015");
+
+        instances = generator.next();
+
+        print(instances, "Monthly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Nov 2014");
+        assertLabel(instances.get(1), "Dec 2014");
+        assertLabel(instances.get(2), "Jan 2015");
+        assertLabel(instances.get(3), "Feb 2015");
+
+        instances = generator.next();
+
+        print(instances, "Monthly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Dec 2014");
+        assertLabel(instances.get(1), "Jan 2015");
+        assertLabel(instances.get(2), "Feb 2015");
+        assertLabel(instances.get(3), "Mar 2015");
+
+        instances = generator.previous();
+
+        print(instances, "Monthly BACK 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Nov 2014");
+        assertLabel(instances.get(1), "Dec 2014");
+        assertLabel(instances.get(2), "Jan 2015");
+        assertLabel(instances.get(3), "Feb 2015");
+
+        instances = generator.next();
+
+        print(instances, "Monthly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Dec 2014");
+        assertLabel(instances.get(1), "Jan 2015");
+        assertLabel(instances.get(2), "Feb 2015");
+        assertLabel(instances.get(3), "Mar 2015");
+
+    }
+
+    @Test
     public void monthlyFirstBack() {
 
         InstanceGenerator generator = jvmGenerator();
-        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 4);
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(Calendar.JANUARY), InstanceGenerator.Direction.BACK, 4);
+
+        print(instances, "Monthly BACK 4");
 
         Assert.assertEquals(instances.size(), 4);
         assertLabel(instances.get(0), "Sep 2014");
@@ -51,9 +113,10 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "Nov 2014");
         assertLabel(instances.get(3), "Dec 2014");
 
-        print(instances);
 
-        instances = generator.next(); // Direction.FORWARD
+        instances = generator.next();
+
+        print(instances, "Monthly NEXT 1");
 
         Assert.assertEquals(instances.size(), 4);
 
@@ -62,9 +125,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "Dec 2014");
         assertLabel(instances.get(3), "Jan 2015");
 
-        print(instances);
+        instances = generator.previous();
 
-        instances = generator.previous(); // Direction.BACK
+        print(instances, "Monthly BACK 1");
 
         Assert.assertEquals(instances.size(), 4);
 
@@ -73,9 +136,53 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "Nov 2014");
         assertLabel(instances.get(3), "Dec 2014");
 
-        print(instances);
+        instances = generator.next();
 
-        instances = generator.fullNext(); // Direction.NEXT full
+        print(instances, "Monthly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Oct 2014");
+        assertLabel(instances.get(1), "Nov 2014");
+        assertLabel(instances.get(2), "Dec 2014");
+        assertLabel(instances.get(3), "Jan 2015");
+
+        instances = generator.previous();
+
+        print(instances, "Monthly BACK 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Sep 2014");
+        assertLabel(instances.get(1), "Oct 2014");
+        assertLabel(instances.get(2), "Nov 2014");
+        assertLabel(instances.get(3), "Dec 2014");
+
+        instances = generator.next();
+
+        print(instances, "Monthly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Oct 2014");
+        assertLabel(instances.get(1), "Nov 2014");
+        assertLabel(instances.get(2), "Dec 2014");
+        assertLabel(instances.get(3), "Jan 2015");
+
+        instances = generator.previous();
+
+        print(instances, "Monthly BACK 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Sep 2014");
+        assertLabel(instances.get(1), "Oct 2014");
+        assertLabel(instances.get(2), "Nov 2014");
+        assertLabel(instances.get(3), "Dec 2014");
+
+        instances = generator.fullNext();
+
+        print(instances, "Monthly NEXT 4");
 
         Assert.assertEquals(instances.size(), 4);
 
@@ -84,9 +191,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "Mar 2015");
         assertLabel(instances.get(3), "Apr 2015");
 
-        print(instances);
+        instances = generator.fullPrevious();
 
-        instances = generator.fullPrevious(); // Direction.PREVIOUS full
+        print(instances, "Monthly BACK 4");
 
         Assert.assertEquals(instances.size(), 4);
 
@@ -95,39 +202,42 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(2), "Nov 2014");
         assertLabel(instances.get(3), "Dec 2014");
 
-        print(instances);
-
     }
 
     @Test
     public void monthlyForward() {
 
         InstanceGenerator generator = jvmGenerator();
-        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.FORWARD, 4);
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(Calendar.JANUARY), InstanceGenerator.Direction.FORWARD, 4);
+
+        print(instances, "Monthly NEXT 4");
 
         Assert.assertEquals(instances.size(), 4);
-        assertLabel(instances.get(0), "Feb 2015");
-        assertLabel(instances.get(1), "Mar 2015");
-        assertLabel(instances.get(2), "Apr 2015");
-        assertLabel(instances.get(3), "May 2015");
+        assertLabel(instances.get(0), "Jan 2015");
+        assertLabel(instances.get(1), "Feb 2015");
+        assertLabel(instances.get(2), "Mar 2015");
+        assertLabel(instances.get(3), "Apr 2015");
 
-        print(instances);
+
     }
 
     @Test
     public void yearlyBack() {
 
         InstanceGenerator generator = jvmGenerator();
-        List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.BACK, 3);
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(Calendar.JANUARY, 2015), InstanceGenerator.Direction.BACK, 3);
+
+        print(instances, "Yearly BACK 3");
 
         Assert.assertEquals(instances.size(), 3);
         assertLabel(instances.get(0), "2012");
         assertLabel(instances.get(1), "2013");
         assertLabel(instances.get(2), "2014");
 
-        print(instances);
 
-        instances = generator.next(); // Direction.FORWARD
+        instances = generator.next();
+
+        print(instances, "Yearly NEXT 1");
 
         Assert.assertEquals(instances.size(), 3);
 
@@ -135,9 +245,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "2014");
         assertLabel(instances.get(2), "2015");
 
-        print(instances);
+        instances = generator.next();
 
-        instances = generator.next(); // Direction.FORWARD
+        print(instances, "Yearly NEXT 1");
 
         Assert.assertEquals(instances.size(), 3);
 
@@ -145,9 +255,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "2015");
         assertLabel(instances.get(2), "2016");
 
-        print(instances);
+        instances = generator.previous();
 
-        instances = generator.previous(); // Direction.BACK
+        print(instances, "Yearly BACK 1");
 
         Assert.assertEquals(instances.size(), 3);
 
@@ -155,9 +265,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "2014");
         assertLabel(instances.get(2), "2015");
 
-        print(instances);
+        instances = generator.previous();
 
-        instances = generator.previous(); // Direction.BACK
+        print(instances, "Yearly BACK 1");
 
         Assert.assertEquals(instances.size(), 3);
 
@@ -165,9 +275,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "2013");
         assertLabel(instances.get(2), "2014");
 
-        print(instances);
+        instances = generator.next();
 
-        instances = generator.next(); // Direction.NEXT
+        print(instances, "Yearly NEXT 1");
 
         Assert.assertEquals(instances.size(), 3);
 
@@ -175,9 +285,9 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "2014");
         assertLabel(instances.get(2), "2015");
 
-        print(instances);
+        instances = generator.fullNext();
 
-        instances = generator.fullNext(); // Direction.FORWARD full
+        print(instances, "Yearly NEXT 4");
 
         Assert.assertEquals(instances.size(), 3);
 
@@ -185,18 +295,15 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "2017");
         assertLabel(instances.get(2), "2018");
 
-        print(instances);
+        instances = generator.fullPrevious();
 
-        instances = generator.fullPrevious(); // Direction.BACK full
+        print(instances, "Yearly BACK 4");
 
         Assert.assertEquals(instances.size(), 3);
 
         assertLabel(instances.get(0), "2013");
         assertLabel(instances.get(1), "2014");
         assertLabel(instances.get(2), "2015");
-
-
-        print(instances);
 
 
     }
@@ -205,14 +312,16 @@ public class InstanceGeneratorTest {
     public void yearlyForward() {
 
         InstanceGenerator generator = jvmGenerator();
-        List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(), InstanceGenerator.Direction.FORWARD, 3);
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(Calendar.JANUARY), InstanceGenerator.Direction.FORWARD, 3);
+
+        print(instances, "Yearly FORWARD 3");
 
         Assert.assertEquals(instances.size(), 3);
-        assertLabel(instances.get(0), "2016");
-        assertLabel(instances.get(1), "2017");
-        assertLabel(instances.get(2), "2018");
+        assertLabel(instances.get(0), "2015");
+        assertLabel(instances.get(1), "2016");
+        assertLabel(instances.get(2), "2017");
 
-        print(instances);
+
     }
 
     private InstanceGenerator jvmGenerator() {
@@ -224,10 +333,14 @@ public class InstanceGeneratorTest {
         });
     }
 
-    private Date fixedDate() {
+    private Date fixedDate(int month) {
+        return fixedDate(month, 2015);
+    }
+
+    private Date fixedDate(int month, int year) {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, 2015);
-        calendar.set(Calendar.MONTH, Calendar.JANUARY);
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         System.out.println(calendar.getTime());
         return calendar.getTime();
@@ -238,6 +351,11 @@ public class InstanceGeneratorTest {
     }
 
     private void print(List<FormInstance> instances) {
+        print(instances, "");
+    }
+
+    private void print(List<FormInstance> instances, String title) {
+        System.out.println("\n :" + title);
         for (FormInstance instance : instances) {
             System.out.println(instance);
         }
