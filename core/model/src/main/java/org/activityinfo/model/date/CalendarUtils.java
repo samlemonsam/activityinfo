@@ -92,8 +92,7 @@ public class CalendarUtils {
             epiWeek.setYear(year - 1);
             return epiWeek;
         }
-        // Calculate week number: Week 1 (january 4th) plus the
-        // number of weeks between target date and january 4th
+        // Calculate week number: number of weeks between target date and january 4th
         int weekInYear = (int) (1 + Math.ceil(daysBetween / 7));
         Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
 

@@ -21,10 +21,12 @@ package org.activityinfo.ui.client.component.formdesigner;
  * #L%
  */
 
+import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.component.form.subform.InstanceGenerator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -208,7 +210,7 @@ public class InstanceGeneratorTest {
     public void monthlyForward() {
 
         InstanceGenerator generator = jvmGenerator();
-        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(Calendar.JANUARY), InstanceGenerator.Direction.FORWARD, 4);
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate(Calendar.DECEMBER, 2014), InstanceGenerator.Direction.FORWARD, 4);
 
         print(instances, "Monthly NEXT 4");
 
@@ -312,7 +314,7 @@ public class InstanceGeneratorTest {
     public void yearlyForward() {
 
         InstanceGenerator generator = jvmGenerator();
-        List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(Calendar.JANUARY), InstanceGenerator.Direction.FORWARD, 3);
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.YEARLY.getPeriod(), fixedDate(Calendar.JANUARY, 2014), InstanceGenerator.Direction.FORWARD, 3);
 
         print(instances, "Yearly FORWARD 3");
 
@@ -357,7 +359,9 @@ public class InstanceGeneratorTest {
     private void print(List<FormInstance> instances, String title) {
         System.out.println("\n :" + title);
         for (FormInstance instance : instances) {
-            System.out.println(instance);
+            DateRange range = InstanceGenerator.getDateRangeFromInstance(instance);
+            System.out.println("start=" + new LocalDate(range.getStart()) + ", end=" + new LocalDate(range.getEnd()) +
+                    ", label=" + FormInstanceLabeler.getLabel(instance) + ", id=" + instance.getId());
         }
     }
 }

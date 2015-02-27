@@ -98,7 +98,7 @@ public class InstanceGenerator {
 
         for (int i = 0; i < count; i++) {
             DateRange dateRange = generateDateRange(period, pointToCalculate, direction);
-            pointToCalculate = getPointToCalculate(dateRange, direction);
+            pointToCalculate = dateRange.midDate();
             result.add(createInstance(dateRange, period, direction));
         }
 
@@ -119,7 +119,7 @@ public class InstanceGenerator {
         int size = lastGeneratedList.size();
         FormInstance lastInstance = lastGeneratedList.get(size - 1);
         DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
-        Date point = getPointToCalculate(lastDateRange, Direction.FORWARD);
+        Date point = lastDateRange.midDate();
         List<FormInstance> next = generate(lastPeriod, point, Direction.FORWARD, 1, false);
         lastGeneratedList.remove(0); // remove first
         lastGeneratedList.add(size - 1, next.get(0)); // add next at the end
@@ -132,7 +132,7 @@ public class InstanceGenerator {
         int size = lastGeneratedList.size();
         FormInstance lastInstance = lastGeneratedList.get(size - 1);
         DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
-        return generate(lastPeriod, getPointToCalculate(lastDateRange, Direction.FORWARD), Direction.FORWARD, lastCount, true);
+        return generate(lastPeriod, lastDateRange.midDate(), Direction.FORWARD, lastCount, true);
     }
 
     public List<FormInstance> previous() {
@@ -141,7 +141,7 @@ public class InstanceGenerator {
         int size = lastGeneratedList.size();
         FormInstance firstInstance = lastGeneratedList.get(0);
         DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
-        List<FormInstance> previous = generate(lastPeriod, getPointToCalculate(firstDateRange, Direction.BACK), Direction.BACK, 1, false);
+        List<FormInstance> previous = generate(lastPeriod, firstDateRange.midDate(), Direction.BACK, 1, false);
         lastGeneratedList.remove(size - 1); // remove last
         lastGeneratedList.add(0, previous.get(0)); // add next at the beginning
         return lastGeneratedList;
@@ -151,7 +151,7 @@ public class InstanceGenerator {
         assertState();
         FormInstance firstInstance = lastGeneratedList.get(0);
         DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
-        return generate(lastPeriod, getPointToCalculate(firstDateRange, Direction.BACK), Direction.BACK, lastCount, true);
+        return generate(lastPeriod, firstDateRange.midDate(), Direction.BACK, lastCount, true);
     }
 
     private void assertState() {
@@ -160,11 +160,7 @@ public class InstanceGenerator {
         Preconditions.checkNotNull(lastPeriod);
     }
 
-    private static Date getPointToCalculate(DateRange range, Direction direction) {
-        return direction == Direction.BACK ? range.getStart() : range.getEnd();
-    }
-
-    private static DateRange getDateRangeFromInstance(FormInstance instance) {
+    public static DateRange getDateRangeFromInstance(FormInstance instance) {
         LocalDate startDate = instance.getDate(PERIOD_START_DATE_ID);
         LocalDate endDate = instance.getDate(PERIOD_END_DATE_ID);
         return new DateRange(startDate.atMidnightInMyTimezone(), endDate.atMidnightInMyTimezone());
@@ -189,12 +185,11 @@ public class InstanceGenerator {
 
     private Date getDateForLabel(DateRange range, PeriodValue period, Direction direction) {
         if (period.equals(PredefinedPeriods.MONTHLY.getPeriod())) {
-            return range.midDate();
+            return range.getStart();
         } else if (period.equals(PredefinedPeriods.YEARLY.getPeriod())) {
-//            return direction == Direction.BACK ? range.getEnd() : range.getStart();
             return range.getStart();
         }
-        return getPointToCalculate(range, direction);
+        return range.midDate();
     }
 
     private String format(Date date, PeriodValue period) {
@@ -210,29 +205,48 @@ public class InstanceGenerator {
         //return DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).format(date);
     }
 
-    private DateRange generateDateRange(PeriodValue period, Date startDate, Direction direction) {
+    private DateRange generateDateRange(PeriodValue period, Date point, Direction direction) {
         // make sure start date is reset, instanceId depends on start/end date of range.
-        CalendarUtil.resetTime(startDate);
-        Date result = CalendarUtil.copyDate(startDate);
+        CalendarUtil.resetTime(point);
+        Date copy = CalendarUtil.copyDate(point);
         if (PredefinedPeriods.YEARLY.getPeriod().equals(period)) {
-            CalendarUtil.addMonthsToDate(result, direction == Direction.BACK ? -12 : 12);
+            CalendarUtil.addMonthsToDate(copy, direction == Direction.BACK ? -12 : 12);
+
+            Date startDate = CalendarUtil.copyDate(copy);
+            startDate.setMonth(0); // january
+            startDate.setDate(1);
+
+            Date endDate = CalendarUtil.copyDate(startDate);
+            CalendarUtil.addMonthsToDate(endDate, 12);
+            CalendarUtil.addDaysToDate(endDate, -1);
+
+            return new DateRange(startDate, endDate);
+
         } else if (PredefinedPeriods.MONTHLY.getPeriod().equals(period)) {
-            CalendarUtil.addMonthsToDate(result, direction == Direction.BACK ? -1 : 1);
+            CalendarUtil.addMonthsToDate(copy, direction == Direction.BACK ? -1 : 1);
+
+            Date startDate = CalendarUtil.copyDate(copy);
+            CalendarUtil.setToFirstDayOfMonth(startDate);
+
+            Date endDate = CalendarUtil.copyDate(copy);
+            CalendarUtil.addMonthsToDate(endDate, 1);
+            CalendarUtil.addDaysToDate(endDate, -1);
+            return new DateRange(startDate, endDate);
         } else if (PredefinedPeriods.WEEKLY.getPeriod().equals(period)) {
             //CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -7 : 7);
-            return CalendarUtils.rangeByEpiWeekFromDate(startDate);
+            return CalendarUtils.rangeByEpiWeekFromDate(point);
         } else if (PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period)) {
-            CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -14 : 14);
+            CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -14 : 14);
         } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {
-            CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -1 : 1);
+            CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -1 : 1);
         } else {
             throw new UnsupportedOperationException("Period is not supported yet, period: " + period);
         }
 
         if (direction == Direction.BACK) {
-            return new DateRange(result, startDate);
+            return new DateRange(copy, point);
         } else {
-            return new DateRange(startDate, result);
+            return new DateRange(point, copy);
         }
     }
 }
