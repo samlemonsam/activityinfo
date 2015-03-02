@@ -60,11 +60,13 @@ public class InstanceGenerator {
 
     private final ResourceId classId;
     private final Formatter formatter;
+    private final CalendarUtils.DayOfWeekProvider dayOfWeekProvider;
 
     private List<FormInstance> lastGeneratedList;
     private PeriodValue lastPeriod;
     private int lastCount = 1;
     private Direction lastDirection;
+
 
     public InstanceGenerator(ResourceId classId) {
         this(classId, new Formatter() {
@@ -76,8 +78,13 @@ public class InstanceGenerator {
     }
 
     public InstanceGenerator(ResourceId classId, Formatter formatter) {
+        this(classId, formatter, CalendarUtils.GWT_DAY_OF_WEEK_PROVIDER);
+    }
+
+    public InstanceGenerator(ResourceId classId, Formatter formatter, CalendarUtils.DayOfWeekProvider dayOfWeekProvider) {
         this.classId = classId;
         this.formatter = formatter;
+        this.dayOfWeekProvider = dayOfWeekProvider;
     }
 
     public List<FormInstance> generate(PeriodValue period, Date startDate, Direction direction, int count) {
@@ -167,7 +174,7 @@ public class InstanceGenerator {
     }
 
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        String instanceId = "period_" + range.getStart().getTime() + "_" + range.getEnd().getTime();
+        String instanceId = ResourceId.GENERATED_ID_DOMAIN + "_period_" + range.getStart().getTime() + "_" + range.getEnd().getTime() + "_" + classId.asString();
         FormInstance instance = new FormInstance(ResourceId.valueOf(instanceId), classId);
         instance.set(PERIOD_START_DATE_ID, range.getStart());
         instance.set(PERIOD_END_DATE_ID, range.getEnd());
@@ -177,7 +184,7 @@ public class InstanceGenerator {
 
     private String getLabel(DateRange range, PeriodValue period, Direction direction) {
         if (period.equals(PredefinedPeriods.WEEKLY.getPeriod())) {
-            EpiWeek epiWeek = CalendarUtils.epiWeek(range.midDate());
+            EpiWeek epiWeek = CalendarUtils.epiWeek(range.midDate(), dayOfWeekProvider);
             return I18N.CONSTANTS.week() + " " + epiWeek.getWeekInYear() + " " + epiWeek.getYear();
         }
         return format(getDateForLabel(range, period, direction), period);
@@ -228,13 +235,13 @@ public class InstanceGenerator {
             Date startDate = CalendarUtil.copyDate(copy);
             CalendarUtil.setToFirstDayOfMonth(startDate);
 
-            Date endDate = CalendarUtil.copyDate(copy);
+            Date endDate = CalendarUtil.copyDate(startDate);
             CalendarUtil.addMonthsToDate(endDate, 1);
             CalendarUtil.addDaysToDate(endDate, -1);
             return new DateRange(startDate, endDate);
         } else if (PredefinedPeriods.WEEKLY.getPeriod().equals(period)) {
-            //CalendarUtil.addDaysToDate(result, direction == Direction.BACK ? -7 : 7);
-            return CalendarUtils.rangeByEpiWeekFromDate(point);
+            CalendarUtil.addDaysToDate(point, direction == Direction.BACK ? -7 : 7);
+            return CalendarUtils.rangeByEpiWeekFromDate(dayOfWeekProvider, point);
         } else if (PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period)) {
             CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -14 : 14);
         } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {

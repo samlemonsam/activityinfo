@@ -1,7 +1,6 @@
 package org.activityinfo.model.resource;
 
 
-import org.activityinfo.model.form.annotation.Field;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -19,6 +18,7 @@ public final class ResourceId {
 
     public static final ResourceId ROOT_ID = ResourceId.valueOf("_root");
 
+    public static final char GENERATED_ID_DOMAIN = 'c';
     public static final int RADIX = 10;
     public static long COUNTER = 1;
 
@@ -35,7 +35,7 @@ public final class ResourceId {
     }
 
     public static ResourceId generateId() {
-        return valueOf("c" + Long.toString(new Date().getTime(), Character.MAX_RADIX) +
+        return valueOf(GENERATED_ID_DOMAIN + Long.toString(new Date().getTime(), Character.MAX_RADIX) +
                        Long.toString(COUNTER++, Character.MAX_RADIX));
     }
 

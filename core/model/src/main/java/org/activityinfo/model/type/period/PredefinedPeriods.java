@@ -56,6 +56,15 @@ public enum PredefinedPeriods {
         return ResourceIdPrefixType.SUBFORM.id("_period_" + this.name());
     }
 
+    public static PredefinedPeriods fromPeriod(PeriodValue value) {
+        for (PredefinedPeriods period : values()) {
+            if (period.getPeriod().equals(value)) {
+                return period;
+            }
+        }
+        return null;
+    }
+
     public static boolean isPeriodId(ResourceId resourceId) {
         return resourceId != null && resourceId.asString().startsWith(ResourceIdPrefixType.SUBFORM.id("_period_").asString());
     }

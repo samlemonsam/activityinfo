@@ -92,6 +92,7 @@ public class SubFormTabsManipulator {
         this.periodValue = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
 
         final InstanceGenerator instanceGenerator = new InstanceGenerator(subForm.getId());
+        presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
         presenter.set(instanceGenerator.generate(periodValue, new Date(), InstanceGenerator.Direction.BACK, presenter.getTabCount()));
 
         presenter.setMoveButtonClickHandler(new org.activityinfo.ui.client.widget.ClickHandler<SubFormTabsPresenter.ButtonType>() {

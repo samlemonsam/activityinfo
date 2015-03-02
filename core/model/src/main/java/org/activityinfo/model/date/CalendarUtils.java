@@ -51,7 +51,7 @@ public class CalendarUtils {
         public DayOfWeek dayOfWeek(Date date);
     }
 
-    public static final DayOfWeekProvider DAY_OF_WEEK_PROVIDER = new DayOfWeekProvider() {
+    public static final DayOfWeekProvider GWT_DAY_OF_WEEK_PROVIDER = new DayOfWeekProvider() {
         @Override
         public DayOfWeek dayOfWeek(Date date) {
             return DayOfWeek.dayOfWeek(date);
@@ -70,7 +70,7 @@ public class CalendarUtils {
     }
 
     public static EpiWeek epiWeek(Date date) {
-        return epiWeek(date, DAY_OF_WEEK_PROVIDER);
+        return epiWeek(date, GWT_DAY_OF_WEEK_PROVIDER);
     }
 
     public static EpiWeek epiWeek(Date date, DayOfWeekProvider dayOfWeekProvider) {
@@ -145,12 +145,12 @@ public class CalendarUtils {
     }
 
     public static DateRange rangeByEpiWeek(EpiWeek epiWeek) {
-        return rangeByEpiWeek(DAY_OF_WEEK_PROVIDER, epiWeek);
+        return rangeByEpiWeek(GWT_DAY_OF_WEEK_PROVIDER, epiWeek);
     }
 
-    public static DateRange rangeByEpiWeekFromDate(Date date) {
-        EpiWeek epiWeek = epiWeek(date);
-        return rangeByEpiWeek(epiWeek);
+    public static DateRange rangeByEpiWeekFromDate(DayOfWeekProvider dayOfWeekProvider, Date date) {
+        EpiWeek epiWeek = epiWeek(date, dayOfWeekProvider);
+        return rangeByEpiWeek(dayOfWeekProvider, epiWeek);
     }
 
     public static DateRange rangeByEpiWeek(DayOfWeekProvider dayOfWeekProvider, EpiWeek epiWeek) {

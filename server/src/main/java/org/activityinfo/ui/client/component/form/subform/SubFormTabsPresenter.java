@@ -28,9 +28,12 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
@@ -85,6 +88,7 @@ public class SubFormTabsPresenter {
 
     private ClickHandler<ButtonType> moveButtonClickHandler;
     private ClickHandler<FormInstance> instanceTabClickHandler;
+    private PredefinedPeriods periodType;
 
     public SubFormTabsPresenter(@Nonnull SubFormTabs view) {
         this.view = view;
@@ -99,7 +103,8 @@ public class SubFormTabsPresenter {
             instancesMap.put(instance.getId().asString(), instance);
 
             String escapedLabel = SafeHtmlUtils.fromString(FormInstanceLabeler.getLabel(instance)).asString();
-            safeHtml = safeHtml + "<li><a href='javascript:' id='" + instance.getId().asString() + "'>" + escapedLabel + "</a></li>";
+            safeHtml = safeHtml + "<li><a href='javascript:' id='" + instance.getId().asString() +
+                    "' title='" + tooltip(instance, escapedLabel) + "'>" + escapedLabel + "</a></li>";
         }
 
         safeHtml = safeHtml + nextButtons();
@@ -113,6 +118,15 @@ public class SubFormTabsPresenter {
                 bindClickHandlers();
             }
         });
+    }
+
+    private String tooltip(FormInstance instance, String label) {
+        if (periodType == PredefinedPeriods.MONTHLY || periodType == PredefinedPeriods.WEEKLY ||
+                periodType == PredefinedPeriods.BI_WEEKLY) {
+            DateRange range = InstanceGenerator.getDateRangeFromInstance(instance);
+            return I18N.MESSAGES.subformTabButtonTooltip(range.getStart(), range.getEnd());
+        }
+        return label;
     }
 
     private void bindClickHandlers() {
@@ -165,13 +179,13 @@ public class SubFormTabsPresenter {
     }
 
     private String perviousButtons() {
-        return "<li><a href='javascript:;' id='_fullprevious_"  + idSuffix.asString() + "'>&laquo;</a></li>\n" +
-                "<li><a href='javascript:;' id='_previous_"  + idSuffix.asString() + "'>&lt;</a></li>";
+        return "<li><a href='javascript:;' id='_fullprevious_" + idSuffix.asString() + "'>&laquo;</a></li>\n" +
+                "<li><a href='javascript:;' id='_previous_" + idSuffix.asString() + "'>&lt;</a></li>";
     }
 
     private String nextButtons() {
-        return "<li><a href='javascript:;' id='_next_"  + idSuffix.asString() + "'>&gt;</a></li>\n" +
-                "<li><a href='javascript:;' id='_fullnext_"  + idSuffix.asString() + "'>&raquo;</a></li>";
+        return "<li><a href='javascript:;' id='_next_" + idSuffix.asString() + "'>&gt;</a></li>\n" +
+                "<li><a href='javascript:;' id='_fullnext_" + idSuffix.asString() + "'>&raquo;</a></li>";
     }
 
     public int getTabCount() {
@@ -207,5 +221,13 @@ public class SubFormTabsPresenter {
 
     public List<FormInstance> getInstances() {
         return instances;
+    }
+
+    public PredefinedPeriods getPeriodType() {
+        return periodType;
+    }
+
+    public void setPeriodType(PredefinedPeriods periodType) {
+        this.periodType = periodType;
     }
 }

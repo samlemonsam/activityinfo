@@ -21,7 +21,10 @@ package org.activityinfo.ui.client.component.formdesigner;
  * #L%
  */
 
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.DateRange;
+import org.activityinfo.model.date.DayOfWeek;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
@@ -29,6 +32,7 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.component.form.subform.InstanceGenerator;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
@@ -40,6 +44,11 @@ import java.util.List;
  * @author yuriyz on 02/05/2015.
  */
 public class InstanceGeneratorTest {
+
+    @BeforeClass
+    public static void beforeClass() {
+        LocaleProxy.initialize();
+    }
 
     @Test
     public void monthlyStateBugWithNextNextBack() {
@@ -326,13 +335,95 @@ public class InstanceGeneratorTest {
 
     }
 
+    @Test
+    public void weekly() {
+        InstanceGenerator generator = jvmGenerator();
+
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.WEEKLY.getPeriod(), fixedDate(Calendar.FEBRUARY), InstanceGenerator.Direction.BACK, 4);
+
+        print(instances, "Weekly BACK 4");
+
+        Assert.assertEquals(instances.size(), 4);
+        assertLabel(instances.get(0), "Week 1 2015");
+        assertLabel(instances.get(1), "Week 2 2015");
+        assertLabel(instances.get(2), "Week 3 2015");
+        assertLabel(instances.get(3), "Week 4 2015");
+
+        instances = generator.next();
+
+        print(instances, "Weekly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Week 2 2015");
+        assertLabel(instances.get(1), "Week 3 2015");
+        assertLabel(instances.get(2), "Week 4 2015");
+        assertLabel(instances.get(3), "Week 5 2015");
+
+        instances = generator.next();
+
+        print(instances, "Weekly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Week 3 2015");
+        assertLabel(instances.get(1), "Week 4 2015");
+        assertLabel(instances.get(2), "Week 5 2015");
+        assertLabel(instances.get(3), "Week 6 2015");
+
+        instances = generator.previous();
+
+        print(instances, "Weekly BACK 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Week 2 2015");
+        assertLabel(instances.get(1), "Week 3 2015");
+        assertLabel(instances.get(2), "Week 4 2015");
+        assertLabel(instances.get(3), "Week 5 2015");
+
+        instances = generator.next();
+
+        print(instances, "Weekly NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Week 3 2015");
+        assertLabel(instances.get(1), "Week 4 2015");
+        assertLabel(instances.get(2), "Week 5 2015");
+        assertLabel(instances.get(3), "Week 6 2015");
+
+        instances = generator.fullPrevious();
+
+        print(instances, "Weekly BACK 4");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "Week 52 2014");
+        assertLabel(instances.get(1), "Week 53 2014");
+        assertLabel(instances.get(2), "Week 1 2015");
+        assertLabel(instances.get(3), "Week 2 2015");
+
+    }
+
     private InstanceGenerator jvmGenerator() {
         return new InstanceGenerator(ResourceId.generateId(), new InstanceGenerator.Formatter() {
             @Override
             public String format(String pattern, Date date) {
                 return new SimpleDateFormat(pattern).format(date);
             }
-        });
+        }, jvmDayOfWeekProvider());
+    }
+
+    public static CalendarUtils.DayOfWeekProvider jvmDayOfWeekProvider() {
+        return new CalendarUtils.DayOfWeekProvider() {
+            @Override
+            public DayOfWeek dayOfWeek(Date date) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                return DayOfWeek.fromValue(calendar.get(Calendar.DAY_OF_WEEK) - 1);
+            }
+        };
     }
 
     private Date fixedDate(int month) {
