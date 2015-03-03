@@ -1,0 +1,15 @@
+
+import org.activityinfo.ProjectVersion
+import org.ajoberstar.grgit.Grgit
+
+
+allprojects {
+
+    def repo = Grgit.open(project.rootDir)
+    
+    project.version = new ProjectVersion(2, 8, System.env.BUILD_NUMBER)
+
+    ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
+    ext.commitId = repo.head().id    
+    
+}

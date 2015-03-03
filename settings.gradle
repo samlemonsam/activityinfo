@@ -1,0 +1,15 @@
+rootProject.name = 'activityinfo'
+include ':model'
+include ':services'
+include ':promises'
+include ':geoadmin'
+include ':server'
+include ':tests:acceptance'
+
+project(':model').projectDir = "$rootDir/core/model" as File
+project(':services').projectDir = "$rootDir/core/services" as File
+project(':promises').projectDir = "$rootDir/core/promises" as File
+project(':geoadmin').projectDir = "$rootDir/geoadmin" as File
+project(':server').projectDir = "$rootDir/server" as File
+project(':tests:acceptance').projectDir = "$rootDir/tests/acceptance" as File
+
