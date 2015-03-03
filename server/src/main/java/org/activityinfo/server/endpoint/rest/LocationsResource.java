@@ -48,19 +48,24 @@ public class LocationsResource {
             json.writeStartObject();
             json.writeNumberField("id", location.getId());
             json.writeStringField("name", location.getName());
+            if (location.hasAxe()) {
+                json.writeStringField("code", location.getAxe());
+            }
             if (location.hasCoordinates()) {
                 json.writeNumberField("latitude", location.getLatitude());
                 json.writeNumberField("longitude", location.getLongitude());
             }
-            json.writeObjectFieldStart("adminEntities");
-            for (AdminEntityDTO entity : location.getAdminEntities()) {
-                json.writeFieldName(Integer.toString(entity.getLevelId()));
-                json.writeStartObject();
-                json.writeNumberField("id", entity.getId());
-                json.writeStringField("name", entity.getName());
+            if(!location.getAdminEntities().isEmpty()) {
+                json.writeObjectFieldStart("adminEntities");
+                for (AdminEntityDTO entity : location.getAdminEntities()) {
+                    json.writeFieldName(Integer.toString(entity.getLevelId()));
+                    json.writeStartObject();
+                    json.writeNumberField("id", entity.getId());
+                    json.writeStringField("name", entity.getName());
+                    json.writeEndObject();
+                }
                 json.writeEndObject();
             }
-            json.writeEndObject();
             json.writeEndObject();
         }
         json.writeEndArray();

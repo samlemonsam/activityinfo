@@ -1,0 +1,55 @@
+apply from: "./gradle/dependencies.gradle"
+apply from: "./gradle/version.gradle"
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.3'
+}
+
+allprojects  {
+  apply plugin: 'maven'
+  group = 'org.activityinfo'
+}
+
+
+subprojects {
+
+  apply plugin: 'java'
+  sourceCompatibility = 1.7
+  targetCompatibility = 1.7
+  
+  // This is required to stop javac from attempting to compile
+  // java sources included in .jar files intended for GWT
+  tasks.withType(JavaCompile) {
+    options.compilerArgs += ["-implicit:none", "-sourcepath", ""]
+  }
+
+  buildscript {
+    repositories {
+      maven {
+        url 'http://dl.bintray.com/steffenschaefer/maven'
+      }
+      mavenCentral()
+      jcenter()
+    }
+    dependencies {
+      classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+      classpath 'com.google.appengine:gradle-appengine-plugin:1.9.17'
+      classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
+    }
+  }
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://nexus.bedatadriven.com/content/groups/public" }
+  }
+  
+  dependencies {
+    compile libraries.slf4j.api
+    compile libraries.slf4j.impl
+    
+    testCompile libraries.junit 
+    testCompile libraries.hamcrest 
+    testCompile libraries.easymock
+  }
+}

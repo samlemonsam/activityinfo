@@ -1,0 +1,11 @@
+
+description = 'Service Interfaces'
+
+apply plugin: 'gwt-base'
+
+dependencies {
+  compile project(':core:model')
+  compile libraries.jersey.core
+  compile libraries.jersey.server
+  compile libraries.guice
+}

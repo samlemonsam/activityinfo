@@ -1,0 +1,111 @@
+
+import liquibase.Liquibase
+import liquibase.database.jvm.JdbcConnection
+import liquibase.resource.FileSystemResourceAccessor
+import com.mysql.jdbc.Driver
+
+import java.sql.Connection
+import java.sql.DriverManager
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath libraries.liquibase
+        classpath libraries.jdbc.mysql
+    }
+    repositories {
+        maven { url "http://nexus.bedatadriven.com/content/groups/public" }
+    }
+}
+
+class LiquibaseTask extends DefaultTask {
+    
+    boolean dropDatabase = false
+    String databaseName
+    String user
+    String password
+
+    def liquibaseLoggingLevel() {
+
+        switch (logging.level) {
+            case LogLevel.DEBUG:
+                return liquibase.logging.LogLevel.DEBUG
+            case LogLevel.INFO:
+                return liquibase.logging.LogLevel.INFO
+            default:
+                return liquibase.logging.LogLevel.SEVERE
+        }
+    }
+
+    def openConnection(String databaseName) {
+        def properties = new Properties()
+        properties.setProperty("user", user)
+        properties.setProperty("password", password)
+
+        def url = "jdbc:mysql://localhost/${databaseName}?useUnicode=true&characterEncoding=UTF-8"
+
+        def driver = new Driver()
+        return driver.connect(url, properties)
+    }
+    
+    
+    def createDatabase() {
+        // First create the database itself, dropping first if requested
+        def connection = openConnection("")
+        try {
+            def stmt = connection.createStatement()
+            if(dropDatabase) {
+                stmt.execute("DROP DATABASE IF EXISTS `${databaseName}`")
+            }
+            stmt.execute("CREATE DATABASE IF NOT EXISTS `${databaseName}`")
+        } finally {
+            connection.close()
+        }
+    }
+    
+    def migrateSchema() {
+        def connection = openConnection(databaseName)
+        try {
+            def liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
+                    new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),
+                    new JdbcConnection(connection));
+
+            liquibase.log.logLevel = liquibaseLoggingLevel()
+            liquibase.update(null)
+        } finally {
+            connection.close()
+        }
+    }
+    
+    @TaskAction
+    def run() {
+        createDatabase()
+        migrateSchema()
+    }
+}
+
+task setupDevDatabase(type: LiquibaseTask) {
+    description = "Creates and populates a database called 'activityinfo' locally for development"
+    databaseName = "activityinfo"
+    user = localMySqlUsername
+    password = localMySqlPassword
+}
+
+task updateDevDatabase(type: LiquibaseTask) {
+    description = "Applies schema migrations to the local 'activityinfo' development database"
+    databaseName = "activityinfo"
+    user = localMySqlUsername
+    password = localMySqlPassword
+}
+
+task resetDevDatabase(type: LiquibaseTask) {
+    description = "Completely drops and resets the local 'activityinfo' development database"
+    databaseName = "activityinfo"
+    dropDatabase = true
+    user = localMySqlUsername
+    password = localMySqlPassword
+}
+

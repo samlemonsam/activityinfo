@@ -72,19 +72,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private static final Logger LOGGER = Logger.getLogger(DbUpdateBuilder.class.getName());
 
-    private final Class[] schemaClasses = new Class[]{Country.class,
-            AdminLevel.class,
-            LocationType.class,
-            UserDatabase.class,
-            Partner.class,
-            Activity.class,
-            Indicator.class,
-            AttributeGroup.class,
-            Attribute.class,
-            User.class,
-            UserPermission.class,
-            LockedPeriod.class,
-            Project.class};
     private final List<LockedPeriod> allLockedPeriods = Lists.newArrayList();
     private final List<Project> projects = Lists.newArrayList();
 
@@ -145,17 +132,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private String buildSql() throws JSONException {
         JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
-        for (Class schemaClass : schemaClasses) {
-            builder.createTableIfNotExists(schemaClass);
-
-            // we never clear data becase now we handle data per database
-            // Special case: we never delete partners, only add them. This way we always have a label for Partners
-            // See : LocalSiteCreateTest.siteRemovePartnerConflict
-//            if (!schemaClass.equals(Partner.class)) {
-//                builder.deleteAll(schemaClass);
-//            }
-        }
-
         builder.insert(" or replace ", Country.class, countries);
         builder.insert(" or replace ", AdminLevel.class, adminLevels);
         builder.insert(" or replace ", UserDatabase.class, Lists.newArrayList(database));
@@ -171,14 +147,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
         builder.insert(" or replace ", Project.class, projects);
         builder.insert(" or replace ", LockedPeriod.class, allLockedPeriods);
 
-        // TODO: this needs to be actually synchronized
-        builder.executeStatement(
-                "CREATE TABLE IF NOT EXISTS  target (targetId int, name text, date1 text, date2 text, projectId int, " +
-                "partnerId int, adminEntityId int, databaseId int)");
-        builder.executeStatement("CREATE TABLE IF NOT EXISTS  targetvalue (targetId int, IndicatorId int, value real)");
-        builder.createTableIfNotExists(Location.class);
-        builder.executeStatement(
-                "create table if not exists LocationAdminLink (LocationId integer, AdminEntityId integer)");
 
 
         createAndSyncIndicatorlinks(builder);
@@ -190,10 +158,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void createAndSyncIndicatorlinks(JpaUpdateBuilder builder) throws JSONException {
-        builder.executeStatement(
-                "create table if not exists IndicatorLink (SourceIndicatorId int, DestinationIndicatorId int) ");
-        // do not clear table, now we handle data per db
-        //builder.executeStatement("delete from IndicatorLink");
 
         if (!indicatorLinks.isEmpty()) {
             builder.beginPreparedStatement(

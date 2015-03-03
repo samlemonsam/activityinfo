@@ -28,11 +28,9 @@ import org.activityinfo.legacy.shared.command.UpdateTargetValue;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class UpdateTargetValueHandler extends BaseEntityHandler implements CommandHandler<UpdateTargetValue> {
@@ -52,14 +50,11 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
 
         LOG.fine("[execute] Update command for entity: TargetValue");
 
-        Map<String, Object> changes = cmd.getChanges().getTransientMap();
-        new PropertyMap(changes);
-
         try {
             TargetValue targetValue = entityManager().find(TargetValue.class,
                     new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
             if (cmd.getChanges().get("value") != null) {
-                targetValue.setValue((Double.valueOf((String) cmd.getChanges().get("value"))));
+                targetValue.setValue(cmd.getChanges().get("value"));
                 entityManager().persist(targetValue);
 
                 return new VoidResult();
@@ -76,7 +71,7 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
 
         TargetValue targetValue = new TargetValue();
         targetValue.setId(new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
-        targetValue.setValue((Double.valueOf((String) cmd.getChanges().get("value"))));
+        targetValue.setValue(cmd.getChanges().get("value"));
         targetValue.setTarget(target);
         targetValue.setIndicator(indicator);
 

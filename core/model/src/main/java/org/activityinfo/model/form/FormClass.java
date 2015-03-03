@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.*;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -30,7 +30,7 @@ public class FormClass implements IsResource, FormElementContainer {
     public static final ResourceId LABEL_FIELD_ID = ResourceId.create("_class_label");
 
 
-    @NotNull
+    @Nonnull
     private ResourceId id;
     private ResourceId ownerId;
 
