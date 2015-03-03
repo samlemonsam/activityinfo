@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.web.design;
 
+import com.google.common.base.Optional;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -18,7 +19,10 @@ public class DesignTab {
     }
     
     public DesignTab selectDatabase(String databaseName) {
-        databaseTree.select("Databases", databaseName);
+        Optional<GxtTree.GxtNode> selected = databaseTree.findSelected();
+        if(!selected.isPresent() || !selected.get().getLabel().equals(databaseName)) {
+            databaseTree.select("Databases", databaseName);
+        }
         return this;
     }
     

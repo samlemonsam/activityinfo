@@ -90,7 +90,7 @@ public class GxtTree {
     }
 
     
-    private Optional<GxtNode> findSelected() {
+    public Optional<GxtNode> findSelected() {
         Optional<FluentElement> element = container.find().div(withClass("x-ftree2-selected")).parent().div().firstIfPresent();
         if(element.isPresent()) {
             return Optional.of(new GxtNode(element.get()));

@@ -7,9 +7,7 @@ import org.activityinfo.test.pageobject.gxt.GxtTree;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Created by alex on 11-2-15.
- */
+
 public class NavigatingVisitor implements GxtTreeVisitor {
 
     private final List<String> steps;
