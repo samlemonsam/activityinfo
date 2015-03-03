@@ -47,4 +47,7 @@ public interface ApplicationDriver {
 
     void cleanup() throws Exception;
 
+    void createLocationType(Property... properties) throws Exception;
+
+    void createLocation(Property... properties) throws Exception;
 }

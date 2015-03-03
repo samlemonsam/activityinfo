@@ -1,3 +1,4 @@
+@api
 Feature: Indicator Targets API
   As a systems analyst
   I want to be able to define target indicator values through the API

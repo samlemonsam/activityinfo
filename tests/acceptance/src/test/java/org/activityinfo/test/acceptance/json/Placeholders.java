@@ -2,6 +2,7 @@ package org.activityinfo.test.acceptance.json;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.activityinfo.test.driver.AliasTable;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -11,6 +12,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.codehaus.jackson.node.TextNode;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,18 +50,48 @@ public class Placeholders {
     }
 
 
-    public String resolvePath(String path) {
+    public String resolvePath(String url) {
+
+        String path;
+
+        int querySymbol = url.indexOf('?');
+        if(querySymbol != -1) {
+            path = url.substring(0, querySymbol);
+        } else {
+            path = url;
+        }
+        
         List<String> result = new ArrayList<>();
         for(String part : path.split("/")) {
-            if(isPlaceholder(part)) {
-                result.add(Integer.toString(resolveId(part)));
-            } else {
-                result.add(part);                
-            }
+            result.add(resolveUrlPart(part));
         }
         return Joiner.on("/").join(result);
     }
     
+    public MultivaluedMap<String, String> resolveQueryParams(String url) {
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        int querySymbol = url.indexOf('?');
+        if(querySymbol != -1) {
+            String queryString = url.substring(querySymbol+1);
+            String[] pairs = queryString.split("&");
+            for(int i=0;i!=pairs.length;++i) {
+                String[] keyValue = pairs[i].split("=");
+                params.putSingle(keyValue[0], resolveUrlPart(keyValue[1]));
+            }
+        }
+        return params;
+    }
+
+    private String resolveUrlPart(String part) {
+        String s;
+        if(isPlaceholder(part)) {
+            s = Integer.toString(resolveId(part));
+        } else {
+            s = part;              
+        }
+        return s;
+    }
+
     private ObjectNode resolveObject(ObjectNode node) {
         ObjectNode result = factory.objectNode();
         Iterator<Map.Entry<String, JsonNode>> it = node.getFields();
@@ -91,6 +123,7 @@ public class Placeholders {
         }
     }
     
+    
     public String aliasText(String text) {
         if(aliasTable.isName(text)) {
             return aliasTable.alias(text);
@@ -100,7 +133,7 @@ public class Placeholders {
     }
 
     private int resolveId(String placeholder) {
-        return aliasTable.getId(parseName(placeholder));
+        return aliasTable.getOrGenerateId(parseName(placeholder));
     }
 
     public int resolveId(JsonNode node) {

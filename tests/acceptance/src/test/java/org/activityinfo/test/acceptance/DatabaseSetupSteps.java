@@ -53,6 +53,14 @@ public class DatabaseSetupSteps {
         driver.setup().createForm(name(formName), property("database", databaseName));
     }
 
+    @Given("^I have created a form named \"([^\"]*)\" with location type \"([^\"]*)\"$")
+    public void I_have_created_a_form_named_with_location_type(String name, String locationType) throws Throwable {
+        driver.setup().createForm(
+                name(name), 
+                property("locationType", locationType),
+                property("database", getCurrentDatabase()));
+    }
+
     @Given("^I have created a form named \"([^\"]*)\"$")
     public void I_have_created_a_form_named(String formName) throws Throwable {
         I_have_created_a_form_named_in(formName, getCurrentDatabase());
@@ -158,4 +166,21 @@ public class DatabaseSetupSteps {
                 property("permissions", permission),
                 property("partner", partner));    
     }
+
+    @Given("^I have created a location type \"([^\"]*)\"$")
+    public void I_have_created_a_location_type(String name) throws Throwable {
+        driver.setup().createLocationType(
+                property("database", getCurrentDatabase()),
+                property("name", name));
+    }
+
+    @Given("^I have created a location \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\"$")
+    public void I_have_created_a_location_in_with_code(String name, String locationType, String code) throws Throwable {
+        driver.setup().createLocation(
+                property("name", name),
+                property("locationType", locationType),
+                property("code", code));
+    }
+
+
 }

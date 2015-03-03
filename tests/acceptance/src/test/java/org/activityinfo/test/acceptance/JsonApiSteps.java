@@ -4,6 +4,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import cucumber.api.Scenario;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
@@ -22,7 +23,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 @ScenarioScoped
 public class JsonApiSteps {
@@ -84,8 +88,12 @@ public class JsonApiSteps {
     }
 
     @When("^I request (.*)$")
-    public void I_request(String path) throws Throwable {
-        WebResource resource = root(currentAccount).path(placeholders.resolvePath(path));
+    public void I_request(String url) throws Throwable {
+        
+        
+        WebResource resource = root(currentAccount)
+                .path(placeholders.resolvePath(url))
+                .queryParams(placeholders.resolveQueryParams(url));
 
         scenario.write(String.format("<code><pre>GET %s</pre></code>", resource.getURI().toString()));
 

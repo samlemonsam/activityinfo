@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 public class ApiApplicationDriver implements ApplicationDriver {
 
@@ -76,11 +77,16 @@ public class ApiApplicationDriver implements ApplicationDriver {
     public void createForm(Property... arguments) throws Exception {
         TestObject map = new TestObject(arguments);
         
+        int locationTypeId = 50529; // TODO: de-hardcode (this is Rdc/Country)
+        if(map.has("locationType")) {
+            locationTypeId = aliases.getId(map.getString("locationType"));    
+        }
+        
         String name = map.getString("name");
         JSONObject properties = new JSONObject();
         properties.put("name", aliases.create(name));
         properties.put("databaseId", aliases.getId(map.getString("database")));
-        properties.put("locationTypeId", 50529); // TODO: de-hardcode (this is Rdc/Country)
+        properties.put("locationTypeId", locationTypeId); 
         createEntity("Activity", name, properties);
     }
 
@@ -113,6 +119,8 @@ public class ApiApplicationDriver implements ApplicationDriver {
         for(FieldValue value : values) {
             if(value.getField().equals("partner")) {
                 properties.put("partnerId", aliases.getId(value.getValue()));
+            } else if(value.getField().equals("location")) {
+                properties.put("locationId", aliases.getId(value.getValue()));
             } else {
                 int indicatorId = aliases.getId(value.getField());
                 properties.put("I" + indicatorId, value.maybeNumberValue());
@@ -238,6 +246,38 @@ public class ApiApplicationDriver implements ApplicationDriver {
         for(Integer databaseId : createdDatabases) {
             executeDelete("UserDatabase", databaseId);
         }
+    }
+
+    @Override
+    public void createLocationType(Property... arguments) throws Exception {
+        TestObject map = new TestObject(arguments);
+        
+        String name = aliases.create(map.getString("name"));
+
+        JSONObject properties = new JSONObject();
+        properties.put("name", name);
+        properties.put("databaseId", aliases.getId(map.getString("database")));
+        
+        createEntity("LocationType", map.getString("name"), properties);
+    }
+
+    @Override
+    public void createLocation(Property... arguments) throws Exception {
+        
+        TestObject map = new TestObject(arguments);
+
+        String alias = map.getString("name");
+        
+        JSONObject properties = new JSONObject();
+        properties.put("id", aliases.generateIdFor(alias));
+        properties.put("name", alias);
+        properties.put("axe", map.getString("code"));
+        properties.put("locationTypeId", aliases.getId(map.getString("locationType")));
+        
+        JSONObject command = new JSONObject();
+        command.put("properties", properties);
+        
+        executeCommand("CreateLocation", command);
     }
 
     @Override

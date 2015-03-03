@@ -48,7 +48,7 @@ task acceptanceTest() {
                         '--plugin', 'org.activityinfo.test.harness.ConsoleReporter',
                         '--plugin', 'html:build/cucumber-reports',
                         '--glue', 'org.activityinfo.test',
-                        '--tags', '@web,@api']
+                        '--tags', '@api,@web']
 
                 systemProperty 'test.url', testUrl
                 systemProperty 'webdriver', 'chrome'

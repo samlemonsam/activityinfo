@@ -21,6 +21,7 @@ appengine {
     downloadSdk = true
 }
 
+compileGwt.enabled = !project.hasProperty('api')
 
 war {
     classpath = classpath.filter { file ->

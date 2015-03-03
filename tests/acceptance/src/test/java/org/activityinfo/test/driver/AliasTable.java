@@ -13,6 +13,8 @@ import java.util.Random;
 
 @ScenarioScoped
 public class AliasTable {
+
+   
     /**
      * Maps test/user-friendly names to unique names that we really use
      */
@@ -103,5 +105,23 @@ public class AliasTable {
     
     public String alias(String name) {
         return nameMap.inverse().get(name);
+    }
+
+
+    /**
+     * @return a random 32-bit integer key
+     */
+    public int generateInt() {
+        return random.nextInt(Integer.MAX_VALUE);
+    }
+    
+    public int getOrGenerateId(String alias) {
+        if(idMap.containsKey(alias)) {
+            return idMap.get(alias);
+        } else {
+            int newId = generateId();
+            idMap.put(alias, newId);
+            return newId;
+        }
     }
 }

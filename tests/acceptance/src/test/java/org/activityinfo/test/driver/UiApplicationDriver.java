@@ -136,6 +136,16 @@ public class UiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
+    public void createLocationType(Property... properties) throws Exception {
+        throw new PendingException();
+    }
+
+    @Override
+    public void createLocation(Property... properties) throws Exception {
+        throw new PendingException();
+    }
+
+    @Override
     public DataTable pivotTable(String measure, List<String> rowDimension) {
         PivotTableEditor pivotTable = applicationPage
                 .navigateToReportsTab()
