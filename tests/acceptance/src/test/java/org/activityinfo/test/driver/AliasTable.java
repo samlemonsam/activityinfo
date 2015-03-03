@@ -96,4 +96,12 @@ public class AliasTable {
         }
         return DataTable.create(rows);
     }
+
+    public boolean isName(String text) {
+        return nameMap.containsValue(text);
+    }
+    
+    public String alias(String name) {
+        return nameMap.inverse().get(name);
+    }
 }

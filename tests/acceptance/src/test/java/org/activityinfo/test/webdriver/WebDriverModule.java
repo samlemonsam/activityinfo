@@ -12,16 +12,16 @@ public class WebDriverModule extends AbstractModule {
     protected void configure() {
 
 
-        if("chrome".equals(System.getProperty("webdriver"))) {
-            bind(WebDriverProvider.class).to(ChromeWebDriverProvider.class);
+        if("phantomjs".equals(System.getProperty("webdriver"))) {
+            System.out.println("Using PhantomJS as WebDriver");
+            bind(WebDriverProvider.class).to(PhantomJsProvider.class);
             bind(SessionReporter.class).to(SimpleReporter.class);
         } else if(SauceLabsDriverProvider.isEnabled()) {
             System.out.println("Using SauceLabs as WebDriver");
             bind(WebDriverProvider.class).to(SauceLabsDriverProvider.class);
             bind(SessionReporter.class).to(SauceReporter.class);
         } else {
-            System.out.println("Using PhantomJS as WebDriver");
-            bind(WebDriverProvider.class).to(PhantomJsProvider.class);
+            bind(WebDriverProvider.class).to(ChromeWebDriverProvider.class);
             bind(SessionReporter.class).to(SimpleReporter.class);
         }
 

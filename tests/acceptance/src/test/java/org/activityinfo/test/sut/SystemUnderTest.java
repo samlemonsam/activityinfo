@@ -10,11 +10,11 @@ public class SystemUnderTest extends AbstractModule {
 
     public static final ConfigProperty TEST_URL = new ConfigProperty("test.url", "Root URL to Test");
     
-    private static final String PRODUCTION_URL = "https://www.activityinfo.org";
+    private static final String LOCAL_URL = "http://localhost:8080/";
 
     @Override
     protected void configure() {
-        String url = TEST_URL.getOr(PRODUCTION_URL);
+        String url = TEST_URL.getOr(LOCAL_URL);
         
         bind(Server.class).toInstance(new Server(url));
         

@@ -51,10 +51,10 @@ Feature: Indicator Targets API
         toDate: 2014-12-31
         partner:
           id: ${UNHCR PESHAWAR}
-          name: ~UNHCR PESHAWAR
+          name: UNHCR PESHAWAR
         project:
           id: ${Direct - HCR Peshawar}
-          name: ~Direct - HCR Peshawar
+          name: Direct - HCR Peshawar
         targetValues:
           - indicatorId: ${Advocacy conducted USD}
             value: 11996

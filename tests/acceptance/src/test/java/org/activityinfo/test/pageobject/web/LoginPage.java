@@ -26,6 +26,7 @@ public class LoginPage extends PageObject {
 
 
     public LoginPage loginAs(UserAccount account) {
+        System.out.println("Logging in as " + account.getEmail() + " and " + account.getPassword());
         emailInput.sendKeys(account.getEmail());
         passwordInput.sendKeys(account.getPassword());
         loginButton.click();

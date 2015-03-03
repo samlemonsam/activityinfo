@@ -32,31 +32,37 @@ public class JsonChecker {
         if(expected.asText().startsWith(Placeholders.ID_PREFIX)) {
             bindPlaceholder(expected, actual);
 
-        } else if(expected.asText().startsWith(Placeholders.ALIAS_PREFIX)) {
-            checkAlias(path, expected, actual);
-        } else {
-            if (expected instanceof ObjectNode) {
-                if(!actual.isObject()) {
-                    throw new AssertionError(String.format("Expected an object at %s; found: %s", path, actual));
-                }
-                checkObject(path, (ObjectNode) expected, (ObjectNode) actual);
-                
-            } else if(expected instanceof ArrayNode) {
-                if (!actual.isArray()) {
-                    throw new AssertionError(String.format("Expected an array at %s; found: %s", path, actual));
-                }
-                checkArray(path, (ArrayNode) expected, (ArrayNode) actual);
+        } else if (expected.isTextual()) {
+            if(!actual.isTextual()) {
+                throw new AssertionError(String.format("Expected an text at %s; found: %s", path, actual));
+            }
+            checkString(path, expected.asText(), actual.asText());
+            
+        } else if (expected instanceof ObjectNode) {
+            if(!actual.isObject()) {
+                throw new AssertionError(String.format("Expected an object at %s; found: %s", path, actual));
+            }
+            checkObject(path, (ObjectNode) expected, (ObjectNode) actual);
 
-            } else {
-                if(!expected.equals(actual)) {
-                    throw mismatchException(path, expected, actual);
-                }
+        } else if(expected instanceof ArrayNode) {
+            if (!actual.isArray()) {
+                throw new AssertionError(String.format("Expected an array at %s; found: %s", path, actual));
+            }
+            checkArray(path, (ArrayNode) expected, (ArrayNode) actual);
+
+        } else {
+            if(!expected.equals(actual)) {
+                throw mismatchException(path, expected, actual);
             }
         }
     }
 
-    private void checkAlias(String path, JsonNode expected, JsonNode actual) {
-        placeholders.resolveName(expected);        
+    private void checkString(String path, String expected, String actual) {
+        String actualString = placeholders.aliasText(actual);
+        if(!expected.equals(actualString)) {
+            throw new AssertionError(String.format("At %s, expected:\n%s\nFound:\n%s",
+                    path, expected, actualString));
+        }
     }
 
     public void check(JsonNode expected, JsonNode actual) {
@@ -73,7 +79,7 @@ public class JsonChecker {
         String alias = placeholders.parseName(expected.asText());
         int id = actual.getIntValue();
         placeholders.bind(alias, id);
-        
+
     }
 
     private void checkObject(String path, ObjectNode expectedObject, ObjectNode actualObject) {
@@ -105,7 +111,7 @@ public class JsonChecker {
             check(String.format("%s[%d]", path, i), expectedValue, actualValue);
         }
         if(expectedArray.size() != actualArray.size()) {
-            throw new AssertionError(String.format("Expected an array with %d elements, found %d.", 
+            throw new AssertionError(String.format("Expected an array with %d elements, found %d.",
                     expectedArray.size(), actualArray.size()));
         }
     }
@@ -117,6 +123,6 @@ public class JsonChecker {
         }
         return isPlaceholder(node.getTextValue());
     }
-    
+
 
 }

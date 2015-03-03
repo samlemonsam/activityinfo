@@ -81,13 +81,21 @@ public class Placeholders {
     private JsonNode resolveText(TextNode node) {
         String text = node.getTextValue();
         if(isPlaceholder(text)) {
-            if(text.startsWith(ID_PREFIX)) {
+            if (text.startsWith(ID_PREFIX)) {
                 return factory.numberNode(resolveId(text));
             } else {
                 return factory.textNode(aliasTable.getName(text));
             }
         } else {
             return node;
+        }
+    }
+    
+    public String aliasText(String text) {
+        if(aliasTable.isName(text)) {
+            return aliasTable.alias(text);
+        } else {
+            return text;
         }
     }
 

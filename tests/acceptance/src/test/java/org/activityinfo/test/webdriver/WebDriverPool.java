@@ -69,6 +69,7 @@ public class WebDriverPool {
         @Override
         public void activateObject(BrowserProfile browserProfile, PooledObject<WebDriver> pooledObject) throws Exception {
             pooledObject.getObject().manage().deleteAllCookies();
+            pooledObject.getObject().navigate().to("about:blank");
         }
     
         @Override
