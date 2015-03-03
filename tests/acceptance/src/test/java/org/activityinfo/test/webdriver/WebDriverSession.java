@@ -6,13 +6,13 @@ import cucumber.api.Scenario;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 import javax.inject.Inject;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 
 @ScenarioScoped
 public class WebDriverSession {
@@ -26,7 +26,7 @@ public class WebDriverSession {
     public WebDriverSession(WebDriverProvider provider) {
         this.provider = provider;
         this.proxy =  (WebDriver) Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class[]{ WebDriver.class, TakesScreenshot.class },
+                new Class[]{ WebDriver.class, TakesScreenshot.class, HasInputDevices.class },
                 new WebDriverProxy());
     }
 
@@ -86,7 +86,11 @@ public class WebDriverSession {
             if(driver == null) {
                 throw new IllegalStateException("WebDriver was not started");
             }
-            return method.invoke(driver, args);
+            try {
+                return method.invoke(driver, args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();                            
+            }
         }
     }
 }

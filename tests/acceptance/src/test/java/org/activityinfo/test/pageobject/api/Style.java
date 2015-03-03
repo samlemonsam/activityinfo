@@ -24,6 +24,11 @@ public class Style {
         return parseValue("height");
     }
 
+    public boolean hasValue(String attribute) {
+        int i = style.indexOf(attribute + ":");
+        return i >= 0;
+    }
+    
     private int parseValue(String attribute) {
         int i = style.indexOf(attribute + ":");
         i += attribute.length() + 1;
@@ -40,4 +45,14 @@ public class Style {
 
         return Integer.parseInt(style.substring(start, i));
     }
+
+    public boolean hasHeight() {
+        return hasValue("height");
+    }
+    
+    public boolean hasWidth() {
+        return hasValue("width");
+    }
+
+    
 }

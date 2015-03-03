@@ -30,10 +30,11 @@ public class PageBinder {
         bind(injector.getInstance(WebDriver.class), instance);
     }
 
-    public <T> void bind(SearchContext context, T instance) {
+    public <T> T bind(SearchContext context, T instance) {
         AjaxElementLocatorFactory factory = new AjaxElementLocatorFactory(context, 30);
         FieldDecorator decorator = new MyFieldDecorator(factory);
         PageFactory.initElements(decorator, instance);
+        return instance;
     }
 
     public <T extends PageObject> T navigateTo(Class<T> pageObjectClass) {

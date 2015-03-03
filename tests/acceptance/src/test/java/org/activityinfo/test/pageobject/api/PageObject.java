@@ -5,7 +5,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import org.activityinfo.test.harness.ScreenShotLogger;
 import org.activityinfo.test.sut.Server;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.inject.Inject;
 import java.util.concurrent.Callable;
@@ -27,10 +29,6 @@ public abstract class PageObject {
 
     @Inject
     protected ScreenShotLogger logger;
-
-    public String getPageUrl() {
-        return server.path(getPagePath(getClass()));
-    }
 
     public static String getPagePath(Class<? extends PageObject> pageClass) {
         Path path = pageClass.getAnnotation(Path.class);
@@ -64,6 +62,10 @@ public abstract class PageObject {
         throw new AssertionError(String.format("Timed out after waiting %d seconds for '%s'", timeoutInSeconds, what));
     }
 
+    protected final WebDriverWait wait(int seconds) {
+        return new WebDriverWait(driver, seconds);
+    }
+    
     protected final void waitFor(WaitBuilder spec) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         while(stopwatch.elapsed(TimeUnit.SECONDS) < spec.timeOutInSeconds) {
@@ -138,4 +140,11 @@ public abstract class PageObject {
             }
         });
     }
+
+
+    protected void click(By locator) {
+        driver.findElement(locator).click();
+    } 
+    
+    
 }

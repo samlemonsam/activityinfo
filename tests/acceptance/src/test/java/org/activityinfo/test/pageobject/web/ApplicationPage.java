@@ -1,17 +1,28 @@
 package org.activityinfo.test.pageobject.web;
 
 import com.google.common.base.Optional;
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.PageObject;
 import org.activityinfo.test.pageobject.api.Path;
 import org.activityinfo.test.pageobject.gxt.Gxt;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtPanel;
+import org.activityinfo.test.pageobject.web.components.ModalDialog;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.activityinfo.test.webdriver.SessionReporter;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 /**
  * Interface to the single-pageobject application
@@ -21,9 +32,12 @@ public class ApplicationPage extends PageObject {
 
     @FindBy(xpath = "//div[text() = 'ActivityInfo']/following-sibling::div[2]")
     private WebElement settingsButton;
+
+    @FindBy(xpath = "//div[contains(text(), 'Design')]")
+    private WebElement designTab;
     
     /**
-     * The outermost pageobject container
+     * The outermost page object container
      */
     @FindBy(className = Gxt.BORDER_LAYOUT_CONTAINER)
     private WebElement pageContainer;
@@ -32,8 +46,14 @@ public class ApplicationPage extends PageObject {
     private SessionReporter logger;
 
     public <T> T assertCurrentPageIs(Class<T> applicationPageClass) {
-        return binder.create(pageContainer,  applicationPageClass);
+        return binder.create(pageContainer, applicationPageClass);
     }
+    
+    
+    public void waitUntilLoaded() {
+        wait(30).until(ExpectedConditions.invisibilityOfElementLocated(By.id("loading")));
+    }
+    
     
     public SettingsMenu openSettingsMenu() {
         logger.screenshot();
@@ -83,4 +103,30 @@ public class ApplicationPage extends PageObject {
             }
         });
     }
+    
+    public GxtPanel findPanel(String header) {
+        return GxtPanel.find(container(), header);
+    }
+    
+    public DesignTab navigateToDesignTab() {
+        try {
+            designTab.click();
+        } catch(Exception ignored) {
+        }
+        return new DesignTab(container());
+    }
+    
+    public ReportsTab navigateToReportsTab() {
+        FluentElement container = container();
+        container.find().div(withText("Reports")).clickWhenReady();
+        
+        return new ReportsTab(container);
+        
+        
+    }
+
+    private FluentElement container() {
+        return new FluentElement(driver, pageContainer);
+    }
+
 }

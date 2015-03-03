@@ -16,8 +16,10 @@ import java.util.List;
  */
 public class InstancePlace implements PageState {
 
+    public static final String DEFAULT_VIEW = "table";
+
     private ResourceId instanceId;
-    private String view;
+    private String view = DEFAULT_VIEW;
 
     public InstancePlace(ResourceId instanceId) {
         this.instanceId = instanceId;

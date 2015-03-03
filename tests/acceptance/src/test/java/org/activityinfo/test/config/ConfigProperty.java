@@ -17,6 +17,9 @@ public class ConfigProperty {
     public String get() {
         String path = System.getProperty(propertyKey);
         if(Strings.isNullOrEmpty(path)) {
+            path = System.getenv(propertyKey);
+        }
+        if(Strings.isNullOrEmpty(path)) {
             throw new ConfigurationError(String.format("Please specify %s using the system property '%s'", description,
                     propertyKey));
         }

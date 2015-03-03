@@ -22,6 +22,8 @@ package org.activityinfo.server.command.handler.crud;
  * #L%
  */
 
+import org.activityinfo.legacy.shared.exception.CommandException;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -35,6 +37,14 @@ public class PropertyMap {
     public <X> X get(String propertyName) {
         return (X) map.get(propertyName);
     }
+    
+    public int getRequiredInt(String propertyName) {
+        Object value = getRequiredProperty(propertyName);
+        if(!(value instanceof Integer)) {
+            throw new CommandException(String.format("Property '%s' must be an integer", propertyName));
+        }
+        return (Integer)value;
+    }
 
     public boolean containsKey(String propertyName) {
         return map.containsKey(propertyName);
@@ -42,5 +52,22 @@ public class PropertyMap {
 
     public Set<Map.Entry<String, Object>> entrySet() {
         return map.entrySet();
+    }
+
+    public String getString(String propertyName) {
+        Object value = getRequiredProperty(propertyName);
+        if(!(value instanceof String)) {
+            throw new CommandException(String.format("Property '%s' must be a string", propertyName));
+        }
+        return (String)value;
+    }
+
+    private Object getRequiredProperty(String propertyName) {
+        Object value = map.get(propertyName);
+
+        if(value == null) {
+            throw new CommandException(String.format("Property '%s' is required", propertyName));
+        }
+        return value;
     }
 }

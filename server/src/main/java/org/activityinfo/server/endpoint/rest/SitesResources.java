@@ -100,6 +100,7 @@ public class SitesResources {
             json.writeObjectFieldStart("location");
             json.writeNumberField("id", site.getLocationId());
             json.writeStringField("name", site.getLocationName());
+            json.writeStringField("code", site.getLocationAxe());
 
             if (site.hasLatLong()) {
                 json.writeFieldName("latitude");

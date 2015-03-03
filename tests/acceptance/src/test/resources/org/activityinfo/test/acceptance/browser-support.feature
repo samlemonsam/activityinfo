@@ -2,7 +2,7 @@ Feature: Cross browser support
 
 Scenario Outline: Supported Browsers
   Given I am using <browser> on <os>
-  When I login as "qa@bedatadriven.com" with my correct password
+  When I login as "auto.qa@bedatadriven.com" with my correct password
   Then my dashboard should open
   
   Examples:

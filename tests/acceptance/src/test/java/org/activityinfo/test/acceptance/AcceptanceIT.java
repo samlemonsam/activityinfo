@@ -7,9 +7,9 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
         format = {"pretty", "html:target/cucumber-html-report", "json:target/cucumber-report.json"},
-        tags = "~@manual")
+        strict = true,
+        tags = "~@manual,~@wip")
 public class AcceptanceIT {
-
 
 
 }

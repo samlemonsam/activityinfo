@@ -23,12 +23,16 @@ public class PhantomJsProvider implements WebDriverProvider {
         pool.setCreator(new Function<BrowserProfile, WebDriver>() {
             @Override
             public WebDriver apply(BrowserProfile input) {
-                WebDriver driver = new PhantomJSDriver();
-                driver.manage().window().setSize(new Dimension(1400,1000));
-
-                return driver;
+                return createDriver();
             }
         });
+    }
+
+    private WebDriver createDriver() {
+        WebDriver driver = new PhantomJSDriver();
+        driver.manage().window().setSize(new Dimension(1400,1000));
+
+        return driver;
     }
 
     @Override
@@ -53,7 +57,8 @@ public class PhantomJsProvider implements WebDriverProvider {
 
     @Override
     public WebDriver start(String name, BrowserProfile profile) {
-        return pool.get(BROWSER_PROFILE);
+     //   return pool.get(BROWSER_PROFILE);
+        return createDriver();
     }
 
 }

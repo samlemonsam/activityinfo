@@ -1,8 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:chrome='urn:import:org.activityinfo.ui.client.chrome'
-             xmlns:formView='urn:import:org.activityinfo.ui.client.pageView.formClass'
-             xmlns:a='urn:import:org.activityinfo.ui.client.widget'>
+        >
 
   <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
 
@@ -13,8 +12,16 @@
     <div class="contentpanel">
 
       <ul class="nav nav-tabs">
-        <li class="active"><a ui:field="tableTab"><strong>Table</strong></a></li>
-        <li><a ui:field="designTab"><strong>Design</strong></a></li>
+        <li class="active" ui:field="tableTabContainer">
+          <a ui:field="tableTab">
+            <strong>Table</strong>
+          </a>
+        </li>
+        <li ui:field="designTabContainer">
+          <a ui:field="designTab">
+            <strong>Design</strong>
+          </a>
+        </li>
       </ul>
       <div class="tab-content">
         <div id="popular" class="tab-pane active">

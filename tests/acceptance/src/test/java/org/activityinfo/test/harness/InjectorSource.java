@@ -8,6 +8,7 @@ import cucumber.runtime.java.guice.ScenarioScope;
 import cucumber.runtime.java.guice.impl.ScenarioModule;
 import cucumber.runtime.java.guice.impl.SequentialScenarioScope;
 import org.activityinfo.test.config.ConfigProperty;
+import org.activityinfo.test.driver.DriverModule;
 import org.activityinfo.test.sut.SystemUnderTest;
 import org.activityinfo.test.webdriver.*;
 import org.activityinfo.test.sut.Accounts;
@@ -26,6 +27,7 @@ public class InjectorSource implements cucumber.runtime.java.guice.InjectorSourc
         return Guice.createInjector(
                 new SystemUnderTest(), 
                 new WebDriverModule(), 
+                new DriverModule(),
                 new ScenarioModule(scope));
     }
 }

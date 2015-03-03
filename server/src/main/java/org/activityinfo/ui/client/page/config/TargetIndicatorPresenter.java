@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
+import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -279,7 +280,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
             if (record.isDirty()) {
                 UpdateTargetValue cmd = new UpdateTargetValue((Integer) model.get("targetId"),
                         (Integer) model.get("indicatorId"),
-                        this.getChangedProperties(record));
+                        changes(record));
 
                 batch.add(cmd);
             }
@@ -288,6 +289,19 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         for (ModelData child : treeStore.getChildren(model)) {
             prepareBatch(batch, child);
         }
+    }
+
+    private Map<String, Double> changes(Record record) {
+        Map<String, Object> changedProperties = this.getChangedProperties(record);
+        Map<String, Double> changes = Maps.newHashMap();
+        for (Map.Entry<String, Object> entry : changedProperties.entrySet()) {
+            if (entry.getValue() instanceof Double) {
+                changes.put(entry.getKey(), (Double) entry.getValue());
+            } else if (entry.getValue() instanceof String) {
+                changes.put(entry.getKey(), Double.valueOf((String) entry.getValue()));
+            }
+        }
+        return changes;
     }
 
     @Override

@@ -1,5 +1,15 @@
-./target/
+/out
+target
+build
+.gradle
+phantomjsdriver.log
+/out
+target
+build
+.gradle
+phantomjsdriver.log
 .metadata/
+build.log
 RemoteSystemsTempFiles/
 .settings
 .project
@@ -10,4 +20,9 @@ libpeerconnection.log
 *~
 *.swp
 velocity.log
-
+atlassian-ide-plugin.xml
+build.log
+atlassian-ide-plugin.xml
+build.log
+build
+.gradle
