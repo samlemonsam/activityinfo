@@ -8,12 +8,12 @@ import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
 
 public class SimpleReporter implements SessionReporter {
     
     private WebDriverSession session;
-    private int screenshotIndex = 1;
+    private static int SCREENSHOT_INDEX = 1;
+    private Scenario scenario;
 
     @Inject
     public SimpleReporter(WebDriverSession session) {
@@ -22,7 +22,7 @@ public class SimpleReporter implements SessionReporter {
 
     @Override
     public void start(Scenario scenario) {
-        
+        this.scenario = scenario;
     }
 
     @Override
@@ -38,10 +38,7 @@ public class SimpleReporter implements SessionReporter {
             WebDriver driver = session.getDriver();
             if (driver instanceof TakesScreenshot) {
                 byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-                File screenshotFile = new File(targetDir(), "screenshot" + (screenshotIndex++) + ".png");
-                Files.write(screenshot, screenshotFile);
-
-                System.out.println("Wrote screenshot to " + screenshotFile.getCanonicalFile().toString());
+                scenario.embed(screenshot, "image/png");
             }
         } catch(Exception e) {
             System.out.println("Exception saving screenshot: " + e.getMessage());

@@ -22,13 +22,24 @@ dependencies {
 
 
 task acceptanceTest() {
-    description = 'Runs acceptance tests against the local development server'
+    description = 'Runs acceptance test suite'
     dependsOn 'testClasses'
-    dependsOn ':server:appengineStart'
-    finalizedBy ':server:appengineStop'
+
+    def testUrl
+    if(!project.hasProperty("testUrl")) {
+        dependsOn ':server:appengineStart'
+        finalizedBy ':server:appengineStop'
+        testUrl = "http://localhost:8080"
+        
+    } else {
+        testUrl = project.property("testUrl")
+    }
     
     doLast {
         try {
+            
+            println "Running acceptance tests against ${testUrl}..."
+            
             project.javaexec {
                 
                 classpath sourceSets.test.runtimeClasspath
@@ -39,7 +50,7 @@ task acceptanceTest() {
                         '--glue', 'org.activityinfo.test',
                         '--tags', '@web,@api']
 
-                systemProperty 'test.url', "http://localhost:8080"
+                systemProperty 'test.url', testUrl
                 systemProperty 'webdriver', 'chrome'
                 systemProperty 'webdriver.chrome.silentOutput', 'true'
                 systemProperty 'acceptanceTestLogFile', new File(project.buildDir, "acceptance-test-web.log").absolutePath

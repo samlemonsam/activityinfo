@@ -21,7 +21,7 @@ public class SystemUnderTest extends AbstractModule {
         if(url.startsWith("http://localhost:")) {
             bind(Accounts.class).to(DevServerAccounts.class);
         } else {
-            bind(Accounts.class).toInstance(fromResource(getClass(), "devserver-credentials.properties"));
+            bind(Accounts.class).to(PredefinedAccounts.class);
         }
     }
 }

@@ -30,6 +30,7 @@ public class WebDriverHooks {
         this.scenario = scenario;
         if(scenario.getSourceTagNames().contains("@web")) {
             session.start(scenario);
+            reporter.start(scenario);
         }
     }
     

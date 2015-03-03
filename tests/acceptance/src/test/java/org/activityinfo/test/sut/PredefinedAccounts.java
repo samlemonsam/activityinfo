@@ -20,7 +20,7 @@ import java.util.Properties;
 public class PredefinedAccounts implements Accounts {
 
     public static final ConfigProperty CREDENTIALS_PROPERTY = new ConfigProperty(
-            "user.credentials",
+            "USER_CREDENTIALS",
             "the path to a properties file containing a list of existing credentials in the format\n" +
                     "user@test.com=password");
 
