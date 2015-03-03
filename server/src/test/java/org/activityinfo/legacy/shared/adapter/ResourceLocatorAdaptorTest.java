@@ -7,6 +7,8 @@ import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.core.shared.criteria.IdCriteria;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
@@ -40,9 +42,7 @@ import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdm
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -300,6 +300,37 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertNotNull(resolvedField);
         assertEquals(resolvedField.getLabel(), formField.getLabel());
 
+    }
+
+    @Test
+    public void persistFormInstance() {
+        ResourceId classId = ResourceId.valueOf("a0000000001"); // classId of activityId = 1
+        ResourceId ownerId = ResourceId.valueOf("a0000000002"); // classId of activityId = 2
+
+        FormInstance instance = new FormInstance(ResourceId.generateId(), classId);
+        instance.set(classId, "instanceString");
+        instance.setOwnerId(ownerId);
+
+        assertResolves(resourceLocator.persist(instance));
+
+        IdCriteria criteria = new IdCriteria(instance.getId())
+                .setMappedToLegacyModel(false);
+        List<FormInstance> serverInstance = assertResolves(resourceLocator.queryInstances(criteria));
+
+        assertEquals(instance.get(classId), serverInstance.get(0).get(classId));
+
+        // update and fetch again
+        instance.set(classId, "instanceString1");
+
+        assertResolves(resourceLocator.persist(instance));
+
+        serverInstance = assertResolves(resourceLocator.queryInstances(criteria));
+
+        assertEquals(instance.get(classId), serverInstance.get(0).get(classId));
+
+        // fetch by owner
+        serverInstance = assertResolves(resourceLocator.queryInstances(ParentCriteria.isChildOf(ownerId)));
+        assertEquals(instance.get(classId), serverInstance.get(0).get(classId));
     }
 
 }

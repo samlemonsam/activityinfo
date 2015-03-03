@@ -14,6 +14,7 @@ import java.util.Set;
 public class IdCriteria implements Criteria {
 
     private final Set<ResourceId> instanceIds;
+    private boolean mappedToLegacyModel = true;
 
     public IdCriteria(ResourceId... instanceIds) {
         this.instanceIds = Sets.newHashSet(instanceIds);
@@ -44,5 +45,14 @@ public class IdCriteria implements Criteria {
     @Override
     public boolean apply(@Nonnull Projection projection) {
         return instanceIds.contains(projection.getRootInstanceId());
+    }
+
+    public boolean isMappedToLegacyModel() {
+        return mappedToLegacyModel;
+    }
+
+    public IdCriteria setMappedToLegacyModel(boolean mappedToLegacyModel) {
+        this.mappedToLegacyModel = mappedToLegacyModel;
+        return this;
     }
 }

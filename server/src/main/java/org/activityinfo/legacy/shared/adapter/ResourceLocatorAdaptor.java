@@ -15,6 +15,7 @@ import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.UpdateFormClass;
+import org.activityinfo.legacy.shared.command.UpdateFormInstance;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -109,6 +110,8 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
             } else if (instance.getId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
                 return new LocationPersister(dispatcher, instance).persist();
+            } else if (instance.getId().getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+                return dispatcher.execute(new UpdateFormInstance(instance)).thenDiscardResult();
             }
         } else if(resource instanceof FormClass) {
             return dispatcher.execute(new UpdateFormClass((FormClass) resource)).thenDiscardResult();

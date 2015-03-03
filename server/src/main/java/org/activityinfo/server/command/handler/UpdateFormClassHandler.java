@@ -1,6 +1,5 @@
 package org.activityinfo.server.command.handler;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -25,22 +24,17 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 
 import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
 
 public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
-
-    private static final int MIN_GZIP_BYTES = 1024 * 5;
 
     private static final Logger LOGGER = Logger.getLogger(UpdateFormClassHandler.class.getName());
 
@@ -62,11 +56,11 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
             updateActivityFormClass(cmd, user, formClass);
         } else {
 
-            org.activityinfo.server.database.hibernate.entity.FormClass hibernateFormClass = new org.activityinfo.server.database.hibernate.entity.FormClass();
+            FormClassEntity hibernateFormClass = new FormClassEntity();
 
             hibernateFormClass.setId(formClass.getId().asString());
             hibernateFormClass.setOwnerId(formClass.getOwnerId().asString());
-            updateWithJson(hibernateFormClass, cmd.getJson());
+            JsonHelper.updateWithJson(hibernateFormClass, cmd.getJson());
 
             if (!exists(hibernateFormClass.getId())) {
                 entityManager.get().persist(hibernateFormClass);
@@ -79,19 +73,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     }
 
     private boolean exists(String formClassId) {
-        return entityManager.get().find(org.activityinfo.server.database.hibernate.entity.FormClass.class, formClassId) != null;
-    }
-
-    private void updateWithJson(HasFormClassJson hasFormClassJson, String json) {
-
-        if(json.length() > MIN_GZIP_BYTES) {
-            hasFormClassJson.setGzFormClass(compressJson(json));
-            hasFormClassJson.setFormClass(null);
-        } else {
-            hasFormClassJson.setFormClass(json);
-            hasFormClassJson.setGzFormClass(null);
-        }
-
+        return entityManager.get().find(FormClassEntity.class, formClassId) != null;
     }
 
     private void updateActivityFormClass(UpdateFormClass cmd, User user, FormClass formClass) {
@@ -101,7 +83,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         permissionOracle.assertDesignPrivileges(activity.getDatabase(), user);
 
         // Update the activity table with the JSON value
-        updateWithJson(activity, cmd.getJson());
+        JsonHelper.updateWithJson(activity, cmd.getJson());
 
         // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
 //        activity.setClassicView(false);
@@ -112,22 +94,6 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
             entityManager.get().persist(activity);
         }
     }
-
-    private byte[] compressJson(String json) {
-        try {
-            ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-            GZIPOutputStream gzOut = new GZIPOutputStream(byteArrayOut);
-            OutputStreamWriter writer = new OutputStreamWriter(gzOut, Charsets.UTF_8);
-            writer.write(json);
-            writer.close();
-            byte[] bytes = byteArrayOut.toByteArray();
-            LOGGER.log(Level.INFO, "FormClass GZipped json size = " + bytes.length);
-            return bytes;
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     private FormClass validateFormClass(String json) {
         try {

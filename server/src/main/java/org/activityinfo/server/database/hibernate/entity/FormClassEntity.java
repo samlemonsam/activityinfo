@@ -21,27 +21,25 @@ package org.activityinfo.server.database.hibernate.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/11/2015.
  */
 @Entity
-public class FormClass implements Serializable, HasFormClassJson {
+@Table(name = "formclass")
+public class FormClassEntity implements Serializable, HasJson {
 
     private String id;
     private String ownerId;
-    private String formClass;
-    private byte[] gzFormClass;
+    private String formClassJson;
+    private byte[] gzFormClassJson;
 
-    public FormClass() {
+    public FormClassEntity() {
     }
 
-    public FormClass(String id) {
+    public FormClassEntity(String id) {
         this.id = id;
     }
 
@@ -66,20 +64,20 @@ public class FormClass implements Serializable, HasFormClassJson {
 
     @Lob
     @Column(name = "json")
-    public String getFormClass() {
-        return formClass;
+    public String getJson() {
+        return formClassJson;
     }
 
-    public void setFormClass(String formClass) {
-        this.formClass = formClass;
+    public void setJson(String formClass) {
+        this.formClassJson = formClass;
     }
 
     @Column(name = "gzJson")
-    public byte[] getGzFormClass() {
-        return gzFormClass;
+    public byte[] getGzJson() {
+        return gzFormClassJson;
     }
 
-    public void setGzFormClass(byte[] gzFormClass) {
-        this.gzFormClass = gzFormClass;
+    public void setGzJson(byte[] gzFormClass) {
+        this.gzFormClassJson = gzFormClass;
     }
 }

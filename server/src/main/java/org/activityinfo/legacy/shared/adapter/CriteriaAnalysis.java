@@ -4,9 +4,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.activityinfo.core.shared.criteria.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.criteria.*;
 
 import java.util.List;
 import java.util.Set;
@@ -31,6 +31,11 @@ public class CriteriaAnalysis extends CriteriaVisitor {
      */
     private final Multimap<Character, Integer> ids = HashMultimap.create();
 
+    /**
+     * List of instance ids not mapped to legacy model (saved in forminstance table)
+     */
+    private final List<String> idsWithoutLegacyModel = Lists.newArrayList();
+
     public ResourceId getParentCriteria() {
         return parentCriteria.iterator().next();
     }
@@ -50,8 +55,14 @@ public class CriteriaAnalysis extends CriteriaVisitor {
         // separate the instances out into domains
         for (ResourceId id : criteria.getInstanceIds()) {
             assert id != null : "ids cannot be null";
-            if (id.getDomain() != CuidAdapter.ACTIVITY_CATEGORY_DOMAIN) {
-                ids.put(id.getDomain(), CuidAdapter.getLegacyIdFromCuid(id));
+            if (criteria.isMappedToLegacyModel()) {
+                if (id.getDomain() != CuidAdapter.ACTIVITY_CATEGORY_DOMAIN) {
+                    ids.put(id.getDomain(), CuidAdapter.getLegacyIdFromCuid(id));
+                }
+            } else {
+                if (id.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+                    idsWithoutLegacyModel.add(id.asString());
+                }
             }
         }
     }
@@ -108,8 +119,12 @@ public class CriteriaAnalysis extends CriteriaVisitor {
         return classUnion && !classCriteria.isEmpty();
     }
 
-    public boolean isRestrictedById() {
+    public boolean isRestrictedByIdWithLegacyModel() {
         return !ids.isEmpty();
+    }
+
+    public boolean isRestrictedByIdWithoutLegacyModel() {
+        return !idsWithoutLegacyModel.isEmpty();
     }
 
     public boolean isLocationQuery() {
@@ -138,6 +153,10 @@ public class CriteriaAnalysis extends CriteriaVisitor {
 
     public List<Integer> getIds(char domain) {
         return Lists.newArrayList(ids.get(domain));
+    }
+
+    public List<String> getIdsWithoutLegacyModel() {
+        return idsWithoutLegacyModel;
     }
 
     public static CriteriaAnalysis analyze(Criteria criteria) {

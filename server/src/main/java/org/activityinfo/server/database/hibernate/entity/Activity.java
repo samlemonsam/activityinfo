@@ -43,7 +43,7 @@ import java.util.Set;
  */
 @Entity @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
 @NamedQuery(name = "queryMaxSortOrder", query = "select max(e.sortOrder) from Activity e where e.database.id = ?1")
-public class Activity implements Serializable, Deleteable, Orderable, HasFormClassJson {
+public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     private int id;
     private LocationType locationType;
@@ -70,8 +70,8 @@ public class Activity implements Serializable, Deleteable, Orderable, HasFormCla
     private int published = Published.NOT_PUBLISHED.getIndex();
     private boolean classicView;
 
-    private String formClass;
-    private byte[] gzFormClass;
+    private String formClassJson;
+    private byte[] gzFormClassJson;
 
     public Activity() {
 
@@ -211,20 +211,20 @@ public class Activity implements Serializable, Deleteable, Orderable, HasFormCla
      * @return the FormClass resource encoded as JSON
      */
     @Lob
-    public String getFormClass() {
-        return formClass;
+    public String getJson() {
+        return formClassJson;
     }
 
-    public void setFormClass(String formClass) {
-        this.formClass = formClass;
+    public void setJson(String formClassJson) {
+        this.formClassJson = formClassJson;
     }
 
-    public byte[] getGzFormClass() {
-        return gzFormClass;
+    public byte[] getGzJson() {
+        return gzFormClassJson;
     }
 
-    public void setGzFormClass(byte[] gzFormClass) {
-        this.gzFormClass = gzFormClass;
+    public void setGzJson(byte[] gzFormClassJson) {
+        this.gzFormClassJson = gzFormClassJson;
     }
 
     @Column @Temporal(value = TemporalType.TIMESTAMP)

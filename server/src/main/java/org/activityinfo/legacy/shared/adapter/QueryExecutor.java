@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -8,6 +9,7 @@ import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
+import org.activityinfo.legacy.shared.command.result.FormInstanceResult;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.*;
@@ -17,6 +19,7 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.ConcatList;
 import org.activityinfo.promise.Promise;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +55,11 @@ public class QueryExecutor {
             return queryByClassId(criteriaAnalysis.getClassRestriction());
         } else if (criteriaAnalysis.isRestrictedByUnionOfClasses()) {
             return queryByClassIds();
-        } else if (criteriaAnalysis.isRestrictedById()) {
+        } else if (criteriaAnalysis.isRestrictedByIdWithoutLegacyModel()) { // WITHOUT legacy model
+
+            return queryByIds(criteriaAnalysis.getIdsWithoutLegacyModel());
+
+        } else if (criteriaAnalysis.isRestrictedByIdWithLegacyModel()) { // WITH legacy model
             List<Promise<List<FormInstance>>> resultSets = Lists.newArrayList();
             for (Character domain : criteriaAnalysis.getIds().keySet()) {
                 resultSets.add(queryByIds(domain, criteriaAnalysis.getIds().get(domain)));
@@ -70,7 +77,16 @@ public class QueryExecutor {
             } else if (parentId.getDomain() == CuidAdapter.COUNTRY_DOMAIN) {
                 return adminLevels(CuidAdapter.getLegacyIdFromCuid(parentId));
             } else {
-                throw new UnsupportedOperationException("parentID " + parentId);
+                GetFormInstance command = new GetFormInstance()
+                        .setOwnerId(parentId.asString())
+                        .setType(GetFormInstance.Type.OWNER);
+                return dispatcher.execute(command).then(new Function<FormInstanceResult, List<FormInstance>>() {
+                    @Nullable
+                    @Override
+                    public List<FormInstance> apply(FormInstanceResult formInstanceResult) {
+                        return formInstanceResult.getFormInstanceList();
+                    }
+                });
             }
         } else {
             throw new UnsupportedOperationException("queries must have either class criteria or parent criteria");
@@ -91,6 +107,16 @@ public class QueryExecutor {
             resultSets.add(queryByClassId(classId));
         }
         return Promise.foldLeft(Collections.<FormInstance>emptyList(), new ConcatList<FormInstance>(), resultSets);
+    }
+
+    private Promise<List<FormInstance>> queryByIds(Collection<String> ids) {
+        return dispatcher.execute(new GetFormInstance(ids)).then(new Function<FormInstanceResult, List<FormInstance>>() {
+            @Nullable
+            @Override
+            public List<FormInstance> apply(FormInstanceResult formInstanceResult) {
+                return formInstanceResult.getFormInstanceList();
+            }
+        });
     }
 
     private Promise<List<FormInstance>> queryByIds(char domain, Collection<Integer> ids) {

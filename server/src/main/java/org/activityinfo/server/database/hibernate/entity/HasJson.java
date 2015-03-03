@@ -24,14 +24,14 @@ package org.activityinfo.server.database.hibernate.entity;
 /**
  * @author yuriyz on 02/11/2015.
  */
-public interface HasFormClassJson {
+public interface HasJson {
 
-    public String getFormClass();
+    public String getJson();
 
-    public void setFormClass(String formClass);
+    public void setJson(String json);
 
-    public byte[] getGzFormClass();
+    public byte[] getGzJson();
 
-    public void setGzFormClass(byte[] gzFormClass);
+    public void setGzJson(byte[] gzJson);
 
 }
