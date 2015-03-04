@@ -98,7 +98,7 @@ public class ActivityEntities {
             List<Integer> forFetching;
             boolean exit = false;
             if (indicatorIdList.size() > INDICATOR_CHUNK_SIZE) {
-                forFetching = indicatorIdList.subList(0, INDICATOR_CHUNK_SIZE); // only first 1000 indicators
+                forFetching = Lists.newArrayList(indicatorIdList.subList(0, INDICATOR_CHUNK_SIZE)); // only first 1000 indicators
                 indicatorIdList.removeAll(forFetching);
             } else {
                 forFetching = indicatorIdList;
