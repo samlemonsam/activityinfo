@@ -32,11 +32,11 @@ import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOProvider;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.hibernate.Session;
 import org.json.JSONException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -56,14 +56,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private final Set<Integer> partnerIds = Sets.newHashSet();
     private final List<Partner> partners = Lists.newArrayList();
-
-    private final List<Activity> activities = Lists.newArrayList();
-    private final List<Indicator> indicators = Lists.newArrayList();
-    private final Set<IndicatorLinkEntity> indicatorLinks = new HashSet<>();
-
-    private final Set<Integer> attributeGroupIds = Sets.newHashSet();
-    private final List<AttributeGroup> attributeGroups = Lists.newArrayList();
-    private final List<Attribute> attributes = Lists.newArrayList();
+    private final ActivityEntities existingActivityEntities;
 
     private final Set<Integer> userIds = Sets.newHashSet();
     private final List<User> users = Lists.newArrayList();
@@ -72,7 +65,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private static final Logger LOGGER = Logger.getLogger(DbUpdateBuilder.class.getName());
 
-    private final List<LockedPeriod> allLockedPeriods = Lists.newArrayList();
     private final List<Project> projects = Lists.newArrayList();
 
     @Inject
@@ -82,6 +74,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         this.userDatabaseDAO = HibernateDAOProvider.makeImplementation(UserDatabaseDAO.class,
                 UserDatabase.class,
                 entityManager);
+        this.existingActivityEntities = new ActivityEntities(entityManager);
     }
 
     @SuppressWarnings("unchecked") @Override
@@ -132,22 +125,21 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private String buildSql() throws JSONException {
         JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
+        buildCleanUpSql(builder);
+
         builder.insert(" or replace ", Country.class, countries);
         builder.insert(" or replace ", AdminLevel.class, adminLevels);
-        builder.insert(" or replace ", UserDatabase.class, Lists.newArrayList(database));
         builder.insert(" or replace ", Partner.class, partners);
-
-        builder.insert(" or replace ", Activity.class, activities);
-        builder.insert(" or replace ", Indicator.class, indicators);
-        builder.insert(" or replace ", AttributeGroup.class, attributeGroups);
-        builder.insert(" or replace ", Attribute.class, attributes);
+        builder.insert(" or replace ", UserDatabase.class, Lists.newArrayList(database));
+        builder.insert(" or replace ", Activity.class, Lists.newArrayList(existingActivityEntities.getActivitiesMap().values()));
+        builder.insert(" or replace ", Indicator.class, Lists.newArrayList(existingActivityEntities.getIndicators().values()));
+        builder.insert(" or replace ", AttributeGroup.class, Lists.newArrayList(existingActivityEntities.getAttributeGroups().values()));
+        builder.insert(" or replace ", Attribute.class, Lists.newArrayList(existingActivityEntities.getAttributes().values()));
         builder.insert(" or replace ", LocationType.class, locationTypes);
         builder.insert(" or replace ", User.class, users);
         builder.insert(" or replace ", UserPermission.class, userPermissions);
         builder.insert(" or replace ", Project.class, projects);
-        builder.insert(" or replace ", LockedPeriod.class, allLockedPeriods);
-
-
+        builder.insert(" or replace ", LockedPeriod.class, existingActivityEntities.getAllLockedPeriods());
 
         createAndSyncIndicatorlinks(builder);
         createAndSyncPartnerInDatabase(builder);
@@ -157,12 +149,73 @@ public class DbUpdateBuilder implements UpdateBuilder {
         return builder.asJson();
     }
 
+    private void buildCleanUpSql(JpaUpdateBuilder builder) throws JSONException {
+
+        ((Session)entityManager.getDelegate()).disableFilter("hideDeleted");
+
+        List<Activity> deletedActivities = entityManager.createQuery("select a from Activity a where a.database.id = ?1 and a.dateDeleted is not null")
+                .setParameter(1, database.getId())
+                .getResultList();
+
+        ActivityEntities allActivities = new ActivityEntities(entityManager);
+        allActivities.collect(deletedActivities);
+        allActivities.collect(existingActivityEntities.getActivitiesMap().values());
+
+        Set<Integer> attributesIds = allActivities.getAttributes().keySet();
+        Set<Integer> indicatorIds = allActivities.getIndicators().keySet();
+        Set<Integer> attributeGroupIds = allActivities.getAttributeGroups().keySet();
+        Set<Integer> activityIds = allActivities.getActivitiesMap().keySet();
+
+        if (!attributesIds.isEmpty()) {
+            builder.executeStatement("delete from attributevalue where attributeid in " + SqlQueryUtil.idSet(attributesIds));
+        }
+
+        if (!indicatorIds.isEmpty()) {
+            String idSet = SqlQueryUtil.idSet(indicatorIds);
+            builder.executeStatement("delete from indicatorvalue where indicatorid in " + idSet);
+            builder.executeStatement("delete from indicatorlink where sourceindicatorid in " + idSet +
+                    " or destinationindicatorid in " + idSet);
+
+            List<IndicatorValue> indicatorValues = entityManager.createQuery("select i from IndicatorValue i where i.indicator.id in " + idSet)
+                    .getResultList();
+            if (!indicatorValues.isEmpty()) {
+                Set<Integer> reportingPeriods = Sets.newHashSet();
+                for (IndicatorValue value : indicatorValues) {
+                    reportingPeriods.add(value.getReportingPeriod().getId());
+                }
+
+                if (!reportingPeriods.isEmpty()) {
+                    builder.executeStatement("delete from reportingperiod where reportingperiodid in " + SqlQueryUtil.idSet(reportingPeriods));
+                }
+            }
+        }
+
+        if (!attributeGroupIds.isEmpty()) {
+            String idSet = SqlQueryUtil.idSet(attributeGroupIds);
+            builder.executeStatement("delete from attribute where attributegroupid in " + idSet);
+            builder.executeStatement("delete from attributegroup where attributegroupid in " + idSet);
+        }
+
+        if (!activityIds.isEmpty()) {
+            String idSet = SqlQueryUtil.idSet(activityIds);
+            builder.executeStatement("delete from attributegroupinactivity where activityid in " + idSet);
+            builder.executeStatement("delete from indicator where activityid in " + idSet);
+            builder.executeStatement("delete from site where activityid in " + idSet);
+        }
+
+        builder.executeStatement("delete from project where databaseid = " + database.getId());
+        builder.executeStatement("delete from activity where databaseid = " + database.getId());
+
+        // enabled deleted filter back
+        ((Session)entityManager.getDelegate()).enableFilter("hideDeleted");
+    }
+
     private void createAndSyncIndicatorlinks(JpaUpdateBuilder builder) throws JSONException {
 
-        if (!indicatorLinks.isEmpty()) {
+        if (!existingActivityEntities.getIndicatorLinks().isEmpty()) {
             builder.beginPreparedStatement(
                     "insert or replace into IndicatorLink (SourceIndicatorId, DestinationIndicatorId) values (?, ?) ");
-            for (IndicatorLinkEntity il : indicatorLinks) {
+            for (IndicatorLinkEntity il : existingActivityEntities.getIndicatorLinks()) {
                 builder.addExecution(il.getId().getSourceIndicatorId(), il.getId().getDestinationIndicatorId());
             }
             builder.finishPreparedStatement();
@@ -170,7 +223,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void createAndSyncPartnerInDatabase(JpaUpdateBuilder builder) throws JSONException {
-        builder.executeStatement("create table if not exists PartnerInDatabase (DatabaseId integer, PartnerId int)");
         // do not clear table, now we handle data per db
 //        builder.executeStatement("delete from PartnerInDatabase");
 
@@ -185,8 +237,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void createAndSyncAttributeGroupInActivity(JpaUpdateBuilder builder) throws JSONException {
-        builder.executeStatement(
-                "create table if not exists AttributeGroupInActivity (ActivityId integer, AttributeGroupId integer)");
+
         // do not clear table, now we handle data per db
 //        builder.executeStatement("delete from AttributeGroupInActivity");
 
@@ -247,52 +298,13 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         projects.addAll(Lists.newArrayList(database.getProjects()));
 
-        allLockedPeriods.addAll(database.getLockedPeriods());
+        existingActivityEntities.getAllLockedPeriods().addAll(database.getLockedPeriods());
         for (Project project : database.getProjects()) {
-            allLockedPeriods.addAll(project.getLockedPeriods());
+            existingActivityEntities.getAllLockedPeriods().addAll(project.getLockedPeriods());
         }
 
-        for (Activity activity : database.getActivities()) {
-            allLockedPeriods.addAll(activity.getLockedPeriods());
+        existingActivityEntities.collect(database.getActivities());
 
-            activities.add(activity);
-            for (Indicator indicator : activity.getIndicators()) {
-                indicators.add(indicator);
-            }
-            for (AttributeGroup g : activity.getAttributeGroups()) {
-                if (!attributeGroupIds.contains(g.getId())) {
-                    attributeGroups.add(g);
-                    attributeGroupIds.add(g.getId());
-                    for (Attribute a : g.getAttributes()) {
-                        attributes.add(a);
-                    }
-                }
-            }
-        }
-
-        findIndicatorLinks();
-
-    }
-
-    @SuppressWarnings("unchecked") // query indicator links with one call
-    private void findIndicatorLinks() {
-        if (indicators.isEmpty()) {// nothing to handle
-            return;
-        }
-        List<Integer> indicatorIdList = Lists.newArrayList();
-        for (Indicator indicator : indicators) {
-            indicatorIdList.add(indicator.getId());
-        }
-
-        List<IndicatorLinkEntity> result = entityManager.createQuery(
-                "select il from IndicatorLinkEntity il where il.id.sourceIndicatorId in (:sourceId) or il.id" +
-                        ".destinationIndicatorId in (:destId)")
-                .setParameter("sourceId", indicatorIdList)
-                .setParameter("destId", indicatorIdList)
-                .getResultList();
-        if (result != null && !result.isEmpty()) {
-            indicatorLinks.addAll(result);
-        }
     }
 
     public long getCurrentDbVersion() {
