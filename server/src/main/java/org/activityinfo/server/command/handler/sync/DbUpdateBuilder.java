@@ -159,7 +159,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         ActivityEntities allActivities = new ActivityEntities(entityManager);
         allActivities.collect(deletedActivities);
-        allActivities.collect(existingActivityEntities.getActivitiesMap().values());
+        allActivities.collect(existingActivityEntities);
 
         Set<Integer> attributesIds = allActivities.getAttributes().keySet();
         Set<Integer> indicatorIds = allActivities.getIndicators().keySet();

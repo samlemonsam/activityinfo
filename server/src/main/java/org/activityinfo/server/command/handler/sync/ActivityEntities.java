@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ActivityEntities {
 
+    public static final int INDICATOR_CHUNK_SIZE = 1000;
+
     private final List<LockedPeriod> allLockedPeriods = Lists.newArrayList();
     private final Map<Integer, Indicator> indicators = Maps.newHashMap();
     private final Set<IndicatorLinkEntity> indicatorLinks = new HashSet<>();
@@ -48,6 +50,15 @@ public class ActivityEntities {
 
     public ActivityEntities(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    public void collect(ActivityEntities existingActivityEntities) {
+        allLockedPeriods.addAll(existingActivityEntities.getAllLockedPeriods());
+        indicators.putAll(existingActivityEntities.getIndicators());
+        indicatorLinks.addAll(existingActivityEntities.getIndicatorLinks());
+        attributeGroups.putAll(existingActivityEntities.getAttributeGroups());
+        attributes.putAll(existingActivityEntities.getAttributes());
+        activitiesMap.putAll(existingActivityEntities.getActivitiesMap());
     }
 
     public void collect(Collection<Activity> activities) {
@@ -82,21 +93,32 @@ public class ActivityEntities {
 
         List<Integer> indicatorIdList = Lists.newArrayList(indicators.keySet());
 
-        // todo remove later : experiment - read by chunks?
-//        if (indicatorIdList.size() > 1000) {
-//            indicatorIdList = indicatorIdList.subList(0, 1000); // only first 1000 indicators
-//        }
+        while(true) { // read indicator links by chunks, we don't want to get mysql timeout here (in case there is more then 10000 indicators)
 
-        Stopwatch stopwatch = Stopwatch.createStarted(); // we may get timeout here if indicatorList.size() > 10000
-        List<IndicatorLinkEntity> result = entityManager.createQuery(
-                "select il from IndicatorLinkEntity il where il.id.sourceIndicatorId in (:sourceId) or il.id" +
-                        ".destinationIndicatorId in (:destId)")
-                .setParameter("sourceId", indicatorIdList)
-                .setParameter("destId", indicatorIdList)
-                .getResultList();
-        if (result != null && !result.isEmpty()) {
-            Log.info("Fetching of  for IndicatorLinkEntity with " + indicatorIdList.size() + " inticators takes " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
-            indicatorLinks.addAll(result);
+            List<Integer> forFetching;
+            boolean exit = false;
+            if (indicatorIdList.size() > INDICATOR_CHUNK_SIZE) {
+                forFetching = indicatorIdList.subList(0, INDICATOR_CHUNK_SIZE); // only first 1000 indicators
+                indicatorIdList.removeAll(forFetching);
+            } else {
+                forFetching = indicatorIdList;
+                exit = true;
+            }
+
+            Stopwatch stopwatch = Stopwatch.createStarted(); // we may get timeout here if indicatorList.size() > 10000
+            List<IndicatorLinkEntity> result = entityManager.createQuery(
+                    "select il from IndicatorLinkEntity il where il.id.sourceIndicatorId in (:sourceId) or il.id" +
+                            ".destinationIndicatorId in (:destId)")
+                    .setParameter("sourceId", forFetching)
+                    .setParameter("destId", forFetching)
+                    .getResultList();
+
+                Log.info("Fetching of  for IndicatorLinkEntity with " + forFetching.size() + " inticators takes " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
+                indicatorLinks.addAll(result);
+
+            if (exit) {
+                break;
+            }
         }
     }
 
