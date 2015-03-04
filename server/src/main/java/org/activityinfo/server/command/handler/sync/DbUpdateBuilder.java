@@ -23,10 +23,13 @@ package org.activityinfo.server.command.handler.sync;
  */
 
 import com.bedatadriven.rebar.sync.server.JpaUpdateBuilder;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOProvider;
@@ -35,10 +38,12 @@ import org.activityinfo.server.database.hibernate.entity.*;
 import org.hibernate.Session;
 import org.json.JSONException;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class DbUpdateBuilder implements UpdateBuilder {
@@ -176,18 +181,19 @@ public class DbUpdateBuilder implements UpdateBuilder {
             builder.executeStatement("delete from indicatorlink where sourceindicatorid in " + idSet +
                     " or destinationindicatorid in " + idSet);
 
-            List<IndicatorValue> indicatorValues = entityManager.createQuery("select i from IndicatorValue i where i.indicator.id in " + idSet)
-                    .getResultList();
-            if (!indicatorValues.isEmpty()) {
-                Set<Integer> reportingPeriods = Sets.newHashSet();
-                for (IndicatorValue value : indicatorValues) {
-                    reportingPeriods.add(value.getReportingPeriod().getId());
-                }
 
-                if (!reportingPeriods.isEmpty()) {
-                    builder.executeStatement("delete from reportingperiod where reportingperiodid in " + SqlQueryUtil.idSet(reportingPeriods));
-                }
-            }
+            // todo collecting indicator values takes too much time : timeout is thrown
+//            List<IndicatorValue> indicatorValues = new ArrayList<>(); //collectIndicatorValues(Lists.newArrayList(indicatorIds));
+//            if (!indicatorValues.isEmpty()) {
+//                Set<Integer> reportingPeriods = Sets.newHashSet();
+//                for (IndicatorValue value : indicatorValues) {
+//                    reportingPeriods.add(value.getReportingPeriod().getId());
+//                }
+//
+//                if (!reportingPeriods.isEmpty()) {
+//                    builder.executeStatement("delete from reportingperiod where reportingperiodid in " + SqlQueryUtil.idSet(reportingPeriods));
+//                }
+//            }
         }
 
         if (!attributeGroupIds.isEmpty()) {
@@ -208,6 +214,20 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         // enabled deleted filter back
         ((Session)entityManager.getDelegate()).enableFilter("hideDeleted");
+    }
+
+    private List<IndicatorValue> collectIndicatorValues(List<Integer> indicatorIds) {
+        return ActivityEntities.collectByChunks(indicatorIds, new Function<List<Integer>, List<IndicatorValue>>() {
+            @Nullable
+            @Override
+            public List<IndicatorValue> apply(@Nullable List<Integer> input) {
+                Stopwatch stopwatch = Stopwatch.createStarted();
+                List<IndicatorValue> indicatorValues = entityManager.createQuery("select i from IndicatorValue i where i.indicator.id in " + SqlQueryUtil.idSet(input))
+                        .getResultList();
+                Log.info("Fetching of  for IndicatorValue with " + input.size() + " inticators takes " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
+                return indicatorValues;
+            }
+        });
     }
 
     private void createAndSyncIndicatorlinks(JpaUpdateBuilder builder) throws JSONException {
