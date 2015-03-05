@@ -148,6 +148,9 @@
                                     <goal>verify</goal>
                                 </goals>
                                 <configuration>
+                                    <includes>
+                                        <include>**/**AT.java</include>
+                                    </includes>
                                     <systemPropertyVariables>
                                         <sauce.username>${sauce.username}</sauce.username>
                                         <sauce.accessKey>${sauce.accessKey}</sauce.accessKey>

@@ -11,7 +11,6 @@ import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
-import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -19,7 +18,7 @@ import java.util.List;
 
 
 @ScenarioScoped
-public class UiApplicationDriver implements ApplicationDriver {
+public class UiApplicationDriver extends ApplicationDriver {
 
     private ApiApplicationDriver apiDriver;
     private PageBinder pageBinder;
@@ -32,8 +31,9 @@ public class UiApplicationDriver implements ApplicationDriver {
     private TargetsPage targetPage;
 
     @Inject
-    public UiApplicationDriver(ApiApplicationDriver apiDriver, WebDriver webDriver, PageBinder pageBinder, 
+    public UiApplicationDriver(ApiApplicationDriver apiDriver, PageBinder pageBinder,
                                AliasTable aliasTable) {
+        super(aliasTable);
         this.apiDriver = apiDriver;
         this.pageBinder = pageBinder;
         this.aliasTable = aliasTable;
@@ -68,82 +68,41 @@ public class UiApplicationDriver implements ApplicationDriver {
     public ApplicationDriver setup() {
         return apiDriver;
     }
+    
 
     @Override
-    public void createDatabase(Property... properties) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void createForm(Property... properties) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void createField(Property... properties) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void addPartner(String partnerName, String databaseName) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void createTarget(Property... properties) throws Exception {
-        TestObject target = new TestObject(properties);
+    public void createTarget(TestObject target) throws Exception {
         ensureLoggedIn();
 
         targetPage = applicationPage
                 .navigateToDesignTab()
-                .selectDatabase(aliasTable.getName(target.getString("database")))
+                .selectDatabase(target.getAlias("database"))
                 .targets();
         
         GxtModal dialog = targetPage.add();
         
-        dialog.form().fillTextField("Name", target.getString("name"));
+        dialog.form().fillTextField("Name", target.getAlias());
         dialog.form().fillDateField("from", new LocalDate(2014, 1, 1));
         dialog.form().fillDateField("to", new LocalDate(2014, 12, 31));
         
         if(target.has("partner")) {
-            dialog.form().select("Partner", aliasTable.getName(target.getString("partner")));
+            dialog.form().select("Partner", target.getAlias("partner"));
         }
         if(target.has("project")) {
-            dialog.form().select("Project", aliasTable.getName(target.getString("project")));
+            dialog.form().select("Project", target.getAlias("project"));
         }
         
         dialog.accept();
-        
-
     }
 
     @Override
     public void setTargetValues(String targetName, List<FieldValue> values) throws Exception {
         targetPage.select(targetName);
         for(FieldValue value : values) {
-            targetPage.setValue(aliasTable.getName(value.getField()), value.asDouble());   
+            targetPage.setValue(aliasTable.getAlias(value.getField()), value.asDouble());   
         }
     }
 
-    @Override
-    public void createProject(Property... properties) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void createLocationType(Property... properties) throws Exception {
-        throw new PendingException();
-    }
-
-    @Override
-    public void createLocation(Property... properties) throws Exception {
-        throw new PendingException();
-    }
 
     @Override
     public DataTable pivotTable(String measure, List<String> rowDimension) {
@@ -151,19 +110,9 @@ public class UiApplicationDriver implements ApplicationDriver {
                 .navigateToReportsTab()
                 .createPivotTable();
         
-        pivotTable.selectMeasure(aliasTable.getName(measure));
+        pivotTable.selectMeasure(aliasTable.getAlias(measure));
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
         return pivotTable.extractData();
-    }
-
-    @Override
-    public void grantPermission(Property... properties) throws Exception {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void delete(String objectType, String name) throws Exception {
-        throw new PendingException();
     }
 
     @Override

@@ -9,6 +9,7 @@ import cucumber.runtime.model.CucumberTagStatement;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.Feature;
+import gherkin.formatter.model.Step;
 import org.junit.runner.Description;
 import org.junit.runners.model.InitializationError;
 
@@ -73,5 +74,10 @@ public class FeatureNode implements Node {
     @Override
     public void finish(Reporter reporter, Formatter formatter) {
         formatter.eof();
+    }
+
+    @Override
+    public List<Step> getSteps() {
+        throw new UnsupportedOperationException();
     }
 }

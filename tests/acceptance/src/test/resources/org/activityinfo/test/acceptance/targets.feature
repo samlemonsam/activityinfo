@@ -1,4 +1,5 @@
-@web @api
+# TODO: should support api as well, but we need to support pivot table requests through the API
+@web  
 Feature: Indicator Targets
   As an analyst
   I want to be able to define target indicator values
@@ -42,4 +43,4 @@ Feature: Indicator Targets
       |   Targeted  | 1,500 |
       | NRC         |       |
       |   Realized  |   800 |
-      |   Targeted  | 1,000 |
+      |   Targeted  | 1,000 | 

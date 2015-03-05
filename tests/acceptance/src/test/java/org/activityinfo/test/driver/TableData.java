@@ -31,6 +31,4 @@ public class TableData {
         return Joiner.on("\n").join(rows);
     }
     
-    
-    
 }

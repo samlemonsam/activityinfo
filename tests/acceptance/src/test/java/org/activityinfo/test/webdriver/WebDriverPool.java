@@ -8,7 +8,9 @@ import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
-
+/**
+ * Maintains a pool of WebDriver instances that can be reused
+ */
 public class WebDriverPool {
     
     private GenericKeyedObjectPool<BrowserProfile, WebDriver> pool;

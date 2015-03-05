@@ -1,4 +1,4 @@
-package org.activityinfo.test.acceptance;
+package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
 import cucumber.api.PendingException;

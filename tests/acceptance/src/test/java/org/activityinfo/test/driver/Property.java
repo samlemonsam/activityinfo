@@ -1,7 +1,5 @@
 package org.activityinfo.test.driver;
 
-import java.util.Properties;
-
 public class Property {
     private String key;
     private Object value;

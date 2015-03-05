@@ -1,16 +1,26 @@
 package org.activityinfo.test.driver;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+/**
+ * Maintains a mapping between human-readable "test handles" and their unique aliases
+ * that are actually used in interacting with the system. This helps isolate tests 
+ * running on the same server from each other.
+ * 
+ * For example, two different tests might refer to "NFI Distribution", or we might run the 
+ * same test on several browsers against the same server. If we actually used the name
+ * "NFI Distribution", tests run against the UI would not be reliable. 
+ * 
+ * To avoid this, we decorate each human-readable "test handle" with a random hex string, so
+ * that when we see "NFI Distribution_ADc323434" we know that is the object that we've 
+ * created in this specific run of the test.
+ */
 @ScenarioScoped
 public class AliasTable {
 
@@ -18,11 +28,10 @@ public class AliasTable {
     /**
      * Maps test/user-friendly names to unique names that we really use
      */
-    private BiMap<String, String> nameMap = HashBiMap.create();
+    private BiMap<String, String> testHandleToAlias = HashBiMap.create();
 
-    private BiMap<String, Integer> idMap = HashBiMap.create();
-
-
+    private Map<String, Integer> testHandleToId = Maps.newHashMap();
+    
 
     private Random random = new Random();
 
@@ -30,26 +39,48 @@ public class AliasTable {
      * Gets a randomized name for a domain object given
      * the friendly test-facing name
      */
-    public String create(String alias) {
-        Preconditions.checkState(!nameMap.containsKey(alias), "There is already a test object with alias '%s'", alias);
+    public String createAlias(String testHandle) {
+        Preconditions.checkNotNull(testHandle, "testHandle");
+        Preconditions.checkState(!testHandleToAlias.containsKey(testHandle), 
+                "The test handle has already been assigned the alias '%s'", testHandle);
 
-        String name = alias + "_" + Long.toHexString(random.nextLong());
-        nameMap.put(alias, name);
-        return name;
+        String alias = testHandle + "_" + Long.toHexString(random.nextLong());
+        testHandleToAlias.put(testHandle, alias);
+        return alias;
     }
 
-    public void bindId(String alias, int newId) {
-        idMap.put(alias, newId);   
+    public List<String> getTestHandles() {
+        Set<String> set = new HashSet<>();
+        set.addAll(testHandleToAlias.keySet());
+        set.addAll(testHandleToId.keySet());
+        List<String> list = new ArrayList<>(set);
+        Collections.sort(list);
+        return list;
     }
 
-    public int getId(String alias) {
-        Preconditions.checkState(idMap.containsKey(alias), "Unknown alias '%s'", alias);
-        return idMap.get(alias);
+    public int getId(String testHandle) {
+        if(!testHandleToId.containsKey(testHandle)) {
+            throw missingHandle("Test handle '%s' has not been bound to an id.", testHandle);
+        }
+        return testHandleToId.get(testHandle);
     }
-    
-    public int generateIdFor(String alias) {
+
+    private IllegalStateException missingHandle(String message, Object... arguments) {
+        StringBuilder s = new StringBuilder();
+        s.append(String.format(message, arguments));
+        s.append("\n");
+        s.append("Test handles:\n");
+        for (String handle : getTestHandles()) {
+            s.append(String.format("  %s [%s] = %d\n", handle, testHandleToAlias.get(handle), testHandleToId.get(handle)));
+        }
+        return new IllegalStateException(s.toString());
+    }
+
+    public int generateIdFor(String testHandle) {
+        Preconditions.checkNotNull(testHandle, "testHandle");
+
         int id = generateId();
-        idMap.put(alias, id);
+        testHandleToId.put(testHandle, id);
         return id;
     }
 
@@ -58,16 +89,44 @@ public class AliasTable {
     }
 
     /**
-     * Maps a "real" name to its server-generated ID
+     * Maps an alias to its server-generated ID
      */
-    public void mapNameToId(String name, int id) {
-        String alias = nameMap.inverse().get(name);
-        idMap.put(alias, id);
-        
+    public void bindAliasToId(String alias, int id) {
+        Preconditions.checkNotNull(alias, "alias");
+        testHandleToId.put(getTestHandleForAlias(alias), id);
     }
 
-    public String getName(String alias) {
-        return nameMap.get(alias);
+    /**
+     * Maps a test handle to its server-generated ID
+     */
+    public void bindTestHandleToId(String handle, int newId) {
+        Preconditions.checkNotNull(handle, "handle");
+
+        Integer existingId = testHandleToId.get(handle);
+        if(existingId != null && existingId != newId) {
+            throw new IllegalStateException(String.format(
+            "Cannot bind test handle %s to id %d: it was previously bound to %d", handle, 
+                    existingId,
+                    testHandleToId.get(handle)));
+        }
+        testHandleToId.put(handle, newId);
+    }
+    
+    /**
+     * 
+     * @param alias the uniquely decorated name
+     * @return the human-readable test alias
+     */
+    public String getTestHandleForAlias(String alias) {
+        String testHandle = testHandleToAlias.inverse().get(alias);
+        if(testHandle == null) {
+            throw missingHandle("Cannot find a test handle for the alias '%s'", alias);
+        }
+        return testHandle;
+    }
+    
+    public String getAlias(String testHandle) {
+        return testHandleToAlias.get(testHandle);
     }
 
     /**
@@ -87,8 +146,8 @@ public class AliasTable {
         for (DataTableRow row : table.getGherkinRows()) {
             List<String> cells = Lists.newArrayList();
             for (String cell : row.getCells()) {
-                if(nameMap.inverse().containsKey(cell)) {
-                    String alias = nameMap.inverse().get(cell);
+                if(testHandleToAlias.inverse().containsKey(cell)) {
+                    String alias = testHandleToAlias.inverse().get(cell);
                     cells.add(alias);
                 } else {
                     cells.add(cell.trim());
@@ -100,11 +159,11 @@ public class AliasTable {
     }
 
     public boolean isName(String text) {
-        return nameMap.containsValue(text);
+        return testHandleToAlias.containsValue(text);
     }
     
     public String alias(String name) {
-        return nameMap.inverse().get(name);
+        return testHandleToAlias.inverse().get(name);
     }
 
 
@@ -116,12 +175,13 @@ public class AliasTable {
     }
     
     public int getOrGenerateId(String alias) {
-        if(idMap.containsKey(alias)) {
-            return idMap.get(alias);
+        if(testHandleToId.containsKey(alias)) {
+            return testHandleToId.get(alias);
         } else {
             int newId = generateId();
-            idMap.put(alias, newId);
+            testHandleToId.put(alias, newId);
             return newId;
         }
     }
+
 }
