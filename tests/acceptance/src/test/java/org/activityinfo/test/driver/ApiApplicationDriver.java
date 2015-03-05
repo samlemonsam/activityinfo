@@ -121,6 +121,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "partner":
                     properties.put("partnerId", aliases.getId(value.getValue()));
                     break;
+                case "project":
+                    properties.put("projectId", aliases.getId(value.getValue()));
+                    break;
                 case "location":
                     properties.put("locationId", aliases.getId(value.getValue()));
                     break;

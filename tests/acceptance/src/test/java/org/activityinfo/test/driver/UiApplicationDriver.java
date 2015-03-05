@@ -99,7 +99,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void setTargetValues(String targetName, List<FieldValue> values) throws Exception {
         targetPage.select(targetName);
         for(FieldValue value : values) {
-            targetPage.setValue(aliasTable.getAlias(value.getField()), value.asDouble());   
+            targetPage.setValue(aliasTable.getAlias(value.getField()), value.getValue());   
         }
     }
 
