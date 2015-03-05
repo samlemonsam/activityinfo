@@ -27,7 +27,7 @@ task acceptanceTest(type: Test) {
 
     // Determine the server against which to test
     if(!project.hasProperty("testUrl")) {
-        dependsOn ':server:appengineStartAt'
+        dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
         systemProperty "test.url", "http://localhost:8080"
         
@@ -43,9 +43,8 @@ task acceptanceTest(type: Test) {
     testLogging.showStandardStreams = false
 
 
-    include "**/*AT.java"
-    exclude "**/CrossBrowserAT.java"
+    // Run only functional tests
+    include "**/Functional*AT*"
     scanForTestClasses false
-
 
 }
