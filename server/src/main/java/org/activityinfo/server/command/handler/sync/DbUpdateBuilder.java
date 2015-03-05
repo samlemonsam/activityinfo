@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 
 public class DbUpdateBuilder implements UpdateBuilder {
 
+    private static final int MINIMUM_DB_VERSION = 1;
     private static final String REGION_PREFIX = "db/";
 
     private final UserDatabaseDAO userDatabaseDAO;
@@ -294,6 +295,9 @@ public class DbUpdateBuilder implements UpdateBuilder {
             if (perm.getVersion() > currentVersion) {
                 currentVersion = perm.getVersion();
             }
+        }
+        if (currentVersion < MINIMUM_DB_VERSION) {
+            return MINIMUM_DB_VERSION;
         }
         return currentVersion;
     }
