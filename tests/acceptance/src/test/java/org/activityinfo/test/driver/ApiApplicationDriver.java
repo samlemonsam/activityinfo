@@ -3,21 +3,27 @@ package org.activityinfo.test.driver;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.*;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import cucumber.api.DataTable;
-import org.activityinfo.test.sut.*;
+import org.activityinfo.test.sut.Accounts;
+import org.activityinfo.test.sut.Server;
+import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
-public class ApiApplicationDriver implements ApplicationDriver {
+public class ApiApplicationDriver extends ApplicationDriver {
+
+    private static final int RDC = 1;
 
     private final Server server;
     private final Accounts accounts;
@@ -30,17 +36,22 @@ public class ApiApplicationDriver implements ApplicationDriver {
 
     @Inject
     public ApiApplicationDriver(Server server, Accounts accounts, AliasTable aliases) {
+        super(aliases);
         this.server = server;
         this.accounts = accounts;
         this.aliases = aliases;
     }
 
     private WebResource commandEndpoint() {
+        return root().path("command");
+    }
+
+    private WebResource root() {
         Client client = new Client();
         if(currentUser != null) {
             client.addFilter(new HTTPBasicAuthFilter(currentUser.getEmail(), currentUser.getPassword()));
         }
-        return client.resource(server.getRootUrl()).path("command");
+        return client.resource(server.getRootUrl());
     }
 
     @Override
@@ -59,49 +70,38 @@ public class ApiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
-    public void createDatabase(Property... databaseProperties) throws Exception {
-        TestObject map = new TestObject(databaseProperties);
+    public void createDatabase(TestObject map) throws Exception {
 
-        String name = map.getString("name");
         JSONObject properties = new JSONObject();
-        properties.put("name", aliases.create(name));
+        properties.put("name", map.getAlias());
         properties.put("countryId", 1);
 
-        createEntity("UserDatabase", name, properties);
+        createEntity("UserDatabase", properties);
         
-        createdDatabases.add(aliases.getId(name));
+        createdDatabases.add(map.lookupId());
     }
 
 
     @Override
-    public void createForm(Property... arguments) throws Exception {
-        TestObject map = new TestObject(arguments);
-        
-        int locationTypeId = 50529; // TODO: de-hardcode (this is Rdc/Country)
-        if(map.has("locationType")) {
-            locationTypeId = aliases.getId(map.getString("locationType"));    
-        }
-        
-        String name = map.getString("name");
+    public void createForm(TestObject form) throws Exception {
         JSONObject properties = new JSONObject();
-        properties.put("name", aliases.create(name));
-        properties.put("databaseId", aliases.getId(map.getString("database")));
-        properties.put("locationTypeId", locationTypeId); 
-        createEntity("Activity", name, properties);
+        properties.put("name", form.getAlias());
+        properties.put("databaseId", form.getId("database")); 
+        properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC))); 
+        
+        createEntity("Activity", properties);
     }
 
     @Override
-    public void createField(Property... arguments) throws Exception {
-        TestObject map = new TestObject(arguments);
+    public void createField(TestObject field) throws Exception {
 
-        String name = map.getString("name");
         JSONObject properties = new JSONObject();
-        properties.put("name", aliases.create(name));
-        properties.put("activityId", aliases.getId(map.getString("form")));
-        properties.put("type", map.getString("type"));
-        properties.put("units", map.getString("units", "parsects"));
+        properties.put("name", field.getAlias());
+        properties.put("activityId", field.getId("form"));
+        properties.put("type", field.getString("type"));
+        properties.put("units", field.getString("units", "parsects"));
 
-        createEntity("Indicator", name, properties);
+        createEntity("Indicator", properties);
     }
 
     @Override
@@ -110,20 +110,33 @@ public class ApiApplicationDriver implements ApplicationDriver {
 
         JSONObject properties = new JSONObject();
         properties.put("activityId", activityId);
-        properties.put("locationId", 50529); // TODO: dehard code
+        properties.put("locationId", queryNullaryLocationType(RDC));
         properties.put("id", aliases.generateId());
         properties.put("reportingPeriodId", aliases.generateId());
-        properties.put("fromDate", "2014-01-01");
-        properties.put("toDate", "2014-02-01");
+        properties.put("date1", "2014-01-01");
+        properties.put("date2", "2014-02-01");
         
         for(FieldValue value : values) {
-            if(value.getField().equals("partner")) {
-                properties.put("partnerId", aliases.getId(value.getValue()));
-            } else if(value.getField().equals("location")) {
-                properties.put("locationId", aliases.getId(value.getValue()));
-            } else {
-                int indicatorId = aliases.getId(value.getField());
-                properties.put("I" + indicatorId, value.maybeNumberValue());
+            switch (value.getField()) {
+                case "partner":
+                    properties.put("partnerId", aliases.getId(value.getValue()));
+                    break;
+                case "project":
+                    properties.put("projectId", aliases.getId(value.getValue()));
+                    break;
+                case "location":
+                    properties.put("locationId", aliases.getId(value.getValue()));
+                    break;
+                case "fromDate":
+                    properties.put("date1", value.getValue());
+                    break;
+                case "toDate":
+                    properties.put("date2", value.getValue());
+                    break;
+                default:
+                    int indicatorId = aliases.getId(value.getField());
+                    properties.put("I" + indicatorId, value.maybeNumberValue());
+                    break;
             }
         }
 
@@ -158,7 +171,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         int databaseId = aliases.getId(databaseName);
 
         JSONObject partner = new JSONObject();
-        partner.put("name", aliases.create(partnerName));
+        partner.put("name", aliases.createAlias(partnerName));
         
         JSONObject command = new JSONObject();
         command.put("databaseId", databaseId);
@@ -168,40 +181,28 @@ public class ApiApplicationDriver implements ApplicationDriver {
         
         int partnerId = response.getInt("newId");
 
-        aliases.bindId(partnerName, partnerId);
+        aliases.bindTestHandleToId(partnerName, partnerId);
     }
 
-
-
     @Override
-    public void createProject(Property... arguments) throws Exception {
-        TestObject properties = new TestObject(arguments);
+    public void createProject(TestObject project) throws Exception {
 
-        int databaseId = aliases.getId(properties.getString("database"));
-        String alias = properties.getString("name");
-        
-        JSONObject project = new JSONObject();
-        project.put("name", aliases.create(alias));
+        JSONObject properties = new JSONObject();
+        properties.put("name", project.getAlias());
 
         JSONObject command = new JSONObject();
-        command.put("databaseId", databaseId);
-        command.put("project", project);
+        command.put("databaseId", project.getId("database"));
+        command.put("project", properties);
         
         JSONObject response = executeCommand("AddProject", command).get();
         
         int projectId = response.getInt("newId");
         
-        aliases.bindId(alias, projectId);
+        aliases.bindTestHandleToId(project.getName(), projectId);
     }
 
     @Override
-    public DataTable pivotTable(String measure, List<String> rowDimension) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void grantPermission(Property... arguments) throws Exception {
-        TestObject properties = new TestObject(arguments);
+    public void grantPermission(TestObject properties) throws Exception {
         
         JSONObject model = new JSONObject();
         model.put("name", "A User");
@@ -249,30 +250,23 @@ public class ApiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
-    public void createLocationType(Property... arguments) throws Exception {
-        TestObject map = new TestObject(arguments);
+    public void createLocationType(TestObject locationType) throws Exception {
         
-        String name = aliases.create(map.getString("name"));
-
         JSONObject properties = new JSONObject();
-        properties.put("name", name);
-        properties.put("databaseId", aliases.getId(map.getString("database")));
+        properties.put("name", locationType.getAlias());
+        properties.put("databaseId", locationType.getId("database"));
         
-        createEntity("LocationType", map.getString("name"), properties);
+        createEntity("LocationType", properties);
     }
 
     @Override
-    public void createLocation(Property... arguments) throws Exception {
-        
-        TestObject map = new TestObject(arguments);
-
-        String alias = map.getString("name");
+    public void createLocation(TestObject map) throws Exception {
         
         JSONObject properties = new JSONObject();
-        properties.put("id", aliases.generateIdFor(alias));
-        properties.put("name", alias);
+        properties.put("id", aliases.generateIdFor(map.getName()));
+        properties.put("name", map.getAlias());
         properties.put("axe", map.getString("code"));
-        properties.put("locationTypeId", aliases.getId(map.getString("locationType")));
+        properties.put("locationTypeId", map.getId("locationType"));
         
         JSONObject command = new JSONObject();
         command.put("properties", properties);
@@ -281,24 +275,22 @@ public class ApiApplicationDriver implements ApplicationDriver {
     }
 
     @Override
-    public void createTarget(Property... arguments) throws Exception {
-        TestObject properties = new TestObject(arguments);
+    public void createTarget(TestObject properties) throws Exception {
 
-        String name = aliases.create(properties.getString("name"));
-        
         JSONObject target = new JSONObject();
-        target.put("name", name);
+        target.put("name", properties.getAlias());
         target.put("fromDate", properties.getDate("fromDate", new LocalDate(1900,1,1)));
         target.put("toDate", properties.getDate("toDate", new LocalDate(2050,1,1)));
 
         JSONObject addTarget = new JSONObject();
-        addTarget.put("databaseId", aliases.getId(properties.getString("database")));
+        addTarget.put("databaseId", properties.getId("database"));
         addTarget.put("target", target);
 
         JSONObject response = executeCommand("AddTarget", addTarget).get();
         
         int id = response.getInt("newId");
-        aliases.mapNameToId(name, id);
+        
+        aliases.bindAliasToId(properties.getAlias(), id);
     }
 
     @Override
@@ -318,7 +310,7 @@ public class ApiApplicationDriver implements ApplicationDriver {
         }
     }
 
-    private void createEntity(String entityType, String alias, JSONObject properties) throws JSONException {
+    private int createEntity(String entityType, JSONObject properties) throws JSONException {
 
         JSONObject object = new JSONObject();
         object.put("entityName", entityType);
@@ -327,7 +319,32 @@ public class ApiApplicationDriver implements ApplicationDriver {
         JSONObject response = executeCommand("CreateEntity", object).get();
 
         int newId = response.getInt("newId");
-        aliases.bindId(alias, newId);
+        aliases.bindAliasToId(properties.getString("name"), newId);
+        
+        return newId;
+    }
+    
+    private int queryNullaryLocationType(int countryId) {
+        String json = root().path("resources")
+                .path("country").path(Integer.toString(countryId))
+                .path("locationTypes")
+                .get(String.class);
+
+        try {
+            JSONArray array = new JSONArray(json);
+
+            for (int i = 0; i != array.length(); ++i) {
+                JSONObject locationType = array.getJSONObject(i);
+                if (locationType.getString("name").equals("Country")) {
+                    return locationType.getInt("id");
+                }
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException("Exception parsing locationType list", e);
+        }
+        
+        throw new IllegalStateException(String.format("Country %d has no nullary location type: expected" +
+                " location type with name 'Country'", countryId));
     }
 
     private Optional<JSONObject> executeCommand(String type, JSONObject command) throws JSONException {

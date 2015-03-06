@@ -38,13 +38,16 @@ Feature: Locations API
       | field       | value        |
       | location    | Village X    |
       | partner     | UNICEF       |
+      | fromDate    | 2014-01-01   |
+      | toDate      | 2014-04-10   |
     When I request /resources/sites?activity=$Distributions
     Then the response should be:
     """
     - id: $SiteId
       activity: $Distributions
       timestamp: ${Village X Last Edit}
-      timestamp: ${Village X Last Edit}
+      startDate: 2014-01-01
+      endDate:   2014-04-10
       location:
         id: ${Village X}
         name: Village X

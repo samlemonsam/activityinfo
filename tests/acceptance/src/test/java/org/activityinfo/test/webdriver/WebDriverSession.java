@@ -2,18 +2,23 @@ package org.activityinfo.test.webdriver;
 
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Provider;
 import cucumber.api.Scenario;
+import cucumber.api.java.Before;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 import javax.inject.Inject;
 import java.lang.reflect.*;
 
+/**
+ * Stores state related to an individual WebDriver session, lazily creating a WebDriver instance
+ * if actually used
+ */
 @ScenarioScoped
 public class WebDriverSession {
 
@@ -21,6 +26,7 @@ public class WebDriverSession {
     private WebDriver driver;
     private WebDriver proxy;
     private Scenario scenario;
+    private BrowserProfile browserProfile = new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME);
 
     @Inject
     public WebDriverSession(WebDriverProvider provider) {
@@ -30,48 +36,28 @@ public class WebDriverSession {
                 new WebDriverProxy());
     }
 
+    public void beforeScenario(Scenario scenario) {
+        this.scenario = scenario;
+    }
+
+    private void startSession() {
+        this.driver = provider.start(scenario.getName(), browserProfile);
+    }
+
     public WebDriver getDriver() {
         return proxy;
     }
 
-    public void start(Scenario scenario, BrowserProfile profile) {
-        Preconditions.checkState(driver == null, "WebDriver is already started");
-        
-        this.scenario = scenario;
-        this.driver = provider.start(scenario.getId(), profile);
-    }
-
-    public void start(Scenario scenario) {
-        start(scenario, null);
-    }
-    
     public SessionId getSessionId() {
         Preconditions.checkState(driver != null, "WebDriver is not started");
         RemoteWebDriver remoteWebDriver = (RemoteWebDriver) driver;
         return remoteWebDriver.getSessionId();
     }
-
-    public BrowserVendor getBrowserType() {
-        RemoteWebDriver remoteDriver = (RemoteWebDriver) driver;
-        String browserName = remoteDriver.getCapabilities().getBrowserName().toLowerCase();
-        switch(browserName) {
-            case "phantomjs":
-            case "chrome":
-                return BrowserVendor.CHROME;
-            case "internet explorer":
-                return BrowserVendor.IE;
-            case "firefox":
-                return BrowserVendor.FIREFOX;
-            case "safari":
-                return BrowserVendor.SAFARI;
-        }
-        throw new UnsupportedOperationException("browserName: " + browserName);
-    }
     
     public boolean isRunning() {
         return driver != null;
     }
-    
+
     public void stop() {
         if(driver != null) {
             driver.quit();
@@ -79,12 +65,20 @@ public class WebDriverSession {
         }
     }
 
+    public void setBrowserProfile(BrowserProfile browserProfile) {
+        this.browserProfile = browserProfile;
+    }
+
+    public BrowserProfile getBrowserProfile() {
+        return browserProfile;
+    }
+
     private class WebDriverProxy implements InvocationHandler {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if(driver == null) {
-                throw new IllegalStateException("WebDriver was not started");
+                startSession();
             }
             try {
                 return method.invoke(driver, args);
@@ -92,5 +86,7 @@ public class WebDriverSession {
                 throw e.getCause();                            
             }
         }
+
     }
+
 }

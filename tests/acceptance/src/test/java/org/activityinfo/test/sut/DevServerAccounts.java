@@ -69,7 +69,7 @@ public class DevServerAccounts implements Accounts {
     }
 
     private String connectionUrl() {
-        return String.format("jdbc:mysql://localhost/%s?useUnicode=true&characterEncoding=UTF-8", 
+        return String.format("jdbc:mysql://localhost/activityinfo_at?useUnicode=true&characterEncoding=UTF-8", 
                 DATABASE_NAME.getOr("activityinfo"));
         
     }

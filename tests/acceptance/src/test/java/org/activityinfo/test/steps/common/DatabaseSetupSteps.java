@@ -1,4 +1,4 @@
-package org.activityinfo.test.acceptance;
+package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
 import cucumber.api.PendingException;
@@ -14,6 +14,7 @@ import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.activityinfo.test.driver.Property.name;
@@ -117,6 +118,15 @@ public class DatabaseSetupSteps {
 
     }
 
+    @When("^I create a target named \"([^\"]*)\"$")
+    public void I_create_a_target(String targetName) throws Throwable {
+        driver.createTarget(
+                property("database", getCurrentDatabase()),
+                property("name", targetName));
+
+    }
+    
+    
     @When("^I create a target named \"([^\"]*)\" for partner (.*) in database (.*)$")
     public void I_create_a_target_for_partner(String targetName, String partnerName, String databaseName) throws Throwable {
         driver.createTarget(
@@ -134,6 +144,19 @@ public class DatabaseSetupSteps {
                 property("project", project));
     }
 
+
+    @When("^I create a target for project \"([^\"]*)\" with values:$")
+    public void I_create_a_target_for_project_with_values(String project, List<FieldValue> values) throws Throwable {
+        String targetName = nextTargetName();
+
+        driver.createTarget(
+                property("name", targetName),
+                property("database", getCurrentDatabase()),
+                property("project", project));
+        driver.setTargetValues(targetName, values);
+    
+    }
+
     @When("^I set the targets of \"(.*)\" to:$")
     public void I_set_the_targets_of_to(String targetName, List<FieldValue> values) throws Throwable {
         driver.setTargetValues(targetName, values);
@@ -141,16 +164,20 @@ public class DatabaseSetupSteps {
 
     @When("^I create a target with values:$")
     public void I_create_a_target(List<FieldValue> targetValues) throws Throwable {
-        String targetName = "target" + (targetIndex++);
+        String targetName = nextTargetName();
         driver.createTarget(
                 property("database", getCurrentDatabase()),
                 property("name", targetName));
         driver.setTargetValues(targetName, targetValues);
     }
 
+    private String nextTargetName() {
+        return "target" + (targetIndex++);
+    }
+
     @When("^I create a target for partner (.*) with values:$")
     public void I_create_for_partner(String partnerName, List<FieldValue> targetValues) throws Throwable {
-        String targetName = "target" + (targetIndex++);
+        String targetName = nextTargetName();
         driver.createTarget(
                 property("database", getCurrentDatabase()),
                 property("partner", partnerName),

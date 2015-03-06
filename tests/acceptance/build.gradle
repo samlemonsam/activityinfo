@@ -21,44 +21,30 @@ dependencies {
 }
 
 
-task acceptanceTest() {
+task acceptanceTest(type: Test) {
     description = 'Runs acceptance test suite'
     dependsOn 'testClasses'
 
-    def testUrl
+    // Determine the server against which to test
     if(!project.hasProperty("testUrl")) {
-        dependsOn ':server:appengineStart'
+        dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
-        testUrl = "http://localhost:8080"
+        systemProperty "test.url", "http://localhost:8080"
         
     } else {
-        testUrl = project.property("testUrl")
+        systemProperty "test.url", project.property("testUrl")
     }
     
-    doLast {
-        try {
-            
-            println "Running acceptance tests against ${testUrl}..."
-            
-            project.javaexec {
-                
-                classpath sourceSets.test.runtimeClasspath
-                main = 'cucumber.api.cli.Main'
-                args = ['src/test/resources',
-                        '--plugin', 'org.activityinfo.test.harness.ConsoleReporter',
-                        '--plugin', 'html:build/cucumber-reports',
-                        '--glue', 'org.activityinfo.test',
-                        '--tags', '@api,@web']
+    // Use ChromeDriver locally
+    systemProperty 'webdriver', 'chrome'
+    systemProperty 'webdriver.chrome.silentOutput', 'true'   
 
-                systemProperty 'test.url', testUrl
-                systemProperty 'webdriver', 'chrome'
-                systemProperty 'webdriver.chrome.silentOutput', 'true'
-                systemProperty 'acceptanceTestLogFile', new File(project.buildDir, "acceptance-test-web.log").absolutePath
-            }
-        } finally {
-            def reportsDir = new File(project.buildDir, "cucumber-reports")
-            def reportsIndex = new File(reportsDir, "index.html")
-            println "Report: ${reportsIndex.toURI().toURL()}"
-        }
-    }
+    // Keep console output to a minimum
+    testLogging.showStandardStreams = false
+
+
+    // Run only functional tests
+    include "**/Functional*AT*"
+    scanForTestClasses false
+
 }

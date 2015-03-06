@@ -23,7 +23,6 @@ package org.activityinfo.server.command.handler;
  */
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.command.UpdateTargetValue;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
@@ -37,46 +36,40 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
 
     private final static Logger LOG = Logger.getLogger(UpdateTargetValueHandler.class.getName());
 
-    private final Injector injector;
-
     @Inject
-    public UpdateTargetValueHandler(EntityManager em, Injector injector) {
+    public UpdateTargetValueHandler(EntityManager em) {
         super(em);
-        this.injector = injector;
     }
 
     @Override
     public CommandResult execute(UpdateTargetValue cmd, User user) throws CommandException {
 
-        LOG.fine("[execute] Update command for entity: TargetValue");
+        Double newValue = cmd.getChanges().get("value");
 
-        try {
-            TargetValue targetValue = entityManager().find(TargetValue.class,
-                    new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
-            if (cmd.getChanges().get("value") != null) {
+        TargetValue targetValue = entityManager().find(TargetValue.class,
+                new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
+        
+        if(targetValue == null) {
+        
+            if(newValue != null) {
+                // Need a new record
+                Target target = entityManager().find(Target.class, cmd.getTargetId());
+                Indicator indicator = entityManager().find(Indicator.class, cmd.getIndicatorId());
+
+                targetValue = new TargetValue();
+                targetValue.setId(new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
                 targetValue.setValue(cmd.getChanges().get("value"));
-                entityManager().persist(targetValue);
+                targetValue.setTarget(target);
+                targetValue.setIndicator(indicator);
 
-                return new VoidResult();
+                entityManager().persist(targetValue);
             }
 
-            entityManager().remove(targetValue);
-            return new VoidResult();
-        } catch (Exception e) {
-            // ignore
+        } else {
+            targetValue.setValue(newValue);
+
         }
-
-        Target target = entityManager().find(Target.class, cmd.getTargetId());
-        Indicator indicator = entityManager().find(Indicator.class, cmd.getIndicatorId());
-
-        TargetValue targetValue = new TargetValue();
-        targetValue.setId(new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));
-        targetValue.setValue(cmd.getChanges().get("value"));
-        targetValue.setTarget(target);
-        targetValue.setIndicator(indicator);
-
-        entityManager().persist(targetValue);
-
+        
         return new VoidResult();
     }
 }

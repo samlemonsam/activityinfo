@@ -1,9 +1,5 @@
-package org.activityinfo.test.acceptance.json;
+package org.activityinfo.test.steps.json;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
@@ -13,10 +9,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.*;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Parses a YAML document into a JsonNode, replacing placeholders
@@ -33,7 +25,7 @@ import java.util.Map;
  * 
  * 
  */
-public class PsuedoJsonParser {
+class PsuedoJsonParser {
 
     private final Yaml yaml = new Yaml();
     private final JsonNodeFactory json;

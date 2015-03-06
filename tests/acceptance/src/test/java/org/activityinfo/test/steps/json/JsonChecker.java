@@ -1,17 +1,16 @@
-package org.activityinfo.test.acceptance.json;
+package org.activityinfo.test.steps.json;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 import org.codehaus.jackson.node.TextNode;
-import org.junit.Assert;
 
 import java.util.Iterator;
 
 /**
  * Determines whether two json objects are equivalent
  */
-public class JsonChecker {
+class JsonChecker {
 
 
     private Placeholders placeholders;

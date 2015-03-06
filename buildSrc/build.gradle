@@ -4,5 +4,12 @@ repositories {
 }
 
 dependencies {
-    compile  'org.ajoberstar:gradle-git:1.0.0'
+    compile 'org.ajoberstar:gradle-git:1.0.0'
+    compile 'org.liquibase:liquibase-core:2.0.2-bdd'
+    compile 'mysql:mysql-connector-java:5.1.27'
+}
+
+repositories {
+    maven { url "http://nexus.bedatadriven.com/content/groups/public" }
+
 }

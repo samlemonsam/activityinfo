@@ -104,7 +104,6 @@ Feature: Indicator Targets API
         | Design   | 201  | Created    |
         | View     | 403  | Forbidden  |
       
-
       
     Scenario Outline: Deleting a target requires design privileges
       Given I have created a target named "Goals" for database "PAKA"

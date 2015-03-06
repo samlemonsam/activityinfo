@@ -1,8 +1,6 @@
-package org.activityinfo.test.acceptance.json;
+package org.activityinfo.test.steps.json;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
-import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.client.ClientResponse;
 import org.codehaus.jackson.JsonNode;
@@ -12,13 +10,12 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Wrapper around a ClientResponse to simplify accessing the entity multiple times.
  */
-public class ApiResponse {
+class ApiResponse {
 
     private final ClientResponse response;
     private ObjectMapper objectMapper;

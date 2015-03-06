@@ -3,7 +3,7 @@ package org.activityinfo.test.pageobject.api;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
-import org.activityinfo.test.harness.ScreenShotLogger;
+import org.activityinfo.test.webdriver.ScreenShotLogger;
 import org.activityinfo.test.sut.Server;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

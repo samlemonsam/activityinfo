@@ -39,6 +39,7 @@ import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.UpdateTargetValue;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.PageId;
@@ -134,6 +135,11 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         Map<String, Link> indicatorCategories = new HashMap<String, Link>();
 
         for (IndicatorDTO indicator : activity.getIndicators()) {
+
+            // yuriy : right now we support only quantity indicators in targets, skip other types
+            if (indicator.getType() != FieldTypeClass.QUANTITY) {
+                continue;
+            }
 
             if (indicator.getCategory() != null) {
                 Link indCategoryLink = indicatorCategories.get(indicator.getCategory());

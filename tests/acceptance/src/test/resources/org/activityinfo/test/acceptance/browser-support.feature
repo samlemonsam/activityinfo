@@ -1,3 +1,4 @@
+@crossbrowser
 Feature: Cross browser support
 
 Scenario Outline: Supported Browsers
