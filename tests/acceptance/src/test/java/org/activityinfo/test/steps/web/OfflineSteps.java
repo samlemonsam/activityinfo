@@ -1,11 +1,11 @@
-package org.activityinfo.test.acceptance.web;
+package org.activityinfo.test.steps.web;
 
 import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.harness.ScreenShotLogger;
+import org.activityinfo.test.webdriver.ScreenShotLogger;
 import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.OfflineMode;

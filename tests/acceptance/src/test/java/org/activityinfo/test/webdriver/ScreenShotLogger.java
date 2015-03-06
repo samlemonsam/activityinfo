@@ -1,4 +1,4 @@
-package org.activityinfo.test.harness;
+package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;

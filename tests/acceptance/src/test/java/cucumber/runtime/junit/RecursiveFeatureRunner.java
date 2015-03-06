@@ -12,13 +12,13 @@ import org.junit.runner.notification.StoppedByUserException;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
-public class JUnitRecursiveRunner extends RecursiveAction {
+public class RecursiveFeatureRunner extends RecursiveAction {
 
     private Node node;
     private RunNotifier runNotifier;
     private RecursiveReporter reporter;
 
-    public JUnitRecursiveRunner(Node node, RunNotifier runNotifier, RecursiveReporter reporter) {
+    public RecursiveFeatureRunner(Node node, RunNotifier runNotifier, RecursiveReporter reporter) {
         this.runNotifier = runNotifier;
         this.reporter = reporter;
         this.node = node;
@@ -55,9 +55,9 @@ public class JUnitRecursiveRunner extends RecursiveAction {
         System.out.println("Starting " + node.getDescription().getDisplayName());
         node.start(reporter.getReporterProxy(), reporter.getFormatterProxy());
 
-        List<JUnitRecursiveRunner> branches = Lists.newArrayList();
+        List<RecursiveFeatureRunner> branches = Lists.newArrayList();
         for (Node branch : node.getBranches()) {
-            branches.add(new JUnitRecursiveRunner(branch, runNotifier, reporter.branch()));
+            branches.add(new RecursiveFeatureRunner(branch, runNotifier, reporter.branch()));
         }
         invokeAll(branches);
         reporter.join();
@@ -71,7 +71,7 @@ public class JUnitRecursiveRunner extends RecursiveAction {
         // Wrap the reporter proxy so that we can fire events to JUnit
         // in real time
         JUnitStepReporter jUnitReporter = new JUnitStepReporter(runNotifier, 
-                node.getDescription(), reporter.getReporterProxy());
+                node.getDescription(), node.getSteps(), reporter.getReporterProxy());
         
         node.start(jUnitReporter, reporter.getFormatterProxy());
         node.finish(jUnitReporter, reporter.getFormatterProxy());

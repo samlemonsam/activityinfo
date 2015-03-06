@@ -16,11 +16,13 @@ subprojects {
   apply plugin: 'java'
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
-  
-  // This is required to stop javac from attempting to compile
+
+
+    // This is required to stop javac from attempting to compile
   // java sources included in .jar files intended for GWT
   tasks.withType(JavaCompile) {
     options.compilerArgs += ["-implicit:none", "-sourcepath", ""]
+    options.encoding = 'UTF-8'
   }
 
   buildscript {

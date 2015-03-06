@@ -1,4 +1,4 @@
-package org.activityinfo.test.acceptance.web;
+package org.activityinfo.test.steps.web;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;

@@ -1,3 +1,4 @@
+import com.google.appengine.task.RunTask
 
 apply plugin: 'gwt'
 apply plugin: 'war'
@@ -35,9 +36,22 @@ test {
     systemProperty "testDatabaseName", "testDb"
 }
 
-task appengineStart(type: com.google.appengine.task.RunTask) {
+
+task appengineStartAT(type: RunTask) {
+    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
+    description = "Starts a local AppEngine Development Server for Acceptance Testing in the background"
+    group = "Google App Engine"
+    
     daemon = true
-    dependsOn 'appengineExplodeApp'
+    jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
+}
+
+task appengineRunAT(type: RunTask) {
+    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
+    description = "Runs a local AppEngine Development Server for Acceptance Testing"
+    group = "Google App Engine"
+
+    jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
 }
 
 processResources {

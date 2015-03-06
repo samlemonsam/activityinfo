@@ -1,10 +1,14 @@
 package org.activityinfo.test.webdriver;
 
+import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+
+import javax.inject.Inject;
+import javax.swing.text.html.Option;
 
 
 public class WebDriverModule extends AbstractModule {

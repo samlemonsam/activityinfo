@@ -23,6 +23,8 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import org.activityinfo.legacy.shared.command.result.VoidResult;
+import org.activityinfo.server.endpoint.jsonrpc.Required;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Map;
 
@@ -33,7 +35,6 @@ public class UpdateTargetValue implements MutatingCommand<VoidResult> {
     private Map<String, Double> changes;
 
     public UpdateTargetValue() {
-
     }
 
     public UpdateTargetValue(int targetId, int indicatorId, Map<String, Double> changes) {
@@ -42,6 +43,8 @@ public class UpdateTargetValue implements MutatingCommand<VoidResult> {
         this.changes = changes;
     }
 
+    @Required
+    @JsonProperty
     public int getTargetId() {
         return targetId;
     }
@@ -50,6 +53,8 @@ public class UpdateTargetValue implements MutatingCommand<VoidResult> {
         this.targetId = targetId;
     }
 
+    @Required
+    @JsonProperty
     public int getIndicatorId() {
         return indicatorId;
     }
@@ -58,6 +63,7 @@ public class UpdateTargetValue implements MutatingCommand<VoidResult> {
         this.indicatorId = indicatorId;
     }
 
+    @JsonProperty
     public Map<String, Double> getChanges() {
         return changes;
     }

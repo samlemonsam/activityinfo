@@ -23,6 +23,7 @@ package org.activityinfo.server.command.handler.crud;
  */
 
 import com.google.inject.Inject;
+import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
@@ -68,7 +69,11 @@ public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
             // this was the default
             countryId = 1;
         }
-        return countryDAO.findById(countryId);
+        Country country = countryDAO.findById(countryId);
+        if(country == null) {
+            throw new CommandException(String.format("No country exists with id %d", countryId));
+        }
+        return country;
     }
 
     @Override

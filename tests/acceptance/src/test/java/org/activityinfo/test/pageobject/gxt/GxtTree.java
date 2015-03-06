@@ -273,7 +273,7 @@ public class GxtTree {
         }
 
         public void select() {
-            element.click();
+            treeItem().span(withClass("x-tree3-node-text")).first().click();
         }
 
         @Override

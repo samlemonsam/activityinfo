@@ -1,4 +1,4 @@
-package org.activityinfo.test.acceptance.web;
+package org.activityinfo.test.steps.web;
 
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class WebDriverHooks {
 
 
-    @Inject
+    @Inject 
     private WebDriverSession session;
     
     @Inject
@@ -28,14 +28,8 @@ public class WebDriverHooks {
     @Before
     public void before(Scenario scenario) {
         this.scenario = scenario;
-        if(scenario.getSourceTagNames().contains("@web")) {
-            session.start(scenario);
-            reporter.start(scenario);
-        }
-    }
-    
-    public void start(BrowserProfile profile) {
-        session.start(scenario, profile);
+        this.session.beforeScenario(scenario);
+        reporter.start(scenario);
     }
 
     @After
@@ -51,14 +45,12 @@ public class WebDriverHooks {
 
     @Given("^my browser supports offline mode$")
     public void my_browser_supports_offline_mode() throws Throwable {
-        start(new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME));
     }
 
     @Given("^I am using (.*) on (.*)$")
     public void I_am_using_browser_version_on_os(String browser, String os) throws Throwable {
-        start(new BrowserProfile(parseOs(os), parseVendor(browser), extractVersion(browser)));
+        session.setBrowserProfile(new BrowserProfile(parseOs(os), parseVendor(browser), extractVersion(browser)));
     }
-
 
     private String extractVersion(String browser) {
         Matcher matcher = Pattern.compile("[\\d\\\\.]+").matcher(browser);

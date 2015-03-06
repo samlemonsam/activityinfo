@@ -1,19 +1,18 @@
-package org.activityinfo.test.acceptance;
+package org.activityinfo.test.steps.json;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 import cucumber.api.Scenario;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.acceptance.json.ApiResponse;
-import org.activityinfo.test.acceptance.json.JsonChecker;
-import org.activityinfo.test.acceptance.json.Placeholders;
-import org.activityinfo.test.acceptance.json.PsuedoJsonParser;
+import org.activityinfo.test.steps.json.ApiResponse;
+import org.activityinfo.test.steps.json.JsonChecker;
+import org.activityinfo.test.steps.json.Placeholders;
+import org.activityinfo.test.steps.json.PsuedoJsonParser;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -23,10 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
 
 @ScenarioScoped
 public class JsonApiSteps {

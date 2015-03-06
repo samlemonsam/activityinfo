@@ -27,13 +27,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.server.endpoint.jsonrpc.BadRpcRequest;
 
 import javax.persistence.EntityManager;
 import java.util.Date;

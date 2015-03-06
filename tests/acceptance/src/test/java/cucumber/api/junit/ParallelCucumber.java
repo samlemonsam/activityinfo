@@ -2,7 +2,6 @@ package cucumber.api.junit;
 
 import com.google.common.collect.Lists;
 import cucumber.runtime.*;
-import cucumber.runtime.Runtime;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
@@ -13,34 +12,18 @@ import cucumber.runtime.parallel.*;
 import cucumber.runtime.model.CucumberFeature;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
-import org.activityinfo.test.harness.ProfileFactoryImpl;
+import gherkin.formatter.model.Step;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
-/**
- * <p>
- * Classes annotated with {@code @RunWith(ParametrizedCucumber.class)} will run a Cucumber Feature against
- * a set of {@code ExecutionProfiles}.
- * 
- * The class should be empty without any fields or methods.
- * </p>
- * <p>
- * Cucumber will look for a {@code .feature} file on the classpath, using the same resource
- * path as the annotated class ({@code .class} substituted by {@code .feature}).
- * </p>
- * Additional hints can be given to Cucumber by annotating the class with {@link cucumber.api.CucumberOptions}.
- *
- * @see cucumber.api.CucumberOptions
- */
+
 public class ParallelCucumber extends Runner implements Node {
-    
     
     private final Description description;
     private final List<Node> branches = Lists.newArrayList();
@@ -76,10 +59,9 @@ public class ParallelCucumber extends Runner implements Node {
 
     private RuntimePool createRuntimePool(ResourceLoader resourceLoader, ClassLoader classLoader,
                                                    RuntimeOptions runtimeOptions) throws InitializationError {
-        ArrayList<Parameter> parameters = Lists.newArrayList();
 
         ClassFinder classFinder = new ResourceLoaderClassFinder(resourceLoader, classLoader);
-        ObjectFactory objectFactory = JavaBackend.loadObjectFactory(classFinder);
+        ObjectFactory objectFactory = getObjectFactory(classFinder);
         
         return new RuntimePool(runtimeOptions,
                         resourceLoader,
@@ -87,7 +69,11 @@ public class ParallelCucumber extends Runner implements Node {
                         classFinder,
                         objectFactory);
     }
-    
+
+    private ObjectFactory getObjectFactory(ClassFinder classFinder) {
+        return JavaBackend.loadObjectFactory(classFinder);
+    }
+
     @Override
     public Description getDescription() {
         return description;
@@ -97,13 +83,13 @@ public class ParallelCucumber extends Runner implements Node {
     @Override
     public void run(RunNotifier notifier) {
         
-        int numThreads = Integer.parseInt(System.getProperty("junit.parallel.threads", "16"));
+        int numThreads = Integer.parseInt(System.getProperty("junit.parallel.threads", "1"));
 
         RecursiveReporter reporter = new RecursiveReporter(
                 runtimeOptions.formatter(classLoader),
                 runtimeOptions.reporter(classLoader));
         
-        JUnitRecursiveRunner runner = new JUnitRecursiveRunner(this, notifier, reporter);
+        RecursiveFeatureRunner runner = new RecursiveFeatureRunner(this, notifier, reporter);
         
         ForkJoinPool pool = new ForkJoinPool(numThreads);
         pool.invoke(runner);
@@ -125,5 +111,10 @@ public class ParallelCucumber extends Runner implements Node {
     @Override
     public void finish(Reporter reporter, Formatter formatter) {
 
+    }
+
+    @Override
+    public List<Step> getSteps() {
+        throw new UnsupportedOperationException();
     }
 }

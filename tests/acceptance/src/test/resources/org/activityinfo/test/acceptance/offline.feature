@@ -1,3 +1,4 @@
+@web
 Feature: Offline Mode
 
 Scenario: Enabling Offline mode

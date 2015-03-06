@@ -1,4 +1,5 @@
-@web @api
+# TODO: should support api as well, but we need to support pivot table requests through the API
+@web  
 Feature: Indicator Targets
   As an analyst
   I want to be able to define target indicator values
@@ -10,16 +11,18 @@ Feature: Indicator Targets
       And I have added partner "NRC" to "RRMP"
       And I have created a form named "NFI Distribution" in "RRMP"
       And I have created a quantity field "nb. kits" in "NFI Distribution"
+      And I have created a quantity field "Satisfaction score" in "NFI Distribution"
       And I have submitted a "NFI Distribution" form with:
-        | field       | value  |
-        | partner     | CRS    |
-        | nb. kits    | 1000   |
+        | field              | value  |
+        | partner            | CRS    |
+        | nb. kits           | 1000   |
+        | Satisfaction score | 5.4    | 
       And I have submitted a "NFI Distribution" form with:
-        | field       | value  |
-        | partner     | NRC    |
-        | nb. kits    | 800    |
-    
-  Scenario: Global target
+        | field              | value  |
+        | partner            | NRC    |
+        | nb. kits           | 800    |
+      
+  Scenario: Defining database-level target
     When I create a target with values:
       | field       | value |
       | nb. kits    | 3000  |
@@ -27,8 +30,9 @@ Feature: Indicator Targets
       |                     | Value |
       | Realized            | 1,800 |
       | Targeted            | 3,000 |
+    
   
-  Scenario: Partner target
+  Scenario: Defining targets by partner
     When I create a target for partner NRC with values:
       | field       | value |
       | nb. kits    | 1000  |
@@ -43,3 +47,24 @@ Feature: Indicator Targets
       | NRC         |       |
       |   Realized  |   800 |
       |   Targeted  | 1,000 |
+
+  @AI-911
+  Scenario: Defining target values with extra text
+    When I create a target with values:
+      | field       | value       |
+      | nb. kits    | 4000  kits  |
+    Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
+      |                     | Value |
+      | Realized            | 1,800 |
+      | Targeted            | 4,000 |
+
+  @AI-911
+  Scenario: Defining fractional target values
+    When I create a target with values:
+      | field                 | value       |
+      | Satisfaction score    | 7.5         |
+    Then aggregating the indicator "Satisfaction score" by Realized / Targeted should yield:
+      |                       | Value       |
+      | Realized              | 5.4         |
+      | Targeted              | 7.5         |
+    

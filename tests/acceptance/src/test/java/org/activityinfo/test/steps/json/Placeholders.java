@@ -1,4 +1,4 @@
-package org.activityinfo.test.acceptance.json;
+package org.activityinfo.test.steps.json;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 
 
-public class Placeholders {
+class Placeholders {
 
     public static final String ID_PREFIX = "$";
     public static final java.lang.String ALIAS_PREFIX = "~";
@@ -116,7 +116,7 @@ public class Placeholders {
             if (text.startsWith(ID_PREFIX)) {
                 return factory.numberNode(resolveId(text));
             } else {
-                return factory.textNode(aliasTable.getName(text));
+                return factory.textNode(aliasTable.getAlias(text));
             }
         } else {
             return node;
@@ -155,11 +155,11 @@ public class Placeholders {
     }
 
     public void bind(String alias, int id) {
-        aliasTable.bindId(alias, id);
+        aliasTable.bindTestHandleToId(alias, id);
     }
 
     public String resolveName(JsonNode expected) {
         String alias = parseName(expected.asText());
-        return aliasTable.getName(alias);
+        return aliasTable.getAlias(alias);
     }
 }
