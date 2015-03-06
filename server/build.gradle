@@ -34,6 +34,10 @@ war {
 
 test {
     systemProperty "testDatabaseName", "testDb"
+    systemProperty "testDatabaseUsername", localMySqlUsername
+    systemProperty "testDatabasePassword", localMySqlPassword
+
+    testLogging.showStandardStreams = false
 }
 
 
