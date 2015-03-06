@@ -5,6 +5,8 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.driver.ApplicationDriver;
+import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.webdriver.ScreenShotLogger;
 import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
@@ -24,6 +26,9 @@ public class OfflineSteps {
 
     @Inject
     private PageBinder pages;
+    
+    @Inject
+    private UiApplicationDriver driver;
 
 
     @Inject
@@ -40,6 +45,7 @@ public class OfflineSteps {
 
     @When("^I enable offline mode$")
     public void I_enable_offline_mode() throws Throwable {
+        driver.ensureLoggedIn();
         pages.waitFor(ApplicationPage.class)
                 .openSettingsMenu()
                 .enableOfflineMode();
@@ -58,4 +64,12 @@ public class OfflineSteps {
         ApplicationPage page = pages.waitFor(ApplicationPage.class);
         page.assertOfflineModeLoads();
     }
+
+
+    @Then("^synchronization should complete successfully$")
+    public void synchronization_should_complete_successfully() throws Throwable {
+        ApplicationPage page = pages.waitFor(ApplicationPage.class);
+        page.assertOfflineModeLoads();        
+    }
+
 }

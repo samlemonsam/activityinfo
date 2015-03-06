@@ -53,7 +53,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         setup().login(account);
     }
     
-    private void ensureLoggedIn() {
+    public void ensureLoggedIn() {
         if(applicationPage == null) {
             LoginPage loginPage = pageBinder.navigateTo(LoginPage.class);
             loginPage.loginAs(currentUser);
