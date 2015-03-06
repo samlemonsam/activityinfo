@@ -35,7 +35,7 @@ subprojects {
     }
     dependencies {
       classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
-      classpath 'com.google.appengine:gradle-appengine-plugin:1.9.17'
+      classpath 'com.google.appengine:gradle-appengine-plugin:1.9.18'
       classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
     }
   }

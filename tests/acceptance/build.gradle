@@ -20,6 +20,10 @@ dependencies {
     testCompile 'joda-time:joda-time:2.5'
 }
 
+test {
+    // Do not run acceptance tests during normal test phase
+    exclude "**/*AT.*"
+}
 
 task acceptanceTest(type: Test) {
     description = 'Runs acceptance test suite'

@@ -25,6 +25,7 @@ appengine {
 compileGwt.enabled = !project.hasProperty('api')
 
 war {
+    archiveName = "activityinfo.war"
     classpath = classpath.filter { file ->
         return !file.name.startsWith('guava-gwt') &&
                !file.name.startsWith('gwt-user')
