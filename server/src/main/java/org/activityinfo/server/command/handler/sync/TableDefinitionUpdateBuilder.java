@@ -61,6 +61,12 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
 
             builder.createTableIfNotExists(Site.class);
             builder.createTableIfNotExists(ReportingPeriod.class);
+
+            builder.executeStatement(
+                    "create table if not exists AttributeGroupInActivity (ActivityId integer, AttributeGroupId integer)");
+            builder.executeStatement("create table if not exists PartnerInDatabase (DatabaseId integer, PartnerId int)");
+            builder.executeStatement("create table if not exists IndicatorLink (SourceIndicatorId integer, DestinationIndicatorId int)");
+
             builder.executeStatement("create index if not exists site_activity on site (ActivityId)");
 
             builder.executeStatement(

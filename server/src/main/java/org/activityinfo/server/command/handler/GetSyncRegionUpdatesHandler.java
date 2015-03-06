@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.sync.*;
 import org.activityinfo.server.database.hibernate.entity.User;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegionUpdates> {
@@ -73,6 +74,7 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
         try {
             return builder.build(user, cmd);
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
