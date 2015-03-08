@@ -32,6 +32,7 @@ import org.activityinfo.server.login.model.LoginPageModel;
 import org.activityinfo.server.util.logging.LogException;
 
 import javax.inject.Provider;
+import javax.persistence.NoResultException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -62,7 +63,12 @@ public class LoginController {
     public Response ajaxLogin(@FormParam("email") String email,
                               @FormParam("password") String password) throws Exception {
 
-        User user = userDAO.get().findUserByEmail(email);
+        User user;
+        try {
+            user = userDAO.get().findUserByEmail(email);
+        } catch(NoResultException e) {
+            throw new LoginException();
+        }
         checkPassword(password, user);
 
         return Response.ok().cookie(authTokenProvider.get().createNewAuthCookies(user)).build();
@@ -77,10 +83,11 @@ public class LoginController {
         try {
             user = userDAO.get().findUserByEmail(email);
             checkPassword(password, user);
+            
         } catch (Exception e) {
             LoginPageModel model = LoginPageModel.unsuccessful();
 
-            return Response.ok(model).type(MediaType.TEXT_HTML).build();
+            return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
         }
 
         return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
