@@ -7,6 +7,7 @@ dependencies {
     compile 'org.ajoberstar:gradle-git:1.0.0'
     compile 'org.liquibase:liquibase-core:2.0.2-bdd'
     compile 'mysql:mysql-connector-java:5.1.27'
+    compile 'com.google.guava:guava:15.0'
 }
 
 repositories {

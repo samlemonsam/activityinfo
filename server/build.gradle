@@ -1,10 +1,12 @@
 import com.google.appengine.task.RunTask
+import org.activityinfo.gcloud.ArchiveArtifactTask
+import org.activityinfo.gcloud.DownloadArtifactTask
+import org.activityinfo.gwt.CheckDownloadSizeTask
 
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
 apply from: '../gradle/database.gradle'
-apply from: '../gradle/nexus.gradle'
 
 description = 'ActivityInfo Server'
 
@@ -13,7 +15,7 @@ gwt {
     
     minHeapSize = "512M";
     maxHeapSize = "2048M";
-    
+
     modules 'org.activityinfo.ui.ActivityInfoRelease',
             'org.activityinfo.ui.Embed'
 }
@@ -22,10 +24,8 @@ appengine {
     downloadSdk = true
 }
 
-compileGwt.enabled = !project.hasProperty('api')
-
 war {
-    archiveName = "activityinfo.war"
+    archiveName = "activityinfo-b${buildNumber}.war"
     classpath = classpath.filter { file ->
         return !file.name.startsWith('guava-gwt') &&
                !file.name.startsWith('gwt-user')
@@ -64,6 +64,21 @@ processResources {
         line.replace('$[display.version]', project.version.toString())
             .replace('$[git.commit.id]', commitId)
     }
+}
+
+task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
+    group = "Verification"
+    dependsOn 'compileGwt'
+    initialJsDownloadSizeLimit "300kb"
+    totalJsDownloadSizeLimit "650kb"
+    appCacheDownloadSizeLimit "2000kb"
+}
+
+task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
+    group = "Delivery Pipeline"
+    description = "Builds, verifies, and archives the binary WAR that is used by subsequent stages"
+    dependsOn 'war'
+    archivePath = war.archivePath
 }
 
 dependencies {

@@ -11,6 +11,13 @@ class ProjectVersion {
         this.build = build
     }
 
+    String getAppEngineVersion() {
+        if(!build) {
+            throw new RuntimeException("Only artifacts from the pipeline can be deployed.")
+        }
+        return "b${build}"
+    }
+    
     @Override
     String toString() {
         String fullVersion = "$major.$minor"
@@ -23,4 +30,5 @@ class ProjectVersion {
 
         fullVersion
     }
+    
 }
