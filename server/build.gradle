@@ -1,12 +1,10 @@
 import com.google.appengine.task.RunTask
-import org.activityinfo.gcloud.ArchiveArtifactTask
-import org.activityinfo.gcloud.DownloadArtifactTask
-import org.activityinfo.gwt.CheckDownloadSizeTask
 
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
 apply from: '../gradle/database.gradle'
+apply from: '../gradle/buildProperties.gradle'
 
 description = 'ActivityInfo Server'
 
@@ -32,6 +30,7 @@ war {
     }
     exclude("**/*.symbolMap")
 }
+
 
 test {
     systemProperty "testDatabaseName", "testDb"
