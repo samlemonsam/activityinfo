@@ -4,7 +4,7 @@ apply plugin: "sonar-runner"
 
 sonarRunner {
     sonarProperties {
-        property "sonar.host.url", "https://sonar.bedatadriven.com"
+        property "sonar.host.url", "http://sonar.bedatadriven.com"
         property "sonar.jdbc.url", "jdbc:mysql://localhost/sonardb"
         property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
         property "sonar.jdbc.username", "sonar"
