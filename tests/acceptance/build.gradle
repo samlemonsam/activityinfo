@@ -18,11 +18,13 @@ dependencies {
     testCompile 'org.yaml:snakeyaml:1.14'
     testCompile 'org.apache.commons:commons-pool2:2.0'
     testCompile 'joda-time:joda-time:2.5'
+    testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
 }
 
 test {
     // Do not run acceptance tests during normal test phase
     exclude "**/*AT.*"
+    exclude "**/*Smoke*.*"
 }
 
 task acceptanceTest(type: Test) {
@@ -51,4 +53,16 @@ task acceptanceTest(type: Test) {
     include "**/Functional*AT*"
     scanForTestClasses false
 
+}
+
+task smokeTest(type: Test) {
+    description = 'Runs pre-release smoke tests'
+    dependsOn 'testClasses'
+
+    include "**/*SmokeTest.*"
+    scanForTestClasses false
+
+    if(project.hasProperty("testUrl")) {
+        systemProperty "test.url", project.property("testUrl")
+    }
 }

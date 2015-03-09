@@ -5,11 +5,10 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.webdriver.ScreenShotLogger;
-import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.OfflineMode;
-import org.activityinfo.test.webdriver.*;
+import org.activityinfo.test.webdriver.ScreenShotLogger;
+import org.activityinfo.test.webdriver.WebDriverSession;
 
 import javax.inject.Inject;
 
@@ -23,7 +22,7 @@ public class OfflineSteps {
     private WebDriverSession session;
 
     @Inject
-    private PageBinder pages;
+    private ApplicationPage applicationPage;
 
 
     @Inject
@@ -32,15 +31,13 @@ public class OfflineSteps {
 
     @Given("^offline mode is not enabled$")
     public void offline_mode_is_not_enabled() throws Throwable {
-        ApplicationPage page = pages.waitFor(ApplicationPage.class);
-
-        assertThat(page.getOfflineMode(), equalTo(OfflineMode.ONLINE));
+        assertThat(applicationPage.getOfflineMode(), equalTo(OfflineMode.ONLINE));
     }
 
 
     @When("^I enable offline mode$")
     public void I_enable_offline_mode() throws Throwable {
-        pages.waitFor(ApplicationPage.class)
+        applicationPage
                 .openSettingsMenu()
                 .enableOfflineMode();
 
@@ -55,7 +52,6 @@ public class OfflineSteps {
 
     @Then("^offline mode should be enabled$")
     public void offline_mode_should_be_enabled() throws Throwable {
-        ApplicationPage page = pages.waitFor(ApplicationPage.class);
-        page.assertOfflineModeLoads();
+        applicationPage.assertOfflineModeLoads();
     }
 }

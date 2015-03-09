@@ -80,6 +80,16 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     archivePath = war.archivePath
 }
 
+task createTargetDir {
+    doLast {
+        // We still have a few tests that are looking for the target folder
+        // created by maven
+        project.file('target').mkdirs()
+    }
+}
+
+project.tasks['test'].dependsOn createTargetDir
+
 dependencies {
     compile project(':model')
     compile project(':services')

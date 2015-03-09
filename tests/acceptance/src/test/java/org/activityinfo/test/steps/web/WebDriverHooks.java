@@ -28,7 +28,7 @@ public class WebDriverHooks {
     @Before
     public void before(Scenario scenario) {
         this.scenario = scenario;
-        this.session.beforeScenario(scenario);
+        this.session.beforeTest(scenario.getName());
         reporter.start(scenario);
     }
 

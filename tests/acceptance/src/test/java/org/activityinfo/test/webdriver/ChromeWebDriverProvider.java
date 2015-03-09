@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.List;
 

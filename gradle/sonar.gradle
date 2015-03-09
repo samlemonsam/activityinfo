@@ -16,3 +16,21 @@ sonarRunner {
 repositories {
     mavenCentral()
 }
+
+gradle.taskGraph.whenReady { graph ->
+    if (project.hasProperty("coverage") || graph.hasTask('sonarRunner')) {
+
+        subprojects {
+            apply plugin: 'jacoco'
+        }
+//        
+//        project(':server') {
+//            apply plugin: 'jacoco'
+//
+//            def agentFile = jacoco.agent.agentJar
+//            def destPath = "${project.buildDir}/jacoco/${task.name}.exec"
+//            
+//            appengineStartAT.jvmArgs.add "-javaagent:${agentFile}=destfile=${destPath}"
+//        }
+    }
+}

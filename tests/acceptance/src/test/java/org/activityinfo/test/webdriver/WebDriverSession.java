@@ -2,9 +2,7 @@ package org.activityinfo.test.webdriver;
 
 
 import com.google.common.base.Preconditions;
-import com.google.inject.Provider;
 import cucumber.api.Scenario;
-import cucumber.api.java.Before;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -25,23 +23,23 @@ public class WebDriverSession {
     private final WebDriverProvider provider;
     private WebDriver driver;
     private WebDriver proxy;
-    private Scenario scenario;
+    private String testName;
     private BrowserProfile browserProfile = new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME);
 
     @Inject
-    public WebDriverSession(WebDriverProvider provider) {
+    public WebDriverSession(WebDriverProvider provider, ProxyController proxyController) {
         this.provider = provider;
         this.proxy =  (WebDriver) Proxy.newProxyInstance(getClass().getClassLoader(),
                 new Class[]{ WebDriver.class, TakesScreenshot.class, HasInputDevices.class },
                 new WebDriverProxy());
     }
 
-    public void beforeScenario(Scenario scenario) {
-        this.scenario = scenario;
+    public void beforeTest(String testName) {
+        this.testName = testName;
     }
 
     private void startSession() {
-        this.driver = provider.start(scenario.getName(), browserProfile);
+        this.driver = provider.start(testName, browserProfile);
     }
 
     public WebDriver getDriver() {
