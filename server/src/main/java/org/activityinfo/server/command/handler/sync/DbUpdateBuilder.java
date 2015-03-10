@@ -57,7 +57,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private final Set<Integer> partnerIds = Sets.newHashSet();
     private final List<Partner> partners = Lists.newArrayList();
-    private final ActivityEntities existingActivityEntities;
+    private ActivityEntities existingActivityEntities;
 
     private final Set<Integer> userIds = Sets.newHashSet();
     private final List<User> users = Lists.newArrayList();
@@ -75,7 +75,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
         this.userDatabaseDAO = HibernateDAOProvider.makeImplementation(UserDatabaseDAO.class,
                 UserDatabase.class,
                 entityManager);
-        this.existingActivityEntities = new ActivityEntities(entityManager);
     }
 
     @SuppressWarnings("unchecked") @Override
@@ -95,6 +94,8 @@ public class DbUpdateBuilder implements UpdateBuilder {
             database = userDatabaseDAO.findById(dbId);
 
             Preconditions.checkNotNull(database, "Failed to fetch database by id:" + dbId + ", region: " + request);
+
+            this.existingActivityEntities = new ActivityEntities(entityManager, dbId);
 
             long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
             long serverVersion = getCurrentDbVersion();
@@ -158,7 +159,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
                 .setParameter(1, database.getId())
                 .getResultList();
 
-        ActivityEntities allActivities = new ActivityEntities(entityManager);
+        ActivityEntities allActivities = new ActivityEntities(entityManager, database.getId());
         allActivities.collect(deletedActivities);
         allActivities.collect(existingActivityEntities);
 
