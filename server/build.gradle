@@ -4,16 +4,18 @@ apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
 apply from: '../gradle/database.gradle'
-apply from: '../gradle/nexus.gradle'
+apply from: './src/script/buildProperties.gradle'
+apply from: './src/script/instrumentedGwt.gradle'
+apply from: './src/script/devServer.gradle'
 
 description = 'ActivityInfo Server'
 
 gwt {
     gwtVersion = project.gwtVersion
-    
+
     minHeapSize = "512M";
     maxHeapSize = "2048M";
-    
+
     modules 'org.activityinfo.ui.ActivityInfoRelease',
             'org.activityinfo.ui.Embed'
 }
@@ -22,71 +24,77 @@ appengine {
     downloadSdk = true
 }
 
-compileGwt.enabled = !project.hasProperty('api')
-
 war {
+    archiveName = "activityinfo-b${buildNumber}.war"
     classpath = classpath.filter { file ->
         return !file.name.startsWith('guava-gwt') &&
-               !file.name.startsWith('gwt-user')
+                !file.name.startsWith('gwt-user')
     }
     exclude("**/*.symbolMap")
 }
 
 test {
     systemProperty "testDatabaseName", "testDb"
-}
-
-
-task appengineStartAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Starts a local AppEngine Development Server for Acceptance Testing in the background"
-    group = "Google App Engine"
-    
-    daemon = true
-    jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
-}
-
-task appengineRunAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Runs a local AppEngine Development Server for Acceptance Testing"
-    group = "Google App Engine"
-
-    jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
+    systemProperty "testDatabaseUsername", localMySqlUsername
+    systemProperty "testDatabasePassword", localMySqlPassword
+    testLogging.showStandardStreams = false
 }
 
 processResources {
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
-            .replace('$[git.commit.id]', commitId)
+                .replace('$[git.commit.id]', commitId)
     }
 }
 
+task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
+    group = "Verification"
+    dependsOn 'compileGwt'
+    initialJsDownloadSizeLimit "300kb"
+    totalJsDownloadSizeLimit "650kb"
+    appCacheDownloadSizeLimit "2000kb"
+}
+
+task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
+    group = "Delivery Pipeline"
+    description = "Builds, verifies, and archives the binary WAR that is used by subsequent stages"
+    dependsOn 'war'
+    archivePath = war.archivePath
+}
+
+task createTargetDir {
+    doLast {
+// We still have a few tests that are looking for the target folder
+// created by maven
+        project.file('target').mkdirs()
+    }
+}
+
+project.tasks['test'].dependsOn createTargetDir
+
 dependencies {
-    compile project(':model')
-    compile project(':services')
-    
+    compile project(':core:model')
+    compile project(':core:services')
+
     // AppEngine
     appengineSdk libraries.appengine.sdk
     compile libraries.appengine.api
     compile libraries.appengine.gcs
-
     testCompile libraries.appengine.testing
     testCompile libraries.appengine.stubs
-    
+
     // IoC Framework
     compile libraries.guice
     compile libraries.guiceServlet
-    
-    // Jersey + Rest 
+
+    // Jersey + Rest
     compile libraries.jersey.server
     compile libraries.jersey.multipart
     compile libraries.jersey.guice
     compile libraries.jersey.json
-    
     compile libraries.freemarker
     compile libraries.jackson.geojson
     compile libraries.gson
-    
     testCompile libraries.jersey.client
 
     // Utility libraries
@@ -94,7 +102,6 @@ dependencies {
     compile libraries.commons.fileupload
     compile libraries.commons.io
     compile libraries.bcrypt
-
 
     // MySQL Related dependencies
     compile libraries.hibernate.entitymanager
@@ -107,17 +114,12 @@ dependencies {
     testCompile libraries.dbunit
     testCompile libraries.c3p0
 
-
     compile libraries.jts
-
     compile libraries.google.apiClient
-    
 
     // GWT User Interface Dependencies
     compile libraries.gxt
-
     compile libraries.gwt.user
-    
     gwt libraries.gwt.dnd
     gwt libraries.gwt.guice
     gwt libraries.gwt.gson
@@ -126,17 +128,14 @@ dependencies {
     gwt libraries.gwt.guava
 
     compile libraries.gwt.i18nServer
-
-
     compile libraries.rebar.time
     compile libraries.rebar.sync
     compile libraries.rebar.asyncFun
     compile libraries.rebar.appcache
     compile libraries.rebar.sql
     compile libraries.rebar.sync
-    
-    gwt libraries.rebar.style
 
+    gwt libraries.rebar.style
 
     // Report Rendering
     compile libraries.appengine.export.itext
@@ -145,6 +144,4 @@ dependencies {
     compile libraries.appengine.export.jcharts
     compile libraries.appengine.export.emf
     compile libraries.prettytime
-
 }
-
