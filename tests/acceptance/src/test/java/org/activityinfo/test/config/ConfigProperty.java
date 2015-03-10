@@ -31,10 +31,14 @@ public class ConfigProperty {
         String value = System.getProperty(propertyKey);
         return !Strings.isNullOrEmpty(value);
     }
-    
+
     public String getOr(String defaultValue) {
+        return getOr(defaultValue, false);
+    }
+    
+    public String getOr(String defaultValue, boolean allowBlank) {
         String path = System.getProperty(propertyKey);
-        if(Strings.isNullOrEmpty(path)) {
+        if (path == null || (!allowBlank && Strings.isNullOrEmpty(path))) {
             return defaultValue;
         }
         return path;

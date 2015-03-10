@@ -2,8 +2,10 @@ package org.activityinfo.test.sut;
 
 import org.activityinfo.test.config.ConfigProperty;
 
-import java.sql.*;
-import java.util.Random;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 
 /**
@@ -23,8 +25,6 @@ public class DevServerAccounts implements Accounts {
      */
     private static final String DEV_PASSWORD = "notasecret";
 
-    private Random random = new Random();
-
     public DevServerAccounts() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -39,7 +39,7 @@ public class DevServerAccounts implements Accounts {
         try(Connection connection = DriverManager.getConnection(
                 connectionUrl(),
                 USERNAME_PROPERTY.getOr("root"),
-                PASSWORD_PROPERTY.getOr("root"))) {
+                PASSWORD_PROPERTY.getOr("root", true))) {
 
             try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM userlogin WHERE email = ?")) {
                 stmt.setString(1, email);
@@ -70,7 +70,7 @@ public class DevServerAccounts implements Accounts {
 
     private String connectionUrl() {
         return String.format("jdbc:mysql://localhost/%s?useUnicode=true&characterEncoding=UTF-8",
-                DATABASE_NAME.getOr("activityinfo"));
+                DATABASE_NAME.getOr("activityinfo_at"));
         
     }
 
