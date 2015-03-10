@@ -2,12 +2,9 @@ package org.activityinfo.ui.client.pageView;
 
 import com.google.common.base.Function;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.page.config.design.DesignView;
-import org.activityinfo.ui.client.page.instance.InstancePlace;
 import org.activityinfo.ui.client.pageView.folder.FolderPageView;
 import org.activityinfo.ui.client.pageView.formClass.DesignTab;
 import org.activityinfo.ui.client.pageView.formClass.FormClassPageView;

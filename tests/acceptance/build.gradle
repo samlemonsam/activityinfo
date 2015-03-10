@@ -28,8 +28,8 @@ test {
 }
 
 task acceptanceTest(type: Test) {
+    group = "Verification"
     description = 'Runs acceptance test suite'
-    dependsOn 'testClasses'
 
     // Determine the server against which to test
     if(!project.hasProperty("testUrl")) {
@@ -52,11 +52,59 @@ task acceptanceTest(type: Test) {
     // Run only functional tests
     include "**/Functional*AT*"
     scanForTestClasses false
-
 }
+
+task instrumentedAcceptanceTest(type: Test) {
+    group = "Verification"
+    description = 'Runs acceptance tests against an instrumented server to gather test coverage metrics'
+
+    ext {
+        coverageReportDir = project.file("$buildDir/gwtCoverage")
+    }
+
+    // Determine the server against which to test
+    dependsOn { ':server:appengineStartInstrumentedAT' }
+    finalizedBy { ':server:appengineStop' }
+
+    systemProperty "test.url", "http://localhost:8080"
+    systemProperty "gwt.coverage.report.dir", coverageReportDir
+
+    // Keep console output to a minimum
+    testLogging.showStandardStreams = false
+
+    // some tests may fail due to the instrumentation process
+    ignoreFailures = true
+
+    // Run only UI functional tests
+    include "**/Functional*AT.*"
+
+    scanForTestClasses false
+}
+
+apply from: './src/script/gwtCoverageReport.gradle'
+
+
+task acceptanceTestCoverage {
+    dependsOn 'instrumentedAcceptanceTest'
+    dependsOn 'gwtTestCoverage'
+}
+
+task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAcceptanceTest') {
+    def sourceSets = rootProject.subprojects.findResults { p -> p.sourceSets?.main }
+
+    sourceDirectories = project.files(sourceSets.collect { s -> s.java })
+    classDirectories = project.files(sourceSets.collect { s -> s.output.classesDir })
+    executionData jacocoAcceptanceDataFile
+    
+    reports {
+        xml.enabled = true
+    }
+}
+
 
 task smokeTest(type: Test) {
     description = 'Runs pre-release smoke tests'
+    group = "Delivery Pipeline"
     dependsOn 'testClasses'
 
     include "**/*SmokeTest.*"

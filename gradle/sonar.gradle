@@ -4,33 +4,26 @@ apply plugin: "sonar-runner"
 
 sonarRunner {
     sonarProperties {
-        property "sonar.host.url", "https://sonar.bedatadriven.com"
-        property "sonar.jdbc.url", "jdbc:mysql://localhost/sonardb"
+        property "sonar.projectName", "ActivityInfo"
+        property "sonar.host.url", "http://sonar.bedatadriven.com"
+        property "sonar.jdbc.url", "jdbc:mysql://sonar.bedatadriven.com/sonardb"
         property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
         property "sonar.jdbc.username", "sonar"
         property "sonar.jdbc.password", sonarDatabasePassword
+        
+    //    property "sonar.jacoco.itReportPath", jacocoAcceptanceDataFile
+        property "sonar.genericcoverage.itReportPaths", gwtAcceptanceDataFile 
     }
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
-gradle.taskGraph.whenReady { graph ->
-    if (project.hasProperty("coverage") || graph.hasTask('sonarRunner')) {
-
-        subprojects {
-            apply plugin: 'jacoco'
-        }
-//        
-//        project(':server') {
-//            apply plugin: 'jacoco'
-//
-//            def agentFile = jacoco.agent.agentJar
-//            def destPath = "${project.buildDir}/jacoco/${task.name}.exec"
-//            
-//            appengineStartAT.jvmArgs.add "-javaagent:${agentFile}=destfile=${destPath}"
-//        }
-    }
-}
+tasks.sonarRunner.dependsOn ':tests:acceptance:'

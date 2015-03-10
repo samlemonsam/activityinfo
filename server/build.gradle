@@ -4,7 +4,10 @@ apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
 apply from: '../gradle/database.gradle'
-apply from: '../gradle/buildProperties.gradle'
+apply from: './src/script/buildProperties.gradle'
+apply from: './src/script/instrumentedGwt.gradle'
+apply from: './src/script/devServer.gradle'
+
 
 description = 'ActivityInfo Server'
 
@@ -38,24 +41,6 @@ test {
     systemProperty "testDatabasePassword", localMySqlPassword
 
     testLogging.showStandardStreams = false
-}
-
-
-task appengineStartAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Starts a local AppEngine Development Server for Acceptance Testing in the background"
-    group = "Google App Engine"
-    
-    daemon = true
-    jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
-}
-
-task appengineRunAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Runs a local AppEngine Development Server for Acceptance Testing"
-    group = "Google App Engine"
-
-    jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
 }
 
 processResources {
