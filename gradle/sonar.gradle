@@ -26,4 +26,4 @@ repositories {
     mavenCentral()
 }
 
-tasks.sonarRunner.dependsOn ':tests:acceptance:'
+tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
