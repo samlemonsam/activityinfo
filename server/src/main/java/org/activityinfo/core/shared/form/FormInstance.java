@@ -27,7 +27,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.core.shared.model.AiLatLng;
 import org.activityinfo.model.resource.IsResource;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;

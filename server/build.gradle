@@ -34,10 +34,6 @@ war {
 
 test {
     systemProperty "testDatabaseName", "testDb"
-    systemProperty "testDatabaseUsername", localMySqlUsername
-    systemProperty "testDatabasePassword", localMySqlPassword
-
-    testLogging.showStandardStreams = false
 }
 
 
@@ -58,9 +54,6 @@ task appengineRunAT(type: RunTask) {
     jvmFlags += [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
 }
 
-// We run our functional tests from a different module
-appengineFunctionalTest.enabled = false
-
 processResources {
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
@@ -69,8 +62,8 @@ processResources {
 }
 
 dependencies {
-    compile project(':core:model')
-    compile project(':core:services')
+    compile project(':model')
+    compile project(':services')
     
     // AppEngine
     appengineSdk libraries.appengine.sdk

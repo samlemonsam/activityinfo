@@ -1,11 +1,14 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Function;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.util.List;
 
@@ -25,7 +28,16 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
         pool.setCreator(new Function<BrowserProfile, WebDriver>() {
             @Override
             public WebDriver apply(BrowserProfile input) {
-                return new ChromeDriver();
+                DesiredCapabilities capabilities = new DesiredCapabilities();
+                String proxyServer = System.getProperty("webdriver.proxy");
+                if(!Strings.isNullOrEmpty(proxyServer)) {
+                    Proxy proxy = new Proxy();
+                    proxy.setHttpProxy(proxyServer);
+                    
+                    capabilities.setCapability(CapabilityType.PROXY, proxy);
+                }
+                        
+                return new ChromeDriver(capabilities);
             }
         });
     }

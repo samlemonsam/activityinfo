@@ -1,9 +1,7 @@
 package org.activityinfo.test.driver;
 
 import cucumber.api.DataTable;
-import cucumber.api.PendingException;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.pageobject.api.PageBinder;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
@@ -21,8 +19,8 @@ import java.util.List;
 public class UiApplicationDriver extends ApplicationDriver {
 
     private ApiApplicationDriver apiDriver;
-    private PageBinder pageBinder;
-    
+    private LoginPage loginPage;
+
     private AliasTable aliasTable;
     
     private UserAccount currentUser = null;
@@ -31,11 +29,12 @@ public class UiApplicationDriver extends ApplicationDriver {
     private TargetsPage targetPage;
 
     @Inject
-    public UiApplicationDriver(ApiApplicationDriver apiDriver, PageBinder pageBinder,
+    public UiApplicationDriver(ApiApplicationDriver apiDriver, 
+                               LoginPage loginPage,
                                AliasTable aliasTable) {
         super(aliasTable);
         this.apiDriver = apiDriver;
-        this.pageBinder = pageBinder;
+        this.loginPage = loginPage;
         this.aliasTable = aliasTable;
     }
 
@@ -55,11 +54,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     
     public void ensureLoggedIn() {
         if(applicationPage == null) {
-            LoginPage loginPage = pageBinder.navigateTo(LoginPage.class);
-            loginPage.loginAs(currentUser);
-            loginPage.andExpectSuccess();
-            
-            applicationPage = pageBinder.waitFor(ApplicationPage.class);
+            applicationPage = loginPage.navigateTo().loginAs(currentUser).andExpectSuccess();
             applicationPage.waitUntilLoaded();
         }
     }

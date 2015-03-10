@@ -7,9 +7,17 @@ allprojects {
 
     def repo = Grgit.open(project.rootDir)
     
-    project.version = new ProjectVersion(2, 8, System.env.BUILD_NUMBER)
-
-    ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
-    ext.commitId = repo.head().id    
+    // This is the environment that we pass from the start of the pipeline
+    // down to each downstream job
+    def buildNumber = System.env.PIPELINE_NUMBER
+    if(!buildNumber) {
+        buildNumber = 'dev'
+    }
     
+    ext.buildNumber = buildNumber
+    ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
+    ext.commitId = repo.head().id
+
+    project.version = new ProjectVersion(2, 8, buildNumber)
+
 }

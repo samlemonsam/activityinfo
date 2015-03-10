@@ -1,0 +1,25 @@
+
+/**
+ * Configures Jacoco to support measurement of test coverage
+ * 
+ * We're avoiding the built-in Gradle Jacoco plugin because it doesn't play well with
+ * tasks like AppEngine Run, which doesn't implement JavaFork whatever
+ */
+
+
+
+
+subprojects {
+    apply plugin: 'jacoco'
+
+    tasks.withType(Test) {
+        ignoreFailures = true
+        jacoco {
+            // Turn off test coverage generation by default
+            enabled = project.hasProperty("coverage")
+        }
+        if(jacoco.enabled) {
+            outputs.file jacoco.destinationFile
+        }
+    }
+}

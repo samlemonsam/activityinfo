@@ -1,0 +1,65 @@
+import groovy.json.JsonSlurper
+import groovy.xml.MarkupBuilder
+
+task gwtTestCoverage {
+    group = "GWT"
+    description = "Combines the results of the gwt coverage into a single report for Sonar"
+    dependsOn 'instrumentedAcceptanceTest'
+
+    inputs.dir instrumentedAcceptanceTest.coverageReportDir
+    outputs.file gwtAcceptanceDataFile
+
+    doLast {
+
+        // Combine the output of the individual test recordings
+        // Parse the individual files into a list
+
+        def json = new JsonSlurper()
+        def reports = instrumentedAcceptanceTest.coverageReportDir
+                .listFiles()
+                .collect { file -> json.parse(file) }
+
+        // Break down the report -> file -> line heirarchy into a flat list
+        // of observations
+
+        def lines = reports.collectMany { report ->
+            report.entrySet().collectMany { sourceFile ->
+                sourceFile.value.entrySet().collect { line ->
+                    [file: sourceFile.key,
+                     line: line.key,
+                     covered: line.value]
+                }
+            }
+        }
+//        
+//        lines += jacocoAcceptanceDataFile.readLines().collect { line ->
+//            
+//            def columns = line.split('/')
+//            def className = line[0]
+//          //  def lineNumber = 
+//        }
+
+        // Aggregate back up by file across all reports
+        def sourceFiles = lines.groupBy { it.file }
+
+        // Read in the map of file names relative to classpath to absolute paths
+        def pathMapFile = project(':server').tasks['compileInstrumentedGwt'].sourceMapFile
+        def pathMap = pathMapFile.readLines().collectEntries { String line -> line.split("=").toList() }
+
+        // Write out the XML Summary
+        gwtAcceptanceDataFile.withWriter { writer ->
+            def xml = new MarkupBuilder(writer)
+            xml.coverage(version: 1) {
+                sourceFiles.each { sourceFile, lineSet ->
+                    file(path: pathMap[sourceFile]) {
+                        lineSet.groupBy { it.line }.each { line, results ->
+                            lineToCover(lineNumber: line, covered: !!results.find { it.covered > 0 })
+                        }
+                    }
+                }
+            }
+        }
+        
+        logger.info("Wrote coverage statistics to ${gwtAcceptanceDataFile}.")
+    }
+}

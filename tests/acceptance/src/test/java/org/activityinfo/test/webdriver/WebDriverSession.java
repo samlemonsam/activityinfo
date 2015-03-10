@@ -1,11 +1,13 @@
 package org.activityinfo.test.webdriver;
 
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.inject.Provider;
-import cucumber.api.Scenario;
-import cucumber.api.java.Before;
+import com.google.common.base.Strings;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.config.ConfigProperty;
+import org.activityinfo.test.sut.Server;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.HasInputDevices;
@@ -13,7 +15,15 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
 
 import javax.inject.Inject;
-import java.lang.reflect.*;
+import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static com.google.common.io.Files.write;
 
 /**
  * Stores state related to an individual WebDriver session, lazily creating a WebDriver instance
@@ -22,26 +32,31 @@ import java.lang.reflect.*;
 @ScenarioScoped
 public class WebDriverSession {
 
+    private static final ConfigProperty COVERAGE_REPORT_DIR = new ConfigProperty("gwt.coverage.report.dir",
+            "Directory to write gwt coverage results.");
+
     private final WebDriverProvider provider;
     private WebDriver driver;
     private WebDriver proxy;
-    private Scenario scenario;
+    private Server server;
+    private String testName;
     private BrowserProfile browserProfile = new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME);
 
     @Inject
-    public WebDriverSession(WebDriverProvider provider) {
+    public WebDriverSession(WebDriverProvider provider, ProxyController proxyController, Server server) {
         this.provider = provider;
+        this.server = server;
         this.proxy =  (WebDriver) Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class[]{ WebDriver.class, TakesScreenshot.class, HasInputDevices.class },
+                new Class[]{ WebDriver.class, TakesScreenshot.class, HasInputDevices.class, JavascriptExecutor.class },
                 new WebDriverProxy());
     }
 
-    public void beforeScenario(Scenario scenario) {
-        this.scenario = scenario;
+    public void beforeTest(String testName) {
+        this.testName = testName;
     }
 
     private void startSession() {
-        this.driver = provider.start(scenario.getName(), browserProfile);
+        this.driver = provider.start(testName, browserProfile);
     }
 
     public WebDriver getDriver() {
@@ -53,15 +68,39 @@ public class WebDriverSession {
         RemoteWebDriver remoteWebDriver = (RemoteWebDriver) driver;
         return remoteWebDriver.getSessionId();
     }
-    
+
     public boolean isRunning() {
         return driver != null;
     }
 
     public void stop() {
         if(driver != null) {
+            if(COVERAGE_REPORT_DIR.isPresent()) {
+                recordCoverage();
+            }
             driver.quit();
             driver = null;
+        }
+    }
+
+    private void recordCoverage()  {
+        try {
+            File outputDir = COVERAGE_REPORT_DIR.getDir();
+            Path reportFile = Files.createTempFile(outputDir.toPath(), testName, ".json");
+
+            // Trigger the 'onLoad' event which should write the statistics to local storage
+            driver.navigate().to(server.path("coverage.html"));
+
+            // Retrieve the results from local storage
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String json = (String) js.executeScript(String.format(
+                    "return localStorage.getItem('%s');", "gwt_coverage"));
+
+            if (!Strings.isNullOrEmpty(json)) {
+                write(json, reportFile.toFile(), Charsets.UTF_8);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception retrieving coverage results", e);
         }
     }
 
@@ -83,7 +122,7 @@ public class WebDriverSession {
             try {
                 return method.invoke(driver, args);
             } catch (InvocationTargetException e) {
-                throw e.getCause();                            
+                throw e.getCause();
             }
         }
 

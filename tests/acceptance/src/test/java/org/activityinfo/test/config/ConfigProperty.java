@@ -54,4 +54,23 @@ public class ConfigProperty {
 
         return file;
     }
+
+
+    public File getDir() {
+        String path = get();
+
+        File file = new File(path);
+        if(file.exists() && !file.isDirectory()) {
+            throw new ConfigurationError(String.format("The system property '%s' should refer to a directory," +
+                    " not a file.", propertyKey));
+        }
+        if(!file.exists()) {
+            boolean created = file.mkdirs();
+            if(!created) {
+                throw new ConfigurationError(String.format("Could not create the directory '%s' at '%s'", 
+                        propertyKey, file));
+            }
+        }
+        return file;
+    }
 }

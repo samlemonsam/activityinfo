@@ -1,0 +1,73 @@
+/**
+ * Defines tasks to compile and build a version of our WAR whose GWT-generated javascript
+ * is instrumented to allow measurement of test coverage
+ */
+
+
+task compileInstrumentedGwt(type: de.richsource.gradle.plugins.gwt.GwtCompile) {
+    group = "GWT"
+    description = "Runs the GWT compiler to produce instrumented output for test coverage measurement"
+
+    // Compile a single permutation
+    modules = ['org.activityinfo.ui.ActivityInfoCoverage']
+
+    ext {
+        // Keep this output seperate from the output to be deployed
+        subdir = { name -> project.file("$buildDir/instrumentedGwt/${name}") }
+
+        // Provide the compiler with a list of source files to instrument
+        sourceListFile = subdir('gwt.coverage')
+        sourceMapFile = subdir('gwt.coverage.map')
+    }
+
+    
+    war = subdir('out')
+    workDir = subdir('work')
+    extra = subdir('extra')
+    gen = subdir('gen')
+
+    outputs.file sourceMapFile
+
+    // Configure the compiler
+    disableRunAsync = true
+    draftCompile = true
+    src = project.tasks.compileGwt.src
+    classpath = project.tasks.compileGwt.classpath
+
+    // Turn on coverage instrumentation
+    jvmArgs "-Dgwt.coverage=${sourceListFile}"
+
+    // Write the file for the compiler containing a list of all
+    // sources to instrument
+    doFirst {
+        def sources = [:]
+        def sourceSets = [project.sourceSets.main.java]
+
+        sourceSets.each { sourceSet ->
+            sourceSet.visit { sourceFile ->
+                if(!sourceFile.directory) {
+                    sources[sourceFile.relativePath] = project.relativePath(sourceFile.file.absolutePath)
+                }
+            }
+        }
+
+        sourceListFile.parentFile.mkdirs()
+        sourceListFile.write sources.keySet().join("\n")
+        sourceMapFile.write sources.entrySet().collect { "${it.key}=${it.value}" }.join("\n")
+    }
+}
+
+task instrumentedWar(type: War, dependsOn: 'compileInstrumentedGwt') {
+    group = "Build"
+    description = "Generates a war archive using the instrumented javascript"
+    archiveName = "instrumented.war"
+    classpath = project.war.classpath
+
+    from(project.file('src/test/resources')) {
+        include 'coverage.html'
+    }
+
+    doFirst {
+        from compileInstrumentedGwt.war
+    }
+}

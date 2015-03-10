@@ -47,7 +47,6 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.command.LocationDTOs;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.database.hibernate.entity.AttributeGroup;
 import org.activityinfo.server.endpoint.export.SiteExporter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

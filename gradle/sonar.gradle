@@ -1,0 +1,29 @@
+
+apply plugin: "sonar-runner"
+
+
+sonarRunner {
+    sonarProperties {
+        property "sonar.projectName", "ActivityInfo"
+        property "sonar.host.url", "http://sonar.bedatadriven.com"
+        property "sonar.jdbc.url", "jdbc:mysql://sonar.bedatadriven.com/sonardb"
+        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+        property "sonar.jdbc.username", "sonar"
+        property "sonar.jdbc.password", sonarDatabasePassword
+        
+    //    property "sonar.jacoco.itReportPath", jacocoAcceptanceDataFile
+        property "sonar.genericcoverage.itReportPaths", gwtAcceptanceDataFile 
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'

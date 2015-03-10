@@ -8,7 +8,6 @@ import org.openqa.selenium.By;
 public class XPathBuilder {
 
 
-
     public enum Axis {
         CHILD,
         DESCENDANT,

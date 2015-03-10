@@ -1,22 +1,19 @@
 package org.activityinfo.test.pageobject.web;
 
-import org.activityinfo.test.pageobject.api.PageObject;
-import org.activityinfo.test.pageobject.api.Path;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import org.activityinfo.test.pageobject.api.FluentElement;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
 
 
-@Path("/")
-public class SettingsMenu extends PageObject {
+public class SettingsMenu {
     
-    @FindBy(xpath = "//div[contains(text(), 'offline')]")
-    private WebElement offlineActionLink;
-    
-    @FindBy(xpath = "//div[contains(text(), 'Logout')]")
-    private WebElement logoutLink;
-    
-    
+    private FluentElement menu;
+
+    public SettingsMenu(FluentElement menu) {
+        this.menu = menu;
+    }
+
     public void enableOfflineMode() {
-        offlineActionLink.click();
+        menu.find().div(containingText("offline")).clickWhenReady();
     }
 }
