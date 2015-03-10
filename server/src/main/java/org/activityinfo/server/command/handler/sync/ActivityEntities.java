@@ -85,9 +85,9 @@ public class ActivityEntities {
 
     private void findIndicatorLinks() {
         List<Object[]> result = entityManager.createNativeQuery(
-                "select link.sourceIndicatorid, link.destinationIndicatorid from IndicatorLink link " +
-                        "left join Indicator i on (link.destinationIndicatorid=i.IndicatorId or link.sourceIndicatorid=i.IndicatorId) " +
-                        "left join Activity a on (i.activityid=a.activityid) " +
+                "select link.sourceindicatorid, link.destinationindicatorid from indicatorlink link " +
+                        "left join indicator i on (link.destinationindicatorid=i.indicatorid or link.sourceindicatorid=i.indicatorid) " +
+                        "left join activity a on (i.activityid=a.activityid) " +
                         "where a.databaseId = " + dbId)
                 .getResultList();
         Set<IndicatorLinkEntityId> links = Sets.newHashSet(); // avoid duplications
