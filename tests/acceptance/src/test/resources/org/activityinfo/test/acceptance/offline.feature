@@ -10,6 +10,7 @@ Scenario: Enabling Offline mode
   
 Scenario: Working offline with large databases
   Given I have created 20 databases each containing 40 forms with 30 fields
+  Given that I am logged in as "qa@bedatadriven.com"
   When I enable offline mode
   Then synchronization should complete successfully
   
