@@ -39,7 +39,7 @@ public class DevServerAccounts implements Accounts {
         try(Connection connection = DriverManager.getConnection(
                 connectionUrl(),
                 USERNAME_PROPERTY.getOr("root"),
-                PASSWORD_PROPERTY.getOr("root", true))) {
+                PASSWORD_PROPERTY.getIfPresent("root"))) {
 
             try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM userlogin WHERE email = ?")) {
                 stmt.setString(1, email);
