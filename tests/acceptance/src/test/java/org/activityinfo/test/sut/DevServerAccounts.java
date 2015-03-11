@@ -14,7 +14,8 @@ import java.sql.ResultSet;
 public class DevServerAccounts implements Accounts {
 
     private static final ConfigProperty DATABASE_NAME = new ConfigProperty("databaseName", "MySQL database name");
-    private static final ConfigProperty USERNAME_PROPERTY = 
+    private static final ConfigProperty EMAIL = new ConfigProperty("devAccountEmail", "Dev account email");
+    private static final ConfigProperty USERNAME_PROPERTY =
             new ConfigProperty("databaseUsername", "MySQL database username");
     private static final ConfigProperty PASSWORD_PROPERTY = 
             new ConfigProperty("databasePassword", "MySQL database password");
@@ -81,6 +82,6 @@ public class DevServerAccounts implements Accounts {
 
     @Override
     public UserAccount any() {
-        return ensureAccountExists("dev@bedatadriven.com");
+        return ensureAccountExists(EMAIL.getIfPresent("dev@bedatadriven.com"));
     }
 }
