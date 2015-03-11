@@ -27,7 +27,7 @@ From the root project, execute:
 To run individual tests interactively from IntelliJ, first start the development server, either 
 from the 'Gradle tasks' tool window or from the command line by running:
 
-    ./gradlew appengineAcceptanceTestStart
+    ./gradlew appengineStartAT
     
 If you install the IntelliJ [https://plugins.jetbrains.com/plugin/7212?pr=idea](Cucumber for Java]
 plugin, you can now right-click on individual .feature files and choose "Run" or "Debug"
