@@ -12,6 +12,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,12 +30,18 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
     public static final String JENKINS_SAUCE_USER_NAME = "SAUCE_USER_NAME";
     public static final String JENKINS_SAUCE_API_KEY = "SAUCE_API_KEY";
-    public static final String JENKINS_STARTING_URL = "SELENIUM_STARTING_URL";
+    
+    public static final ConfigProperty JENKINS_SELENIUM_HOST = new ConfigProperty("SELENIUM_HOST", 
+            "The host name of the selenium server");
+
+    public static final ConfigProperty JENKINS_SELENIUM_PORT = new ConfigProperty("SELENIUM_PORT",
+            "The port of the selenium server");
+
 
     public static final ConfigProperty SAUCE_USERNAME = new ConfigProperty("sauce.username", "Sauce.io username");
     public static final ConfigProperty SAUCE_ACCESS_KEY = new ConfigProperty("sauce.accessKey", "Sauce.io access key");
     
-
+    
     private String userName;
     private String apiKey;
     
@@ -62,17 +69,17 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         }
     }
     
-    private URL getRemoteAddress() {
+    private URL getWebDriverServer() {
 
-        String startingUrl = System.getenv(JENKINS_STARTING_URL);
-        if (Strings.isNullOrEmpty(startingUrl)) {
-            startingUrl = String.format("http://%s:%s@ondemand.saucelabs.com:80/wd/hub", userName, apiKey);
-        }
-
+        String host = JENKINS_SELENIUM_HOST.getOr("ondemand.saucelabs.com");
+        String port = JENKINS_SELENIUM_PORT.getOr("80");
+        
+        String url = String.format("http://%s:%s@%s:%s/wd/hub", userName, apiKey, host, port);
+        
         try {
-            return new URL(startingUrl);
+            return new URL(url);
         } catch (MalformedURLException e) {
-            throw new ConfigurationError(String.format("Sauce labs remote address [%s] is malformed.", startingUrl), e);
+            throw new ConfigurationError(String.format("Sauce labs remote address [%s] is malformed.", url), e);
         }
     }
 
@@ -121,7 +128,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             capabilities.setCapability("record-screenshots", false);
         }
         
-        return new RemoteWebDriver(getRemoteAddress(), capabilities);
+        return new RemoteWebDriver(getWebDriverServer(), capabilities);
     }
 
 
