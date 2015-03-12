@@ -5,23 +5,15 @@ ext {
 }
 
 task setupDevDatabase(type: MySqlSetupTask) {
-    group = "Database"
     description = "Creates and populates a database called 'activityinfo' locally for development"
     databaseName = "activityinfo"
-    user = localMySqlUsername
-    password = localMySqlPassword
-    changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'
     scripts = files("${project.rootDir}/store/mysql/geography.sql")
 }
 
 task setupAcceptanceTestDatabase(type: MySqlSetupTask) {
-    group = "Database"
     dropDatabase = true
     description = "Creates and populates a database called 'activityinfo_at' locally for running acceptance tests"
     databaseName = "activityinfo_at"
-    user = localMySqlUsername
-    password = localMySqlPassword
-    changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'
     scripts = files("${project.rootDir}/store/mysql/geography.sql",
                     "${project.rootDir}/store/mysql/nullary-locations.sql")
     
@@ -35,19 +27,20 @@ task setupAcceptanceTestDatabase(type: MySqlSetupTask) {
         config.setProperty("hibernate.connection.password", localMySqlPassword)
         config.setProperty("hibernate.connection.url", 'jdbc:mysql://localhost/activityinfo_at?useUnicode=true&amp;characterEncoding=utf8')
         
-        acceptanceTestConfigFile.withObjectOutputStream { out ->
+        acceptanceTestConfigFile.withOutputStream { out ->
             config.store(out, "Acceptance Test Configuration")
-            
         }
     }
 }
 
 task updateDevDatabase(type: MySqlSetupTask) {
-    group = "Database"
     description = "Applies schema migrations to the local 'activityinfo' development database"
     databaseName = "activityinfo"
+}
+
+tasks.withType(MySqlSetupTask) {
+    group = "Database"
     changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'
     user = localMySqlUsername
     password = localMySqlPassword
 }
-

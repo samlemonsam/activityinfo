@@ -52,7 +52,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         setup().login(account);
     }
     
-    private void ensureLoggedIn() {
+    public void ensureLoggedIn() {
         if(applicationPage == null) {
             applicationPage = loginPage.navigateTo().loginAs(currentUser).andExpectSuccess();
             applicationPage.waitUntilLoaded();
