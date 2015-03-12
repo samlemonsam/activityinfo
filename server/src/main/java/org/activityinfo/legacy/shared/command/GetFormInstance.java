@@ -1,7 +1,7 @@
 package org.activityinfo.legacy.shared.command;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.legacy.shared.command.result.FormInstanceResult;
+import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collection;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by yuriy on 3/1/2015.
  */
-public class GetFormInstance implements Command<FormInstanceResult> {
+public class GetFormInstance implements Command<FormInstanceListResult> {
 
     // todo : code it via type, need criteria but a lot of model classes are not serializable
     // have to ask Alex why

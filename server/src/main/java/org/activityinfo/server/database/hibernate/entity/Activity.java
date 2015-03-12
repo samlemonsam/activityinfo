@@ -211,6 +211,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
      * @return the FormClass resource encoded as JSON
      */
     @Lob
+    @Column(name = "formClass")
     public String getJson() {
         return formClassJson;
     }
@@ -219,6 +220,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.formClassJson = formClassJson;
     }
 
+    @Column(name = "gzFormClass")
     public byte[] getGzJson() {
         return gzFormClassJson;
     }

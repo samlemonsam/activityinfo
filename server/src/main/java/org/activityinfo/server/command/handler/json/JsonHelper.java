@@ -4,6 +4,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
 import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.database.hibernate.entity.HasJson;
 
 import java.io.*;
@@ -79,5 +81,17 @@ public class JsonHelper {
             jsons.add(readJson(json));
         }
         return jsons;
+    }
+
+    public static List<String> asJsonList(List<FormInstance> instances) {
+        List<String> jsons = Lists.newArrayList();
+        for (FormInstance instance : instances) {
+            jsons.add(toJson(instance));
+        }
+        return jsons;
+    }
+
+    public static String toJson(FormInstance instance) {
+        return Resources.toJson(instance.asResource());
     }
 }

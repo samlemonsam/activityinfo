@@ -9,13 +9,17 @@ import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
-import org.activityinfo.legacy.shared.command.result.FormInstanceResult;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
+import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.ConcatList;
 import org.activityinfo.promise.Promise;
 
@@ -67,7 +71,8 @@ public class QueryExecutor {
             return Promise.foldLeft(Collections.<FormInstance>emptyList(), new ConcatList<FormInstance>(), resultSets);
 
         } else if (criteriaAnalysis.isAncestorQuery()) {
-            ResourceId parentId = criteriaAnalysis.getParentCriteria();
+            ParentCriteria.Parent parent = criteriaAnalysis.getParentCriteria();
+            ResourceId parentId = parent.getParentId();
 
             if (parentId.equals(FolderListAdapter.HOME_ID) || parentId.getDomain() == DATABASE_DOMAIN ||
                 parentId.getDomain() == ACTIVITY_CATEGORY_DOMAIN) {
@@ -76,21 +81,51 @@ public class QueryExecutor {
                 return countries();
             } else if (parentId.getDomain() == CuidAdapter.COUNTRY_DOMAIN) {
                 return adminLevels(CuidAdapter.getLegacyIdFromCuid(parentId));
+            } else if (ClassType.isClassType(parentId)) {
+                return instancesByClassType(parent);
             } else {
                 GetFormInstance command = new GetFormInstance()
                         .setOwnerId(parentId.asString())
                         .setType(GetFormInstance.Type.OWNER);
-                return dispatcher.execute(command).then(new Function<FormInstanceResult, List<FormInstance>>() {
-                    @Nullable
-                    @Override
-                    public List<FormInstance> apply(FormInstanceResult formInstanceResult) {
-                        return formInstanceResult.getFormInstanceList();
-                    }
-                });
+                return dispatcher.execute(command).then(FormInstanceListAdapter.getInstance());
             }
         } else {
             throw new UnsupportedOperationException("queries must have either class criteria or parent criteria");
         }
+    }
+
+    private Promise<List<FormInstance>> instancesByClassType(ParentCriteria.Parent parent) {
+        ResourceId parentId = parent.getParentId();
+
+        if (parentId.equals(ClassType.LOCATION_TYPE.getResourceId())) {
+            return locationTypes(parent);
+        } else if (parentId.equals(ClassType.PROJECT.getResourceId())) {
+            return projects(parent);
+        } else if (parentId.equals(ClassType.PARTNER.getResourceId())) {
+            return partner(parent);
+        } else {
+            throw new UnsupportedOperationException("ClassType is not supported, classType: " + parentId);
+        }
+    }
+
+    private Promise<List<FormInstance>> partner(ParentCriteria.Parent parent) {
+        // todo implement
+        throw new UnsupportedOperationException("TODO : implement");
+    }
+
+    private Promise<List<FormInstance>> projects(ParentCriteria.Parent parent) {
+        // todo implement
+        throw new UnsupportedOperationException("TODO : implement");
+    }
+
+    private Promise<List<FormInstance>> locationTypes(final ParentCriteria.Parent parent) {
+        return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<LocationTypeDTO>>() {
+            @Override
+            public List<LocationTypeDTO> apply(SchemaDTO input) {
+                int countryId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
+                return input.getCountryById(countryId).getLocationTypes();
+            }
+        }).then(new ListAdapter<>(new LocationTypeInstanceAdapter()));
     }
 
     private Promise<List<FormInstance>> adminLevels(int countryId) {
@@ -110,10 +145,10 @@ public class QueryExecutor {
     }
 
     private Promise<List<FormInstance>> queryByIds(Collection<String> ids) {
-        return dispatcher.execute(new GetFormInstance(ids)).then(new Function<FormInstanceResult, List<FormInstance>>() {
+        return dispatcher.execute(new GetFormInstance(ids)).then(new Function<FormInstanceListResult, List<FormInstance>>() {
             @Nullable
             @Override
-            public List<FormInstance> apply(FormInstanceResult formInstanceResult) {
+            public List<FormInstance> apply(FormInstanceListResult formInstanceResult) {
                 return formInstanceResult.getFormInstanceList();
             }
         });

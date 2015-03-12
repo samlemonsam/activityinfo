@@ -21,7 +21,7 @@ public class CriteriaAnalysis extends CriteriaVisitor {
      */
     private final Set<ResourceId> classCriteria = Sets.newHashSet();
 
-    private final Set<ResourceId> parentCriteria = Sets.newHashSet();
+    private final Set<ParentCriteria.Parent> parentCriteria = Sets.newHashSet();
 
     private boolean rootOnly = false;
     private boolean classUnion = true;
@@ -36,7 +36,7 @@ public class CriteriaAnalysis extends CriteriaVisitor {
      */
     private final List<String> idsWithoutLegacyModel = Lists.newArrayList();
 
-    public ResourceId getParentCriteria() {
+    public ParentCriteria.Parent getParentCriteria() {
         return parentCriteria.iterator().next();
     }
 
@@ -72,7 +72,7 @@ public class CriteriaAnalysis extends CriteriaVisitor {
         if (criteria.selectsRoot()) {
             rootOnly = true;
         } else {
-            parentCriteria.add(criteria.getParentId());
+            parentCriteria.add(criteria.getParent());
         }
     }
 

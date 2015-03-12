@@ -9,14 +9,14 @@ import java.util.List;
 /**
  * Created by yuriy on 3/1/2015.
  */
-public class FormInstanceResult implements CommandResult {
+public class FormInstanceListResult implements CommandResult {
 
     private List<String> formInstanceJsonList = Lists.newArrayList();
 
-    public FormInstanceResult() {
+    public FormInstanceListResult() {
     }
 
-    public FormInstanceResult(List<String> formInstanceJsonList) {
+    public FormInstanceListResult(List<String> formInstanceJsonList) {
         this.formInstanceJsonList = formInstanceJsonList;
     }
 
@@ -32,7 +32,7 @@ public class FormInstanceResult implements CommandResult {
         return result;
     }
 
-    public FormInstanceResult setFormInstanceJsonList(List<String> formInstanceJsonList) {
+    public FormInstanceListResult setFormInstanceJsonList(List<String> formInstanceJsonList) {
         this.formInstanceJsonList = formInstanceJsonList;
         return this;
     }

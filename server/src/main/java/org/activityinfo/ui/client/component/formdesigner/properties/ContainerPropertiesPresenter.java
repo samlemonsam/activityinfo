@@ -31,6 +31,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
@@ -113,7 +114,7 @@ public class ContainerPropertiesPresenter {
 
         final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
 
-        if (SubFormKindRegistry.getUserDefinedId().asString().equals(selectedValue)) {
+        if (ClassType.isClassType(ResourceId.valueOf(selectedValue))) {
             final SelectSubformTypeDialog dialog = new SelectSubformTypeDialog();
             dialog.setHideHandler(new ClickHandler() {
                 @Override

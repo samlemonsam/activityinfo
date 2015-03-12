@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetFormInstance;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.command.result.FormInstanceResult;
+import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.entity.FormInstanceEntity;
@@ -43,12 +43,12 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
                 "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId")
                 .setParameter("ownerId", cmd.getOwnerId())
                 .getResultList();
-        return new FormInstanceResult(JsonHelper.readJsons(entities));
+        return new FormInstanceListResult(JsonHelper.readJsons(entities));
     }
 
     private CommandResult fecthById(GetFormInstance cmd) {
         List<FormInstanceEntity> entities = fetchEntities(cmd.getInstanceIds());
-        return new FormInstanceResult(JsonHelper.readJsons(entities));
+        return new FormInstanceListResult(JsonHelper.readJsons(entities));
     }
 
     private List<FormInstanceEntity> fetchEntities(List<String> instanceIds) {

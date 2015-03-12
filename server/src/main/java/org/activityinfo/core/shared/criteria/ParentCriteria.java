@@ -12,10 +12,60 @@ import java.util.Objects;
  */
 public class ParentCriteria implements Criteria {
 
-    private final ResourceId parentId;
+    public static class Parent {
+
+        private final ResourceId parentId;
+        private ResourceId restrictedBy;
+
+        public Parent(ResourceId parentId) {
+            this.parentId = parentId;
+        }
+
+        public ResourceId getParentId() {
+            return parentId;
+        }
+
+        public ResourceId getRestrictedBy() {
+            return restrictedBy;
+        }
+
+        public Parent setRestrictedBy(ResourceId restrictedBy) {
+            this.restrictedBy = restrictedBy;
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Parent parent = (Parent) o;
+
+            return !(parentId != null ? !parentId.equals(parent.parentId) : parent.parentId != null) && !(restrictedBy != null ?
+                    !restrictedBy.equals(parent.restrictedBy) : parent.restrictedBy != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = parentId != null ? parentId.hashCode() : 0;
+            result = 31 * result + (restrictedBy != null ? restrictedBy.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Parent{" +
+                    "parentId=" + parentId +
+                    ", restrictedBy=" + restrictedBy +
+                    '}';
+        }
+    }
+
+    private final Parent parent;
 
     private ParentCriteria(ResourceId id) {
-        this.parentId = id;
+        this.parent = new Parent(id);
     }
 
     @Override
@@ -24,16 +74,20 @@ public class ParentCriteria implements Criteria {
     }
 
     public boolean selectsRoot() {
-        return parentId == null;
+        return parent.getParentId() == null;
     }
 
     public ResourceId getParentId() {
-        return parentId;
+        return parent.getParentId();
+    }
+
+    public Parent getParent() {
+        return parent;
     }
 
     @Override
     public boolean apply(@Nonnull FormInstance instance) {
-        return Objects.equals(parentId, instance.getOwnerId());
+        return Objects.equals(parent.getParentId(), instance.getOwnerId());
     }
 
     @Override
