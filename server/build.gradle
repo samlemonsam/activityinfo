@@ -6,12 +6,11 @@ apply plugin: 'appengine'
 apply from: '../gradle/database.gradle'
 apply from: './src/script/buildProperties.gradle'
 
-
 description = 'ActivityInfo Server'
 
 gwt {
     gwtVersion = project.gwtVersion
-    
+
     minHeapSize = "512M";
     maxHeapSize = "2048M";
 
@@ -35,24 +34,22 @@ war {
     archiveName = "activityinfo-b${buildNumber}.war"
     classpath = classpath.filter { file ->
         return !file.name.startsWith('guava-gwt') &&
-               !file.name.startsWith('gwt-user')
+                !file.name.startsWith('gwt-user')
     }
     exclude("**/*.symbolMap")
 }
-
 
 test {
     systemProperty "testDatabaseName", "testDb"
     systemProperty "testDatabaseUsername", localMySqlUsername
     systemProperty "testDatabasePassword", localMySqlPassword
-
     testLogging.showStandardStreams = false
 }
 
 processResources {
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
-            .replace('$[git.commit.id]', commitId)
+                .replace('$[git.commit.id]', commitId)
     }
 }
 
@@ -73,8 +70,8 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
 
 task createTargetDir {
     doLast {
-        // We still have a few tests that are looking for the target folder
-        // created by maven
+// We still have a few tests that are looking for the target folder
+// created by maven
         project.file('target').mkdirs()
     }
 }
@@ -144,31 +141,28 @@ apply from: './src/script/instrumentedGwt.gradle'
 
 
 dependencies {
-    compile project(':model')
-    compile project(':services')
-    
+    compile project(':core:model')
+    compile project(':core:services')
+
     // AppEngine
     appengineSdk libraries.appengine.sdk
     compile libraries.appengine.api
     compile libraries.appengine.gcs
-
     testCompile libraries.appengine.testing
     testCompile libraries.appengine.stubs
-    
+
     // IoC Framework
     compile libraries.guice
     compile libraries.guiceServlet
-    
-    // Jersey + Rest 
+
+    // Jersey + Rest
     compile libraries.jersey.server
     compile libraries.jersey.multipart
     compile libraries.jersey.guice
     compile libraries.jersey.json
-    
     compile libraries.freemarker
     compile libraries.jackson.geojson
     compile libraries.gson
-    
     testCompile libraries.jersey.client
 
     // Utility libraries
@@ -176,7 +170,6 @@ dependencies {
     compile libraries.commons.fileupload
     compile libraries.commons.io
     compile libraries.bcrypt
-
 
     // MySQL Related dependencies
     compile libraries.hibernate.entitymanager
@@ -189,17 +182,12 @@ dependencies {
     testCompile libraries.dbunit
     testCompile libraries.c3p0
 
-
     compile libraries.jts
-
     compile libraries.google.apiClient
-    
 
     // GWT User Interface Dependencies
     compile libraries.gxt
-
     compile libraries.gwt.user
-    
     gwt libraries.gwt.dnd
     gwt libraries.gwt.guice
     gwt libraries.gwt.gson
@@ -208,17 +196,14 @@ dependencies {
     gwt libraries.gwt.guava
 
     compile libraries.gwt.i18nServer
-
-
     compile libraries.rebar.time
     compile libraries.rebar.sync
     compile libraries.rebar.asyncFun
     compile libraries.rebar.appcache
     compile libraries.rebar.sql
     compile libraries.rebar.sync
-    
-    gwt libraries.rebar.style
 
+    gwt libraries.rebar.style
 
     // Report Rendering
     compile libraries.appengine.export.itext
@@ -227,6 +212,4 @@ dependencies {
     compile libraries.appengine.export.jcharts
     compile libraries.appengine.export.emf
     compile libraries.prettytime
-
 }
-

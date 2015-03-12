@@ -2,8 +2,10 @@ package org.activityinfo.test.sut;
 
 import org.activityinfo.test.config.ConfigProperty;
 
-import java.sql.*;
-import java.util.Random;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 
 /**
@@ -12,7 +14,8 @@ import java.util.Random;
 public class DevServerAccounts implements Accounts {
 
     private static final ConfigProperty DATABASE_NAME = new ConfigProperty("databaseName", "MySQL database name");
-    private static final ConfigProperty USERNAME_PROPERTY = 
+    private static final ConfigProperty EMAIL = new ConfigProperty("devAccountEmail", "Dev account email");
+    private static final ConfigProperty USERNAME_PROPERTY =
             new ConfigProperty("databaseUsername", "MySQL database username");
     private static final ConfigProperty PASSWORD_PROPERTY = 
             new ConfigProperty("databasePassword", "MySQL database password");
@@ -22,8 +25,6 @@ public class DevServerAccounts implements Accounts {
      * Passwords are not checked when running in development mode
      */
     private static final String DEV_PASSWORD = "notasecret";
-
-    private Random random = new Random();
 
     public DevServerAccounts() {
         try {
@@ -39,7 +40,7 @@ public class DevServerAccounts implements Accounts {
         try(Connection connection = DriverManager.getConnection(
                 connectionUrl(),
                 USERNAME_PROPERTY.getOr("root"),
-                PASSWORD_PROPERTY.getOr("root"))) {
+                PASSWORD_PROPERTY.getIfPresent("root"))) {
 
             try(PreparedStatement stmt = connection.prepareStatement("SELECT * FROM userlogin WHERE email = ?")) {
                 stmt.setString(1, email);
@@ -69,8 +70,8 @@ public class DevServerAccounts implements Accounts {
     }
 
     private String connectionUrl() {
-        return String.format("jdbc:mysql://localhost/activityinfo_at?useUnicode=true&characterEncoding=UTF-8", 
-                DATABASE_NAME.getOr("activityinfo"));
+        return String.format("jdbc:mysql://localhost/%s?useUnicode=true&characterEncoding=UTF-8",
+                DATABASE_NAME.getOr("activityinfo_at"));
         
     }
 
@@ -81,6 +82,6 @@ public class DevServerAccounts implements Accounts {
 
     @Override
     public UserAccount any() {
-        return ensureAccountExists("dev@bedatadriven.com");
+        return ensureAccountExists(EMAIL.getIfPresent("dev@bedatadriven.com"));
     }
 }
