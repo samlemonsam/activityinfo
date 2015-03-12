@@ -79,6 +79,8 @@ task createTargetDir {
     }
 }
 
+tasks.test.dependsOn 'createTargetDir'
+
 
 
 task appengineStartAT(type: RunTask) {
