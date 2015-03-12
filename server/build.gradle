@@ -87,6 +87,7 @@ task appengineStartAT(type: RunTask) {
 
     daemon = true
     jvmFlags = [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
+    
 }
 
 task appengineRunAT(type: RunTask) {
@@ -123,15 +124,27 @@ task appengineStartInstrumentedAT(type: com.google.appengine.task.RunTask) {
     daemon = true
     explodedAppDirectory = appengineExplodeInstrumentedApp.warDir
 
-    def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
-    def jacocoAgentJar = jacocoAgent.filter { it.name == 'jacocoagent.jar' }.singleFile.absolutePath
+      
+    doFirst {
+        def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
+        def jacocoAgentJar = jacocoAgent.filter { it.name == 'jacocoagent.jar' }.singleFile.absolutePath
 
-    logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
+        logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
 
-
-    jvmFlags = ["-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}",
-                "-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}"
-    ]
+        jvmFlags = ["-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}",
+                    "-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}"
+        ]
+    }
+    
+    doLast {
+        // Verify that the server actually started
+        try {
+            ant.get(src: "http://localhost:${appengine.httpPort}", dest: project.file("$buildDir/runningCommit"))
+        } catch(Exception e) {
+            throw new RuntimeException("AppEngine DevServer failed to start: ${e.message}", e)
+        }
+    }
+    
 }
 
 
