@@ -16,10 +16,7 @@ subprojects {
         ignoreFailures = true
         jacoco {
             // Turn off test coverage generation by default
-            enabled = project.hasProperty("coverage")
-        }
-        if(jacoco.enabled) {
-            outputs.file jacoco.destinationFile
+            enabled = false
         }
     }
 }
