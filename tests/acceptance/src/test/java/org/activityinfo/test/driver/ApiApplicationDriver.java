@@ -1,7 +1,9 @@
 package org.activityinfo.test.driver;
 
 
-import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -18,10 +20,53 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 public class ApiApplicationDriver extends ApplicationDriver {
+
+    private class Command {
+        private final JSONObject request;
+        private final ResponseHandler handler;
+
+        public Command(JSONObject object, ResponseHandler handler) {
+            this.request = object;
+            this.handler = handler;
+        }
+    }
+    
+    private interface ResponseHandler {
+        void response(JSONObject response) throws JSONException;
+    }
+    
+    private class PendingId implements ResponseHandler, Supplier<Integer> {
+
+        private Integer id;
+        
+        @Override
+        public void response(JSONObject response) throws JSONException {
+            this.id = response.getInt("newId");
+        }
+
+        @Override
+        public Integer get() {
+            if(id == null) {
+                try {
+                    flush();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if(id == null) {
+                throw new IllegalStateException();
+            }
+            return id;
+        }
+    }
+
 
     private static final int RDC = 1;
 
@@ -32,7 +77,12 @@ public class ApiApplicationDriver extends ApplicationDriver {
     
     private UserAccount currentUser = null;
     
-    private List<Integer> createdDatabases = Lists.newArrayList();
+    private List<String> createdDatabases = Lists.newArrayList();
+
+    private Cache<Integer, Integer> nullaryLocationCache = CacheBuilder.newBuilder().build();
+
+    private boolean batchingEnabled = false;
+    private LinkedList<Command> pendingBatch = new LinkedList<>();
 
     @Inject
     public ApiApplicationDriver(Server server, Accounts accounts, AliasTable aliases) {
@@ -52,6 +102,13 @@ public class ApiApplicationDriver extends ApplicationDriver {
             client.addFilter(new HTTPBasicAuthFilter(currentUser.getEmail(), currentUser.getPassword()));
         }
         return client.resource(server.getRootUrl());
+    }
+
+    /**
+     * Enables batching of commands for higher performance
+     */
+    public void startBatch() {
+        batchingEnabled = true;
     }
 
     @Override
@@ -78,7 +135,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         createEntity("UserDatabase", properties);
         
-        createdDatabases.add(map.lookupId());
+        createdDatabases.add(map.getName());
     }
 
 
@@ -91,17 +148,34 @@ public class ApiApplicationDriver extends ApplicationDriver {
         
         createEntity("Activity", properties);
     }
-
+    
     @Override
     public void createField(TestObject field) throws Exception {
 
-        JSONObject properties = new JSONObject();
-        properties.put("name", field.getAlias());
-        properties.put("activityId", field.getId("form"));
-        properties.put("type", field.getString("type"));
-        properties.put("units", field.getString("units", "parsects"));
+        if(field.getString("type").equals("enumerated")) {
+            JSONObject properties = new JSONObject();
+            properties.put("name", field.getAlias());
+            properties.put("activityId", field.getId("form"));
+            
+            createEntity("AttributeGroup", properties);
 
-        createEntity("Indicator", properties);
+            for (String item : field.getStringList("items")) {
+                JSONObject itemProperties = new JSONObject();
+                itemProperties.put("name", item);
+                itemProperties.put("attributeGroupId", aliases.getId(field.getName()));
+                
+                createEntity("Attribute", itemProperties);
+            }
+
+        } else {
+            JSONObject properties = new JSONObject();
+            properties.put("name", field.getAlias());
+            properties.put("activityId", field.getId("form"));
+            properties.put("type", field.getString("type"));
+            properties.put("units", field.getString("units", "parsects"));
+
+            createEntity("Indicator", properties);
+        }
     }
 
     @Override
@@ -114,7 +188,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("id", aliases.generateId());
         properties.put("reportingPeriodId", aliases.generateId());
         properties.put("date1", "2014-01-01");
-        properties.put("date2", "2014-02-01");
+        properties.put("date2", "2014-02-01");  
         
         for(FieldValue value : values) {
             switch (value.getField()) {
@@ -177,11 +251,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
         command.put("databaseId", databaseId);
         command.put("partner", partner);
 
-        JSONObject response = executeCommand("AddPartner", command).get();
+        PendingId pendingId = new PendingId();
         
-        int partnerId = response.getInt("newId");
-
-        aliases.bindTestHandleToId(partnerName, partnerId);
+        executeCommand("AddPartner", command, pendingId);
+        
+        aliases.bindTestHandleToId(partnerName, pendingId);
     }
 
     @Override
@@ -193,12 +267,12 @@ public class ApiApplicationDriver extends ApplicationDriver {
         JSONObject command = new JSONObject();
         command.put("databaseId", project.getId("database"));
         command.put("project", properties);
+
+        PendingId pendingId = new PendingId();
         
-        JSONObject response = executeCommand("AddProject", command).get();
+        executeCommand("AddProject", command, pendingId);
         
-        int projectId = response.getInt("newId");
-        
-        aliases.bindTestHandleToId(project.getName(), projectId);
+        aliases.bindTestHandleToId(project.getName(), pendingId);
     }
 
     @Override
@@ -244,8 +318,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void cleanup() throws Exception {
-        for(Integer databaseId : createdDatabases) {
-            executeDelete("UserDatabase", databaseId);
+        for(String databaseName : createdDatabases) {
+            executeDelete("UserDatabase", aliases.getId(databaseName));
         }
     }
 
@@ -286,11 +360,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
         addTarget.put("databaseId", properties.getId("database"));
         addTarget.put("target", target);
 
-        JSONObject response = executeCommand("AddTarget", addTarget).get();
+        PendingId pendingId = new PendingId();
         
-        int id = response.getInt("newId");
+        executeCommand("AddTarget", addTarget, pendingId);
         
-        aliases.bindAliasToId(properties.getAlias(), id);
+        aliases.bindAliasToId(properties.getAlias(), pendingId);
     }
 
     @Override
@@ -310,62 +384,129 @@ public class ApiApplicationDriver extends ApplicationDriver {
         }
     }
 
-    private int createEntity(String entityType, JSONObject properties) throws JSONException {
+    private void createEntity(String entityType, JSONObject properties) throws JSONException {
 
         JSONObject object = new JSONObject();
         object.put("entityName", entityType);
         object.put("properties", properties);
 
-        JSONObject response = executeCommand("CreateEntity", object).get();
+        PendingId pendingId = new PendingId();
 
-        int newId = response.getInt("newId");
-        aliases.bindAliasToId(properties.getString("name"), newId);
-        
-        return newId;
+        executeCommand("CreateEntity", object, pendingId);
+
+        aliases.bindAliasToId(properties.getString("name"), pendingId);
     }
     
-    private int queryNullaryLocationType(int countryId) {
-        String json = root().path("resources")
-                .path("country").path(Integer.toString(countryId))
-                .path("locationTypes")
-                .get(String.class);
+    private int queryNullaryLocationType(final int countryId) throws ExecutionException {
+    
+        return nullaryLocationCache.get(countryId, new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
 
-        try {
-            JSONArray array = new JSONArray(json);
+                String json = root().path("resources")
+                        .path("country").path(Integer.toString(countryId))
+                        .path("locationTypes")
+                        .get(String.class);
 
-            for (int i = 0; i != array.length(); ++i) {
-                JSONObject locationType = array.getJSONObject(i);
-                if (locationType.getString("name").equals("Country")) {
-                    return locationType.getInt("id");
+                try {
+                    JSONArray array = new JSONArray(json);
+
+                    for (int i = 0; i != array.length(); ++i) {
+                        JSONObject locationType = array.getJSONObject(i);
+                        if (locationType.getString("name").equals("Country")) {
+                            return locationType.getInt("id");
+                        }
+                    }
+                } catch (JSONException e) {
+                    throw new RuntimeException("Exception parsing locationType list", e);
                 }
+
+                throw new IllegalStateException(String.format("Country %d has no nullary location type: expected" +
+                        " location type with name 'Country'", countryId));
             }
-        } catch (JSONException e) {
-            throw new RuntimeException("Exception parsing locationType list", e);
-        }
-        
-        throw new IllegalStateException(String.format("Country %d has no nullary location type: expected" +
-                " location type with name 'Country'", countryId));
+        });
     }
 
-    private Optional<JSONObject> executeCommand(String type, JSONObject command) throws JSONException {
+
+    private void executeCommand(String type, JSONObject command) throws JSONException {
+        executeCommand(type, command, null);
+    }
+
+    private void executeCommand(String type, JSONObject command, ResponseHandler handler) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("type", type);
         request.put("command", command);
+
+        Command pendingCommand = new Command(request, handler);
+
+        if(batchingEnabled) {
+      //      System.out.println("Queueing " + pendingCommand.request.getString("type"));
+
+            pendingBatch.add(pendingCommand);
+            if(pendingBatch.size() > 1000) {
+                flush();
+            }
+        } else {
+            executeImmediately(pendingCommand);
+        }
+    }
+    
+    private void executeImmediately(Command command) throws JSONException {
         
-        String json = request.toString();
-        
+        System.out.println("Sending " + command.request.getString("type") + " to server...");
+
+        String json = command.request.toString();
+
         String response = null;
         try {
             response = commandEndpoint().type(MediaType.APPLICATION_JSON_TYPE).post(String.class, json);
-            return Optional.of(new JSONObject(response));
-            
+            if(command.handler != null) {
+                command.handler.response(new JSONObject(response));
+            }
+
         } catch (UniformInterfaceException e) {
-            if(e.getResponse().getClientResponseStatus() == ClientResponse.Status.NO_CONTENT) {
-                return Optional.absent();
-            } else {
+            if(e.getResponse().getClientResponseStatus() != ClientResponse.Status.NO_CONTENT) {
                 throw new RuntimeException(e.getResponse().getStatus() + ": "
                         + e.getResponse().getEntity(String.class));
             }
-        } 
+        }
+    }
+    
+    public void flush() throws JSONException {
+
+        if(!pendingBatch.isEmpty()) {
+
+            System.out.println("Flushing " + pendingBatch.size() + " commands to server...");
+
+            List<JSONObject> requests = new ArrayList<>();
+            for (Command command : pendingBatch) {
+                requests.add(command.request);
+            }
+
+            JSONObject command = new JSONObject();
+            command.put("commands", requests);
+
+            JSONObject request = new JSONObject();
+            request.put("type", "BatchCommand");
+            request.put("command", command);
+
+            String json = commandEndpoint().type(MediaType.APPLICATION_JSON_TYPE).post(String.class, request.toString());
+            JSONObject response = new JSONObject(json);
+            JSONArray results = response.getJSONArray("results");
+
+            System.out.println("Batch complete.");
+            
+            for (int i = 0; i != results.length(); ++i) {
+                ResponseHandler responseHandler = pendingBatch.get(i).handler;
+                responseHandler.response(results.getJSONObject(i));
+            }
+
+            pendingBatch.clear();
+        }
+    }
+    
+    public void submitBatch() throws JSONException {
+        flush();
+        batchingEnabled = false;
     }
 }

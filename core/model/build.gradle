@@ -4,7 +4,7 @@ description = 'ActivityInfo Model'
 apply plugin: 'gwt-base'
 
 dependencies {
-    compile project(':promises')
+    compile project(':core:promises')
 
     compile libraries.guava 
     compile libraries.gson 
