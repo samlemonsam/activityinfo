@@ -1,23 +1,27 @@
 
-import org.activityinfo.ProjectVersion
 import org.ajoberstar.grgit.Grgit
 
 
 allprojects {
 
     def repo = Grgit.open(project.rootDir)
+    def majorVersion = "2.8"
+
+    if(System.env.PIPELINE_VERSION) {
+        // Resuming an existing pipeline
+        project.version = "${majorVersion}.${System.env.PIPELINE_VERSION}"
+        project.ext.buildNumber = System.env.PIPELINE_VERSION
     
-    // This is the environment that we pass from the start of the pipeline
-    // down to each downstream job
-    def buildNumber = System.env.PIPELINE_NUMBER
-    if(!buildNumber) {
-        buildNumber = 'dev'
+    } else if(System.env.BUILD_NUMBER) {
+        // Starting a new pipeline build
+        project.version = "${majorVersion}.${System.env.BUILD_NUMBER}"
+        project.ext.buildNumber = System.env.BUILD_NUMBER
+    
+    } else {
+        // Development
+        project.version = "${majorVersion}-dev"      
     }
     
-    ext.buildNumber = buildNumber
-    ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
     ext.commitId = repo.head().id
-
-    project.version = new ProjectVersion(2, 8, buildNumber)
 
 }
