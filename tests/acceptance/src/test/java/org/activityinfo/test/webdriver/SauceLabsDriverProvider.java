@@ -118,10 +118,16 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, profile.getType().sauceId());
             capabilities.setCapability(CapabilityType.VERSION, profile.getVersion().toString());
             capabilities.setCapability(CapabilityType.PLATFORM, osName(profile));
+            
+        } else if(!Strings.isNullOrEmpty(System.getenv("SELENIUM_BROWSER"))) {
+            capabilities.setCapability(CapabilityType.BROWSER_NAME, System.getenv("SELENIUM_BROWSER"));
+            capabilities.setCapability(CapabilityType.VERSION, System.getenv("SELENIUM_VERSION"));
+            capabilities.setCapability(CapabilityType.PLATFORM, System.getenv("SELENIUM_PLATFORM"));
+            
         } else {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
+            capabilities.setCapability("name", name);
         }
-        capabilities.setCapability("name", name);
         
         if(fast) {
             capabilities.setCapability("record-video", false);

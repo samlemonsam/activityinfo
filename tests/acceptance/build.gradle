@@ -1,5 +1,4 @@
 
-
 dependencies {
 
     testCompile libraries.junit
@@ -35,7 +34,7 @@ task acceptanceTest(type: Test) {
     if(!project.hasProperty("testUrl")) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
-        systemProperty "test.url", "http://localhost:8080"
+        systemProperty "test.url", "http://localhost:${devServerPort}"
         
     } else {
         systemProperty "test.url", project.property("testUrl")
@@ -54,6 +53,18 @@ task acceptanceTest(type: Test) {
     scanForTestClasses false
 }
 
+task browserTest(type: Test) {
+    group = "Verification"
+    description = 'Runs functional tests against a specific browser'
+
+    systemProperty "test.url", project.property("testUrl")
+    include "**/CrossBrowserAT*"
+    scanForTestClasses false
+    
+    outputs.upToDateWhen { false }
+
+}
+
 task instrumentedAcceptanceTest(type: Test) {
     group = "Verification"
     description = 'Runs acceptance tests against an instrumented server to gather test coverage metrics'
@@ -66,7 +77,7 @@ task instrumentedAcceptanceTest(type: Test) {
     dependsOn { ':server:appengineStartInstrumentedAT' }
     finalizedBy { ':server:appengineStop' }
 
-    systemProperty "test.url", "http://localhost:8080"
+    systemProperty "test.url", "http://localhost:${devServerPort}"
     systemProperty "gwt.coverage.report.dir", coverageReportDir
 
     // Keep console output to a minimum
@@ -81,13 +92,6 @@ task instrumentedAcceptanceTest(type: Test) {
     scanForTestClasses false
 }
 
-apply from: './src/script/gwtCoverageReport.gradle'
-
-
-task acceptanceTestCoverage {
-    dependsOn 'instrumentedAcceptanceTest'
-    dependsOn 'gwtTestCoverage'
-}
 
 task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAcceptanceTest') {
     def sourceSets = rootProject.subprojects.findResults { p -> p.sourceSets?.main }
@@ -95,10 +99,18 @@ task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAccep
     sourceDirectories = project.files(sourceSets.collect { s -> s.java })
     classDirectories = project.files(sourceSets.collect { s -> s.output.classesDir })
     executionData jacocoAcceptanceDataFile
-    
+
     reports {
         xml.enabled = true
     }
+}
+
+task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
+    dependsOn 'acceptanceTestJacocoReport'
+
+    gwtCoverageReportsDir = instrumentedAcceptanceTest.coverageReportDir
+    jacocoReportFile = acceptanceTestJacocoReport.reports.xml.destination
+    outputFile = project.acceptanceDataFile
 }
 
 

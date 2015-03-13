@@ -139,7 +139,7 @@ task appengineStartInstrumentedAT(type: com.google.appengine.task.RunTask) {
     doLast {
         // Verify that the server actually started
         try {
-            ant.get(src: "http://localhost:${appengine.httpPort}", dest: project.file("$buildDir/runningCommit"))
+            ant.get(src: "http://localhost:${devServerPort}", dest: project.file("$buildDir/runningCommit"))
         } catch(Exception e) {
             throw new RuntimeException("AppEngine DevServer failed to start: ${e.message}", e)
         }

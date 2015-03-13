@@ -12,7 +12,7 @@ sonarRunner {
         property "sonar.jdbc.password", sonarDatabasePassword
         
     //    property "sonar.jacoco.itReportPath", jacocoAcceptanceDataFile
-        property "sonar.genericcoverage.itReportPaths", gwtAcceptanceDataFile 
+        property "sonar.genericcoverage.itReportPaths", acceptanceDataFile 
     }
 }
 
@@ -30,13 +30,3 @@ repositories {
 // to ensure that we have the coverage data to provide sonar
 tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
 
-// ONLY when sonar is enabled, ignore test failures when they occur 
-// and turn on instrumentation of tests
-project.gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.find { it.name == "sonarRunner" }) {
-        project.tasks.withType(Test).each { Test test ->
-            test.ignoreFailures = true
-            test.jacoco.enabled = true
-        }
-    }
-}
