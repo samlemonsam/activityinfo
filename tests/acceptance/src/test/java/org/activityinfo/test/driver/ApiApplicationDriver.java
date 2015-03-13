@@ -443,7 +443,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
       //      System.out.println("Queueing " + pendingCommand.request.getString("type"));
 
             pendingBatch.add(pendingCommand);
-            if(pendingBatch.size() > 1000) {
+            if(pendingBatch.size() > 300) {
                 flush();
             }
         } else {
