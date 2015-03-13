@@ -14,6 +14,8 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -75,7 +77,7 @@ public class QueryExecutor {
             ResourceId parentId = parent.getParentId();
 
             if (parentId.equals(FolderListAdapter.HOME_ID) || parentId.getDomain() == DATABASE_DOMAIN ||
-                parentId.getDomain() == ACTIVITY_CATEGORY_DOMAIN) {
+                    parentId.getDomain() == ACTIVITY_CATEGORY_DOMAIN) {
                 return folders();
             } else if (parentId.equals(FolderListAdapter.GEODB_ID)) {
                 return countries();
@@ -108,22 +110,32 @@ public class QueryExecutor {
         }
     }
 
-    private Promise<List<FormInstance>> partner(ParentCriteria.Parent parent) {
-        // todo implement
-        throw new UnsupportedOperationException("TODO : implement");
+    private Promise<List<FormInstance>> partner(final ParentCriteria.Parent parent) {
+        return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<PartnerDTO>>() {
+            @Override
+            public List<PartnerDTO> apply(SchemaDTO input) {
+                int dbId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
+                return input.getDatabaseById(dbId).getPartners();
+            }
+        }).then(new ListAdapter<>(new PartnerInstanceAdapter(parent.getParentId())));
     }
 
-    private Promise<List<FormInstance>> projects(ParentCriteria.Parent parent) {
-        // todo implement
-        throw new UnsupportedOperationException("TODO : implement");
+    private Promise<List<FormInstance>> projects(final ParentCriteria.Parent parent) {
+        return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<ProjectDTO>>() {
+            @Override
+            public List<ProjectDTO> apply(SchemaDTO input) {
+                int dbId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
+                return input.getDatabaseById(dbId).getProjects();
+            }
+        }).then(new ListAdapter<>(new ProjectInstanceAdapter(parent.getParentId())));
     }
 
     private Promise<List<FormInstance>> locationTypes(final ParentCriteria.Parent parent) {
         return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<LocationTypeDTO>>() {
             @Override
             public List<LocationTypeDTO> apply(SchemaDTO input) {
-                int countryId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
-                return input.getCountryById(countryId).getLocationTypes();
+                int dbId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
+                return input.getDatabaseById(dbId).getCountry().getLocationTypes();
             }
         }).then(new ListAdapter<>(new LocationTypeInstanceAdapter()));
     }
@@ -165,7 +177,7 @@ public class QueryExecutor {
 
             case LOCATION_DOMAIN:
                 return dispatcher.execute(new GetLocations(Lists.newArrayList(ids)))
-                                 .then(new ListResultAdapter<>(new LocationInstanceAdapter()));
+                        .then(new ListResultAdapter<>(new LocationInstanceAdapter()));
 
             case COUNTRY_DOMAIN:
                 return countries();
@@ -195,16 +207,16 @@ public class QueryExecutor {
         switch (formClassId.getDomain()) {
             case ADMIN_LEVEL_DOMAIN:
                 return dispatcher.execute(adminQuery(formClassId))
-                                 .then(new ListResultAdapter<>(new AdminEntityInstanceAdapter()));
+                        .then(new ListResultAdapter<>(new AdminEntityInstanceAdapter()));
 
             case LOCATION_TYPE_DOMAIN:
                 return dispatcher.execute(composeLocationQuery(formClassId))
-                                 .then(new ListResultAdapter<>(new LocationInstanceAdapter()));
+                        .then(new ListResultAdapter<>(new LocationInstanceAdapter()));
 
             case PARTNER_FORM_CLASS_DOMAIN:
                 return dispatcher.execute(new GetSchema())
-                                 .then(new PartnerListExtractor(criteria))
-                                 .then(concatMap(new PartnerInstanceAdapter(formClassId)));
+                        .then(new PartnerListExtractor(criteria))
+                        .then(concatMap(new PartnerInstanceAdapter(formClassId)));
             case PROJECT_CLASS_DOMAIN:
                 return dispatcher.execute(new GetSchema())
                         .then(new ProjectListExtractor(criteria))

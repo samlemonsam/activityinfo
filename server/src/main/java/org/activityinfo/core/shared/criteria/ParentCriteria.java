@@ -21,6 +21,11 @@ public class ParentCriteria implements Criteria {
             this.parentId = parentId;
         }
 
+        public Parent(ResourceId parentId, ResourceId restrictedBy) {
+            this.parentId = parentId;
+            this.restrictedBy = restrictedBy;
+        }
+
         public ResourceId getParentId() {
             return parentId;
         }
@@ -64,8 +69,8 @@ public class ParentCriteria implements Criteria {
 
     private final Parent parent;
 
-    private ParentCriteria(ResourceId id) {
-        this.parent = new Parent(id);
+    private ParentCriteria(Parent parent) {
+        this.parent = parent;
     }
 
     @Override
@@ -101,6 +106,10 @@ public class ParentCriteria implements Criteria {
     }
 
     public static ParentCriteria isChildOf(ResourceId id) {
-        return new ParentCriteria(id);
+        return new ParentCriteria(new Parent(id));
+    }
+
+    public static ParentCriteria isChildOf(ResourceId parentId, ResourceId restrictedBy) {
+        return new ParentCriteria(new Parent(parentId, restrictedBy));
     }
 }

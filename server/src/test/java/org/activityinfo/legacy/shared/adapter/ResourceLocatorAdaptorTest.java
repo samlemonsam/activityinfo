@@ -22,6 +22,7 @@ import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -182,6 +183,30 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
                     new ClassCriteria(HEALTH_CENTER_CLASS))));
 
         System.out.println(Joiner.on("\n").join(projections));
+    }
+
+    @Test
+    public void simpleLocationTypeClassQuery() {
+        assertThat(queryByClassType(ClassType.LOCATION_TYPE, databaseId(PEAR_DATABASE_ID)), Matchers.hasSize(3));
+    }
+
+    @Test
+    public void simplePartnerClassQuery() {
+        assertThat(queryByClassType(ClassType.PARTNER, databaseId(PEAR_DATABASE_ID)), Matchers.hasSize(3));
+    }
+
+    @Test
+    public void simpleProjectClassQuery() {
+        assertThat(queryByClassType(ClassType.PROJECT, databaseId(PEAR_DATABASE_ID)), Matchers.hasSize(3));
+    }
+
+    private List<FormInstance> queryByClassType(ClassType classType, ResourceId restrictedBy) {
+        Promise<List<FormInstance>> promise = resourceLocator.queryInstances(ParentCriteria.isChildOf(classType.getResourceId(), restrictedBy));
+
+        List<FormInstance> list = assertResolves(promise);
+
+        System.out.println(Joiner.on("\n").join(list));
+        return list;
     }
 
     private List<FormInstance> queryByClass(ResourceId classId) {
