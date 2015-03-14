@@ -1,9 +1,8 @@
 package org.activityinfo.test.sut;
 
 import com.google.inject.AbstractModule;
+import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.config.ConfigProperty;
-
-import static org.activityinfo.test.sut.PredefinedAccounts.fromResource;
 
 
 public class SystemUnderTest extends AbstractModule {
@@ -17,11 +16,6 @@ public class SystemUnderTest extends AbstractModule {
         String url = TEST_URL.getOr(LOCAL_URL);
         
         bind(Server.class).toInstance(new Server(url));
-        
-        if(url.startsWith("http://localhost:")) {
-            bind(Accounts.class).to(DevServerAccounts.class);
-        } else {
-            bind(Accounts.class).to(PredefinedAccounts.class);
-        }
+        bind(Accounts.class).to(DevServerAccounts.class).in(ScenarioScoped.class);
     }
 }
