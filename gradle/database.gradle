@@ -1,46 +1,15 @@
+import org.activityinfo.store.mysql.MySqlServer
 import org.activityinfo.store.mysql.MySqlSetupTask
 
+
+def localMySqlServer = new MySqlServer(
+        host: 'localhost',
+        username: localMySqlUsername,
+        password: localMySqlPassword)
+
 ext {
-    acceptanceTestConfigFile = new File(project.buildDir, "config-at.properties")
-}
-
-task setupDevDatabase(type: MySqlSetupTask) {
-    description = "Creates and populates a database called 'activityinfo' locally for development"
-    databaseName = "activityinfo"
-    scripts = files("${project.rootDir}/store/mysql/geography.sql")
-}
-
-task setupAcceptanceTestDatabase(type: MySqlSetupTask) {
-    dropDatabase = true
-    description = "Creates and populates a database called 'activityinfo_at' locally for running acceptance tests"
-    databaseName = "activityinfo_at"
-    scripts = files("${project.rootDir}/store/mysql/geography.sql",
-                    "${project.rootDir}/store/mysql/nullary-locations.sql")
-    
-    doLast {
-        // write the connection properties to a configuration file that 
-        // we can point the server to
-        Properties config = new Properties()
-        config.setProperty("hibernate.connection.pool_size", "0")
-        config.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver")
-        config.setProperty("hibernate.connection.username", localMySqlUsername)
-        config.setProperty("hibernate.connection.password", localMySqlPassword)
-        config.setProperty("hibernate.connection.url", 'jdbc:mysql://localhost/activityinfo_at?useUnicode=true&amp;characterEncoding=utf8')
-        
-        acceptanceTestConfigFile.withOutputStream { out ->
-            config.store(out, "Acceptance Test Configuration")
-        }
-    }
-}
-
-task updateDevDatabase(type: MySqlSetupTask) {
-    description = "Applies schema migrations to the local 'activityinfo' development database"
-    databaseName = "activityinfo"
-}
-
-tasks.withType(MySqlSetupTask) {
-    group = "Database"
-    changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'
-    user = localMySqlUsername
-    password = localMySqlPassword
+    mysql = [ 
+        localDev: localMySqlServer.database('activityinfo_dev'),
+        localAT:  localMySqlServer.database('activityinfo_at')
+    ]
 }

@@ -9,6 +9,7 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Maintains a mapping between human-readable "test handles" and their unique aliases

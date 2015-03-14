@@ -278,9 +278,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
     @Override
     public void grantPermission(TestObject properties) throws Exception {
         
+        UserAccount email = accounts.ensureAccountExists(properties.getString("user"));
+        
         JSONObject model = new JSONObject();
         model.put("name", "A User");
-        model.put("email", properties.getString("user"));
+        model.put("email", email.getEmail());
         model.put("partnerId", aliases.getId(properties.getString("partner")));
         
         for(String permission : properties.getStringList("permissions")) {
@@ -440,7 +442,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
         Command pendingCommand = new Command(request, handler);
 
         if(batchingEnabled) {
-      //      System.out.println("Queueing " + pendingCommand.request.getString("type"));
 
             pendingBatch.add(pendingCommand);
             if(pendingBatch.size() > 300) {
@@ -453,8 +454,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
     
     private void executeImmediately(Command command) throws JSONException {
         
-        System.out.println("Sending " + command.request.getString("type") + " to server...");
-
         String json = command.request.toString();
 
         String response = null;

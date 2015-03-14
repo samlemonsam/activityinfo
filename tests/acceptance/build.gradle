@@ -18,6 +18,7 @@ dependencies {
     testCompile 'org.apache.commons:commons-pool2:2.0'
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
+    testCompile libraries.bcrypt
 }
 
 test {
@@ -31,15 +32,10 @@ task acceptanceTest(type: Test) {
     description = 'Runs acceptance test suite'
 
     // Determine the server against which to test
-    if(!project.hasProperty("testUrl")) {
+    if(testEnvironment.local) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
-        systemProperty "test.url", "http://localhost:${devServerPort}"
-        
-    } else {
-        systemProperty "test.url", project.property("testUrl")
-    }
-    
+    } 
     // Use ChromeDriver locally
     systemProperty 'webdriver', 'chrome'
     systemProperty 'webdriver.chrome.silentOutput', 'true'   
@@ -50,19 +46,15 @@ task acceptanceTest(type: Test) {
 
     // Run only functional tests
     include "**/Functional*AT*"
-    scanForTestClasses false
 }
 
-task browserTest(type: Test) {
+task browserAcceptanceTest(type: Test) {
     group = "Verification"
     description = 'Runs functional tests against a specific browser'
 
-    systemProperty "test.url", project.property("testUrl")
     include "**/CrossBrowserAT*"
-    scanForTestClasses false
     
     outputs.upToDateWhen { false }
-
 }
 
 task instrumentedAcceptanceTest(type: Test) {
@@ -77,19 +69,13 @@ task instrumentedAcceptanceTest(type: Test) {
     dependsOn { ':server:appengineStartInstrumentedAT' }
     finalizedBy { ':server:appengineStop' }
 
-    systemProperty "test.url", "http://localhost:${devServerPort}"
-    systemProperty "gwt.coverage.report.dir", coverageReportDir
-
-    // Keep console output to a minimum
-    testLogging.showStandardStreams = false
-
     // some tests may fail due to the instrumentation process
     ignoreFailures = true
+    systemProperty "gwt.coverage.report.dir", coverageReportDir
+
 
     // Run only UI functional tests
     include "**/Functional*AT.*"
-
-    scanForTestClasses false
 }
 
 
@@ -120,9 +106,22 @@ task smokeTest(type: Test) {
     dependsOn 'testClasses'
 
     include "**/*SmokeTest.*"
-    scanForTestClasses false
 
     if(project.hasProperty("testUrl")) {
         systemProperty "test.url", project.property("testUrl")
+    }
+}
+
+tasks.each { task ->
+    if(task.name =~ /[aA]cceptanceTest$/) {
+        task.configure {
+            println "Configuring ${test.name}"
+            scanForTestClasses = false
+
+            systemProperty "test.url", testEnvironment.url
+            systemProperties.putAll(testEnvironment.database.properties)
+            // Keep console output to a minimum
+            testLogging.showStandardStreams = false
+        }
     }
 }

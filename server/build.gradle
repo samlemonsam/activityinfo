@@ -1,10 +1,14 @@
-import com.google.appengine.task.RunTask
 
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
-apply from: '../gradle/database.gradle'
-apply from: './src/script/buildProperties.gradle'
+
+apply from: './src/build/dependencies.gradle'
+apply from: './src/build/databaseSetup.gradle'
+apply from: './src/build/buildProperties.gradle'
+apply from: './src/build/instrumentedGwt.gradle'
+apply from: './src/build/devServer.gradle'
+
 
 description = 'ActivityInfo Server'
 
@@ -16,6 +20,12 @@ gwt {
 
     modules 'org.activityinfo.ui.ActivityInfoRelease',
             'org.activityinfo.ui.Embed'
+}
+
+ext {
+    // The location of the configuration file to be used 
+    // for the appengine dev server
+    configFile = project.file("$buildDir/config.properties")
 }
 
 appengine {
@@ -43,13 +53,12 @@ test {
     systemProperty "testDatabaseName", "testDb"
     systemProperty "testDatabaseUsername", localMySqlUsername
     systemProperty "testDatabasePassword", localMySqlPassword
-    testLogging.showStandardStreams = false
 }
 
 processResources {
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
-                .replace('$[git.commit.id]', commitId)
+            .replace('$[git.commit.id]', commitId)
     }
 }
 
@@ -70,8 +79,8 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
 
 task createTargetDir {
     doLast {
-// We still have a few tests that are looking for the target folder
-// created by maven
+        // We still have a few tests that are looking for the target folder
+        // created by maven
         project.file('target').mkdirs()
     }
 }
@@ -80,149 +89,3 @@ tasks.test.dependsOn 'createTargetDir'
 
 
 
-task appengineStartAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Starts a local AppEngine Development Server for Acceptance Testing in the background"
-    group = "Google App Engine"
-
-    daemon = true
-    jvmFlags = [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
-    
-}
-
-task appengineRunAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Runs a local AppEngine Development Server for Acceptance Testing"
-    group = "Google App Engine"
-
-    jvmFlags = [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
-}
-
-
-task appengineExplodeInstrumentedApp  {
-    group = "Google App Engine"
-    description = "Explodes the instrumented WAR into a directory"
-    ext {
-        warDir = project.file("$buildDir/instrumented-app")
-    }
-    dependsOn {
-        'instrumentedWar'
-    }
-    doLast {
-        ant.unzip(src: instrumentedWar.archivePath, dest: warDir)
-    }
-}
-
-task appengineStartInstrumentedAT(type: com.google.appengine.task.RunTask) {
-
-    group = "Google App Engine"
-    description = "Runs a local AppEngine Dev Server instrumented for measuring test coverage"
-
-    dependsOn 'setupAcceptanceTestDatabase'
-    dependsOn 'appengineExplodeInstrumentedApp'
-
-    daemon = true
-    explodedAppDirectory = appengineExplodeInstrumentedApp.warDir
-
-      
-    doFirst {
-        def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
-        def jacocoAgentJar = jacocoAgent.filter { it.name == 'jacocoagent.jar' }.singleFile.absolutePath
-
-        logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
-
-        jvmFlags = ["-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}",
-                    "-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}"
-        ]
-    }
-    
-    doLast {
-        // Verify that the server actually started
-        try {
-            ant.get(src: "http://localhost:${devServerPort}", dest: project.file("$buildDir/runningCommit"))
-        } catch(Exception e) {
-            throw new RuntimeException("AppEngine DevServer failed to start: ${e.message}", e)
-        }
-    }
-    
-}
-
-
-// Add additional configurations based on the aboves
-apply from: './src/script/instrumentedGwt.gradle'
-
-
-
-dependencies {
-    compile project(':core:model')
-    compile project(':core:services')
-
-    // AppEngine
-    appengineSdk libraries.appengine.sdk
-    compile libraries.appengine.api
-    compile libraries.appengine.gcs
-    testCompile libraries.appengine.testing
-    testCompile libraries.appengine.stubs
-
-    // IoC Framework
-    compile libraries.guice
-    compile libraries.guiceServlet
-
-    // Jersey + Rest
-    compile libraries.jersey.server
-    compile libraries.jersey.multipart
-    compile libraries.jersey.guice
-    compile libraries.jersey.json
-    compile libraries.freemarker
-    compile libraries.jackson.geojson
-    compile libraries.gson
-    testCompile libraries.jersey.client
-
-    // Utility libraries
-    compile libraries.guava
-    compile libraries.commons.fileupload
-    compile libraries.commons.io
-    compile libraries.bcrypt
-
-    // MySQL Related dependencies
-    compile libraries.hibernate.entitymanager
-    compile libraries.hibernate.spatial
-    compile libraries.hibernate.validator
-    compile libraries.liquibase
-    compile libraries.jdbc.mysql
-
-    testCompile libraries.jdbc.sqlite
-    testCompile libraries.dbunit
-    testCompile libraries.c3p0
-
-    compile libraries.jts
-    compile libraries.google.apiClient
-
-    // GWT User Interface Dependencies
-    compile libraries.gxt
-    compile libraries.gwt.user
-    gwt libraries.gwt.dnd
-    gwt libraries.gwt.guice
-    gwt libraries.gwt.gson
-    gwt libraries.gwt.leaflet
-    gwt libraries.gwt.gears
-    gwt libraries.gwt.guava
-
-    compile libraries.gwt.i18nServer
-    compile libraries.rebar.time
-    compile libraries.rebar.sync
-    compile libraries.rebar.asyncFun
-    compile libraries.rebar.appcache
-    compile libraries.rebar.sql
-    compile libraries.rebar.sync
-
-    gwt libraries.rebar.style
-
-    // Report Rendering
-    compile libraries.appengine.export.itext
-    compile libraries.appengine.export.awt
-    compile libraries.appengine.export.ppt
-    compile libraries.appengine.export.jcharts
-    compile libraries.appengine.export.emf
-    compile libraries.prettytime
-}
