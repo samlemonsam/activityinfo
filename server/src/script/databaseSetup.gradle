@@ -19,7 +19,7 @@ task updateDatabase(type: MySqlSetupTask) {
 task setupDatabaseAT(type: MySqlSetupTask) {
     description =  "Creates and populates a database for running acceptance tests"
     dropDatabase =  true
-    database =      mysql.localAT
+    database =      testEnvironment.database
     scripts =       setupScripts
 }
 
