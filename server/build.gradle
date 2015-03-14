@@ -3,11 +3,11 @@ apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
 
-apply from: './src/build/dependencies.gradle'
-apply from: './src/build/databaseSetup.gradle'
-apply from: './src/build/buildProperties.gradle'
-apply from: './src/build/instrumentedGwt.gradle'
-apply from: './src/build/devServer.gradle'
+apply from: './src/script/dependencies.gradle'
+apply from: './src/script/databaseSetup.gradle'
+apply from: './src/script/buildProperties.gradle'
+apply from: './src/script/instrumentedGwt.gradle'
+apply from: './src/script/devServer.gradle'
 
 
 description = 'ActivityInfo Server'
