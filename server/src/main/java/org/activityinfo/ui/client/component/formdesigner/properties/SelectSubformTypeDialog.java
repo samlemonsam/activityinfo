@@ -24,12 +24,17 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.ModalDialog;
+
+import javax.inject.Provider;
+import java.util.List;
 
 /**
  * @author yuriyz on 02/04/2015.
@@ -38,24 +43,28 @@ public class SelectSubformTypeDialog {
 
     private static final int DIALOG_WIDTH = 900;
 
+    private final FormDesigner formDesigner;
+    private final ResourceId parentId;
     private final ModalDialog dialog;
     private final SelectSubformTypePanel contentPanel;
+    private final LoadingPanel<List<FormInstance>> loadingPanel;
 
     public SelectSubformTypeDialog(ResourceId parentId, FormDesigner formDesigner) {
-        contentPanel = new SelectSubformTypePanel(parentId, formDesigner) {
+        this.parentId = parentId;
+        this.formDesigner = formDesigner;
+        this.contentPanel = new SelectSubformTypePanel(parentId) {
             @Override
             public void stateChanged() {
                 dialog.getPrimaryButton().setEnabled(contentPanel.isValid());
             }
         };
 
-        final LoadingPanel<FormInstance> loadingPanel = new LoadingPanel<>();
-        loadingPanel.setDisplayWidget(contentPanel);
+        this.loadingPanel = new LoadingPanel<>();
+        this.loadingPanel.setDisplayWidget(contentPanel);
 
         this.dialog = new ModalDialog(loadingPanel);
         this.dialog.setDialogTitle(I18N.CONSTANTS.selectType());
         this.dialog.getDialogDiv().getStyle().setWidth(DIALOG_WIDTH, Style.Unit.PX);
-        this.dialog.disablePrimaryButton();
         this.dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -77,6 +86,17 @@ public class SelectSubformTypeDialog {
     }
 
     public void show() {
+        this.loadingPanel.show(new Provider<Promise<List<FormInstance>>>() {
+
+            @Override
+            public Promise<List<FormInstance>> get() {
+                // restricted by activity form class (means by db of that activity but we don't want to mess code with legacy here,
+                // so deal with it in QueryExecutor)
+                ResourceId restrictedBy = formDesigner.getModel().getRootFormClass().getId();
+                ParentCriteria criteria = ParentCriteria.isChildOf(parentId, restrictedBy);
+                return formDesigner.getResourceLocator().queryInstances(criteria);
+            }
+        });
         dialog.show();
     }
 }

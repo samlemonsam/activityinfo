@@ -21,7 +21,6 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  * #L%
  */
 
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
@@ -32,25 +31,22 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 import org.activityinfo.ui.client.widget.ListBox;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author yuriyz on 03/16/2015.
  */
-public class SelectSubformTypePanel extends Composite implements DisplayWidget<FormInstance> {
+public class SelectSubformTypePanel extends Composite implements DisplayWidget<List<FormInstance>> {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
@@ -63,14 +59,12 @@ public class SelectSubformTypePanel extends Composite implements DisplayWidget<F
     ListBox classList;
 
     private final ResourceId parentId;
-    private final FormDesigner formDesigner;
 
     private final Map<String, FormInstance> idToInstance = Maps.newHashMap();
     private ResourceId selectedClassId = null;
 
-    public SelectSubformTypePanel(ResourceId parentId, FormDesigner formDesigner) {
+    public SelectSubformTypePanel(ResourceId parentId) {
         this.parentId = parentId;
-        this.formDesigner = formDesigner;
 
         uiBinder.createAndBindUi(this);
 
@@ -93,20 +87,12 @@ public class SelectSubformTypePanel extends Composite implements DisplayWidget<F
     }
 
     @Override
-    public Promise<Void> show(FormInstance value) {
-        ParentCriteria criteria = ParentCriteria.isChildOf(parentId, formDesigner.getModel().getRootFormClass().getOwnerId());
-        return formDesigner.getResourceLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Void>() {
-            @Nullable
-            @Override
-            public Void apply(List<FormInstance> instances) {
-                for (FormInstance instance : instances) {
-                    idToInstance.put(instance.getId().asString(), instance);
-                    classList.addItem(getInstanceLabel(instance), instance.getId().asString());
-                }
-
-                return null;
-            }
-        });
+    public Promise<Void> show(List<FormInstance> instances) {
+        for (FormInstance instance : instances) {
+            idToInstance.put(instance.getId().asString(), instance);
+            classList.addItem(getInstanceLabel(instance), instance.getId().asString());
+        }
+        return Promise.done();
     }
 
     private String getInstanceLabel(FormInstance instance) {

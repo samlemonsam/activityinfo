@@ -113,9 +113,9 @@ public class QueryExecutor {
     private Promise<List<FormInstance>> partner(final ParentCriteria.Parent parent) {
         return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<PartnerDTO>>() {
             @Override
-            public List<PartnerDTO> apply(SchemaDTO input) {
-                int dbId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
-                return input.getDatabaseById(dbId).getPartners();
+            public List<PartnerDTO> apply(SchemaDTO schema) {
+                int dbId = getDbIdFromRestrictedById(schema, parent.getRestrictedBy());
+                return schema.getDatabaseById(dbId).getPartners();
             }
         }).then(new ListAdapter<>(new PartnerInstanceAdapter(parent.getParentId())));
     }
@@ -123,9 +123,9 @@ public class QueryExecutor {
     private Promise<List<FormInstance>> projects(final ParentCriteria.Parent parent) {
         return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<ProjectDTO>>() {
             @Override
-            public List<ProjectDTO> apply(SchemaDTO input) {
-                int dbId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
-                return input.getDatabaseById(dbId).getProjects();
+            public List<ProjectDTO> apply(SchemaDTO schema) {
+                int dbId = getDbIdFromRestrictedById(schema, parent.getRestrictedBy());
+                return schema.getDatabaseById(dbId).getProjects();
             }
         }).then(new ListAdapter<>(new ProjectInstanceAdapter(parent.getParentId())));
     }
@@ -133,11 +133,25 @@ public class QueryExecutor {
     private Promise<List<FormInstance>> locationTypes(final ParentCriteria.Parent parent) {
         return dispatcher.execute(new GetSchema()).then(new Function<SchemaDTO, List<LocationTypeDTO>>() {
             @Override
-            public List<LocationTypeDTO> apply(SchemaDTO input) {
-                int dbId = CuidAdapter.getLegacyIdFromCuid(parent.getRestrictedBy());
-                return input.getDatabaseById(dbId).getCountry().getLocationTypes();
+            public List<LocationTypeDTO> apply(SchemaDTO schema) {
+                int dbId = getDbIdFromRestrictedById(schema, parent.getRestrictedBy());
+                return schema.getDatabaseById(dbId).getCountry().getLocationTypes();
             }
         }).then(new ListAdapter<>(new LocationTypeInstanceAdapter()));
+    }
+
+    private static int getDbIdFromRestrictedById(SchemaDTO schema, ResourceId restrictedById) {
+        char domain = restrictedById.getDomain();
+        int legacyId = CuidAdapter.getLegacyIdFromCuid(restrictedById);
+
+        if (domain == CuidAdapter.DATABASE_DOMAIN) {
+            return legacyId;
+
+        } else if (domain == ACTIVITY_DOMAIN) {
+            return schema.getActivityById(legacyId).getDatabaseId();
+
+        }
+        throw new UnsupportedOperationException("Id is not supported: " + restrictedById);
     }
 
     private Promise<List<FormInstance>> adminLevels(int countryId) {
