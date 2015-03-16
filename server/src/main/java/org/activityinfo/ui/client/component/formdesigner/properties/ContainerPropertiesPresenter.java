@@ -114,8 +114,9 @@ public class ContainerPropertiesPresenter {
 
         final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
 
-        if (ClassType.isClassType(ResourceId.valueOf(selectedValue))) {
-            final SelectSubformTypeDialog dialog = new SelectSubformTypeDialog();
+        ResourceId resourceId = ResourceId.valueOf(selectedValue);
+        if (ClassType.isClassType(resourceId)) {
+            final SelectSubformTypeDialog dialog = new SelectSubformTypeDialog(resourceId, formDesigner);
             dialog.setHideHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {

@@ -24,9 +24,11 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
+import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.ModalDialog;
 
 /**
@@ -37,24 +39,37 @@ public class SelectSubformTypeDialog {
     private static final int DIALOG_WIDTH = 900;
 
     private final ModalDialog dialog;
-    private ResourceId selectedClassId = null;
+    private final SelectSubformTypePanel contentPanel;
 
-    public SelectSubformTypeDialog() {
-        HTML html = new HTML("<h2>Not implemented yet.</h2>");
-        this.dialog = new ModalDialog(html) ;
+    public SelectSubformTypeDialog(ResourceId parentId, FormDesigner formDesigner) {
+        contentPanel = new SelectSubformTypePanel(parentId, formDesigner) {
+            @Override
+            public void stateChanged() {
+                dialog.getPrimaryButton().setEnabled(contentPanel.isValid());
+            }
+        };
+
+        final LoadingPanel<FormInstance> loadingPanel = new LoadingPanel<>();
+        loadingPanel.setDisplayWidget(contentPanel);
+
+        this.dialog = new ModalDialog(loadingPanel);
         this.dialog.setDialogTitle(I18N.CONSTANTS.selectType());
         this.dialog.getDialogDiv().getStyle().setWidth(DIALOG_WIDTH, Style.Unit.PX);
         this.dialog.disablePrimaryButton();
         this.dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                dialog.hide();
+                if (contentPanel.isValid()) {
+                    dialog.hide();
+                } else {
+                    dialog.getStatusLabel().setText(I18N.CONSTANTS.pleaseSelectType());
+                }
             }
         });
     }
 
     public ResourceId getSelectedClassId() {
-        return selectedClassId;
+        return contentPanel.getSelectedClassId();
     }
 
     public void setHideHandler(ClickHandler hideHandler) {

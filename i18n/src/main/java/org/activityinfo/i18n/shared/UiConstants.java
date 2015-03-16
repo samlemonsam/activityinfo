@@ -3647,6 +3647,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
+    @DefaultStringValue("Please select type")
+    String pleaseSelectType();
+
     @DefaultStringValue("Unfortunately you do not have design privileges to perform this action.")
     String noDesignPrivileges();
 

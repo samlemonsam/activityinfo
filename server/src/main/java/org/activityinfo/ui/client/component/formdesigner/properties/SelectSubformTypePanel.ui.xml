@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+             xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="style" type="org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles"/>
+
+  <g:HTMLPanel width="100%" ui:field="rootPanel" addStyleNames="form-horizontal">
+
+    <!-- Class list -->
+    <f:FormGroup ui:field="classGroup" label="{i18n.type}" columnLabelWidth="4">
+      <a:ListBox ui:field="classList" width="100%" multipleSelect="false"/>
+    </f:FormGroup>
+
+  </g:HTMLPanel>
+</ui:UiBinder>

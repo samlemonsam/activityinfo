@@ -59,7 +59,7 @@ public enum ClassType {
 
     public FormClass getDefinition() {
         FormClass formClass = new FormClass(getResourceId());
-        formClass.setLabel("Select " + label);
+        formClass.setLabel(label);
 
         return formClass;
     }
