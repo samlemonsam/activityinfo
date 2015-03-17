@@ -134,9 +134,7 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             CommandResult result = context.startExecute(command);
 
             long timeElapsed = System.currentTimeMillis() - timeStart;
-            if (timeElapsed > 1000) {
-                LOGGER.warning("Command " + command.toString() + " completed in " + timeElapsed + "ms");
-            }
+            LOGGER.warning("Command " + command.toString() + " completed in " + timeElapsed + "ms");
 
             return result;
         } catch (Exception e) {

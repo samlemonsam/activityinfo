@@ -109,6 +109,15 @@ public class UiApplicationDriver extends ApplicationDriver {
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
         return pivotTable.extractData();
     }
+    
+    public void loadOfflineMode() {
+        ensureLoggedIn();
+        applicationPage.waitUntilLoaded();
+        applicationPage.openSettingsMenu().enableOfflineMode();
+        applicationPage.assertOfflineModeLoads();
+    }
+    
+    
 
     @Override
     public void cleanup() throws Exception {

@@ -19,6 +19,9 @@ dependencies {
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
     testCompile libraries.bcrypt
+    testCompile 'io.dropwizard.metrics:metrics-core:3.1.0'
+    testCompile libraries.c3p0
+
 }
 
 test {
@@ -99,6 +102,28 @@ task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
     outputFile = project.acceptanceDataFile
 }
 
+task capacityTest(type: JavaExec) {
+    description = 'Runs capacity tests to verify performance under load'
+    main = 'org.activityinfo.test.capacity.CapacityTest'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir/capacity"
+    
+    systemProperty "test.url", testEnvironment.url
+    systemProperties.putAll(testEnvironment.database.properties)
+    
+    if(project.hasProperty("testBuild")) {
+        dependsOn tasks.getByPath(':server:stageBuild')
+    }
+    if(project.hasProperty("phantomjsPath")) {
+        systemProperty "phantomjsPath", project.property("phantomjsPath")
+    }
+    
+    doFirst {
+        workingDir.mkdirs()
+    }
+}
+
 
 task smokeTest(type: Test) {
     description = 'Runs pre-release smoke tests'
@@ -110,6 +135,7 @@ task smokeTest(type: Test) {
     if(project.hasProperty("testUrl")) {
         systemProperty "test.url", project.property("testUrl")
     }
+
 }
 
 tasks.each { task ->

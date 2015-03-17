@@ -233,44 +233,5 @@ public class DatabaseSetupSteps {
     @Given("^I have created (\\d+) databases each containing (\\d+) forms with (\\d+) fields$")
     public void I_have_created_databases_each_containing_forms_with_fields(int databaseCount, int formCount, int fieldCount) throws Throwable {
 
-        ApiApplicationDriver driver = (ApiApplicationDriver) this.driver.setup();
-        driver.startBatch();
-
-        for(int dbIndex=0;dbIndex<databaseCount;++dbIndex) {
-            String databaseName = "Database " + dbIndex;
-            System.out.println("Creating " + databaseName);
-
-            createDatabase(databaseName);
-        }
-
-        for(int dbIndex=0;dbIndex<databaseCount;++dbIndex) {
-            String databaseName = "Database " + dbIndex;
-
-            for (int formIndex = 0; formIndex < formCount; ++formIndex) {
-                String formName = String.format("Form %d-%d", dbIndex, formIndex);
-
-                this.driver.setup().createForm(
-                        property("database", databaseName),
-                        property("name", formName));
-
-            }
-        }
-
-        for(int dbIndex=0;dbIndex<databaseCount;++dbIndex) {
-            for (int formIndex = 0; formIndex < formCount; ++formIndex) {
-                String formName = String.format("Form %d-%d", dbIndex, formIndex);
-                for (int fieldIndex = 0; fieldIndex < fieldCount; ++fieldIndex) {
-                    String fieldName = String.format("Field %d-%d-%d", dbIndex, formIndex, fieldIndex);
-                    if(fieldIndex % 2 == 0) {
-                        // quantity
-                        I_have_created_a_quantity_field_in(fieldName, formName);
-                    } else {
-                        
-                    }
-                }
-            }
-        }
-        
-        driver.submitBatch();
     }
 }

@@ -3,13 +3,15 @@ package org.activityinfo.test.driver;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.google.common.collect.*;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Maintains a mapping between human-readable "test handles" and their unique aliases
@@ -52,6 +54,17 @@ public class AliasTable {
         return alias;
     }
 
+
+    public String createAliasIfNotExists(String testHandle) {
+        Preconditions.checkNotNull(testHandle, "testHandle");
+        
+        if(testHandleToAlias.containsKey(testHandle)) {
+            return testHandleToAlias.get(testHandle);
+        } else {
+            return createAlias(testHandle);
+        }
+    }
+
     public List<String> getTestHandles() {
         Set<String> set = new HashSet<>();
         set.addAll(testHandleToAlias.keySet());
@@ -74,7 +87,8 @@ public class AliasTable {
         s.append("\n");
         s.append("Test handles:\n");
         for (String handle : getTestHandles()) {
-            s.append(String.format("  %s [%s] = %d\n", handle, testHandleToAlias.get(handle), testHandleToId.get(handle)));
+            s.append(String.format("  %s [%s] = %d\n", handle, testHandleToAlias.get(handle),
+                    testHandleToId.get(handle).get()));
         }
         return new IllegalStateException(s.toString());
     }
@@ -103,6 +117,13 @@ public class AliasTable {
         bindAliasToId(alias, Suppliers.ofInstance(id));
     }
 
+    public void bindTestHandleToIdIfAbsent(String handle, Supplier<Integer> newId) {
+        Preconditions.checkNotNull(handle, "handle");
+        if(!testHandleToId.containsKey(handle)) {
+            testHandleToId.put(handle, newId);
+        }
+    }
+    
     /**
      * Maps a test handle to its server-generated ID
      */

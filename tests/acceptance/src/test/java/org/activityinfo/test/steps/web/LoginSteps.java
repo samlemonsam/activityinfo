@@ -40,12 +40,12 @@ public class LoginSteps {
 
     @Given("^that the user \"([^\"]*)\" is signed up$")
     public void that_the_user_is_signed_up(String email) throws Throwable {
-        accounts.ensureAccountExists(email);
+        accounts.createAccount(email);
     }
 
     @When("^I login as \"([^\"]*)\" with my correct password$")
     public void I_login_as_with_my_password(String email) throws Throwable {
-        UserAccount account = accounts.ensureAccountExists(email);
+        UserAccount account = accounts.createAccount(email);
 
         loginPage.navigateTo().loginAs(account);
     }
@@ -70,7 +70,7 @@ public class LoginSteps {
 
     @Given("^that I am logged in as \"([^\"]*)\"$")
     public void that_I_am_logged_in_as(String email) throws Throwable {
-        UserAccount account = accounts.ensureAccountExists(email);
+        UserAccount account = accounts.createAccount(email);
         loginPage
             .navigateTo()
             .loginAs(account)

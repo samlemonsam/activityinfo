@@ -77,6 +77,53 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     archivePath = war.archivePath
 }
 
+
+task downloadBuild {
+    description = "Downloads and unpacks a previous build"
+    ext {
+        if(project.hasProperty("testBuild")) {
+            build = project.property("testBuild")
+        } else {
+            build = project.buildNumber
+        }
+        warFile = "$buildDir/build${build}.war"
+        warDir = "$buildDir/build${build}"
+    }
+
+    inputs.property 'build', build
+    outputs.file "$buildDir/build${build}.war"
+
+    doLast {
+        project.exec {
+            commandLine 'gsutil', 'cp', "gs://ai-pipeline/artifacts/activityinfo-b${build}.war", warFile
+        }
+        ant.unzip(src: warFile, dest: warDir)
+
+    }
+}
+
+task stageBuild(type: com.google.appengine.task.appcfg.UpdateTask) {
+    description = "Deploys a previous build to the staging environment"
+
+    
+    dependsOn downloadBuild, appengineDownloadSdk
+
+    explodedAppDirectory = project.file(downloadBuild.warDir)
+    extraOptions = ["--application=ai-staging", '--version=staging']
+    oauth2 = true
+}
+
+task rollbackStagingBuild(type: com.google.appengine.task.appcfg.RollbackTask) {
+    description = "Deploys a previous build to the staging environment"
+
+    extraOptions = ["--application=ai-staging", '--version=staging']
+    oauth2 = true
+}
+
+
+
+
+
 task createTargetDir {
     doLast {
         // We still have a few tests that are looking for the target folder

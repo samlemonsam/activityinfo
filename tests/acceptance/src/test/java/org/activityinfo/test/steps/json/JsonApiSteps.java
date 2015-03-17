@@ -9,10 +9,6 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.steps.json.ApiResponse;
-import org.activityinfo.test.steps.json.JsonChecker;
-import org.activityinfo.test.steps.json.Placeholders;
-import org.activityinfo.test.steps.json.PsuedoJsonParser;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -67,7 +63,7 @@ public class JsonApiSteps {
 
     @When("([^ ]+) executes the command:$")
     public void user_executes_the_command(String accountEmail, String requestBody) throws Throwable {
-        UserAccount user = accounts.ensureAccountExists(accountEmail);
+        UserAccount user = accounts.createAccount(accountEmail);
         
         execute(user, requestBody);
     }
