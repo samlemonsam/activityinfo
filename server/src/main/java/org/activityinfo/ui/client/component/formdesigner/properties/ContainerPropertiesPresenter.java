@@ -21,22 +21,34 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  * #L%
  */
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.gwt.event.dom.client.*;
+import com.google.common.collect.Maps;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 01/15/2015.
@@ -48,7 +60,10 @@ public class ContainerPropertiesPresenter {
 
     private HandlerRegistration labelKeyUpHandler;
     private HandlerRegistration subformKindChangeHandler;
+    private HandlerRegistration subformSubKindChangeHandler;
     private HandlerRegistration subformTabCountHandler;
+
+    private final Map<String, FormInstance> kindIdToInstance = Maps.newHashMap();
 
     public ContainerPropertiesPresenter(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
@@ -84,6 +99,21 @@ public class ContainerPropertiesPresenter {
                 }
             });
 
+            subformSubKindChangeHandler = view.getSubformSubKind().addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent event) {
+
+                    int selectedIndex = view.getSubformSubKind().getSelectedIndex();
+
+                    if (selectedIndex != -1) {
+                        FormInstance selectedInstance = kindIdToInstance.get(view.getSubformSubKind().getValue(selectedIndex));
+                        ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+                        subFormType.setRange(selectedInstance.getId());
+                        forceSubformRerender(subForm);
+                    }
+                }
+            });
+
             subformTabCountHandler = view.getSubformTabCount().addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {
@@ -114,23 +144,12 @@ public class ContainerPropertiesPresenter {
 
         final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
 
-        ResourceId resourceId = ResourceId.valueOf(selectedValue);
-        if (ClassType.isClassType(resourceId)) {
-            final SelectSubformTypeDialog dialog = new SelectSubformTypeDialog(resourceId, formDesigner);
-            dialog.setHideHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    ResourceId selectedClassId = dialog.getSelectedClassId();
-                    if (selectedClassId == null) { // user simply canceled selection
-                        selectedClassId = PredefinedPeriods.MONTHLY.getResourceId();
-                        view.getSubformKind().setSelectedIndex(getKindIndex(selectedClassId));
-                    }
+        ResourceId kindId = ResourceId.valueOf(selectedValue);
+        ClassType classType = ClassType.byId(kindId);
 
-                    subFormType.setRange(selectedClassId);
-                    forceSubformRerender(subForm);
-                }
-            });
-            dialog.show();
+        if (classType == ClassType.LOCATION_TYPE) { // for now we need sub kinds only for location types
+            initSubKindList(kindId, subForm);
+
             return;
         }
 
@@ -142,6 +161,36 @@ public class ContainerPropertiesPresenter {
         }
 
         throw new UnsupportedOperationException("Subform type is not supported, type: " + selectedValue);
+    }
+
+    private void initSubKindList(final ResourceId kindId, final FormClass subForm) {
+        view.getSubformSubKind().clear();
+        view.getSubformSubKindGroup().setVisible(true);
+
+        // restricted by activity form class (means by db of that activity but we don't want to mess code with legacy here,
+        // so deal with it in QueryExecutor)
+        ResourceId restrictedBy = formDesigner.getModel().getRootFormClass().getId();
+
+        ParentCriteria criteria = ParentCriteria.isChildOf(kindId, restrictedBy);
+        final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+
+        formDesigner.getResourceLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Object>() {
+            @Nullable
+            @Override
+            public Object apply(List<FormInstance> instances) {
+                for (FormInstance instance : instances) {
+                    kindIdToInstance.put(instance.getId().asString(), instance);
+                    view.getSubformSubKind().addItem(getInstanceLabel(instance, kindId), instance.getId().asString());
+                }
+
+                if (!instances.isEmpty()) {
+                    FormInstance first = instances.iterator().next(); // on init first is selected
+                    subFormType.setRange(first.getClassId());
+                    forceSubformRerender(subForm);
+                }
+                return null;
+            }
+        });
     }
 
     private void forceSubformRerender(FormClass subForm) {
@@ -164,11 +213,28 @@ public class ContainerPropertiesPresenter {
         if (subformKindChangeHandler != null) {
             subformKindChangeHandler.removeHandler();
         }
+        if (subformSubKindChangeHandler != null) {
+            subformSubKindChangeHandler.removeHandler();
+        }
         if (subformTabCountHandler != null) {
             subformTabCountHandler.removeHandler();
         }
         view.getLabelGroup().setVisible(false);
         view.getSubformGroup().setVisible(false);
+        view.getSubformSubKindGroup().setVisible(false);
+    }
+
+
+    private static String getInstanceLabel(FormInstance instance, ResourceId parentId) {
+        if (ClassType.isClassType(parentId)) {
+            return instance.getString(CuidAdapter.field(instance.getClassId(), CuidAdapter.NAME_FIELD));
+        }
+
+        String fallbackLabel = FormInstanceLabeler.getLabel(instance);
+        if (Strings.isNullOrEmpty(fallbackLabel)) {
+            return "no label";
+        }
+        return fallbackLabel;
     }
 
     /**

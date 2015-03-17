@@ -54,6 +54,10 @@ public class ContainerPropertiesPanel extends Composite {
     DoubleBox subformTabCount;
     @UiField
     HTMLPanel subformGroup;
+    @UiField
+    ListBox subformSubKind;
+    @UiField
+    FormGroup subformSubKindGroup;
 
     public ContainerPropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -92,5 +96,13 @@ public class ContainerPropertiesPanel extends Composite {
 
     public HTMLPanel getSubformGroup() {
         return subformGroup;
+    }
+
+    public ListBox getSubformSubKind() {
+        return subformSubKind;
+    }
+
+    public FormGroup getSubformSubKindGroup() {
+        return subformSubKindGroup;
     }
 }

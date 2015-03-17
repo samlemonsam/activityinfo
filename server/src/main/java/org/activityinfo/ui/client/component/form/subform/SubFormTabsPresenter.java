@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
@@ -92,6 +93,10 @@ public class SubFormTabsPresenter {
 
     public SubFormTabsPresenter(@Nonnull SubFormTabs view) {
         this.view = view;
+    }
+
+    public void clear() {
+        set(Lists.<FormInstance>newArrayList());
     }
 
     public void set(List<FormInstance> instances) {

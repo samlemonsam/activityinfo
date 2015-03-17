@@ -130,7 +130,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
         if (isSubform) {
             final FormClass subForm = (FormClass) elementContainer;
-            final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner.getResourceLocator(), panel.getPanel().getSubformTabs());
+            final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner, panel.getPanel().getSubformTabs());
 
             if (panel.getPanel().getSubformTabs().isAttached()) {
                 tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()));

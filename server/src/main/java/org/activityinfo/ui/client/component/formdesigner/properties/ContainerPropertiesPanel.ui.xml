@@ -16,10 +16,16 @@
       <a:TextBox ui:field="label" width="100%"/>
     </f:FormGroup>
 
-    <!-- Subform kind -->
     <g:HTMLPanel ui:field="subformGroup">
+
+      <!-- Subform kind -->
       <f:FormGroup ui:field="subformKindGroup" label="{i18n.type}" columnLabelWidth="4">
         <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformKind"/>
+      </f:FormGroup>
+
+      <!-- Subform sub kind -->
+      <f:FormGroup ui:field="subformSubKindGroup" label="{i18n.subType}" columnLabelWidth="4">
+        <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformSubKind"/>
       </f:FormGroup>
 
       <!-- Subform tab count -->

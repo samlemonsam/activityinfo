@@ -24,6 +24,7 @@ package org.activityinfo.legacy.shared.adapter;
 import com.google.common.base.Function;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -42,6 +43,7 @@ public class ProjectInstanceAdapter implements Function<ProjectDTO, FormInstance
     public FormInstance apply(ProjectDTO input) {
         FormInstance instance = new FormInstance(CuidAdapter.cuid(CuidAdapter.PROJECT_DOMAIN, input.getId()), classId);
 
+        FormInstanceLabeler.setLabel(instance, input.getName()); // hack to unify label id when we want to fetch it without class id
         instance.set(CuidAdapter.field(classId, CuidAdapter.NAME_FIELD), input.getName());
         return instance;
     }

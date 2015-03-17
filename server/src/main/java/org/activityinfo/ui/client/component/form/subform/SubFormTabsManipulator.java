@@ -25,6 +25,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -32,10 +34,12 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.form.FormModel;
+import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
 import javax.annotation.Nonnull;
@@ -56,13 +60,16 @@ public class SubFormTabsManipulator {
 
     private FormClass subForm;
     private FormModel formModel;
+    private FormDesigner formDesigner;
 
     public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator) {
-        this(resourceLocator, new SubFormTabs());
+        this.resourceLocator = formDesigner.getResourceLocator();
+        this.presenter = new SubFormTabsPresenter(new SubFormTabs());
     }
 
-    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator, @Nonnull SubFormTabs tabs) {
-        this.resourceLocator = resourceLocator;
+    public SubFormTabsManipulator(@Nonnull FormDesigner formDesigner, @Nonnull SubFormTabs tabs) {
+        this.resourceLocator = formDesigner.getResourceLocator();
+        this.formDesigner = formDesigner;
         this.presenter = new SubFormTabsPresenter(tabs);
     }
 
@@ -133,7 +140,12 @@ public class SubFormTabsManipulator {
     }
 
     private void queryFormInstances(ResourceId typeClassId) {
-        resourceLocator.queryInstances(new ClassCriteria(typeClassId)).then(new Function<List<FormInstance>, Object>() {
+        presenter.clear();
+
+        Criteria criteria = ClassType.isClassType(typeClassId) ?
+                ParentCriteria.isChildOf(typeClassId, formDesigner.getRootFormClass().getId()) :
+                new ClassCriteria(typeClassId);
+        resourceLocator.queryInstances(criteria).then(new Function<List<FormInstance>, Object>() {
             @Nullable
             @Override
             public Object apply(List<FormInstance> input) {

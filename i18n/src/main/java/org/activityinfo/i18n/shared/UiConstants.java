@@ -3677,6 +3677,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
 
+    @DefaultStringValue("Sub type")
+    String subType();
+
     @DefaultStringValue("Recommended mode for new users")
     String recommendedMode();
 
