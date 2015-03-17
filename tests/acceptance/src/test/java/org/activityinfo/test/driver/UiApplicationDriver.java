@@ -52,7 +52,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         setup().login(account);
     }
     
-    private void ensureLoggedIn() {
+    public void ensureLoggedIn() {
         if(applicationPage == null) {
             applicationPage = loginPage.navigateTo().loginAs(currentUser).andExpectSuccess();
             applicationPage.waitUntilLoaded();
@@ -109,6 +109,15 @@ public class UiApplicationDriver extends ApplicationDriver {
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
         return pivotTable.extractData();
     }
+    
+    public void loadOfflineMode() {
+        ensureLoggedIn();
+        applicationPage.waitUntilLoaded();
+        applicationPage.openSettingsMenu().enableOfflineMode();
+        applicationPage.assertOfflineModeLoads();
+    }
+    
+    
 
     @Override
     public void cleanup() throws Exception {

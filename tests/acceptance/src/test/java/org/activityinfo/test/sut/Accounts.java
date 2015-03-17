@@ -6,9 +6,10 @@ package org.activityinfo.test.sut;
 public interface Accounts {
 
 
-    UserAccount ensureAccountExists(String email);
+    UserAccount createAccount(String email);
+
+    UserAccount getAccount(String user);
     
     UserAccount any();
-
 
 }

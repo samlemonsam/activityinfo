@@ -1,0 +1,29 @@
+import org.activityinfo.store.mysql.MySqlSetupTask
+
+
+def setupScripts = files("${project.rootDir}/store/mysql/geography.sql",
+        "${project.rootDir}/store/mysql/nullary-locations.sql")
+
+task setupDatabase(type: MySqlSetupTask) {
+    description =  "Creates and populates a database called 'activityinfo' locally for development"
+    dropDatabase =  true
+    database =      mysql.localDev
+    scripts =       files("${project.rootDir}/store/mysql/geography.sql")
+}
+
+task updateDatabase(type: MySqlSetupTask) {
+    description =  "Applies schema migrations to the local 'activityinfo' development database"
+    database =      mysql.localDev
+}
+
+task setupDatabaseAT(type: MySqlSetupTask) {
+    description =  "Creates and populates a database for running acceptance tests"
+    dropDatabase =  true
+    database =      testEnvironment.database
+    scripts =       setupScripts
+}
+
+tasks.withType(MySqlSetupTask) {
+    group = "Database"
+    changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'
+}

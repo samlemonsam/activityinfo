@@ -20,6 +20,7 @@ allprojects {
     } else {
         // Development
         project.version = "${majorVersion}-dev"      
+        project.ext.buildNumber = 'dev'
     }
     
     ext.commitId = repo.head().id

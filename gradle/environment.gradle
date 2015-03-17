@@ -1,0 +1,18 @@
+import org.activityinfo.store.mysql.MySqlServer
+
+
+ext {
+    if(project.hasProperty("staging")) {
+        testEnvironment = [
+                local: false,
+                database: new MySqlServer(host: '173.194.87.197', username: 'root', password: 'staging').database('staging'),
+                url: "https://staging-dot-ai-staging.appspot.com"
+        ]
+    } else {
+        testEnvironment = [
+                local: true,
+                database: mysql.localAT,
+                url: "http://localhost:${devServerPort}"
+        ]
+    }
+}
