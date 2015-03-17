@@ -1,5 +1,4 @@
 
-
 dependencies {
 
     testCompile libraries.junit
@@ -19,6 +18,10 @@ dependencies {
     testCompile 'org.apache.commons:commons-pool2:2.0'
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
+    testCompile libraries.bcrypt
+    testCompile 'io.dropwizard.metrics:metrics-core:3.1.0'
+    testCompile libraries.c3p0
+
 }
 
 test {
@@ -32,15 +35,10 @@ task acceptanceTest(type: Test) {
     description = 'Runs acceptance test suite'
 
     // Determine the server against which to test
-    if(!project.hasProperty("testUrl")) {
+    if(testEnvironment.local) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
-        systemProperty "test.url", "http://localhost:8080"
-        
-    } else {
-        systemProperty "test.url", project.property("testUrl")
-    }
-    
+    } 
     // Use ChromeDriver locally
     systemProperty 'webdriver', 'chrome'
     systemProperty 'webdriver.chrome.silentOutput', 'true'   
@@ -51,7 +49,15 @@ task acceptanceTest(type: Test) {
 
     // Run only functional tests
     include "**/Functional*AT*"
-    scanForTestClasses false
+}
+
+task browserAcceptanceTest(type: Test) {
+    group = "Verification"
+    description = 'Runs functional tests against a specific browser'
+
+    include "**/CrossBrowserAT*"
+    
+    outputs.upToDateWhen { false }
 }
 
 task instrumentedAcceptanceTest(type: Test) {
@@ -66,28 +72,15 @@ task instrumentedAcceptanceTest(type: Test) {
     dependsOn { ':server:appengineStartInstrumentedAT' }
     finalizedBy { ':server:appengineStop' }
 
-    systemProperty "test.url", "http://localhost:8080"
-    systemProperty "gwt.coverage.report.dir", coverageReportDir
-
-    // Keep console output to a minimum
-    testLogging.showStandardStreams = false
-
     // some tests may fail due to the instrumentation process
     ignoreFailures = true
+    systemProperty "gwt.coverage.report.dir", coverageReportDir
+
 
     // Run only UI functional tests
     include "**/Functional*AT.*"
-
-    scanForTestClasses false
 }
 
-apply from: './src/script/gwtCoverageReport.gradle'
-
-
-task acceptanceTestCoverage {
-    dependsOn 'instrumentedAcceptanceTest'
-    dependsOn 'gwtTestCoverage'
-}
 
 task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAcceptanceTest') {
     def sourceSets = rootProject.subprojects.findResults { p -> p.sourceSets?.main }
@@ -95,9 +88,39 @@ task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAccep
     sourceDirectories = project.files(sourceSets.collect { s -> s.java })
     classDirectories = project.files(sourceSets.collect { s -> s.output.classesDir })
     executionData jacocoAcceptanceDataFile
-    
+
     reports {
         xml.enabled = true
+    }
+}
+
+task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
+    dependsOn 'acceptanceTestJacocoReport'
+
+    gwtCoverageReportsDir = instrumentedAcceptanceTest.coverageReportDir
+    jacocoReportFile = acceptanceTestJacocoReport.reports.xml.destination
+    outputFile = project.acceptanceDataFile
+}
+
+task capacityTest(type: JavaExec) {
+    description = 'Runs capacity tests to verify performance under load'
+    main = 'org.activityinfo.test.capacity.CapacityTest'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir/capacity"
+    
+    systemProperty "test.url", testEnvironment.url
+    systemProperties.putAll(testEnvironment.database.properties)
+    
+    if(project.hasProperty("testBuild")) {
+        dependsOn tasks.getByPath(':server:stageBuild')
+    }
+    if(project.hasProperty("phantomjsPath")) {
+        systemProperty "phantomjsPath", project.property("phantomjsPath")
+    }
+    
+    doFirst {
+        workingDir.mkdirs()
     }
 }
 
@@ -108,9 +131,23 @@ task smokeTest(type: Test) {
     dependsOn 'testClasses'
 
     include "**/*SmokeTest.*"
-    scanForTestClasses false
 
     if(project.hasProperty("testUrl")) {
         systemProperty "test.url", project.property("testUrl")
+    }
+
+}
+
+tasks.each { task ->
+    if(task.name =~ /[aA]cceptanceTest$/) {
+        task.configure {
+            println "Configuring ${test.name}"
+            scanForTestClasses = false
+
+            systemProperty "test.url", testEnvironment.url
+            systemProperties.putAll(testEnvironment.database.properties)
+            // Keep console output to a minimum
+            testLogging.showStandardStreams = false
+        }
     }
 }

@@ -1,9 +1,8 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import cucumber.api.PendingException;
+import cucumber.api.DataTable;
 import cucumber.api.java.After;
-import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
@@ -14,7 +13,6 @@ import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.activityinfo.test.driver.Property.name;
@@ -74,6 +72,18 @@ public class DatabaseSetupSteps {
                 property("name", fieldName),
                 property("type", "quantity"));
     }
+
+
+    @Given("^I have created a enumerated field \"([^\"]*)\" in \"([^\"]*) with choices:\"$")
+    public void I_have_created_a_quantity_field_in(String fieldName, String formName, DataTable dataTable) throws Throwable {
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"));
+        
+        
+    }
+
 
     @Given("^I have submitted a \"([^\"]*)\" form with:$")
     public void I_have_submitted_a_form_with(String formName, List<FieldValue> values) throws Throwable {
@@ -209,5 +219,19 @@ public class DatabaseSetupSteps {
                 property("code", code));
     }
 
+    @Given("^I have imported (\\d+) locations into \"([^\"]*)\"$")
+    public void I_have_imported_locations_into(int locationCount, String locationType) throws Throwable {
+        for(int i=0;i<locationCount;++i) {
+            driver.setup().createLocation(
+                    property("locationType", locationType),
+                    property("name", "Location " + i),
+                    property("code", "LOC" + i));
+        }
+    }
 
+
+    @Given("^I have created (\\d+) databases each containing (\\d+) forms with (\\d+) fields$")
+    public void I_have_created_databases_each_containing_forms_with_fields(int databaseCount, int formCount, int fieldCount) throws Throwable {
+
+    }
 }

@@ -1,12 +1,10 @@
 package org.activityinfo.store.mysql
 
-import com.mysql.jdbc.Driver
 import liquibase.Liquibase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.FileSystemResourceAccessor
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.FileTree
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 
@@ -16,45 +14,35 @@ import org.gradle.api.tasks.TaskAction
 class MySqlSetupTask extends DefaultTask {
 
     boolean dropDatabase = false
-    String databaseName
-    String user
-    String password
+    
+    MySqlDatabase database
     String changeLog
     FileCollection scripts
 
     @TaskAction
     def setup() {
         createDatabase()
-        def connection = openConnection(databaseName)
+        def connection = database.connect()
         try {
             migrateSchema(connection)
             populateData(connection)
+            
         } finally {
             connection.close()
         }
     }
 
-    def openConnection(String databaseName) {
-        def properties = new Properties()
-        properties.setProperty("user", user)
-        properties.setProperty("password", password)
-
-        def url = "jdbc:mysql://localhost/${databaseName}?useUnicode=true&characterEncoding=UTF-8"
-
-        def driver = new Driver()
-        return driver.connect(url, properties)
-    }
-
 
     def createDatabase() {
         // First create the database itself, dropping first if requested
-        def connection = openConnection("")
+        def connection = database.server.connect()
         try {
             def stmt = connection.createStatement()
             if(dropDatabase) {
-                stmt.execute("DROP DATABASE IF EXISTS `${databaseName}`")
+                stmt.execute("DROP DATABASE IF EXISTS `${database.name}`")
             }
-            stmt.execute("CREATE DATABASE IF NOT EXISTS `${databaseName}`")
+            stmt.execute("CREATE DATABASE IF NOT EXISTS `${database.name}`")
+            
         } finally {
             connection.close()
         }
@@ -68,7 +56,6 @@ class MySqlSetupTask extends DefaultTask {
         liquibase.log.logLevel = liquibaseLoggingLevel()
         liquibase.update(null)
     }
-
 
     def populateData(connection) {
         ScriptRunner runner = new ScriptRunner(connection, false, true)
