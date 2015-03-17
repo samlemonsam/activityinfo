@@ -81,7 +81,7 @@ public class DevServerAccounts implements Accounts {
     }
 
     @Override
-    public UserAccount createAccount(String userName) {
+    public UserAccount ensureAccountExists(String userName) {
 
         if(aliasMap.containsKey(userName)) {
             String email = aliasMap.get(userName);
@@ -90,12 +90,6 @@ public class DevServerAccounts implements Accounts {
         return createUniqueAccount(userName);
     }
 
-    @Override
-    public UserAccount getAccount(String user) {
-        Preconditions.checkState(aliasMap.containsKey(user));
-
-        return new UserAccount(aliasMap.get(user), DEV_PASSWORD);
-    }
 
     /**
      * Creates a unique account mapped to the username for the duration of the test.
@@ -214,6 +208,6 @@ public class DevServerAccounts implements Accounts {
 
     @Override
     public UserAccount any() {
-        return createAccount("user");
+        return ensureAccountExists("user");
     }
 }

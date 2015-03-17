@@ -63,7 +63,7 @@ public class JsonApiSteps {
 
     @When("([^ ]+) executes the command:$")
     public void user_executes_the_command(String accountEmail, String requestBody) throws Throwable {
-        UserAccount user = accounts.createAccount(accountEmail);
+        UserAccount user = accounts.ensureAccountExists(accountEmail);
         
         execute(user, requestBody);
     }

@@ -43,7 +43,7 @@ public class Scenario {
         String testHandle = name + " #" + number;
         
         ApiApplicationDriver driver = new ApiApplicationDriver(server, accounts, aliasTable);
-        UserAccount account = accounts.createAccount(testHandle);
+        UserAccount account = accounts.ensureAccountExists(testHandle);
         driver.login(account);
         return new Agent(this, testHandle, account, driver);
     }

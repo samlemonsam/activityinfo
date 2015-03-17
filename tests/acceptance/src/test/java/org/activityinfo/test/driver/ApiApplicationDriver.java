@@ -337,7 +337,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
     @Override
     public void grantPermission(TestObject properties) throws Exception {
         
-        UserAccount email = accounts.getAccount(properties.getString("user"));
+        UserAccount email = accounts.ensureAccountExists(properties.getString("user"));
         
         JSONObject model = new JSONObject();
         model.put("name", "A User");
