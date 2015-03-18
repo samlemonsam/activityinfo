@@ -77,6 +77,8 @@ public class SubFormTabsPresenter {
     private final SubFormTabs view;
 
     private int tabCount = SubformConstants.DEFAULT_TAB_COUNT;
+    private boolean showPreviousButtons = true;
+    private boolean showNextButtons = true;
 
     private final Map<String, FormInstance> instancesMap = Maps.newHashMap();
     private List<FormInstance> instances = null;
@@ -103,7 +105,7 @@ public class SubFormTabsPresenter {
         this.instances = instances;
         instancesMap.clear();
 
-        String safeHtml = perviousButtons();
+        String safeHtml = showPreviousButtons ? perviousButtons() : "";
         for (FormInstance instance : instances) {
             instancesMap.put(instance.getId().asString(), instance);
 
@@ -112,7 +114,7 @@ public class SubFormTabsPresenter {
                     "' title='" + tooltip(instance, escapedLabel) + "'>" + escapedLabel + "</a></li>";
         }
 
-        safeHtml = safeHtml + nextButtons();
+        safeHtml = showNextButtons ? safeHtml + nextButtons() : safeHtml;
 
         view.getSubformTabsUl().removeAllChildren();
         view.getSubformTabsUl().setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(safeHtml));
@@ -138,6 +140,13 @@ public class SubFormTabsPresenter {
 
         // predefined buttons
         for (ButtonType buttonType : ButtonType.values()) {
+            if (!showNextButtons && (buttonType == ButtonType.NEXT || buttonType == ButtonType.FULL_NEXT)) {
+                continue;
+            }
+            if (!showPreviousButtons && (buttonType == ButtonType.PREVIOUS || buttonType == ButtonType.FULL_PREVIOUS)) {
+                continue;
+            }
+
             addClickHandlerToElementById(buttonType.getValue() + "_" + idSuffix.asString());
         }
 
@@ -215,9 +224,28 @@ public class SubFormTabsPresenter {
         setTabCount(tabCount);
     }
 
-    public void setTabCount(int tabCount) {
+    public SubFormTabsPresenter setTabCount(int tabCount) {
         Preconditions.checkState(tabCount >= SubformConstants.MIN_TAB_COUNT && tabCount <= SubformConstants.MAX_TAB_COUNT);
         this.tabCount = tabCount;
+        return this;
+    }
+
+    public boolean isShowPreviousButtons() {
+        return showPreviousButtons;
+    }
+
+    public SubFormTabsPresenter setShowPreviousButtons(boolean showPreviousButtons) {
+        this.showPreviousButtons = showPreviousButtons;
+        return this;
+    }
+
+    public boolean isShowNextButtons() {
+        return showNextButtons;
+    }
+
+    public SubFormTabsPresenter setShowNextButtons(boolean showNextButtons) {
+        this.showNextButtons = showNextButtons;
+        return this;
     }
 
     public SubFormTabs getView() {

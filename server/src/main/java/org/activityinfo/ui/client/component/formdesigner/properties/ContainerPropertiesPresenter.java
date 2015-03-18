@@ -92,6 +92,7 @@ public class ContainerPropertiesPresenter {
             view.getSubformGroup().setVisible(true);
 
             final FormClass subForm = (FormClass) fieldsHolder.getElementContainer();
+
             subformKindChangeHandler = view.getSubformKind().addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {
@@ -106,8 +107,8 @@ public class ContainerPropertiesPresenter {
                     int selectedIndex = view.getSubformSubKind().getSelectedIndex();
 
                     if (selectedIndex != -1) {
+                        final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
                         FormInstance selectedInstance = kindIdToInstance.get(view.getSubformSubKind().getValue(selectedIndex));
-                        ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
                         subFormType.setRange(selectedInstance.getId());
                         forceSubformRerender(subForm);
                     }
@@ -125,7 +126,15 @@ public class ContainerPropertiesPresenter {
 
             // kind
             ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
-            view.getSubformKind().setSelectedIndex(getKindIndex(typeClass.getRange().iterator().next()));
+            ResourceId typeClassId = typeClass.getRange().iterator().next();
+            view.getSubformKind().setSelectedIndex(getKindIndex(typeClassId));
+
+            // sub kind
+            ClassType classType = ClassType.byDomainSilently(typeClassId.getDomain());
+            if (classType == ClassType.LOCATION_TYPE) {
+                view.getSubformSubKindGroup().setVisible(true);
+                initSubKindList(classType, typeClassId, subForm);
+            }
 
             // tabs count
             QuantityType tabCount = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
@@ -148,7 +157,7 @@ public class ContainerPropertiesPresenter {
         ClassType classType = ClassType.byId(kindId);
 
         if (classType == ClassType.LOCATION_TYPE) { // for now we need sub kinds only for location types
-            initSubKindList(kindId, subForm);
+            initSubKindList(classType, kindId, subForm);
 
             return;
         }
@@ -163,7 +172,7 @@ public class ContainerPropertiesPresenter {
         throw new UnsupportedOperationException("Subform type is not supported, type: " + selectedValue);
     }
 
-    private void initSubKindList(final ResourceId kindId, final FormClass subForm) {
+    private void initSubKindList(final ClassType classType, final ResourceId subKindId, final FormClass subForm) {
         view.getSubformSubKind().clear();
         view.getSubformSubKindGroup().setVisible(true);
 
@@ -171,16 +180,21 @@ public class ContainerPropertiesPresenter {
         // so deal with it in QueryExecutor)
         ResourceId restrictedBy = formDesigner.getModel().getRootFormClass().getId();
 
-        ParentCriteria criteria = ParentCriteria.isChildOf(kindId, restrictedBy);
+        ParentCriteria criteria = ParentCriteria.isChildOf(classType.getResourceId(), restrictedBy);
         final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
 
         formDesigner.getResourceLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Object>() {
             @Nullable
             @Override
             public Object apply(List<FormInstance> instances) {
+                int index = 0;
                 for (FormInstance instance : instances) {
                     kindIdToInstance.put(instance.getId().asString(), instance);
-                    view.getSubformSubKind().addItem(getInstanceLabel(instance, kindId), instance.getId().asString());
+                    view.getSubformSubKind().addItem(getInstanceLabel(instance, classType.getResourceId()), instance.getId().asString());
+                    if (instance.getId().equals(subKindId)) {
+                        view.getSubformSubKind().setSelectedIndex(index);
+                    }
+                    index++;
                 }
 
                 if (!instances.isEmpty()) {
@@ -203,6 +217,12 @@ public class ContainerPropertiesPresenter {
                 return i;
             }
         }
+
+        ClassType classType = ClassType.byDomainSilently(valueId.getDomain());
+        if (classType != null) {
+            return view.getIndexOf(classType);
+        }
+
         throw new IllegalArgumentException("Value is unknown, value:" + valueId);
     }
 
@@ -250,5 +270,5 @@ public class ContainerPropertiesPresenter {
         }
         return true;
     }
-
 }
+

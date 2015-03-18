@@ -21,14 +21,18 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  * #L%
  */
 
+import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.form.FormGroup;
+
+import java.util.Map;
 
 /**
  * @author yuriyz on 01/15/2015.
@@ -59,9 +63,28 @@ public class ContainerPropertiesPanel extends Composite {
     @UiField
     FormGroup subformSubKindGroup;
 
+    private final Map<ClassType, Integer> classTypeIndexesInList = Maps.newHashMap();
+
     public ContainerPropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
         initSubformCombobox();
+        initIndexes();
+    }
+
+    private void initIndexes() {
+        for (int i = 0; i < getSubformKind().getItemCount(); i++) {
+            String value = getSubformKind().getValue(i);
+            for (ClassType classType : ClassType.values()) {
+                if (value.equals(classType.getResourceId().asString())) {
+                    classTypeIndexesInList.put(classType, i);
+                    break;
+                }
+            }
+        }
+    }
+
+    public int getIndexOf(ClassType classType) {
+        return classTypeIndexesInList.get(classType);
     }
 
     private void initSubformCombobox() {

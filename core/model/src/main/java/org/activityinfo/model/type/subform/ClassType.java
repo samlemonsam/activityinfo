@@ -23,6 +23,7 @@ package org.activityinfo.model.type.subform;
 
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Map;
@@ -64,6 +65,26 @@ public enum ClassType {
         return formClass;
     }
 
+    public static ClassType byDomain(char domain) {
+        ClassType classType = byDomainSilently(domain);
+        if (classType == null) {
+            throw new RuntimeException("Unsupported domain: " + domain);
+        }
+        return classType;
+    }
+
+    public static ClassType byDomainSilently(char domain) {
+        switch (domain) {
+            case CuidAdapter.LOCATION_TYPE_DOMAIN:
+                return LOCATION_TYPE;
+            case CuidAdapter.PARTNER_FORM_CLASS_DOMAIN:
+                return PARTNER;
+            case CuidAdapter.PROJECT_CLASS_DOMAIN:
+                return PROJECT;
+        }
+        return null;
+    }
+
     public SubFormKind createSubformKind() {
         return new SubFormKind() {
             @Override
@@ -78,6 +99,6 @@ public enum ClassType {
     }
 
     public static boolean isClassType(ResourceId resourceId) {
-        return byId(resourceId) !=null;
+        return byId(resourceId) != null;
     }
 }

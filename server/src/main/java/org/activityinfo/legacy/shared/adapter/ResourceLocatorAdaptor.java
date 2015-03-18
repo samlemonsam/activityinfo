@@ -130,6 +130,10 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         return Promise.waitAll(promises);
     }
 
+    public Promise<QueryResult<FormInstance>> queryInstances(InstanceQuery criteria) {
+        return queryInstances(criteria.getCriteria()).then(new InstanceQueryResultAdapter<FormInstance>(criteria));
+    }
+
     @Override
     public Promise<List<FormInstance>> queryInstances(Criteria criteria) {
         return new QueryExecutor(dispatcher, criteria).execute();

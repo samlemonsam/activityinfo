@@ -72,7 +72,7 @@ public class SitePersisterTest extends CommandTestCase2 {
 
         // query projection
         InstanceQuery query = new InstanceQuery(paths, new ClassCriteria(PEAR_Activity));
-        Projection projection = byId(assertResolves(resourceLocator.queryProjection(query)).getProjections(), siteFormInstance.getId());
+        Projection projection = byId(assertResolves(resourceLocator.queryProjection(query)).getItems(), siteFormInstance.getId());
         Assert.assertNotNull(projection);
         Assert.assertEquals(projection.getReferenceValue(CONTENU_DI_KIT_FIELD).iterator().next(), CONTENU_DI_KIT_FIELD_ATTR_VALUE);
 

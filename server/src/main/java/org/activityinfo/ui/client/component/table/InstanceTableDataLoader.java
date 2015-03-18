@@ -169,7 +169,7 @@ public class InstanceTableDataLoader {
 
             @Override
             public void onSuccess(QueryResult<Projection> result) {
-                tableDataProvider.getList().addAll(result.getProjections());
+                tableDataProvider.getList().addAll(result.getItems());
                 instanceTotalCount = result.getTotalCount();
                 table.getTable().getEventBus().fireEvent(new DataLoadEvent(instanceTotalCount, tableDataProvider.getList().size()));
             }

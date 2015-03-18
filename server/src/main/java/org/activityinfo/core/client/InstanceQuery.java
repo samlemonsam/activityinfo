@@ -15,10 +15,13 @@ public class InstanceQuery {
 
     private final static int FALLBACK_MAX_COUNT = 100;
 
-    private final List<FieldPath> fieldPaths;
-    private final Criteria criteria;
-    private final int offset;
-    private final int maxCount;
+    private List<FieldPath> fieldPaths;
+    private Criteria criteria;
+    private int offset;
+    private int maxCount;
+
+    public InstanceQuery() {
+    }
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria) {
         this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT);
@@ -48,6 +51,33 @@ public class InstanceQuery {
         return criteria;
     }
 
+    public InstanceQuery setFieldPaths(List<FieldPath> fieldPaths) {
+        this.fieldPaths = fieldPaths;
+        return this;
+    }
+
+    public InstanceQuery setCriteria(Criteria criteria) {
+        this.criteria = criteria;
+        return this;
+    }
+
+    public InstanceQuery setOffset(int offset) {
+        this.offset = offset;
+        return this;
+    }
+
+    public InstanceQuery incrementOffsetOn(int incrementedOn) {
+        offset = offset + incrementedOn;
+        if (offset < 0) {
+            offset = 0;
+        }
+        return this;
+    }
+
+    public InstanceQuery setMaxCount(int maxCount) {
+        this.maxCount = maxCount;
+        return this;
+    }
 
     public static Builder select(ResourceId... fieldIds) {
         return new Builder().select(fieldIds);

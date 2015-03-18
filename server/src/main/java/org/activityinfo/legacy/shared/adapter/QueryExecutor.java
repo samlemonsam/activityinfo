@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.Criteria;
@@ -49,6 +50,16 @@ public class QueryExecutor {
         this.dispatcher = dispatcher;
         this.criteria = rootCriteria;
         this.criteriaAnalysis = CriteriaAnalysis.analyze(rootCriteria);
+    }
+
+    public Promise<QueryResult<FormInstance>> executeQuery() {
+        return execute().then(new Function<List<FormInstance>, QueryResult<FormInstance>>() {
+            @Nullable
+            @Override
+            public QueryResult<FormInstance> apply(List<FormInstance> input) {
+                return QueryResult.fullResult(input);
+            }
+        });
     }
 
     public Promise<List<FormInstance>> execute() {

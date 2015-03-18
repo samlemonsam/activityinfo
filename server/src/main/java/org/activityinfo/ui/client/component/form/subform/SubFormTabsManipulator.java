@@ -23,6 +23,8 @@ package org.activityinfo.ui.client.component.form.subform;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import org.activityinfo.core.client.InstanceQuery;
+import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
@@ -45,7 +47,6 @@ import org.activityinfo.ui.client.widget.ClickHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author yuriyz on 02/17/2015.
@@ -145,18 +146,18 @@ public class SubFormTabsManipulator {
         Criteria criteria = ClassType.isClassType(typeClassId) ?
                 ParentCriteria.isChildOf(typeClassId, formDesigner.getRootFormClass().getId()) :
                 new ClassCriteria(typeClassId);
-        resourceLocator.queryInstances(criteria).then(new Function<List<FormInstance>, Object>() {
-            @Nullable
-            @Override
-            public Object apply(List<FormInstance> input) {
-                presenter.set(input);
-                return null;
-            }
-        });
+
+        final InstanceQuery query = new InstanceQuery()
+                .setCriteria(criteria)
+                .setMaxCount(presenter.getTabCount())
+                .setOffset(0);
+
+        queryInstances(query);
+
         presenter.setMoveButtonClickHandler(new org.activityinfo.ui.client.widget.ClickHandler<SubFormTabsPresenter.ButtonType>() {
             @Override
             public void onClick(SubFormTabsPresenter.ButtonType buttonType) {
-                // todo : support user-defined form classes
+                onInstanceMoveButtonClick(buttonType, query);
             }
         });
         presenter.setInstanceTabClickHandler(new ClickHandler<FormInstance>() {
@@ -165,6 +166,38 @@ public class SubFormTabsManipulator {
                 // todo : support user-defined form classes
             }
         });
+    }
+
+    private void queryInstances(final InstanceQuery query) {
+        resourceLocator.queryInstances(query).then(new Function<QueryResult<FormInstance>, Object>() {
+            @Nullable
+            @Override
+            public Object apply(QueryResult<FormInstance> queryResult) {
+                presenter.setShowPreviousButtons(query.getOffset() > 0);
+                presenter.setShowNextButtons(queryResult.hasNext(query.getOffset()));
+                presenter.set(queryResult.getItems());
+                return null;
+            }
+        });
+    }
+
+    private void onInstanceMoveButtonClick(SubFormTabsPresenter.ButtonType buttonType, InstanceQuery query) {
+        switch (buttonType) {
+            case NEXT:
+                queryInstances(query.incrementOffsetOn(1));
+                break;
+            case FULL_NEXT:
+                queryInstances(query.incrementOffsetOn(query.getMaxCount()));
+                break;
+            case FULL_PREVIOUS:
+                queryInstances(query.incrementOffsetOn(-query.getMaxCount()));
+                break;
+            case PREVIOUS:
+                queryInstances(query.incrementOffsetOn(-1));
+                break;
+            default:
+                throw new UnsupportedOperationException("Button type is not supported, type:" + buttonType);
+        }
     }
 
     public SubFormTabsPresenter getPresenter() {

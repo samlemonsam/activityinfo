@@ -24,15 +24,13 @@ package org.activityinfo.legacy.shared.adapter;
 import com.google.common.base.Function;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
-import org.activityinfo.core.shared.Projection;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * @author yuriyz on 4/10/14.
  */
-public class InstanceQueryResultAdapter implements Function<List<Projection>, QueryResult<Projection>> {
+public class InstanceQueryResultAdapter<T> implements Function<List<T>, QueryResult<T>> {
 
     private final InstanceQuery query;
 
@@ -40,8 +38,8 @@ public class InstanceQueryResultAdapter implements Function<List<Projection>, Qu
         this.query = query;
     }
 
-    @Nullable @Override
-    public QueryResult<Projection> apply(List<Projection> list) {
+    @Override
+    public QueryResult<T> apply(List<T> list) {
         final int size = list.size();
         final int startIndex = query.getOffset() >= 0 && query.getOffset() < size ? query.getOffset() : 0;
         final int count = query.getMaxCount();

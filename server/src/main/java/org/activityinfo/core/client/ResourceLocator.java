@@ -36,6 +36,8 @@ public interface ResourceLocator {
 
     Promise<Void> persist(List<? extends IsResource> resources);
 
+    Promise<QueryResult<FormInstance>> queryInstances(InstanceQuery criteria);
+
     /**
      * Retrieves the form instances that match the given criteria.
      * @param criteria
