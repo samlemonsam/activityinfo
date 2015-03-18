@@ -11,7 +11,7 @@ class MySqlDatabase {
     String name
 
     String getUrl() {
-        "jdbc:mysql://${server.host}:${server.port}/${name}?useUnicode=true&characterEncoding=UTF-8"
+        return server.getUrl(name)
     }
 
     Connection connect() {
@@ -20,10 +20,10 @@ class MySqlDatabase {
     
     Map<String, String> getProperties() {
         Map<String, String> properties = new HashMap<>()
-        properties.put("databaseName", name)
-        properties.put("databaseHost", server.host)
-        properties.put("databaseUsername", server.username)
-        properties.put("databasePassword", server.password)
+        properties.put("databaseUrl", url)
+        server.connectionProperties.each { String name, String value ->
+            properties.put("mysql." + name, value);
+        }
         return properties
     }
 }

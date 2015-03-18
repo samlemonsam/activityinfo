@@ -33,9 +33,11 @@ test {
 task acceptanceTest(type: Test) {
     group = "Verification"
     description = 'Runs acceptance test suite'
-
+    
+    dependsOn ':server:configureDatabase'
+    
     // Determine the server against which to test
-    if(testEnvironment.local) {
+    if(project.environment.local) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
     } 
@@ -54,6 +56,7 @@ task acceptanceTest(type: Test) {
 task browserAcceptanceTest(type: Test) {
     group = "Verification"
     description = 'Runs functional tests against a specific browser'
+    dependsOn ':server:configureDatabase'
 
     include "**/CrossBrowserAT*"
     
@@ -100,27 +103,28 @@ task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
     gwtCoverageReportsDir = instrumentedAcceptanceTest.coverageReportDir
     jacocoReportFile = acceptanceTestJacocoReport.reports.xml.destination
     outputFile = project.acceptanceDataFile
+    
+    doFirst {
+        if (!project.environment.local) {
+            throw new IllegalStateException("${task.name} can only run in a local environment")
+        }
+    }
 }
 
 task capacityTest(type: JavaExec) {
     description = 'Runs capacity tests to verify performance under load'
     main = 'org.activityinfo.test.capacity.CapacityTest'
-    dependsOn 'testClasses'
+    dependsOn 'testClasses', ':server:configureDatabase'
     classpath = sourceSets.test.runtimeClasspath
     workingDir = "$buildDir/capacity"
     
-    systemProperty "test.url", testEnvironment.url
-    systemProperties.putAll(testEnvironment.database.properties)
-    
-    if(project.hasProperty("testBuild")) {
-        dependsOn tasks.getByPath(':server:stageBuild')
-    }
     if(project.hasProperty("phantomjsPath")) {
         systemProperty "phantomjsPath", project.property("phantomjsPath")
     }
     
     doFirst {
-        workingDir.mkdirs()
+        workingDir.mkdir()
+        systemProperties.putAll(project.environment.systemProperties)
     }
 }
 
@@ -144,8 +148,9 @@ tasks.each { task ->
             println "Configuring ${test.name}"
             scanForTestClasses = false
 
-            systemProperty "test.url", testEnvironment.url
-            systemProperties.putAll(testEnvironment.database.properties)
+            doFirst {
+                systemProperties.putAll(project.environment.systemProperties)
+            }
             // Keep console output to a minimum
             testLogging.showStandardStreams = false
         }

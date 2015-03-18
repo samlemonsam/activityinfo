@@ -21,10 +21,16 @@ class MySqlSetupTask extends DefaultTask {
 
     @TaskAction
     def setup() {
+        logger.info("Creating database ${database.name}...")
         createDatabase()
+
+        logger.info("Connecting to ${database.server}")
         def connection = database.connect()
         try {
+            logger.info("Migrating schema...")
             migrateSchema(connection)
+
+            logger.info("Populating database...")
             populateData(connection)
             
         } finally {
@@ -53,7 +59,7 @@ class MySqlSetupTask extends DefaultTask {
                 new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),
                 new JdbcConnection(connection));
 
-        liquibase.log.logLevel = liquibaseLoggingLevel()
+        liquibase.log.logLevel = liquibase.logging.LogLevel.DEBUG //liquibaseLoggingLevel()
         liquibase.update(null)
     }
 

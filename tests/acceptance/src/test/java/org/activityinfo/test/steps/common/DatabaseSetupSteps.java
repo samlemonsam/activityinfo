@@ -228,10 +228,4 @@ public class DatabaseSetupSteps {
                     property("code", "LOC" + i));
         }
     }
-
-
-    @Given("^I have created (\\d+) databases each containing (\\d+) forms with (\\d+) fields$")
-    public void I_have_created_databases_each_containing_forms_with_fields(int databaseCount, int formCount, int fieldCount) throws Throwable {
-
-    }
 }

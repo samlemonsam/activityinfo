@@ -1,18 +1,19 @@
-import org.activityinfo.store.mysql.MySqlServer
-
+import org.activityinfo.DeploymentEnvironment
+import org.activityinfo.store.mysql.MySqlDatabase
 
 ext {
-    if(project.hasProperty("staging")) {
-        testEnvironment = [
-                local: false,
-                database: new MySqlServer(host: '173.194.87.197', username: 'root', password: 'staging').database('staging'),
-                url: "https://staging-dot-ai-staging.appspot.com"
-        ]
+    environment = new DeploymentEnvironment()
+    
+    if(project.hasProperty('env')) {
+        environment.projectId = project.property('env')
+        environment.url = "https://${environment.projectId}.appspot.com"
+        
+        // needs to be configured by the 
+        environment.database = new MySqlDatabase() 
+        
     } else {
-        testEnvironment = [
-                local: true,
-                database: mysql.localAT,
-                url: "http://localhost:${devServerPort}"
-        ]
+        environment.url = "http://localhost:${devServerPort}"
+        environment.database = mysql.localAT
     }
 }
+

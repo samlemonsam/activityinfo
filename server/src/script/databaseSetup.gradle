@@ -4,6 +4,19 @@ import org.activityinfo.store.mysql.MySqlSetupTask
 def setupScripts = files("${project.rootDir}/store/mysql/geography.sql",
         "${project.rootDir}/store/mysql/nullary-locations.sql")
 
+
+task configureDatabase(type: org.activityinfo.gcloud.FetchCloudSqlConfiguration) {
+    instanceId = 'activityinfo'
+    doFirst {
+        if(!project.hasProperty('env')) {
+            throw new InvalidUserDataException("You must provide the name of the projectId using -Penv=<projectId>")
+        }
+        projectId = project.property('env')
+    }
+}
+
+configureDatabase.onlyIf { project.hasProperty('env') }
+
 task setupDatabase(type: MySqlSetupTask) {
     description =  "Creates and populates a database called 'activityinfo' locally for development"
     dropDatabase =  true
@@ -16,14 +29,21 @@ task updateDatabase(type: MySqlSetupTask) {
     database =      mysql.localDev
 }
 
-task setupDatabaseAT(type: MySqlSetupTask) {
+task setupDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
     description =  "Creates and populates a database for running acceptance tests"
     dropDatabase =  true
-    database =      testEnvironment.database
+    database =      environment.database
     scripts =       setupScripts
+    
+    doFirst {
+        logger.info("Setting up ${database.url}...")
+    }
 }
+
 
 tasks.withType(MySqlSetupTask) {
     group = "Database"
     changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'
 }
+
+

@@ -540,6 +540,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 throw new RuntimeException(e.getResponse().getStatus() + ": "
                         + e.getResponse().getEntity(String.class));
             }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while posting to " + commandEndpoint().getURI(), e);
         }
     }
     

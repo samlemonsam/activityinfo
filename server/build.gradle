@@ -81,17 +81,12 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
 task downloadBuild {
     description = "Downloads and unpacks a previous build"
     ext {
-        if(project.hasProperty("testBuild")) {
-            build = project.property("testBuild")
-        } else {
-            build = project.buildNumber
-        }
-        warFile = "$buildDir/build${build}.war"
-        warDir = "$buildDir/build${build}"
+        warFile = "$buildDir/build${project.buildNumber}.war"
+        warDir = "$buildDir/build${project.buildNumber}"
     }
 
     inputs.property 'build', build
-    outputs.file "$buildDir/build${build}.war"
+    outputs.file "$buildDir/build${project.buildNumber}.war"
 
     doLast {
         project.exec {
@@ -102,25 +97,29 @@ task downloadBuild {
     }
 }
 
-task stageBuild(type: com.google.appengine.task.appcfg.UpdateTask) {
-    description = "Deploys a previous build to the staging environment"
-
+task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
+    description = "Deploys a build to the staging environment"
     
     dependsOn downloadBuild, appengineDownloadSdk
 
+
     explodedAppDirectory = project.file(downloadBuild.warDir)
-    extraOptions = ["--application=ai-staging", '--version=staging']
+    extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
+    
+    doFirst {
+        if(environment.local) {
+            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
+        }
+    }
 }
 
-task rollbackStagingBuild(type: com.google.appengine.task.appcfg.RollbackTask) {
+task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Deploys a previous build to the staging environment"
 
-    extraOptions = ["--application=ai-staging", '--version=staging']
+    extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
 }
-
-
 
 
 
@@ -133,6 +132,3 @@ task createTargetDir {
 }
 
 tasks.test.dependsOn 'createTargetDir'
-
-
-

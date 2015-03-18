@@ -24,14 +24,8 @@ public class DevServerAccounts implements Accounts {
     private static final Logger LOGGER = Logger.getLogger(DevServerAccounts.class.getName());
 
 
-    private static final ConfigProperty DATABASE_NAME = new ConfigProperty("databaseName", "MySQL database name");
-    private static final ConfigProperty DATABASE_HOST = new ConfigProperty("databaseHost", "MySQL database name");
-
+    private static final ConfigProperty DATABASE_URL = new ConfigProperty("databaseUrl", "MySQL database url");
     private static final ConfigProperty EMAIL = new ConfigProperty("devAccountEmail", "Dev account email");
-    private static final ConfigProperty USERNAME_PROPERTY =
-            new ConfigProperty("databaseUsername", "MySQL database username");
-    private static final ConfigProperty PASSWORD_PROPERTY =
-            new ConfigProperty("databasePassword", "MySQL database password");
 
 
     private static final String DEV_PASSWORD = "notasecret";
@@ -120,10 +114,18 @@ public class DevServerAccounts implements Accounts {
         if(connection == null) {
             try {
                 LOGGER.info("Opening connection to " + connectionUrl());
-                connection = DriverManager.getConnection(
-                        connectionUrl(),
-                        USERNAME_PROPERTY.getOr("root"),
-                        PASSWORD_PROPERTY.getIfPresent("root"));
+                // Add all system properties prefixed by 'mysql.' to the driver properties,
+                // stripped of the 'mysql.' prefix
+                Properties properties = new Properties();
+                for(String systemProperty : System.getProperties().stringPropertyNames()) {
+                    if(systemProperty.startsWith("mysql.")) {
+                        String key = systemProperty.substring("mysql.".length());
+                        String value = System.getProperty(systemProperty);
+                        properties.put(key, value);
+                    }
+                }
+                connection = DriverManager.getConnection(DATABASE_URL.get(), properties);
+                
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -195,10 +197,7 @@ public class DevServerAccounts implements Accounts {
     }
 
     private String connectionUrl() {
-        return String.format("jdbc:mysql://%s/%s?useUnicode=true&characterEncoding=UTF-8",
-                DATABASE_HOST.getOr("localhost"),
-                DATABASE_NAME.getOr("activityinfo_at"));
-
+        return DATABASE_URL.getOr("jdbc:mysql://localhost/activityinfo_at?useUnicode=true&characterEncoding=UTF-8");
     }
 
     private String nameForEmail(String email) {

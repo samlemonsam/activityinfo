@@ -1,6 +1,4 @@
 import org.activityinfo.store.mysql.MySqlServer
-import org.activityinfo.store.mysql.MySqlSetupTask
-
 
 def localMySqlServer = new MySqlServer(
         host: 'localhost',
@@ -12,4 +10,5 @@ ext {
         localDev: localMySqlServer.database('activityinfo_dev'),
         localAT:  localMySqlServer.database('activityinfo_at')
     ]
+    
 }

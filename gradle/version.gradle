@@ -7,6 +7,7 @@ allprojects {
     def repo = Grgit.open(project.rootDir)
     def majorVersion = "2.8"
 
+    
     if(System.env.PIPELINE_VERSION) {
         // Resuming an existing pipeline
         project.version = "${majorVersion}.${System.env.PIPELINE_VERSION}"
@@ -21,6 +22,12 @@ allprojects {
         // Development
         project.version = "${majorVersion}-dev"      
         project.ext.buildNumber = 'dev'
+    }
+    
+    // Override the build number to support deploying past builds to
+    // new environments etc
+    if(project.hasProperty('build')) {
+        project.ext.buildNumber = Integer.parseInt(project.property('build'))
     }
     
     ext.commitId = repo.head().id
