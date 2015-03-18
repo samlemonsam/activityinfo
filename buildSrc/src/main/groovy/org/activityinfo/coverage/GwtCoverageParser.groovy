@@ -8,7 +8,7 @@ class GwtCoverageParser {
     private ProjectCoverage coverage
 
     /**
-     * 
+     *
      * @param pathMapFile file containing the mapping between the relative paths reported by the GWT instrumentation
      *                      and the results 
      * @param coverage
@@ -24,11 +24,14 @@ class GwtCoverageParser {
          * }
          */
 
-        def report = jsonParser.parse(reportFile)
-        report.each { sourceFile, lines ->
-            def fileCoverage = coverage.getSource(sourceFile)
-            lines.each { lineNumber, covered ->
-                fileCoverage.setCovered(Integer.parseInt(lineNumber), covered > 0)
+        if(reportFile.size() > 0) {
+
+            def report = jsonParser.parse(reportFile)
+            report.each { sourceFile, lines ->
+                def fileCoverage = coverage.getSource(sourceFile)
+                lines.each { lineNumber, covered ->
+                    fileCoverage.setCovered(Integer.parseInt(lineNumber), covered > 0)
+                }
             }
         }
     }

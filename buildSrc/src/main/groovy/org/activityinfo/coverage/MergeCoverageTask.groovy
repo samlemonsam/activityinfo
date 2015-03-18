@@ -24,7 +24,11 @@ class MergeCoverageTask extends DefaultTask {
         // Parse the GWT Coverage Reports
         GwtCoverageParser gwtCoverage = new GwtCoverageParser(coverage)
         gwtCoverageReportsDir.eachFile { it ->
-            gwtCoverage.readGwtOutput(it)
+            try {
+                gwtCoverage.readGwtOutput(it)
+            } catch (Exception e) {
+                logger.error("Failed to parse GWT coverage file ${it.absolutePath}", e)
+            }
         }
         
         // And the Jacoco reports..

@@ -141,4 +141,9 @@ public class RootResource {
     public LocationsResource getLocations() {
         return new LocationsResource(dispatcher);
     }
+    
+    @Path("/users")
+    public UsersResource getUsers() {
+        return new UsersResource(config, entityManager);
+    }
 }
