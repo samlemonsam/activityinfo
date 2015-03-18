@@ -6,6 +6,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -47,10 +48,12 @@ public class LoginPage {
             public boolean apply(WebDriver input) {
                 // Check for error messages
                 List<WebElement> alerts = input.findElements(LOGIN_ALERT);
-                if (!alerts.isEmpty() && alerts.get(0).isDisplayed()) {
-                    throw new RuntimeException("Login failed: " +
-                            Iterables.getOnlyElement(alerts).getText());
-                }
+                try {
+                    if (!alerts.isEmpty() && alerts.get(0).isDisplayed()) {
+                        throw new RuntimeException("Login failed: " +
+                                Iterables.getOnlyElement(alerts).getText());
+                    }
+                } catch (StaleElementReferenceException ignored) {}
 
                 URI currentUri = page.getCurrentUri();
 

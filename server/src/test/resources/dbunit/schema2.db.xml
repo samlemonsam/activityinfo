@@ -235,6 +235,30 @@
   <lockedPeriod LockedPeriodId="2" enabled="true" toDate="2009-01-12"
                 fromDate="2009-01-01" name="lala" ProjectId="1"/>
 
+  <activity activityId="42" databaseId="1" name="Deleted Activity"
+            reportingFrequency="1" allowEdit="1" sortOrder="1" locationTypeId="3"
+            published="2" dateDeleted="2009-01-01"/>
+
+
+  <indicator indicatorId="42" activityId="42" name="Number of children"
+             calculatedAutomatically="0"
+             units="children" aggregation="1" listHeader="kids" description="desc"
+             sortOrder="1" mandatory="0"/>
+
+  <site siteId="42" activityId="42" locationId="1" partnerId="1"
+        Date1="2009-01-01" Date2="2009-01-02" DateCreated="2009-02-01"
+        DateEdited="2009-02-01" timeEdited="3" ProjectId="1" Comments="He said 'booyah'"/>
+  <attributeValue siteId="42" attributeId="43" value="0"/>
+  <attributeValue siteId="42" attributeId="44" value="0"/>
+
+  <reportingPeriod reportingPeriodId="42" siteId="42"
+                   date1="2009-01-01" date2="2009-01-02" DateCreated="2009-02-01"
+                   DateEdited="2009-02-01"/>
+  <indicatorValue reportingPeriodId="42" indicatorId="42"
+                  value="1500"/>
+  <indicatorValue reportingPeriodId="43" indicatorId="42"
+                  value="500"/>
+
   <!-- PEAR Partners -->
 
   <partner partnerId="1" name="NRC"/>
