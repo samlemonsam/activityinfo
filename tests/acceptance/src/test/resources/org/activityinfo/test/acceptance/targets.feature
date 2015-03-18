@@ -1,5 +1,5 @@
 # TODO: should support api as well, but we need to support pivot table requests through the API
-@web  
+@web @cross-browser
 Feature: Indicator Targets
   As an analyst
   I want to be able to define target indicator values

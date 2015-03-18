@@ -54,4 +54,11 @@ public class OfflineSteps {
     public void offline_mode_should_be_enabled() throws Throwable {
         applicationPage.assertOfflineModeLoads();
     }
+
+
+    @Then("^synchronization should complete successfully$")
+    public void synchronization_should_complete_successfully() throws Throwable {
+        applicationPage.assertOfflineModeLoads();        
+    }
+
 }

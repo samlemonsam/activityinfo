@@ -12,7 +12,7 @@ sonarRunner {
         property "sonar.jdbc.password", sonarDatabasePassword
         
     //    property "sonar.jacoco.itReportPath", jacocoAcceptanceDataFile
-        property "sonar.genericcoverage.itReportPaths", gwtAcceptanceDataFile 
+        property "sonar.genericcoverage.itReportPaths", acceptanceDataFile 
     }
 }
 
@@ -26,4 +26,7 @@ repositories {
     mavenCentral()
 }
 
+// Ensure that we run the acceptanceTest with coverage enabled
+// to ensure that we have the coverage data to provide sonar
 tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
+
