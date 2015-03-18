@@ -1,4 +1,4 @@
-@web
+@web @cross-browser
 Feature: Projects
   As a program manager
   I want to be able to associate results with specific projects such as contracts or funding agreements
