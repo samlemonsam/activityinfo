@@ -31,16 +31,34 @@ public class ConfigProperty {
         String value = System.getProperty(propertyKey);
         return !Strings.isNullOrEmpty(value);
     }
-    
+
+    /**
+     * Returns property value if not null and not empty, otherwise default value is returned.
+     *
+     * @param defaultValue default value
+     * @return property value if not null and not empty, otherwise default value is returned.
+     */
     public String getOr(String defaultValue) {
         String path = System.getProperty(propertyKey);
-        if(Strings.isNullOrEmpty(path)) {
+        if (Strings.isNullOrEmpty(path)) {
             return defaultValue;
         }
         return path;
     }
-    
 
+    /**
+     * Returns property value if present (not null), otherwise default value is returned.
+     *
+     * @param defaultValue default value
+     * @return property value if present (not null), otherwise default value is returned.
+     */
+    public String getIfPresent(String defaultValue) {
+        String path = System.getProperty(propertyKey);
+        if (path == null) {
+            return defaultValue;
+        }
+        return path;
+    }
 
     public File getFile() {
         String path = get();
