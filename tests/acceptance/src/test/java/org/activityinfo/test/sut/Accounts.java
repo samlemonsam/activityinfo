@@ -10,5 +10,4 @@ public interface Accounts {
     
     UserAccount any();
 
-
 }

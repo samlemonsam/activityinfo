@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 public class SqlQueryUtil {
@@ -67,6 +68,25 @@ public class SqlQueryUtil {
             }
         });
         return set.toString();
+    }
+
+    public static String idSet(Collection<Integer> ids) {
+        return idSet(Lists.newArrayList(ids));
+    }
+
+    public static String idSet(List<Integer> ids) {
+        String s = "(";
+        int size = ids.size();
+        for (int i = 0; i < size; i++) {
+            Integer id = ids.get(i);
+            s = s + id;
+            boolean isLast = (i + 1) == size;
+            if (!isLast && size != 1) {
+                s+= ",";
+            }
+        }
+        s = s + ")";
+        return s;
     }
 
     public static long queryLong(EntityManager entityManager, final SqlQuery query) {

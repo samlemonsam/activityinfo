@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
         LoggingModule.class
 })
 @OnDataSet("/dbunit/schema2.db.xml")
-public class SchemaUpdateBuilderTest {
+public class DbUpdateBuilderTest {
 
     private static final int USER_ID = 1;
 
@@ -67,10 +67,13 @@ public class SchemaUpdateBuilderTest {
         EntityManager em = emFactory.createEntityManager();
         User user = em.find(User.class, USER_ID);
 
+        GetSyncRegionUpdates request = new GetSyncRegionUpdates();
+        request.setRegionId("db/1");
+
         Stopwatch stopwatch = Stopwatch.createStarted();
-        SchemaUpdateBuilder b = new SchemaUpdateBuilder(emFactory);
-        SyncRegionUpdate build = b.build(user, new GetSyncRegionUpdates());
-        System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
+        DbUpdateBuilder b = new DbUpdateBuilder(emFactory);
+        SyncRegionUpdate build = b.build(user, request);
+        System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms, sql: " + build.getSql());
 
 //        System.out.println("Number of queries: " + statistics.getQueries().length + " (was: 59)");
 //        for (String q : statistics.getQueries()) {
