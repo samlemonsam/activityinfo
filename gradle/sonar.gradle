@@ -10,9 +10,14 @@ sonarRunner {
         property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
         property "sonar.jdbc.username", "sonar"
         property "sonar.jdbc.password", sonarDatabasePassword
-        
-    //    property "sonar.jacoco.itReportPath", jacocoAcceptanceDataFile
-        property "sonar.genericcoverage.itReportPaths", acceptanceDataFile 
+    }
+}
+
+subprojects {
+    sonarRunner {
+        sonarProperties {
+            property "sonar.genericcoverage.itReportPaths", "$buildDir/coverage-at.xml"
+        }
     }
 }
 

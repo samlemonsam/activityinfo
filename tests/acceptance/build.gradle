@@ -104,6 +104,8 @@ task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
     jacocoReportFile = acceptanceTestJacocoReport.reports.xml.destination
     outputFile = project.acceptanceDataFile
     
+    outputs.upToDateWhen { false }
+    
     doFirst {
         if (!project.environment.local) {
             throw new IllegalStateException("${task.name} can only run in a local environment")

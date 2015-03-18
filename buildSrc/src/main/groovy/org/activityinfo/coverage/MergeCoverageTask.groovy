@@ -19,7 +19,7 @@ class MergeCoverageTask extends DefaultTask {
     @TaskAction
     public void mergeReports() {
         
-        ProjectCoverage coverage = new ProjectCoverage(project.rootProject)
+        ProjectCoverage coverage = new ProjectCoverage()
         
         // Parse the GWT Coverage Reports
         GwtCoverageParser gwtCoverage = new GwtCoverageParser(coverage)
@@ -35,6 +35,9 @@ class MergeCoverageTask extends DefaultTask {
         JacocoParser jacoco = new JacocoParser(coverage)
         jacoco.parse(jacocoReportFile)
         
-        coverage.writeReport(outputFile)
+        // Now write out a coverage report for each project
+        project.rootProject.subprojects.each { project ->
+            coverage.writeReport(project)
+        }
     }
 }
