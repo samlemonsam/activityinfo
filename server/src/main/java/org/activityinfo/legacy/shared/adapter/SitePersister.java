@@ -63,6 +63,7 @@ public class SitePersister {
             siteProperties.put("locationId", siteBinding.getLocationType().getId());
         }
 
+        
         final CreateSite createSite = new CreateSite(siteProperties);
 
         if (siteBinding.getLocationType().isAdminLevel()) {
