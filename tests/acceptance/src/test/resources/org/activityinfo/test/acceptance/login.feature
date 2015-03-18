@@ -1,4 +1,4 @@
-@web
+@web @cross-browser
 Feature: Login
 
 Scenario: Successful login

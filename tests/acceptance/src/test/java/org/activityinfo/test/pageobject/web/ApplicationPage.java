@@ -13,7 +13,7 @@ import org.openqa.selenium.WebElement;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
@@ -24,6 +24,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
  */
 public class ApplicationPage {
 
+    private static final Logger LOGGER = Logger.getLogger(ApplicationPage.class.getName());
     
     private static final By SETTINGS_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[2]");
     private static final By DESIGN_TAB = By.xpath("//div[contains(text(), 'Design')]");
@@ -75,6 +76,9 @@ public class ApplicationPage {
 
     public void assertOfflineModeLoads() {
         page.wait(5, MINUTES).until(new Predicate<WebDriver>() {
+            
+            private String lastStatus = "";
+
             @Override
             public boolean apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.className("x-status-text"));
@@ -87,7 +91,11 @@ public class ApplicationPage {
 
 
                     } else if (element.getText().contains("%")) {
-                        System.out.println(element.getText());
+                        String status = element.getText();
+                        if(!lastStatus.equals(status)) {
+                            LOGGER.info("Offline Status: " + status);
+                            lastStatus = status;
+                        }
                     }
                 }
                 return false;

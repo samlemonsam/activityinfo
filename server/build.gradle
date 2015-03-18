@@ -1,22 +1,31 @@
-import com.google.appengine.task.RunTask
 
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
-apply from: '../gradle/database.gradle'
+
+apply from: './src/script/dependencies.gradle'
+apply from: './src/script/databaseSetup.gradle'
 apply from: './src/script/buildProperties.gradle'
+apply from: './src/script/instrumentedGwt.gradle'
+apply from: './src/script/devServer.gradle'
 
 
 description = 'ActivityInfo Server'
 
 gwt {
     gwtVersion = project.gwtVersion
-    
+
     minHeapSize = "512M";
     maxHeapSize = "2048M";
 
     modules 'org.activityinfo.ui.ActivityInfoRelease',
             'org.activityinfo.ui.Embed'
+}
+
+ext {
+    // The location of the configuration file to be used 
+    // for the appengine dev server
+    configFile = project.file("$buildDir/config.properties")
 }
 
 appengine {
@@ -35,18 +44,15 @@ war {
     archiveName = "activityinfo-b${buildNumber}.war"
     classpath = classpath.filter { file ->
         return !file.name.startsWith('guava-gwt') &&
-               !file.name.startsWith('gwt-user')
+                !file.name.startsWith('gwt-user')
     }
     exclude("**/*.symbolMap")
 }
-
 
 test {
     systemProperty "testDatabaseName", "testDb"
     systemProperty "testDatabaseUsername", localMySqlUsername
     systemProperty "testDatabasePassword", localMySqlPassword
-
-    testLogging.showStandardStreams = false
 }
 
 processResources {
@@ -71,6 +77,52 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     archivePath = war.archivePath
 }
 
+
+task downloadBuild {
+    description = "Downloads and unpacks a previous build"
+    ext {
+        warFile = "$buildDir/build${project.buildNumber}.war"
+        warDir = "$buildDir/build${project.buildNumber}"
+    }
+
+    inputs.property 'build', build
+    outputs.file "$buildDir/build${project.buildNumber}.war"
+
+    doLast {
+        project.exec {
+            commandLine 'gsutil', 'cp', "gs://ai-pipeline/artifacts/activityinfo-b${build}.war", warFile
+        }
+        ant.unzip(src: warFile, dest: warDir)
+
+    }
+}
+
+task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
+    description = "Deploys a build to the staging environment"
+    
+    dependsOn downloadBuild, appengineDownloadSdk
+
+
+    explodedAppDirectory = project.file(downloadBuild.warDir)
+    extraOptions = ["--application=${environment.projectId}", '--version=1']
+    oauth2 = true
+    
+    doFirst {
+        if(environment.local) {
+            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
+        }
+    }
+}
+
+task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
+    description = "Deploys a previous build to the staging environment"
+
+    extraOptions = ["--application=${environment.projectId}", '--version=1']
+    oauth2 = true
+}
+
+
+
 task createTargetDir {
     doLast {
         // We still have a few tests that are looking for the target folder
@@ -80,153 +132,3 @@ task createTargetDir {
 }
 
 tasks.test.dependsOn 'createTargetDir'
-
-
-
-task appengineStartAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Starts a local AppEngine Development Server for Acceptance Testing in the background"
-    group = "Google App Engine"
-
-    daemon = true
-    jvmFlags = [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
-}
-
-task appengineRunAT(type: RunTask) {
-    dependsOn 'appengineExplodeApp', 'setupAcceptanceTestDatabase'
-    description = "Runs a local AppEngine Development Server for Acceptance Testing"
-    group = "Google App Engine"
-
-    jvmFlags = [ "-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}"]
-}
-
-
-task appengineExplodeInstrumentedApp  {
-    group = "Google App Engine"
-    description = "Explodes the instrumented WAR into a directory"
-    ext {
-        warDir = project.file("$buildDir/instrumented-app")
-    }
-    dependsOn {
-        'instrumentedWar'
-    }
-    doLast {
-        ant.unzip(src: instrumentedWar.archivePath, dest: warDir)
-    }
-}
-
-task appengineStartInstrumentedAT(type: com.google.appengine.task.RunTask) {
-
-    group = "Google App Engine"
-    description = "Runs a local AppEngine Dev Server instrumented for measuring test coverage"
-
-    dependsOn 'setupAcceptanceTestDatabase'
-    dependsOn 'appengineExplodeInstrumentedApp'
-
-    daemon = true
-    explodedAppDirectory = appengineExplodeInstrumentedApp.warDir
-
-    def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
-    def jacocoAgentJar = jacocoAgent.filter { it.name == 'jacocoagent.jar' }.singleFile.absolutePath
-
-    logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
-
-
-    jvmFlags = ["-Dactivityinfo.config=${acceptanceTestConfigFile.absolutePath}",
-                "-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}"
-    ]
-}
-
-
-// Add additional configurations based on the aboves
-apply from: './src/script/instrumentedGwt.gradle'
-
-
-
-dependencies {
-    compile project(':model')
-    compile project(':services')
-    
-    // AppEngine
-    appengineSdk libraries.appengine.sdk
-    compile libraries.appengine.api
-    compile libraries.appengine.gcs
-
-    testCompile libraries.appengine.testing
-    testCompile libraries.appengine.stubs
-    
-    // IoC Framework
-    compile libraries.guice
-    compile libraries.guiceServlet
-    
-    // Jersey + Rest 
-    compile libraries.jersey.server
-    compile libraries.jersey.multipart
-    compile libraries.jersey.guice
-    compile libraries.jersey.json
-    
-    compile libraries.freemarker
-    compile libraries.jackson.geojson
-    compile libraries.gson
-    
-    testCompile libraries.jersey.client
-
-    // Utility libraries
-    compile libraries.guava
-    compile libraries.commons.fileupload
-    compile libraries.commons.io
-    compile libraries.bcrypt
-
-
-    // MySQL Related dependencies
-    compile libraries.hibernate.entitymanager
-    compile libraries.hibernate.spatial
-    compile libraries.hibernate.validator
-    compile libraries.liquibase
-    compile libraries.jdbc.mysql
-
-    testCompile libraries.jdbc.sqlite
-    testCompile libraries.dbunit
-    testCompile libraries.c3p0
-
-
-    compile libraries.jts
-
-    compile libraries.google.apiClient
-    
-
-    // GWT User Interface Dependencies
-    compile libraries.gxt
-
-    compile libraries.gwt.user
-    
-    gwt libraries.gwt.dnd
-    gwt libraries.gwt.guice
-    gwt libraries.gwt.gson
-    gwt libraries.gwt.leaflet
-    gwt libraries.gwt.gears
-    gwt libraries.gwt.guava
-
-    compile libraries.gwt.i18nServer
-
-
-    compile libraries.rebar.time
-    compile libraries.rebar.sync
-    compile libraries.rebar.asyncFun
-    compile libraries.rebar.appcache
-    compile libraries.rebar.sql
-    compile libraries.rebar.sync
-    
-    gwt libraries.rebar.style
-
-
-    // Report Rendering
-    compile libraries.appengine.export.itext
-    compile libraries.appengine.export.awt
-    compile libraries.appengine.export.ppt
-    compile libraries.appengine.export.jcharts
-    compile libraries.appengine.export.emf
-    compile libraries.prettytime
-
-}
-
