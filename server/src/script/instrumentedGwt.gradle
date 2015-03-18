@@ -37,7 +37,13 @@ task compileInstrumentedGwt(type: de.richsource.gradle.plugins.gwt.GwtCompile) {
         // Write the file for the compiler containing a list of all
         // sources to instrument
         def sourceSets = [project.sourceSets.main.java]
-        def sources = sourceSets.collectMany { s -> s.files }
+        def sources = []
+        
+        sourceSets.each {  SourceDirectorySet s ->  
+            s.visit { FileVisitDetails f ->
+                sources.add(f.relativePath.toString())
+            }
+        }
        
         sourceListFile.parentFile.mkdirs()
         sourceListFile.write sources.join("\n")

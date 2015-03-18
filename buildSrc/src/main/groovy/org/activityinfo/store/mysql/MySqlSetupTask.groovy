@@ -59,7 +59,7 @@ class MySqlSetupTask extends DefaultTask {
                 new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),
                 new JdbcConnection(connection));
 
-        liquibase.log.logLevel = liquibase.logging.LogLevel.DEBUG //liquibaseLoggingLevel()
+        liquibase.log.logLevel = liquibaseLoggingLevel()
         liquibase.update(null)
     }
 
