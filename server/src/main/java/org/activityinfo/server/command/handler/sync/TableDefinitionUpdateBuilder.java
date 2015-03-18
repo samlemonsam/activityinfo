@@ -25,16 +25,28 @@ package org.activityinfo.server.command.handler.sync;
 import com.bedatadriven.rebar.sync.server.JpaUpdateBuilder;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
-import org.activityinfo.server.database.hibernate.entity.ReportingPeriod;
-import org.activityinfo.server.database.hibernate.entity.Site;
-import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.*;
 import org.json.JSONException;
 
-public class SiteTableUpdateBuilder implements UpdateBuilder {
+public class TableDefinitionUpdateBuilder implements UpdateBuilder {
 
     public static final String CURRENT_VERSION = "2";
     private final JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
+    private final Class[] schemaClasses = new Class[]{Country.class,
+            AdminLevel.class,
+            LocationType.class,
+            UserDatabase.class,
+            Partner.class,
+            Activity.class,
+            Indicator.class,
+            AttributeGroup.class,
+            Attribute.class,
+            User.class,
+            UserPermission.class,
+            LockedPeriod.class,
+            Project.class};
+    
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws JSONException {
         SyncRegionUpdate update = new SyncRegionUpdate();
@@ -43,11 +55,20 @@ public class SiteTableUpdateBuilder implements UpdateBuilder {
 
         if (!CURRENT_VERSION.equals(request.getLocalVersion())) {
 
+            for (Class schemaClass : schemaClasses) {
+                builder.createTableIfNotExists(schemaClass);
+            }
+
             builder.createTableIfNotExists(Site.class);
             builder.createTableIfNotExists(ReportingPeriod.class);
+
+            builder.executeStatement(
+                    "create table if not exists AttributeGroupInActivity (ActivityId integer, AttributeGroupId integer)");
+            builder.executeStatement("create table if not exists PartnerInDatabase (DatabaseId integer, PartnerId int)");
+            builder.executeStatement("create table if not exists IndicatorLink (SourceIndicatorId integer, DestinationIndicatorId int)");
+
             builder.executeStatement("create index if not exists site_activity on site (ActivityId)");
 
-            // TODO: fix rebar to handle these types of classes correctly
             builder.executeStatement(
                     "create table if not exists AttributeValue (SiteId integer, AttributeId integer, Value integer)");
             builder.executeStatement(
@@ -57,6 +78,17 @@ public class SiteTableUpdateBuilder implements UpdateBuilder {
             builder.executeStatement(
                     "create table if not exists sitehistory (id integer, siteid integer, userid integer, " +
                     "timecreated real, initial integer, json text)");
+
+            builder.createTableIfNotExists(Location.class);
+            builder.executeStatement(
+                    "create table if not exists LocationAdminLink (LocationId integer, AdminEntityId integer)");
+
+            builder.executeStatement(
+                    "CREATE TABLE IF NOT EXISTS  target (targetId int, name text, date1 text, date2 text, projectId int, " +
+                            "partnerId int, adminEntityId int, databaseId int)");
+            builder.executeStatement("CREATE TABLE IF NOT EXISTS  targetvalue (targetId int, IndicatorId int, value real)");
+
+
             update.setSql(builder.asJson());
         }
 

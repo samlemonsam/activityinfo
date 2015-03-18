@@ -1,7 +1,12 @@
 package org.activityinfo.test.driver;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
@@ -30,7 +35,7 @@ public class AliasTable {
      */
     private BiMap<String, String> testHandleToAlias = HashBiMap.create();
 
-    private Map<String, Integer> testHandleToId = Maps.newHashMap();
+    private Map<String, Supplier<Integer>> testHandleToId = Maps.newHashMap();
     
 
     private Random random = new Random();
@@ -49,6 +54,17 @@ public class AliasTable {
         return alias;
     }
 
+
+    public String createAliasIfNotExists(String testHandle) {
+        Preconditions.checkNotNull(testHandle, "testHandle");
+        
+        if(testHandleToAlias.containsKey(testHandle)) {
+            return testHandleToAlias.get(testHandle);
+        } else {
+            return createAlias(testHandle);
+        }
+    }
+
     public List<String> getTestHandles() {
         Set<String> set = new HashSet<>();
         set.addAll(testHandleToAlias.keySet());
@@ -62,7 +78,7 @@ public class AliasTable {
         if(!testHandleToId.containsKey(testHandle)) {
             throw missingHandle("Test handle '%s' has not been bound to an id.", testHandle);
         }
-        return testHandleToId.get(testHandle);
+        return testHandleToId.get(testHandle).get();
     }
 
     private IllegalStateException missingHandle(String message, Object... arguments) {
@@ -71,7 +87,8 @@ public class AliasTable {
         s.append("\n");
         s.append("Test handles:\n");
         for (String handle : getTestHandles()) {
-            s.append(String.format("  %s [%s] = %d\n", handle, testHandleToAlias.get(handle), testHandleToId.get(handle)));
+            s.append(String.format("  %s [%s] = %d\n", handle, testHandleToAlias.get(handle),
+                    testHandleToId.get(handle).get()));
         }
         return new IllegalStateException(s.toString());
     }
@@ -80,7 +97,7 @@ public class AliasTable {
         Preconditions.checkNotNull(testHandle, "testHandle");
 
         int id = generateId();
-        testHandleToId.put(testHandle, id);
+        testHandleToId.put(testHandle, Suppliers.ofInstance(id));
         return id;
     }
 
@@ -91,25 +108,42 @@ public class AliasTable {
     /**
      * Maps an alias to its server-generated ID
      */
-    public void bindAliasToId(String alias, int id) {
+    public void bindAliasToId(String alias, Supplier<Integer> id) {
         Preconditions.checkNotNull(alias, "alias");
         testHandleToId.put(getTestHandleForAlias(alias), id);
     }
 
+    public void bindAliasToId(String alias, int id) {
+        bindAliasToId(alias, Suppliers.ofInstance(id));
+    }
+
+    public void bindTestHandleToIdIfAbsent(String handle, Supplier<Integer> newId) {
+        Preconditions.checkNotNull(handle, "handle");
+        if(!testHandleToId.containsKey(handle)) {
+            testHandleToId.put(handle, newId);
+        }
+    }
+    
     /**
      * Maps a test handle to its server-generated ID
      */
-    public void bindTestHandleToId(String handle, int newId) {
+    public void bindTestHandleToId(String handle, Supplier<Integer> newId) {
         Preconditions.checkNotNull(handle, "handle");
 
-        Integer existingId = testHandleToId.get(handle);
-        if(existingId != null && existingId != newId) {
-            throw new IllegalStateException(String.format(
-            "Cannot bind test handle %s to id %d: it was previously bound to %d", handle, 
-                    existingId,
-                    testHandleToId.get(handle)));
+        if(testHandleToId.containsKey(handle)) {
+            int existingId = testHandleToId.get(handle).get();
+            if (existingId != newId.get()) {
+                throw new IllegalStateException(String.format(
+                        "Cannot bind test handle %s to id %d: it was previously bound to %d", handle,
+                        newId.get(),
+                        existingId));
+            }
         }
         testHandleToId.put(handle, newId);
+    }
+    
+    public void bindTestHandleToId(String handle, int newId) {
+        bindTestHandleToId(handle, Suppliers.ofInstance(newId));
     }
     
     /**
@@ -176,10 +210,10 @@ public class AliasTable {
     
     public int getOrGenerateId(String alias) {
         if(testHandleToId.containsKey(alias)) {
-            return testHandleToId.get(alias);
+            return testHandleToId.get(alias).get();
         } else {
             int newId = generateId();
-            testHandleToId.put(alias, newId);
+            testHandleToId.put(alias, Suppliers.ofInstance(newId));
             return newId;
         }
     }
