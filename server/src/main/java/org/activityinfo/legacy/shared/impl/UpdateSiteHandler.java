@@ -134,7 +134,7 @@ public class UpdateSiteHandler implements CommandHandlerAsync<UpdateSite, VoidRe
                             .value("reportingPeriodId", reportingPeriodId)
                             .value("indicatorId", indicatorId);
 
-                    if (value instanceof Double) {
+                    if (value instanceof Double && !((Double)value).isNaN()) {
                         sqlInsert.value("value", value).execute(tx);
                     } else if (value instanceof String) {
                         sqlInsert.value("TextValue", value).execute(tx);
