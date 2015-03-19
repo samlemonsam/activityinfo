@@ -32,8 +32,9 @@ class FetchCloudSqlConfiguration extends DefaultTask {
     
     public String getCertificateName() {
         def name = System.getProperty("user.name") + "-" + InetAddress.getLocalHost().getHostName()
-        def cleanedName = name.trim().replaceAll("[^A-Za-z._ -]", "")
-        return cleanedName
+        return name.trim()
+                .replaceAll("([0-9])", { (('A' as char) + Integer.parseInt(it[0])) as char })
+                .replaceAll("[^A-Za-z._ -]", "")
     }
     
     public File getClientKeyFile() {
@@ -59,7 +60,6 @@ class FetchCloudSqlConfiguration extends DefaultTask {
     
     @TaskAction
     def fetch() {
-
         def httpTransport = GoogleNetHttpTransport.newTrustedTransport()
         def jsonFactory = new JacksonFactory()
         def credentials = GoogleCredential
