@@ -7,5 +7,6 @@
 ext {
     jacocoAcceptanceDataFile = project(':tests:acceptance').file("build/acceptanceTest.exec")
     gwtAcceptanceDataFile = project(':tests:acceptance').file("build/acceptanceTest-gwt.xml")
+    acceptanceDataFile = project(':tests:acceptance').file("build/acceptanceTest-total.xml")
 
 }
