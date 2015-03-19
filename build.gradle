@@ -8,6 +8,8 @@ apply from: "./gradle/version.gradle"
 apply from: "./gradle/coverage.gradle"
 apply from: "./gradle/jacoco.gradle"
 apply from: "./gradle/sonar.gradle"
+apply from: './gradle/database.gradle'
+apply from: "./gradle/environment.gradle"
 
 
 task wrapper(type: Wrapper) {
@@ -66,7 +68,6 @@ buildscript {
   }
   dependencies {
     classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
-    classpath 'com.google.appengine:gradle-appengine-plugin:1.9.18'
     classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
   }
 }
