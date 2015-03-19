@@ -32,8 +32,6 @@ public class DevServerAccounts implements Accounts {
 
     private final Meter users = Metrics.REGISTRY.meter("registeredUsers");
 
-    private Connection connection = null;
-
     private List<String> pendingUsers = Lists.newArrayList();
 
     private boolean batchingEnabled = false;
@@ -51,19 +49,6 @@ public class DevServerAccounts implements Accounts {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("MySQL driver is not on the classpath", e);
         }
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if(connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
     }
 
     public boolean isBatchingEnabled() {
@@ -110,26 +95,21 @@ public class DevServerAccounts implements Accounts {
         return new UserAccount(email, DEV_PASSWORD);
     }
 
-    private void ensureConnected() {
-        if(connection == null) {
-            try {
-                LOGGER.info("Opening connection to " + connectionUrl());
-                // Add all system properties prefixed by 'mysql.' to the driver properties,
-                // stripped of the 'mysql.' prefix
-                Properties properties = new Properties();
-                for(String systemProperty : System.getProperties().stringPropertyNames()) {
-                    if(systemProperty.startsWith("mysql.")) {
-                        String key = systemProperty.substring("mysql.".length());
-                        String value = System.getProperty(systemProperty);
-                        properties.put(key, value);
-                    }
-                }
-                connection = DriverManager.getConnection(DATABASE_URL.get(), properties);
-                
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+    private Connection openConnection() throws SQLException {
+
+        LOGGER.info("Opening connection to " + connectionUrl());
+        // Add all system properties prefixed by 'mysql.' to the driver properties,
+        // stripped of the 'mysql.' prefix
+        Properties properties = new Properties();
+        for(String systemProperty : System.getProperties().stringPropertyNames()) {
+            if(systemProperty.startsWith("mysql.")) {
+                String key = systemProperty.substring("mysql.".length());
+                String value = System.getProperty(systemProperty);
+                properties.put(key, value);
             }
         }
+        return DriverManager.getConnection(DATABASE_URL.get(), properties);
+            
     }
 
     public void flush() {
@@ -141,9 +121,7 @@ public class DevServerAccounts implements Accounts {
 
     private void insertUsers(List<String> users) {
 
-        ensureConnected();
-
-        try {
+        try(Connection connection = openConnection()) {
             connection.setAutoCommit(false);
 
             // Create the user for testing purposes
