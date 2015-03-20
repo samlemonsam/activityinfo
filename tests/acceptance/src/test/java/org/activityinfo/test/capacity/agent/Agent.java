@@ -4,7 +4,8 @@ package org.activityinfo.test.capacity.agent;
 import com.codahale.metrics.Counter;
 import com.google.common.io.Files;
 import org.activityinfo.test.capacity.Metrics;
-import org.activityinfo.test.capacity.scenario.Scenario;
+import org.activityinfo.test.capacity.model.BrowserSession;
+import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.web.LoginPage;
@@ -30,21 +31,20 @@ public class Agent {
     
     private static final AtomicInteger SESSION_NUMBER = new AtomicInteger(1);
     
-    private static final Counter CONCURRENT_USERS = Metrics.REGISTRY.counter("concurrentUsers");
 
-    private Scenario scenario;
+    private ScenarioContext scenario;
     private String name;
     private UserAccount account;
     private ApiApplicationDriver driver;
     
-    public Agent(Scenario scenario, String name, UserAccount account, ApiApplicationDriver driver) {
+    public Agent(ScenarioContext scenario, String name, UserAccount account, ApiApplicationDriver driver) {
         this.scenario = scenario;
         this.name = name;
         this.account = account;
         this.driver = driver;
     }
 
-    public Scenario getScenario() {
+    public ScenarioContext getScenario() {
         return scenario;
     }
 
@@ -64,38 +64,36 @@ public class Agent {
     public String getName() {
         return name;
     }
-    
-    public void startBrowserSession(BrowserSession session) {
-        String sessionName = "session" + SESSION_NUMBER.getAndIncrement();
-        
-        WebDriver webDriver = startWebDriver(sessionName);
-        try {
-            CONCURRENT_USERS.inc();
-            logConcurrentUsers();
+//    
+//    public void startBrowserSession(BrowserSession session) {
+//        String sessionName = "session" + SESSION_NUMBER.getAndIncrement();
+//        
+//        WebDriver webDriver = startWebDriver(sessionName);
+//        try {
+//            CONCURRENT_USERS.inc();
+//            logConcurrentUsers();
+//
+//            LoginPage loginPage = new LoginPage(webDriver, scenario.getServer());
+//            UiApplicationDriver uiDriver = new UiApplicationDriver(driver, loginPage, scenario.getAliasTable());
+//            uiDriver.login(account);
+//            
+//            session.execute(this, uiDriver);
+//            
+//        } catch (Exception e) {
+//            Metrics.ERRORS.inc();
+//            logError(webDriver, e);
+//        } finally {
+//            CONCURRENT_USERS.dec();
+//            logConcurrentUsers();
+//            try {
+//                webDriver.quit();
+//            } catch(Exception e) {
+//                LOGGER.log(Level.SEVERE, "Exception while shutting down web driver", e);
+//            }
+//        }
+////    }
+//
 
-            LoginPage loginPage = new LoginPage(webDriver, scenario.getServer());
-            UiApplicationDriver uiDriver = new UiApplicationDriver(driver, loginPage, scenario.getAliasTable());
-            uiDriver.login(account);
-            
-            session.execute(this, uiDriver);
-            
-        } catch (Exception e) {
-            Metrics.ERRORS.inc();
-            logError(webDriver, e);
-        } finally {
-            CONCURRENT_USERS.dec();
-            logConcurrentUsers();
-            try {
-                webDriver.quit();
-            } catch(Exception e) {
-                LOGGER.log(Level.SEVERE, "Exception while shutting down web driver", e);
-            }
-        }
-    }
-
-    private void logConcurrentUsers() {
-        LOGGER.info(String.format("Concurrent users: %d", CONCURRENT_USERS.getCount()));
-    }
 
     private WebDriver startWebDriver(String sessionName) {
         

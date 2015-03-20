@@ -11,7 +11,7 @@ import org.json.JSONException;
 import java.util.List;
 
 public abstract class ApplicationDriver {
-
+    
     private final AliasTable aliasTable;
 
     public ApplicationDriver(AliasTable aliasTable) {
@@ -95,6 +95,7 @@ public abstract class ApplicationDriver {
     public final void grantPermission(Property... properties) throws Exception {
         grantPermission(new TestObject(aliasTable, properties));
     }
+    
 
     protected void grantPermission(TestObject permission) throws Exception {
         throw new PendingException();
@@ -120,4 +121,6 @@ public abstract class ApplicationDriver {
     protected void createLocation(TestObject testObject) throws Exception {
         throw new PendingException();
     }
+    
+    public abstract ApplicationDriver withNamespace(AliasTable aliasTable);
 }

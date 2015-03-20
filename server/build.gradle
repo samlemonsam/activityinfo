@@ -89,8 +89,9 @@ task downloadBuild {
     outputs.file "$buildDir/build${project.buildNumber}.war"
 
     doLast {
+
         project.exec {
-            commandLine 'gsutil', 'cp', "gs://ai-pipeline/artifacts/activityinfo-b${build}.war", warFile
+            commandLine 'gsutil', 'cp', "gs://ai-pipeline/artifacts/activityinfo-b${project.buildNumber}.war", warFile
         }
         ant.unzip(src: warFile, dest: warDir)
 

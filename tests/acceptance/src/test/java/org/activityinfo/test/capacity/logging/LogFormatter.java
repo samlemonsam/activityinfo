@@ -4,23 +4,24 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 
-public class CapacityTestLogHandler extends Handler {
+public class LogFormatter extends Formatter {
 
     public static final int NAME_WIDTH = 25;
     public static final String DEFAULT_PREFIX = "org.activityinfo.test";
     private final Stopwatch stopwatch = Stopwatch.createStarted();
 
     @Override
-    public void publish(LogRecord record) {
-        System.out.println(String.format("%6.2f %6s %s %s", 
+    public String format(LogRecord record) {
+        return String.format("%6.2f %6s %s %s\n", 
                 stopwatch.elapsed(TimeUnit.SECONDS) / 60d,
                 record.getLevel(),
                 abbreviate(record.getLoggerName()),
-                record.getMessage()));
+                record.getMessage());
         
     }
 
@@ -53,15 +54,5 @@ public class CapacityTestLogHandler extends Handler {
                 return name.substring(name.length()-NAME_WIDTH);
             }
         }
-    }
-
-    @Override
-    public void flush() {
-        System.out.flush();
-    }
-
-    @Override
-    public void close() throws SecurityException {
-
     }
 }

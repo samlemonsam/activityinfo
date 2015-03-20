@@ -2,6 +2,10 @@ package org.activityinfo.test.sut;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.config.ConfigProperty;
@@ -12,6 +16,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,21 +32,19 @@ public class DevServerAccounts implements Accounts {
     private static final ConfigProperty DATABASE_URL = new ConfigProperty("databaseUrl", "MySQL database url");
     private static final ConfigProperty EMAIL = new ConfigProperty("devAccountEmail", "Dev account email");
 
-
     private static final String DEV_PASSWORD = "notasecret";
+    public static final String DEV_PASSWORD_HASHED = BCrypt.hashpw(DEV_PASSWORD, BCrypt.gensalt());
 
     private final Meter users = Metrics.REGISTRY.meter("registeredUsers");
-
-    private List<String> pendingUsers = Lists.newArrayList();
-
-    private boolean batchingEnabled = false;
 
     /**
      * Map from test-friendly handles to unique email addresses
      */
-    private Map<String, String> aliasMap = new HashMap<>();
+    private LoadingCache<String, UserAccount> aliasMap;
 
     private Random random = new Random();
+    private boolean batchingEnabled = false;
+    private List<String> pendingUsers = Lists.newArrayList();
 
     public DevServerAccounts() {
         try {
@@ -49,6 +52,15 @@ public class DevServerAccounts implements Accounts {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("MySQL driver is not on the classpath", e);
         }
+        LOGGER.info("Using connection to " + connectionUrl());
+
+        aliasMap = CacheBuilder.newBuilder().concurrencyLevel(100).build(new CacheLoader<String, UserAccount>() {
+            @Override
+            public UserAccount load(String key) throws Exception {
+                return createUniqueAccount(key);
+            }
+        });
+
     }
 
     public boolean isBatchingEnabled() {
@@ -61,12 +73,11 @@ public class DevServerAccounts implements Accounts {
 
     @Override
     public UserAccount ensureAccountExists(String userName) {
-
-        if(aliasMap.containsKey(userName)) {
-            String email = aliasMap.get(userName);
-            return new UserAccount(email, DEV_PASSWORD);
+        try {
+            return aliasMap.get(userName);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return createUniqueAccount(userName);
     }
 
 
@@ -89,15 +100,11 @@ public class DevServerAccounts implements Accounts {
             insertUsers(Arrays.asList(email));
         }
 
-        aliasMap.put(userName, email);
-
-
         return new UserAccount(email, DEV_PASSWORD);
     }
 
     private Connection openConnection() throws SQLException {
 
-        LOGGER.info("Opening connection to " + connectionUrl());
         // Add all system properties prefixed by 'mysql.' to the driver properties,
         // stripped of the 'mysql.' prefix
         Properties properties = new Properties();
@@ -111,9 +118,10 @@ public class DevServerAccounts implements Accounts {
         return DriverManager.getConnection(DATABASE_URL.get(), properties);
             
     }
-
+    
     public void flush() {
         if(!pendingUsers.isEmpty()) {
+            LOGGER.info(String.format("Creating %d accounts...", pendingUsers.size()));
             insertUsers(pendingUsers);
             pendingUsers.clear();
         }
@@ -131,17 +139,16 @@ public class DevServerAccounts implements Accounts {
                 for(String user : users) {
                     stmt.setString(1, user);
                     stmt.setString(2, nameForEmail(user));
-                    stmt.setString(3, BCrypt.hashpw(DEV_PASSWORD, BCrypt.gensalt()));
+                    stmt.setString(3, DEV_PASSWORD_HASHED);
                     stmt.setString(4, "en");
-                    stmt.execute();
+                    stmt.addBatch();
 
                     this.users.mark();
                 }
+                stmt.executeBatch();
             }
 
             connection.commit();
-
-            LOGGER.log(Level.INFO, String.format("Registered users: %d ", this.users.getCount()));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -177,7 +184,7 @@ public class DevServerAccounts implements Accounts {
     private String connectionUrl() {
         return DATABASE_URL.getOr("jdbc:mysql://localhost/activityinfo_at?useUnicode=true&characterEncoding=UTF-8");
     }
-
+    
     private String nameForEmail(String email) {
         int at = email.indexOf('@');
         return email.substring(0, at);

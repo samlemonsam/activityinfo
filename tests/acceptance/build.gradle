@@ -22,6 +22,7 @@ dependencies {
     testCompile 'io.dropwizard.metrics:metrics-core:3.1.0'
     testCompile libraries.c3p0
 
+    testCompile project(':core:model')
 }
 
 test {

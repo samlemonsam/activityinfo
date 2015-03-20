@@ -39,6 +39,11 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
+    public ApplicationDriver withNamespace(AliasTable aliasTable) {
+        return new UiApplicationDriver(apiDriver.withNamespace(aliasTable), loginPage, aliasTable);
+    }
+
+    @Override
     public void login() {
         throw new UnsupportedOperationException();
     }

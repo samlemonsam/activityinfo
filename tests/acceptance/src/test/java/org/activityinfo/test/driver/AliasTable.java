@@ -47,7 +47,7 @@ public class AliasTable {
     public String createAlias(String testHandle) {
         Preconditions.checkNotNull(testHandle, "testHandle");
         Preconditions.checkState(!testHandleToAlias.containsKey(testHandle), 
-                "The test handle has already been assigned the alias '%s'", testHandle);
+                "The test handle '%s' has already been assigned an alias", testHandle);
 
         String alias = testHandle + "_" + Long.toHexString(random.nextLong());
         testHandleToAlias.put(testHandle, alias);
