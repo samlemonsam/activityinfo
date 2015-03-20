@@ -71,6 +71,7 @@ public class FormDesigner {
         dropControllerRegistry.register(rootFormClass.getId(), formDesignerPanel.getDropPanel(), this);
 
         formDesignerPanel.bind(eventBus);
+        model.bind(eventBus);
 
         headerPresenter = new HeaderPresenter(this);
         headerPresenter.show();

@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
+import com.google.gwt.event.shared.EventBus;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormElementContainer;
@@ -35,6 +36,8 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubformConstants;
+import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -47,6 +50,7 @@ public class FormDesignerModel {
     private final BiMap<ResourceId, FormClass> formFieldToSubFormClass = HashBiMap.create();
 
     private final FormClass rootFormClass;
+    private WidgetContainer selectedWidgetContainer;
 
     public FormDesignerModel(FormClass rootFormClass) {
         Preconditions.checkNotNull(rootFormClass);
@@ -171,5 +175,18 @@ public class FormDesignerModel {
             formFields.addAll(subForm.getFields());
         }
         return formFields;
+    }
+
+    public void bind(EventBus eventBus) {
+        eventBus.addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
+            @Override
+            public void handle(WidgetContainerSelectionEvent event) {
+                selectedWidgetContainer = event.getSelectedItem();
+            }
+        });
+    }
+
+    public WidgetContainer getSelectedWidgetContainer() {
+        return selectedWidgetContainer;
     }
 }

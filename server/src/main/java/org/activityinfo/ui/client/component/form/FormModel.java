@@ -23,10 +23,7 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
@@ -40,6 +37,7 @@ import org.activityinfo.promise.Promise;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 02/13/2015.
@@ -109,6 +107,10 @@ public class FormModel {
      */
     private final BiMap<SubformValueKey, FormInstance> subFormInstances = HashBiMap.create();
 
+    /**
+     * Keeps formClass to create FieldContainers map.
+     */
+    private final Map<ResourceId, Set<FieldContainer>> classToFields = Maps.newHashMap();
 
     public FormModel(ResourceLocator locator) {
         this.locator = locator;
@@ -251,6 +253,20 @@ public class FormModel {
         instance.setOwnerId(key.getSelectedTab().getId());
         subFormInstances.put(key, instance);
         return instance;
+    }
+
+    public Set<FieldContainer> getContainersOfClass(ResourceId classId) {
+        return classToFields.get(classId);
+    }
+
+    public FormModel addContainerOfClass(ResourceId classId, FieldContainer fieldContainer) {
+        Set<FieldContainer> containers = classToFields.get(classId);
+        if (containers == null) {
+            containers = Sets.newHashSet();
+            classToFields.put(classId, containers);
+        }
+        containers.add(fieldContainer);
+        return this;
     }
 
     public FormInstance getOriginalRootInstance() {

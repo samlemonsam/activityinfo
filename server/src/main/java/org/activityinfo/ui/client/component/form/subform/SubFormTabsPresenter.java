@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.form.subform;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -64,7 +65,7 @@ public class SubFormTabsPresenter {
         }
 
         public static ButtonType fromValue(String value) {
-            value = value.substring(0, value.lastIndexOf("_")); // cut off suffix
+            value = cutOffIdSuffix(value); // cut off suffix
             for (ButtonType type : values()) {
                 if (type.getValue().equals(value)) {
                     return type;
@@ -72,6 +73,10 @@ public class SubFormTabsPresenter {
             }
             return null;
         }
+    }
+
+    private static String cutOffIdSuffix(String value) {
+        return value.substring(0, value.lastIndexOf("_"));
     }
 
     private final SubFormTabs view;
@@ -102,29 +107,34 @@ public class SubFormTabsPresenter {
     }
 
     public void set(List<FormInstance> instances) {
-        this.instances = instances;
-        instancesMap.clear();
+        try {
+            this.instances = instances;
+            instancesMap.clear();
 
-        String safeHtml = showPreviousButtons ? perviousButtons() : "";
-        for (FormInstance instance : instances) {
-            instancesMap.put(instance.getId().asString(), instance);
+            String safeHtml = showPreviousButtons ? perviousButtons() : "";
+            for (FormInstance instance : instances) {
+                instancesMap.put(instance.getId().asString(), instance);
 
-            String escapedLabel = SafeHtmlUtils.fromString(FormInstanceLabeler.getLabel(instance)).asString();
-            safeHtml = safeHtml + "<li><a href='javascript:' id='" + instance.getId().asString() +
-                    "' title='" + tooltip(instance, escapedLabel) + "'>" + escapedLabel + "</a></li>";
-        }
-
-        safeHtml = showNextButtons ? safeHtml + nextButtons() : safeHtml;
-
-        view.getSubformTabsUl().removeAllChildren();
-        view.getSubformTabsUl().setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(safeHtml));
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                bindClickHandlers();
+                String escapedLabel = SafeHtmlUtils.fromString(FormInstanceLabeler.getLabel(instance)).asString();
+                safeHtml = safeHtml + "<li><a href='javascript:' id='" + appendIdSuffix(instance.getId().asString()) +
+                        "' title='" + tooltip(instance, escapedLabel) + "'>" + escapedLabel + "</a></li>";
             }
-        });
+
+            safeHtml = showNextButtons ? safeHtml + nextButtons() : safeHtml;
+
+            view.getSubformTabsUl().removeAllChildren();
+            view.getSubformTabsUl().setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(safeHtml));
+
+
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    bindClickHandlers();
+                }
+            });
+        } catch (Exception e) {
+            GWT.log(e.getMessage(), e);
+        }
     }
 
     private String tooltip(FormInstance instance, String label) {
@@ -147,13 +157,17 @@ public class SubFormTabsPresenter {
                 continue;
             }
 
-            addClickHandlerToElementById(buttonType.getValue() + "_" + idSuffix.asString());
+            addClickHandlerToElementById(appendIdSuffix(buttonType.getValue()));
         }
 
         // tabs
         for (String id : instancesMap.keySet()) {
-            addClickHandlerToElementById(id);
+            addClickHandlerToElementById(appendIdSuffix(id));
         }
+    }
+
+    private String appendIdSuffix(String id) {
+        return id + "_" + idSuffix.asString();
     }
 
     private void addClickHandlerToElementById(final String elementId) {
@@ -176,6 +190,7 @@ public class SubFormTabsPresenter {
                 moveButtonClickHandler.onClick(buttonType);
             }
         } else {
+            elementId = cutOffIdSuffix(elementId); // cut off suffix
             FormInstance instance = instancesMap.get(elementId);
             Preconditions.checkNotNull(instance);
             if (instanceTabClickHandler != null) {

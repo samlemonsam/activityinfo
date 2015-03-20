@@ -32,6 +32,7 @@ import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PeriodValue;
@@ -40,6 +41,7 @@ import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
+import org.activityinfo.ui.client.component.form.FieldContainer;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.widget.ClickHandler;
@@ -47,6 +49,7 @@ import org.activityinfo.ui.client.widget.ClickHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * @author yuriyz on 02/17/2015.
@@ -55,6 +58,7 @@ public class SubFormTabsManipulator {
 
     private final SubFormTabsPresenter presenter;
     private final ResourceLocator resourceLocator;
+    private final boolean designMode;
 
     @Nullable
     private PeriodValue periodValue = null; // if not null then period instance generator is in use
@@ -62,22 +66,33 @@ public class SubFormTabsManipulator {
     private FormClass subForm;
     private FormModel formModel;
     private FormDesigner formDesigner;
+    private FormInstance selectedInstance;
 
     public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator) {
-        this.resourceLocator = formDesigner.getResourceLocator();
+        this.resourceLocator = resourceLocator;
         this.presenter = new SubFormTabsPresenter(new SubFormTabs());
+        this.designMode = false;
     }
 
     public SubFormTabsManipulator(@Nonnull FormDesigner formDesigner, @Nonnull SubFormTabs tabs) {
         this.resourceLocator = formDesigner.getResourceLocator();
         this.formDesigner = formDesigner;
         this.presenter = new SubFormTabsPresenter(tabs);
+        this.designMode = true;
     }
 
     public SubFormTabsManipulator show(@Nonnull FormClass subForm, @Nonnull FormModel formModel) {
+        return show(subForm, formModel, false);
+    }
+
+    public SubFormTabsManipulator show(@Nonnull FormClass subForm, @Nonnull FormModel formModel, boolean force) {
 
         Preconditions.checkNotNull(subForm);
         Preconditions.checkNotNull(formModel);
+
+        if (!force && subForm.equals(this.subForm) && (formModel.equals(this.formModel) || designMode)) {
+            return this; // we already showing this subform
+        }
 
         this.subForm = subForm;
         this.formModel = formModel;
@@ -122,6 +137,7 @@ public class SubFormTabsManipulator {
     }
 
     private void onPeriodMoveButtonClick(SubFormTabsPresenter.ButtonType buttonType, InstanceGenerator instanceGenerator) {
+        presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
         switch (buttonType) {
             case NEXT:
                 presenter.set(instanceGenerator.next());
@@ -163,10 +179,31 @@ public class SubFormTabsManipulator {
         presenter.setInstanceTabClickHandler(new ClickHandler<FormInstance>() {
             @Override
             public void onClick(FormInstance instance) {
-                // todo : support user-defined form classes
+                onInstanceSelection(instance);
             }
         });
     }
+
+    private void onInstanceSelection(FormInstance instance) {
+        this.selectedInstance = instance;
+
+        if (!designMode) {
+            applyInstanceValues(instance);
+        }
+    }
+
+    private void applyInstanceValues(FormInstance instance) {
+        Set<FieldContainer> containers = formModel.getContainersOfClass(subForm.getId());
+        for (FieldContainer fieldContainer : containers) {
+            FieldValue fieldValue = instance.get(fieldContainer.getField().getId());
+            if (fieldValue != null) {
+                fieldContainer.getFieldWidget().setValue(fieldValue);
+            } else {
+                fieldContainer.getFieldWidget().clearValue();
+            }
+        }
+    }
+
 
     private void queryInstances(final InstanceQuery query) {
         resourceLocator.queryInstances(query).then(new Function<QueryResult<FormInstance>, Object>() {
@@ -175,6 +212,7 @@ public class SubFormTabsManipulator {
             public Object apply(QueryResult<FormInstance> queryResult) {
                 presenter.setShowPreviousButtons(query.getOffset() > 0);
                 presenter.setShowNextButtons(queryResult.hasNext(query.getOffset()));
+                presenter.setPeriodType(null);
                 presenter.set(queryResult.getItems());
                 return null;
             }
@@ -204,4 +242,16 @@ public class SubFormTabsManipulator {
         return presenter;
     }
 
+    public FormInstance getSelectedInstance() {
+        return selectedInstance;
+    }
+
+    public void setSelectedInstance(FormInstance selectedInstance) {
+        this.selectedInstance = selectedInstance;
+        onInstanceSelection(selectedInstance);
+    }
+
+    public boolean isDesignMode() {
+        return designMode;
+    }
 }

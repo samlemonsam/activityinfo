@@ -119,6 +119,11 @@ public class FieldWidgetContainer implements WidgetContainer {
         formFieldWidget.setType(formField.getType());
     }
 
+    @Override
+    public void syncWithModel(boolean force) {
+        syncWithModel();
+    }
+
     public Widget asWidget() {
         return fieldPanel.asWidget();
     }

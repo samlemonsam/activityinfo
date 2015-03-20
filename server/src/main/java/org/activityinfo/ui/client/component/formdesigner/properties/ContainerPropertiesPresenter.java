@@ -46,6 +46,7 @@ import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
@@ -65,12 +66,16 @@ public class ContainerPropertiesPresenter {
 
     private final Map<String, FormInstance> kindIdToInstance = Maps.newHashMap();
 
-    public ContainerPropertiesPresenter(FormDesigner formDesigner) {
+    public ContainerPropertiesPresenter(@Nonnull FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
         this.view = formDesigner.getFormDesignerPanel().getContainerPropertiesPanel();
     }
 
-    public void show(final FieldsHolder fieldsHolder) {
+    public void show(@Nonnull final FieldsHolder fieldsHolder) {
+        if (fieldsHolder.equals(formDesigner.getModel().getSelectedWidgetContainer())) {
+            return; // skip, container is already selected
+        }
+
         reset();
 
         view.getLabelGroup().setVisible(true);
@@ -156,6 +161,7 @@ public class ContainerPropertiesPresenter {
         ResourceId kindId = ResourceId.valueOf(selectedValue);
         ClassType classType = ClassType.byId(kindId);
 
+        view.getSubformSubKindGroup().setVisible(classType == ClassType.LOCATION_TYPE);
         if (classType == ClassType.LOCATION_TYPE) { // for now we need sub kinds only for location types
             initSubKindList(classType, kindId, subForm);
 
@@ -208,7 +214,7 @@ public class ContainerPropertiesPresenter {
     }
 
     private void forceSubformRerender(FormClass subForm) {
-        formDesigner.getWidgetContainer(subForm.getId()).syncWithModel();
+        formDesigner.getWidgetContainer(subForm.getId()).syncWithModel(true);
     }
 
     private int getKindIndex(ResourceId valueId) {

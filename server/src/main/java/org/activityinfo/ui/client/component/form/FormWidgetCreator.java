@@ -90,7 +90,11 @@ public class FormWidgetCreator {
                     }, model.getValidationFormClass(), model.getEventBus()).then(new Function<FormFieldWidget, Void>() {
                         @Override
                         public Void apply(@Nullable FormFieldWidget widget) {
-                            containers.put(field.getId(), containerFactory.createContainer(field, widget, 4));
+                            FieldContainer fieldContainer = containerFactory.createContainer(field, widget, 4);
+                            containers.put(field.getId(), fieldContainer);
+
+                            model.addContainerOfClass(formClass.getId(), fieldContainer);
+
                             return null;
                         }
                     });

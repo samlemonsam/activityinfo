@@ -39,4 +39,6 @@ public interface WidgetContainer {
     public ResourceId getParentId();
 
     public void syncWithModel();
+
+    public void syncWithModel(boolean force);
 }

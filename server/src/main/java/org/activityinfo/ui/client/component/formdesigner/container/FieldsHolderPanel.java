@@ -57,6 +57,11 @@ public class FieldsHolderPanel implements WidgetContainer {
         // do nothing
     }
 
+    @Override
+    public void syncWithModel(boolean force) {
+        // do nothing
+    }
+
     public FieldPanel getPanel() {
         return panel;
     }
