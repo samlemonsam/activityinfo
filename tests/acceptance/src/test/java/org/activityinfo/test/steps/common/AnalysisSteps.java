@@ -6,7 +6,6 @@ import cucumber.api.java.en.Then;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.TableData;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -24,7 +23,7 @@ public class AnalysisSteps {
     @Then("^aggregating the indicator \"([^\"]*)\" by (.*) should yield:$")
     public void aggregating_the_indicator_by_should_yield(String indicatorName, String dimensions, DataTable expected) throws Throwable {
         DataTable actual = driver.pivotTable(indicatorName, parseDimensions(dimensions));
-        expected.diff(aliasTable.alias(actual));
+        expected.diff(aliasTable.deAlias(actual));
     }
 
     private List<String> parseDimensions(String dimensionList) {
