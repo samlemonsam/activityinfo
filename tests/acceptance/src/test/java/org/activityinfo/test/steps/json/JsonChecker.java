@@ -57,7 +57,7 @@ class JsonChecker {
     }
 
     private void checkString(String path, String expected, String actual) {
-        String actualString = placeholders.aliasText(actual);
+        String actualString = placeholders.deAliasText(actual);
         if(!expected.equals(actualString)) {
             throw new AssertionError(String.format("At %s, expected:\n%s\nFound:\n%s",
                     path, expected, actualString));

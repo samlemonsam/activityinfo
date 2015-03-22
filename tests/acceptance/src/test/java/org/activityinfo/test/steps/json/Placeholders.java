@@ -124,9 +124,9 @@ class Placeholders {
     }
     
     
-    public String aliasText(String text) {
-        if(aliasTable.isName(text)) {
-            return aliasTable.alias(text);
+    public String deAliasText(String text) {
+        if(aliasTable.isAlias(text)) {
+            return aliasTable.getTestHandleForAlias(text);
         } else {
             return text;
         }
