@@ -3,7 +3,6 @@ package org.activityinfo.test.capacity.action;
 import org.activityinfo.test.capacity.CapacityTest;
 import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.capacity.model.UserRole;
-import org.activityinfo.test.config.ConfigurationError;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
 import java.util.logging.Level;
@@ -28,30 +27,36 @@ public class ActionExecution implements Runnable {
     
     @Override
     public void run() {
-        CapacityTest.CONCURRENT_USERS.inc();
+        String oldThreadName = Thread.currentThread().getName();
         try {
+            Thread.currentThread().setName("UserAction " + action.toString());
+            CapacityTest.CONCURRENT_USERS.inc();
+            try {
 
-            ApiApplicationDriver driver = new ApiApplicationDriver(
-                    context.getServer(),
-                    context.getAccounts(),
-                    context.getAliasTable());
+                ApiApplicationDriver driver = new ApiApplicationDriver(
+                        context.getServer(),
+                        context.getAccounts(),
+                        context.getAliasTable());
 
-            driver.login(context.getAccounts().ensureAccountExists(user.getNickName()));
+                driver.login(context.getAccounts().ensureAccountExists(user.getNickName()));
 
-            LOGGER.fine(String.format("%s: %s Starting", user.getNickName(), action.toString()));
+                LOGGER.fine(String.format("%s: %s Starting", user.getNickName(), action.toString()));
 
-            action.execute(driver);
+                action.execute(driver);
 
-            LOGGER.fine(String.format("%s: %s Completed.", user.getNickName(), action.toString()));
+                LOGGER.fine(String.format("%s: %s Completed.", user.getNickName(), action.toString()));
 
-        } catch (AssertionError | ConfigurationError | IllegalStateException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("%s: %s Failed [%s]",
-                    user.getNickName(), action.toString(), e.getMessage()), e);
+            } catch (Error | IllegalStateException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            } catch (Exception e) {
+                LOGGER.log(Level.FINE, String.format("%s: %s Failed [%s]",
+                        user.getNickName(), action.toString(), e.getMessage()), e);
+            } finally {
+                CapacityTest.CONCURRENT_USERS.dec();
+            }
         } finally {
-            CapacityTest.CONCURRENT_USERS.dec();
-        }    
+            Thread.currentThread().setName(oldThreadName);
+        }
     }
 }

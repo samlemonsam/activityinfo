@@ -34,7 +34,7 @@ public class Metrics {
         CSV_REPORTER.start(1, TimeUnit.SECONDS);
     }
 
-    public static void done() {
+    public static void stop() {
         CSV_REPORTER.stop();
     }
 

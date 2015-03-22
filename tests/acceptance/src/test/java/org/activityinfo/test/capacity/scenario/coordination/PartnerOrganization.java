@@ -1,6 +1,7 @@
 package org.activityinfo.test.capacity.scenario.coordination;
 
 import com.google.common.collect.Lists;
+import org.activityinfo.test.capacity.action.Sampling;
 import org.activityinfo.test.capacity.model.UserRole;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class PartnerOrganization {
         this.scenario = scenario;
         this.partnerName = partnerName;
         for(int i=0;i<numUsers;++i) {
-            users.add(new ReportingUser(this, username(i)));
+            users.add(new ReportingUser(this, username(i), Sampling.chooseOne(scenario.getSectors())));
         }
     }
 

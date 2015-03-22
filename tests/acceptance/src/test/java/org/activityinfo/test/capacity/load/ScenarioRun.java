@@ -65,5 +65,7 @@ public class ScenarioRun implements Runnable {
         LoadExecutor loadExecutor = new LoadExecutor(executorService);
         loadExecutor.setMaxConcurrent(LogisticGrowthFunction.rampUpTo(50).during(Period.seconds(90)));
         loadExecutor.execute(tasks);
+        
+        LOGGER.info(String.format("%s: Run complete.", scenario.toString()));
     }
 }

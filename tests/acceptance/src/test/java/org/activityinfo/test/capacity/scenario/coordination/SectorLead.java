@@ -8,10 +8,9 @@ import org.activityinfo.test.capacity.action.SyncOfflineWithApi;
 import org.activityinfo.test.capacity.action.UserAction;
 import org.activityinfo.test.capacity.model.DatabaseBuilder;
 import org.activityinfo.test.capacity.model.UserRole;
-import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class SectorLead implements UserRole {
@@ -20,14 +19,14 @@ public class SectorLead implements UserRole {
     public static final int RETRY_COUNT = 3;
 
     private final Sector sector;
-    
-    private final AliasTable aliasTable = new AliasTable();
+
     private final DatabaseBuilder builder;
+    private final List<List<String>> formsToCreate;
 
     public SectorLead(Sector sector) {
         this.sector = sector;
         builder = new DatabaseBuilder();
-
+        formsToCreate = Lists.partition(sector.getActivityForms(), 3);
     }
 
     @Override
@@ -37,21 +36,31 @@ public class SectorLead implements UserRole {
 
     @Override
     public Optional<UserAction> getTask(int dayNumber) {
-        if(dayNumber == 0) {
-            // On the first day, setup the databases and invite useres
-            return Optional.<UserAction>of(new CompositeAction(
-                    new CreateDatabase(), 
-                    SyncOfflineWithApi.INSTANCE, 
-                    new InviteUsers(), 
-                    SyncOfflineWithApi.INSTANCE));
-            
-        } else if(dayNumber < 5) {
-            // Afterwards, for the next week, and a new form each day
-            return Optional.<UserAction>of(new CompositeAction(
-                    new CreateForms(2),
-                    SyncOfflineWithApi.INSTANCE));
-        } else {
-            return Optional.absent();
+        
+        switch(dayNumber) {
+            case 0:
+                // On the first day, setup the databases and invite users
+                return Optional.<UserAction>of(new CompositeAction(
+                        new CreateDatabase(),
+                        new CreateForms(formsToCreate.get(0)),
+                        SyncOfflineWithApi.INSTANCE,
+                        new InviteUsers(),
+                        SyncOfflineWithApi.INSTANCE));
+            case 1:
+                // Continue to create forms while reporting users are 
+                // synchronizing and adding data to see the effects of the
+                // these two activities occurring together
+                return Optional.<UserAction>of(new CompositeAction(
+                        new CreateForms(formsToCreate.get(1)),
+                        SyncOfflineWithApi.INSTANCE));
+            case 2:
+                return Optional.<UserAction>of(new CompositeAction(
+                        new CreateForms(formsToCreate.get(2)),
+                        SyncOfflineWithApi.INSTANCE));
+
+            default:
+                return Optional.of(SyncOfflineWithApi.INSTANCE);
+
         }
     }
 
@@ -60,15 +69,7 @@ public class SectorLead implements UserRole {
         @Override
         public void execute(ApiApplicationDriver driver) throws Exception {
             builder.createDatabase(sector.getDatabaseName());
-            builder.createForm();
-            builder.createEnumeratedField(3);
-            builder.createEnumeratedField(15);
-            builder.createEnumeratedField(10);
-
-            for(int indicatorIndex = 0; indicatorIndex < sector.getIndicatorCount(); ++indicatorIndex) {
-                builder.createQuantityField();
-            }
-            builder.flush(driver.withNamespace(aliasTable).setRetryCount(RETRY_COUNT));
+            builder.flush(driver.setRetryCount(RETRY_COUNT));
         }
 
         @Override
@@ -76,7 +77,7 @@ public class SectorLead implements UserRole {
             return "CreateDatabase";
         }
     }
-    
+
     private class InviteUsers implements UserAction {
 
         @Override
@@ -96,9 +97,10 @@ public class SectorLead implements UserRole {
                 for (UserRole user : partner.getUsers()) {
                     builder.grantPermission(user.getNickName(), "View", "View All", "Edit");
                 }
+                builder.flush(driver.setRetryCount(RETRY_COUNT));
             }
 
-            builder.flush(driver.withNamespace(aliasTable).setRetryCount(RETRY_COUNT));
+            builder.flush(driver.setRetryCount(RETRY_COUNT));
 
             LOGGER.info(getNickName() + " invited users.");
         }
@@ -108,26 +110,26 @@ public class SectorLead implements UserRole {
             return "InviteUsers";
         }
     }
-    
-    private class CreateForms implements UserAction {
-        private int count;
 
-        public CreateForms(int count) {
-            this.count = count;
+    private class CreateForms implements UserAction {
+        private List<String> forms;
+
+        public CreateForms(List<String> forms) {
+            this.forms = forms;
         }
 
         @Override
         public void execute(ApiApplicationDriver driver) throws Exception {
-            for(int i=0;i<count;++i) {
-                builder.createForm();
+            for(String form : forms) {
+                builder.createForm(form);
                 builder.createEnumeratedField(3);
                 builder.createEnumeratedField(15);
                 builder.createEnumeratedField(10);
 
                 for (int indicatorIndex = 0; indicatorIndex < sector.getIndicatorCount(); ++indicatorIndex) {
-                    builder.createQuantityField();
+                    builder.createQuantityField(sector.getIndicatorName(form, indicatorIndex));
                 }
-                builder.flush(driver.withNamespace(aliasTable).setRetryCount(RETRY_COUNT));
+                builder.flush(driver.setRetryCount(RETRY_COUNT));
             }
         }
 

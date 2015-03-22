@@ -4,14 +4,15 @@ package org.activityinfo.test.driver;
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingOutputStream;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import org.activityinfo.test.capacity.Metrics;
@@ -54,6 +55,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         return currentUser;
     }
 
+
     private class Command {
         private final JSONObject request;
         private final ResponseHandler handler;
@@ -91,6 +93,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
             if(id == null) {
                 try {
                     flush();
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -137,15 +141,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
         this.server = server;
         this.accounts = accounts;
         this.aliases = aliases;
-    }
-
-    @Override
-    public ApiApplicationDriver withNamespace(AliasTable aliasTable) {
-        ApiApplicationDriver namespacedDriver = new ApiApplicationDriver(server, accounts, aliasTable);
-        if(currentUser != null) {
-            namespacedDriver.login(currentUser);
-        }
-        return namespacedDriver;
     }
 
     public int getRetryCount() {
@@ -336,6 +331,13 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void addPartner(String partnerName, String databaseName) throws Exception {
+        
+        // AddPartner will be called multiple times by different members of the scenario
+        // and concurrency introduces a tricky problem with concurrency here, so we 
+        // have to flush the queue here and block on the call to get the id
+        
+        flush();
+        
         int databaseId = aliases.getId(databaseName);
         String partnerAlias = aliases.createAliasIfNotExists(partnerName);
 
@@ -346,11 +348,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
         command.put("databaseId", databaseId);
         command.put("partner", partner);
 
-        PendingId pendingId = new PendingId(partnerName);
+        JSONObject response = new JSONObject(doCommand("AddPartner", command).getEntity(String.class));
         
-        executeCommand("AddPartner", command, pendingId);
-        
-        aliases.bindTestHandleToIdIfAbsent(partnerName, pendingId);
+        aliases.bindTestHandleToIdIfAbsent(partnerName, Suppliers.ofInstance(response.getInt("newId")));
     }
 
     @Override
@@ -566,19 +566,33 @@ public class ApiApplicationDriver extends ApplicationDriver {
     
     private void executeImmediately(Command command, int retriesRemaining) throws JSONException {
 
-        ClientResponse response = doCommand(command.request.toString(), retriesRemaining);
+        ClientResponse response = doCommand(command.request, retriesRemaining);
         if(command.handler != null) {
             command.handler.response(new JSONObject(response.getEntity(String.class)));
         }
     }
+    
+    private ClientResponse doCommand(String type, JSONObject command) throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("type", type);
+        request.put("command", command);
+        
+        return doCommand(request, getRetryCount());
 
-    private ClientResponse doCommand(String json, int retriesRemaining) throws JSONException {
+    }
+    
+    private ClientResponse doCommand(JSONObject json, int retriesRemaining) throws JSONException {
         COMMAND_RATE.mark();
         ERROR_RATE.markSubmitted();
 
-        ClientResponse response = commandEndpoint()
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class, json);
+        ClientResponse response;
+        try {
+            response = commandEndpoint()
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .post(ClientResponse.class, json.toString());
+        } catch (ClientHandlerException e) {
+            throw new Error("Post failed: " + e.getMessage(), e);
+        }
         
         ClientResponse.Status status = response.getClientResponseStatus();
 
@@ -588,12 +602,15 @@ public class ApiApplicationDriver extends ApplicationDriver {
         } else {
             ERROR_RATE.markError();
 
+            LOGGER.fine(String.format("Command %s failed: %d %s", 
+                    json.getString("type"), status.getStatusCode(), status.getReasonPhrase()));
+            
             if (retriesRemaining > 0 &&
                     status == ClientResponse.Status.INTERNAL_SERVER_ERROR ||
                     status == ClientResponse.Status.SERVICE_UNAVAILABLE) {
                 return doCommand(json, --retriesRemaining);
-
             }
+            
         
             String message = status.getStatusCode() + " " + status.getReasonPhrase();
             if(response.getType().equals(MediaType.TEXT_PLAIN_TYPE)) {
@@ -606,13 +623,15 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
 
     public List<String> getSyncRegions() throws Exception {
+        Preconditions.checkState(currentUser != null, "Authentication required");
+        
         flush();
 
         JSONObject request = new JSONObject();
         request.put("type", "GetSyncRegions");
         request.put("command", new JSONObject());
         
-        String responseJson = doCommand(request.toString(), getRetryCount()).getEntity(String.class);
+        String responseJson = doCommand(request, getRetryCount()).getEntity(String.class);
 
         JSONObject response = new JSONObject(responseJson);
         
@@ -626,6 +645,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
     
     public long fetchSyncRegion(String id) throws Exception {
+        Preconditions.checkState(currentUser != null, "Authentication required");
 
         JSONObject command = new JSONObject();
         command.put("regionId", id);
@@ -634,7 +654,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         request.put("type", "GetSyncRegionUpdates");
         request.put("command", command);
 
-        ClientResponse response = doCommand(request.toString(), getRetryCount());
+        ClientResponse response = doCommand(request, getRetryCount());
         
         // Read response to exercise server.. not sure if necessary
         CountingOutputStream countingOutputStream = new CountingOutputStream(ByteStreams.nullOutputStream());
@@ -650,54 +670,54 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
 
         this.flushing = true;
-        
-        if(!pendingBatch.isEmpty()) {
+        try {
+            if (!pendingBatch.isEmpty()) {
 
-            List<JSONObject> requests = new ArrayList<>();
-            for (Command command : pendingBatch) {
-                requests.add(command.request);
+                List<JSONObject> requests = new ArrayList<>();
+                for (Command command : pendingBatch) {
+                    requests.add(command.request);
+                }
+
+                JSONObject command = new JSONObject();
+                command.put("commands", requests);
+
+                JSONObject request = new JSONObject();
+                request.put("type", "BatchCommand");
+                request.put("command", command);
+
+
+                String json = doCommand(request, getRetryCount()).getEntity(String.class);
+
+                JSONObject response = new JSONObject(json);
+                JSONArray results = response.getJSONArray("results");
+
+                for (int i = 0; i != results.length(); ++i) {
+                    ResponseHandler responseHandler = pendingBatch.get(i).handler;
+                    if (responseHandler != null) {
+                        responseHandler.response(results.getJSONObject(i));
+                    }
+                }
+
+                pendingBatch.clear();
+
             }
 
-            JSONObject command = new JSONObject();
-            command.put("commands", requests);
+            Iterator<PendingChild> childIt = pendingChildren.listIterator();
+            while (childIt.hasNext()) {
+                PendingChild child = childIt.next();
+                if (child.parentId.isResolved()) {
+                    JSONObject itemProperties = new JSONObject();
+                    itemProperties.put("name", child.name);
+                    itemProperties.put("attributeGroupId", child.parentId.get());
 
-            JSONObject request = new JSONObject();
-            request.put("type", "BatchCommand");
-            request.put("command", command);
-            
+                    createEntity("Attribute", itemProperties);
 
-            String json = doCommand(request.toString(), getRetryCount()).getEntity(String.class);
-            
-            JSONObject response = new JSONObject(json);
-            JSONArray results = response.getJSONArray("results");
-
-            for (int i = 0; i != results.length(); ++i) {
-                ResponseHandler responseHandler = pendingBatch.get(i).handler;
-                if(responseHandler != null) {
-                    responseHandler.response(results.getJSONObject(i));
+                    childIt.remove();
                 }
             }
-
-            pendingBatch.clear();
-
+        } finally {
+            flushing = false;
         }
-
-        Iterator<PendingChild> childIt = pendingChildren.listIterator();
-        while(childIt.hasNext()) {
-            PendingChild child = childIt.next();
-            if(child.parentId.isResolved()) {
-                JSONObject itemProperties = new JSONObject();
-                itemProperties.put("name", child.name);
-                itemProperties.put("attributeGroupId", child.parentId.get());
-
-                createEntity("Attribute", itemProperties);
-            
-                childIt.remove();
-            }
-        }
-        
-        flushing = false;
-
     }
 
     

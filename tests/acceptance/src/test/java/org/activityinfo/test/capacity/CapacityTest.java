@@ -62,12 +62,20 @@ public class CapacityTest {
         ExecutorService userExecutorService = new ThreadPoolExecutor(10, MAX_CONCURRENT_USERS, 
                 5, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 
+        List<Callable<Void>> runs = Lists.newArrayList();
         for(Scenario scenario : scenarios) {
-            scenarioExecutionService.submit(new ScenarioRun(context, userExecutorService, scenario));
+            runs.add(Executors.callable(new ScenarioRun(context, userExecutorService, scenario), (Void)null));
         }
         
-        scenarioExecutionService.shutdown();
-        scenarioExecutionService.awaitTermination(10, TimeUnit.MINUTES);
+        scenarioExecutionService.invokeAll(runs);
+        
+        LOGGER.info("All scenarios completed");
+        
+        scenarioExecutionService.awaitTermination(5, TimeUnit.SECONDS);
+        LOGGER.info("Scenario execution service shutdown.");
+
+        userExecutorService.awaitTermination(5, TimeUnit.SECONDS);
+        LOGGER.info("User action execution service shutdown.");
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -79,10 +87,13 @@ public class CapacityTest {
         CapacityTest capacityTest = new CapacityTest();
         capacityTest.setupScenarios();
         capacityTest.run();
+        
+        Metrics.stop();
+        LOGGER.info("Metrics stopped.");
 
-
-        if (Metrics.ERRORS.getCount() > 0) {
-            System.exit(-1);
-        }
+        CapacityTestLogging.stop();
+        LOGGER.info("Logging stopped.");
+        
+        System.exit(0);
     }
 }

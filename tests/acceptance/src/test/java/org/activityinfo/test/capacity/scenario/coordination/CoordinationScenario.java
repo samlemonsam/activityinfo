@@ -14,8 +14,8 @@ public class CoordinationScenario implements Scenario {
 
     public static final String COORDINATING_AGENCY = "UNHCR";
 
-    private static final int PARTNER_COUNT = 120;
-    public static final int USERS_PER_PARTNER = 5;
+    private static final int PARTNER_COUNT = 80;
+    public static final int USERS_PER_PARTNER = 10;
 
     private final List<Sector> sectors = Lists.newArrayList();
     private final List<PartnerOrganization> partners = Lists.newArrayList();

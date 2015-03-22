@@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.Property;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -72,11 +74,8 @@ public class DatabaseBuilder {
                 property("items", items) });
     }
 
-    public void createQuantityField() throws Exception {
+    public void createQuantityField(String fieldName) throws Exception {
         Preconditions.checkState(currentForm != null, "Create a form first");
-
-        String fieldName = String.format("%s Indicator %d.%d: Number of individuals",
-                currentDatabase, formNumber, fieldNumber++);
 
         fields.add(new Property[]{
                 property("form", currentForm),

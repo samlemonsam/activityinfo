@@ -34,6 +34,8 @@ public class SyncOfflineWithApi implements UserAction {
         try {
             Timer.Context time = SYNC_TIME.time();
             List<String> syncRegions = driver.getSyncRegions();
+            LOGGER.fine(String.format("%s: %d sync regions", driver.getCurrentUser(), syncRegions.size()));
+            
             long totalBytesTransferred = 0;
             for (String id : syncRegions) {
                 currentRegion = id;

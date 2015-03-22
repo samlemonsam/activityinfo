@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.io.Resources;
 import org.activityinfo.test.capacity.CapacityTest;
 import org.activityinfo.test.capacity.Metrics;
-import org.activityinfo.test.capacity.action.SyncOffline;
 import org.activityinfo.test.capacity.action.SyncOfflineWithApi;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
@@ -23,6 +22,8 @@ import java.util.logging.Logger;
 public class CapacityTestLogging {
 
 
+    private static ScheduledExecutorService SCHEDULER;
+
     public static void setup() throws IOException {
         // Divert System.err because webDriver just dumps everything without synchronization
         // System.setErr(new PrintStream(new NullOutputStream()));
@@ -32,10 +33,15 @@ public class CapacityTestLogging {
             LogManager.getLogManager().readConfiguration(in);
         }
 
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleWithFixedDelay(new MetricLogger(), 10, 10, TimeUnit.SECONDS);
+        SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+        SCHEDULER.scheduleWithFixedDelay(new MetricLogger(), 10, 10, TimeUnit.SECONDS);
     }
-    
+
+    public static void stop() throws InterruptedException {
+        SCHEDULER.shutdown();
+        SCHEDULER.awaitTermination(5, TimeUnit.SECONDS);
+    }
+
     private static class MetricLogger implements Runnable {
         
         private Logger logger = Logger.getLogger(Metrics.class.getName());
