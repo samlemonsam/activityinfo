@@ -29,7 +29,11 @@ public class FunctionCallNode extends ExprNode {
 
     @Override
     public double evalReal() {
-        return function.applyReal(arguments);
+        double evaluated = function.applyReal(arguments);
+        if (Double.isNaN(evaluated)) {
+            throw new NotNumberException();
+        }
+        return evaluated;
     }
 
     @Override

@@ -20,7 +20,13 @@
       <artifactId>activityinfo-model</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.activityinfo</groupId>
+      <artifactId>activityinfo-model</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
     <!-- GWT deps (from central repo) -->
     <dependency>

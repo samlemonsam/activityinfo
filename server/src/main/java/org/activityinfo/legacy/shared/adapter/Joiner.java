@@ -98,8 +98,11 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
             return projectLocations(criteriaAnalysis, instanceQuery.getFieldPaths());
         }
 
-        if (criteriaAnalysis.isSiteQuery()) {
-            return projectSites(criteriaAnalysis, instanceQuery.getFieldPaths());
+        if (criteriaAnalysis.isQuerySiteById()) { // query site by id
+            return projectSitesById(criteriaAnalysis, instanceQuery.getFieldPaths());
+        }
+        if (criteriaAnalysis.isSiteQueryByClass()) { // query all sites of activity
+            return projectSitesByClass(criteriaAnalysis, instanceQuery.getFieldPaths());
         }
 
         Promise<List<FormInstance>> instances = query(criteria);
@@ -129,8 +132,17 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
         return results;
     }
 
-    private Promise<List<Projection>> projectSites(CriteriaAnalysis criteriaAnalysis,
-                                                   final List<FieldPath> fieldPaths) {
+    private Promise<List<Projection>> projectSitesById(CriteriaAnalysis criteriaAnalysis, List<FieldPath> fieldPaths) {
+        GetSites query =  new GetSites();
+        for (Integer siteId : criteriaAnalysis.getIds(CuidAdapter.SITE_DOMAIN)) {
+            query.filter().addRestriction(DimensionType.Site, siteId);
+        }
+
+        return projectSites(query, fieldPaths);
+    }
+
+    private Promise<List<Projection>> projectSitesByClass(CriteriaAnalysis criteriaAnalysis,
+                                                          final List<FieldPath> fieldPaths) {
         ResourceId activityClass = criteriaAnalysis.getClassRestriction();
         int activityId = CuidAdapter.getLegacyIdFromCuid(activityClass);
 
@@ -140,6 +152,10 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
         GetSites query = new GetSites();
         query.setFilter(filter);
 
+        return projectSites(query, fieldPaths);
+    }
+
+    private Promise<List<Projection>> projectSites(GetSites query, final List<FieldPath> fieldPaths) {
         final Promise<SchemaDTO> schemaPromise = dispatcher.execute(new GetSchema());
         final Promise<SiteResult> sitePromise = dispatcher.execute(query);
         return Promise.waitAll(schemaPromise, sitePromise).then(new Supplier<List<Projection>>() {

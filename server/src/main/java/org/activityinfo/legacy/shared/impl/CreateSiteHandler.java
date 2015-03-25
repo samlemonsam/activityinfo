@@ -136,11 +136,7 @@ public class CreateSiteHandler implements CommandHandlerAsync<CreateSite, Create
                         .value("IndicatorId", IndicatorDTO.indicatorIdForPropertyName(property.getKey()))
                         .value("ReportingPeriodId", cmd.getReportingPeriodId());
 
-                if (value instanceof Integer) {
-                    value = Double.valueOf(((Integer)value).doubleValue());
-                }
-
-                if (value instanceof Double) {
+                if (value instanceof Number) {
                     sqlInsert.value("Value", value).execute(tx);
                 } else if (value instanceof String) {
                     sqlInsert.value("TextValue", value).execute(tx);
