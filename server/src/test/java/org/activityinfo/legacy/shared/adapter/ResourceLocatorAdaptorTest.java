@@ -68,7 +68,6 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     public static final int IRUMU = 21;
 
-
     private ResourceLocatorAdaptor resourceLocator;
 
     @Before
@@ -232,8 +231,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         List<Projection> projections = assertResolves(resourceLocator.query(
                 new InstanceQuery(
-                    Lists.newArrayList(locationName, locationAdminUnitName),
-                    new ClassCriteria(HEALTH_CENTER_CLASS))));
+                        Lists.newArrayList(locationName, locationAdminUnitName),
+                        new ClassCriteria(HEALTH_CENTER_CLASS))));
 
         System.out.println(Joiner.on("\n").join(projections));
     }
@@ -278,8 +277,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
 
-        for(FormInstance instance : formInstances) {
-            if(instance.getId().equals(instanceToDelete)) {
+        for (FormInstance instance : formInstances) {
+            if (instance.getId().equals(instanceToDelete)) {
                 throw new AssertionError();
             }
         }
