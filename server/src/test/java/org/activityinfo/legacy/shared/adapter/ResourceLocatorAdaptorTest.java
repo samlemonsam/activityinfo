@@ -5,19 +5,22 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.core.client.form.tree.AsyncFormTreeBuilder;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.core.shared.model.AiLatLng;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.formTree.TFormTree;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Matchers;
@@ -40,7 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
-@OnDataSet("/dbunit/sites-simple1.db.xml")
+@OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
 public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     private static final int CAUSE_ATTRIBUTE_GROUP_ID = 1;
@@ -116,6 +119,58 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         result = resourceLocator.persist(Arrays.asList(instance, instance));
         assertThat(result.getState(), equalTo(Promise.State.REJECTED));
+    }
+
+    @Test
+    public void persistSiteWithCalculatedIndicators() {
+        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
+                NFI_DIST_FORM_CLASS);
+
+        instance.set(indicatorField(1), 1);
+        instance.set(indicatorField(2), 2);
+        instance.set(locationField(NFI_DIST_ID), locationInstanceId(1));
+        instance.set(partnerField(NFI_DIST_ID), partnerInstanceId(1));
+        instance.set(projectField(NFI_DIST_ID), projectInstanceId(1));
+        instance.set(field(NFI_DIST_FORM_CLASS, START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(NFI_DIST_FORM_CLASS, END_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(NFI_DIST_FORM_CLASS, COMMENT_FIELD), "My comment");
+
+        assertResolves(resourceLocator.persist(instance));
+
+        TFormTree formTree = new TFormTree(assertResolves(new AsyncFormTreeBuilder(resourceLocator).apply(NFI_DIST_FORM_CLASS)));
+        InstanceQuery query = new InstanceQuery(Lists.newArrayList(formTree.getRootPaths()), new IdCriteria(instance.getId()));
+
+        Projection firstRead = singleSiteProjection(query);
+
+        assertEquals(1d, firstRead.getValue(path(indicatorField(1))));
+        assertEquals(2d, firstRead.getValue(path(indicatorField(2))));
+        assertEquals(3d, firstRead.getValue(path(indicatorField(11))));
+        assertEquals(0.5d, firstRead.getValue(path(indicatorField(12))));
+
+        // set indicators to null
+        instance.set(indicatorField(1), null);
+        instance.set(indicatorField(2), null);
+
+        // persist it
+        assertResolves(resourceLocator.persist(instance));
+
+        // read from server
+        Projection secondRead = singleSiteProjection(query);
+
+        assertEquals(null, secondRead.getValue(path(indicatorField(1))));
+        assertEquals(null, secondRead.getValue(path(indicatorField(2))));
+        assertEquals(0d, secondRead.getValue(path(indicatorField(11))));
+        assertEquals(null, secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
+    }
+
+    private FieldPath path(ResourceId... fieldIds) {
+        return new FieldPath(fieldIds);
+    }
+
+    private Projection singleSiteProjection(InstanceQuery query) {
+        List<Projection> projections = assertResolves(resourceLocator.query(query));
+        assertEquals(projections.size(), 1);
+        return projections.get(0);
     }
 
     @Test
