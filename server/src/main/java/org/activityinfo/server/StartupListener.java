@@ -48,8 +48,8 @@ import org.activityinfo.server.util.blob.BlobServiceModule;
 import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.jaxrs.JaxRsModule;
 import org.activityinfo.server.util.locale.LocaleModule;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.activityinfo.server.util.monitoring.MonitoringModule;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.servlet.ServletContextEvent;
 import java.util.logging.Logger;
@@ -70,11 +70,11 @@ public class StartupListener extends GuiceServletContextListener {
     }
 
     @Override
+    @Timed("startup.get_injector")
     protected Injector getInjector() {
 
         return Guice.createInjector(new HibernateModule(),
                 new ConfigModule(),
-                new LoggingModule(),
                 new TemplateModule(),
                 new MailModule(),
                 new ServerDatabaseModule(),

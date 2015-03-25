@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 import com.teklabs.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
+import org.activityinfo.server.util.monitoring.Metrics;
 
 import javax.persistence.EntityManager;
 import javax.servlet.*;
@@ -60,33 +61,30 @@ public class AuthenticationFilter implements Filter {
     private final Provider<EntityManager> entityManager;
     private final ServerSideAuthProvider authProvider;
     private final BasicAuthentication basicAuthenticator;
+    
+    private final Metrics metrics;
 
-    private final LoadingCache<String, AuthenticatedUser> authTokenCache = CacheBuilder.newBuilder()
-                                                                                       .maximumSize(10000)
-                                                                                       .expireAfterAccess(6,
-                                                                                               TimeUnit.HOURS)
-                                                                                       .build(new CacheLoader<String,
-                                                                                               AuthenticatedUser>() {
-
-                                                                                           @Override
-                                                                                           public AuthenticatedUser
-                                                                                           load(
-                                                                                                   String authToken)
-                                                                                                   throws Exception {
-                                                                                               return queryAuthToken(
-                                                                                                       authToken);
-                                                                                           }
-                                                                                       });
+    private final LoadingCache<String, AuthenticatedUser> authTokenCache;
 
     @Inject
     public AuthenticationFilter(Provider<HttpServletRequest> request,
                                 Provider<EntityManager> entityManager,
                                 ServerSideAuthProvider authProvider,
-                                BasicAuthentication basicAuthenticator) {
+                                BasicAuthentication basicAuthenticator, Metrics metrics) {
         this.entityManager = entityManager;
         this.request = request;
         this.authProvider = authProvider;
         this.basicAuthenticator = basicAuthenticator;
+        this.metrics = metrics;
+        authTokenCache = CacheBuilder.newBuilder()
+            .maximumSize(10000)
+            .expireAfterAccess(6, TimeUnit.HOURS)
+            .build(new CacheLoader<String, AuthenticatedUser>() {
+                @Override
+                public AuthenticatedUser load(String authToken) throws Exception {
+                    return queryAuthToken(authToken);
+                }
+            });
     }
 
     @Override
@@ -108,8 +106,12 @@ public class AuthenticationFilter implements Filter {
                 authProvider.set(currentUser);
 
                 LocaleProxy.setLocale(Locale.forLanguageTag(currentUser.getUserLocale()));
-
+                
                 LOGGER.info("Setting locale to " + currentUser.getUserLocale());
+                
+                metrics.set("users.authenticated.concurrent", currentUser.getId());
+                metrics.set("users.authenticated.concurrent." + currentUser.getUserLocale(), currentUser.getUserId());
+
 
             } catch (Exception e) {
                 authProvider.clear();

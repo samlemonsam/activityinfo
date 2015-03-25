@@ -18,6 +18,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.odk.SiteFormData.FormAttributeGroup;
 import org.activityinfo.server.endpoint.odk.SiteFormData.FormIndicator;
 import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;
@@ -45,7 +46,10 @@ public class FormSubmissionResource extends ODKResource {
         this.siteHistoryProcessor = siteHistoryProcessor;
     }
 
-    @POST @Consumes(MediaType.MULTIPART_FORM_DATA) @Produces(MediaType.TEXT_XML)
+    @POST
+    @Timed("odk.submission")
+    @Consumes(MediaType.MULTIPART_FORM_DATA) 
+    @Produces(MediaType.TEXT_XML)
     public Response submit(@FormDataParam("xml_submission_file") String xml) throws Exception {
         LOGGER.fine("ODK form submitted by user " + getUser().getEmail() + " (" + getUser().getId() + ")");
 

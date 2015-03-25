@@ -1,7 +1,6 @@
 package org.activityinfo.test.capacity;
 
 
-import com.codahale.metrics.Counter;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.capacity.load.ScenarioRun;
 import org.activityinfo.test.capacity.logging.CapacityTestLogging;
@@ -12,7 +11,6 @@ import org.activityinfo.test.capacity.scenario.coordination.CoordinationScenario
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.UserAccount;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
@@ -23,8 +21,7 @@ import java.util.logging.Logger;
 public class CapacityTest {
     
     private static final int MAX_CONCURRENT_USERS = 150;
-    
-    public static final Counter CONCURRENT_USERS = Metrics.REGISTRY.counter("concurrentUsers");
+
     private static final Logger LOGGER = Logger.getLogger(CapacityTest.class.getName());
     
 
@@ -78,7 +75,7 @@ public class CapacityTest {
         LOGGER.info("User action execution service shutdown.");
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
 
         CapacityTestLogging.setup();
         Metrics.start();

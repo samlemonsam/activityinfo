@@ -18,6 +18,7 @@ task wrapper(type: Wrapper) {
 
 allprojects  {
   apply plugin: 'maven'
+  apply plugin: 'idea'
   group = 'org.activityinfo'
 }
 
@@ -25,8 +26,11 @@ allprojects  {
 subprojects {
 
   apply plugin: 'java'
+
+
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
+
 
   // This is required to stop javac from attempting to compile
   // java sources included in .jar files intended for GWT
@@ -48,6 +52,18 @@ subprojects {
     testCompile libraries.junit
     testCompile libraries.hamcrest
     testCompile libraries.easymock
+  }
+
+  project.afterEvaluate { project -> 
+    if(project.configurations.hasProperty('gwt')) {
+      project.tasks.getByName('ideaModule').doFirst { task ->
+        // Update the configuration *just* before the ideaModules task is executed,
+        // because once we resolve the gwt configuration, it can't be further modified
+        task.module.scopes.PROVIDED.plus += [ 
+                project.configurations.gwt,
+                project.configurations.gwtSdk]
+      }
+    }
   }
 }
 

@@ -49,6 +49,7 @@ war {
     exclude("**/*.symbolMap")
 }
 
+
 test {
     systemProperty "testDatabaseName", "testDb"
     systemProperty "testDatabaseUsername", localMySqlUsername
@@ -69,6 +70,8 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     totalJsDownloadSizeLimit "650kb"
     appCacheDownloadSizeLimit "2000kb"
 }
+
+tasks.compileGwt.onlyIf { !project.hasProperty('skipGwt') }
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
@@ -101,10 +104,14 @@ task downloadBuild {
 task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     description = "Deploys a build to the staging environment"
     
-    dependsOn downloadBuild, appengineDownloadSdk
+    if(project.buildNumber != 'dev') {
+        dependsOn downloadBuild
+        explodedAppDirectory = project.file(downloadBuild.warDir)
+    }
+    
+    dependsOn appengineDownloadSdk
 
 
-    explodedAppDirectory = project.file(downloadBuild.warDir)
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
     
@@ -116,7 +123,7 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
 }
 
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
-    description = "Deploys a previous build to the staging environment"
+    description = "Rolls back a previous build to the staging environment"
 
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true

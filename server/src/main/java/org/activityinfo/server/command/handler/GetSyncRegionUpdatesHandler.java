@@ -27,9 +27,12 @@ import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.sync.*;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.monitoring.Metrics;
+import org.activityinfo.server.util.monitoring.Profiler;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,10 +42,12 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
     private static final Logger LOGGER = Logger.getLogger(GetSyncRegionsHandler.class.getName());
 
     private final Injector injector;
+    private final Metrics metrics;
 
     @Inject
-    public GetSyncRegionUpdatesHandler(Injector injector) {
+    public GetSyncRegionUpdatesHandler(Injector injector, Metrics metrics) {
         this.injector = injector;
+        this.metrics = metrics;
     }
 
     @Override
@@ -71,12 +76,30 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
             throw new CommandException("Unknown sync region: " + cmd.getRegionId());
         }
 
+        Profiler profiler = metrics.profile("sync", "region", prefix(cmd.getRegionId()));
         try {
-            return builder.build(user, cmd);
+            
+            SyncRegionUpdate update = builder.build(user, cmd);
+            
+            profiler.succeeded();
+            return update;
+            
         } catch (Exception e) {
+            profiler.failed();
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    private String prefix(String regionId) {
+        String prefix;
+        int slash = regionId.indexOf('/');
+        if(slash != -1) {
+            prefix = regionId.substring(0, slash);
+        } else {
+            prefix = regionId;
+        }
+        return prefix.replace('-', '_');
     }
 
 }

@@ -30,7 +30,6 @@ import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -44,7 +43,6 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @Modules({
         MockHibernateModule.class,
-        LoggingModule.class
 })
 public class LocationBuilderTest {
 

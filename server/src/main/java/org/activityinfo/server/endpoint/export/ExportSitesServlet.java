@@ -30,12 +30,12 @@ import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.output.StorageProvider;
+import org.activityinfo.server.util.monitoring.Metrics;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -43,8 +43,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.Channels;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,14 +60,16 @@ public class ExportSitesServlet extends HttpServlet {
     private StorageProvider storageProvider;
     private Provider<AuthenticatedUser> authenticatedUserProvider;
     private SecureRandom random = new SecureRandom();
+    private Metrics metrics;
 
     @Inject
     public ExportSitesServlet(DispatcherSync dispatcher,
                               StorageProvider storageProvider,
-                              Provider<AuthenticatedUser> authenticatedUserProvider) {
+                              Provider<AuthenticatedUser> authenticatedUserProvider, Metrics metrics) {
         this.dispatcher = dispatcher;
         this.storageProvider = storageProvider;
         this.authenticatedUserProvider = authenticatedUserProvider;
+        this.metrics = metrics;
     }
 
 
@@ -80,6 +80,8 @@ public class ExportSitesServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        metrics.incrementCount("export.sites.started");
+        
         // Create a unique key from which the user can retrieve the file from GCS
         String exportId = Long.toString(Math.abs(random.nextLong()), 16);
 
@@ -129,9 +131,12 @@ public class ExportSitesServlet extends HttpServlet {
             if(!Strings.isNullOrEmpty(req.getHeader(X_AI_STORAGE_PROXY))) {
                 url = url.replace("https://storage.googleapis.com", "http://" + req.getHeader(X_AI_STORAGE_PROXY));
             }
-
+            
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getOutputStream().print(url);
+
+            metrics.incrementCount("export.sites.retrieved");
+
         }
     }
 

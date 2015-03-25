@@ -2,8 +2,8 @@ package org.activityinfo.test.capacity.logging;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.Resources;
-import org.activityinfo.test.capacity.CapacityTest;
 import org.activityinfo.test.capacity.Metrics;
+import org.activityinfo.test.capacity.action.ActionExecution;
 import org.activityinfo.test.capacity.action.SyncOfflineWithApi;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
@@ -46,6 +46,12 @@ public class CapacityTestLogging {
         
         private Logger logger = Logger.getLogger(Metrics.class.getName());
 
+        private ActionExecution.ActionMetrics syncMetrics;
+        
+        public MetricLogger() {
+            syncMetrics = ActionExecution.getMetrics(SyncOfflineWithApi.class);
+        }
+
         @Override
         public void run() {
             logger.log(Level.INFO, Joiner.on("   ").join(concurrentUsers(), throughput(), sync(), failure()));
@@ -53,7 +59,7 @@ public class CapacityTestLogging {
         }
         
         private String concurrentUsers() {
-            return String.format("users[%3d]", CapacityTest.CONCURRENT_USERS.getCount());
+            return String.format("users[%3d]", ActionExecution.CONCURRENT_USERS.getCount());
         }
         
         private String throughput() {
@@ -70,12 +76,10 @@ public class CapacityTestLogging {
         }
         
         private String sync() {
-            long concurrentUser = SyncOfflineWithApi.CONCURRENT.getCount();
-            double meanSizeKb = SyncOfflineWithApi.SYNC_BYTES.getSnapshot().getMean() / 1024d;
-            long latency = TimeUnit.NANOSECONDS.toSeconds((long)SyncOfflineWithApi.SYNC_TIME.getSnapshot().getMedian());
-            double completed = SyncOfflineWithApi.SYNC_COMPLETED.getOneMinuteRate();
-            double failed = SyncOfflineWithApi.SYNC_FAILED.getOneMinuteRate();
-            double successRate = (completed / (completed+failed)) * 100d;
+            long concurrentUser = ActionExecution.CONCURRENT_USERS.getCount();
+            double meanSizeKb = SyncOfflineWithApi.TOTAL_SIZE_METRIC.getSnapshot().getMedian() / 1024d;
+            long latency = syncMetrics.getOneMinuteLatencySeconds();
+            double successRate = syncMetrics.getOneMinuteSuccessRate();
             return String.format("sync[ %3d %4.0fkb %2ds %2.0f%%]", concurrentUser, meanSizeKb, latency, successRate);
         }
     }

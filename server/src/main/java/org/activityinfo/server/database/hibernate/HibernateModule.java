@@ -36,6 +36,7 @@ import org.activityinfo.server.database.hibernate.dao.FixGeometryTask;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
 import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.server.util.monitoring.Timed;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Environment;
@@ -95,7 +96,8 @@ public class HibernateModule extends ServletModule {
         return hem.getSession();
     }
 
-    @Provides @Singleton
+    @Provides 
+    @Singleton
     public Validator provideValidator() {
         ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class)
                                                       .configure()
@@ -112,6 +114,7 @@ public class HibernateModule extends ServletModule {
         }
 
         @Override
+        @Timed("startup.hibernate")
         public EntityManagerFactory get() {
             Ejb3Configuration config = new Ejb3Configuration();
             config.addProperties(deploymentConfig.asProperties());

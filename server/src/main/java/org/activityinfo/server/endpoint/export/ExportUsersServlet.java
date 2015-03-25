@@ -27,6 +27,7 @@ import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,7 +53,8 @@ public class ExportUsersServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @Timed("export.users")
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         int dbId = Integer.valueOf(req.getParameter("dbUsers"));
 

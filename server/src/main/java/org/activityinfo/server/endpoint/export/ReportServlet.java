@@ -36,6 +36,7 @@ import org.activityinfo.server.report.ReportParserJaxb;
 import org.activityinfo.server.report.generator.ReportGenerator;
 import org.activityinfo.server.report.renderer.Renderer;
 import org.activityinfo.server.report.renderer.RendererFactory;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
@@ -61,7 +62,8 @@ public class ReportServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @Timed("export.report")
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // first, authenticate the response
         AuthenticationDAO authDAO = injector.getInstance(AuthenticationDAO.class);

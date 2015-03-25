@@ -17,5 +17,4 @@
     <description>Mail Daily Geographic Digests</description>
     <schedule>every day 17:00</schedule>
   </cron>
-
 </cronentries>

@@ -31,7 +31,6 @@ import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 @Modules({
         MockHibernateModule.class,
         GwtRpcModule.class,
-        LoggingModule.class
 })
 @OnDataSet("/dbunit/schema2.db.xml")
 public class DbUpdateBuilderTest {

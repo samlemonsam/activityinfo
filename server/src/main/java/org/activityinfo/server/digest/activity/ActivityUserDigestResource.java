@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.digest.UserDigestResource;
 import org.activityinfo.server.mail.MailSender;
+import org.activityinfo.server.util.monitoring.Metrics;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.Path;
@@ -19,8 +20,9 @@ public class ActivityUserDigestResource extends UserDigestResource {
                                       Provider<MailSender> mailSender,
                                       ServerSideAuthProvider authProvider,
                                       ActivityDigestModelBuilder activityDigestModelBuilder,
-                                      ActivityDigestRenderer activityDigestRenderer) {
-        super(entityManager, mailSender, authProvider, activityDigestModelBuilder, activityDigestRenderer);
+                                      ActivityDigestRenderer activityDigestRenderer,
+                                      Metrics metrics) {
+        super(entityManager, mailSender, authProvider, activityDigestModelBuilder, activityDigestRenderer, metrics);
     }
 
     @Override

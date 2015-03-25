@@ -37,7 +37,7 @@ import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.logging.LogException;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +75,7 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     private PersistentPolicyProvider policyProvider;
 
 
-    @Override @LogException
+    @Override
     public List<CommandResult> execute(String authToken, List<Command> commands) throws CommandException {
         if (!checkAuthentication(authToken)) {
             throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
@@ -101,7 +101,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     /**
      * Publicly visible for testing *
      */
-    @LogException
     public List<CommandResult> handleCommands(List<Command> commands) {
         applyUserFilters();
 
@@ -125,7 +124,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
         DomainFilters.applyUserFilter(user, em);
     }
 
-    @LogException(emailAlert = true)
     protected CommandResult handleCommand(Command command) throws CommandException {
         RemoteExecutionContext context = null;
         try {
@@ -155,6 +153,7 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     }
 
     @Override
+    @Timed("gwt.get_serialization_policy")
     protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request,
                                                            String moduleBaseURL,
                                                            String strongName) {

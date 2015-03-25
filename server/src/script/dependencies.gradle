@@ -65,6 +65,8 @@ dependencies {
     compile libraries.rebar.sync
 
     gwt libraries.rebar.style
+    
+
 
     // Report Rendering
     compile libraries.appengine.export.itext

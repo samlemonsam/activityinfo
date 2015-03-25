@@ -19,7 +19,9 @@ dependencies {
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
     testCompile libraries.bcrypt
-    testCompile 'io.dropwizard.metrics:metrics-core:3.1.0'
+    testCompile libraries.metrics.core
+    testCompile libraries.metrics.influxdb
+
     testCompile libraries.c3p0
 
     testCompile project(':core:model')

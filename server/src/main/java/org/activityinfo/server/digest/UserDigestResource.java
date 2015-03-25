@@ -6,6 +6,8 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
 import org.activityinfo.server.util.date.DateFormatter;
+import org.activityinfo.server.util.monitoring.Metrics;
+import org.activityinfo.server.util.monitoring.Profiler;
 
 import javax.mail.MessagingException;
 import javax.persistence.EntityManager;
@@ -32,53 +34,67 @@ public abstract class UserDigestResource {
     private final ServerSideAuthProvider authProvider;
     private final DigestModelBuilder digestModelBuilder;
     private final DigestRenderer digestRenderer;
+    private final Metrics metrics;
 
     public UserDigestResource(Provider<EntityManager> entityManager,
                               Provider<MailSender> mailSender,
                               ServerSideAuthProvider authProvider,
                               DigestModelBuilder digestModelBuilder,
-                              DigestRenderer digestRenderer) {
+                              DigestRenderer digestRenderer, Metrics metrics) {
         this.entityManager = entityManager;
         this.mailSender = mailSender;
         this.authProvider = authProvider;
         this.digestModelBuilder = digestModelBuilder;
         this.digestRenderer = digestRenderer;
+        this.metrics = metrics;
     }
 
-    @GET @Produces(MediaType.TEXT_HTML)
+    @GET 
+    @Produces(MediaType.TEXT_HTML)
     public String createUserDigest(@QueryParam(PARAM_USER) int userId,
                                    @QueryParam(PARAM_NOW) Long now,
                                    @QueryParam(PARAM_DAYS) int days,
                                    @QueryParam(PARAM_SENDEMAIL) @DefaultValue(PARAM_SENDEMAIL_DEF) boolean sendEmail)
             throws IOException, MessagingException {
 
+
         if (userId <= 0) {
             return "no user specified";
         }
 
-        Date date = now == null ? new Date() : new Date(now);
+        Profiler profiler = metrics.profile("mail", "digests", getClass().getSimpleName());
 
-        if (days <= 0) {
-            days = getDefaultDays();
-        }
+        try {
+            Date date = now == null ? new Date() : new Date(now);
 
-        User user = entityManager.get().find(User.class, userId);
-        authProvider.set(user);
+            if (days <= 0) {
+                days = getDefaultDays();
+            }
 
-        LOGGER.info("creating digest for " + user.getEmail() + " on " + DateFormatter.formatDateTime(date) +
+            User user = entityManager.get().find(User.class, userId);
+            authProvider.set(user);
+
+            LOGGER.info("creating digest for " + user.getEmail() + " on " + DateFormatter.formatDateTime(date) +
                     " for activity period: " + days + " day(s)." + " (sending email: " + sendEmail + ")");
 
-        DigestMessageBuilder digest = new DigestMessageBuilder(digestModelBuilder, digestRenderer);
-        digest.setUser(user);
-        digest.setDate(date);
-        digest.setDays(days);
+            DigestMessageBuilder digest = new DigestMessageBuilder(digestModelBuilder, digestRenderer);
+            digest.setUser(user);
+            digest.setDate(date);
+            digest.setDays(days);
 
-        Message message = digest.build();
-        if (message != null && sendEmail) {
-            mailSender.get().send(message);
+            Message message = digest.build();
+            if (message != null && sendEmail) {
+                mailSender.get().send(message);
+            }
+
+            profiler.succeeded();
+            
+            return message == null ? "no updates found" : message.getHtmlBody();
+            
+        } catch (Exception e) {
+            profiler.failed();
+            throw e;
         }
-
-        return message == null ? "no updates found" : message.getHtmlBody();
     }
 
     public abstract int getDefaultDays();

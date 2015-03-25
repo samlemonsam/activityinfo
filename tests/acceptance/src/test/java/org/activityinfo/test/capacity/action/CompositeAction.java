@@ -3,7 +3,6 @@ package org.activityinfo.test.capacity.action;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class CompositeAction implements UserAction {
     
@@ -22,6 +21,10 @@ public class CompositeAction implements UserAction {
         for(UserAction action : actions) {
             action.execute(driver);
         }
+    }
+
+    public Iterable<UserAction> getActions() {
+        return actions;
     }
 
     @Override

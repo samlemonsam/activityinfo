@@ -60,7 +60,7 @@ class FetchCloudSqlConfiguration extends DefaultTask {
     
     @TaskAction
     def fetch() {
-        def httpTransport = GoogleNetHttpTransport.newTrustedTransport()
+        def httpTransport =  GoogleNetHttpTransport.newTrustedTransport()
         def jsonFactory = new JacksonFactory()
         def credentials = GoogleCredential
                 .fromStream(openJsonCredentials())

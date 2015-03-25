@@ -31,7 +31,7 @@ import org.activityinfo.server.login.exception.IncompleteFormException;
 import org.activityinfo.server.login.model.ChangePasswordPageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
 import org.activityinfo.server.login.model.PageModel;
-import org.activityinfo.server.util.logging.LogException;
+import org.activityinfo.server.util.monitoring.Count;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -60,7 +60,8 @@ public class ChangePasswordController {
         this.authTokenProvider = authTokenProvider;
     }
 
-    @GET @Produces(MediaType.TEXT_HTML)
+    @GET 
+    @Produces(MediaType.TEXT_HTML)
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
@@ -70,7 +71,8 @@ public class ChangePasswordController {
         }
     }
 
-    @POST @LogException(emailAlert = true)
+    @POST
+    @Count("login.password_change")
     public Response changePassword(@Context UriInfo uri,
                                    @FormParam("key") String key,
                                    @FormParam("password") String password,

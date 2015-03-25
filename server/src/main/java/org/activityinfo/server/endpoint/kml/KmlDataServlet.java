@@ -38,6 +38,7 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.kml.xml.XmlBuilder;
+import org.activityinfo.server.util.monitoring.Count;
 import org.activityinfo.ui.client.page.entry.form.SiteRenderer;
 import org.xml.sax.SAXException;
 
@@ -82,6 +83,7 @@ public class KmlDataServlet extends javax.servlet.http.HttpServlet {
     }
 
     @Override
+    @Count("kml.data")
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         res.getWriter();
 

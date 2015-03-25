@@ -1,6 +1,8 @@
 package org.activityinfo.test.capacity;
 
 import com.codahale.metrics.*;
+import metrics_influxdb.InfluxdbHttp;
+import metrics_influxdb.InfluxdbReporter;
 
 import java.io.File;
 import java.util.Locale;
@@ -14,13 +16,16 @@ public class Metrics {
 
     public static final MetricRegistry REGISTRY = new MetricRegistry();
     public static final Counter ERRORS = REGISTRY.counter("errors");
+    
     private static CsvReporter CSV_REPORTER;
-
+    
+    private static InfluxdbReporter INFLUX_REPORTER;
+    
     private static final Logger LOGGER = Logger.getLogger(Metrics.class.getName());
 
     private static final ConcurrentHashMap<Metric, Long> LAST_UPDATE = new ConcurrentHashMap<>();
 
-    public static void start() {
+    public static void start() throws Exception {
         File metricsDir = new File("metrics");
         if(!metricsDir.exists()) {
             metricsDir.mkdirs();
@@ -32,10 +37,20 @@ public class Metrics {
                 .build(metricsDir);
 
         CSV_REPORTER.start(1, TimeUnit.SECONDS);
+        
+        InfluxdbHttp influxdbHttp = new InfluxdbHttp("localhost", 8086, "capacityTest", "root", "root");
+        
+        INFLUX_REPORTER = InfluxdbReporter.forRegistry(REGISTRY)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .build(influxdbHttp);
+        
+        INFLUX_REPORTER.start(1, TimeUnit.SECONDS);
     }
 
     public static void stop() {
         CSV_REPORTER.stop();
+        INFLUX_REPORTER.stop();
     }
 
     public static void log(String label, Meter meter) {

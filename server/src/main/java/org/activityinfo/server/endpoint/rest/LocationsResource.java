@@ -11,6 +11,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.Location;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.rest.model.NewLocation;
+import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.JsonGenerator;
 
 import javax.persistence.EntityManager;
@@ -31,7 +32,9 @@ public class LocationsResource {
         this.dispatcher = dispatcher;
     }
 
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET 
+    @Timed("api.rest.locations.get")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response query(@QueryParam("type") int typeId) throws IOException {
 
         GetLocations query = new GetLocations();
@@ -74,7 +77,9 @@ public class LocationsResource {
         return Response.ok(writer.toString()).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    @POST @Path("/{typeId}")
+    @POST 
+    @Path("/{typeId}")
+    @Timed("api.rest.locations.post")
     public Response postNewLocations(@InjectParam EntityManager entityManager,
                                      @PathParam("typeId") int locationTypeId,
                                      List<NewLocation> locations) {

@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.digest.UserDigestResource;
 import org.activityinfo.server.mail.MailSender;
+import org.activityinfo.server.util.monitoring.Metrics;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.Path;
@@ -19,8 +20,9 @@ public class GeoUserDigestResource extends UserDigestResource {
                                  Provider<MailSender> mailSender,
                                  ServerSideAuthProvider authProvider,
                                  GeoDigestModelBuilder geoDigestModelBuilder,
-                                 GeoDigestRenderer geoDigestRenderer) {
-        super(entityManager, mailSender, authProvider, geoDigestModelBuilder, geoDigestRenderer);
+                                 GeoDigestRenderer geoDigestRenderer,
+                                 Metrics metrics) {
+        super(entityManager, mailSender, authProvider, geoDigestModelBuilder, geoDigestRenderer, metrics);
     }
 
     @Override
