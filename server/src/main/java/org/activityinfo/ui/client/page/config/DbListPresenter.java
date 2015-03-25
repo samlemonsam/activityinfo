@@ -164,10 +164,10 @@ public class DbListPresenter implements ActionListener {
     public void onRename() {
         DatabaseForm form = new DatabaseForm(dispatcher);
         form.getBinding().bind(selection);
-        form.disableCountry();
+        form.hideCountryField(); // it's not allowed to change country by design
         final FormDialogImpl dialog = new FormDialogImpl(form);
         dialog.setWidth(400);
-        dialog.setHeight(200);
+        dialog.setHeight(170);
         dialog.setHeadingText(I18N.CONSTANTS.renameDatabase());
 
         dialog.show(new FormDialogCallback() {
