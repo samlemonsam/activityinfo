@@ -30,7 +30,7 @@ public class CubeResource {
     }
 
     @GET
-    @Timed("api.rest.sites.pivot")
+    @Timed(name = "api.rest.sites.pivot")
     @Produces("application/json")
     public List<Bucket> pivot(@QueryParam("dimension") List<String> dimensions, @QueryParam("form") List<Integer> forms,
                               @QueryParam("month") String monthName) {

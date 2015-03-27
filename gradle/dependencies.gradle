@@ -38,7 +38,7 @@ ext {
 
         ],
             
-        appengineMetrics:   'com.bedatadriven:appengine-metrics:0.1-SNAPSHOT',
+        appengineMetrics:   'com.bedatadriven.appengine:appengine-metrics:0.3-SNAPSHOT',
             
         influxdb:           'org.influxdb:influxdb-java:1.5',
             

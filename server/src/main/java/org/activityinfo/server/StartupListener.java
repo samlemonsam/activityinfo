@@ -70,7 +70,7 @@ public class StartupListener extends GuiceServletContextListener {
     }
 
     @Override
-    @Timed("startup.get_injector")
+    @Timed(name = "startup", kind = "getInjector")
     protected Injector getInjector() {
 
         return Guice.createInjector(new HibernateModule(),

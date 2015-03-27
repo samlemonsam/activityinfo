@@ -22,24 +22,17 @@ package org.activityinfo.server.util.monitoring;
  * #L%
  */
 
-import com.google.inject.Provides;
+import com.bedatadriven.appengine.metrics.MetricsRequestFilter;
+import com.bedatadriven.appengine.metrics.MetricsServlet;
 import com.google.inject.Singleton;
-import com.google.inject.matcher.Matchers;
 import com.google.inject.servlet.ServletModule;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
-import org.aopalliance.intercept.MethodInterceptor;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MonitoringModule extends ServletModule {
 
     private static final Logger LOGGER = Logger.getLogger(MonitoringModule.class.getName());
     
-    public static final String STATSD_HOST = "statsd.host";
-    public static final String STATSD_PORT = "statsd.port";
-    public static final String STATSD_PREFIX = "statsd.prefix";
 
     public MonitoringModule() {
     }
@@ -47,29 +40,10 @@ public class MonitoringModule extends ServletModule {
     @Override
     protected void configureServlets() {
 
+        bind(MetricsRequestFilter.class).in(Singleton.class);
+        bind(MetricsServlet.class).in(Singleton.class);
+        
         filter("/*").through(MetricsRequestFilter.class);
-
-        MethodInterceptor interceptor = new ProfilingInterceptor();
-        requestInjection(interceptor);
-
-
-        bindInterceptor(Matchers.any(), Matchers.annotatedWith(Count.class), interceptor);
-        bindInterceptor(Matchers.any(), Matchers.annotatedWith(Timed.class), interceptor);
-    }
-
-    @Provides
-    @Singleton
-    public MetricsReporter provide(DeploymentConfiguration config) {
-        try {
-            return new UdpReporter(
-                    config.getProperty(STATSD_PREFIX, ""), 
-                    config.getProperty(STATSD_HOST, "146.148.16.39"), 
-                    config.getIntProperty(STATSD_PORT, 8125));
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Exception creating " + UdpReporter.class.getName() + ", falling back to " + 
-                    NullReporter.class.getName());
-            
-            return new NullReporter();
-        }
+        serve("/tasks/metrics").with(MetricsServlet.class);
     }
 }

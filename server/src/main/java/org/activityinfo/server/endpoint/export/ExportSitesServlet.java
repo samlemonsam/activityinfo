@@ -35,7 +35,6 @@ import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.output.StorageProvider;
-import org.activityinfo.server.util.monitoring.Metrics;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -60,16 +59,14 @@ public class ExportSitesServlet extends HttpServlet {
     private StorageProvider storageProvider;
     private Provider<AuthenticatedUser> authenticatedUserProvider;
     private SecureRandom random = new SecureRandom();
-    private Metrics metrics;
 
     @Inject
     public ExportSitesServlet(DispatcherSync dispatcher,
                               StorageProvider storageProvider,
-                              Provider<AuthenticatedUser> authenticatedUserProvider, Metrics metrics) {
+                              Provider<AuthenticatedUser> authenticatedUserProvider) {
         this.dispatcher = dispatcher;
         this.storageProvider = storageProvider;
         this.authenticatedUserProvider = authenticatedUserProvider;
-        this.metrics = metrics;
     }
 
 
@@ -80,8 +77,6 @@ public class ExportSitesServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        metrics.incrementCount("export.sites.started");
-        
         // Create a unique key from which the user can retrieve the file from GCS
         String exportId = Long.toString(Math.abs(random.nextLong()), 16);
 
@@ -134,9 +129,6 @@ public class ExportSitesServlet extends HttpServlet {
             
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getOutputStream().print(url);
-
-            metrics.incrementCount("export.sites.retrieved");
-
         }
     }
 

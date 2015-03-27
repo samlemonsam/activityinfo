@@ -31,7 +31,6 @@ import org.activityinfo.server.login.exception.IncompleteFormException;
 import org.activityinfo.server.login.model.ChangePasswordPageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
 import org.activityinfo.server.login.model.PageModel;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -72,7 +71,6 @@ public class ChangePasswordController {
     }
 
     @POST
-    @Count("login.password_change")
     public Response changePassword(@Context UriInfo uri,
                                    @FormParam("key") String key,
                                    @FormParam("password") String password,

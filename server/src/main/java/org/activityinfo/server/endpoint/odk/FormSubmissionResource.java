@@ -47,7 +47,7 @@ public class FormSubmissionResource extends ODKResource {
     }
 
     @POST
-    @Timed("odk.submission")
+    @Timed(name = "odk", kind = "submission")
     @Consumes(MediaType.MULTIPART_FORM_DATA) 
     @Produces(MediaType.TEXT_XML)
     public Response submit(@FormDataParam("xml_submission_file") String xml) throws Exception {

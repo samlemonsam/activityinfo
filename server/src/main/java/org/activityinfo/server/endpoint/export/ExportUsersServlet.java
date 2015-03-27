@@ -53,7 +53,7 @@ public class ExportUsersServlet extends HttpServlet {
     }
 
     @Override
-    @Timed("export.users")
+    @Timed(name = "export", kind = "users")
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         int dbId = Integer.valueOf(req.getParameter("dbUsers"));

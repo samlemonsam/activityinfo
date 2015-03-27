@@ -19,7 +19,7 @@ public class FormListResource extends ODKResource {
     
     
     @GET 
-    @Timed("odk.form_list")
+    @Timed(name = "odk", kind = "formList")
     @Produces(MediaType.TEXT_XML)
     public Response formList(@Context UriInfo info) throws Exception {
         if (enforceAuthorization()) {

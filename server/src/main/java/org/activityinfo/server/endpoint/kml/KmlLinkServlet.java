@@ -27,7 +27,6 @@ import com.google.inject.Singleton;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -57,7 +56,6 @@ public class KmlLinkServlet extends HttpServlet {
     }
 
     @Override
-    @Count("kml.link")
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         Map<String, Object> link = new HashMap<String, Object>();

@@ -59,7 +59,7 @@ public class SiteHistoryProcessor {
         this.dispatcher = dispatcher;
     }
 
-    @Timed("updates.site_history")
+    @Timed(name = "updates.site_history")
     public void process(Command<?> cmd, final int userId, final int siteId) {
         assert (cmd instanceof SiteCommand);
 

@@ -39,7 +39,7 @@ public class ExportSitesTask extends HttpServlet {
     }
 
     @Override
-    @Timed("export.sites.task")
+    @Timed(name = "export", kind = "sites")
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // authenticate this task

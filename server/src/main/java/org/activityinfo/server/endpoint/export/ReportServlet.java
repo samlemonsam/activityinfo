@@ -62,7 +62,7 @@ public class ReportServlet extends HttpServlet {
     }
 
     @Override
-    @Timed("export.report")
+    @Timed(name = "export", kind = "report")
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // first, authenticate the response

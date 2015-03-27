@@ -114,7 +114,7 @@ public class HibernateModule extends ServletModule {
         }
 
         @Override
-        @Timed("startup.hibernate")
+        @Timed(name = "startup", kind = "hibernate")
         public EntityManagerFactory get() {
             Ejb3Configuration config = new Ejb3Configuration();
             config.addProperties(deploymentConfig.asProperties());

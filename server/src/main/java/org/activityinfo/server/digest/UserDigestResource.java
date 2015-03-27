@@ -6,8 +6,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
 import org.activityinfo.server.util.date.DateFormatter;
-import org.activityinfo.server.util.monitoring.Metrics;
-import org.activityinfo.server.util.monitoring.Profiler;
 
 import javax.mail.MessagingException;
 import javax.persistence.EntityManager;
@@ -34,19 +32,17 @@ public abstract class UserDigestResource {
     private final ServerSideAuthProvider authProvider;
     private final DigestModelBuilder digestModelBuilder;
     private final DigestRenderer digestRenderer;
-    private final Metrics metrics;
 
     public UserDigestResource(Provider<EntityManager> entityManager,
                               Provider<MailSender> mailSender,
                               ServerSideAuthProvider authProvider,
                               DigestModelBuilder digestModelBuilder,
-                              DigestRenderer digestRenderer, Metrics metrics) {
+                              DigestRenderer digestRenderer) {
         this.entityManager = entityManager;
         this.mailSender = mailSender;
         this.authProvider = authProvider;
         this.digestModelBuilder = digestModelBuilder;
         this.digestRenderer = digestRenderer;
-        this.metrics = metrics;
     }
 
     @GET 
@@ -61,8 +57,6 @@ public abstract class UserDigestResource {
         if (userId <= 0) {
             return "no user specified";
         }
-
-        Profiler profiler = metrics.profile("mail", "digests", getClass().getSimpleName());
 
         try {
             Date date = now == null ? new Date() : new Date(now);
@@ -87,12 +81,9 @@ public abstract class UserDigestResource {
                 mailSender.get().send(message);
             }
 
-            profiler.succeeded();
-            
             return message == null ? "no updates found" : message.getHtmlBody();
             
         } catch (Exception e) {
-            profiler.failed();
             throw e;
         }
     }

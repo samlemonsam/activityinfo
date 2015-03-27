@@ -44,7 +44,7 @@ public abstract class MailSender {
 
     public abstract void send(Message message) throws MessagingException;
 
-    @Timed("mail.send")
+    @Timed(name = "mail.send")
     public void send(MessageModel model) {
         try {
             Message message = createMessage(model);

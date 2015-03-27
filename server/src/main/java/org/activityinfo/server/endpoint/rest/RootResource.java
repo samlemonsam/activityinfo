@@ -100,7 +100,7 @@ public class RootResource {
 
     @GET 
     @Path("/databases") 
-    @Timed("api.rest.get_databases")
+    @Timed(name = "api.rest.get_databases")
     @JsonView(DTOViews.List.class) 
     @Produces(MediaType.APPLICATION_JSON)
     public List<UserDatabaseDTO> getDatabases() {
@@ -109,7 +109,7 @@ public class RootResource {
 
     @GET 
     @Path("/database/{id}/schema")
-    @Timed("api.rest.get_schema")
+    @Timed(name = "api.rest.get_schema")
     @JsonView(DTOViews.Schema.class) 
     @Produces(MediaType.APPLICATION_JSON)
     public UserDatabaseDTO getDatabaseSchema(@PathParam("id") int id) {
@@ -122,7 +122,7 @@ public class RootResource {
 
     @GET 
     @Path("/database/{id}/schema.csv")
-    @Timed("api.rest.get_schema_csv")
+    @Timed(name = "api.rest.get_schema_csv")
     public Response getDatabaseSchemaCsv(@PathParam("id") int id) {
         UserDatabaseDTO db = getDatabaseSchema(id);
         SchemaCsvWriter writer = new SchemaCsvWriter();

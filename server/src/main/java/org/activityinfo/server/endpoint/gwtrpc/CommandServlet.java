@@ -37,7 +37,6 @@ import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -153,7 +152,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     }
 
     @Override
-    @Timed("gwt.get_serialization_policy")
     protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request,
                                                            String moduleBaseURL,
                                                            String strongName) {

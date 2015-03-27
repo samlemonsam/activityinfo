@@ -51,7 +51,7 @@ public class WkbGeometryProvider implements AdminGeometryProvider {
     }
 
     @Override
-    @Timed(value = "mapping.fetch_geometry")
+    @Timed(name = "mapping.fetch_geometry")
     public List<AdminGeo> getGeometries(int adminLevelId) {
         try {
             List<AdminGeo> list = Lists.newArrayList();

@@ -104,7 +104,7 @@ public class AdminLevelResource {
 
     @GET 
     @Path("/entities")
-    @Timed("site.rest.admin.entities")
+    @Timed(name = "site.rest.admin.entities")
     @Produces(MediaType.APPLICATION_JSON)
     public List<AdminEntity> getEntities(@InjectParam EntityManager em) {
         return em.createQuery("select e  from AdminEntity e where e.deleted = false and e.level = :level")
@@ -114,7 +114,7 @@ public class AdminLevelResource {
 
 
     @GET 
-    @Timed("site.rest.admin.features")
+    @Timed(name = "site.rest.admin.features")
     @Path("/entities/features")
     public Response getFeatures(@InjectParam EntityManager em) throws IOException {
 
@@ -162,7 +162,7 @@ public class AdminLevelResource {
     }
 
     @PUT
-    @Timed("site.rest.admin.put")
+    @Timed(name = "site.rest.admin.put")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(@InjectParam AuthenticatedUser user, UpdatedAdminLevel updatedLevel) throws ParseException {
 
@@ -250,7 +250,7 @@ public class AdminLevelResource {
     }
 
     @POST
-    @Timed("site.rest.admin.child_levels")
+    @Timed(name = "site.rest.admin.child_levels")
     @Path("/childLevels") @Consumes(MediaType.APPLICATION_JSON)
     public Response postNewLevel(@InjectParam AuthenticatedUser user, NewAdminLevel newLevel) throws ParseException {
 

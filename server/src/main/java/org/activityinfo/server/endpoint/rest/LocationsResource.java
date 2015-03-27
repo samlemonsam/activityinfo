@@ -33,7 +33,7 @@ public class LocationsResource {
     }
 
     @GET 
-    @Timed("api.rest.locations.get")
+    @Timed(name = "api.rest.locations.get")
     @Produces(MediaType.APPLICATION_JSON)
     public Response query(@QueryParam("type") int typeId) throws IOException {
 
@@ -79,7 +79,7 @@ public class LocationsResource {
 
     @POST 
     @Path("/{typeId}")
-    @Timed("api.rest.locations.post")
+    @Timed(name = "api.rest.locations.post")
     public Response postNewLocations(@InjectParam EntityManager entityManager,
                                      @PathParam("typeId") int locationTypeId,
                                      List<NewLocation> locations) {

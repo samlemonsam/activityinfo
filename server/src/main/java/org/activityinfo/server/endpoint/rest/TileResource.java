@@ -4,7 +4,6 @@ import com.google.appengine.api.datastore.*;
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import org.activityinfo.server.util.config.DeploymentConfiguration;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -24,7 +23,6 @@ public class TileResource {
     }
 
     @PUT 
-    @Count("mapping.tiles.put")
     @Path("{layer}/{z}/{x}/{y}.png")
     public Response putTile(@HeaderParam("X-Update-Key") String authToken,
                             @PathParam("layer") String layer,
@@ -46,7 +44,6 @@ public class TileResource {
     }
 
     @GET
-    @Count("mapping.tiles.get")
     @Path("{layer}/{z}/{x}/{y}.png") 
     @Produces("image/png")
     public Response getTile(@PathParam("layer") String layer,

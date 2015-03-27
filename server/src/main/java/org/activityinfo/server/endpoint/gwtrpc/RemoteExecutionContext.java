@@ -44,7 +44,6 @@ import org.activityinfo.server.database.hibernate.HibernateExecutor;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.event.CommandEvent;
 import org.activityinfo.server.event.ServerEventBus;
-import org.activityinfo.server.util.monitoring.Metrics;
 import org.activityinfo.server.util.monitoring.Profiler;
 import org.hibernate.ejb.HibernateEntityManager;
 
@@ -63,7 +62,6 @@ public class RemoteExecutionContext implements ExecutionContext {
     private SyncTransactionAdapter tx;
     private HibernateEntityManager entityManager;
     private JdbcScheduler scheduler;
-    private Metrics metrics;
 
     private ServerEventBus serverEventBus;
 
@@ -75,7 +73,6 @@ public class RemoteExecutionContext implements ExecutionContext {
         this.scheduler = new JdbcScheduler();
         this.scheduler.allowNestedProcessing();
         this.serverEventBus = injector.getInstance(ServerEventBus.class);
-        this.metrics = injector.getInstance(Metrics.class);
     }
 
     @Override
@@ -302,7 +299,7 @@ public class RemoteExecutionContext implements ExecutionContext {
             super();
             this.command = command;
             this.callback = callback;
-            this.profiler = metrics.profile("rpc", MetricNames.commandNameMetricName(command.getClass()));
+            this.profiler = new Profiler("api/rpc", command.getClass().getSimpleName());
         }
 
         @Override

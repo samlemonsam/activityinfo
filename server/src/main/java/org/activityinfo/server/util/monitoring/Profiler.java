@@ -1,42 +1,39 @@
 package org.activityinfo.server.util.monitoring;
 
 
+import com.bedatadriven.appengine.metrics.MetricsRegistry;
+
 import java.util.concurrent.TimeUnit;
 
 public class Profiler {
     
+    
     private final long started;
-    private final String prefix;
-    private MetricsReporter reporter;
+    private String metric;
+    private String kind;
 
-    Profiler(MetricsReporter reporter, String prefix) {
-        this.reporter = reporter;
-        this.prefix = prefix;
+    public Profiler(String metric, String kind) {
+        this.metric = "custom.cloudmonitoring.googleapis.com/" + metric;
+        this.kind = kind;
         this.started = System.nanoTime();
+        MetricsRegistry.INSTANCE.meter(this.metric + "/count", kind).mark();
     }
 
     public void failed() {
-        reporter.increment(prefix + ".failed", 1L);
+        MetricsRegistry.INSTANCE.meter(metric + "/failure", kind).mark();
         reportTime();
     }
     
     public void succeeded() {
-        markSuccess();
-        reportTime();
-    }
-    
-    void succeeded(boolean time) {
-        markSuccess();
         reportTime();
     }
 
     void reportTime() {
-        reporter.time(prefix + ".time", elapsedTime());
+        MetricsRegistry.INSTANCE
+                .timer(metric + "/time", kind)
+                .update(elapsedTime());
     }
 
-    void markSuccess() {
-        reporter.increment(prefix + ".succeeded", 1L);
-    }
 
     private long elapsedTime() {
         return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);

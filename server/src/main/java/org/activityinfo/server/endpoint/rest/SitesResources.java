@@ -29,7 +29,7 @@ public class SitesResources {
     }
 
     @GET 
-    @Timed("api.rest.sites")
+    @Timed(name = "api.rest.sites")
     @Produces(MediaType.APPLICATION_JSON)
     public String query(@QueryParam("activity") List<Integer> activityIds,
                         @QueryParam("database") List<Integer> databaseIds,
@@ -60,7 +60,7 @@ public class SitesResources {
 
     @GET 
     @Path("/points")
-    @Timed("api.rest.sites.points")
+    @Timed(name = "api.rest.sites.points")
     public Response queryPoints(@QueryParam("activity") List<Integer> activityIds,
                                 @QueryParam("database") List<Integer> databaseIds,
                                 @QueryParam("callback") String callback) throws IOException {
@@ -289,7 +289,7 @@ public class SitesResources {
     @GET
     @Path("{id}/monthlyReports")
     @Produces("application/json")
-    @Timed("api.rest.sites.monthly_reports")
+    @Timed(name = "api.rest.sites.monthly_reports")
     public String queryMonthlyReports(@PathParam("id") int siteId) throws IOException {
 
         GetMonthlyReports command = new GetMonthlyReports(siteId, new Month(0,1), new Month(Integer.MAX_VALUE, 12));

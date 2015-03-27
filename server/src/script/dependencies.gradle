@@ -63,6 +63,8 @@ dependencies {
     compile libraries.rebar.appcache
     compile libraries.rebar.sql
     compile libraries.rebar.sync
+    
+    compile libraries.appengineMetrics
 
     gwt libraries.rebar.style
     

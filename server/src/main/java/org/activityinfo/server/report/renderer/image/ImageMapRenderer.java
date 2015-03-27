@@ -139,7 +139,7 @@ public class ImageMapRenderer {
         }
     }
 
-    @Timed("mapping.draw_admin_overlay")
+    @Timed(name = "mapping.draw_admin_overlay")
     protected void drawAdminOverlay(TiledMap map, Graphics2D g2d, AdminOverlay overlay) {
 
         List<AdminGeo> geometry = geometryProvider.getGeometries(overlay.getAdminLevelId());

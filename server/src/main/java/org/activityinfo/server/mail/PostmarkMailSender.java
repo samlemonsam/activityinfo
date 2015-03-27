@@ -50,7 +50,7 @@ public class PostmarkMailSender extends MailSender {
     }
 
     @Override
-    @Timed("mail.send.postmark")
+    @Timed(name = "mail.send.postmark")
     public void send(Message message) throws MessagingException {
         try {
             JsonObject json = toJson(message);

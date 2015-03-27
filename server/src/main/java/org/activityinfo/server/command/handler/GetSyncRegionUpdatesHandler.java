@@ -31,7 +31,6 @@ import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.sync.*;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.monitoring.Metrics;
 import org.activityinfo.server.util.monitoring.Profiler;
 
 import java.util.logging.Level;
@@ -42,12 +41,10 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
     private static final Logger LOGGER = Logger.getLogger(GetSyncRegionsHandler.class.getName());
 
     private final Injector injector;
-    private final Metrics metrics;
 
     @Inject
-    public GetSyncRegionUpdatesHandler(Injector injector, Metrics metrics) {
+    public GetSyncRegionUpdatesHandler(Injector injector) {
         this.injector = injector;
-        this.metrics = metrics;
     }
 
     @Override
@@ -76,7 +73,7 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
             throw new CommandException("Unknown sync region: " + cmd.getRegionId());
         }
 
-        Profiler profiler = metrics.profile("sync", "region", prefix(cmd.getRegionId()));
+        Profiler profiler = new Profiler("api/rpc/sync", prefix(cmd.getRegionId()));
         try {
             
             SyncRegionUpdate update = builder.build(user, cmd);
@@ -99,7 +96,7 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
         } else {
             prefix = regionId;
         }
-        return prefix.replace('-', '_');
+        return prefix;
     }
 
 }

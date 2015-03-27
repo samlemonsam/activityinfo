@@ -32,7 +32,6 @@ import com.google.inject.Singleton;
 import com.teklabs.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
-import org.activityinfo.server.util.monitoring.Metrics;
 
 import javax.persistence.EntityManager;
 import javax.servlet.*;
@@ -62,7 +61,6 @@ public class AuthenticationFilter implements Filter {
     private final ServerSideAuthProvider authProvider;
     private final BasicAuthentication basicAuthenticator;
     
-    private final Metrics metrics;
 
     private final LoadingCache<String, AuthenticatedUser> authTokenCache;
 
@@ -70,12 +68,11 @@ public class AuthenticationFilter implements Filter {
     public AuthenticationFilter(Provider<HttpServletRequest> request,
                                 Provider<EntityManager> entityManager,
                                 ServerSideAuthProvider authProvider,
-                                BasicAuthentication basicAuthenticator, Metrics metrics) {
+                                BasicAuthentication basicAuthenticator) {
         this.entityManager = entityManager;
         this.request = request;
         this.authProvider = authProvider;
         this.basicAuthenticator = basicAuthenticator;
-        this.metrics = metrics;
         authTokenCache = CacheBuilder.newBuilder()
             .maximumSize(10000)
             .expireAfterAccess(6, TimeUnit.HOURS)
@@ -109,10 +106,6 @@ public class AuthenticationFilter implements Filter {
                 
                 LOGGER.info("Setting locale to " + currentUser.getUserLocale());
                 
-                metrics.set("users.authenticated.concurrent", currentUser.getId());
-                metrics.set("users.authenticated.concurrent." + currentUser.getUserLocale(), currentUser.getUserId());
-
-
             } catch (Exception e) {
                 authProvider.clear();
             }
