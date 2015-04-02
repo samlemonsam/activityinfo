@@ -2,8 +2,10 @@ package org.activityinfo.test.sut;
 
 import org.activityinfo.test.config.ConfigProperty;
 
-import java.sql.*;
-import java.util.Random;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 
 /**
@@ -22,8 +24,6 @@ public class DevServerAccounts implements Accounts {
      * Passwords are not checked when running in development mode
      */
     private static final String DEV_PASSWORD = "notasecret";
-
-    private Random random = new Random();
 
     public DevServerAccounts() {
         try {
@@ -69,9 +69,8 @@ public class DevServerAccounts implements Accounts {
     }
 
     private String connectionUrl() {
-        return String.format("jdbc:mysql://localhost/activityinfo_at?useUnicode=true&characterEncoding=UTF-8", 
+        return String.format("jdbc:mysql://localhost/%s?useUnicode=true&characterEncoding=UTF-8",
                 DATABASE_NAME.getOr("activityinfo"));
-        
     }
 
     private String nameForEmail(String email) {

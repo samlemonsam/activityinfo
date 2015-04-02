@@ -117,6 +117,15 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void assertObjectExistence(ObjectType objectType, String objectName, boolean exists) {
+        switch(objectType) {
+            case LOCATION_TYPE:
+                assertLocationTypeExistence(objectName, exists);
+                return;
+        }
+        throw new UnsupportedOperationException("Object type is not supported: " + objectType + ", objectName: " + objectName);
+    }
+
+    private void assertLocationTypeExistence(String objectName, boolean exists) {
         DesignTab designTab = applicationPage.navigateToDesignTab();
         designTab.selectDatabase(aliasTable.getAlias("database"));
         Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(objectName);
