@@ -32,6 +32,16 @@ ext {
             ]
         ],
             
+        metrics: [
+            core:           'io.dropwizard.metrics:metrics-core:3.1.1-gae',
+            influxdb:       'net.alchim31:metrics-influxdb:0.6.0'
+
+        ],
+            
+        appengineMetrics:   'com.bedatadriven.appengine:appengine-metrics:0.3-SNAPSHOT',
+            
+        influxdb:           'org.influxdb:influxdb-java:1.5',
+            
         gwt:[
             user:           "com.google.gwt:gwt-user:${gwtVersion}", 
             servlet:        "com.google.gwt:gwt-servlet:${gwtVersion}",

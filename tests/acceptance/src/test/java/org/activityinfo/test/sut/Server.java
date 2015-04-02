@@ -1,13 +1,24 @@
 package org.activityinfo.test.sut;
 
+import org.activityinfo.test.config.ConfigProperty;
+
 /**
  * Provides information about and access to the deployment of the
  * server currently under test
  */
 public class Server {
 
+
+    public static final ConfigProperty TEST_URL = new ConfigProperty("test.url", "Root URL to Test");
+
+    private static final String LOCAL_URL = "http://localhost:8080/";
+    
     private final String rootUrl;
 
+    public Server() {
+        this.rootUrl = TEST_URL.getOr(LOCAL_URL);
+    }
+    
     public Server(String rootUrl) {
         this.rootUrl = rootUrl;
     }

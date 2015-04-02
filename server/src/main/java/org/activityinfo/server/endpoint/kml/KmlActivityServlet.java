@@ -34,6 +34,7 @@ import org.activityinfo.server.authentication.BasicAuthentication;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.monitoring.Count;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
@@ -63,9 +64,10 @@ public class KmlActivityServlet extends HttpServlet {
         this.authenticator = authenticator;
         this.dispatcher = dispatcher;
     }
-
+    
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    @Count("kml.activity")
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 
         // Get Authorization header
         String auth = req.getHeader("Authorization");

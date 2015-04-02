@@ -9,8 +9,26 @@ public class FieldValue {
     
     private String field;
     private String value;
-    
-    
+
+    public FieldValue() {
+    }
+
+    public FieldValue(String field, String value) {
+        this.field = field;
+        this.value = value;
+    }
+
+    public FieldValue(String field, Double value) {
+        this.field = field;
+        this.value = Double.toString(value);
+    }
+
+    public FieldValue(String fieldName, int value) {
+        this.field = fieldName;
+        this.value = Integer.toString(value);
+    }
+
+
     public String getField() {
         return field;
     }

@@ -27,7 +27,6 @@ import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.server.endpoint.jsonrpc.Required;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 /*
  * The user wants to add a Target to a UserDatabase

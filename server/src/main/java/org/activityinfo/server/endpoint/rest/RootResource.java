@@ -34,6 +34,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
@@ -65,7 +66,9 @@ public class RootResource {
         return new AdminEntityResource(entityManager.get().find(AdminEntity.class, id));
     }
 
-    @GET @Path("/countries") @JsonView(DTOViews.List.class) @Produces(MediaType.APPLICATION_JSON)
+    @GET @Path("/countries") 
+    @JsonView(DTOViews.List.class) 
+    @Produces(MediaType.APPLICATION_JSON)
     public List<CountryDTO> getCountries() {
         return dispatcher.execute(new GetCountries()).getData();
     }
@@ -95,12 +98,20 @@ public class RootResource {
         return new CountryResource(results.get(0));
     }
 
-    @GET @Path("/databases") @JsonView(DTOViews.List.class) @Produces(MediaType.APPLICATION_JSON)
+    @GET 
+    @Path("/databases") 
+    @Timed(name = "api.rest.get_databases")
+    @JsonView(DTOViews.List.class) 
+    @Produces(MediaType.APPLICATION_JSON)
     public List<UserDatabaseDTO> getDatabases() {
         return dispatcher.execute(new GetSchema()).getDatabases();
     }
 
-    @GET @Path("/database/{id}/schema") @JsonView(DTOViews.Schema.class) @Produces(MediaType.APPLICATION_JSON)
+    @GET 
+    @Path("/database/{id}/schema")
+    @Timed(name = "api.rest.get_schema")
+    @JsonView(DTOViews.Schema.class) 
+    @Produces(MediaType.APPLICATION_JSON)
     public UserDatabaseDTO getDatabaseSchema(@PathParam("id") int id) {
         UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(id);
         if (db == null) {
@@ -109,7 +120,9 @@ public class RootResource {
         return db;
     }
 
-    @GET @Path("/database/{id}/schema.csv")
+    @GET 
+    @Path("/database/{id}/schema.csv")
+    @Timed(name = "api.rest.get_schema_csv")
     public Response getDatabaseSchemaCsv(@PathParam("id") int id) {
         UserDatabaseDTO db = getDatabaseSchema(id);
         SchemaCsvWriter writer = new SchemaCsvWriter();
@@ -140,5 +153,10 @@ public class RootResource {
     @Path("/locations")
     public LocationsResource getLocations() {
         return new LocationsResource(dispatcher);
+    }
+    
+    @Path("/users")
+    public UsersResource getUsers() {
+        return new UsersResource(config, entityManager);
     }
 }
