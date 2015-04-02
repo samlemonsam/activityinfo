@@ -22,6 +22,7 @@ package org.activityinfo.server.database.hibernate;
  * #L%
  */
 
+import com.bedatadriven.appengine.cloudsql.CloudSqlConnectionProvider;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -39,6 +40,7 @@ import org.activityinfo.server.util.config.DeploymentConfiguration;
 import org.activityinfo.server.util.monitoring.Timed;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Environment;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.ejb.HibernateEntityManager;
@@ -124,6 +126,7 @@ public class HibernateModule extends ServletModule {
             // ensure that hibernate does NOT do schema updating--liquibase is
             // in charge
             config.setProperty(Environment.HBM2DDL_AUTO, "");
+            config.setProperty(AvailableSettings.CONNECTION_PROVIDER, CloudSqlConnectionProvider.class.getName());
             config.setNamingStrategy(new AINamingStrategy());
             EntityManagerFactory emf = config.buildEntityManagerFactory();
 

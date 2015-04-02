@@ -65,6 +65,7 @@ dependencies {
     compile libraries.rebar.sync
     
     compile libraries.appengineMetrics
+    compile 'com.bedatadriven.appengine:appengine-hibernate:23'
 
     gwt libraries.rebar.style
     
