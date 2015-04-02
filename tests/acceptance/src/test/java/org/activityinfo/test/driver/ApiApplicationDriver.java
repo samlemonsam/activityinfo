@@ -19,7 +19,6 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.Map;
 
 public class ApiApplicationDriver extends ApplicationDriver {
 
@@ -147,10 +146,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void delete(String objectType, String name) throws Exception {
+    public void delete(ObjectType objectType, String name) throws Exception {
         
         switch(objectType) {
-            case "database":
+            case DATABASE:
                 executeDelete("UserDatabase", aliases.getId(name));
                 break;
             default:

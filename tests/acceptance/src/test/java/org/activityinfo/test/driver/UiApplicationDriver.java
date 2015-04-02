@@ -1,14 +1,19 @@
 package org.activityinfo.test.driver;
 
+import com.google.common.base.Optional;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
+import org.junit.Assert;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -108,6 +113,39 @@ public class UiApplicationDriver extends ApplicationDriver {
         pivotTable.selectMeasure(aliasTable.getAlias(measure));
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
         return pivotTable.extractData();
+    }
+
+    @Override
+    public void assertObjectExistence(ObjectType objectType, String objectName, boolean exists) {
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+        designTab.selectDatabase(aliasTable.getAlias("database"));
+        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(objectName);
+
+        if (exists) {
+            Assert.assertTrue("Location type with name '" + objectName + "' is not present.", node.isPresent());
+        } else {
+            Assert.assertTrue("Location type with name '" + objectName + "' is present.", !node.isPresent());
+        }
+    }
+
+    @Override
+    public void delete(ObjectType objectType, String name) throws Exception {
+            switch(objectType) {
+                case LOCATION_TYPE:
+                    deleteLocationType(name);
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
+            }
+    }
+
+    private void deleteLocationType(String name) {
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+        designTab.selectDatabase(aliasTable.getAlias("database"));
+
+        DesignPage designPage = designTab.design();
+        designPage.getDesignTree().select(name);
+        designPage.getToolbarMenu().clickButton("Delete");
     }
 
     @Override
