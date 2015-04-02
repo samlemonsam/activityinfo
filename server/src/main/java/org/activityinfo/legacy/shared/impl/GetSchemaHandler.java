@@ -31,13 +31,12 @@ import com.bedatadriven.rebar.sql.client.util.RowHandler;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.FormFieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.form.FormFieldType;
+import org.activityinfo.promise.Promise;
 
 import java.util.ArrayList;
 import java.util.HashMap;
