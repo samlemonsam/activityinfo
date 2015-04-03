@@ -50,7 +50,6 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.Location;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.activityinfo.ui.client.local.LocalModuleStub;
 import org.activityinfo.ui.client.local.sync.pipeline.InstallPipeline;
 import org.hamcrest.CoreMatchers;
@@ -77,7 +76,6 @@ import static org.junit.Assert.*;
 @Modules({
         MockHibernateModule.class,
         GwtRpcModule.class,
-        LoggingModule.class
 })
 public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Inject

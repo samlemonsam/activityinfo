@@ -9,6 +9,12 @@ dependencies {
     compile 'mysql:mysql-connector-java:5.1.27'
     compile 'com.google.guava:guava:15.0'
     compile 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+    compile 'com.google.appengine:gradle-appengine-plugin:1.9.18'
+    compile 'com.google.apis:google-api-services-sqladmin:v1beta4-rev1-1.19.1'
+    compile 'org.bouncycastle:bcprov-jdk16:1.46'
+
+
+
 }
 
 repositories {

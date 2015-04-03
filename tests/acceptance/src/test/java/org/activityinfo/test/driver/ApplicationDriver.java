@@ -1,17 +1,14 @@
 package org.activityinfo.test.driver;
 
 
-import com.google.inject.ImplementedBy;
 import cucumber.api.DataTable;
-import cucumber.api.Pending;
 import cucumber.api.PendingException;
 import org.activityinfo.test.sut.UserAccount;
-import org.json.JSONException;
 
 import java.util.List;
 
 public abstract class ApplicationDriver {
-
+    
     private final AliasTable aliasTable;
 
     public ApplicationDriver(AliasTable aliasTable) {
@@ -95,6 +92,7 @@ public abstract class ApplicationDriver {
     public final void grantPermission(Property... properties) throws Exception {
         grantPermission(new TestObject(aliasTable, properties));
     }
+    
 
     protected void grantPermission(TestObject permission) throws Exception {
         throw new PendingException();
@@ -120,4 +118,5 @@ public abstract class ApplicationDriver {
     protected void createLocation(TestObject testObject) throws Exception {
         throw new PendingException();
     }
+
 }

@@ -115,7 +115,7 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
                 POOL.setMinPoolSize(2);
                 POOL.setAcquireIncrement(1);
                 POOL.setMaxPoolSize(5);
-                POOL.setUnreturnedConnectionTimeout(10);
+                POOL.setUnreturnedConnectionTimeout(60);
                 POOL.setDebugUnreturnedConnectionStackTraces(true);
             } catch (Exception e) {
                 throw new Error("Could not open connection to " + DATABASE_NAME, e);

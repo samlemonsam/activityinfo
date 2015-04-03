@@ -24,15 +24,14 @@ package org.activityinfo.server.command.handler.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
-import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
+import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,7 +46,6 @@ import static org.junit.matchers.JUnitMatchers.containsString;
 @RunWith(InjectionSupport.class)
 @Modules({
         MockHibernateModule.class,
-        LoggingModule.class
 })
 public class SiteUpdateBuilderTest {
 
