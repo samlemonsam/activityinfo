@@ -202,9 +202,9 @@ public class DatabaseSetupSteps {
                 property("code", code));
     }
 
-    @Then("^Location type \"(.*?)\" should appear in tree\\.$")
+    @Then("^Location type \"(.*?)\" should be visible\\.$")
     public void location_type_should_appear_in_tree(String locationTypeName) throws Throwable {
-        driver.assertObjectExistence(ObjectType.LOCATION_TYPE, true,
+        driver.assertVisible(ObjectType.LOCATION_TYPE, true,
                 new Property("name", locationTypeName),
                 new Property("database", getCurrentDatabase())
         );
@@ -218,9 +218,9 @@ public class DatabaseSetupSteps {
         );
     }
 
-    @Then("^Location type \"(.*?)\" should disappear from tree\\.$")
+    @Then("^Location type \"(.*?)\" is no longer visible\\.$")
     public void location_type_should_disappear_from_tree(String locationTypeName) throws Throwable {
-        driver.assertObjectExistence(ObjectType.LOCATION_TYPE, false,
+        driver.assertVisible(ObjectType.LOCATION_TYPE, false,
                 new Property("name", locationTypeName),
                 new Property("database", getCurrentDatabase())
         );

@@ -126,11 +126,11 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertObjectExistence(ObjectType objectType, boolean exists, Property... properties) {
-        assertObjectExistence(objectType, exists, new TestObject(aliasTable, properties));
+    public void assertVisible(ObjectType objectType, boolean exists, Property... properties) {
+        assertVisible(objectType, exists, new TestObject(aliasTable, properties));
     }
 
-    public void assertObjectExistence(ObjectType objectType, boolean exists, TestObject testObject) {
+    public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
         throw new PendingException();
     }
 }

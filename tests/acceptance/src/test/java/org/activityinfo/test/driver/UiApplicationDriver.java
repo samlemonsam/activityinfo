@@ -116,18 +116,18 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void assertObjectExistence(ObjectType objectType, boolean exists, TestObject testObject) {
+    public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
         ensureLoggedIn();
 
         switch(objectType) {
             case LOCATION_TYPE:
-                assertLocationTypeExistence(testObject, exists);
+                assertLocationTypeVisible(testObject, exists);
                 return;
         }
         throw new UnsupportedOperationException("Object type is not supported: " + objectType);
     }
 
-    private void assertLocationTypeExistence(TestObject testObject, boolean exists) {
+    private void assertLocationTypeVisible(TestObject testObject, boolean exists) {
         String locationTypeName = testObject.getAlias("name");
 
         DesignTab designTab = applicationPage.navigateToDesignTab();
