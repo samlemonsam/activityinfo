@@ -1,12 +1,9 @@
 package org.activityinfo.test.driver;
 
 
-import com.google.inject.ImplementedBy;
 import cucumber.api.DataTable;
-import cucumber.api.Pending;
 import cucumber.api.PendingException;
 import org.activityinfo.test.sut.UserAccount;
-import org.json.JSONException;
 
 import java.util.List;
 
@@ -59,8 +56,16 @@ public abstract class ApplicationDriver {
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         throw new PendingException();
     }
-    
-    public void delete(String objectType, String name) throws Exception {
+
+    public void delete(ObjectType objectType, String name) throws Exception {
+        throw new PendingException();
+    }
+
+    public void delete(ObjectType objectType, Property... properties) throws Exception {
+        delete(objectType, new TestObject(aliasTable, properties));
+    }
+
+    public void delete(ObjectType objectType, TestObject testObject) throws Exception {
         throw new PendingException();
     }
 
@@ -118,6 +123,14 @@ public abstract class ApplicationDriver {
     }
 
     protected void createLocation(TestObject testObject) throws Exception {
+        throw new PendingException();
+    }
+
+    public void assertObjectExistence(ObjectType objectType, boolean exists, Property... properties) {
+        assertObjectExistence(objectType, exists, new TestObject(aliasTable, properties));
+    }
+
+    public void assertObjectExistence(ObjectType objectType, boolean exists, TestObject testObject) {
         throw new PendingException();
     }
 }
