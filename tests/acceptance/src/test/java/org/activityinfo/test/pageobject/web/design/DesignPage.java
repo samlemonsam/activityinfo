@@ -31,16 +31,14 @@ import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
  */
 public class DesignPage {
 
-    private FluentElement container;
     private GxtTree designTree;
     private ToolbarMenu toolbarMenu;
 
     public DesignPage(FluentElement container) {
-        this.container = container;
 
         GxtPanel panel = GxtPanel.findStartsWith(container, "Design");
 
-        this.designTree = panel.tree();
+        this.designTree = panel.treeGrid();
         this.toolbarMenu = panel.toolbarMenu();
     }
 

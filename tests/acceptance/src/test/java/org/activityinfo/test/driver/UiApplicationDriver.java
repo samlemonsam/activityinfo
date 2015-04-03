@@ -116,44 +116,48 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void assertObjectExistence(ObjectType objectType, String objectName, boolean exists) {
+    public void assertObjectExistence(ObjectType objectType, boolean exists, TestObject testObject) {
+        ensureLoggedIn();
+
         switch(objectType) {
             case LOCATION_TYPE:
-                assertLocationTypeExistence(objectName, exists);
+                assertLocationTypeExistence(testObject, exists);
                 return;
         }
-        throw new UnsupportedOperationException("Object type is not supported: " + objectType + ", objectName: " + objectName);
+        throw new UnsupportedOperationException("Object type is not supported: " + objectType);
     }
 
-    private void assertLocationTypeExistence(String objectName, boolean exists) {
+    private void assertLocationTypeExistence(TestObject testObject, boolean exists) {
+        String locationTypeName = testObject.getAlias("name");
+
         DesignTab designTab = applicationPage.navigateToDesignTab();
-        designTab.selectDatabase(aliasTable.getAlias("database"));
-        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(objectName);
+        designTab.selectDatabase(testObject.getAlias("database"));
+        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(locationTypeName);
 
         if (exists) {
-            Assert.assertTrue("Location type with name '" + objectName + "' is not present.", node.isPresent());
+            Assert.assertTrue("Location type with name '" + locationTypeName + "' is not present.", node.isPresent());
         } else {
-            Assert.assertTrue("Location type with name '" + objectName + "' is present.", !node.isPresent());
+            Assert.assertTrue("Location type with name '" + locationTypeName + "' is present.", !node.isPresent());
         }
     }
 
     @Override
-    public void delete(ObjectType objectType, String name) throws Exception {
+    public void delete(ObjectType objectType, TestObject testObject) throws Exception {
             switch(objectType) {
                 case LOCATION_TYPE:
-                    deleteLocationType(name);
+                    deleteLocationType(testObject);
                     break;
                 default:
                     throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
             }
     }
 
-    private void deleteLocationType(String name) {
+    private void deleteLocationType(TestObject testObject) {
         DesignTab designTab = applicationPage.navigateToDesignTab();
-        designTab.selectDatabase(aliasTable.getAlias("database"));
+        designTab.selectDatabase(testObject.getAlias("database"));
 
         DesignPage designPage = designTab.design();
-        designPage.getDesignTree().select(name);
+        designPage.getDesignTree().select(testObject.getAlias("name"));
         designPage.getToolbarMenu().clickButton("Delete");
     }
 

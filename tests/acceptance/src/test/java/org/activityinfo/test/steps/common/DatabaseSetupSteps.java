@@ -6,9 +6,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.ObjectType;
+import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -206,17 +204,26 @@ public class DatabaseSetupSteps {
 
     @Then("^Location type \"(.*?)\" should appear in tree\\.$")
     public void location_type_should_appear_in_tree(String locationTypeName) throws Throwable {
-        driver.setup().assertObjectExistence(ObjectType.LOCATION_TYPE, locationTypeName, true);
+        driver.assertObjectExistence(ObjectType.LOCATION_TYPE, true,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
     }
 
     @When("^I have removed the location type \"(.*?)\"$")
     public void i_have_removed_the_location_type_in(String locationTypeName) throws Throwable {
-        driver.setup().delete(ObjectType.LOCATION_TYPE, locationTypeName);
+        driver.delete(ObjectType.LOCATION_TYPE,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
     }
 
     @Then("^Location type \"(.*?)\" should disappear from tree\\.$")
     public void location_type_should_disappear_from_tree(String locationTypeName) throws Throwable {
-        driver.setup().assertObjectExistence(ObjectType.LOCATION_TYPE, locationTypeName, false);
+        driver.assertObjectExistence(ObjectType.LOCATION_TYPE, false,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
     }
 
 

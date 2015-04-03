@@ -26,7 +26,11 @@ public class GxtPanel {
     }
     
     public GxtTree tree() {
-        return new GxtTree(panel.findElement(By.className("x-tree3")));
+        return GxtTree.tree(panel.findElement(By.className("x-tree3")));
+    }
+
+    public GxtTree treeGrid() {
+        return GxtTree.treeGrid(panel.findElement(By.className("x-treegrid")));
     }
 
     public ToolbarMenu toolbarMenu() {

@@ -56,8 +56,16 @@ public abstract class ApplicationDriver {
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         throw new PendingException();
     }
-    
+
     public void delete(ObjectType objectType, String name) throws Exception {
+        throw new PendingException();
+    }
+
+    public void delete(ObjectType objectType, Property... properties) throws Exception {
+        delete(objectType, new TestObject(aliasTable, properties));
+    }
+
+    public void delete(ObjectType objectType, TestObject testObject) throws Exception {
         throw new PendingException();
     }
 
@@ -118,7 +126,11 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertObjectExistence(ObjectType objectType, String objectName, boolean exists) {
+    public void assertObjectExistence(ObjectType objectType, boolean exists, Property... properties) {
+        assertObjectExistence(objectType, exists, new TestObject(aliasTable, properties));
+    }
+
+    public void assertObjectExistence(ObjectType objectType, boolean exists, TestObject testObject) {
         throw new PendingException();
     }
 }
