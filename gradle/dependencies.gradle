@@ -33,7 +33,7 @@ ext {
         ],
             
         metrics: [
-            core:           'io.dropwizard.metrics:metrics-core:3.1.1-gae',
+            core:           'io.dropwizard.metrics:metrics-core:3.1.1',
             influxdb:       'net.alchim31:metrics-influxdb:0.6.0'
 
         ],
