@@ -68,6 +68,7 @@ task instrumentedAcceptanceTest(type: Test) {
 
     systemProperty "test.url", "http://localhost:8080"
     systemProperty "gwt.coverage.report.dir", coverageReportDir
+    systemProperty "databaseName", "activityinfo_at"
 
     // Keep console output to a minimum
     testLogging.showStandardStreams = false
