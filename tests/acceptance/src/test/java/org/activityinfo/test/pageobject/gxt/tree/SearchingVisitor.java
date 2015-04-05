@@ -22,6 +22,9 @@ public class SearchingVisitor implements GxtTreeVisitor {
         } else {
             if(!node.isLeaf()) {
                 node.ensureExpanded();
+                System.out.println(node + " is expanded");
+            } else {
+                System.out.println(node + " is a leaf, not expanding");
             }
             return Action.CONTINUE;
         }

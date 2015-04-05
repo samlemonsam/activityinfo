@@ -29,7 +29,7 @@ import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.activityinfo.server.login.model.RootPageModel;
 import org.activityinfo.server.util.config.DeploymentConfiguration;
-import org.activityinfo.server.util.logging.LogException;
+import org.activityinfo.server.util.monitoring.Count;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -53,7 +53,8 @@ public class HostController {
         this.authProvider = authProvider;
     }
 
-    @GET @Produces(MediaType.TEXT_HTML) @LogException(emailAlert = true)
+    @GET 
+    @Produces(MediaType.TEXT_HTML) 
     public Response getHostPage(@Context UriInfo uri,
                                 @Context HttpServletRequest req,
                                 @QueryParam("redirect") boolean redirect,
@@ -97,6 +98,7 @@ public class HostController {
     @GET 
     @Path("/unsupportedBrowser")
     @Produces(MediaType.TEXT_HTML)
+    @Count("login.unsupported_browser")
     public Viewable getUnsupportedBrowserMessage() {
         return new Viewable("/page/UnsupportedBrowser.ftl", new HashMap());
     }

@@ -1,7 +1,6 @@
 package org.activityinfo.test.pageobject.gxt.tree;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.PeekingIterator;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 
 import java.util.Iterator;
@@ -23,6 +22,7 @@ public class NavigatingVisitor implements GxtTreeVisitor {
 
     @Override
     public Action visit(GxtTree.GxtNode node) {
+        System.out.println(node.getLabel());
         if(current.equals(node.getLabel())) {
             if(!path.hasNext()) {
                 match = node;

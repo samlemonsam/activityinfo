@@ -29,7 +29,6 @@ import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.exception.LoginException;
 import org.activityinfo.server.login.model.LoginPageModel;
-import org.activityinfo.server.util.logging.LogException;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -53,13 +52,15 @@ public class LoginController {
     @Inject
     private Provider<UserDAO> userDAO;
 
-    @GET @LogException(emailAlert = true) @Produces(MediaType.TEXT_HTML)
+    @GET 
+    @Produces(MediaType.TEXT_HTML)
     public Viewable getLoginPage(@Context UriInfo uri) throws Exception {
         LoginPageModel model = new LoginPageModel();
         return model.asViewable();
     }
 
-    @POST @Path("ajax")
+    @POST 
+    @Path("ajax")
     public Response ajaxLogin(@FormParam("email") String email,
                               @FormParam("password") String password) throws Exception {
 

@@ -1,10 +1,12 @@
 package org.activityinfo.test.pageobject.web.design;
 
+import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 
@@ -18,7 +20,13 @@ public class TargetsPage {
     }
 
     public GxtModal add() {
-        container.find().button(withText("Add")).clickWhenReady();
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                container.find().button(withText("Add")).first().click();
+                return container.root().exists(By.className(GxtModal.CLASS_NAME));
+            }
+        });
         return new GxtModal(container);
     }
 

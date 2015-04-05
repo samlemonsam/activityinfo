@@ -3,12 +3,12 @@ package org.activityinfo.server.endpoint.rest;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.JsonGenerator;
 
 import javax.ws.rs.*;
@@ -28,7 +28,9 @@ public class SitesResources {
         this.dispatcher = dispatcher;
     }
 
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET 
+    @Timed(name = "api.rest.sites")
+    @Produces(MediaType.APPLICATION_JSON)
     public String query(@QueryParam("activity") List<Integer> activityIds,
                         @QueryParam("database") List<Integer> databaseIds,
                         @QueryParam("indicator") List<Integer> indicatorIds,
@@ -56,7 +58,9 @@ public class SitesResources {
     }
 
 
-    @GET @Path("/points")
+    @GET 
+    @Path("/points")
+    @Timed(name = "api.rest.sites.points")
     public Response queryPoints(@QueryParam("activity") List<Integer> activityIds,
                                 @QueryParam("database") List<Integer> databaseIds,
                                 @QueryParam("callback") String callback) throws IOException {
@@ -285,6 +289,7 @@ public class SitesResources {
     @GET
     @Path("{id}/monthlyReports")
     @Produces("application/json")
+    @Timed(name = "api.rest.sites.monthly_reports")
     public String queryMonthlyReports(@PathParam("id") int siteId) throws IOException {
 
         GetMonthlyReports command = new GetMonthlyReports(siteId, new Month(0,1), new Month(Integer.MAX_VALUE, 12));
