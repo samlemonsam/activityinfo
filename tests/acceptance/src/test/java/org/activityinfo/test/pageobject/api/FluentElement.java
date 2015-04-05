@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -156,5 +155,9 @@ public class FluentElement {
     
     public WebDriverWait wait(long duration, TimeUnit unit) {
         return new WebDriverWait(webDriver, unit.toSeconds(duration));
+    }
+
+    public String getTagName() {
+        return element().getTagName();
     }
 }

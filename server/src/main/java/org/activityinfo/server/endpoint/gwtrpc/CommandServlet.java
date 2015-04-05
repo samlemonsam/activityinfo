@@ -37,7 +37,6 @@ import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.logging.LogException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +74,7 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     private PersistentPolicyProvider policyProvider;
 
 
-    @Override @LogException
+    @Override
     public List<CommandResult> execute(String authToken, List<Command> commands) throws CommandException {
         if (!checkAuthentication(authToken)) {
             throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
@@ -85,6 +84,7 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             return handleCommands(commands);
 
         } catch (Exception caught) {
+            LOGGER.log(Level.SEVERE, "Could not execute commands!", caught);
             throw new CommandException();
         }
     }
@@ -101,7 +101,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     /**
      * Publicly visible for testing *
      */
-    @LogException
     public List<CommandResult> handleCommands(List<Command> commands) {
         applyUserFilters();
 
@@ -125,21 +124,24 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
         DomainFilters.applyUserFilter(user, em);
     }
 
-    @LogException(emailAlert = true)
     protected CommandResult handleCommand(Command command) throws CommandException {
         RemoteExecutionContext context = null;
         try {
             long timeStart = System.currentTimeMillis();
             context = new RemoteExecutionContext(injector);
             CommandResult result = context.startExecute(command);
+            
+            if(result instanceof CommandException) {
+                LOGGER.log(Level.SEVERE, "Exception executing " + command.getClass().getSimpleName(), 
+                        (CommandException)result);
+            }
 
             long timeElapsed = System.currentTimeMillis() - timeStart;
-            if (timeElapsed > 1000) {
-                LOGGER.warning("Command " + command.toString() + " completed in " + timeElapsed + "ms");
-            }
+            LOGGER.warning("Command " + command.toString() + " completed in " + timeElapsed + "ms");
 
             return result;
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception executing " + command.getClass().getSimpleName(), e);
             throw new CommandException(command, context, e);
         }
     }

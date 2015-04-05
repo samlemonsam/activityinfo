@@ -1,21 +1,19 @@
 package org.activityinfo.test.pageobject.gxt;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
@@ -50,6 +48,12 @@ public class GxtTree {
      *
      */
     public Optional<GxtNode> search(String label) {
+
+        Optional<GxtNode> selected = findSelected();
+        if(selected.isPresent() && selected.get().getLabel().equals(label)) {
+            return selected;
+        }
+
         SearchingVisitor visitor = SearchingVisitor.byLabel(label);
         accept(visitor);
         
@@ -70,6 +74,20 @@ public class GxtTree {
         }
     }
 
+    public void waitUntilLoaded() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        while(isEmpty()) {
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                throw new AssertionError("Interrupted while waiting for nodes to load...");
+            }
+            if(stopwatch.elapsed(TimeUnit.SECONDS) > 10) {
+                throw new AssertionError("Timed out while waiting for nodes to load...");
+            }
+        }
+    }
+    
     /**
      * Advances to the next node in the tree using the Keyboard
      * so that we don't have problems with scrolling
@@ -98,10 +116,6 @@ public class GxtTree {
             return Optional.absent();            
         }
     }
-    
-    public void setChecked(String... labels) {
-        setChecked(Sets.newHashSet(labels));
-    }
 
     public void setChecked(Iterable<String> labels) {
         CheckingVisitor visitor = new CheckingVisitor(labels);
@@ -117,16 +131,11 @@ public class GxtTree {
     private Optional<GxtNode> firstRootNode() {
         return container.findElements(By.xpath("table/tbody/tr/td/div[@role = 'presentation'][1]")).as(GxtNode.class).first();
     }
-
-
-    private GxtNode findNode(FluentIterable<GxtNode> nodes, String label) {
-        for(GxtNode node : nodes) {
-            if(node.getLabel().equals(label)) {
-                return node;
-            }
-        }
-        throw assertionError("Could not find tree item with label '%s'", label);
+    
+    public boolean isEmpty() {
+        return findRootNodes().isEmpty();
     }
+
 
     private AssertionError assertionError(String message, Object... args) {
         return new AssertionError(String.format(message, args) + dumpTree());

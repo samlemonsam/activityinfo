@@ -45,40 +45,47 @@ public abstract class UserDigestResource {
         this.digestRenderer = digestRenderer;
     }
 
-    @GET @Produces(MediaType.TEXT_HTML)
+    @GET 
+    @Produces(MediaType.TEXT_HTML)
     public String createUserDigest(@QueryParam(PARAM_USER) int userId,
                                    @QueryParam(PARAM_NOW) Long now,
                                    @QueryParam(PARAM_DAYS) int days,
                                    @QueryParam(PARAM_SENDEMAIL) @DefaultValue(PARAM_SENDEMAIL_DEF) boolean sendEmail)
             throws IOException, MessagingException {
 
+
         if (userId <= 0) {
             return "no user specified";
         }
 
-        Date date = now == null ? new Date() : new Date(now);
+        try {
+            Date date = now == null ? new Date() : new Date(now);
 
-        if (days <= 0) {
-            days = getDefaultDays();
-        }
+            if (days <= 0) {
+                days = getDefaultDays();
+            }
 
-        User user = entityManager.get().find(User.class, userId);
-        authProvider.set(user);
+            User user = entityManager.get().find(User.class, userId);
+            authProvider.set(user);
 
-        LOGGER.info("creating digest for " + user.getEmail() + " on " + DateFormatter.formatDateTime(date) +
+            LOGGER.info("creating digest for " + user.getEmail() + " on " + DateFormatter.formatDateTime(date) +
                     " for activity period: " + days + " day(s)." + " (sending email: " + sendEmail + ")");
 
-        DigestMessageBuilder digest = new DigestMessageBuilder(digestModelBuilder, digestRenderer);
-        digest.setUser(user);
-        digest.setDate(date);
-        digest.setDays(days);
+            DigestMessageBuilder digest = new DigestMessageBuilder(digestModelBuilder, digestRenderer);
+            digest.setUser(user);
+            digest.setDate(date);
+            digest.setDays(days);
 
-        Message message = digest.build();
-        if (message != null && sendEmail) {
-            mailSender.get().send(message);
+            Message message = digest.build();
+            if (message != null && sendEmail) {
+                mailSender.get().send(message);
+            }
+
+            return message == null ? "no updates found" : message.getHtmlBody();
+            
+        } catch (Exception e) {
+            throw e;
         }
-
-        return message == null ? "no updates found" : message.getHtmlBody();
     }
 
     public abstract int getDefaultDays();
