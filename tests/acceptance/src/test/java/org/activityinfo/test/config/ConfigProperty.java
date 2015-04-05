@@ -17,13 +17,29 @@ public class ConfigProperty {
     public String get() {
         String path = System.getProperty(propertyKey);
         if(Strings.isNullOrEmpty(path)) {
-            path = System.getenv(propertyKey);
+            path = findEnvironmentVariable();
         }
         if(Strings.isNullOrEmpty(path)) {
             throw new ConfigurationError(String.format("Please specify %s using the system property '%s'", description,
                     propertyKey));
         }
         return path;
+    }
+
+    private String findEnvironmentVariable() {
+
+        // Try exact match first
+        String value = System.getenv(propertyKey);
+        if(!Strings.isNullOrEmpty(value)) {
+            return value;
+        }
+        
+        for (String envName : System.getenv().keySet()) {
+            if(envName.replace("_", "").toLowerCase().equalsIgnoreCase(propertyKey)) {
+                return System.getenv(envName);
+            }
+        }
+        return null;
     }
 
 

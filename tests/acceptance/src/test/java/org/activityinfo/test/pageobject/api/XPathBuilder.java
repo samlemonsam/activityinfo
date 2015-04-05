@@ -2,7 +2,10 @@ package org.activityinfo.test.pageobject.api;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
 
 public class XPathBuilder {
@@ -205,6 +208,17 @@ public class XPathBuilder {
 
 
     public void clickWhenReady() {
-        first().clickWhenReady();
+        context.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                try {
+                    first().click();
+                    return true;
+
+                } catch (WebDriverException e) {
+                    return false;
+                }
+            }
+        });
     }
 }

@@ -1,17 +1,11 @@
 package org.activityinfo.test.capacity.agent;
 
 
-import com.codahale.metrics.Counter;
 import com.google.common.io.Files;
-import org.activityinfo.test.capacity.Metrics;
-import org.activityinfo.test.capacity.model.BrowserSession;
 import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.driver.ApiApplicationDriver;
-import org.activityinfo.test.driver.UiApplicationDriver;
-import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.sut.UserAccount;
 import org.activityinfo.test.webdriver.PhantomJsProvider;
-import org.joda.time.LocalDate;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -97,23 +91,7 @@ public class Agent {
 
     private WebDriver startWebDriver(String sessionName) {
         
-        File userDir = new File(getId());
-        if(!userDir.exists()) {
-            boolean succeeded = userDir.mkdirs();
-            if(!succeeded) {
-                throw new RuntimeException("Could not create " + userDir);
-            }
-        }
-        
-        File sessionLog = new File(userDir, new LocalDate().toString("YYYYMMDD") + ".phantomjs.log");
-        if(sessionLog.exists()) {
-            sessionLog.delete();
-        }
-        
         PhantomJsProvider provider = new PhantomJsProvider();
-        provider.setLogFile(sessionLog);
-        provider.setHomeDir(userDir);
-
         return provider.start(sessionName, PhantomJsProvider.BROWSER_PROFILE);
     }
 

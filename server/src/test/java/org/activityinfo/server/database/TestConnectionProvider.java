@@ -31,8 +31,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
-import javax.management.RuntimeErrorException;
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;
@@ -88,12 +86,19 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
                     System.getProperty(PASSWORD_PROPERTY, DEFAULT_PASSWORD);
 
 
-            // Surefire is set up to run tests across several forked JVMs
-            // if the forkNumber property is present, then automatically create a fresh
+            // Gradle is set up to run tests across several forked JVMs
+            // if the worker.id property is present, then automatically create a fresh
             // database and run liquibase
-            DATABASE_NAME = System.getProperty("testDatabaseName");
-            if(Strings.isNullOrEmpty(DATABASE_NAME)) {
-                throw new Error("No database name provided");
+
+            String workerId = System.getProperty("org.gradle.test.worker");
+            if(!Strings.isNullOrEmpty(workerId)) {
+                DATABASE_NAME = "aitest_" + workerId;
+            } else {
+
+                DATABASE_NAME = System.getProperty("testDatabaseName");
+                if (Strings.isNullOrEmpty(DATABASE_NAME)) {
+                    throw new Error("No database name provided");
+                }
             }
             
         } catch (Exception e) {

@@ -31,6 +31,18 @@ test {
     // Do not run acceptance tests during normal test phase
     exclude "**/*AT.*"
     exclude "**/*Smoke*.*"
+    
+}
+
+task commitTest(type: Test) {
+    group = "Verification"
+    description = "Runs API tests against Local Development Server upon commit"
+    
+    dependsOn ':server:configureDatabase'
+    dependsOn ':server:appengineStartAT'
+    finalizedBy ':server:appengineStop'
+    
+    include "**/FunctionalApiAT*"
 }
 
 task acceptanceTest(type: Test) {
@@ -44,9 +56,6 @@ task acceptanceTest(type: Test) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
     } 
-    // Keep console output to a minimum
-    testLogging.showStandardStreams = false
-
 
     // Run only functional tests
     include "**/Functional*AT*"
@@ -78,8 +87,6 @@ task instrumentedAcceptanceTest(type: Test) {
     ignoreFailures = true
     systemProperty "gwt.coverage.report.dir", coverageReportDir
 
-
-    // Run only UI functional tests
     include "**/Functional*AT.*"
 }
 
@@ -140,17 +147,19 @@ task smokeTest(type: Test) {
 }
 
 tasks.each { task ->
-    if(task.name =~ /[aA]cceptanceTest$/) {
+    if(task.name =~ /commitTest|[aA]cceptanceTest$/) {
         task.configure {
-            println "Configuring ${test.name}"
             scanForTestClasses = false
 
             doFirst {
                 systemProperties.putAll(project.environment.systemProperties)
+      
+                // Keep console output to a minimum
+                testLogging {
+                    showStandardStreams = false
+                    events = ['failed']
+                }
             }
-            // Keep console output to a minimum
-            testLogging.showStandardStreams = false
-
             systemProperty 'webdriver', project.property('webdriver')
             systemProperty 'webdriver.chrome.silentOutput', 'true'
 

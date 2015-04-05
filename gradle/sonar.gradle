@@ -12,6 +12,7 @@ sonarRunner {
         property "sonar.jdbc.password", sonarDatabasePassword
         property "sonar.issuesReport.html.enable", true
         property "sonar.analysis.mode", "incremental"
+        property "sonar.preview.readTimeout", 60*3
     }
 }
 

@@ -17,10 +17,6 @@ ext {
     // The location of the configuration file to be used 
     // for the appengine dev server
     configFile = project.file("$buildDir/config.properties")
-    gwtMode = 'production'
-    if(project.hasProperty('gwt')) {
-        gwtMode = project.property('gwt')
-    }
 }
 
 gwt {
@@ -66,6 +62,18 @@ test {
     systemProperty "testDatabaseName", "testDb"
     systemProperty "testDatabaseUsername", localMySqlUsername
     systemProperty "testDatabasePassword", localMySqlPassword
+
+    maxParallelForks = Runtime.runtime.availableProcessors() / 2
+    
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+            events = ['failed']
+        }
+        
+        // still have a few tests writing to maven 'target' dir
+        project.file('target').mkdirs()
+    }
 }
 
 processResources {
@@ -83,7 +91,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     appCacheDownloadSizeLimit "2000kb"
 }
 
-tasks.compileGwt.onlyIf { !gwtMode.equals("skip") }
+tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
@@ -142,15 +150,3 @@ task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
 }
-
-
-
-task createTargetDir {
-    doLast {
-        // We still have a few tests that are looking for the target folder
-        // created by maven
-        project.file('target').mkdirs()
-    }
-}
-
-tasks.test.dependsOn 'createTargetDir'

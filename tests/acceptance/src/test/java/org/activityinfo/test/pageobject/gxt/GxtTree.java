@@ -12,6 +12,7 @@ import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -182,7 +183,10 @@ public class GxtTree {
                 return false;
             }
             try {
-                return !joint.get().style().hasValue("background");
+                String style = joint.get().attribute("style");
+                boolean leaf = !style.contains("background");
+                System.out.println(getLabel() + ".leaf = " + leaf);
+                return leaf;
             } catch(StaleElementReferenceException e) {
                 return isLeaf();
             }
@@ -214,17 +218,20 @@ public class GxtTree {
 
             Stopwatch stopwatch = Stopwatch.createStarted();
             while(stopwatch.elapsed(TimeUnit.SECONDS) < 90) {
-                if(isExpanded() || isLeaf()) {
+                if(isExpanded()) {
                     break;
                 }
-                expand();
+                if(isLeaf()) {
+                    break;
+                }
+                tryExpand();
 
                 int checksRemaining = 5;
                 while(checksRemaining > 0) {
-                    sleep(250);
                     if(isExpanded() || isLeaf()) {
                         break;
                     }
+                    sleep(150);
                     checksRemaining --;
                 }
             }
@@ -238,8 +245,12 @@ public class GxtTree {
             }
         }
 
-        private void expand() {
-            joint().clickWhenReady();
+        private void tryExpand() {
+            try {
+                joint().first().click();
+            } catch (WebDriverException ignore) {
+                
+            }
         }
 
         public GxtNode search(String label) {
@@ -257,12 +268,6 @@ public class GxtTree {
             return null;
         }
 
-        private void waitUntilExpanded() {
-            if (!isExpanded()) {
-                expand();
-                childContainer().waitForFirst();
-            }
-        }
         
         private FluentElement checkbox() {
             return treeItem().img(withClass("x-tree3-node-check")).first();
