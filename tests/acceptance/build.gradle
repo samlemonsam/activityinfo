@@ -1,5 +1,4 @@
 
-
 dependencies {
 
     testCompile libraries.junit
@@ -19,39 +18,57 @@ dependencies {
     testCompile 'org.apache.commons:commons-pool2:2.0'
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
+    testCompile libraries.bcrypt
+    testCompile libraries.metrics.core
+
+    testCompile libraries.c3p0
+    testCompile 'org.apache.poi:poi:3.8'
+
+    testCompile project(':core:model')
 }
 
 test {
     // Do not run acceptance tests during normal test phase
     exclude "**/*AT.*"
     exclude "**/*Smoke*.*"
+    
+}
+
+task commitTest(type: Test) {
+    group = "Verification"
+    description = "Runs API tests against Local Development Server upon commit"
+    
+    dependsOn ':server:configureDatabase'
+    dependsOn ':server:appengineStartAT'
+    finalizedBy ':server:appengineStop'
+    
+    include "**/FunctionalApiAT*"
 }
 
 task acceptanceTest(type: Test) {
     group = "Verification"
     description = 'Runs acceptance test suite'
-
+    
+    dependsOn ':server:configureDatabase'
+    
     // Determine the server against which to test
-    if(!project.hasProperty("testUrl")) {
+    if(project.environment.local) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
-        systemProperty "test.url", "http://localhost:8080"
-        
-    } else {
-        systemProperty "test.url", project.property("testUrl")
-    }
-    
-    // Use ChromeDriver locally
-    systemProperty 'webdriver', 'chrome'
-    systemProperty 'webdriver.chrome.silentOutput', 'true'   
-
-    // Keep console output to a minimum
-    testLogging.showStandardStreams = false
-
+    } 
 
     // Run only functional tests
     include "**/Functional*AT*"
-    scanForTestClasses false
+}
+
+task browserAcceptanceTest(type: Test) {
+    group = "Verification"
+    description = 'Runs functional tests against a specific browser'
+    dependsOn ':server:configureDatabase'
+
+    include "**/CrossBrowserAT*"
+    
+    outputs.upToDateWhen { false }
 }
 
 task instrumentedAcceptanceTest(type: Test) {
@@ -66,28 +83,13 @@ task instrumentedAcceptanceTest(type: Test) {
     dependsOn { ':server:appengineStartInstrumentedAT' }
     finalizedBy { ':server:appengineStop' }
 
-    systemProperty "test.url", "http://localhost:8080"
-    systemProperty "gwt.coverage.report.dir", coverageReportDir
-
-    // Keep console output to a minimum
-    testLogging.showStandardStreams = false
-
     // some tests may fail due to the instrumentation process
     ignoreFailures = true
+    systemProperty "gwt.coverage.report.dir", coverageReportDir
 
-    // Run only UI functional tests
     include "**/Functional*AT.*"
-
-    scanForTestClasses false
 }
 
-apply from: './src/script/gwtCoverageReport.gradle'
-
-
-task acceptanceTestCoverage {
-    dependsOn 'instrumentedAcceptanceTest'
-    dependsOn 'gwtTestCoverage'
-}
 
 task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAcceptanceTest') {
     def sourceSets = rootProject.subprojects.findResults { p -> p.sourceSets?.main }
@@ -95,9 +97,38 @@ task acceptanceTestJacocoReport(type:JacocoReport, dependsOn: 'instrumentedAccep
     sourceDirectories = project.files(sourceSets.collect { s -> s.java })
     classDirectories = project.files(sourceSets.collect { s -> s.output.classesDir })
     executionData jacocoAcceptanceDataFile
-    
+
     reports {
         xml.enabled = true
+    }
+}
+
+task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
+    dependsOn 'acceptanceTestJacocoReport'
+
+    gwtCoverageReportsDir = instrumentedAcceptanceTest.coverageReportDir
+    jacocoReportFile = acceptanceTestJacocoReport.reports.xml.destination
+    outputFile = project.acceptanceDataFile
+    
+    outputs.upToDateWhen { false }
+    
+    doFirst {
+        if (!project.environment.local) {
+            throw new IllegalStateException("${task.name} can only run in a local environment")
+        }
+    }
+}
+
+task capacityTest(type: JavaExec) {
+    description = 'Runs capacity tests to verify performance under load'
+    main = 'org.activityinfo.test.capacity.CapacityTest'
+    dependsOn 'testClasses', ':server:configureDatabase'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir/capacity"
+    
+    doFirst {
+        workingDir.mkdir()
+        systemProperties.putAll(project.environment.systemProperties)
     }
 }
 
@@ -108,9 +139,34 @@ task smokeTest(type: Test) {
     dependsOn 'testClasses'
 
     include "**/*SmokeTest.*"
-    scanForTestClasses false
 
     if(project.hasProperty("testUrl")) {
         systemProperty "test.url", project.property("testUrl")
+    }
+
+}
+
+tasks.each { task ->
+    if(task.name =~ /commitTest|[aA]cceptanceTest$/) {
+        task.configure {
+            scanForTestClasses = false
+
+            doFirst {
+                systemProperties.putAll(project.environment.systemProperties)
+      
+                // Keep console output to a minimum
+                testLogging {
+                    showStandardStreams = false
+                    events = ['failed']
+                }
+            }
+            systemProperty 'webdriver', project.property('webdriver')
+            systemProperty 'webdriver.chrome.silentOutput', 'true'
+
+
+            if(project.hasProperty("phantomjsPath")) {
+                systemProperty "phantomjsPath", project.property("phantomjsPath")
+            }
+        }
     }
 }

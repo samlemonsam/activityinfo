@@ -51,4 +51,12 @@ public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
     public void setLocalVersion(String localVersion) {
         this.localVersion = localVersion;
     }
+
+    @Override
+    public String toString() {
+        return "GetSyncRegionUpdates{" +
+                "regionId='" + regionId + '\'' +
+                ", localVersion='" + localVersion + '\'' +
+                '}';
+    }
 }

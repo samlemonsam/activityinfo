@@ -4,12 +4,12 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
-import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 
@@ -19,9 +19,6 @@ public class LoginSteps {
 
     @Inject
     private Server server;
-    
-    @Inject 
-    private WebDriver driver;
 
     @Inject
     private ApplicationPage applicationPage;
@@ -32,6 +29,9 @@ public class LoginSteps {
     @Inject
     private LoginPage loginPage;
 
+    @Inject
+    private ApplicationDriver applicationDriver;
+    
 
     @Given("^that the user \"([^\"]*)\" is not signed up$")
     public void that_the_user_is_not_signed_up(String email) throws Throwable {
@@ -49,6 +49,7 @@ public class LoginSteps {
 
         loginPage.navigateTo().loginAs(account);
     }
+
 
     @When("^I login as \"([^\"]*)\" with password \"([^\"]*)\"$")
     public void I_login_as_with_password(String email, String password) throws Throwable {

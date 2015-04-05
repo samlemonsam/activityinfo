@@ -9,7 +9,7 @@ import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
 
 public class GxtModal extends ModalDialog {
@@ -21,6 +21,14 @@ public class GxtModal extends ModalDialog {
     
     public GxtModal(FluentElement parent) {
         this.windowElement = parent.root().waitFor(By.className(CLASS_NAME));
+    }
+
+    public FluentElement getWindowElement() {
+        return windowElement;
+    }
+
+    public String getTitle() {
+        return windowElement.find().span(withRole("heading")).first().text();
     }
 
     @Override
@@ -53,5 +61,9 @@ public class GxtModal extends ModalDialog {
             }
         });
         
+    }
+
+    public boolean isClosed() {
+        return !windowElement.isDisplayed();
     }
 }

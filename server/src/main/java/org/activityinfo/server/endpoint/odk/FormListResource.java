@@ -3,6 +3,7 @@ package org.activityinfo.server.endpoint.odk;
 import com.google.common.collect.Maps;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,7 +16,11 @@ import java.util.Map;
 
 @Path("/formList")
 public class FormListResource extends ODKResource {
-    @GET @Produces(MediaType.TEXT_XML)
+    
+    
+    @GET 
+    @Timed(name = "odk", kind = "formList")
+    @Produces(MediaType.TEXT_XML)
     public Response formList(@Context UriInfo info) throws Exception {
         if (enforceAuthorization()) {
             return askAuthentication();
