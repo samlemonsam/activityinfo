@@ -13,7 +13,6 @@ subprojects {
     apply plugin: 'jacoco'
 
     tasks.withType(Test) {
-        ignoreFailures = true
         jacoco {
             // Turn off test coverage generation by default
             enabled = false

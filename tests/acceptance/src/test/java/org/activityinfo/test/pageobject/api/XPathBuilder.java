@@ -12,7 +12,8 @@ public class XPathBuilder {
         CHILD,
         DESCENDANT,
         ANCESTORS,
-        PARENT
+        PARENT,
+        FOLLOWING_SIBLING
     }
     
     private FluentElement context;
@@ -40,6 +41,11 @@ public class XPathBuilder {
 
     public XPathBuilder ancestor() {
         this.axis = Axis.ANCESTORS;
+        return this;
+    }
+    
+    public XPathBuilder followingSibling() {
+        this.axis = Axis.FOLLOWING_SIBLING;
         return this;
     }
 
@@ -77,6 +83,10 @@ public class XPathBuilder {
         return tagName("td", conditions);
     }
 
+    public XPathBuilder tr(String... conditions) {
+        return tagName("tr", conditions);
+    }
+
     public XPathBuilder h4(String... conditions) {
         return tagName("h4", conditions);
     }
@@ -100,6 +110,10 @@ public class XPathBuilder {
 
     public static String withRole(String roleName ) {
         return String.format("@role = '%s'", roleName);
+    }
+    
+    public static String withPosition(int index) {
+        return String.format("position() = %d", index);
     }
 
     public XPathBuilder descendants() {
@@ -143,6 +157,8 @@ public class XPathBuilder {
                 xpath.append("ancestor::");
             } else if(axis == Axis.PARENT) {
                 xpath.append("parent::");
+            } else if(axis == Axis.FOLLOWING_SIBLING) {
+                xpath.append("following-sibling::");
             }
             xpath.append(step);
         }
@@ -154,7 +170,7 @@ public class XPathBuilder {
         xpath.append("[1]");
         return By.xpath(xpath.toString());
     }
-
+    
     public FluentElement first() {
         try {
             return context.findElement(firstLocator());

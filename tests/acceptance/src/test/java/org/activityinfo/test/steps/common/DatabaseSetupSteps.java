@@ -3,6 +3,7 @@ package org.activityinfo.test.steps.common;
 import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import cucumber.api.java.After;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
@@ -227,5 +228,10 @@ public class DatabaseSetupSteps {
                     property("name", "Location " + i),
                     property("code", "LOC" + i));
         }
+    }
+
+    @And("^I open a new session as (.+)$")
+    public void I_open_a_new_session_as_(String user) throws Throwable {
+        driver.login(accounts.ensureAccountExists(user));
     }
 }

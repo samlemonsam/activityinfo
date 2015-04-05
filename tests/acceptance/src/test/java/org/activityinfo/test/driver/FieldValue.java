@@ -1,5 +1,7 @@
 package org.activityinfo.test.driver;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,5 +66,13 @@ public class FieldValue {
                     "The property '%s' with value '%s' is not an number: %s",
                     field, value, e.getMessage()), e);
         }
+    }
+    
+    public static Map<String, FieldValue> toMap(Iterable<FieldValue> values) {
+        Map<String, FieldValue> map = new HashMap<>();
+        for(FieldValue value : values) {
+            map.put(value.getField(), value);
+        }
+        return map;
     }
 }

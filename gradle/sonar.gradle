@@ -10,6 +10,8 @@ sonarRunner {
         property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
         property "sonar.jdbc.username", "sonar"
         property "sonar.jdbc.password", sonarDatabasePassword
+        property "sonar.issuesReport.html.enable", true
+        property "sonar.analysis.mode", "incremental"
     }
 }
 

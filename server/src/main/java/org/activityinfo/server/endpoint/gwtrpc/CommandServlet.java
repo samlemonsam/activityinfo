@@ -84,6 +84,7 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             return handleCommands(commands);
 
         } catch (Exception caught) {
+            LOGGER.log(Level.SEVERE, "Could not execute commands!", caught);
             throw new CommandException();
         }
     }
@@ -129,12 +130,18 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             long timeStart = System.currentTimeMillis();
             context = new RemoteExecutionContext(injector);
             CommandResult result = context.startExecute(command);
+            
+            if(result instanceof CommandException) {
+                LOGGER.log(Level.SEVERE, "Exception executing " + command.getClass().getSimpleName(), 
+                        (CommandException)result);
+            }
 
             long timeElapsed = System.currentTimeMillis() - timeStart;
             LOGGER.warning("Command " + command.toString() + " completed in " + timeElapsed + "ms");
 
             return result;
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception executing " + command.getClass().getSimpleName(), e);
             throw new CommandException(command, context, e);
         }
     }

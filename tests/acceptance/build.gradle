@@ -20,9 +20,9 @@ dependencies {
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
     testCompile libraries.bcrypt
     testCompile libraries.metrics.core
-    testCompile libraries.metrics.influxdb
 
     testCompile libraries.c3p0
+    testCompile 'org.apache.poi:poi:3.8'
 
     testCompile project(':core:model')
 }
@@ -44,10 +44,6 @@ task acceptanceTest(type: Test) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
     } 
-    // Use ChromeDriver locally
-    systemProperty 'webdriver', 'chrome'
-    systemProperty 'webdriver.chrome.silentOutput', 'true'   
-
     // Keep console output to a minimum
     testLogging.showStandardStreams = false
 
@@ -123,10 +119,6 @@ task capacityTest(type: JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     workingDir = "$buildDir/capacity"
     
-    if(project.hasProperty("phantomjsPath")) {
-        systemProperty "phantomjsPath", project.property("phantomjsPath")
-    }
-    
     doFirst {
         workingDir.mkdir()
         systemProperties.putAll(project.environment.systemProperties)
@@ -158,6 +150,14 @@ tasks.each { task ->
             }
             // Keep console output to a minimum
             testLogging.showStandardStreams = false
+
+            systemProperty 'webdriver', project.property('webdriver')
+            systemProperty 'webdriver.chrome.silentOutput', 'true'
+
+
+            if(project.hasProperty("phantomjsPath")) {
+                systemProperty "phantomjsPath", project.property("phantomjsPath")
+            }
         }
     }
 }

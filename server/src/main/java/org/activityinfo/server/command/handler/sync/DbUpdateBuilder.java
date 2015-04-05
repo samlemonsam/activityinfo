@@ -29,14 +29,11 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
-import org.activityinfo.server.database.hibernate.dao.HibernateDAOProvider;
-import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.hibernate.Session;
 import org.json.JSONException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -46,7 +43,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private static final int MINIMUM_DB_VERSION = 1;
     private static final String REGION_PREFIX = "db/";
 
-    private final UserDatabaseDAO userDatabaseDAO;
     private final EntityManager entityManager;
 
     private final Set<Integer> countryIds = Sets.newHashSet();
@@ -69,51 +65,49 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private final List<Project> projects = Lists.newArrayList();
 
     @Inject
-    public DbUpdateBuilder(EntityManagerFactory entityManagerFactory) {
-        // create a new, unfiltered entity manager so we can see deleted records
-        this.entityManager = entityManagerFactory.createEntityManager();
-        this.userDatabaseDAO = HibernateDAOProvider.makeImplementation(UserDatabaseDAO.class,
-                UserDatabase.class,
-                entityManager);
+    public DbUpdateBuilder(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @SuppressWarnings("unchecked") @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws JSONException {
 
-        try {
-            // get the permissions before we apply the filter
-            // otherwise they will be excluded
-            userPermissions = entityManager.createQuery("select p from UserPermission p where p.user.id = ?1")
-                                           .setParameter(1, user.getId())
-                                           .getResultList();
+        // get the permissions before we apply the filter
+        // otherwise they will be excluded
 
-            DomainFilters.applyUserFilter(user, entityManager);
+        entityManager.unwrap(Session.class).disableFilter("userVisible");
 
-            int dbId = parseDbId(request);
+        userPermissions = entityManager.createQuery("select p from UserPermission p where p.user.id = ?1")
+                                       .setParameter(1, user.getId())
+                                       .getResultList();
 
-            database = userDatabaseDAO.findById(dbId);
 
-            Preconditions.checkNotNull(database, "Failed to fetch database by id:" + dbId + ", region: " + request);
+        entityManager.unwrap(Session.class).enableFilter("userVisible");
+        
+        DomainFilters.applyUserFilter(user, entityManager);
 
-            this.existingActivityEntities = new ActivityEntities(entityManager, dbId);
+        int dbId = parseDbId(request);
 
-            long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
-            long serverVersion = getCurrentDbVersion();
+        database = entityManager.find(UserDatabase.class, dbId);
+        
+        Preconditions.checkNotNull(database, "Failed to fetch database by id:" + dbId + ", region: " + request);
 
-            LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
+        this.existingActivityEntities = new ActivityEntities(entityManager, dbId);
 
-            SyncRegionUpdate update = new SyncRegionUpdate();
-            update.setVersion(Long.toString(serverVersion));
-            update.setComplete(true);
+        long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
+        long serverVersion = getCurrentDbVersion();
 
-            if (localVersion < serverVersion) {
-                makeEntityLists();
-                update.setSql(buildSql());
-            }
-            return update;
-        } finally {
-            entityManager.close();
+        LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
+
+        SyncRegionUpdate update = new SyncRegionUpdate();
+        update.setVersion(Long.toString(serverVersion));
+        update.setComplete(true);
+
+        if (localVersion < serverVersion) {
+            makeEntityLists();
+            update.setSql(buildSql());
         }
+        return update;
     }
 
     private int parseDbId(GetSyncRegionUpdates request) {

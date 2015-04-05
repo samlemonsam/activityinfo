@@ -14,28 +14,28 @@ public class CoordinationScenario implements Scenario {
 
     public static final String COORDINATING_AGENCY = "UNHCR";
 
-    private static final int PARTNER_COUNT = 80;
-    public static final int USERS_PER_PARTNER = 10;
+    public static final String[] SECTORS = { 
+            "Health", "Protection", "SGBV", "Food Security", "Child Protection",
+            "Basic Assistance", "Shelter", "WASH", "Education", "Social Stability", "Social Cohesion"};
+    
+    private final int partnerCount;
+    private final int usersPerPartner;
+    private final int databaseCount;
 
+    
     private final List<Sector> sectors = Lists.newArrayList();
     private final List<PartnerOrganization> partners = Lists.newArrayList();
 
-    public CoordinationScenario() {
+    public CoordinationScenario(int databaseCount, int partnerCount, int usersPerPartner) {
+        this.databaseCount = databaseCount;
+        this.partnerCount = partnerCount;
+        this.usersPerPartner = usersPerPartner;
         
-        addSector("Health");
-        addSector("Protection");
-        addSector("SGBV");
-        addSector("Food Security");
-        addSector("Child Protection");
-        addSector("Basic Assistance");
-        addSector("Shelter");
-        addSector("WASH");
-        addSector("Education");
-        addSector("Social Stability");
-        addSector("Social Cohesion");
-        addSector("Livelihoods");
+        for(int i=0;i<Math.min(this.databaseCount, SECTORS.length);++i) {
+            addSector(SECTORS[i]);
+        }
 
-        for(int i=0;i<PARTNER_COUNT;++i) {
+        for(int i=0;i< this.partnerCount;++i) {
             addPartner(i);
         }
     }
@@ -61,7 +61,7 @@ public class CoordinationScenario implements Scenario {
     }
 
     private void addPartner(int i) {
-        partners.add(new PartnerOrganization(this, PartnerOrganization.partnerName(i), USERS_PER_PARTNER));
+        partners.add(new PartnerOrganization(this, PartnerOrganization.partnerName(i), usersPerPartner));
     }
 
     public List<Sector> getSectors() {

@@ -2,9 +2,11 @@ package org.activityinfo.test.pageobject.web;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -27,6 +29,7 @@ public class ApplicationPage {
     private static final Logger LOGGER = Logger.getLogger(ApplicationPage.class.getName());
     
     private static final By SETTINGS_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[2]");
+    private static final By DATA_ENTRY_TAB = By.xpath("//div[contains(text(), 'Data Entry')]");
     private static final By DESIGN_TAB = By.xpath("//div[contains(text(), 'Design')]");
     
     private final FluentElement page;
@@ -101,6 +104,14 @@ public class ApplicationPage {
                 return false;
             }
         });
+    }
+    
+    public DataEntryTab navigateToDataEntryTab() {
+        try {
+            page.findElement(DATA_ENTRY_TAB).click();
+        } catch(Exception ignored) {
+        }
+        return new DataEntryTab(container());
     }
 
     public DesignTab navigateToDesignTab() {

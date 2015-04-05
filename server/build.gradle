@@ -12,20 +12,32 @@ apply from: './src/script/devServer.gradle'
 
 description = 'ActivityInfo Server'
 
+
+ext {
+    // The location of the configuration file to be used 
+    // for the appengine dev server
+    configFile = project.file("$buildDir/config.properties")
+    gwtMode = 'production'
+    if(project.hasProperty('gwt')) {
+        gwtMode = project.property('gwt')
+    }
+}
+
 gwt {
     gwtVersion = project.gwtVersion
 
     minHeapSize = "512M";
     maxHeapSize = "2048M";
 
-    modules 'org.activityinfo.ui.ActivityInfoRelease',
-            'org.activityinfo.ui.Embed'
-}
-
-ext {
-    // The location of the configuration file to be used 
-    // for the appengine dev server
-    configFile = project.file("$buildDir/config.properties")
+    if (gwtMode.equals('safari')) {
+        modules 'org.activityinfo.ui.ActivityInfoSafariTest'
+        compiler {
+            draftCompile = true
+        }
+    } else {
+        modules 'org.activityinfo.ui.ActivityInfoRelease',
+                'org.activityinfo.ui.Embed'
+    }
 }
 
 appengine {
@@ -71,7 +83,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     appCacheDownloadSizeLimit "2000kb"
 }
 
-tasks.compileGwt.onlyIf { !project.hasProperty('skipGwt') }
+tasks.compileGwt.onlyIf { !gwtMode.equals("skip") }
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
@@ -107,6 +119,8 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     if(project.buildNumber != 'dev') {
         dependsOn downloadBuild
         explodedAppDirectory = project.file(downloadBuild.warDir)
+    } else {
+        dependsOn 'appengineExplodeApp'
     }
     
     dependsOn appengineDownloadSdk

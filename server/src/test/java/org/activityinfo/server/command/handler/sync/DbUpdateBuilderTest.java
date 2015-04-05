@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -53,23 +52,23 @@ public class DbUpdateBuilderTest {
     private static final int USER_ID = 1;
 
     @Inject
-    protected EntityManagerFactory emFactory;
+    protected EntityManager em;
 
+    
     @Test
     public void optimizationTest() throws JSONException {
 
-//        HibernateEntityManagerFactory hibernateFactory = (HibernateEntityManagerFactory) emFactory;
+//        HibernateEntityManagerFactory hibernateFactory = (HibernateEntityManagerFactory) em;
 //        Statistics statistics = hibernateFactory.getSessionFactory().getStatistics();
 //        statistics.setStatisticsEnabled(true);
 
-        EntityManager em = emFactory.createEntityManager();
         User user = em.find(User.class, USER_ID);
 
         GetSyncRegionUpdates request = new GetSyncRegionUpdates();
         request.setRegionId("db/1");
 
         Stopwatch stopwatch = Stopwatch.createStarted();
-        DbUpdateBuilder b = new DbUpdateBuilder(emFactory);
+        DbUpdateBuilder b = new DbUpdateBuilder(this.em);
         SyncRegionUpdate build = b.build(user, request);
         System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms, sql: " + build.getSql());
 

@@ -420,9 +420,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void cleanup() throws Exception {
-        for(String databaseName : createdDatabases) {
-            executeDelete("UserDatabase", aliases.getId(databaseName));
-        }
     }
 
     @Override
