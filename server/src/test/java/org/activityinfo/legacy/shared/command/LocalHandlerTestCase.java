@@ -182,20 +182,11 @@ public abstract class LocalHandlerTestCase {
                 @Override
                 public void execute() {
 
-                    Stopwatch stopwatch = Stopwatch.createStarted();
                     List<CommandResult> results = servlet
                             .handleCommands(Collections
                                     .<Command>singletonList(command));
                     CommandResult result = results.get(0);
-
-                    long elapsedSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
-                    if (elapsedSeconds > maximumCommandExecutionTimeInSeconds) {
-                        throw new RuntimeException("Command execution takes too long. Takes: " + elapsedSeconds + " seconds, "
-                        + ", maximum allowed execution time: " + maximumCommandExecutionTimeInSeconds + " seconds, command: " + command);
-                    } else {
-                        //System.out.println("Command " + command + " takes: " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms.");
-                    }
-
+                    
                     if (result instanceof SyncRegionUpdate) {
                         System.out.println(((SyncRegionUpdate) result).getSql());
                     }
