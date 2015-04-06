@@ -63,7 +63,7 @@ test {
     systemProperty "testDatabaseUsername", localMySqlUsername
     systemProperty "testDatabasePassword", localMySqlPassword
 
-    maxParallelForks = Runtime.runtime.availableProcessors() / 2
+    maxParallelForks = Math.max(Runtime.runtime.availableProcessors(), 1)
     
     doFirst {
         testLogging {
