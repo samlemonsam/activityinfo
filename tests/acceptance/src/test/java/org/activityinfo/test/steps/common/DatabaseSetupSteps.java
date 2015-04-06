@@ -1,19 +1,17 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import cucumber.api.DataTable;
 import cucumber.api.java.After;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApiApplicationDriver;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.activityinfo.test.driver.Property.name;

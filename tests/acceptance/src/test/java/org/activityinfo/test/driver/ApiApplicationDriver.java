@@ -1,13 +1,21 @@
 package org.activityinfo.test.driver;
 
 
-import com.google.common.base.Optional;
+import com.codahale.metrics.Meter;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CountingOutputStream;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
@@ -404,7 +412,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         LOGGER.fine(String.format("Granting access to database '%s' [%d] to %s [%s] within %s [%d]",
                 properties.getString("database"), command.getInt("databaseId"),
-                properties.getString("user"), email.getEmail(), 
+                properties.getString("user"), email.getEmail(),
                 properties.getString("partner"), model.getInt("partnerId")));
         
         executeCommand("UpdateUserPermissions", command);
@@ -444,8 +452,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         JSONObject target = new JSONObject();
         target.put("name", properties.getAlias());
-        target.put("fromDate", properties.getDate("fromDate", new LocalDate(1900,1,1)));
-        target.put("toDate", properties.getDate("toDate", new LocalDate(2050,1,1)));
+        target.put("fromDate", properties.getDate("fromDate", new LocalDate(1900, 1, 1)));
+        target.put("toDate", properties.getDate("toDate", new LocalDate(2050, 1, 1)));
 
         JSONObject addTarget = new JSONObject();
         addTarget.put("databaseId", properties.getId("database"));

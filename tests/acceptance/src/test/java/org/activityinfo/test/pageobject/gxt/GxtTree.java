@@ -1,6 +1,5 @@
 package org.activityinfo.test.pageobject.gxt;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
@@ -8,10 +7,13 @@ import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
-import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.openqa.selenium.*;
+import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;

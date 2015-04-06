@@ -1,13 +1,11 @@
 package org.activityinfo.test.driver;
 
 
-import com.google.inject.ImplementedBy;
 import cucumber.api.DataTable;
-import cucumber.api.Pending;
 import cucumber.api.PendingException;
 import org.activityinfo.test.sut.UserAccount;
-import org.json.JSONException;
 
+import java.io.File;
 import java.util.List;
 
 public abstract class ApplicationDriver {
