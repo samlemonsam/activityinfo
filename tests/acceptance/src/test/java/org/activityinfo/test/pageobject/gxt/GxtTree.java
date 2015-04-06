@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.gxt;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
@@ -10,9 +11,7 @@ import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.*;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +59,12 @@ public class GxtTree {
      *
      */
     public Optional<GxtNode> search(String label) {
+
+        Optional<GxtNode> selected = findSelected();
+        if(selected.isPresent() && selected.get().getLabel().equals(label)) {
+            return selected;
+        }
+
         SearchingVisitor visitor = SearchingVisitor.byLabel(label);
         accept(visitor);
         
@@ -80,6 +85,20 @@ public class GxtTree {
         }
     }
 
+    public void waitUntilLoaded() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        while(isEmpty()) {
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                throw new AssertionError("Interrupted while waiting for nodes to load...");
+            }
+            if(stopwatch.elapsed(TimeUnit.SECONDS) > 10) {
+                throw new AssertionError("Timed out while waiting for nodes to load...");
+            }
+        }
+    }
+    
     /**
      * Advances to the next node in the tree using the Keyboard
      * so that we don't have problems with scrolling
@@ -126,6 +145,10 @@ public class GxtTree {
     
     private Optional<GxtNode> firstRootNode() {
         return container.findElements(By.xpath(xPathProvider.firstRoot())).as(GxtNode.class).first();
+    }
+
+    public boolean isEmpty() {
+        return findRootNodes().isEmpty();
     }
 
 
@@ -194,7 +217,10 @@ public class GxtTree {
                 return false;
             }
             try {
-                return !joint.get().style().hasValue("background");
+                String style = joint.get().attribute("style");
+                boolean leaf = !style.contains("background");
+                System.out.println(getLabel() + ".leaf = " + leaf);
+                return leaf;
             } catch(StaleElementReferenceException e) {
                 return isLeaf();
             }
@@ -226,17 +252,20 @@ public class GxtTree {
 
             Stopwatch stopwatch = Stopwatch.createStarted();
             while(stopwatch.elapsed(TimeUnit.SECONDS) < 90) {
-                if(isExpanded() || isLeaf()) {
+                if(isExpanded()) {
                     break;
                 }
-                expand();
+                if(isLeaf()) {
+                    break;
+                }
+                tryExpand();
 
                 int checksRemaining = 5;
                 while(checksRemaining > 0) {
-                    sleep(250);
                     if(isExpanded() || isLeaf()) {
                         break;
                     }
+                    sleep(150);
                     checksRemaining --;
                 }
             }
@@ -250,8 +279,12 @@ public class GxtTree {
             }
         }
 
-        private void expand() {
-            joint().clickWhenReady();
+        private void tryExpand() {
+            try {
+                joint().first().click();
+            } catch (WebDriverException ignore) {
+                
+            }
         }
 
         public GxtNode search(String label) {
@@ -269,12 +302,6 @@ public class GxtTree {
             return null;
         }
 
-        private void waitUntilExpanded() {
-            if (!isExpanded()) {
-                expand();
-                childContainer().waitForFirst();
-            }
-        }
         
         private FluentElement checkbox() {
             return treeItem().img(withClass("x-tree3-node-check")).first();

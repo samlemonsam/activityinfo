@@ -99,7 +99,7 @@ public class GxtGrid {
 
             final FluentElement input = container.find().div(withClass("x-grid-editor")).input().waitForFirst();
             input.sendKeys(value);
-            input.sendKeys(Keys.ENTER);
+            input.sendKeys(Keys.TAB);
             container.waitUntil(new Predicate<WebDriver>() {
                 @Override
                 public boolean apply(WebDriver driver) {

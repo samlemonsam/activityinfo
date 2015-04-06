@@ -36,7 +36,7 @@ import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.login.model.SignUpConfirmationInvalidPageModel;
 import org.activityinfo.server.login.model.SignUpConfirmationPageModel;
 import org.activityinfo.server.util.MailingListClient;
-import org.activityinfo.server.util.logging.LogException;
+import org.activityinfo.server.util.monitoring.Count;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -84,7 +84,9 @@ public class SignUpConfirmationController {
         this.mailingList = mailChimp;
     }
 
-    @GET @Produces(MediaType.TEXT_HTML) @LogException(emailAlert = true)
+    @GET 
+    @Count("sign_up.confirmation.started")
+    @Produces(MediaType.TEXT_HTML) 
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
@@ -94,7 +96,8 @@ public class SignUpConfirmationController {
         }
     }
 
-    @POST @LogException(emailAlert = true)
+    @POST
+    @Count("sign_up.confirmation.completed")
     public Response confirm(@Context UriInfo uri,
                             @FormParam("key") String key,
                             @FormParam("password") String password,
@@ -131,7 +134,6 @@ public class SignUpConfirmationController {
         }
     }
 
-    @LogException(emailAlert = true)
     protected void addUserToDefaultDatabase(User user) {
         UserDatabase database = databaseDAO.get().findById(DEFAULT_DATABASE_ID);
         Partner partner = partnerDAO.get().findById(DEFAULT_PARTNER_ID);

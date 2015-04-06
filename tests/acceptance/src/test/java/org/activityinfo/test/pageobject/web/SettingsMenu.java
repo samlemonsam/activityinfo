@@ -16,4 +16,8 @@ public class SettingsMenu {
     public void enableOfflineMode() {
         menu.find().div(containingText("offline")).clickWhenReady();
     }
+    
+    public void synchronizeNow() {
+        menu.find().span(containingText("Sync Now")).clickWhenReady();
+    }
 }

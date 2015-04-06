@@ -43,6 +43,7 @@ import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.blob.BlobServiceModuleStub;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import javax.persistence.EntityManager;
 
@@ -61,6 +62,12 @@ import javax.persistence.EntityManager;
         ConfigModuleStub.class
 })
 public class CommandTestCase2 {
+
+
+    @BeforeClass
+    public static void setupI18N() {
+        LocaleProxy.initialize();
+    }
 
     @Inject
     protected CommandServlet2 servlet;

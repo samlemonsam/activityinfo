@@ -25,15 +25,13 @@ package org.activityinfo.server.endpoint.export;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.RetryOptions;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.tools.cloudstorage.GcsFileMetadata;
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
+import com.google.appengine.tools.cloudstorage.*;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.output.StorageProvider;
 
@@ -112,6 +110,19 @@ public class ExportSitesServlet extends HttpServlet {
         if(metadata == null) {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 
+        } else if(DeploymentEnvironment.isAppEngineDevelopment()) {
+            if("true".equals(req.getParameter("download"))) {
+                resp.setContentType(metadata.getOptions().getMimeType());
+                resp.setHeader("Content-Disposition", metadata.getOptions().getContentDisposition());
+                
+                GcsInputChannel readChannel = gcs.openReadChannel(fileName, 1024);
+                try(InputStream inputStream = Channels.newInputStream(readChannel)) {
+                    ByteStreams.copy(inputStream, resp.getOutputStream());
+                }
+            } else {
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.getOutputStream().print("/ActivityInfo/export?id=" + exportId + "&download=true");
+            }
         } else {
             // First determine whether the file is available
 
@@ -129,7 +140,7 @@ public class ExportSitesServlet extends HttpServlet {
             if(!Strings.isNullOrEmpty(req.getHeader(X_AI_STORAGE_PROXY))) {
                 url = url.replace("https://storage.googleapis.com", "http://" + req.getHeader(X_AI_STORAGE_PROXY));
             }
-
+            
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getOutputStream().print(url);
         }

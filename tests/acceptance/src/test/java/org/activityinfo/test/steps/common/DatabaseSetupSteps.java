@@ -1,16 +1,19 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
+import cucumber.api.DataTable;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.*;
+import org.activityinfo.test.driver.ApiApplicationDriver;
+import org.activityinfo.test.driver.ApplicationDriver;
+import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.activityinfo.test.driver.Property.name;
@@ -18,10 +21,13 @@ import static org.activityinfo.test.driver.Property.property;
 
 @ScenarioScoped
 public class DatabaseSetupSteps {
-
+    
+    @Inject
+    private ApiApplicationDriver setupDriver;
+    
     @Inject
     private ApplicationDriver driver;
-
+    
     @Inject
     private Accounts accounts;
     
@@ -226,5 +232,18 @@ public class DatabaseSetupSteps {
         );
     }
 
+    @Given("^I have imported (\\d+) locations into \"([^\"]*)\"$")
+    public void I_have_imported_locations_into(int locationCount, String locationType) throws Throwable {
+        for(int i=0;i<locationCount;++i) {
+            driver.setup().createLocation(
+                    property("locationType", locationType),
+                    property("name", "Location " + i),
+                    property("code", "LOC" + i));
+        }
+    }
 
+    @And("^I open a new session as (.+)$")
+    public void I_open_a_new_session_as_(String user) throws Throwable {
+        driver.login(accounts.ensureAccountExists(user));
+    }
 }

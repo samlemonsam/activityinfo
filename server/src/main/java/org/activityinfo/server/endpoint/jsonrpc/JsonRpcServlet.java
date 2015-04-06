@@ -4,6 +4,7 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.RpcMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.HttpStatusCode;
@@ -11,12 +12,14 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.util.monitoring.Count;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.module.SimpleModule;
 
+import javax.inject.Provider;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
@@ -34,10 +37,13 @@ public class JsonRpcServlet {
     private final DispatcherSync dispatcher;
     private final ObjectMapper objectMapper;
     private final CommandValidator validator = new CommandValidator();
+    
+    private final Provider<AuthenticatedUser> user;
 
     @Inject
-    public JsonRpcServlet(DispatcherSync dispatcher) {
+    public JsonRpcServlet(DispatcherSync dispatcher, Provider<AuthenticatedUser> user) {
         this.dispatcher = dispatcher;
+        this.user = user;
 
         SimpleModule module = new SimpleModule("Command", new Version(1, 0, 0, null));
         module.addDeserializer(Command.class, new CommandDeserializer());
@@ -57,7 +63,14 @@ public class JsonRpcServlet {
     }
     
     @POST
+    @Count("api.rpc")
     public Response execute(String json) {
+        
+        // All RPC Commands require authentication
+        if(user.get().isAnonymous()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        
         Command command = deserialize(json);
         CommandResult result = execute(command);
         return serializeResult(result);

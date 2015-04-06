@@ -1,9 +1,12 @@
 package org.activityinfo.test.driver;
 
 
+import com.google.inject.ImplementedBy;
 import cucumber.api.DataTable;
+import cucumber.api.Pending;
 import cucumber.api.PendingException;
 import org.activityinfo.test.sut.UserAccount;
+import org.json.JSONException;
 
 import java.util.List;
 
@@ -31,6 +34,14 @@ public abstract class ApplicationDriver {
     
     public final void createDatabase(Property... properties) throws Exception {
         createDatabase(new TestObject(aliasTable, properties));
+    }
+    
+    public void enableOfflineMode() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public OfflineMode getCurrentOfflineMode() {
+        throw new UnsupportedOperationException();
     }
 
     protected void createDatabase(TestObject database) throws Exception {
@@ -100,6 +111,7 @@ public abstract class ApplicationDriver {
     public final void grantPermission(Property... properties) throws Exception {
         grantPermission(new TestObject(aliasTable, properties));
     }
+    
 
     protected void grantPermission(TestObject permission) throws Exception {
         throw new PendingException();
@@ -132,5 +144,17 @@ public abstract class ApplicationDriver {
 
     public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
         throw new PendingException();
+    }
+
+    public void synchronize() {
+        throw new UnsupportedOperationException();
+    }
+
+    public int countFormSubmissions(String formName) {
+        throw new PendingException();
+    }
+
+    public File exportForm(String formName) {
+        throw new UnsupportedOperationException();
     }
 }
