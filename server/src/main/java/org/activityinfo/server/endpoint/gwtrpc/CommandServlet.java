@@ -35,10 +35,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
-import org.activityinfo.server.database.hibernate.entity.DomainFilters;
-import org.activityinfo.server.database.hibernate.entity.User;
 
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +91,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
         }
 
-        applyUserFilters();
         return handleCommand(command);
     }
 
@@ -102,7 +98,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
      * Publicly visible for testing *
      */
     public List<CommandResult> handleCommands(List<Command> commands) {
-        applyUserFilters();
 
         List<CommandResult> results = new ArrayList<CommandResult>();
         for (Command command : commands) {
@@ -116,12 +111,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             }
         }
         return results;
-    }
-
-    private void applyUserFilters() {
-        EntityManager em = injector.getInstance(EntityManager.class);
-        User user = em.getReference(User.class, authProvider.get().getUserId());
-        DomainFilters.applyUserFilter(user, em);
     }
 
     protected CommandResult handleCommand(Command command) throws CommandException {

@@ -41,6 +41,7 @@ import org.activityinfo.legacy.shared.impl.ExecutionContext;
 import org.activityinfo.server.command.handler.CommandHandler;
 import org.activityinfo.server.command.handler.HandlerUtil;
 import org.activityinfo.server.database.hibernate.HibernateExecutor;
+import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.event.CommandEvent;
 import org.activityinfo.server.event.ServerEventBus;
@@ -110,6 +111,10 @@ public class RemoteExecutionContext implements ExecutionContext {
         if (CURRENT.get() != null) {
             throw new IllegalStateException("Command execution context already in progress");
         }
+
+        // Apply Hibernate User Filters
+        DomainFilters.applyUserFilter(retrieveUserEntity(), entityManager);
+
 //
 //        AdvisoryLock lock = null;
 //        if (Commands.hasMutatingCommand(command)) {
