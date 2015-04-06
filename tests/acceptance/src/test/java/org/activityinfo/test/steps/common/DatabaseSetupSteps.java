@@ -1,15 +1,13 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import cucumber.api.DataTable;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApiApplicationDriver;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -73,18 +71,6 @@ public class DatabaseSetupSteps {
                 property("name", fieldName),
                 property("type", "quantity"));
     }
-
-
-    @Given("^I have created a enumerated field \"([^\"]*)\" in \"([^\"]*) with choices:\"$")
-    public void I_have_created_a_quantity_field_in(String fieldName, String formName, DataTable dataTable) throws Throwable {
-        driver.setup().createField(
-                property("form", formName),
-                property("name", fieldName),
-                property("type", "quantity"));
-        
-        
-    }
-
 
     @Given("^I have submitted a \"([^\"]*)\" form with:$")
     public void I_have_submitted_a_form_with(String formName, List<FieldValue> values) throws Throwable {
@@ -218,6 +204,30 @@ public class DatabaseSetupSteps {
                 property("name", name),
                 property("locationType", locationType),
                 property("code", code));
+    }
+
+    @Then("^Location type \"(.*?)\" should be visible\\.$")
+    public void location_type_should_appear_in_tree(String locationTypeName) throws Throwable {
+        driver.assertVisible(ObjectType.LOCATION_TYPE, true,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @When("^I have removed the location type \"(.*?)\"$")
+    public void i_have_removed_the_location_type_in(String locationTypeName) throws Throwable {
+        driver.delete(ObjectType.LOCATION_TYPE,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @Then("^Location type \"(.*?)\" is no longer visible\\.$")
+    public void location_type_should_disappear_from_tree(String locationTypeName) throws Throwable {
+        driver.assertVisible(ObjectType.LOCATION_TYPE, false,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
     }
 
     @Given("^I have imported (\\d+) locations into \"([^\"]*)\"$")

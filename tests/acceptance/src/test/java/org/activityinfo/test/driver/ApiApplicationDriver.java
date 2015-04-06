@@ -280,10 +280,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void delete(String objectType, String name) throws Exception {
+    public void delete(ObjectType objectType, String name) throws Exception {
         
         switch(objectType) {
-            case "database":
+            case DATABASE:
                 executeDelete("UserDatabase", aliases.getId(name));
                 break;
             default:
@@ -412,7 +412,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         LOGGER.fine(String.format("Granting access to database '%s' [%d] to %s [%s] within %s [%d]",
                 properties.getString("database"), command.getInt("databaseId"),
-                properties.getString("user"), email.getEmail(), 
+                properties.getString("user"), email.getEmail(),
                 properties.getString("partner"), model.getInt("partnerId")));
         
         executeCommand("UpdateUserPermissions", command);
@@ -452,8 +452,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         JSONObject target = new JSONObject();
         target.put("name", properties.getAlias());
-        target.put("fromDate", properties.getDate("fromDate", new LocalDate(1900,1,1)));
-        target.put("toDate", properties.getDate("toDate", new LocalDate(2050,1,1)));
+        target.put("fromDate", properties.getDate("fromDate", new LocalDate(1900, 1, 1)));
+        target.put("toDate", properties.getDate("toDate", new LocalDate(2050, 1, 1)));
 
         JSONObject addTarget = new JSONObject();
         addTarget.put("databaseId", properties.getId("database"));

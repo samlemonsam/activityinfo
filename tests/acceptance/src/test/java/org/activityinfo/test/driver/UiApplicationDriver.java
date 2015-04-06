@@ -1,15 +1,20 @@
 package org.activityinfo.test.driver;
 
+import com.google.common.base.Optional;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
+import org.junit.Assert;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -199,6 +204,52 @@ public class UiApplicationDriver extends ApplicationDriver {
         return pivotTable.extractData();
     }
 
+
+    @Override
+    public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
+        ensureLoggedIn();
+
+        switch(objectType) {
+            case LOCATION_TYPE:
+                assertLocationTypeVisible(testObject, exists);
+                return;
+        }
+        throw new UnsupportedOperationException("Object type is not supported: " + objectType);
+    }
+
+    private void assertLocationTypeVisible(TestObject testObject, boolean exists) {
+        String locationTypeName = testObject.getAlias("name");
+
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+        designTab.selectDatabase(testObject.getAlias("database"));
+        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(locationTypeName);
+
+        if (exists) {
+            Assert.assertTrue("Location type with name '" + locationTypeName + "' is not present.", node.isPresent());
+        } else {
+            Assert.assertTrue("Location type with name '" + locationTypeName + "' is present.", !node.isPresent());
+        }
+    }
+
+    @Override
+    public void delete(ObjectType objectType, TestObject testObject) throws Exception {
+            switch(objectType) {
+                case LOCATION_TYPE:
+                    deleteLocationType(testObject);
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
+            }
+    }
+
+    private void deleteLocationType(TestObject testObject) {
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+        designTab.selectDatabase(testObject.getAlias("database"));
+
+        DesignPage designPage = designTab.design();
+        designPage.getDesignTree().select(testObject.getAlias("name"));
+        designPage.getToolbarMenu().clickButton("Delete");
+    }
 
     @Override
     public void cleanup() throws Exception {

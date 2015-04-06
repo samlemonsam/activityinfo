@@ -28,6 +28,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ import java.util.Set;
  * @author Alex Bertram
  */
 @Entity @JsonAutoDetect(JsonMethod.NONE)
-public class LocationType implements Serializable {
+public class LocationType implements Serializable, Deleteable {
 
     private int id;
     private boolean reuse;
@@ -48,6 +49,7 @@ public class LocationType implements Serializable {
     private UserDatabase database;
 
     private AdminLevel boundAdminLevel;
+    private Date dateDeleted;
 
     public LocationType() {
     }
@@ -136,5 +138,24 @@ public class LocationType implements Serializable {
 
     public void setWorkflowId(String workflowId) {
         this.workflowId = workflowId;
+    }
+
+    @Column @Temporal(value = TemporalType.TIMESTAMP)
+    public Date getDateDeleted() {
+        return this.dateDeleted;
+    }
+
+    public void setDateDeleted(Date date) {
+        this.dateDeleted = date;
+    }
+
+    @Override
+    public void delete() {
+        setDateDeleted(new Date());
+    }
+
+    @Override @Transient
+    public boolean isDeleted() {
+        return getDateDeleted() != null;
     }
 }
