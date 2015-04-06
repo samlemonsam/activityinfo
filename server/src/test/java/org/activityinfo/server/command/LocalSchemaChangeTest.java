@@ -22,14 +22,17 @@ package org.activityinfo.server.command;
  * #L%
  */
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
+import org.activityinfo.legacy.shared.command.result.TargetResult;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
@@ -37,8 +40,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
@@ -135,6 +141,26 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         schema = executeLocally(new GetSchema());
 
         assertThat(schema.getActivityById(2), is(nullValue()));
+    }
+    
+    @Test
+    public void deleteLockedPeriod() {
+
+        synchronizeFirstTime();
+
+        SchemaDTO schema = executeLocally(new GetSchema());
+
+        Set<LockedPeriodDTO> lockedPeriods = schema.getDatabaseById(1).getLockedPeriods();
+        
+        assertThat(lockedPeriods, hasSize(1));
+
+        executeRemotely(new Delete("LockedPeriod", lockedPeriods.iterator().next().getId()));
+
+        synchronize();
+
+        schema = executeLocally(new GetSchema());
+
+        assertThat(schema.getDatabaseById(1).getLockedPeriods(), hasSize(0));
     }
 
     @Test
