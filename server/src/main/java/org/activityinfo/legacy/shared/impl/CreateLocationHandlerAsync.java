@@ -36,7 +36,7 @@ import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 
 import java.util.Date;
 
-public class CreateLocationHandler implements CommandHandlerAsync<CreateLocation, VoidResult> {
+public class CreateLocationHandlerAsync implements CommandHandlerAsync<CreateLocation, VoidResult> {
 
     @Override
     public void execute(final CreateLocation command,

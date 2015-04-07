@@ -48,6 +48,7 @@ public class Location implements java.io.Serializable {
     private Set<AdminEntity> adminEntities = new HashSet<AdminEntity>(0);
     private String workflowStatusId;
     private long timeEdited;
+    private long version;
 
     public Location() {
     }
@@ -164,27 +165,27 @@ public class Location implements java.io.Serializable {
         }
     }
 
+    @Deprecated
     public long getTimeEdited() {
         return timeEdited;
     }
 
+    @Deprecated
     public void setTimeEdited(long timeEdited) {
         this.timeEdited = timeEdited;
     }
 
+    @Deprecated
     public void setTimeEdited(Date date) {
         this.timeEdited = date.getTime();
     }
 
-    @PrePersist
-    public void onCreate() {
-        Date now = new Date();
-        setTimeEdited(now.getTime());
+
+    public long getVersion() {
+        return version;
     }
 
-    @PreUpdate
-    public void onUpdate() {
-        Date now = new Date();
-        setTimeEdited(now.getTime());
+    public void setVersion(long version) {
+        this.version = version;
     }
 }

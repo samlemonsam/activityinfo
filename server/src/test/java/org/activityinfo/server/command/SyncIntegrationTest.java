@@ -91,7 +91,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void run() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
 
         Collector<Date> lastUpdate = Collector.newCollector();
         syncHistoryTable.get(lastUpdate);
@@ -177,10 +177,9 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @OnDataSet("/dbunit/locations.db.xml")
     public void locationsAreChunked() throws SQLException, InterruptedException {
         addLocationsToServerDatabase(220);
-        synchronizeFirstTime();
+        synchronize();
 
-        assertThat(
-                Integer.valueOf(queryString("select count(*) from Location")),
+        assertThat(Integer.valueOf(queryString("select count(*) from Location")),
                 equalTo(221));
 
         // update a location on the server
@@ -189,15 +188,11 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
                 "select l from Location l where l.name = 'Penekusu 26'")
                 .getSingleResult();
         location.setAxe("Motown");
-        location.setTimeEdited(new Date().getTime());
+        location.setVersion(location.getLocationType().incrementVersion());
         serverEm.getTransaction().commit();
 
         newRequest();
         synchronize();
-
-        // todo: store milliseconds in mysql rather than as
-        // date time which has resolution limited to 1 second
-        Thread.sleep(1000);
 
         assertThat(
                 queryInt("select count(*) from Location where Name='Penekusu 26'"),
@@ -210,9 +205,9 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         Location newLocation = new Location();
         int locationId = keyGenerator.generateInt();
         newLocation.setName("Bukavu");
-        newLocation.setTimeEdited(new Date().getTime());
         newLocation.setId(123456789);
         newLocation.setLocationType(serverEm.find(LocationType.class, 1));
+        newLocation.setVersion(newLocation.getLocationType().incrementVersion());
         newLocation.setId(locationId);
         serverEm.getTransaction().begin();
         serverEm.persist(newLocation);
@@ -230,14 +225,14 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void testGetAdminEntities() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
         executeLocally(new GetAdminEntities(1));
     }
 
     @Test
     @OnDataSet("/dbunit/monthly-calc-indicators.db.xml")
     public void updateMonthlyReports() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
 
         int siteId = 1;
 
@@ -439,7 +434,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         int generatedLocationCount = 50000;
         final List<Integer> locationIds = addLocationsToServerDatabase(generatedLocationCount);
 
-        Dispatcher remoteDispatcher = new RemoteDispatcherStub(servlet, 5);
+        Dispatcher remoteDispatcher = new RemoteDispatcherStub(servlet);
 
         Injector clientSideInjector = Guice.createInjector(new LocalModuleStub(
                 AuthenticationModuleStub.getCurrentUser(),
@@ -485,7 +480,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Test
     @OnDataSet("/dbunit/sites-simple-with-unicode.db.xml")
     public void syncWithUnicodeInNames() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
 
         Collector<Date> lastUpdate = Collector.newCollector();
         syncHistoryTable.get(lastUpdate);
@@ -515,24 +510,21 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
     private List<Integer> addLocationsToServerDatabase(int count) {
 
-        nowIsh = new Date().getTime();
-
         final List<Integer> locationIds = Lists.newArrayList();
 
-        EntityManager entityManager = serverEntityManagerFactory
-                .createEntityManager();
+        EntityManager entityManager = serverEntityManagerFactory.createEntityManager();
+        LocationType locationType = entityManager.find(LocationType.class, 1);
+
         entityManager.getTransaction().begin();
         for (int i = 1; i <= count; ++i) {
 
             Location loc = new Location();
             loc.setId(i + 10); // first 10 ids are used by data set
-            loc.setTimeEdited(nowIsh += 15000);
+            loc.setVersion(locationType.incrementVersion());
             loc.setName("Penekusu " + i);
-            loc.getAdminEntities().add(
-                    entityManager.getReference(AdminEntity.class, 2));
-            loc.getAdminEntities().add(
-                    entityManager.getReference(AdminEntity.class, 12));
-            loc.setLocationType(entityManager.find(LocationType.class, 1));
+            loc.getAdminEntities().add(entityManager.getReference(AdminEntity.class, 2));
+            loc.getAdminEntities().add(entityManager.getReference(AdminEntity.class, 12));
+            loc.setLocationType(locationType);
             entityManager.persist(loc);
             entityManager.flush();
 

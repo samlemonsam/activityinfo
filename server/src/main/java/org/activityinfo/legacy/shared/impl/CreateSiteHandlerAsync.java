@@ -44,7 +44,7 @@ import java.util.Map.Entry;
  * <p/>
  * Currently only supports updates to the SiteDTO view.
  */
-public class CreateSiteHandler implements CommandHandlerAsync<CreateSite, CreateResult> {
+public class CreateSiteHandlerAsync implements CommandHandlerAsync<CreateSite, CreateResult> {
 
     @Override
     public void execute(final CreateSite cmd,

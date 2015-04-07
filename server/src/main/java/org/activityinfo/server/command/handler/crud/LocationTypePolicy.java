@@ -52,13 +52,15 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
 
         // create the entity
         LocationType locationType = new LocationType();
+        locationType.setVersion(1L);
         locationType.setName(properties.<String>get("name"));
         locationType.setCountry(database.getCountry());
         locationType.setWorkflowId(Workflow.CLOSED_WORKFLOW_ID);
         locationType.setDatabase(database);
 
         em.persist(locationType);
-
+        
+        
         return locationType.getId();
     }
 

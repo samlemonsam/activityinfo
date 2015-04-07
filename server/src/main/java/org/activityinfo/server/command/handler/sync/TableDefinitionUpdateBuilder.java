@@ -30,11 +30,13 @@ import org.json.JSONException;
 
 public class TableDefinitionUpdateBuilder implements UpdateBuilder {
 
-    public static final String CURRENT_VERSION = "2";
+    public static final String CURRENT_VERSION = "3";
     private final JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
-    private final Class[] schemaClasses = new Class[]{Country.class,
+    private final Class[] tablesToSync = new Class[]{
+            Country.class,
             AdminLevel.class,
+            AdminEntity.class,
             LocationType.class,
             UserDatabase.class,
             Partner.class,
@@ -55,7 +57,7 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
 
         if (!CURRENT_VERSION.equals(request.getLocalVersion())) {
 
-            for (Class schemaClass : schemaClasses) {
+            for (Class schemaClass : tablesToSync) {
                 builder.createTableIfNotExists(schemaClass);
             }
 
@@ -87,8 +89,7 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
                     "CREATE TABLE IF NOT EXISTS  target (targetId int, name text, date1 text, date2 text, projectId int, " +
                             "partnerId int, adminEntityId int, databaseId int)");
             builder.executeStatement("CREATE TABLE IF NOT EXISTS  targetvalue (targetId int, IndicatorId int, value real)");
-
-
+            
             update.setSql(builder.asJson());
         }
 

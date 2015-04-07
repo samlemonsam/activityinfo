@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.impl.Tables;
-import org.activityinfo.server.database.hibernate.entity.Location;
+import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.json.JSONException;
 
@@ -63,6 +63,9 @@ public class LocationUpdateBuilder implements UpdateBuilder {
         typeId = parseTypeId(request);
         localState = new LocalState(request.getLocalVersion());
         batch = new SqliteBatchBuilder();
+        
+        JpaBatchBuilder jpaBuilder = new JpaBatchBuilder(batch, em);
+        jpaBuilder.insert(LocationType.class, "LocationTypeId=" + typeId);
 
         SyncRegionUpdate update = new SyncRegionUpdate();
         long latestVersion = queryLatestVersion(update);
@@ -95,10 +98,8 @@ public class LocationUpdateBuilder implements UpdateBuilder {
                                  .appendColumn("LocationTypeId")
                                  .appendColumn("workflowStatusId")
                                  .from(Tables.LOCATION)
-                                 .where("locationTypeId")
-                                 .equalTo(typeId)
-                                 .where("timeEdited")
-                                 .greaterThan(localState.lastDate);
+                                 .where("locationTypeId").equalTo(typeId)
+                                 .where("version").greaterThan(localState.lastDate);
 
         batch.insert().into(Tables.LOCATION).from(query).execute(em);
     }
@@ -111,10 +112,8 @@ public class LocationUpdateBuilder implements UpdateBuilder {
                                  .from(Tables.LOCATION, "L")
                                  .innerJoin(Tables.LOCATION_ADMIN_LINK, "K")
                                  .on("L.LocationId=K.LocationId")
-                                 .where("L.locationTypeId")
-                                 .equalTo(typeId)
-                                 .where("L.timeEdited")
-                                 .greaterThan(localState.lastDate);
+                                 .where("L.locationTypeId").equalTo(typeId)
+                                 .where("L.version").greaterThan(localState.lastDate);
 
         batch.insert().into(Tables.LOCATION_ADMIN_LINK).from(query).execute(em);
     }
@@ -123,10 +122,8 @@ public class LocationUpdateBuilder implements UpdateBuilder {
         SqlQuery query = SqlQuery.select()
                                  .appendColumn("timeEdited", "latest")
                                  .from(Tables.LOCATION)
-                                 .where("locationTypeId")
-                                 .equalTo(typeId)
-                                 .where("timeEdited")
-                                 .greaterThan(localState.lastDate);
+                                 .where("locationTypeId").equalTo(typeId)
+                                 .where("version").greaterThan(localState.lastDate);
 
         List<Long> longs = SqlQueryUtil.queryLongList(em, query);
 
@@ -149,10 +146,6 @@ public class LocationUpdateBuilder implements UpdateBuilder {
     private class LocalState {
         private long lastDate;
 
-        public LocalState(Location lastLocation) {
-            lastDate = lastLocation.getTimeEdited();
-        }
-
         public LocalState(String cookie) {
             if (cookie == null) {
                 lastDate = 0;
@@ -161,8 +154,5 @@ public class LocationUpdateBuilder implements UpdateBuilder {
             }
         }
 
-        public String toVersionString() {
-            return TimestampHelper.toString(lastDate);
-        }
     }
 }

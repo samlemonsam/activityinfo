@@ -63,10 +63,6 @@ public class DeleteHandler implements CommandHandler<Delete> {
         if (entity instanceof Deleteable) {
             Deleteable deleteable = (Deleteable) entity;
             deleteable.delete();
-
-            if (entity instanceof Site) {
-                ((Site) entity).setDateEdited(new Date());
-            }
         }
 
         if (entity instanceof ReallyDeleteable) {

@@ -76,7 +76,9 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return the name of this UserDatabase
      */
-    @Override @JsonProperty @JsonView({DTOViews.Schema.class, DTOViews.List.class})
+    @Override 
+    @JsonProperty 
+    @JsonView({DTOViews.Schema.class, DTOViews.List.class})
     public String getName() {
         return get("name");
     }
@@ -128,7 +130,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * Gets the full, descriptive name of this UserDatabase
      */
-    @JsonProperty("description") @JsonView(DTOViews.Schema.class)
+    @JsonProperty("description") 
+    @JsonView(DTOViews.Schema.class)
     public String getFullName() {
         return get("fullName");
     }
@@ -136,7 +139,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return this list of ActivityDTOs that belong to this UserDatabase
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty 
+    @JsonView(DTOViews.Schema.class)
     public List<ActivityDTO> getActivities() {
         return activities;
     }
@@ -151,7 +155,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return the Country in which this UserDatabase is set
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty 
+    @JsonView(DTOViews.Schema.class)
     public CountryDTO getCountry() {
         return country;
     }

@@ -74,7 +74,9 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
         this.name = name;
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "DatabaseId", unique = true, nullable = false)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.AUTO) 
+    @Column(name = "DatabaseId", unique = true, nullable = false)
     public int getId() {
         return this.id;
     }
@@ -91,7 +93,8 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      *
      * @return The country assocatited with this database.
      */
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "CountryId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "CountryId", nullable = false)
     public Country getCountry() {
         return this.country;
     }
@@ -105,7 +108,8 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      * started. I.e. provides a minimum bound for the dates of
      * activities.
      */
-    @Temporal(TemporalType.DATE) @Column(name = "StartDate", length = 23)
+    @Temporal(TemporalType.DATE) 
+    @Column(name = "StartDate", length = 23)
     public Date getStartDate() {
         return this.startDate;
     }
@@ -141,7 +145,8 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
     /**
      * @return The user who owns this database
      */
-    @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "OwnerUserId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER) 
+    @JoinColumn(name = "OwnerUserId", nullable = false)
     public User getOwner() {
         return this.owner;
     }
@@ -226,7 +231,7 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      */
     @Override @Transient
     public boolean isDeleted() {
-        return getDateDeleted() == null;
+        return getDateDeleted() != null;
     }
 
     /**
@@ -241,6 +246,7 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
         return new Date(version);
     }
 
+    @Offline(sync = false)
     public long getVersion() {
         return version;
     }
@@ -291,5 +297,9 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
     @Override
     public String toString() {
         return id + ": " + name;
+    }
+
+    public void updateVersion() {
+        setVersion(System.currentTimeMillis());
     }
 }

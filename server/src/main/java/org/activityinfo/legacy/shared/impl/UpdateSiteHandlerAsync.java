@@ -32,7 +32,6 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.UpdateSite;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 
@@ -40,7 +39,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class UpdateSiteHandler implements CommandHandlerAsync<UpdateSite, VoidResult> {
+public class UpdateSiteHandlerAsync implements CommandHandlerAsync<UpdateSite, VoidResult> {
 
     @Override
     public void execute(final UpdateSite command, ExecutionContext context, final AsyncCallback<VoidResult> callback) {
@@ -49,7 +48,6 @@ public class UpdateSiteHandler implements CommandHandlerAsync<UpdateSite, VoidRe
         SqlTransaction tx = context.getTransaction();
         updateSiteProperties(tx, command, changes);
         updateAttributeValues(tx, command.getSiteId(), changes);
-        // updateLocation(tx, command.getSiteId(), changes);
         updateReportingPeriod(tx, command.getSiteId(), changes);
 
         callback.onSuccess(new VoidResult());
@@ -144,39 +142,6 @@ public class UpdateSiteHandler implements CommandHandlerAsync<UpdateSite, VoidRe
                 }
             }
         }
-    }
-
-    private void updateLocationAdminLinks(SqlTransaction tx, int locationId, Map<String, Object> properties) {
-
-        // admin entity membership is not updated invidually,
-        // it must be updated in totality for a given site to maintain
-        // consistency
-
-        if (hasAdminUpdates(properties)) {
-
-            SqlUpdate.delete(Tables.LOCATION_ADMIN_LINK).where("locationId", locationId).execute(tx);
-
-            for (Entry<String, Object> property : properties.entrySet()) {
-                if (property.getKey().startsWith(AdminLevelDTO.PROPERTY_PREFIX)) {
-                    Integer entityId = (Integer) property.getValue();
-                    if (entityId != null) {
-                        SqlInsert.insertInto("LocationAdminLink")
-                                 .value("AdminEntityId", entityId)
-                                 .value("Locationid", locationId)
-                                 .execute(tx);
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean hasAdminUpdates(Map<String, Object> changes) {
-        for (String propertyName : changes.keySet()) {
-            if (propertyName.startsWith(AdminLevelDTO.PROPERTY_PREFIX)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

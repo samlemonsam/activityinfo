@@ -44,6 +44,8 @@ public class LocationType implements Serializable {
     private Set<Location> locations = new HashSet<Location>(0);
     private Set<Activity> activities = new HashSet<Activity>(0);
     private String workflowId;
+    private long version;
+    private long locationVersion;
 
     private UserDatabase database;
 
@@ -136,5 +138,26 @@ public class LocationType implements Serializable {
 
     public void setWorkflowId(String workflowId) {
         this.workflowId = workflowId;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
+
+    public long getLocationVersion() {
+        return locationVersion;
+    }
+
+    public void setLocationVersion(long locationVersion) {
+        this.locationVersion = locationVersion;
+    }
+
+    public long incrementVersion() {
+        version++;
+        return version;
     }
 }

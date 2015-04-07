@@ -73,6 +73,7 @@ public class Site implements java.io.Serializable, Deleteable {
     private Set<SiteHistory> siteHistories = new HashSet<SiteHistory>(0);
 
     private String comments;
+    private long version;
 
     public Site() {
         Date now = new Date();
@@ -327,7 +328,8 @@ public class Site implements java.io.Serializable, Deleteable {
      * @return the time at which this Site was deleted. Used for synchronization
      * with clients.
      */
-    @Column @Temporal(value = TemporalType.TIMESTAMP)
+    @Column 
+    @Temporal(value = TemporalType.TIMESTAMP)
     public Date getDateDeleted() {
         return this.dateDeleted;
     }
@@ -351,7 +353,7 @@ public class Site implements java.io.Serializable, Deleteable {
         Date now = new Date();
         setDateDeleted(now);
         setDateEdited(now);
-        getActivity().getDatabase().setLastSchemaUpdate(new Date());
+        setVersion(activity.incrementSiteVersion());
     }
 
     /**
@@ -369,5 +371,15 @@ public class Site implements java.io.Serializable, Deleteable {
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "ProjectId", nullable = true)
     public Project getProject() {
         return project;
+    }
+
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+        this.dateEdited = new Date();
     }
 }

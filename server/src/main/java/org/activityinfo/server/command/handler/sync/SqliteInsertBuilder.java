@@ -83,7 +83,6 @@ public class SqliteInsertBuilder {
             }
         });
     }
-
     private void composeInsertStatement() throws SQLException {
         insert = new StringBuilder();
         insert.append("INSERT OR REPLACE INTO ").append(tableName).append(" (");
@@ -130,4 +129,5 @@ public class SqliteInsertBuilder {
             batch.addStatement(sql.toString());
         }
     }
+
 }

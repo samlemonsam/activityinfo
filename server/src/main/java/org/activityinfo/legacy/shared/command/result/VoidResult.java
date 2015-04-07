@@ -31,4 +31,5 @@ import javax.ws.rs.core.Response;
 @HttpStatusCode(Response.Status.NO_CONTENT)
 public class VoidResult implements CommandResult {
 
+    public static final VoidResult EMPTY = null;
 }

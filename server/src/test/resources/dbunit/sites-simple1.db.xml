@@ -27,7 +27,7 @@
 
   <!-- Country setup -->
 
-  <country countryId="1" name="Rdc" x1="0" y1="0" x2="0" y2="0"/>
+  <country countryId="1" name="Rdc" x1="12.18794184" y1="31.306" x2="-13.45599996" y2="5.386098154"/>
 
   <adminLevel countryId="1" adminLevelId="1" name="Province" deleted="0"/>
   <adminLevel countryId="1" adminLevelId="2" name="Territoire"

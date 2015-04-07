@@ -32,7 +32,7 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 
 import java.util.Date;
 
-public class DeleteSiteHandler implements CommandHandlerAsync<DeleteSite, VoidResult> {
+public class DeleteSiteHandlerAsync implements CommandHandlerAsync<DeleteSite, VoidResult> {
 
     @Override
     public void execute(DeleteSite command, ExecutionContext context, final AsyncCallback<VoidResult> callback) {

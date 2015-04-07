@@ -54,7 +54,7 @@ public class LocalSiteCreateTest extends LocalHandlerTestCase {
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void createNew() throws CommandException {
 
-        synchronizeFirstTime();
+        synchronize();
 
         // create a new detached, client model
         SiteDTO newSite = SiteDTOs.newSite();
@@ -102,7 +102,7 @@ public class LocalSiteCreateTest extends LocalHandlerTestCase {
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void delete() throws CommandException {
 
-        synchronizeFirstTime();
+        synchronize();
 
         executeLocally(new DeleteSite(1));
 
@@ -134,7 +134,7 @@ public class LocalSiteCreateTest extends LocalHandlerTestCase {
 
         // Now U2 synchronizes, and adds a new site with this partner
 
-        synchronizeFirstTime();
+        synchronize();
 
         SiteDTO site = new SiteDTO();
         site.setId(3343234);
