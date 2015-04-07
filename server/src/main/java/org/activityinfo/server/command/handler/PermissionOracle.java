@@ -41,6 +41,16 @@ public class PermissionOracle {
                getPermissionByUser(database, user).isAllowManageUsers();
     }
 
+    public boolean isVisible(ReportDefinition definition, User user) {
+        if(definition.getOwner().getId() == user.getId()) {
+            return true;
+        }
+        if(definition.getVisibility() == 1) {
+            UserPermission databasePermission = getPermissionByUser(definition.getDatabase(), user);
+            return databasePermission.isAllowView();
+        }
+        return false;
+    }
 
     public boolean isManagePartnersAllowed(UserDatabase db, User user) {
         UserPermission perm = getPermissionByUser(db, user);

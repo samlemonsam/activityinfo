@@ -37,14 +37,7 @@ import java.util.Set;
  *
  * @author Alex Bertram
  */
-@Entity @org.hibernate.annotations.FilterDefs({@org.hibernate.annotations.FilterDef(name = "userVisible",
-        parameters = {@org.hibernate.annotations.ParamDef(name = "currentUserId", type = "int")}),
-        @org.hibernate.annotations.FilterDef(name = "hideDeleted")})
-@org.hibernate.annotations.Filters({@org.hibernate.annotations.Filter(name = "userVisible",
-        condition = "(:currentUserId = OwnerUserId  " + "or :currentUserId in (select p.UserId from userpermission p " +
-                    "where p.AllowView and p.UserId=:currentUserId and p.DatabaseId=DatabaseId))"),
-        @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")})
-@NamedQuery(name = "queryAllUserDatabasesAlphabetically", query = "select db from UserDatabase db order by db.name")
+@Entity
 public class UserDatabase implements java.io.Serializable, Deleteable {
 
     private static final long serialVersionUID = 7405094318163898712L;
@@ -178,7 +171,6 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "database")
     @org.hibernate.annotations.OrderBy(clause = "sortOrder")
-    @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
     @BatchSize(size = DEFAULT_BATCH_SIZE)
     public Set<Activity> getActivities() {
         return this.activities;

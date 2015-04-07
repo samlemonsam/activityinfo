@@ -29,6 +29,7 @@ import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.exception.NotAuthorizedException;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.database.OnDataSet;
@@ -69,7 +70,7 @@ public class CreateSiteTest extends CommandTestCase2 {
         SiteDTOs.validateNewSite(secondRead);
     }
 
-    @Test(expected = NotAuthorizedException.class)
+    @Test(expected = IllegalAccessCommandException.class)
     public void unauthorized() throws CommandException {
         // create a new detached, client model
         SiteDTO newSite = SiteDTOs.newSite();

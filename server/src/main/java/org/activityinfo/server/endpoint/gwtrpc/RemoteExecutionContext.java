@@ -32,16 +32,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
-import org.activityinfo.legacy.shared.command.MutatingCommand;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.impl.AuthorizationHandler;
 import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
 import org.activityinfo.legacy.shared.impl.ExecutionContext;
 import org.activityinfo.server.command.handler.CommandHandler;
 import org.activityinfo.server.command.handler.HandlerUtil;
 import org.activityinfo.server.database.hibernate.HibernateExecutor;
-import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.event.CommandEvent;
 import org.activityinfo.server.event.ServerEventBus;
@@ -111,10 +108,6 @@ public class RemoteExecutionContext implements ExecutionContext {
         if (CURRENT.get() != null) {
             throw new IllegalStateException("Command execution context already in progress");
         }
-
-        // Apply Hibernate User Filters
-        DomainFilters.applyUserFilter(retrieveUserEntity(), entityManager);
-
 //
 //        AdvisoryLock lock = null;
 //        if (Commands.hasMutatingCommand(command)) {
@@ -208,42 +201,12 @@ public class RemoteExecutionContext implements ExecutionContext {
      */
     @Override
     public <C extends Command<R>, R extends CommandResult> void execute(final C command,
-                                                                        final AsyncCallback<R> callback) {
-
-        if (command instanceof MutatingCommand) {
-            // mutating commands MUST have a server-side AuthorizationHandler
-            Class<AuthorizationHandler<C>> authHandlerClass = HandlerUtil.authorizationHandlerForCommand(command);
-
-            if (authHandlerClass == null) {
-                onAuthorized(command, callback);
-            } else {
-                AuthorizationHandler<C> authHandler = injector.getInstance(authHandlerClass);
-
-                authHandler.authorize(command, this, new AsyncCallback<Void>() {
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        onAuthorized(command, callback);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
-                    }
-                });
-            }
-        } else {
-            onAuthorized(command, callback);
-        }
-    }
-
-    private <C extends Command<R>, R extends CommandResult> void onAuthorized(final C command,
-                                                                              AsyncCallback<R> outerCallback) {
+                                                                        final AsyncCallback<R> outerCallback) {
 
         AsyncCallback<R> callback = new FiringCallback<R>(command, outerCallback);
 
 
-        Object handler = injector.getInstance(HandlerUtil.asyncHandlerForCommand(command));
+        Object handler = injector.getInstance(HandlerUtil.handlerForCommand(command));
 
         if (handler instanceof CommandHandlerAsync) {
             /**

@@ -42,7 +42,7 @@ import java.util.Set;
  *
  * @author Alex Bertram
  */
-@Entity @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
+@Entity
 @NamedQuery(name = "queryMaxSortOrder", query = "select max(e.sortOrder) from Activity e where e.database.id = ?1")
 public class Activity implements Serializable, Deleteable, Orderable {
 
@@ -164,7 +164,6 @@ public class Activity implements Serializable, Deleteable, Orderable {
             joinColumns = {@JoinColumn(name = "ActivityId", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "AttributeGroupId", nullable = false, updatable = false)})
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
-    @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
     public Set<AttributeGroup> getAttributeGroups() {
         return this.attributeGroups;
     }
@@ -176,7 +175,6 @@ public class Activity implements Serializable, Deleteable, Orderable {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "activity")
     @org.hibernate.annotations.OrderBy(clause = "sortOrder")
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
-    @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
     public Set<Indicator> getIndicators() {
         return this.indicators;
     }
