@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
@@ -32,7 +33,7 @@ import java.util.*;
 
 public class SiteHistoryRenderer {
 
-    private static final Date HISTORY_AVAILABLE_FROM = new Date(2012, 12, 20);
+    private static final Date HISTORY_AVAILABLE_FROM = new LocalDate(2012, 12, 20).atMidnightInMyTimezone();
 
     public String renderLoading() {
         return new Item(I18N.CONSTANTS.loading()).toString();

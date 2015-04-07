@@ -1,6 +1,7 @@
 package org.activityinfo.test.driver;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
@@ -35,6 +36,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     
     private ApplicationPage applicationPage;
     private TargetsPage targetPage;
+    private String currentForm;
 
     @Inject
     public UiApplicationDriver(ApiApplicationDriver apiDriver, 
@@ -82,18 +84,28 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         ensureLoggedIn();
 
+        currentForm = formName;
+        
         Map<String, FieldValue> valueMap = FieldValue.toMap(values);
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
         
         DataEntryDriver driver = dataEntryTab.newSubmission();
-        
+
+        fillForm(valueMap, driver);
+
+        driver.submit();
+    }
+
+    private void fillForm(Map<String, FieldValue> valueMap, DataEntryDriver driver) throws InterruptedException {
         while(driver.nextField()) {
             System.out.println("label = " + driver.getLabel());
             switch(driver.getLabel()) {
                 case "Partner":
-                    driver.select(aliasTable.getAlias(valueMap.get("partner").getValue()));
+                    if(valueMap.containsKey("partner")) {
+                        driver.select(aliasTable.getAlias(valueMap.get("partner").getValue()));
+                    }
                     break;
                 case "Start Date":
                     driver.fill(new LocalDate(2014,1,1));
@@ -114,7 +126,6 @@ public class UiApplicationDriver extends ApplicationDriver {
                     break;
             }
         }
-        driver.submit();
     }
 
     @Override
@@ -157,6 +168,32 @@ public class UiApplicationDriver extends ApplicationDriver {
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
         return dataEntryTab.export();
+    }
+
+    @Override
+    public List<String> getSubmissionHistory() {
+        Preconditions.checkState(currentForm != null, "No current form");
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+        
+        dataEntryTab.selectSubmission(0);
+        return dataEntryTab.changes();
+    }
+
+    @Override
+    public void updateSubmission(List<FieldValue> values) throws Exception {
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+
+        dataEntryTab.selectSubmission(0);
+
+        DataEntryDriver driver = dataEntryTab.updateSubmission();
+        
+        fillForm(FieldValue.toMap(values), driver);
+        
+        driver.submit();
     }
 
     @Override

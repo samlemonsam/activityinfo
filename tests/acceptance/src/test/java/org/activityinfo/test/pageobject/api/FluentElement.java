@@ -70,7 +70,7 @@ public class FluentElement {
         actions.click(element()).perform();
     }
 
-    private WebElement element() {
+    public WebElement element() {
         Preconditions.checkState(element != null, "no element has been selected yet");
         return element;
     }
