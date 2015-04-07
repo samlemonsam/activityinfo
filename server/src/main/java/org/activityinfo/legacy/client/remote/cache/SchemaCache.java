@@ -65,6 +65,7 @@ public class SchemaCache implements DispatchListener {
         source.registerListener(BatchCommand.class, this);
         source.registerListener(GetFormViewModel.class, this);
         source.registerListener(BatchCommand.class, this);
+        source.registerListener(Delete.class, this);
 
         schemaEntityTypes.add("UserDatabase");
         schemaEntityTypes.add("Activity");
@@ -75,6 +76,7 @@ public class SchemaCache implements DispatchListener {
         schemaEntityTypes.add("Partner");
         schemaEntityTypes.add("Project");
         schemaEntityTypes.add("LockedPeriod");
+        schemaEntityTypes.add("LocationType");
     }
 
 
@@ -83,6 +85,8 @@ public class SchemaCache implements DispatchListener {
         if (command instanceof UpdateEntity) {
             clearCache();
         } else if (command instanceof CreateEntity) {
+            clearCache();
+        } else if (command instanceof Delete && isSchemaEntity(((Delete) command).getEntityName())) {
             clearCache();
         } else if (command instanceof AddPartner || command instanceof RemovePartner) {
             clearCache();
