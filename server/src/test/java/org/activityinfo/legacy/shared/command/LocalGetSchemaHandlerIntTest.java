@@ -49,7 +49,7 @@ public class LocalGetSchemaHandlerIntTest extends LocalHandlerTestCase {
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void forDatabaseOwner() throws CommandException {
 
-        synchronizeFirstTime();
+        synchronize();
 
         SchemaDTO schema = executeLocally(new GetSchema());
         assertThat(schema.getDatabases().size(), equalTo(3));
@@ -64,7 +64,7 @@ public class LocalGetSchemaHandlerIntTest extends LocalHandlerTestCase {
     public void forUser() throws CommandException {
 
         setUser(4); // only has view access to databse 1
-        synchronizeFirstTime();
+        synchronize();
 
         SchemaDTO schema = executeLocally(new GetSchema());
 

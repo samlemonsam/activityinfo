@@ -41,6 +41,10 @@ public class SyncRegion implements Serializable {
         this.currentVersion = currentVersion;
     }
 
+    public SyncRegion(String id, Object currentVersion) {
+        this(id, currentVersion.toString());
+    }
+
     public String getId() {
         return id;
     }

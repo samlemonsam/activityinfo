@@ -48,6 +48,18 @@ public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
         return localVersion;
     }
 
+    public long getLocalVersionNumber() {
+        if (localVersion == null) {
+            return 0;
+        }
+        int fractionStart = localVersion.indexOf('.');
+        if(fractionStart != -1) {
+            return Long.parseLong(localVersion.substring(0, fractionStart));
+        } else {
+            return Long.parseLong(localVersion);
+        }
+    }
+    
     public void setLocalVersion(String localVersion) {
         this.localVersion = localVersion;
     }

@@ -91,7 +91,7 @@ public class LocationBuilderTest {
         update = builder.build(new User(), request);
 
         assertThat(update.isComplete(), equalTo(true));
-        assertThat(update.getVersion(), equalTo("500")); // second chunk
+        assertThat(update.getVersion(), equalTo("3")); // second chunk
         assertThat(update.getSql(), containsString("Boga"));
 
     }

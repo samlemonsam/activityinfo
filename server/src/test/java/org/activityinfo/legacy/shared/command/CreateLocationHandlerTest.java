@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
-public class CreateLocationTest extends CommandTestCase2 {
+public class CreateLocationHandlerTest extends CommandTestCase2 {
     @Test
     public void test() throws CommandException {
         LocationDTO location = LocationDTOs.newLocation();

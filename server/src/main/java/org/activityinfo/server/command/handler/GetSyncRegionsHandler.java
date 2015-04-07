@@ -35,8 +35,11 @@ import org.activityinfo.legacy.shared.util.CollectionUtil;
 import org.activityinfo.server.command.handler.sync.AdminUpdateBuilder;
 import org.activityinfo.server.command.handler.sync.TableDefinitionUpdateBuilder;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import java.util.*;
 
 public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
@@ -48,86 +51,87 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
         this.entityManager = entityManager;
     }
 
-    @Override @SuppressWarnings("unchecked")
+    @Override
     public CommandResult execute(GetSyncRegions cmd, User user) throws CommandException {
 
-        List<Object[]> databases = entityManager.createQuery("SELECT " +
-                                                             "db.id, db.country.id, db.version, " +
-                                                             "MAX(p.version) " +
-                                                             "FROM UserDatabase db " +
-                                                             "LEFT JOIN db.userPermissions p " +
-                                                             "GROUP BY db.id").getResultList();
-
-        Map<Integer, Long> databaseIdToVerions = Maps.newHashMap();
         Set<Integer> countryIds = Sets.newHashSet();
+        Set<Integer> visibleDatabaseIds = Sets.newHashSet();
+        List<SyncRegion> databaseRegions = new ArrayList<>();
+        
+        List<UserDatabase> ownedDatabases = entityManager
+            .createQuery("SELECT db FROM UserDatabase db WHERE db.owner = :user", UserDatabase.class)
+            .setParameter("user", user)
+            .getResultList();
 
-        for (Object[] db : databases) {
-            long version = 1;
-            if (db[2] != null) {
-                version = (Long) db[2];
+        for (UserDatabase database : ownedDatabases) {
+            if(!database.isDeleted()) {
+                visibleDatabaseIds.add(database.getId());
+                countryIds.add(database.getCountry().getId());
             }
-            if (db[3] != null && (Long) db[3] > version) {
-                version = (Long) db[3];
+            databaseRegions.add(new SyncRegion("db/" + database.getId(), database.getVersion()));
+        }
+        
+        List<UserPermission> sharedDatabases = entityManager
+            .createQuery("SELECT p FROM UserPermission p LEFT JOIN FETCH p.database WHERE p.user = :user",
+                    UserPermission.class)
+            .setParameter("user", user)
+            .getResultList();
+        
+        for(UserPermission permission : sharedDatabases) {
+            if(permission.isAllowView() && !permission.getDatabase().isDeleted()) {
+                visibleDatabaseIds.add(permission.getDatabase().getId());
+                countryIds.add(permission.getDatabase().getCountry().getId());
             }
-            databaseIdToVerions.put((Integer) db[0], version);
-            countryIds.add((Integer) db[1]);
+            long version = Math.max(permission.getVersion(), permission.getDatabase().getVersion());
+            databaseRegions.add(new SyncRegion("db/" + permission.getDatabase().getId(), version));
         }
 
         List<SyncRegion> regions = Lists.newArrayList();
         regions.add(new SyncRegion("site-tables", TableDefinitionUpdateBuilder.CURRENT_VERSION));
-        regions.addAll(listDbs(databaseIdToVerions));
+
+        for(Integer countryId : countryIds) {
+            regions.add(new SyncRegion("country/" + countryId, "1"));
+        }
+        regions.addAll(databaseRegions);
         regions.addAll(listAdminRegions(countryIds));
         regions.addAll(listLocations(countryIds));
-        regions.addAll(listSiteRegions(databaseIdToVerions.keySet()));
+        regions.addAll(listSiteRegions(visibleDatabaseIds));
         return new SyncRegions(regions);
     }
 
-    private Collection<? extends SyncRegion> listDbs(Map<Integer, Long> databaseIdToVerions) {
-        List<SyncRegion> dbRegions = Lists.newArrayList();
-        for (Map.Entry<Integer, Long> entry : databaseIdToVerions.entrySet()) {
-            dbRegions.add(new SyncRegion("db/" + entry.getKey(), entry.getValue().toString()));
-        }
-        return dbRegions;
-    }
 
     @SuppressWarnings("unchecked")
-    private Collection<? extends SyncRegion> listLocations(Set<Integer> countryIds) {
+    private Collection<SyncRegion> listLocations(Set<Integer> countryIds) {
 
         List<SyncRegion> locationRegions = Lists.newArrayList();
-
-        if (CollectionUtil.isNotEmpty(countryIds)) {
-            List<Object[]> regions = entityManager.createNativeQuery("SELECT loc.LocationTypeId, MAX(loc.timeEdited) " +
-                    "FROM location loc " +
-                    "INNER JOIN locationtype t ON loc.LocationTypeId = t.LocationTypeId " +
-                    "WHERE loc.LocationId IN (SELECT LocationId FROM site WHERE dateDeleted is null) " +
-                    " AND t.countryId IN (:countries) " +
-                    "GROUP BY loc.LocationTypeId")
-                    .setParameter("countries", countryIds)
-                    .getResultList();
-
-            for (Object[] region : regions) {
-                locationRegions.add(new SyncRegion("location/" + region[0], region[1].toString()));
+        if (!countryIds.isEmpty()) {
+            List<Tuple> locationTypes = entityManager
+            .createQuery("SELECT L.id, L.version FROM LocationType L WHERE L.country.id in :countryIds",
+                    Tuple.class)
+            .setParameter("countryIds", countryIds)
+            .getResultList();
+            
+            for(Tuple locationType : locationTypes) {
+                locationRegions.add(new SyncRegion("location/" + locationType.get(0), locationType.get(1)));
             }
         }
         return locationRegions;
     }
 
-    @SuppressWarnings("unchecked")
-    private Collection<? extends SyncRegion> listAdminRegions(Set<Integer> countryIds) {
+    private Collection<SyncRegion> listAdminRegions(Set<Integer> countryIds) {
 
         List<SyncRegion> adminRegions = Lists.newArrayList();
 
-        if (CollectionUtil.isNotEmpty(countryIds)) {
-            List<Integer> levels = entityManager.createQuery("SELECT " +
-                                                             "level.id " +
-                                                             "FROM AdminLevel level " +
-                                                             "WHERE level.country.id in (:countries) ")
-                                                .setParameter("countries", countryIds)
-                                                .getResultList();
+        if (!countryIds.isEmpty()) {
+            List<Integer> levels = entityManager.createQuery(
+                    "SELECT level.id " +
+                     "FROM AdminLevel level " +
+                     "WHERE level.country.id in (:countries)", Integer.class)
+                .setParameter("countries", countryIds)
+                .getResultList();
 
             for (Integer level : levels) {
-                adminRegions.add(new SyncRegion("admin/" + level,
-                        Integer.toString(AdminUpdateBuilder.LAST_VERSION_NUMBER)));
+                adminRegions.add(new SyncRegion("admin/" + level, AdminUpdateBuilder.LAST_VERSION_NUMBER));
             }
         }
         return adminRegions;
@@ -137,20 +141,19 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
      * We need a separate sync region for each Partner/UserDatabase combination
      * because we may be given permission to view data at different times.
      */
-    @SuppressWarnings("unchecked")
-    private Collection<? extends SyncRegion> listSiteRegions(Collection<Integer> databases) {
+    private Collection<SyncRegion> listSiteRegions(Collection<Integer> databases) {
         List<SyncRegion> siteRegions = Lists.newArrayList();
         
-        if (CollectionUtil.isNotEmpty(databases)) {
+        if (!databases.isEmpty()) {
             // do one sync region per form
-            List<Object[]> regions = entityManager.createQuery("SELECT " +
-                                                               "s.activity.id, " +
-                                                               "MAX(s.timeEdited) " +
-                                                               "FROM Site s " +
-                                                               "WHERE s.activity.database.id in (:dbs) " +
-                                                               "GROUP BY s.activity.id")
-                                                  .setParameter("dbs", databases)
-                                                  .getResultList();
+            List<Object[]> regions = entityManager.createQuery(
+                    "SELECT s.activity.id, " +
+                       "MAX(s.timeEdited) " +
+                       "FROM Site s " +
+                       "WHERE s.activity.database.id in (:dbs) " +
+                       "GROUP BY s.activity.id", Object[].class)
+                  .setParameter("dbs", databases)
+                  .getResultList();
 
             for (Object[] region : regions) {
                 siteRegions.add(new SyncRegion("form-submissions/" + region[0], region[1].toString()));

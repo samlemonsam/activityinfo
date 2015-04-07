@@ -219,7 +219,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
-        adapter.remove(Arrays.asList(instanceToDelete));
+        assertResolves(adapter.remove(Arrays.asList(instanceToDelete)));
 
         List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
 

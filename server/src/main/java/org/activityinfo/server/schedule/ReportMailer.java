@@ -28,7 +28,6 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
-import org.activityinfo.server.database.hibernate.entity.DomainFilters;
 import org.activityinfo.server.database.hibernate.entity.ReportSubscription;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
@@ -82,7 +81,8 @@ public class ReportMailer {
 
         LOGGER.info("Starting nightly mailing job for " + today);
 
-        List<ReportSubscription> subscriptions = em.createQuery("select t from ReportSubscription t").getResultList();
+        List<ReportSubscription> subscriptions = em.createQuery(
+            "select t from ReportSubscription t", ReportSubscription.class).getResultList();
 
         for (ReportSubscription subscription : subscriptions) {
             try {
@@ -103,7 +103,6 @@ public class ReportMailer {
         // set up authentication for the subscriber of this report
 
         authProvider.set(sub.getUser());
-        DomainFilters.applyUserFilter(sub.getUser(), em);
 
         // render the report to a temp file
         // generate the report
@@ -115,10 +114,10 @@ public class ReportMailer {
 
         try {
             mailReport(sub, report, today, rtf.toByteArray());
+            
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE,
-                    "Report mailing of " + sub.getTemplate().getId() + " failed for user " + sub.getUser().getEmail(),
-                    e);
+            LOGGER.log(Level.SEVERE, "Report mailing of " + sub.getTemplate().getId() + " failed for user " +
+                        sub.getUser().getEmail(), e);
         }
     }
 

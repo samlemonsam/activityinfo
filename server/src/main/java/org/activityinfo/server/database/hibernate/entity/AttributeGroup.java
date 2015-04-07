@@ -28,12 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * @author Alex Bertram
- */
-@Entity @org.hibernate.annotations.Filter(
-        name = "hideDeleted",
-        condition = "DateDeleted is null")
+@Entity
 public class AttributeGroup implements Serializable, Deleteable, Orderable {
 
     private int id;

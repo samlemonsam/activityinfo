@@ -32,8 +32,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity @JsonAutoDetect(JsonMethod.NONE) @NamedQuery(name = "queryAllCountriesAlphabetically",
-        query = "select c from Country c order by c.name")
+@Entity @JsonAutoDetect(JsonMethod.NONE) 
+@NamedQuery(name = "queryAllCountriesAlphabetically", query = "select c from Country c order by c.name")
 public class Country implements Serializable {
 
     private static final int DEFAULT_BATCH_SIZE = 100;

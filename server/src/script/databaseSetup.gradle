@@ -27,9 +27,9 @@ task setupDatabase(type: MySqlSetupTask) {
             "${project.rootDir}/store/mysql/dev-user.sql")
 }
 
-task updateDatabase(type: MySqlSetupTask) {
+task migrateDatabase(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
     description =  "Applies schema migrations to the local 'activityinfo' development database"
-    database =      mysql.localDev
+    database =      environment.database
 }
 
 task setupDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
