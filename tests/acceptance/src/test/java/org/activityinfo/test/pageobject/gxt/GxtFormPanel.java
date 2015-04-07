@@ -82,7 +82,9 @@ public class GxtFormPanel extends Form {
 
         @Override
         public void fill(String value) {
-            element.findElement(By.tagName("input")).sendKeys(value);
+            FluentElement input = element.findElement(By.tagName("input"));
+            input.element().clear();
+            input.sendKeys(value);
         }
 
         @Override

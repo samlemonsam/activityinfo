@@ -24,7 +24,3 @@ Scenario: Offline Data Entry
     And I synchronize with the server
     And I open a new session as jim@nrc.org
    Then the "NFI Distribution" form should have 2 submissions
-
-  
-  
- 

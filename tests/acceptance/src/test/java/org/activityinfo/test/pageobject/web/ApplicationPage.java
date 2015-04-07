@@ -34,7 +34,6 @@ public class ApplicationPage {
     
     private final FluentElement page;
 
-
     @Inject
     public ApplicationPage(WebDriver webDriver) {
         this.page = new FluentElement(webDriver);        

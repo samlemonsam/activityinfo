@@ -205,7 +205,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private void insert(Class<?> entityClass, String criteria) {
         if(permission.isAllowView() && !database.isDeleted()) {
-            LOGGER.severe(entityClass.getName() + " Criteria: " + criteria.toLowerCase());
+            LOGGER.fine(entityClass.getName() + " Criteria: " + criteria.toLowerCase());
             batch.insert(entityClass, criteria.toLowerCase());
         }
     }
@@ -213,7 +213,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private void insert(String tableName, String criteria) {
         if(permission.isAllowView() && !database.isDeleted()) {
             SqlQuery query = SqlQuery.selectAll().from(tableName).whereTrue(criteria.toLowerCase());
-            LOGGER.severe(query.sql());
+            LOGGER.fine(query.sql());
             batch.insert()
                     .into(tableName)
                     .from(query)

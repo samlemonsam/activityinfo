@@ -55,6 +55,10 @@ public class GxtGrid {
         return new AssertionError(String.format("Could not find cell with text '%s'.", text) + extractData());
     }
     
+    public FluentIterable<GxtRow> rows() {
+        return container.findElements(By.className("x-grid3-row")).as(GxtRow.class);
+    }
+    
     public DataTable extractData() {
         List<List<String>> rows = new ArrayList<>();
         
@@ -87,6 +91,18 @@ public class GxtGrid {
     }
 
 
+    public static class GxtRow {
+        private FluentElement element;
+
+        public GxtRow(FluentElement element) {
+            this.element = element;
+        }
+        
+        public void select() {
+            element.click();
+        }
+    }
+    
     public class GxtCell {
         private FluentElement element;
 

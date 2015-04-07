@@ -155,4 +155,15 @@ public abstract class ApplicationDriver {
     public File exportForm(String formName) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @return the text of the history of the last site we modified
+     */
+    public List<String> getSubmissionHistory() {
+        throw new PendingException();
+    }
+
+    public void updateSubmission(List<FieldValue> values) throws InterruptedException, Exception {
+        throw new PendingException();
+    }
 }

@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriverException;
 public class XPathBuilder {
 
 
+
     public enum Axis {
         CHILD,
         DESCENDANT,
@@ -60,6 +61,11 @@ public class XPathBuilder {
 
     public XPathBuilder div(String... conditions) {
         return tagName("div", conditions);
+    }
+
+
+    public XPathBuilder p(String... conditions) {
+        return tagName("p", conditions);
     }
 
     public XPathBuilder span(String... conditions) {
