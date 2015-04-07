@@ -23,6 +23,7 @@ package org.activityinfo.server.database.hibernate;
  */
 
 import com.bedatadriven.appengine.cloudsql.CloudSqlConnectionProvider;
+import com.bedatadriven.appengine.cloudsql.CloudSqlFilter;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -81,6 +82,7 @@ public class HibernateModule extends ServletModule {
         // temporary fix for geometry types
         bind(FixGeometryTask.class);
         filter("/tasks/fixGeometry").through(GuiceContainer.class);
+        filter("/*").through(CloudSqlFilter.class);
 
     }
 
