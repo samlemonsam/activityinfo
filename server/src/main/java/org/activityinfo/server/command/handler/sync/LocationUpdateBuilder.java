@@ -41,7 +41,7 @@ public class LocationUpdateBuilder implements UpdateBuilder {
     private static final String REGION_PREFIX = "location/";
 
     private final EntityManager em;
-    private LocalState localState;
+    private long localVersion;
     private SqliteBatchBuilder batch;
 
     private int typeId;
@@ -61,21 +61,28 @@ public class LocationUpdateBuilder implements UpdateBuilder {
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws Exception {
 
         typeId = parseTypeId(request);
-        localState = new LocalState(request.getLocalVersion());
+        localVersion = request.getLocalVersionNumber();
         batch = new SqliteBatchBuilder();
-        
-        JpaBatchBuilder jpaBuilder = new JpaBatchBuilder(batch, em);
-        jpaBuilder.insert(LocationType.class, "LocationTypeId=" + typeId);
 
         SyncRegionUpdate update = new SyncRegionUpdate();
-        long latestVersion = queryLatestVersion(update);
-        if (latestVersion > localState.lastDate) {
-            queryChanged();
-            linkAdminEntities();
-        }
 
-        update.setVersion(Long.toString(latestVersion));
-        update.setSql(batch.build());
+        LocationType locationType = em.find(LocationType.class, typeId);
+        if(localVersion == locationType.getVersion()) {
+            update.setComplete(true);
+            update.setVersion(locationType.getVersion());
+        } else {
+            JpaBatchBuilder jpaBuilder = new JpaBatchBuilder(batch, em);
+            jpaBuilder.insert(LocationType.class, "LocationTypeId=" + typeId);
+
+            long latestVersion = queryLatestVersion(update);
+            if (latestVersion > localVersion) {
+                queryChanged();
+                linkAdminEntities();
+            }
+
+            update.setVersion(Long.toString(latestVersion));
+            update.setSql(batch.build());
+        }
         return update;
     }
 
@@ -99,7 +106,7 @@ public class LocationUpdateBuilder implements UpdateBuilder {
                                  .appendColumn("workflowStatusId")
                                  .from(Tables.LOCATION)
                                  .where("locationTypeId").equalTo(typeId)
-                                 .where("version").greaterThan(localState.lastDate);
+                                 .where("version").greaterThan(localVersion);
 
         batch.insert().into(Tables.LOCATION).from(query).execute(em);
     }
@@ -113,23 +120,23 @@ public class LocationUpdateBuilder implements UpdateBuilder {
                                  .innerJoin(Tables.LOCATION_ADMIN_LINK, "K")
                                  .on("L.LocationId=K.LocationId")
                                  .where("L.locationTypeId").equalTo(typeId)
-                                 .where("L.version").greaterThan(localState.lastDate);
+                                 .where("L.version").greaterThan(localVersion);
 
         batch.insert().into(Tables.LOCATION_ADMIN_LINK).from(query).execute(em);
     }
 
     private long queryLatestVersion(SyncRegionUpdate update) throws JSONException {
         SqlQuery query = SqlQuery.select()
-                                 .appendColumn("timeEdited", "latest")
+                                 .appendColumn("version", "latest")
                                  .from(Tables.LOCATION)
                                  .where("locationTypeId").equalTo(typeId)
-                                 .where("version").greaterThan(localState.lastDate);
+                                 .where("version").greaterThan(localVersion);
 
         List<Long> longs = SqlQueryUtil.queryLongList(em, query);
 
         if (longs.isEmpty()) {
             update.setComplete(true);
-            return localState.lastDate;
+            return localVersion;
         }
 
         // our intention is to reduce batch, so we cut versions into chunks
@@ -140,19 +147,5 @@ public class LocationUpdateBuilder implements UpdateBuilder {
             update.setComplete(true);
         }
         return Collections.max(longs);
-    }
-
-
-    private class LocalState {
-        private long lastDate;
-
-        public LocalState(String cookie) {
-            if (cookie == null) {
-                lastDate = 0;
-            } else {
-                lastDate = TimestampHelper.fromString(cookie);
-            }
-        }
-
     }
 }

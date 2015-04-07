@@ -108,6 +108,15 @@ public class IndicatorValue implements java.io.Serializable {
         this.value = value;
     }
 
+    @Lob
+    public String getTextValue() {
+        return textValue;
+    }
+
+    public void setTextValue(String textValue) {
+        this.textValue = textValue;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {

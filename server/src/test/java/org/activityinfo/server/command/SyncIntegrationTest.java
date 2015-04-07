@@ -43,7 +43,6 @@ import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.Collector;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
-import org.activityinfo.server.command.handler.sync.TimestampHelper;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.TestSqliteDatabase;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
@@ -70,7 +69,8 @@ import java.util.logging.Logger;
 import static org.activityinfo.legacy.shared.command.UpdateMonthlyReports.Change;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
 @Modules({
@@ -324,41 +324,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
 
     }
-
-    @Test
-    @OnDataSet("/dbunit/locations.db.xml")
-    public void timeStampSurvivesRoundTrip() {
-        EntityManager entityManager = serverEntityManagerFactory
-                .createEntityManager();
-        entityManager.getTransaction().begin();
-        Location loc = new Location();
-        loc.setTimeEdited(nowIsh += 1500);
-        loc.setName("Penekusu");
-        loc.setLocationType(entityManager.find(LocationType.class, 1));
-        entityManager.persist(loc);
-        entityManager.getTransaction().commit();
-        entityManager.clear();
-
-        entityManager.getTransaction().begin();
-        Location loc2 = entityManager.find(Location.class, loc.getId());
-
-        String tsString = TimestampHelper.toString(loc2.getTimeEdited());
-        long ts = TimestampHelper.fromString(tsString);
-
-        assertFalse(loc2 == loc);
-        assertThat(loc2.getTimeEdited(), equalTo(ts));
-        entityManager.getTransaction().commit();
-        entityManager.clear();
-
-        entityManager.getTransaction().begin();
-        Location loc3 = entityManager.find(Location.class, loc.getId());
-
-        assertFalse(ts > loc3.getTimeEdited());
-        assertFalse(ts < loc3.getTimeEdited());
-
-        entityManager.close();
-
-    }
+    
 
     // AI-864 : we know that
     // 1) on customer side location is present but locationadminlink entry is absent.

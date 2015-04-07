@@ -23,7 +23,6 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
-import org.activityinfo.server.command.handler.sync.TimestampHelper;
 
 public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
     private String regionId;
@@ -50,7 +49,15 @@ public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
     }
 
     public long getLocalVersionNumber() {
-        return TimestampHelper.fromString(localVersion);
+        if (localVersion == null) {
+            return 0;
+        }
+        int fractionStart = localVersion.indexOf('.');
+        if(fractionStart != -1) {
+            return Long.parseLong(localVersion.substring(0, fractionStart));
+        } else {
+            return Long.parseLong(localVersion);
+        }
     }
     
     public void setLocalVersion(String localVersion) {

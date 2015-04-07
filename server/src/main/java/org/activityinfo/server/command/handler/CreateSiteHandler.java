@@ -131,7 +131,7 @@ public class CreateSiteHandler implements CommandHandler<CreateSite> {
             site.setDate2(propertyMap.getDate("date2"));
         }
         if(propertyMap.containsKey("comments")) {
-            site.setComments(propertyMap.getString("comments"));
+            site.setComments(propertyMap.getOptionalString("comments"));
         }
         if(propertyMap.containsKey("projectId")) {
             if (propertyMap.get("projectId") == null) {
@@ -139,10 +139,6 @@ public class CreateSiteHandler implements CommandHandler<CreateSite> {
             } else {
                 Project project = entityManager.find(Project.class, propertyMap.getRequiredInt("projectId"));
                 site.setProject(project);
-//                if (project.getUserDatabase().getId() != site.getActivity().getDatabase().getId()) {
-//                    throw new CommandException(String.format("Project %d does not belong to database %d",
-//                            project.getId(), site.getActivity().getDatabase().getId()));
-//                }
             }
         }
     }
@@ -183,6 +179,7 @@ public class CreateSiteHandler implements CommandHandler<CreateSite> {
                         Indicator indicator = entityManager.getReference(Indicator.class, indicatorId);
                         valueEntity = new IndicatorValue(period, indicator);
                         valueEntity.setValue(value);
+                        existingValues.put(indicatorId, valueEntity);
                         entityManager.persist(valueEntity);
                     }
                 } else {

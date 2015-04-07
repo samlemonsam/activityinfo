@@ -30,12 +30,7 @@ public class CreateLocationHandler implements CommandHandler<CreateLocation> {
 
     @Override
     public VoidResult execute(CreateLocation cmd, User user) throws CommandException {
-
-        LocationType locationType = entityManager.find(LocationType.class, cmd.getLocationTypeId());
-        if(locationType == null) {
-            throw new CommandException("LocationType " + cmd.getLocationTypeId() + " does not exist");
-        }
-
+        
         PropertyMap propertyMap = new PropertyMap(cmd.getProperties());
         
         List<Location> existingLocation = entityManager
@@ -44,6 +39,15 @@ public class CreateLocationHandler implements CommandHandler<CreateLocation> {
                 .getResultList();
         
         if(existingLocation.isEmpty()) {
+            
+            /*
+             * Create new Location
+             */
+            LocationType locationType = entityManager.find(LocationType.class, cmd.getLocationTypeId());
+            if(locationType == null) {
+                throw new CommandException("LocationType " + cmd.getLocationTypeId() + " does not exist");
+            }
+
             Location location = new Location();
             location.setId(cmd.getLocationId());
             location.setLocationType(locationType);
@@ -53,8 +57,9 @@ public class CreateLocationHandler implements CommandHandler<CreateLocation> {
 
         } else {
             Location location = existingLocation.get(0);
-            location.setVersion(locationType.incrementVersion());
-            if(location.getLocationType().getId() != locationType.getId()) {
+            location.setVersion(location.getLocationType().incrementVersion());
+            if(cmd.getProperties().containsKey("locationTypeId") &&
+                location.getLocationType().getId() != cmd.getLocationTypeId()) {
                 throw new CommandException("LocationType of a location cannot be changed");
             }
             applyProperties(location, propertyMap);
@@ -65,18 +70,24 @@ public class CreateLocationHandler implements CommandHandler<CreateLocation> {
 
 
     private void applyProperties(Location location, PropertyMap propertyMap) {
-        location.setName(propertyMap.getString("name"));
-        location.setAxe(propertyMap.getOptionalString("axe"));
+        if(propertyMap.containsKey("name")) {
+            location.setName(propertyMap.getString("name"));
+        }
+        if(propertyMap.containsKey("axe")) {
+            location.setAxe(propertyMap.getOptionalString("axe"));
+        }
+        if(propertyMap.get("workflowstatusid") != null) {
+            location.setWorkflowStatusId(propertyMap.getString("workflowstatusid"));
+        }
         location.setAdminEntities(adminMembership(propertyMap));
         
-        Double longitude = propertyMap.getOptionalDouble("longitude");
-        Double latitude = propertyMap.getOptionalDouble("latitude");
-        if(latitude != null && longitude != null) {
-            location.setX(longitude);
-            location.setY(latitude);
-        } else {
-            location.setX(null);
-            location.setY(null);
+        if(propertyMap.containsKey("latitude") || propertyMap.containsKey("longitude")) {
+            Double longitude = propertyMap.getOptionalDouble("longitude");
+            Double latitude = propertyMap.getOptionalDouble("latitude");
+            if (latitude != null && longitude != null) {
+                location.setX(longitude);
+                location.setY(latitude);
+            }
         }
 
         location.setVersion(location.getLocationType().incrementVersion());
