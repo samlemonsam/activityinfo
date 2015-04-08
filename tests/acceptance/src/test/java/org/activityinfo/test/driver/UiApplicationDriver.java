@@ -12,6 +12,7 @@ import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
@@ -121,7 +122,12 @@ public class UiApplicationDriver extends ApplicationDriver {
                 default:
                     String testHandle = aliasTable.getTestHandleForAlias(driver.getLabel());
                     if(valueMap.containsKey(testHandle)) {
-                        driver.fill(valueMap.get(testHandle).getValue());
+                        String value = valueMap.get(testHandle).getValue();
+                        if(value.matches("^\\d+$")) {
+                            driver.fill(value);
+                        } else {
+                            driver.fill(aliasTable.getAlias(value));
+                        }
                     }
                     break;
             }
@@ -171,7 +177,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public List<String> getSubmissionHistory() {
+    public List<HistoryEntry> getSubmissionHistory() {
         Preconditions.checkState(currentForm != null, "No current form");
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();

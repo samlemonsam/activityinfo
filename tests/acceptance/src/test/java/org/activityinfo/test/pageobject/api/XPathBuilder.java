@@ -11,7 +11,6 @@ import org.openqa.selenium.WebDriverException;
 public class XPathBuilder {
 
 
-
     public enum Axis {
         CHILD,
         DESCENDANT,
@@ -58,7 +57,11 @@ public class XPathBuilder {
         this.axis = Axis.PARENT;
         return this;
     }
-
+    
+    public XPathBuilder li(String... conditions) {
+        return tagName("li", conditions);
+    }
+    
     public XPathBuilder div(String... conditions) {
         return tagName("div", conditions);
     }
@@ -68,6 +71,10 @@ public class XPathBuilder {
         return tagName("p", conditions);
     }
 
+    public XPathBuilder ul(String... conditions) {
+        return tagName("ul", conditions);
+    }
+
     public XPathBuilder span(String... conditions) {
         return tagName("span", conditions);
     }
@@ -75,6 +82,7 @@ public class XPathBuilder {
     public XPathBuilder button(String... conditions) {
         return tagName("button", conditions);
     }
+
 
     public XPathBuilder label(String... conditions) {
         return tagName("label", conditions);
@@ -119,10 +127,6 @@ public class XPathBuilder {
 
     public static String withRole(String roleName ) {
         return String.format("@role = '%s'", roleName);
-    }
-    
-    public static String withPosition(int index) {
-        return String.format("position() = %d", index);
     }
 
     public XPathBuilder descendants() {

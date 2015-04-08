@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.gxt.GxtFormPanel;
 import org.activityinfo.test.pageobject.gxt.GxtMessageBox;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
@@ -60,13 +61,27 @@ public class GxtDataEntryDriver implements DataEntryDriver {
         String sectionName = sectionElement.findElement(By.className("formSecHeader")).text();
         
         System.out.println(sectionName);
-        if(sectionName.equals("Indicators")) {
-            currentForm = new GxtIndicatorForm(modal.getWindowElement());
-        } else if(sectionName.equals("Comments")) {
-            currentForm = new GxtCommentsForm(modal.getWindowElement());
-        } else {
-            currentForm = new GxtFormPanel(modal.getWindowElement().findElement(By.className("x-form-label-left")));
+        switch (sectionName) {
+            case "Indicators":
+                currentForm = new GxtIndicatorForm(modal.getWindowElement());
+                break;
+            case "Comments":
+                currentForm = new GxtCommentsForm(modal.getWindowElement());
+                break;
+            default:
+                currentForm = findVisibleForm();
+                break;
         }
+    }
+
+    private GxtFormPanel findVisibleForm() {
+        FluentElements forms = modal.getWindowElement().findElements(By.className("x-form-label-left"));
+        for (FluentElement form : forms) {
+            if(form.isDisplayed()) {
+                return new GxtFormPanel(form);
+            }
+        }
+        throw new IllegalStateException("No visible form panels");
     }
 
     @Override
@@ -76,7 +91,11 @@ public class GxtDataEntryDriver implements DataEntryDriver {
 
     @Override
     public void fill(String text) {
-        currentField.fill(text);
+        if(currentField.isDropDown()) {
+            currentField.select(text);
+        } else {
+            currentField.fill(text);
+        }
     }
 
     @Override

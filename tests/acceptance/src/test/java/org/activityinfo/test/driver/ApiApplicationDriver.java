@@ -33,15 +33,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 public class ApiApplicationDriver extends ApplicationDriver {
 
     public static final Logger LOGGER = Logger.getLogger(ApiApplicationDriver.class.getName());
-    
-    public static final AtomicLong LAST_LOGGED = new AtomicLong(0);
-    
+
     public static final Meter COMMAND_RATE = Metrics.REGISTRY.meter("COMMAND_RATE");
     public static final ApiErrorRate ERROR_RATE = new ApiErrorRate();
     
@@ -73,10 +70,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
     private class PendingId implements ResponseHandler, Supplier<Integer> {
 
         private Integer id;
-        private String alias;
 
-        public PendingId(String alias) {
-            this.alias = alias;
+        public PendingId() {
         }
 
         @Override
@@ -204,7 +199,16 @@ public class ApiApplicationDriver extends ApplicationDriver {
         JSONObject properties = new JSONObject();
         properties.put("name", form.getAlias());
         properties.put("databaseId", form.getId("database")); 
-        properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC))); 
+        properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC)));
+        
+        switch (form.getString("reportingFrequency", "once")) {
+            case "monthly":
+                properties.put("reportingFrequency", 1);
+                break;
+            default:
+                properties.put("reportingFrequency", 0);
+                break;
+        }
         
         createEntityAndBindId("Activity", properties);
     }
@@ -222,8 +226,12 @@ public class ApiApplicationDriver extends ApplicationDriver {
             for (String item : field.getStringList("items")) {
                 
                 String alias = aliases.createAliasIfNotExists(item);
-
-                pendingChildren.add(new PendingChild(groupId, alias));
+        
+                if(batchingEnabled) {
+                    pendingChildren.add(new PendingChild(groupId, alias));
+                } else {
+                    createAttribute(groupId, alias);
+                }
             }
 
         } else {
@@ -290,21 +298,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
         }
     }
-    
-    public List<String> getEditableDatabases() throws JSONException {
-        
-        flush();
-
-        JSONArray array = new JSONArray(root().path("resources/databases").get(String.class));
-        List<String> databases = Lists.newArrayList();
-        
-        for(int i=0;i!=array.length();++i) {
-            JSONObject database = array.getJSONObject(i);
-            databases.add(aliases.getTestHandleForAlias(database.getString("name")));
-        }
-
-        return databases;
-    }
 
     public List<String> getForms(String database) throws JSONException {
         flush();
@@ -363,7 +356,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         command.put("databaseId", project.getId("database"));
         command.put("project", properties);
 
-        PendingId pendingId = new PendingId(project.getName());
+        PendingId pendingId = new PendingId();
         
         executeCommand("AddProject", command, pendingId);
         
@@ -459,7 +452,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         addTarget.put("databaseId", properties.getId("database"));
         addTarget.put("target", target);
 
-        PendingId pendingId = new PendingId(properties.getName());
+        PendingId pendingId = new PendingId();
         
         executeCommand("AddTarget", addTarget, pendingId);
         
@@ -497,12 +490,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
         object.put("entityName", entityType);
         object.put("properties", properties);
 
-        String testHandle = entityType;
         if(properties.has("name")) {
             aliases.getTestHandleForAlias(properties.getString("name"));
         }
         
-        PendingId pendingId = new PendingId(testHandle);
+        PendingId pendingId = new PendingId();
 
         executeCommand("CreateEntity", object, pendingId);
         return pendingId;
@@ -703,21 +695,26 @@ public class ApiApplicationDriver extends ApplicationDriver {
             while (childIt.hasNext()) {
                 PendingChild child = childIt.next();
                 if (child.parentId.isResolved()) {
-                    JSONObject itemProperties = new JSONObject();
-                    itemProperties.put("name", child.name);
-                    itemProperties.put("attributeGroupId", child.parentId.get());
-
-                    createEntity("Attribute", itemProperties);
-
+                    createAttribute(child.parentId, child.name);
                     childIt.remove();
+
                 }
             }
         } finally {
             flushing = false;
         }
     }
-
     
+    
+    private void createAttribute(PendingId parentId, String name) throws JSONException {
+        JSONObject itemProperties = new JSONObject();
+        itemProperties.put("name", name);
+        itemProperties.put("attributeGroupId", parentId.get());
+
+        createEntity("Attribute", itemProperties);
+    }
+
+
     public void submitBatch() throws JSONException {
         flush();
         batchingEnabled = false;

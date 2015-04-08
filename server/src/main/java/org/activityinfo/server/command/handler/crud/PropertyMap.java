@@ -114,4 +114,8 @@ public class PropertyMap {
                 property));
         
     }
+
+    public Map<String, Object> asMap() {
+        return map;
+    }
 }

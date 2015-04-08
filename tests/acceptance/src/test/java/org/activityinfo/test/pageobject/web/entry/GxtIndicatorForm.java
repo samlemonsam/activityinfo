@@ -80,8 +80,15 @@ public class GxtIndicatorForm extends Form {
         }
 
         @Override
+        public boolean isDropDown() {
+            return false;
+        }
+
+        @Override
         public void fill(String value) {
-            row.find().input().first().sendKeys(value);
+            FluentElement input = row.find().input().first();
+            input.element().clear();
+            input.sendKeys(value);
         }
 
         public void tab() {
