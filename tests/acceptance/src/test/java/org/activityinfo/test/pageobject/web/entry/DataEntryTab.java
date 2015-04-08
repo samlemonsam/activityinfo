@@ -14,6 +14,7 @@ import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -138,7 +139,12 @@ public class DataEntryTab {
                 List<HistoryEntry> entries = Lists.newArrayList();
                 FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
                 for (FluentElement p : paragraphs) {
-                    String text = p.text();
+                    String text;
+                    try {
+                        text = p.text();
+                    } catch (StaleElementReferenceException ignored) {
+                        return null;
+                    }
                     if(text.contains("Loading")) {
                         return null;
                     }

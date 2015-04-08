@@ -23,9 +23,11 @@ public abstract class Form {
     
     public abstract FormItem current();
     
+    
     public interface FormItem {
         
         String getLabel();
+        boolean isDropDown();
         
         void fill(String value);
         void fill(LocalDate date);

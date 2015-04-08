@@ -27,7 +27,6 @@ import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.SqlTransactionCallback;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.sql.shared.adapter.SyncTransactionAdapter;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
@@ -40,8 +39,6 @@ import org.activityinfo.server.command.handler.CommandHandler;
 import org.activityinfo.server.command.handler.HandlerUtil;
 import org.activityinfo.server.database.hibernate.HibernateExecutor;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.event.CommandEvent;
-import org.activityinfo.server.event.ServerEventBus;
 import org.activityinfo.server.util.monitoring.Profiler;
 import org.hibernate.ejb.HibernateEntityManager;
 
@@ -53,15 +50,13 @@ public class RemoteExecutionContext implements ExecutionContext {
 
     private static final Logger LOGGER = Logger.getLogger(RemoteExecutionContext.class.getName());
 
-    private static final ThreadLocal<RemoteExecutionContext> CURRENT = new ThreadLocal<RemoteExecutionContext>();
+    private static final ThreadLocal<RemoteExecutionContext> CURRENT = new ThreadLocal<>();
 
     private AuthenticatedUser user;
     private Injector injector;
     private SyncTransactionAdapter tx;
     private HibernateEntityManager entityManager;
     private JdbcScheduler scheduler;
-
-    private ServerEventBus serverEventBus;
 
     public RemoteExecutionContext(Injector injector) {
         super();
@@ -70,7 +65,6 @@ public class RemoteExecutionContext implements ExecutionContext {
         this.entityManager = (HibernateEntityManager) injector.getInstance(EntityManager.class);
         this.scheduler = new JdbcScheduler();
         this.scheduler.allowNestedProcessing();
-        this.serverEventBus = injector.getInstance(ServerEventBus.class);
     }
 
     @Override
@@ -187,7 +181,7 @@ public class RemoteExecutionContext implements ExecutionContext {
             throw new IllegalStateException("Command execution has not started yet");
         }
 
-        ResultCollector<R> collector = new ResultCollector<R>(command.getClass());
+        ResultCollector<R> collector = new ResultCollector<>(command.getClass());
         execute(command, collector);
 
         scheduler.process();
@@ -200,10 +194,11 @@ public class RemoteExecutionContext implements ExecutionContext {
      * within CommandHandlers to execute nested commands.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <C extends Command<R>, R extends CommandResult> void execute(final C command,
                                                                         final AsyncCallback<R> outerCallback) {
 
-        AsyncCallback<R> callback = new FiringCallback<R>(command, outerCallback);
+        AsyncCallback<R> callback = new FiringCallback<>(command, outerCallback);
 
 
         Object handler = injector.getInstance(HandlerUtil.handlerForCommand(command));
@@ -230,11 +225,6 @@ public class RemoteExecutionContext implements ExecutionContext {
         return entityManager.find(User.class, user.getId());
     }
 
-    private void fireEvent(Command command, CommandResult result) {
-        LOGGER.fine("notifying serverEventBus of completed command " + command.toString());
-        serverEventBus.post(new CommandEvent(command, result, this));
-    }
-
     private static RuntimeException wrapException(Throwable t) {
         if (t instanceof RuntimeException) {
             return (RuntimeException) t;
@@ -259,13 +249,11 @@ public class RemoteExecutionContext implements ExecutionContext {
     }
 
     private class FiringCallback<R extends CommandResult> implements AsyncCallback<R> {
-        private final Command command;
         private final AsyncCallback<R> callback;
         private final Profiler profiler;
 
         public FiringCallback(Command command, AsyncCallback<R> callback) {
             super();
-            this.command = command;
             this.callback = callback;
             this.profiler = new Profiler("api/rpc", command.getClass().getSimpleName());
         }
@@ -279,26 +267,6 @@ public class RemoteExecutionContext implements ExecutionContext {
         @Override
         public void onSuccess(final R result) {
             this.profiler.succeeded();
-            
-            // *only* enqueue the event notification --
-            // unfortunately, many async command handlers are written
-            // to only submit their update statements to the queue
-            // before returning, which breaks terribly when 
-            // subsequent nested commands rely on their having inserted
-            // something
-            scheduler.scheduleDeferred(new ScheduledCommand() {
-
-                @Override
-                public void execute() {
-
-                    LOGGER.fine("notifying serverEventBus of completed command " + command.toString());
-                    try {
-                        serverEventBus.post(new CommandEvent(command, result, RemoteExecutionContext.this));
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Exception while posting via server event bus: " + e.getMessage(), e);
-                    }
-                }
-            });
             callback.onSuccess(result);
         }
     }
@@ -342,6 +310,4 @@ public class RemoteExecutionContext implements ExecutionContext {
             this.result = result;
         }
     }
-    
-
 }

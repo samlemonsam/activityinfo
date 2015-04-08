@@ -49,6 +49,11 @@ public class GxtCommentsForm extends Form {
         }
 
         @Override
+        public boolean isDropDown() {
+            return false;
+        }
+
+        @Override
         public void fill(String value) {
             textArea.sendKeys(value);
         }

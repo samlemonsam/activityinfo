@@ -122,7 +122,12 @@ public class UiApplicationDriver extends ApplicationDriver {
                 default:
                     String testHandle = aliasTable.getTestHandleForAlias(driver.getLabel());
                     if(valueMap.containsKey(testHandle)) {
-                        driver.fill(valueMap.get(testHandle).getValue());
+                        String value = valueMap.get(testHandle).getValue();
+                        if(value.matches("^\\d+$")) {
+                            driver.fill(value);
+                        } else {
+                            driver.fill(aliasTable.getAlias(value));
+                        }
                     }
                     break;
             }

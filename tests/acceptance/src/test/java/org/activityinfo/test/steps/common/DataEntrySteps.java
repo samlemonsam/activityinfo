@@ -69,19 +69,16 @@ public class DataEntrySteps {
 
 
 
-    @Then("^the submission's history should show one change from (.*) to (.*)$")
+    @Then("^the submission's history should show a change from (.*) to (.*)$")
     public void the_submission_s_history_should_show_one_change_from_to(String from, String to) throws Throwable {
         List<HistoryEntry> changes = driver.getSubmissionHistory();
 
         dumpChanges(changes);
 
-        assertThat(changes, hasSize(2));
+        assertThat(changes.size(), greaterThan(1));
         assertThat(changes.get(0).getSummary(), Matchers.containsString("updated the entry"));
-        assertThat(changes.get(0).getChanges(), hasSize(1));
-        assertThat(changes.get(0).getChanges().get(0), CoreMatchers.containsString(from));
-        assertThat(changes.get(0).getChanges().get(0), CoreMatchers.containsString(to));
-
-
+        assertThat(changes.get(0).getChanges().toString(), CoreMatchers.containsString(from));
+        assertThat(changes.get(0).getChanges().toString(), CoreMatchers.containsString(to));
 
     }
     

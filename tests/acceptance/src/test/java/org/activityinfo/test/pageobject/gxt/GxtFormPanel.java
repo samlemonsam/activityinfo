@@ -17,6 +17,12 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 public class GxtFormPanel extends Form {
 
+    public static final String ARROW_CLASS = "x-form-trigger-arrow";
+    public static final String COMBO_LIST_CLASS = "x-combo-list-inner";
+    public static final String READ_ONLY_CLASS = "x-form-readonly";
+    public static final String ITEM_LABEL_CLASS = "x-form-item-label";
+    public static final String COMBO_ITEM_CLASS = "x-combo-list-item";
+
     private FluentElement form;
     private GxtField current;
 
@@ -65,7 +71,7 @@ public class GxtFormPanel extends Form {
         }
 
         public String getLabel() {
-            String label = this.element.find().label(withClass("x-form-item-label")).first().text();
+            String label = this.element.find().label(withClass(ITEM_LABEL_CLASS)).first().text();
             if(label.endsWith(":")) {
                 return label.substring(0, label.length()-1);
             } else {
@@ -74,12 +80,17 @@ public class GxtFormPanel extends Form {
         }
 
         @Override
+        public boolean isDropDown() {
+            return element.find().img(withClass(ARROW_CLASS)).exists();
+        }
+
+        @Override
         public boolean isEnabled() {
-            boolean enabled = !this.element.exists(By.className("x-form-readonly"));
+            boolean enabled = !this.element.exists(By.className(READ_ONLY_CLASS));
             System.out.println(getLabel() + ".enabled = " + enabled);
             return enabled;
         }
-
+        
         @Override
         public void fill(String value) {
             FluentElement input = element.findElement(By.tagName("input"));
@@ -95,12 +106,12 @@ public class GxtFormPanel extends Form {
         @Override
         public void select(String itemLabel) {
 
-            element.findElement(By.className("x-form-trigger-arrow")).click();
+            element.findElement(By.className(ARROW_CLASS)).click();
 
-            FluentElement list = this.element.waitFor(By.className("x-combo-list-inner"));
+            FluentElement list = this.element.waitFor(By.className(COMBO_LIST_CLASS));
 
 
-            FluentElements items = list.findElements(By.className("x-combo-list-item"));
+            FluentElements items = list.findElements(By.className(COMBO_ITEM_CLASS));
             List<String> itemLabels = Lists.newArrayList();
             for (FluentElement element : items) {
                 String text = element.text();

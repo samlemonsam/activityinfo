@@ -5,6 +5,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.openqa.selenium.StaleElementReferenceException;
 
 public class DesignTab {
 
@@ -18,11 +19,15 @@ public class DesignTab {
     
     public DesignTab selectDatabase(String databaseName) {
 
-        Optional<GxtTree.GxtNode> selected = databaseTree.findSelected();
-        if(!selected.isPresent() || !selected.get().getLabel().equals(databaseName)) {
-            databaseTree.select("Databases", databaseName);
+        while(true) {
+            try {
+                Optional<GxtTree.GxtNode> selected = databaseTree.findSelected();
+                if (!selected.isPresent() || !selected.get().getLabel().equals(databaseName)) {
+                    databaseTree.select("Databases", databaseName);
+                }
+                return this;
+            } catch (StaleElementReferenceException ignored) {}
         }
-        return this;
     }
     
     private GalleryView gallery() {

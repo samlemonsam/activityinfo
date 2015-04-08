@@ -44,7 +44,7 @@ public class SiteHistoryRenderer {
     }
 
     public String render(SchemaDTO schema, List<LocationDTO> locations, SiteDTO site, List<SiteHistoryDTO> histories) {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
         items.addAll(items(schema, locations, site, histories));
         items.add(availableFrom(site));
         return Item.appendAll(items);
@@ -54,7 +54,7 @@ public class SiteHistoryRenderer {
                              List<LocationDTO> locations,
                              SiteDTO site,
                              List<SiteHistoryDTO> histories) {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
 
         Map<String, Object> baselineState = histories.get(0).getJsonMap();
         RenderContext ctx = new RenderContext(schema, locations, site, baselineState);
@@ -89,9 +89,12 @@ public class SiteHistoryRenderer {
     }
 
     private List<ItemDetail> details(RenderContext ctx) {
-        List<ItemDetail> details = new ArrayList<ItemDetail>();
+        List<ItemDetail> details = new ArrayList<>();
         for (Map.Entry<String, Object> entry : ctx.getHistory().getJsonMap().entrySet()) {
-            details.add(ItemDetail.create(ctx, entry));
+            ItemDetail detail = ItemDetail.create(ctx, entry);
+            if(detail != null) {
+                details.add(detail);
+            }
         }
         return details;
     }

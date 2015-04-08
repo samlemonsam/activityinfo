@@ -51,6 +51,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liqui
   <include file="org/activityinfo/database/changelog/db.changelog-024-field-lengths.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-025-calculated-indicators.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-026-cache-regions.xml"/>
+  <include file="org/activityinfo/database/changelog/db.changelog-027-utf-fix.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-031-locationtype.xml"/>
 
 </databaseChangeLog>
