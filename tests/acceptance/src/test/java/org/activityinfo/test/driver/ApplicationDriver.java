@@ -3,6 +3,7 @@ package org.activityinfo.test.driver;
 
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
+import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
 
 import java.io.File;
@@ -159,7 +160,7 @@ public abstract class ApplicationDriver {
     /**
      * @return the text of the history of the last site we modified
      */
-    public List<String> getSubmissionHistory() {
+    public List<HistoryEntry> getSubmissionHistory() {
         throw new PendingException();
     }
 

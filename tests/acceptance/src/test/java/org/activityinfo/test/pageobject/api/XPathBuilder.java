@@ -58,7 +58,11 @@ public class XPathBuilder {
         this.axis = Axis.PARENT;
         return this;
     }
-
+    
+    public XPathBuilder li(String... conditions) {
+        return tagName("li", conditions);
+    }
+    
     public XPathBuilder div(String... conditions) {
         return tagName("div", conditions);
     }
@@ -66,6 +70,10 @@ public class XPathBuilder {
 
     public XPathBuilder p(String... conditions) {
         return tagName("p", conditions);
+    }
+
+    public XPathBuilder ul(String... conditions) {
+        return tagName("ul", conditions);
     }
 
     public XPathBuilder span(String... conditions) {

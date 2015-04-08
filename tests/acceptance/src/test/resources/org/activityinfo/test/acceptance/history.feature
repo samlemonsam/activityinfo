@@ -1,4 +1,4 @@
-
+@web
 Feature: Data Entry History
   As a database owner,
   I want to be able to see the history of all changes to form submissions

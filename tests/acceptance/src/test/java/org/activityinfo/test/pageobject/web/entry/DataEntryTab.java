@@ -2,8 +2,6 @@ package org.activityinfo.test.pageobject.web.entry;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
@@ -11,7 +9,6 @@ import com.google.common.io.Resources;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
-import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -19,8 +16,6 @@ import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -32,7 +27,6 @@ import java.util.regex.Pattern;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
-import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 
 
 public class DataEntryTab {
@@ -128,18 +122,20 @@ public class DataEntryTab {
     }
     
     public void selectTab(String tabName) {
-        container.find().span(withClass("x-tab-strip-text"), withText(tabName)).first().click();
+        FluentElement tab = container.find().span(withClass("x-tab-strip-text"), withText(tabName)).first();
+        if(!tab.find().ancestor().li(withClass("x-tab-strip-active")).exists()) {
+            tab.click();
+        }
     }
     
-    public List<String> changes() {
+    public List<HistoryEntry> changes() {
         
         selectTab("History");
         
-        return container.waitFor(new Function<WebDriver, List<String>>() {
-            @Nullable
+        return container.waitFor(new Function<WebDriver, List<HistoryEntry>>() {
             @Override
-            public List<String> apply(@Nullable WebDriver input) {
-                List<String> changes = Lists.newArrayList();
+            public List<HistoryEntry> apply(WebDriver input) {
+                List<HistoryEntry> entries = Lists.newArrayList();
                 FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
                 for (FluentElement p : paragraphs) {
                     String text = p.text();
@@ -147,10 +143,16 @@ public class DataEntryTab {
                         return null;
                     }
                     if(!text.trim().isEmpty()) {
-                        changes.add(text);
+                        HistoryEntry entry = new HistoryEntry(text);
+                        FluentElements changes = p.find().parent().p().followingSibling().ul().li().asList();
+                        for (FluentElement change : changes) {
+                            entry.addChange(change.text());
+                        }
+                       
+                        entries.add(entry);
                     }
                 }
-                return changes;
+                return entries;
             }
         });
     }
