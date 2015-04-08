@@ -280,7 +280,6 @@ public class SiteUpdate {
         history.setSite(site);
         history.setUser(user);
         String json = JsonUtil.encodeMap(changes.asMap()).toString();
-        System.out.println(json);
         history.setJson(json);
         history.setTimeCreated(System.currentTimeMillis());
         history.setInitial(isNew);

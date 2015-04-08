@@ -37,8 +37,9 @@ import java.util.List;
 
 public class LocationUpdateBuilder implements UpdateBuilder {
 
+    public static final String REGION_TYPE = "location";
+
     private static final int DEFAULT_CHUNK_SIZE = 50; // items in chunk
-    private static final String REGION_PREFIX = "location/";
 
     private final EntityManager em;
     private long localVersion;
@@ -60,7 +61,7 @@ public class LocationUpdateBuilder implements UpdateBuilder {
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws Exception {
 
-        typeId = parseTypeId(request);
+        typeId = request.getRegionId();
         localVersion = request.getLocalVersionNumber();
         batch = new SqliteBatchBuilder();
 
@@ -84,14 +85,6 @@ public class LocationUpdateBuilder implements UpdateBuilder {
             update.setSql(batch.build());
         }
         return update;
-    }
-
-    private int parseTypeId(GetSyncRegionUpdates request) {
-        if (!request.getRegionId().startsWith(REGION_PREFIX)) {
-            throw new AssertionError("Expected region prefixed by '" + REGION_PREFIX +
-                                     "', got '" + request.getRegionId() + "'");
-        }
-        return Integer.parseInt(request.getRegionId().substring(REGION_PREFIX.length()));
     }
 
     private void queryChanged() {

@@ -37,11 +37,13 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.kml.xml.XmlBuilder;
 import org.activityinfo.ui.client.page.entry.form.SiteRenderer;
+import org.xml.sax.SAXException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -106,7 +108,7 @@ public class KmlDataServlet extends javax.servlet.http.HttpServlet {
         }
     }
 
-    protected void writeDocument(PrintWriter out, int activityId) throws Exception {
+    protected void writeDocument(PrintWriter out, int activityId) throws SAXException, TransformerConfigurationException {
 
         XmlBuilder xml = new XmlBuilder(new StreamResult(out));
 

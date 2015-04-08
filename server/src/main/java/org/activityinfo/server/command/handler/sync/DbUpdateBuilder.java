@@ -37,11 +37,11 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public class DbUpdateBuilder implements UpdateBuilder {
+    public static final String REGION_TYPE = "db";
 
     private static final Logger LOGGER = Logger.getLogger(DbUpdateBuilder.class.getName());
-
+    
     private static final int MINIMUM_DB_VERSION = 1;
-    private static final String REGION_PREFIX = "db/";
 
     private final EntityManager entityManager;
     private final PermissionOracle permissionOracle;
@@ -62,12 +62,11 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // get the permissions before we apply the filter
         // otherwise they will be excluded
 
-        int dbId = parseDbId(request);
-
-        this.database = entityManager.find(UserDatabase.class, dbId);
+        this.database = entityManager.find(UserDatabase.class, request.getRegionId());
         this.permission = permissionOracle.getPermissionByUser(database, user);
 
-        Preconditions.checkNotNull(database, "Failed to fetch database by id:" + dbId + ", region: " + request);
+        Preconditions.checkNotNull(database, "Failed to fetch database by id:" + 
+                request.getRegionId() + ", region: " + request);
 
         // This database's version is a function of both the database's version
         // and our permission own version, which determines whether we can see the database or not
@@ -87,14 +86,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
             update.setSql(buildSql());
         }
         return update;
-    }
-
-    private int parseDbId(GetSyncRegionUpdates request) {
-        if (!request.getRegionId().startsWith(REGION_PREFIX)) {
-            throw new AssertionError("Expected region prefixed by '" + REGION_PREFIX +
-                    "', got '" + request.getRegionId() + "'");
-        }
-        return Integer.parseInt(request.getRegionId().substring(REGION_PREFIX.length()));
     }
 
     private String buildSql() throws JSONException, IOException {

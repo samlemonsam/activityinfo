@@ -35,6 +35,8 @@ import java.io.IOException;
 
 public class SiteUpdateBuilder implements UpdateBuilder {
 
+    public static final String REGION_TYPE = "form-submissions";
+    
     private final EntityManager entityManager;
 
     private Activity activity;
@@ -49,7 +51,7 @@ public class SiteUpdateBuilder implements UpdateBuilder {
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws IOException {
         batch = new JpaBatchBuilder(entityManager);
-        activity = entityManager.find(Activity.class, parseActivityId(request.getRegionId()));
+        activity = entityManager.find(Activity.class, request.getRegionId());
         localVersion = request.getLocalVersionNumber();
 
         SyncRegionUpdate update = new SyncRegionUpdate();
@@ -75,10 +77,6 @@ public class SiteUpdateBuilder implements UpdateBuilder {
         batch.insert().into(table).from(query).execute(entityManager);
     }
 
-    private int parseActivityId(String regionId) {
-        String[] parts = regionId.split("/");
-        return Integer.parseInt(parts[1]);
-    }
     
     private void deleteUpdated() throws IOException {
         String updatedIds = SqlQueryUtil.queryIdSet(entityManager, updatedSites());

@@ -25,23 +25,23 @@ package org.activityinfo.legacy.shared.command;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 
 public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
-    private String regionId;
+    private String regionPath;
     private String localVersion;
 
     public GetSyncRegionUpdates() {
     }
 
     public GetSyncRegionUpdates(String regionId, String localVersion) {
-        this.regionId = regionId;
+        this.regionPath = regionId;
         this.localVersion = localVersion;
     }
 
-    public String getRegionId() {
-        return regionId;
+    public String getRegionPath() {
+        return regionPath;
     }
 
-    public void setRegionId(String regionId) {
-        this.regionId = regionId;
+    public void setRegionPath(String regionPath) {
+        this.regionPath = regionPath;
     }
 
     public String getLocalVersion() {
@@ -60,6 +60,24 @@ public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
         }
     }
     
+    public String getRegionType() {
+        int separator = regionPath.indexOf('/');
+        if(separator == -1) {
+            return regionPath;
+        } else {
+            return regionPath.substring(0, separator);
+        }
+    }
+    
+    public int getRegionId() {
+        int separator = regionPath.indexOf('/');
+        if(separator == -1) {
+            throw new UnsupportedOperationException("Region " + regionPath + " has no id component");
+        }
+
+        return Integer.parseInt(regionPath.substring(separator+1));
+    }
+    
     public void setLocalVersion(String localVersion) {
         this.localVersion = localVersion;
     }
@@ -67,7 +85,7 @@ public class GetSyncRegionUpdates implements Command<SyncRegionUpdate> {
     @Override
     public String toString() {
         return "GetSyncRegionUpdates{" +
-                "regionId='" + regionId + '\'' +
+                "regionPath='" + regionPath + '\'' +
                 ", localVersion='" + localVersion + '\'' +
                 '}';
     }

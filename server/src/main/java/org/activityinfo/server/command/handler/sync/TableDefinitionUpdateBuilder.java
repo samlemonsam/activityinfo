@@ -30,7 +30,10 @@ import org.json.JSONException;
 
 public class TableDefinitionUpdateBuilder implements UpdateBuilder {
 
+    public static final String REGION_TYPE = "site-tables";
+    
     public static final String CURRENT_VERSION = "3";
+    
     private final JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
     private final Class[] tablesToSync = new Class[]{

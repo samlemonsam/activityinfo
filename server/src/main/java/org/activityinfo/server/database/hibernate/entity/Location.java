@@ -167,16 +167,25 @@ public class Location implements java.io.Serializable {
         }
     }
 
+    /**
+     * @deprecated Use the version field for synchronization purposes
+     */
     @Deprecated
     public long getTimeEdited() {
         return timeEdited;
     }
 
+    /**
+     * @deprecated Use the version field for synchronization purposes
+     */
     @Deprecated
     public void setTimeEdited(long timeEdited) {
         this.timeEdited = timeEdited;
     }
 
+    /**
+     * @deprecated Use the version field for synchronization purposes
+     */
     @Deprecated
     public void setTimeEdited(Date date) {
         this.timeEdited = date.getTime();
