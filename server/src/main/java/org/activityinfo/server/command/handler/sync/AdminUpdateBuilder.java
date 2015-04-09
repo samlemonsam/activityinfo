@@ -22,12 +22,9 @@ package org.activityinfo.server.command.handler.sync;
  * #L%
  */
 
-import com.bedatadriven.rebar.sql.client.query.SqlQuery;
-import com.bedatadriven.rebar.sync.server.JpaUpdateBuilder;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
-import org.activityinfo.legacy.shared.impl.Tables;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
@@ -37,10 +34,12 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 
 public class AdminUpdateBuilder implements UpdateBuilder {
-    private EntityManager em;
-    private int levelId;
-    private AdminLocalState localState;
+
+    public static final String REGION_TYPE = "admin";
+
     public static final int LAST_VERSION_NUMBER = 1;
+
+    private EntityManager em;
     private SqliteBatchBuilder batch;
 
     @Inject
@@ -50,35 +49,29 @@ public class AdminUpdateBuilder implements UpdateBuilder {
 
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws IOException {
-        parseLevelId(request);
-        localState = new AdminLocalState(request.getLocalVersion());
 
         SyncRegionUpdate update = new SyncRegionUpdate();
         batch = new SqliteBatchBuilder();
 
-        AdminLevel level = em.find(AdminLevel.class, levelId);
+        AdminLevel level = em.find(AdminLevel.class, request.getRegionId());
         
         JpaBatchBuilder builder = new JpaBatchBuilder(batch, em);
 
-        if (localState.getVersion() < LAST_VERSION_NUMBER) {
+        if (request.getLocalVersionNumber() < LAST_VERSION_NUMBER) {
             /*
              * This level is out of date, delete all on the client and send all
              * from the server
              */
             builder.insert(Country.class, "CountryId=" + level.getCountry().getId());
-            builder.insert(AdminLevel.class, "AdminLevelId=" + levelId);
-            builder.delete(AdminEntity.class, "AdminLevelId=" + levelId);
-            builder.insert(AdminEntity.class, "AdminLevelId=" + levelId);
+            builder.insert(AdminLevel.class, "AdminLevelId=" + level.getId());
+            builder.delete(AdminEntity.class, "AdminLevelId=" + level.getId());
+            builder.insert(AdminEntity.class, "AdminLevelId=" + level.getId());
             update.setSql(batch.build());
         }
         update.setComplete(true);
         update.setVersion(Integer.toString(LAST_VERSION_NUMBER));
 
         return update;
-    }
-
-    private void parseLevelId(GetSyncRegionUpdates request) {
-        levelId = Integer.parseInt(request.getRegionId().substring("admin/".length()));
     }
 
 }

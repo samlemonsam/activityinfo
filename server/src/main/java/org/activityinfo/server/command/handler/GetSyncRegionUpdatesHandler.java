@@ -50,33 +50,33 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
     @Override
     public CommandResult execute(GetSyncRegionUpdates cmd, User user) throws CommandException {
 
-        Log.info("Fetching updates for " + cmd.getRegionId() + ", localVersion = " + cmd.getLocalVersion());
+        Log.info("Fetching updates for " + cmd.getRegionPath() + ", localVersion = " + cmd.getLocalVersion());
 
         UpdateBuilder builder;
 
-        if (cmd.getRegionId().startsWith("db/")) {
+        if (cmd.getRegionType().equals(DbUpdateBuilder.REGION_TYPE)) {
             builder = injector.getInstance(DbUpdateBuilder.class);
 
-        } else if (cmd.getRegionId().startsWith("admin/")) {
+        } else if (cmd.getRegionType().equals(AdminUpdateBuilder.REGION_TYPE)) {
             builder = injector.getInstance(AdminUpdateBuilder.class);
 
-        } else if (cmd.getRegionId().startsWith("location/")) {
+        } else if (cmd.getRegionType().equals(LocationUpdateBuilder.REGION_TYPE)) {
             builder = injector.getInstance(LocationUpdateBuilder.class);
 
-        } else if (cmd.getRegionId().startsWith("form-submissions/")) {
+        } else if (cmd.getRegionType().equals(SiteUpdateBuilder.REGION_TYPE)) {
             builder = injector.getInstance(SiteUpdateBuilder.class);
 
-        } else if (cmd.getRegionId().equals("site-tables")) {
+        } else if (cmd.getRegionType().equals(TableDefinitionUpdateBuilder.REGION_TYPE)) {
             builder = injector.getInstance(TableDefinitionUpdateBuilder.class);
 
-        } else if (cmd.getRegionId().startsWith(CountryUpdateBuilder.REGION_PREFIX)) {
+        } else if (cmd.getRegionType().equals(CountryUpdateBuilder.REGION_TYPE)) {
             builder = injector.getInstance(CountryUpdateBuilder.class);
             
         } else {
-            throw new CommandException("Unknown sync region: " + cmd.getRegionId());
+            throw new CommandException("Unknown sync region: " + cmd.getRegionPath());
         }
 
-        Profiler profiler = new Profiler("api/rpc/sync", prefix(cmd.getRegionId()));
+        Profiler profiler = new Profiler("api/rpc/sync", prefix(cmd.getRegionPath()));
         try {
             
             SyncRegionUpdate update = builder.build(user, cmd);

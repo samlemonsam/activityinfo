@@ -1,19 +1,19 @@
 package org.activityinfo.server.command.handler.sync;
 
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
-import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import org.activityinfo.server.database.hibernate.entity.Location;
 import org.activityinfo.server.database.hibernate.entity.Offline;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.EntityManager;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,6 +81,10 @@ public class JpaBatchBuilder {
                 .from(query)
                 .execute(entityManager);
     }
+    
+    public SqlQuery select(Class<?> entity) {
+        return SqlQuery.select(columnsToSync(entity)).from(tableName(entity));
+    }
 
     private List<SingularAttribute<?, ?>> attributesToSync(Class<?> entity) {
         List<SingularAttribute<?, ?>> attributes = new ArrayList<>();
@@ -131,10 +135,8 @@ public class JpaBatchBuilder {
             }
         }
         JoinColumn joinColumn = member.getAnnotation(JoinColumn.class);
-        if(joinColumn != null) {
-            if(joinColumn.name() != null) {
-                columnName = joinColumn.name();
-            }
+        if(joinColumn != null && joinColumn.name() != null) {
+            columnName = joinColumn.name();
         }
         return columnName;
     }
@@ -154,32 +156,10 @@ public class JpaBatchBuilder {
         if(attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.MANY_TO_ONE) {
 
             return findIdType(attribute.getJavaType());
-            
+
         } else {
 
-            Class<?> type = attribute.getJavaType();
-
-            if (type == String.class) {
-                return "TEXT";
-            } else if (type == Integer.TYPE || type == Integer.class ||
-                    type == Short.TYPE || type == Short.class ||
-                    type == Long.TYPE || type == Long.class ||
-                    type == Byte.TYPE || type == Byte.class ||
-                    type == Boolean.TYPE || type == Boolean.class) {
-
-                return "INT";
-
-            } else if (type == Float.TYPE || type == Float.class ||
-                    type == Double.TYPE || type == Double.class) {
-
-                return "REAL";
-
-            } else if (type == Character.TYPE || type == Character.class) {
-
-                return "TEXT";
-            }
-
-            throw new UnsupportedOperationException(type.getName());
+            return SqliteTypes.getSqliteType(attribute.getJavaType());
 
         }
     }
@@ -191,8 +171,8 @@ public class JpaBatchBuilder {
                 return sqliteType(attribute);
             }
         }
-        throw new RuntimeException(javaType + " has no @Id field!");
-        
+        throw new IllegalArgumentException(javaType + " has no @Id field!");
+
     }
 
     public String build() throws IOException {

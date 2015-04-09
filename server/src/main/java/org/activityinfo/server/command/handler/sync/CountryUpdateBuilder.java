@@ -15,7 +15,8 @@ import java.io.IOException;
 
 public class CountryUpdateBuilder implements UpdateBuilder {
 
-    public static final String REGION_PREFIX = "country/";
+    public static final String REGION_TYPE = "country";
+
     private final EntityManager entityManager;
 
     @Inject
@@ -26,7 +27,7 @@ public class CountryUpdateBuilder implements UpdateBuilder {
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws JSONException, IOException {
 
-        int countryId = parseCountryId(request);
+        int countryId = request.getRegionId();
         
         JpaBatchBuilder batch = new JpaBatchBuilder(new SqliteBatchBuilder(), entityManager);
         
@@ -44,11 +45,4 @@ public class CountryUpdateBuilder implements UpdateBuilder {
         return update;
     }
 
-    private int parseCountryId(GetSyncRegionUpdates request) {
-        if (!request.getRegionId().startsWith(REGION_PREFIX)) {
-            throw new AssertionError("Expected region prefixed by '" + REGION_PREFIX +
-                    "', got '" + request.getRegionId() + "'");
-        }
-        return Integer.parseInt(request.getRegionId().substring(REGION_PREFIX.length()));
-    }
 }

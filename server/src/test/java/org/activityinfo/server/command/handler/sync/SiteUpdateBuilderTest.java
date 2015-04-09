@@ -41,7 +41,6 @@ import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 @RunWith(InjectionSupport.class)
 @Modules({
@@ -72,7 +71,7 @@ public class SiteUpdateBuilderTest {
         em.close();
 
         SyncRegionUpdate initialUpdate = builder.get().build(user,
-                new GetSyncRegionUpdates("sites/1/1", null));
+                new GetSyncRegionUpdates("sites/1", null));
         assertThat(initialUpdate.isComplete(), equalTo(true));
         assertThat(initialUpdate.getSql(), not(nullValue()));
         assertThat(initialUpdate.getSql(), containsString("slightly new"));
@@ -81,7 +80,7 @@ public class SiteUpdateBuilderTest {
         // nothing has changed!
 
         SyncRegionUpdate subsequentUpdate = builder.get().build(user,
-                new GetSyncRegionUpdates("sites/1/1", initialUpdate.getVersion()));
+                new GetSyncRegionUpdates("sites/1", initialUpdate.getVersion()));
 
         assertThat(subsequentUpdate.isComplete(), equalTo(true));
         assertThat(subsequentUpdate.getSql(), nullValue());
