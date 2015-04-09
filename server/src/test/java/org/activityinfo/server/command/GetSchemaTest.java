@@ -190,10 +190,11 @@ public class GetSchemaTest extends CommandTestCase2 {
         assertTrue("no attributes case", schema.getActivityById(3).getAttributeGroups().size() == 0);
 
         ActivityDTO nfi = schema.getActivityById(1);
-        AttributeDTO[] attributes = nfi.getAttributeGroupById(1)
-                .getAttributes().toArray(new AttributeDTO[0]);
-
-        assertTrue("attributes are present", attributes.length == 2);
+        List<AttributeDTO> attributes = nfi.getAttributeGroupById(1).getAttributes();
+        
+        System.out.println(nfi.getAttributeGroupById(1).getName());
+        
+        assertThat("attributes are present", attributes, hasSize(2));
 
         AttributeDTO test = nfi.getAttributeById(1);
 

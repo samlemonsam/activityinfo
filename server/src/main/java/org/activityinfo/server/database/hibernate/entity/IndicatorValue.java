@@ -66,9 +66,10 @@ public class IndicatorValue implements java.io.Serializable {
         this.value = value;
     }
 
-    @EmbeddedId @AttributeOverrides({@AttributeOverride(name = "reportingPeriodId",
-            column = @Column(name = "ReportingPeriodId", nullable = false)),
-            @AttributeOverride(name = "indicatorId", column = @Column(name = "IndicatorId", nullable = false))})
+    @EmbeddedId 
+    @AttributeOverrides({
+        @AttributeOverride(name = "reportingPeriodId", column = @Column(name = "ReportingPeriodId", nullable = false)),
+        @AttributeOverride(name = "indicatorId", column = @Column(name = "IndicatorId", nullable = false))})
     public IndicatorValueId getId() {
         return this.id;
     }
@@ -97,7 +98,7 @@ public class IndicatorValue implements java.io.Serializable {
         this.reportingPeriod = reportingPeriod;
     }
 
-    @Column(name = "Value", precision = 15, scale = 0, nullable = false)
+    @Column(name = "Value", precision = 15, scale = 0, nullable = true)
     public Double getValue() {
         return this.value;
     }

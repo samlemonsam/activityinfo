@@ -99,6 +99,7 @@ public class RemoteExecutionContext implements ExecutionContext {
      */
     public <C extends Command<R>, R extends CommandResult> R startExecute(final C command) {
 
+        
         if (CURRENT.get() != null) {
             throw new IllegalStateException("Command execution context already in progress");
         }
@@ -197,6 +198,8 @@ public class RemoteExecutionContext implements ExecutionContext {
     @SuppressWarnings("unchecked")
     public <C extends Command<R>, R extends CommandResult> void execute(final C command,
                                                                         final AsyncCallback<R> outerCallback) {
+
+        LOGGER.info("Executing " + command.getClass().getSimpleName() + " for " + user.getEmail());
 
         AsyncCallback<R> callback = new FiringCallback<>(command, outerCallback);
 

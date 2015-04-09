@@ -23,8 +23,8 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
@@ -40,7 +40,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @Modules({
-        MockHibernateModule.class,
+        TestHibernateModule.class,
         GwtRpcModule.class,
 })
 public class LocalGetSchemaHandlerIntTest extends LocalHandlerTestCase {

@@ -102,15 +102,14 @@ public class DbUpdateBuilder implements UpdateBuilder {
         insert(Activity.class, notDeletedAnd(inDatabase()));
 
         delete(Indicator.class, inDatabaseActivities());
-        insert(Indicator.class, notDeletedAnd(inDatabaseActivities(notDeleted())));
-
+        insertIndicators();
 
         // Attribute Groups
         delete(AttributeGroup.class, inDatabaseAttributeGroups());
-        insert(AttributeGroup.class, notDeletedAnd(inDatabaseAttributeGroups()));
+        insertAttributeGroups();
 
         delete(Attribute.class, inDatabaseAttributeGroups());
-        insert(Attribute.class, notDeletedAnd(inDatabaseAttributeGroupsNotDeleted()));
+        insertAttributes();
 
         delete(Tables.ATTRIBUTE_GROUP_IN_ACTIVITY, inDatabaseAttributeGroups());
         insert(Tables.ATTRIBUTE_GROUP_IN_ACTIVITY, inDatabaseAttributeGroupsNotDeleted());
@@ -123,7 +122,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // Since Partners are shared, we replace the join table completely
         // for this database, but do not delete partners removed
         // from the database as they may be used by other databases
-        insert(Partner.class, partnersInDatabase());
+        insertPartners();
         delete(Tables.PARTNER_IN_DATABASE, inDatabase());
         insert(Tables.PARTNER_IN_DATABASE, inDatabase());
 
@@ -131,6 +130,46 @@ public class DbUpdateBuilder implements UpdateBuilder {
         insert(UserPermission.class, "userId = " + permission.getUser().getId());
 
         return batch.build();
+    }
+
+    private void insertIndicators() {
+        batch.insert(Indicator.class)
+                .join(Activity.class)
+                .whereNotDeleted(Indicator.class)
+                .whereNotDeleted(Activity.class)
+                .where(inDatabase())
+                .execute();
+        
+    }
+
+    private void insertAttributeGroups() {
+        batch.insert(AttributeGroup.class)
+                .join(Tables.ATTRIBUTE_GROUP_IN_ACTIVITY, "AttributeGroupId")
+                .join(Activity.class)
+                .whereNotDeleted(AttributeGroup.class)
+                .whereNotDeleted(Activity.class)
+                .where(inDatabase())
+                .execute();
+
+    }
+
+    private void insertAttributes() {
+        batch.insert(Attribute.class)
+                .join(AttributeGroup.class)
+                .join(Tables.ATTRIBUTE_GROUP_IN_ACTIVITY, "AttributeGroupId")
+                .join(Activity.class)
+                .whereNotDeleted(Attribute.class)
+                .whereNotDeleted(AttributeGroup.class)
+                .whereNotDeleted(Activity.class)
+                .where(inDatabase())
+                .execute();
+    }
+    
+    private void insertPartners() {
+        batch.insert(Partner.class)
+                .join(Tables.PARTNER_IN_DATABASE, "PartnerId")
+                .where(inDatabase())
+                .execute();
     }
 
     private String inDatabaseAttributeGroups(String... criteria) {
@@ -178,10 +217,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
             assert extraCriteria.length == 1;
             return criteria + " AND " + extraCriteria[0];
         }
-    }
-
-    private String partnersInDatabase() {
-        return "partnerId in (select partnerId From PartnerInDatabase where DatabaseId = " + database.getId() + ")";
     }
 
 

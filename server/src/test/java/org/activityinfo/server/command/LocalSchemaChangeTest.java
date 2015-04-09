@@ -26,8 +26,8 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.google.common.base.Function;
 import com.google.common.collect.*;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
@@ -52,7 +52,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @Modules({
         MailSenderStubModule.class,
-        MockHibernateModule.class,
+        TestHibernateModule.class,
         GwtRpcModule.class,
 })
 @OnDataSet("/dbunit/sites-simple1.db.xml")

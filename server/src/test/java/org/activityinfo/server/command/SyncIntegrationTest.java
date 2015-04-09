@@ -31,8 +31,8 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.*;
@@ -74,7 +74,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
 @Modules({
-        MockHibernateModule.class,
+        TestHibernateModule.class,
         GwtRpcModule.class,
 })
 public class SyncIntegrationTest extends LocalHandlerTestCase {
@@ -85,8 +85,6 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     public void setupLogging() {
         Logger.getLogger("org.hibernate").setLevel(Level.ALL);
     }
-
-    private long nowIsh;
 
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -394,7 +392,6 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
         final TestSqliteDatabase localDatabase = new TestSqliteDatabase("target/localdbtest"
                 + new java.util.Date().getTime());
-        EntityManager em = serverEntityManagerFactory.createEntityManager();
 
         // before sync, fill in db with locations
         int generatedLocationCount = 50000;

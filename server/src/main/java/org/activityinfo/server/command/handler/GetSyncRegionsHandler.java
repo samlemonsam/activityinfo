@@ -23,7 +23,6 @@ package org.activityinfo.server.command.handler;
  */
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegions;
@@ -31,7 +30,6 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.SyncRegion;
 import org.activityinfo.legacy.shared.command.result.SyncRegions;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.util.CollectionUtil;
 import org.activityinfo.server.command.handler.sync.AdminUpdateBuilder;
 import org.activityinfo.server.command.handler.sync.TableDefinitionUpdateBuilder;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -40,7 +38,10 @@ import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
 
@@ -145,18 +146,15 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
         List<SyncRegion> siteRegions = Lists.newArrayList();
         
         if (!databases.isEmpty()) {
-            // do one sync region per form
-            List<Object[]> regions = entityManager.createQuery(
-                    "SELECT s.activity.id, " +
-                       "MAX(s.timeEdited) " +
-                       "FROM Site s " +
-                       "WHERE s.activity.database.id in (:dbs) " +
-                       "GROUP BY s.activity.id", Object[].class)
-                  .setParameter("dbs", databases)
-                  .getResultList();
+            List<Tuple> activities = entityManager
+                    .createQuery("SELECT A.id, A.version FROM Activity A WHERE A.database.id in :databaseIds",
+                            Tuple.class)
+                    .setParameter("databaseIds", databases)
+                    .getResultList();
 
-            for (Object[] region : regions) {
-                siteRegions.add(new SyncRegion("form-submissions/" + region[0], region[1].toString()));
+
+            for (Tuple activity : activities) {
+                siteRegions.add(new SyncRegion("form-submissions/" +  activity.get(0), activity.get(1)));
             }
         }
         return siteRegions;

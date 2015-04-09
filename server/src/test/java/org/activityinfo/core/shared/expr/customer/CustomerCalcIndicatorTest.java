@@ -52,7 +52,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,8 +61,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.legacy.shared.adapter.CuidAdapter.activityFormClass;
@@ -79,13 +76,7 @@ import static org.junit.Assert.assertThat;
 @OnDataSet("/dbunit/schema1.db.xml")
 public class CustomerCalcIndicatorTest extends CommandTestCase2 {
 
-    @BeforeClass
-    public static void setup() {
-        Logger.getLogger("org.activityinfo").setLevel(Level.ALL);
-        Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
 
-        Logger.getLogger("com.bedatadriven.rebar").setLevel(Level.ALL);
-    }
 
 
     public static final Dimension INDICATOR_DIMENSION = new Dimension(DimensionType.Indicator);

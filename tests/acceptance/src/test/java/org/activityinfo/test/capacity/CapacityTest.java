@@ -1,6 +1,7 @@
 package org.activityinfo.test.capacity;
 
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.capacity.action.ActionExecution;
 import org.activityinfo.test.capacity.load.ScenarioRun;
@@ -110,7 +111,8 @@ public class CapacityTest {
         for (String actionName : ActionExecution.ACTIONS) {
             ActionExecution.ActionMetrics metrics = new ActionExecution.ActionMetrics(actionName);
             double successRate = metrics.getSuccessRate();
-            System.out.printf("%s: %10.1f%% %s\n", actionName, successRate,
+            System.out.printf("%s: %5.1f%% %s\n",
+                    Strings.padEnd(actionName, 40, ' '), successRate,
                     (successRate >= MINIMUM_SUCCESS_RATE ? "OK" : "FAILED"));
             
             if(successRate < MINIMUM_SUCCESS_RATE) {
