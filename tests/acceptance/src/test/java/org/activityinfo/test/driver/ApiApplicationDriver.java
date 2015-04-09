@@ -637,7 +637,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         Preconditions.checkState(currentUser != null, "Authentication required");
 
         JSONObject command = new JSONObject();
-        command.put("regionId", id);
+        command.put("regionPath", id);
         
         JSONObject request = new JSONObject();
         request.put("type", "GetSyncRegionUpdates");

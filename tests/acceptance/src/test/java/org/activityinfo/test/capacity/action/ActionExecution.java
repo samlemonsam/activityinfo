@@ -4,11 +4,14 @@ import com.codahale.metrics.Clock;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import com.google.common.collect.Sets;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.capacity.model.UserRole;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,10 +22,13 @@ import static com.codahale.metrics.MetricRegistry.name;
 * Runs a {@code UserAction} with the ApiApplicationDriver
 */
 public class ActionExecution implements Runnable {
+    
+    public static final Set<String> ACTIONS = Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     public static final Counter CONCURRENT_USERS = Metrics.REGISTRY.counter("users.concurrent");
 
     private static final Logger LOGGER = Logger.getLogger(ActionExecution.class.getName());
+    
     
     public static class ActionMetrics {
         
@@ -35,7 +41,8 @@ public class ActionExecution implements Runnable {
             this(actionClass.getSimpleName());
         }
         
-        ActionMetrics(String actionName) {
+        public ActionMetrics(String actionName) {
+            ACTIONS.add(actionName);
             concurrent = Metrics.REGISTRY.counter(name("action", "concurrent", actionName));
             latency = Metrics.REGISTRY.timer(name("action", "latency", actionName));
             succeeded = Metrics.REGISTRY.meter(name("action", "succeeded", actionName));
@@ -67,6 +74,12 @@ public class ActionExecution implements Runnable {
         
         public long getOneMinuteLatencySeconds() {
             return TimeUnit.NANOSECONDS.toSeconds((long) latency.getSnapshot().getMedian());
+        }
+
+        public double getSuccessRate() {
+            double successCount = succeeded.getCount();
+            double failureCount = failed.getCount();
+            return (successCount / (successCount+failureCount)) * 100d;
         }
     }
     

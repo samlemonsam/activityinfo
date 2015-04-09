@@ -2,6 +2,7 @@ package org.activityinfo.test.capacity;
 
 
 import com.google.common.collect.Lists;
+import org.activityinfo.test.capacity.action.ActionExecution;
 import org.activityinfo.test.capacity.load.ScenarioRun;
 import org.activityinfo.test.capacity.logging.CapacityTestLogging;
 import org.activityinfo.test.capacity.model.Scenario;
@@ -28,6 +29,7 @@ public class CapacityTest {
 
     private final TestContext context;
     private final List<Scenario> scenarios = Lists.newArrayList();
+    public static final double MINIMUM_SUCCESS_RATE = 98;
 
 
     public CapacityTest() {
@@ -94,7 +96,33 @@ public class CapacityTest {
 
         CapacityTestLogging.stop();
         LOGGER.info("Logging stopped.");
+        
+        validate();
+    }
 
-        System.exit(0);
+    private static void validate() {
+        
+        System.out.println("RESULTS");
+        System.out.println("=======");
+
+
+        boolean failed = false;
+        for (String actionName : ActionExecution.ACTIONS) {
+            ActionExecution.ActionMetrics metrics = new ActionExecution.ActionMetrics(actionName);
+            double successRate = metrics.getSuccessRate();
+            System.out.printf("%s: %10.1f%% %s\n", actionName, successRate,
+                    (successRate >= MINIMUM_SUCCESS_RATE ? "OK" : "FAILED"));
+            
+            if(successRate < MINIMUM_SUCCESS_RATE) {
+                failed = true;
+            }
+        }
+        
+        if(failed) {
+            System.exit(-1);
+        } else {
+            System.exit(0);
+        }
+        
     }
 }

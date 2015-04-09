@@ -13,8 +13,7 @@ import java.util.logging.Logger;
 public class Metrics {
 
     public static final MetricRegistry REGISTRY = new MetricRegistry();
-    public static final Counter ERRORS = REGISTRY.counter("errors");
-    
+
     private static CsvReporter CSV_REPORTER;
     
     private static final Logger LOGGER = Logger.getLogger(Metrics.class.getName());
