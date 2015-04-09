@@ -52,16 +52,16 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
     }
 
     private class SchemaBuilder {
-        private final List<UserDatabaseDTO> databaseList = new ArrayList<UserDatabaseDTO>();
-        private final List<CountryDTO> countryList = new ArrayList<CountryDTO>();
+        private final List<UserDatabaseDTO> databaseList = new ArrayList<>();
+        private final List<CountryDTO> countryList = new ArrayList<>();
 
-        private final Map<Integer, UserDatabaseDTO> databaseMap = new HashMap<Integer, UserDatabaseDTO>();
+        private final Map<Integer, UserDatabaseDTO> databaseMap = new HashMap<>();
 
-        private final Map<Integer, CountryDTO> countries = new HashMap<Integer, CountryDTO>();
-        private final Map<Integer, PartnerDTO> partners = new HashMap<Integer, PartnerDTO>();
-        private final Map<Integer, ActivityDTO> activities = new HashMap<Integer, ActivityDTO>();
-        private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<Integer, AttributeGroupDTO>();
-        private final Map<Integer, ProjectDTO> projects = new HashMap<Integer, ProjectDTO>();
+        private final Map<Integer, CountryDTO> countries = new HashMap<>();
+        private final Map<Integer, PartnerDTO> partners = new HashMap<>();
+        private final Map<Integer, ActivityDTO> activities = new HashMap<>();
+        private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<>();
+        private final Map<Integer, ProjectDTO> projects = new HashMap<>();
         private final Map<Integer, LocationTypeDTO> locationTypes = new HashMap<>();
 
         private SqlTransaction tx;
@@ -274,9 +274,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                 loadIndicators(),
                                 loadAttributeGroups(),
                                 loadAttributes(),
-                                joinAttributesToActivities(),
                                 loadLockedPeriods())
-                               .then(promise);
+                                .then(promise);
                     }
                 }
             });
@@ -527,66 +526,76 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         public Promise<Void> loadAttributeGroups() {
             SqlQuery query = SqlQuery.select()
-                                     .appendColumn("AttributeGroupId", "id")
-                                     .appendColumn("Name", "name")
-                                     .appendColumn("multipleAllowed")
-                                     .appendColumn("mandatory")
-                                     .appendColumn("defaultValue")
-                                     .appendColumn("workflow")
-                                     .appendColumn("sortOrder")
-                                     .from("attributegroup")
-                                     .orderBy("SortOrder");
+                     .appendColumn("g.AttributeGroupId", "id")
+                     .appendColumn("g.Name", "name")
+                     .appendColumn("g.multipleAllowed")
+                     .appendColumn("g.mandatory")
+                     .appendColumn("g.defaultValue")
+                     .appendColumn("g.workflow")
+                     .appendColumn("g.sortOrder")
+                     .appendColumn("ga.activityid")
+                     .from("attributegroup", "g")
+                     .innerJoin(Tables.ATTRIBUTE_GROUP_IN_ACTIVITY, "ga").on("g.attributegroupid=ga.attributegroupid")
+                     .orderBy("g.SortOrder");
 
             if (context.isRemote()) {
-                query.where("DateDeleted IS NULL");
-                query.where("AttributeGroupId")
-                     .in(SqlQuery.select("AttributeGroupId")
-                                 .from("attributegroupinactivity")
-                                 .where("ActivityId")
-                                 .in(SqlQuery.select("ActivityId")
-                                             .from("activity")
-                                             .where("databaseId")
-                                             .in(databaseMap.keySet())));
-
+                query
+                     .innerJoin(Tables.ACTIVITY, "a").on("a.activityid=ga.activityid")
+                     .whereTrue("g.DateDeleted IS NULL")
+                     .whereTrue("a.DateDeleted IS NULL")
+                     .where("a.DatabaseId").in(databaseMap.keySet());
             }
 
             return execute(query, new RowHandler() {
 
                 @Override
                 public void handleRow(SqlResultSetRow rs) {
+                    
+                    int groupId = rs.getInt("id");
 
-                    AttributeGroupDTO group = new AttributeGroupDTO();
-                    group.setId(rs.getInt("id"));
-                    group.setName(rs.getString("name"));
-                    group.setMultipleAllowed(rs.getBoolean("multipleAllowed"));
-                    group.setMandatory(rs.getBoolean("mandatory"));
-                    group.setSortOrder(rs.getInt("sortOrder"));
-                    if (!rs.isNull("defaultValue")) { // if null it throws NPE
-                        group.setDefaultValue(rs.getInt("defaultValue"));
+                    AttributeGroupDTO group = attributeGroups.get(groupId);
+
+                    if(group == null) {
+                        group = new AttributeGroupDTO();
+                        group.setId(groupId);
+                        group.setName(rs.getString("name"));
+                        group.setMultipleAllowed(rs.getBoolean("multipleAllowed"));
+                        group.setMandatory(rs.getBoolean("mandatory"));
+                        group.setSortOrder(rs.getInt("sortOrder"));
+                        if (!rs.isNull("defaultValue")) { // if null it throws NPE
+                            group.setDefaultValue(rs.getInt("defaultValue"));
+                        }
+                        group.setWorkflow(rs.getBoolean("workflow"));
+                        attributeGroups.put(group.getId(), group);
                     }
-                    group.setWorkflow(rs.getBoolean("workflow"));
-
-                    attributeGroups.put(group.getId(), group);
+                    
+                    int activityId = rs.getInt("activityid");
+                    ActivityDTO activity = activities.get(activityId);
+                    if(activity != null) {
+                        activity.getAttributeGroups().add(group);
+                    }
                 }
             });
         }
 
         public Promise<Void> loadAttributes() {
-            SqlQuery query = SqlQuery.select("attributeId", "name", "attributeGroupId")
-                                     .from("attribute")
-                                     .orderBy("SortOrder");
+            SqlQuery query = SqlQuery.selectDistinct()
+                    .appendColumn("k.attributeId")
+                    .appendColumn("k.name")
+                    .appendColumn("k.attributeGroupId")
+                    .from("attribute", "k")
+                    .orderBy("k.SortOrder");
+
 
             if (context.isRemote()) {
-                query.where("DateDeleted IS NULL");
-                query.where("AttributeGroupId")
-                     .in(SqlQuery.select("AttributeGroupId")
-                                 .from("attributegroupinactivity")
-                                 .where("ActivityId")
-                                 .in(SqlQuery.select("ActivityId")
-                                             .from("activity")
-                                             .where("databaseId")
-                                             .in(databaseMap.keySet())));
-
+                query
+                    .innerJoin(Tables.ATTRIBUTE_GROUP, "g").on("k.attributegroupid=g.attributegroupid")
+                    .innerJoin(Tables.ATTRIBUTE_GROUP_IN_ACTIVITY, "ga").on("k.attributegroupid=ga.attributegroupid")
+                    .innerJoin(Tables.ACTIVITY, "a").on("a.activityid=ga.activityid")
+                        .whereTrue("k.DateDeleted IS NULL")
+                        .whereTrue("g.DateDeleted IS NULL")
+                        .whereTrue("a.DateDeleted IS NULL")
+                        .where("a.DatabaseId").in(databaseMap.keySet());
             }
 
             return execute(query, new RowHandler() {
@@ -599,39 +608,11 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     attribute.setName(row.getString("name"));
 
                     int groupId = row.getInt("attributeGroupId");
+                    
                     AttributeGroupDTO group = attributeGroups.get(groupId);
                     if (group != null) {
                         group.getAttributes().add(attribute);
                     }
-                }
-            });
-        }
-
-        public Promise<Void> joinAttributesToActivities() {
-            SqlQuery query = SqlQuery.select("J.activityId", "J.attributeGroupId")
-                                     .from("attributegroupinactivity J " +
-                                           "INNER JOIN attributegroup G ON (J.attributeGroupId = G.attributeGroupId)")
-                                     .orderBy("G.SortOrder")
-                                     .where("G.dateDeleted")
-                                     .isNull();
-
-            if (context.isRemote()) {
-                query.where("ActivityId")
-                     .in(SqlQuery.select("ActivityId").from("activity").where("databaseId").in(databaseMap.keySet()));
-
-            }
-
-            return execute(query, new RowHandler() {
-                @Override
-                public void handleRow(SqlResultSetRow row) {
-
-                    int groupId = row.getInt("attributeGroupId");
-
-                    ActivityDTO activity = activities.get(row.getInt("activityId"));
-                    if (activity != null) { // it may have been deleted
-                        activity.getAttributeGroups().add(attributeGroups.get(groupId));
-                    }
-
                 }
             });
         }

@@ -27,7 +27,6 @@ import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import org.activityinfo.server.database.hibernate.EntityManagerProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Map;

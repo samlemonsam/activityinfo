@@ -24,8 +24,8 @@ package org.activityinfo.server.command.handler.sync;
 
 import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.OnDataSet;
@@ -42,7 +42,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @Modules({
-        MockHibernateModule.class,
+        TestHibernateModule.class,
 })
 public class LocationBuilderTest {
 

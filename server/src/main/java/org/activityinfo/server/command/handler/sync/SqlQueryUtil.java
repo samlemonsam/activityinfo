@@ -32,11 +32,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 
 public class SqlQueryUtil {
-
+    
     public static ResultSet query(Connection connection, final SqlQuery query) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query.sql());
         Object[] params = query.parameters();
@@ -70,10 +69,6 @@ public class SqlQueryUtil {
         return set.toString();
     }
 
-    public static String idSet(Collection<Integer> ids) {
-        return idSet(Lists.newArrayList(ids));
-    }
-
     public static String idSet(List<Integer> ids) {
         String s = "(";
         int size = ids.size();
@@ -87,10 +82,6 @@ public class SqlQueryUtil {
         }
         s = s + ")";
         return s;
-    }
-
-    public static long queryLong(EntityManager entityManager, final SqlQuery query) {
-        return queryLongList(entityManager, query).get(0);
     }
 
     public static List<Long> queryLongList(EntityManager entityManager, final SqlQuery query) {

@@ -28,12 +28,11 @@
     <include path="/static/**.png" expiration="365d"/>
     <include path="/error.html"/>
   </static-files>
-
-  <admin-console>
-    <page name="Appstats" url="/appstats"/>
-  </admin-console>
-
-  <sessions-enabled>false</sessions-enabled>
+  
+  <inbound-services>
+    <service>warmup</service>
+  </inbound-services>
+    <sessions-enabled>false</sessions-enabled>
   <precompilation-enabled>false</precompilation-enabled>
   <threadsafe>true</threadsafe>
   <instance-class>${gae.instance.class}</instance-class>
@@ -41,7 +40,8 @@
     <min-idle-instances>${gae.min.idle.instances}</min-idle-instances>
     <max-idle-instances>automatic</max-idle-instances>
     <min-pending-latency>automatic</min-pending-latency>
-    <max-pending-latency>30ms</max-pending-latency>
+    <max-pending-latency>500ms</max-pending-latency>
+    <max-concurrent-requests>12</max-concurrent-requests>
   </automatic-scaling>
 
   <static-error-handlers>

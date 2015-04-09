@@ -23,8 +23,8 @@ package org.activityinfo.server.command;
  */
 
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
@@ -45,7 +45,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @Modules({
-        MockHibernateModule.class,
+        TestHibernateModule.class,
         GwtRpcModule.class,
 })
 public class LocalSiteCreateTest extends LocalHandlerTestCase {

@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SqliteTypes {
+public final class SqliteTypes {
 
     private static final String TEXT = "TEXT";
     private static final String INT = "INT";
     private static final String REAL = "REAL";
 
+    private SqliteTypes() {}
 
     private static final Map<Class, String> MAP = new HashMap<>();
 

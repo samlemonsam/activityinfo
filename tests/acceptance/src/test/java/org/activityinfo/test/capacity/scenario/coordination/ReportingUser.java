@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ReportingUser implements UserRole {
     
-    private static final int INSTANCES_PER_REPORT = 50;
+    private static final int INSTANCES_PER_REPORT = 10;
     
     private final PartnerOrganization organization;
     private final String nickname;

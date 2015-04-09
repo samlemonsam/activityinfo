@@ -110,7 +110,9 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
     static synchronized Connection openConnection() throws SQLException {
         if(POOL == null) {
             try {
-                initializeDatabase();
+                if(!Boolean.getBoolean("skipDatabaseInit")) {
+                    initializeDatabase();
+                }
 
                 POOL = new ComboPooledDataSource();
                 POOL.setDriverClass("com.mysql.jdbc.Driver");

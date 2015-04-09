@@ -16,13 +16,16 @@ import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class JpaBatchBuilder {
 
+    private static final Logger LOGGER = Logger.getLogger(JpaBatchBuilder.class.getName());
+
     private SqliteBatchBuilder batch;
     private EntityManager entityManager;
-
 
     public JpaBatchBuilder(SqliteBatchBuilder batch, EntityManager entityManager) {
         this.batch = batch;
@@ -32,24 +35,6 @@ public class JpaBatchBuilder {
     public JpaBatchBuilder(EntityManager entityManager) throws IOException {
         this.batch = new SqliteBatchBuilder();
         this.entityManager = entityManager;
-    }
-
-    public void createTableIfNotExists(Class<?> entity) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("CREATE TABLE IF NOT EXISTS " + tableName(entity) + "(");
-
-        boolean needsComma = false;
-
-        for (SingularAttribute<?,?> attribute : attributesToSync(entity)) {
-            if(needsComma) {
-                sql.append(", ");
-            }
-            sql.append(sqliteType(attribute));
-            sql.append(" ");
-            sql.append(columnName(attribute));
-            needsComma = true;
-        }
-        sql.append(")");
     }
 
     /**
@@ -76,15 +61,19 @@ public class JpaBatchBuilder {
     }
 
     public void insert(Class<?> entity, String criteria) {
-        SqlQuery query = SqlQuery.select(columnsToSync(entity)).from(tableName(entity)).whereTrue(criteria);
+        SqlQuery query = SqlQuery
+                .select(columnsToSync(entity))
+                .from(tableName(entity))
+                .whereTrue(criteria);
         batch.insert().into(tableName(entity))
                 .from(query)
                 .execute(entityManager);
     }
     
-    public SqlQuery select(Class<?> entity) {
-        return SqlQuery.select(columnsToSync(entity)).from(tableName(entity));
+    public InsertBuilder insert(Class<?> entity) {
+        return new InsertBuilder(entity);
     }
+    
 
     private List<SingularAttribute<?, ?>> attributesToSync(Class<?> entity) {
         List<SingularAttribute<?, ?>> attributes = new ArrayList<>();
@@ -144,11 +133,7 @@ public class JpaBatchBuilder {
     private boolean isSynced(SingularAttribute<?, ?> attribute) {
         AccessibleObject member = (AccessibleObject) attribute.getJavaMember();
         Offline offline = member.getAnnotation(Offline.class);
-        if(offline == null) {
-            return true;
-        } else {
-            return offline.sync();
-        }
+        return offline == null || offline.sync();
     }
 
     private String sqliteType(SingularAttribute<?,?> attribute) {
@@ -183,4 +168,59 @@ public class JpaBatchBuilder {
         return batch.insert();
     }
 
+    
+    public class InsertBuilder {
+
+        private SqlQuery query;
+        private String targetTable;
+        private String lastTable;
+        
+        public InsertBuilder(Class<?> entity) {
+            targetTable = tableName(entity);
+            query = SqlQuery.select().from(targetTable);
+            
+            for(String column : columnsToSync(entity)) {
+               query.appendColumn(targetTable + "." + column); 
+            }
+            lastTable = targetTable;
+        }
+
+        public InsertBuilder join(Class<?> entityClass) {
+            String joinTable = tableName(entityClass);
+            String idField = joinTable + "Id";
+            query.innerJoin(joinTable).on(String.format("%s.%s = %s.%s",
+                    lastTable, idField,
+                    joinTable, idField));
+            
+            lastTable = joinTable;
+            return this;
+        }
+
+        public InsertBuilder join(String joinTable, String idField) {
+            query.innerJoin(joinTable).on(String.format("%s.%s = %s.%s",
+                    lastTable, idField,
+                    joinTable, idField));
+
+            lastTable = joinTable;
+            return this;
+        }
+        
+        public InsertBuilder whereNotDeleted(Class<?> entityClass) {
+            query.whereTrue(String.format("%s.dateDeleted IS NULL", tableName(entityClass)));
+            return this;
+        }
+        
+        public InsertBuilder where(String criteria) {
+            query.whereTrue(criteria);
+            return this;
+        }
+        
+        public void execute() {
+            if(LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(query.sql());
+            }
+            batch.insert().from(query).into(targetTable).execute(entityManager);
+        }
+
+    }
 }

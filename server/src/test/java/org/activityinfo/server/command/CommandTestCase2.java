@@ -26,15 +26,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.teklabs.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.AbstractDispatcher;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
-import org.activityinfo.server.database.TestDatabaseModule;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet2;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
@@ -53,8 +52,7 @@ import javax.persistence.EntityManager;
  * The future.
  */
 @Modules({
-        TestDatabaseModule.class,
-        MockHibernateModule.class,
+        TestHibernateModule.class,
         TemplateModule.class,
         GwtRpcModule.class,
         AuthenticationModuleStub.class,
@@ -87,7 +85,7 @@ public class CommandTestCase2 {
     protected <T extends CommandResult> T execute(Command<T> command)
             throws CommandException {
 
-        User user = null;
+        User user;
         if (AuthenticationModuleStub.getCurrentUser().getUserId() == 0) {
             user = new User();
             user.setName("Anonymous");
@@ -100,7 +98,6 @@ public class CommandTestCase2 {
             user.setLocale("en");
         }
 
-        assert user != null;
         LocaleProxy.setLocale(user.getLocaleObject());
 
         RemoteExecutionContext context = new RemoteExecutionContext(injector);
