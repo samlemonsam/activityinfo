@@ -157,7 +157,7 @@ tasks.each { task ->
                 // Keep console output to a minimum
                 testLogging {
                     showStandardStreams = false
-                    events = ['failed']
+                    events = ['failed', 'passed']
                 }
             }
             systemProperty 'webdriver', project.property('webdriver')
