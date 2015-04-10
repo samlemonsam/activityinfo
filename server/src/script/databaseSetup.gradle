@@ -1,4 +1,5 @@
 import org.activityinfo.store.mysql.MySqlSetupTask
+import org.activityinfo.store.mysql.MySqlReleaseTask
 
 
 def setupScripts =
@@ -17,6 +18,7 @@ task configureDatabase(type: org.activityinfo.gcloud.FetchCloudSqlConfiguration)
 }
 
 configureDatabase.onlyIf { project.hasProperty('env') }
+
 
 task setupDatabase(type: MySqlSetupTask) {
     description = "Creates and populates a database called 'activityinfo' locally for development"
@@ -41,6 +43,11 @@ task setupDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
     doFirst {
         logger.info("Setting up ${database.url}...")
     }
+}
+
+task migrateProductionDatabase(type: MySqlReleaseTask) {
+    description = "Prepares a migration script for the production database"
+    changeLog = 'org/activityinfo/database/changelog/db.changelog-master.xml'   
 }
 
 

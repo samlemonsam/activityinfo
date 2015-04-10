@@ -66,7 +66,6 @@ public class HibernateModule extends ServletModule {
         filter("/*").through(CloudSqlFilter.class);
         
         filter("/*").through(HibernateSessionFilter.class);
-        serve(SchemaServlet.ENDPOINT).with(SchemaServlet.class);
 
         install(new HibernateDAOModule());
         install(new TransactionModule());
