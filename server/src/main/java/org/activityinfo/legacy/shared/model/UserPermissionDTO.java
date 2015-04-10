@@ -168,6 +168,7 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         set("allowManageAllUsers", allowManageAll);
     }
 
+    @JsonProperty
     public PartnerDTO getPartner() {
         return get("partner");
     }
