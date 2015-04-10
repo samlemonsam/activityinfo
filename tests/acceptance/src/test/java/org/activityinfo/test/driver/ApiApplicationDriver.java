@@ -597,7 +597,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             if (retriesRemaining > 0 &&
                     status == ClientResponse.Status.INTERNAL_SERVER_ERROR ||
                     status == ClientResponse.Status.SERVICE_UNAVAILABLE) {
-                return doCommand(json, --retriesRemaining);
+                return doCommand(json, retriesRemaining-1);
             }
             
         
