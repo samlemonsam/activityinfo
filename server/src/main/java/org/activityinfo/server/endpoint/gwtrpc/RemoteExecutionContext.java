@@ -254,11 +254,13 @@ public class RemoteExecutionContext implements ExecutionContext {
     private class FiringCallback<R extends CommandResult> implements AsyncCallback<R> {
         private final AsyncCallback<R> callback;
         private final Profiler profiler;
+        private final String commandName;
 
         public FiringCallback(Command command, AsyncCallback<R> callback) {
             super();
             this.callback = callback;
-            this.profiler = new Profiler("api/rpc", command.getClass().getSimpleName());
+            commandName = command.getClass().getSimpleName();
+            this.profiler = new Profiler("api/rpc", commandName);
         }
 
         @Override
@@ -270,6 +272,7 @@ public class RemoteExecutionContext implements ExecutionContext {
         @Override
         public void onSuccess(final R result) {
             this.profiler.succeeded();
+            LOGGER.info(commandName + " finished in " + profiler.elapsedTime() + " ms");
             callback.onSuccess(result);
         }
     }

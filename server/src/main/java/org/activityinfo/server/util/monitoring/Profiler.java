@@ -35,7 +35,7 @@ public class Profiler {
     }
 
 
-    private long elapsedTime() {
+    public long elapsedTime() {
         return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
     }
 }
