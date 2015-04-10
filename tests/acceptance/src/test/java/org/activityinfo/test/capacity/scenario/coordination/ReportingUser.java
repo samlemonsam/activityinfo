@@ -58,6 +58,8 @@ public class ReportingUser implements UserRole {
             if(!forms.isEmpty()) {
                 String form = Sampling.chooseOne(forms);
 
+                driver.startBatch();
+
                 for(int submissionIndex=0;submissionIndex<INSTANCES_PER_REPORT;++submissionIndex) {
                     List<FieldValue> values = Lists.newArrayList();
                     // Partner
@@ -71,7 +73,9 @@ public class ReportingUser implements UserRole {
                         values.add(new FieldValue(fieldName, value));
                     }
                     driver.submitForm(form, values);
+                    driver.flush();
                 }
+                driver.submitBatch();
             }
         }
     }
