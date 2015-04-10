@@ -9,9 +9,12 @@ import java.util.Collection;
 /**
  * Runs scenarios which specifically stress on the number of form submissions
  */
-public class SiteStress implements CapacityTestScript {
+public class DatabaseStress implements CapacityTestScript {
     @Override
     public Collection<Scenario> get() {
-        return Arrays.<Scenario>asList(new CoordinationScenario(1, 10, 10));
+        int databaseCount = 11;
+        int partnerCount = 10;
+        int usersPerPartner = 10;
+        return Arrays.<Scenario>asList(new CoordinationScenario(databaseCount, partnerCount, usersPerPartner));
     }
 }
