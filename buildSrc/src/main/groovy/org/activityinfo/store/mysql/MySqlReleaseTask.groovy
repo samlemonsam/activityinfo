@@ -3,12 +3,8 @@ package org.activityinfo.store.mysql
 import liquibase.Liquibase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.FileSystemResourceAccessor
-
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileCollection
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
-
 
 /**
  * Checks for unapplied liquibase changesets to the production
@@ -49,7 +45,11 @@ class MySqlReleaseTask extends DefaultTask {
                 toApply.each {
                     logger.info("Unapplied changeset: ${it.id}")
                 }
-                def sqlFile = project.file("build/migration-b${project.buildNumber}.sql")
+                
+                if(!project.buildDir.exists()) {
+                    project.buildDir.mkdirs()
+                }
+                def sqlFile = project.file("${project.buildDir}/migration-b${project.buildNumber}.sql")
                 sqlFile.withWriter { writer ->
                     liquibase.update(null, writer)
                 }
