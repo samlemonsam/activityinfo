@@ -59,7 +59,7 @@ class MySqlSetupTask extends DefaultTask {
                 new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),
                 new JdbcConnection(connection));
 
-        liquibase.log.logLevel = liquibaseLoggingLevel()
+        liquibase.log.logLevel = LiquibaseLogging.get(project)
         liquibase.update(null)
     }
 
@@ -72,18 +72,6 @@ class MySqlSetupTask extends DefaultTask {
             it.withReader { reader ->
                 runner.execute(reader)
             }
-        }
-    }
-
-    def liquibaseLoggingLevel() {
-
-        switch (logging.level) {
-            case LogLevel.DEBUG:
-                return liquibase.logging.LogLevel.DEBUG
-            case LogLevel.INFO:
-                return liquibase.logging.LogLevel.INFO
-            default:
-                return liquibase.logging.LogLevel.SEVERE
         }
     }
 }

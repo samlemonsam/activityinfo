@@ -34,7 +34,6 @@ class MySqlServer {
 
         def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true&characterEncoding=UTF-8"
         def driver = new Driver()
-        println url
         return driver.connect(url, connectionProperties)
     }
     
@@ -56,9 +55,6 @@ class MySqlServer {
             properties.put('clientCertificateKeyStoreUrl', keyStore.toURI().toURL().toString())
             properties.put('clientCertificateKeyStorePassword', 'notasecret')
         }
-        
-        println properties
-        
         return properties
     }
 }
