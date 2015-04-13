@@ -23,8 +23,12 @@ package org.activityinfo.server.command.handler.sync;
  */
 
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.jdbc.AbstractWork;
 import org.hibernate.jdbc.Work;
 
 import javax.persistence.EntityManager;
@@ -32,10 +36,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SqlQueryUtil {
-    
+
     public static ResultSet query(Connection connection, final SqlQuery query) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query.sql());
         Object[] params = query.parameters();
@@ -97,6 +102,27 @@ public class SqlQueryUtil {
             }
         });
         return result;
+    }
+
+    public static void execute(EntityManager entityManager, final SqlQuery query, final ResultSetHandler handler) {
+        entityManager.unwrap(Session.class).doWork(new AbstractWork() {
+            @Override
+            public void execute(Connection connection) throws SQLException {
+                try(PreparedStatement statement = connection.prepareStatement(query.sql())) {
+                    Object[] params = query.parameters();
+                    for (int i = 0; i != params.length; ++i) {
+                        statement.setObject(i + 1, params[i]);
+                    }
+                    try(ResultSet rs = statement.executeQuery()) {
+                        try {
+                            handler.handle(rs);
+                        } catch (Exception e) {
+                            throw new SQLException(e);
+                        }
+                    }
+                }
+            }
+        });
     }
 
 }
