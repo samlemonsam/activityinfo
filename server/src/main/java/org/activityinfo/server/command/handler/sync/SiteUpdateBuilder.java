@@ -50,11 +50,9 @@ public class SiteUpdateBuilder implements UpdateBuilder {
 
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws IOException {
-        batch = new JpaBatchBuilder(entityManager);
+        batch = new JpaBatchBuilder(entityManager, request.getRegionPath());
         activity = entityManager.find(Activity.class, request.getRegionId());
         localVersion = request.getLocalVersionNumber();
-
-        SyncRegionUpdate update = new SyncRegionUpdate();
 
         if (activity.getSiteVersion() > localVersion) {
             if(localVersion > 0) {
@@ -66,11 +64,10 @@ public class SiteUpdateBuilder implements UpdateBuilder {
             insert(Tables.REPORTING_PERIOD, updatedReportingPeriods());
             insert(Tables.INDICATOR_VALUE, updateIndicatorValues());
 
-            update.setSql(batch.build());
         }
-        update.setComplete(true);
-        update.setVersion(activity.getVersion());
-        return update;
+        batch.setComplete(true);
+        batch.setVersion(activity.getVersion());
+        return batch.buildUpdate();
     }
 
     private void insert(String table, SqlQuery query) {

@@ -2,6 +2,8 @@ package org.activityinfo.server.command.handler.sync;
 
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.google.common.collect.Lists;
+import org.activityinfo.legacy.shared.command.result.SyncRegion;
+import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.server.database.hibernate.entity.Offline;
 
 import javax.persistence.Column;
@@ -24,15 +26,19 @@ public class JpaBatchBuilder {
 
     private static final Logger LOGGER = Logger.getLogger(JpaBatchBuilder.class.getName());
 
-    private SqliteBatchBuilder batch;
     private EntityManager entityManager;
+    private SqliteBatchBuilder batch;
+    private long version;
+    private String regionPath;
+    private boolean complete = true;
 
     public JpaBatchBuilder(SqliteBatchBuilder batch, EntityManager entityManager) {
         this.batch = batch;
         this.entityManager = entityManager;
     }
 
-    public JpaBatchBuilder(EntityManager entityManager) throws IOException {
+    public JpaBatchBuilder(EntityManager entityManager, String regionPath) throws IOException {
+        this.regionPath = regionPath;
         this.batch = new SqliteBatchBuilder();
         this.entityManager = entityManager;
     }
@@ -73,7 +79,15 @@ public class JpaBatchBuilder {
     public InsertBuilder insert(Class<?> entity) {
         return new InsertBuilder(entity);
     }
-    
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public JpaBatchBuilder setComplete(boolean complete) {
+        this.complete = complete;
+        return this;
+    }
 
     private List<SingularAttribute<?, ?>> attributesToSync(Class<?> entity) {
         List<SingularAttribute<?, ?>> attributes = new ArrayList<>();
@@ -88,6 +102,11 @@ public class JpaBatchBuilder {
             }
         }
         return attributes;
+    }
+    
+    public JpaBatchBuilder setVersion(long version) {
+        this.version = version;
+        return this;
     }
 
 
@@ -168,7 +187,15 @@ public class JpaBatchBuilder {
         return batch.insert();
     }
 
-    
+    public SyncRegionUpdate buildUpdate() throws IOException {
+        SyncRegionUpdate update = new SyncRegionUpdate();
+        update.setVersion(version);
+        update.setComplete(complete);
+        update.setSql(batch.build());
+        return update;
+    }
+
+
     public class InsertBuilder {
 
         private SqlQuery query;

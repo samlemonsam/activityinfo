@@ -53,7 +53,7 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
     }
 
     @Override
-    public CommandResult execute(GetSyncRegions cmd, User user) throws CommandException {
+    public SyncRegions execute(GetSyncRegions cmd, User user) throws CommandException {
 
         Set<Integer> countryIds = Sets.newHashSet();
         Set<Integer> visibleDatabaseIds = Sets.newHashSet();

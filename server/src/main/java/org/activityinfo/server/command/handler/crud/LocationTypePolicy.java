@@ -71,6 +71,8 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
         PermissionOracle.using(em).assertDesignPrivileges(locationType.getDatabase(), user);
 
         applyProperties(locationType, changes);
+        
+        locationType.incrementVersion();
     }
 
     private void applyProperties(LocationType locationType, PropertyMap changes) {

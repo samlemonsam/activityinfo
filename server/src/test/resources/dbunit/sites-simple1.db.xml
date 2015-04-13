@@ -33,8 +33,7 @@
   <adminLevel countryId="1" adminLevelId="2" name="Territoire"
               ParentId="1" deleted="0"/>
 
-  <locationType locationTypeId="1" countryId="1" name="localite" version="3" locationVersion="3"
-                reuse="1"/>
+
   <locationType locationTypeId="2" countryId="1" version="1" locationVersion="1"
                 name="Health Center" reuse="1"/>
   <locationType locationTypeId="3" countryId="1" name="Territorie" version="1" locationVersion="1"
@@ -173,6 +172,9 @@
             name="Distribution de Kits Scolaire" reportingFrequency="0"
             allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
 
+  <locationType locationTypeId="1" countryId="1" name="localite" version="3" locationVersion="3"
+                databaseId="1" reuse="1"/>
+  
   <attributeGroupInActivity activityId="2"
                             attributeGroupId="1"/>
 

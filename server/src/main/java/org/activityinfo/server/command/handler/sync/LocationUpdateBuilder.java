@@ -32,6 +32,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.json.JSONException;
 
 import javax.persistence.EntityManager;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,10 +44,10 @@ public class LocationUpdateBuilder implements UpdateBuilder {
 
     private final EntityManager em;
     private long localVersion;
-    private SqliteBatchBuilder batch;
 
-    private int typeId;
     private int chunkSize;
+    private JpaBatchBuilder batch;
+    private LocationType locationType;
 
     @Inject
     public LocationUpdateBuilder(EntityManager em) {
@@ -61,30 +62,19 @@ public class LocationUpdateBuilder implements UpdateBuilder {
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws Exception {
 
-        typeId = request.getRegionId();
         localVersion = request.getLocalVersionNumber();
-        batch = new SqliteBatchBuilder();
+        batch = new JpaBatchBuilder(em, request.getRegionPath());
 
-        SyncRegionUpdate update = new SyncRegionUpdate();
+        locationType = em.find(LocationType.class, request.getRegionId());
 
-        LocationType locationType = em.find(LocationType.class, typeId);
         if(localVersion == locationType.getVersion()) {
-            update.setComplete(true);
-            update.setVersion(locationType.getVersion());
+            return batch
+                    .setComplete(true)
+                    .setVersion(locationType.getVersion())
+                    .buildUpdate();
         } else {
-            JpaBatchBuilder jpaBuilder = new JpaBatchBuilder(batch, em);
-            jpaBuilder.insert(LocationType.class, "LocationTypeId=" + typeId);
-
-            long latestVersion = queryLatestVersion(update);
-            if (latestVersion > localVersion) {
-                queryChanged();
-                linkAdminEntities();
-            }
-
-            update.setVersion(Long.toString(latestVersion));
-            update.setSql(batch.build());
+            return buildUpdate();
         }
-        return update;
     }
 
     private void queryChanged() {
@@ -98,7 +88,7 @@ public class LocationUpdateBuilder implements UpdateBuilder {
                                  .appendColumn("LocationTypeId")
                                  .appendColumn("workflowStatusId")
                                  .from(Tables.LOCATION)
-                                 .where("locationTypeId").equalTo(typeId)
+                                 .where("locationTypeId").equalTo(locationType.getId())
                                  .where("version").greaterThan(localVersion);
 
         batch.insert().into(Tables.LOCATION).from(query).execute(em);
@@ -112,33 +102,45 @@ public class LocationUpdateBuilder implements UpdateBuilder {
                                  .from(Tables.LOCATION, "L")
                                  .innerJoin(Tables.LOCATION_ADMIN_LINK, "K")
                                  .on("L.LocationId=K.LocationId")
-                                 .where("L.locationTypeId").equalTo(typeId)
+                                 .where("L.locationTypeId").equalTo(locationType.getId())
                                  .where("L.version").greaterThan(localVersion);
 
         batch.insert().into(Tables.LOCATION_ADMIN_LINK).from(query).execute(em);
     }
 
-    private long queryLatestVersion(SyncRegionUpdate update) throws JSONException {
+    private SyncRegionUpdate buildUpdate() throws JSONException, IOException {
+
+        // Always update the LocationType as the cost is negligible and we don't 
+        // track the version of the LocationType properties separately
+        batch.insert(LocationType.class, "LocationTypeId=" + locationType.getId());
+        
         SqlQuery query = SqlQuery.select()
                                  .appendColumn("version", "latest")
                                  .from(Tables.LOCATION)
-                                 .where("locationTypeId").equalTo(typeId)
-                                 .where("version").greaterThan(localVersion);
-
+                                 .where("locationTypeId").equalTo(locationType.getId())
+                                 .where("version").greaterThan(localVersion)
+                                 .orderBy("version");
+        
         List<Long> longs = SqlQueryUtil.queryLongList(em, query);
 
         if (longs.isEmpty()) {
-            update.setComplete(true);
-            return localVersion;
-        }
-
-        // our intention is to reduce batch, so we cut versions into chunks
-        if (longs.size() > chunkSize) {
-            longs = longs.subList(0, chunkSize);
-            update.setComplete(false);
+            batch.setVersion(locationType.getVersion());
+            batch.setComplete(true);
+            
         } else {
-            update.setComplete(true);
+            // our intention is to reduce batch, so we cut versions into chunks
+            if (longs.size() > chunkSize) {
+                longs = longs.subList(0, chunkSize);
+                batch.setComplete(false);
+                batch.setVersion(Collections.max(longs));
+            } else {
+                batch.setComplete(true);
+                batch.setVersion(locationType.getVersion());
+            }
+            queryChanged();
+            linkAdminEntities();
         }
-        return Collections.max(longs);
+        
+        return batch.buildUpdate();
     }
 }

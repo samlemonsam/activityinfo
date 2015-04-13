@@ -77,19 +77,18 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
 
         LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
-
-        SyncRegionUpdate update = new SyncRegionUpdate();
-        update.setVersion(Long.toString(serverVersion));
-        update.setComplete(true);
-
+     
+        batch = new JpaBatchBuilder(entityManager, request.getRegionPath());
+        batch.setVersion(serverVersion);
+        batch.setComplete(true);
+        
         if (localVersion < serverVersion) {
-            update.setSql(buildSql());
+            queryUpdates();
         }
-        return update;
+        return batch.buildUpdate();
     }
 
-    private String buildSql() throws JSONException, IOException {
-        batch = new JpaBatchBuilder(entityManager);
+    private void queryUpdates() throws JSONException, IOException {
 
         delete(UserDatabase.class, inDatabase());
         insert(UserDatabase.class, inDatabase());
@@ -128,8 +127,6 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         insert(User.class, "userId = " + database.getOwner().getId());
         insert(UserPermission.class, "userId = " + permission.getUser().getId());
-
-        return batch.build();
     }
 
     private void insertIndicators() {

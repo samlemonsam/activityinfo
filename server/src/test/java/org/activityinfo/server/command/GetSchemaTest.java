@@ -254,6 +254,6 @@ public class GetSchemaTest extends CommandTestCase2 {
             System.out.println(child.getStringValue(ApplicationProperties.LABEL_PROPERTY));
         }
 
-        assertThat(children.size(), equalTo(3));
+        assertThat(children, hasSize(4));
     }
 }
