@@ -30,6 +30,7 @@ import com.bedatadriven.rebar.sql.server.jdbc.JdbcDatabase;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.sql.server.jdbc.SqliteStubDatabase;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.TestOutput;
 import org.activityinfo.legacy.shared.command.CreateSite;
 import org.activityinfo.legacy.shared.command.UpdateSite;
 import org.activityinfo.legacy.shared.util.Collector;
@@ -37,6 +38,7 @@ import org.activityinfo.ui.client.MockEventBus;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,8 +63,8 @@ public class CommandQueueTest {
     }
 
     public static JdbcDatabase emptySqliteDatabase() {
-        String name = "target/localdbtest" + new java.util.Date().getTime();
-        return new SqliteStubDatabase(name);
+        File name = TestOutput.getFile(CommandQueueTest.class, "sqlite");
+        return new SqliteStubDatabase(name.getAbsolutePath());
     }
 
     @Test

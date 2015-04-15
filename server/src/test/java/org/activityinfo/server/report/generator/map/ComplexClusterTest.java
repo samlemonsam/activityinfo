@@ -49,7 +49,7 @@ public class ComplexClusterTest extends GraphTest {
         GsLogCalculator rCtor = new GsLogCalculator(5, 30);
 
         BufferedWriter csv = new BufferedWriter(new FileWriter(
-                "target/report-tests/brute.csv"));
+                "build/report-tests/brute.csv"));
 
         List<List<MarkerGraph.Node>> subgraphs = data.getLargestN(2);
 

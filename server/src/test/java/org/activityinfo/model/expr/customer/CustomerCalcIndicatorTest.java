@@ -24,6 +24,7 @@ package org.activityinfo.model.expr.customer;
 import com.extjs.gxt.ui.client.data.PagingLoadResult;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.*;
@@ -57,7 +58,6 @@ import org.junit.runner.RunWith;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -196,7 +196,7 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
         exporter.export(activity, Filter.filter().onActivity(activityId));
 
         exporter.done();
-        try(FileOutputStream fos = new FileOutputStream(Paths.get("target", "calcs.xls").toFile())) {
+        try(FileOutputStream fos = TestOutput.open(getClass(), "calcs.xls")) {
             exporter.getBook().write(fos);
         }
 

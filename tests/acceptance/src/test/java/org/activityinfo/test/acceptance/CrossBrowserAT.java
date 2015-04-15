@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 @RunWith(CucumberAndGuice.class)
 @CucumberOptions(strict = true, tags = { "@web", "@cross-browser" },
         plugin = {
-                "json:target/cucumber-report.json" },
+                "json:build/cucumber-report.json" },
         glue = {
                 "org.activityinfo.test.steps.web",
                 "org.activityinfo.test.steps.common" })

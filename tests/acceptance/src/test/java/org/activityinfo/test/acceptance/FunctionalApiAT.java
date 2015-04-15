@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 @RunWith(CucumberAndGuice.class)
 @CucumberOptions(strict = true, tags = "@api",
     plugin = {
-            "json:target/cucumber-report.json" },
+            "json:build/cucumber-report.json" },
     glue = {
         "org.activityinfo.test.steps.json",
         "org.activityinfo.test.steps.common" })

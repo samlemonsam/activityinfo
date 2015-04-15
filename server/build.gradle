@@ -58,6 +58,7 @@ war {
 }
 
 
+
 test {
     systemProperty "testDatabaseName", "testDb"
     systemProperty "testDatabaseUsername", localMySqlUsername
@@ -70,9 +71,6 @@ test {
             showStandardStreams = false
             events = ['failed']
         }
-        
-        // still have a few tests writing to maven 'target' dir
-        project.file('target').mkdirs()
     }
 }
 
@@ -92,6 +90,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
 }
 
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
+tasks.warTemplate.enabled = false
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"

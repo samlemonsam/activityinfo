@@ -72,7 +72,7 @@ public class ItextReportRendererTest {
 
     @Before
     public void setUpDirs() {
-        new File("target/report-tests").mkdirs();
+        new File("build/report-tests").mkdirs();
     }
 
     @Before
@@ -501,7 +501,7 @@ public class ItextReportRendererTest {
 
     private void renderTo(Report report, Renderer reportRenderer, String name)
             throws FileNotFoundException, IOException {
-        FileOutputStream fos = new FileOutputStream("target/report-tests/"
+        FileOutputStream fos = new FileOutputStream("build/report-tests/"
                 + name);
         reportRenderer.render(report, fos);
         fos.close();
@@ -517,7 +517,7 @@ public class ItextReportRendererTest {
             throws IOException {
         ImageMapRenderer mapRenderer = new ImageMapRenderer(TestGeometry.get(),
                 mapIconPath());
-        mapRenderer.renderToFile(map, new File("target/report-tests/" + name));
+        mapRenderer.renderToFile(map, new File("build/report-tests/" + name));
 
     }
 
@@ -533,7 +533,7 @@ public class ItextReportRendererTest {
 
     private void renderToHtmlUsingWriter(Report report, String name)
             throws IOException {
-        FileWriter writer = new FileWriter("target/report-tests/" + name);
+        FileWriter writer = new FileWriter("build/report-tests/" + name);
         HtmlReportRenderer renderer = new HtmlReportRenderer(
                 TestGeometry.get(), mapIconPath(), new TestImageStorageProvider());
         renderer.render(report, writer);
@@ -550,7 +550,7 @@ public class ItextReportRendererTest {
         PPTMapRenderer renderer = new PPTMapRenderer(TestGeometry.get(),
                 mapIconPath());
         renderer.render(map,
-                new FileOutputStream("target/report-tests/" + name));
+                new FileOutputStream("build/report-tests/" + name));
     }
 
     private static class TestImageStorageProvider implements StorageProvider {
@@ -561,7 +561,7 @@ public class ItextReportRendererTest {
         public TempStorage allocateTemporaryFile(String mimeType, String suffix)
                 throws IOException {
             String fileName = (nextId++) + suffix;
-            File file = new File("target/report-tests/" + fileName);
+            File file = new File("build/report-tests/" + fileName);
             return new TempStorage(file.toURI().toURL().toString(),
                     new FileOutputStream(file));
         }

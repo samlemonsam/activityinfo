@@ -23,6 +23,7 @@ package org.activityinfo.server.report;
  */
 
 import com.google.inject.Inject;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.ServletStubModule;
@@ -87,10 +88,9 @@ public class ReportsTest {
             if (format != RenderElement.Format.Excel
                     && format != RenderElement.Format.Excel_Data) {
                 Renderer renderer = factory.get(format);
-                FileOutputStream fos = new FileOutputStream(
-                        "target/report-tests/full-test" + renderer.getFileSuffix());
-                renderer.render(report, fos);
-                fos.close();
+                try(FileOutputStream out = TestOutput.open(getClass(), "full-test" + renderer.getFileSuffix())) {
+                    renderer.render(report, out);
+                }
             }
         }
     }
@@ -145,7 +145,7 @@ public class ReportsTest {
     }
 
     private void createDirectoriesIfNecessary() {
-        File file = new File("target/report-test");
+        File file = new File("build/report-test");
         file.mkdirs();
     }
 

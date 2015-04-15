@@ -14,7 +14,7 @@ public class BlobServiceModuleStub extends AbstractModule {
 
     @Provides
     public BlobService provideBlobService() {
-        File target = new File("target");
+        File target = new File("build");
         File blobRoot = new File(target, "blobs");
         blobRoot.mkdirs();
 

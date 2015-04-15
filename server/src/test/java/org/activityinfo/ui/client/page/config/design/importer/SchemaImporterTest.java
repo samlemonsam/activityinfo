@@ -6,11 +6,15 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
+import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
@@ -19,7 +23,6 @@ import org.easymock.EasyMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,7 +56,7 @@ public class SchemaImporterTest extends CommandTestCase2 {
         SchemaCsvWriter writer = new SchemaCsvWriter(getDispatcherSync());
         writer.write(syria.getId());
 
-        Files.write(writer.toString(), new File("target/syria.csv"), Charsets.UTF_8);
+        Files.write(writer.toString(), TestOutput.getFile(getClass(), "syria", ".csv"), Charsets.UTF_8);
     }
 
     @Test
@@ -83,7 +86,7 @@ public class SchemaImporterTest extends CommandTestCase2 {
     }
 
     private static boolean hasDuplicates(Collection<?> list) {
-        Set set = new HashSet(list);
+        Set set = new HashSet<>(list);
         return set.size() < list.size();
     }
 

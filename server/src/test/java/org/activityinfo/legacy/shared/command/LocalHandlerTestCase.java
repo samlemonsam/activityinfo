@@ -30,6 +30,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.i18n.shared.UiMessages;
@@ -51,6 +52,7 @@ import org.junit.Before;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -83,8 +85,7 @@ public abstract class LocalHandlerTestCase {
     private UiMessages uiMessages;
     protected Connection localConnection;
 
-    private String databaseName = "target/localdbtest"
-            + new java.util.Date().getTime();
+    private File databaseName = TestOutput.getFile(getClass(), "offline", "sqlite");
 
     protected AsyncPipeline installer;
     protected AsyncPipeline synchronizer;
@@ -97,7 +98,7 @@ public abstract class LocalHandlerTestCase {
 
         System.err.println("Sqlite database = " + databaseName);
 
-        localDatabase = new JdbcDatabase(databaseName);
+        localDatabase = new JdbcDatabase(databaseName.getAbsolutePath());
 
         setUser(1); // default is db owner
 

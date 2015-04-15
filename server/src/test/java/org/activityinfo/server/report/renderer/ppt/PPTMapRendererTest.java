@@ -22,12 +22,12 @@ package org.activityinfo.server.report.renderer.ppt;
  * #L%
  */
 
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.BaseMap;
 import org.activityinfo.legacy.shared.model.TileBaseMap;
 import org.activityinfo.legacy.shared.reports.content.GoogleBaseMap;
 import org.activityinfo.legacy.shared.reports.content.MapContent;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.server.geo.TestGeometry;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class PPTMapRendererTest {
 
     @Before
     public void setUpDirs() {
-        new File("target/report-tests").mkdirs();
+        new File("build/report-tests").mkdirs();
 
         referenceBaseMap = new TileBaseMap();
         referenceBaseMap
@@ -81,7 +81,7 @@ public class PPTMapRendererTest {
     private void renderPPT(MapReportElement map, String filename)
             throws FileNotFoundException,
             IOException {
-        FileOutputStream fos = new FileOutputStream("target/report-tests/"
+        FileOutputStream fos = new FileOutputStream("build/report-tests/"
                 + filename);
 
         PPTMapRenderer renderer = new PPTMapRenderer(TestGeometry.get(), "");
@@ -112,7 +112,7 @@ public class PPTMapRendererTest {
         MapReportElement element = createMap(GoogleBaseMap.ROADMAP);
 
         FileOutputStream fos = new FileOutputStream(
-                "target/report-tests/map-custom-extents.ppt");
+                "build/report-tests/map-custom-extents.ppt");
 
         PPTMapRenderer renderer = new PPTMapRenderer(TestGeometry.get(), "");
         renderer.render(element, fos);

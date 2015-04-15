@@ -8,9 +8,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnCache;
@@ -28,7 +26,7 @@ import static org.junit.Assert.assertThat;
 public class MySqlCatalogIntegrationTest {
 
     private static DbUnit dbunit;
-    private static ColumnSetBuilder executor;
+    private static ColumnSetBuilder columnSetBuilder;
     private ColumnSet columnSet;
     private static CollectionCatalog catalogProvider;
 
@@ -43,7 +41,7 @@ public class MySqlCatalogIntegrationTest {
         dbunit.dropAllRows();
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "rdc.db.xml"));
         catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        executor = new ColumnSetBuilder(catalogProvider, ColumnCache.NULL);
+        columnSetBuilder = new ColumnSetBuilder(catalogProvider, ColumnCache.NULL);
     }
 
 
@@ -67,11 +65,10 @@ public class MySqlCatalogIntegrationTest {
         }
 
         Stopwatch stopwatch = Stopwatch.createStarted();
-        ColumnSet columnSet = executor.build(model);
+        ColumnSet columnSet = columnSetBuilder.build(model);
         System.out.println("Query executed in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
         
         assertThat(columnSet.getNumRows(), equalTo(759));
-
-        
+       
     }
 }
