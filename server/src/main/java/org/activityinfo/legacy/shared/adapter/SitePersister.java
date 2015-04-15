@@ -3,6 +3,7 @@ package org.activityinfo.legacy.shared.adapter;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
@@ -50,6 +51,11 @@ public class SitePersister {
                                 query.setLocationTypeId(locationTypeDTO.getId());
                                 break;
                             }
+                        }
+                        // yuriyz : dummy result in case we don't need location for fallback
+                        // it's tricky but it produce even worse code if load location inside persist() method where it is really needed
+                        if (query.getLocationTypeId() == null) {
+                            return Promise.resolved(new LocationResult(Lists.newArrayList(new LocationDTO())));
                         }
                         return dispatcher.execute(query);
                     }
