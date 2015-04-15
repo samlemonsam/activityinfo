@@ -9,6 +9,7 @@ import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -38,16 +39,30 @@ public class SitePersister {
         final Promise<SchemaDTO> schemaPromise = dispatcher.execute(new GetSchema());
         final Promise<SiteBinding> siteBinding = dispatcher.execute(new GetActivityForm(activityId))
                 .then(new SiteBindingFactory());
-        return Promise.waitAll(schemaPromise, siteBinding)
-                .join(new Function<Void, Promise<Void>>() {
+        return Promise.waitAll(schemaPromise, siteBinding).
+                join(new Function<Void, Promise<LocationResult>>() {
                     @Override
-                    public Promise<Void> apply(Void input) {
-                        return persist(siteBinding.get(), siteInstance, schemaPromise.get()).thenDiscardResult();
+                    public Promise<LocationResult> apply(@Nullable Void input) {
+                        GetLocations query = new GetLocations();
+                        UserDatabaseDTO databaseById = schemaPromise.get().getDatabaseById(siteBinding.get().getActivity().getDatabaseId());
+                        for (LocationTypeDTO locationTypeDTO : databaseById.getCountry().getLocationTypes()) {
+                            if (locationTypeDTO.isNationwide()) {
+                                query.setLocationTypeId(locationTypeDTO.getId());
+                                break;
+                            }
+                        }
+                        return dispatcher.execute(query);
+                    }
+                }).
+                join(new Function<LocationResult, Promise<Void>>() {
+                    @Override
+                    public Promise<Void> apply(LocationResult locationResult) {
+                        return persist(siteBinding.get(), siteInstance, locationResult.getData().get(0)).thenDiscardResult();
                     }
                 });
     }
 
-    private Promise<? extends CommandResult> persist(SiteBinding siteBinding, FormInstance instance, SchemaDTO schema) {
+    private Promise<? extends CommandResult> persist(SiteBinding siteBinding, FormInstance instance, LocationDTO locationDTO) {
 
         Map<String, Object> siteProperties = siteBinding.toChangePropertyMap(instance);
         siteProperties.put("activityId", siteBinding.getActivity().getId());
@@ -62,19 +77,14 @@ public class SitePersister {
         if (siteBinding.getLocationType().isNationwide()) {
             siteProperties.put("locationId", siteBinding.getLocationType().getId());
         } else if (!siteProperties.containsKey("locationId")) { // set the locationtypeid to nationwide if the user deletes the location field
-            UserDatabaseDTO databaseById = schema.getDatabaseById(siteBinding.getActivity().getDatabaseId());
-            for (LocationTypeDTO locationTypeDTO : databaseById.getCountry().getLocationTypes()) {
-                if (locationTypeDTO.isNationwide()) {
-                    siteProperties.put("locationId", locationTypeDTO.getId());
-                }
-            }
+            siteProperties.put("locationId", locationDTO.getId());
         }
 
         // default values for start and end dates (if corresponding form field were removed)
         if (!siteProperties.containsKey("date1") || siteProperties.get("date1") == null) {
             siteProperties.put("date1", new LocalDate());
         }
-        if (!siteProperties.containsKey("date2") || siteProperties.get("date1") == null) {
+        if (!siteProperties.containsKey("date2") || siteProperties.get("date2") == null) {
             siteProperties.put("date2", new LocalDate());
         }
 
