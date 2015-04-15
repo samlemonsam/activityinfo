@@ -75,7 +75,7 @@ public class Activity implements Serializable, Deleteable, Orderable {
     private long version;
     private long siteVersion;
     
-    private boolean classicView;
+    private boolean classicView = true;
 
     private String formClass;
     private byte[] gzFormClass;
