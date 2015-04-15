@@ -71,10 +71,10 @@ public class SitePersister {
         }
 
         // default values for start and end dates (if corresponding form field were removed)
-        if (!siteProperties.containsKey("date1")) {
+        if (!siteProperties.containsKey("date1") || siteProperties.get("date1") == null) {
             siteProperties.put("date1", new LocalDate());
         }
-        if (!siteProperties.containsKey("date2")) {
+        if (!siteProperties.containsKey("date2") || siteProperties.get("date1") == null) {
             siteProperties.put("date2", new LocalDate());
         }
 
