@@ -1,18 +1,16 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.model.AdminEntityDTO;
-import org.activityinfo.legacy.shared.model.AdminLevelDTO;
-import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.promise.Promise;
@@ -37,17 +35,19 @@ public class SitePersister {
     public Promise<Void> persist(final FormInstance siteInstance) {
 
         int activityId = CuidAdapter.getLegacyIdFromCuid(siteInstance.getClassId());
-        return dispatcher.execute(new GetActivityForm(activityId))
-                         .then(new SiteBindingFactory())
-                         .join(new Function<SiteBinding, Promise<Void>>() {
-                             @Nullable @Override
-                             public Promise<Void> apply(@Nullable SiteBinding binding) {
-                                 return persist(binding, siteInstance).thenDiscardResult();
-                             }
-                         });
+        final Promise<SchemaDTO> schemaPromise = dispatcher.execute(new GetSchema());
+        final Promise<SiteBinding> siteBinding = dispatcher.execute(new GetActivityForm(activityId))
+                .then(new SiteBindingFactory());
+        return Promise.waitAll(schemaPromise, siteBinding)
+                .join(new Function<Void, Promise<Void>>() {
+                    @Override
+                    public Promise<Void> apply(Void input) {
+                        return persist(siteBinding.get(), siteInstance, schemaPromise.get()).thenDiscardResult();
+                    }
+                });
     }
 
-    private Promise<? extends CommandResult> persist(SiteBinding siteBinding, FormInstance instance) {
+    private Promise<? extends CommandResult> persist(SiteBinding siteBinding, FormInstance instance, SchemaDTO schema) {
 
         Map<String, Object> siteProperties = siteBinding.toChangePropertyMap(instance);
         siteProperties.put("activityId", siteBinding.getActivity().getId());
@@ -61,20 +61,35 @@ public class SitePersister {
 
         if (siteBinding.getLocationType().isNationwide()) {
             siteProperties.put("locationId", siteBinding.getLocationType().getId());
+        } else if (!siteProperties.containsKey("locationId")) { // set the locationtypeid to nationwide if the user deletes the location field
+            UserDatabaseDTO databaseById = schema.getDatabaseById(siteBinding.getActivity().getDatabaseId());
+            for (LocationTypeDTO locationTypeDTO : databaseById.getCountry().getLocationTypes()) {
+                if (locationTypeDTO.isNationwide()) {
+                    siteProperties.put("locationId", locationTypeDTO.getId());
+                }
+            }
         }
 
-        
+        // default values for start and end dates (if corresponding form field were removed)
+        if (!siteProperties.containsKey("date1")) {
+            siteProperties.put("date1", new LocalDate());
+        }
+        if (!siteProperties.containsKey("date2")) {
+            siteProperties.put("date2", new LocalDate());
+        }
+
         final CreateSite createSite = new CreateSite(siteProperties);
 
         if (siteBinding.getLocationType().isAdminLevel()) {
             // we need to create the dummy location as well
             Promise<Command> createLocation = Promise.resolved(siteBinding.getAdminEntityId(instance))
-                                                     .join(new FetchEntityFunction())
-                                                     .then(new CreateDummyLocation(createSite.getLocationId(),
-                                                             siteBinding.getLocationType()));
+                    .join(new FetchEntityFunction())
+                    .then(new CreateDummyLocation(createSite.getLocationId(),
+                            siteBinding.getLocationType()));
 
             return createLocation.join(new Function<Command, Promise<BatchResult>>() {
-                @Nullable @Override
+                @Nullable
+                @Override
                 public Promise<BatchResult> apply(@Nullable Command createLocation) {
                     return dispatcher.execute(new BatchCommand(createLocation, createSite));
                 }
@@ -87,12 +102,13 @@ public class SitePersister {
 
     private class FetchEntityFunction implements Function<Integer, Promise<List<AdminEntityDTO>>> {
 
-        @Nullable @Override
+        @Nullable
+        @Override
         public Promise<List<AdminEntityDTO>> apply(@Nullable Integer input) {
             GetAdminEntities query = new GetAdminEntities().setEntityId(input);
 
             Promise<AdminEntityDTO> entity = dispatcher.execute(query)
-                                                       .then(new SingleListResultAdapter<AdminEntityDTO>());
+                    .then(new SingleListResultAdapter<AdminEntityDTO>());
 
             Promise<List<AdminEntityDTO>> parents = entity.join(new FetchParentsFunction());
 
