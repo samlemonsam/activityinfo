@@ -22,6 +22,8 @@ package org.activityinfo.model.type.geo;
  * #L%
  */
 
+import org.activityinfo.model.resource.IsRecord;
+import org.activityinfo.model.resource.Record;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -35,7 +37,7 @@ import java.io.Serializable;
  * a sphere as opposed to a coordinate on a 2D plane.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Extents implements Serializable {
+public class Extents implements Serializable, IsRecord {
 
     private static final int LAT_MAX = 90;
     private static final int LNG_MAX = 180;
@@ -278,5 +280,39 @@ public class Extents implements Serializable {
                ", maxLon=" + maxLon +
                '}';
     }
+    
+    @Override
+    public Record asRecord() {
+        Record record = new Record();
+        if (!Double.isNaN(minLat)) {
+            record.set("minLat", minLat);
+        }
+        if (!Double.isNaN(maxLat)) {
+            record.set("maxLat", maxLat);
+        }
+        if (!Double.isNaN(minLon)) {
+            record.set("minLon", minLon);
+        }
+        if (!Double.isNaN(maxLon)) {
+            record.set("maxLon", maxLon);
+        }
+        return record;
+    }
 
+    public static Extents fromRecord(Record record) {
+        Extents area = Extents.empty();
+        if(record.has("minLat")) {
+            area.minLat = record.getDouble("minLat");
+        }
+        if(record.has("maxLat")) {
+            area.maxLat = record.getDouble("maxLat");
+        }
+        if(record.has("minLon")) {
+            area.minLon = record.getDouble("minLon");
+        }
+        if(record.has("maxLon")) {
+            area.maxLon = record.getDouble("maxLon");
+        }
+        return area;
+    }
 }

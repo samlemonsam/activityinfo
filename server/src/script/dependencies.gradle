@@ -7,6 +7,8 @@ dependencies {
     compile project(':i18n')
     compile project(':io:xform')
     
+    compile project(':store:mysql')
+    
     // AppEngine
     appengineSdk libraries.appengine.sdk
     compile libraries.appengine.api

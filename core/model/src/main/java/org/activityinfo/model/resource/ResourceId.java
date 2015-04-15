@@ -83,4 +83,8 @@ public final class ResourceId {
             return CuidAdapter.indicatorField(generator.generateInt());
         }
     }
+
+    public ResourceId fieldId(String propertyName) {
+        return ResourceId.valueOf(text + "." + propertyName);
+    }
 }

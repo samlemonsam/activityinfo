@@ -106,6 +106,8 @@
     <module>server</module>
     <module>i18n</module>
     <module>io/xform</module>
+    <module>store/query</module>
+    <module>store/mysql</module>
   </modules>
 
   <dependencies>

@@ -7,11 +7,12 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordFieldTypeClass;
 
 /**
- * Created by alex on 15-4-15.
+ * A value type describing a geographic area on the Earth's surface
+ * in the WGS84 geographic reference system.
  */
 public class GeoAreaType implements FieldType {
 
-    public static final String TYPE_ID = "GEOGRAPHIC_AREA";
+    public static final String TYPE_ID = "geoArea";
 
     public static final GeoAreaType INSTANCE = new GeoAreaType();
 

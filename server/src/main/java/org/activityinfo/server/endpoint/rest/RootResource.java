@@ -29,16 +29,19 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.DTOViews;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.store.mysql.collections.CountryCollection;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
@@ -64,17 +67,24 @@ public class RootResource {
         return new AdminEntityResource(entityManager.get().find(AdminEntity.class, id));
     }
 
-    @GET @Path("/countries") 
-    @JsonView(DTOViews.List.class) 
+    @GET @Path("/countries")
+    @JsonView(DTOViews.List.class)
     @Produces(MediaType.APPLICATION_JSON)
     public List<CountryDTO> getCountries() {
+
+        QueryModel model = new QueryModel(CountryCollection.FORM_CLASS_ID);
+        model.selectField(CountryCollection.CODE_FIELD_ID).as("code");
+        model.selectField(CountryCollection.NAME_FIELD_ID).as("name");
+        
+        
+        
         return dispatcher.execute(new GetCountries()).getData();
     }
 
 
     @Path("/country/{id: [0-9]+}")
     public CountryResource getCountryById(@PathParam("id") int id) {
-        Country result = (Country) entityManager.get().find(Country.class, id);
+        Country result = entityManager.get().find(Country.class, id);
         if (result == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }

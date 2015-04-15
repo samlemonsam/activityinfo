@@ -8,17 +8,14 @@ import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.ErrorType;
+import org.activityinfo.model.type.ErrorValue;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.BooleanFieldValue;
-import org.activityinfo.model.type.primitive.BooleanType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +33,7 @@ public class PartialEvaluator<InstanceT> {
     private final PartiallyEvaluatingVisitor visitor = new PartiallyEvaluatingVisitor();
     private final FieldReaderFactory<InstanceT> readerFactory;
 
-    public PartialEvaluator(FormClass formClass, FieldReaderFactory<InstanceT> readerFactory) {
+    public PartialEvaluator(@Nonnull FormClass formClass, @Nonnull FieldReaderFactory<InstanceT> readerFactory) {
         this.readerFactory = readerFactory;
         this.symbolTable = new FormSymbolTable(formClass);
     }

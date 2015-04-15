@@ -1,0 +1,13 @@
+
+
+
+dependencies {
+    compile project(':core:model')
+    compile project(':core:services')
+    compile project(':store:query')
+    compile project(':i18n')
+    compile libraries.guava
+    compile libraries.jdbc.mysql
+    testCompile 'org.dbunit:dbunit:2.5.0'
+}
+

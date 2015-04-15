@@ -5,15 +5,13 @@ import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-/**
- * A Field Value defining a geographic area in the WGS84 geographic
- * reference system.
- */
+/* A Field Value describing a geographic area on the Earth's surface
+* in the WGS84 geographic reference system.
+*/
 public class GeoArea implements GeoFieldValue, IsRecord {
-    
+
     private Extents envelope;
     private String blobId;
-
 
     public GeoArea(Extents envelope, String blobId) {
         this.envelope = envelope;

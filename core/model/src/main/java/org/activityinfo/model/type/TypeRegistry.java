@@ -6,6 +6,8 @@ import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
+import org.activityinfo.model.type.geo.GeoArea;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.image.ImageType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -43,6 +45,7 @@ public class TypeRegistry {
         register(LocalDateType.TYPE_CLASS);
         register(LocalDateIntervalType.TYPE_CLASS);
         register(GeoPointType.TYPE_CLASS);
+        register(GeoAreaType.TYPE_CLASS);
         register(BooleanType.TYPE_CLASS);
         register(BarcodeType.TYPE_CLASS);
         register(ImageType.TYPE_CLASS);
