@@ -3023,6 +3023,10 @@ public interface UiConstants extends Constants {
     @Key("versionChecking")
     String versionChecking();
 
+
+    @DefaultStringValue("Are you sure want to delete attachment(s)?")
+    String confirmDeleteAttachment();
+
     /**
      * Translated "No connection.".
      *
@@ -3668,7 +3672,7 @@ public interface UiConstants extends Constants {
             "make new submissions at this time.")
     String noPartners();
 
-    @DefaultStringValue("Do you really want to delete this field? All dependent data will me removed as well (can't be reverted).")
+    @DefaultStringValue("Do you really want to delete this field? All dependent data will be removed as well (can't be reverted).")
     String deleteFormFieldConfirmation();
 
     @DefaultStringValue("Do you want to retry deletion?")

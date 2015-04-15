@@ -22,13 +22,17 @@ package org.activityinfo.legacy.shared.impl;
  * #L%
  */
 
+import com.bedatadriven.rebar.sql.client.SqlResultCallback;
+import com.bedatadriven.rebar.sql.client.SqlResultSet;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlInsert;
+import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.query.SqlUpdate;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.RpcMap;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.CreateSite;
+import org.activityinfo.legacy.shared.command.UpdateSite;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -55,6 +59,36 @@ public class CreateSiteHandler implements CommandHandlerAsync<CreateSite, Create
             executeNestedCommand(cmd, context);
         }
 
+        // Determine whether this site already exists
+        SqlQuery.select("siteid").from(Tables.SITE).where("siteId").equalTo(cmd.getSiteId())
+        .execute(context.getTransaction(), new SqlResultCallback() {
+            @Override
+            public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+                if(results.getRows().isEmpty()) {
+                    createNewSite(cmd, context, callback);
+                } else {
+                    updateExistingSite(cmd, context, callback);
+                }
+            }
+        });
+    }
+
+    private void updateExistingSite(final CreateSite cmd, ExecutionContext context, final AsyncCallback<CreateResult> callback) {
+        UpdateSite updateSite = new UpdateSite(cmd.getSiteId(), cmd.getProperties());
+        context.execute(updateSite, new AsyncCallback<VoidResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(VoidResult result) {
+                callback.onSuccess(new CreateResult(cmd.getSiteId()));
+            }
+        });
+    }
+
+    private void createNewSite(CreateSite cmd, ExecutionContext context, AsyncCallback<CreateResult> callback) {
         insertSite(context.getTransaction(), cmd);
 
         // we only create a reporting period if this is a one-off activity
