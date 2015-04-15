@@ -1,4 +1,4 @@
-package org.activityinfo.legacy.shared.reports.util.mapping;
+package org.activityinfo.model.type.geo;
 
 /*
  * #%L
@@ -22,7 +22,9 @@ package org.activityinfo.legacy.shared.reports.util.mapping;
  * #L%
  */
 
-import org.activityinfo.model.type.geo.AiLatLng;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonSetter;
 
 import java.io.Serializable;
 
@@ -32,6 +34,7 @@ import java.io.Serializable;
  * This cannot be mapped 1:1 to a rectangle, since a lat/long combination is a coordinate on
  * a sphere as opposed to a coordinate on a 2D plane.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Extents implements Serializable {
 
     private static final int LAT_MAX = 90;
@@ -176,7 +179,12 @@ public class Extents implements Serializable {
     public static Extents create(double x1, double y1, double x2, double y2) {
         return new Extents(y1, y2, x1, x2);
     }
+    
 
+    public static Extents fromLatLng(double latitude, double longitude) {
+        return new Extents(latitude, latitude, longitude, longitude);
+    }
+    
     /**
      * @return the x (longitude) coordinate of the Extents's centroid, (x1+x2)/2
      */
@@ -200,6 +208,42 @@ public class Extents implements Serializable {
         return new AiLatLng((minLat + maxLat) / 2.0, (minLon + maxLon) / 2.0);
     }
 
+    @JsonSetter
+    public void setX1(double x1) {
+        setMinLon(x1);
+    }
+    
+    @JsonSetter
+    public void setY1(double y1) {
+        setMinLat(y1);
+    }
+    
+    @JsonSetter
+    public void setX2(double x2) {
+        setMaxLon(x2);
+    }
+    
+    @JsonSetter
+    public void setY2(double y2) {
+        setMaxLat(y2);
+    }
+    
+    public double getX1() {
+        return getMinLon();
+    }
+    
+    public double getY1() {
+        return getMinLat();
+    }
+    
+    public double getX2() {
+        return getMaxLon();
+    }
+    
+    public double getY2() {
+        return getMaxLat();
+    }
+    
     @Override
     public int hashCode() {
         return (minLon + "").hashCode();
@@ -222,6 +266,8 @@ public class Extents implements Serializable {
                minLon == other.minLon &&
                maxLon == other.maxLon;
     }
+    
+    
 
     @Override
     public String toString() {

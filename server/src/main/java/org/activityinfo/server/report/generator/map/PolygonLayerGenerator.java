@@ -36,7 +36,7 @@ import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.content.MapContent;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.layers.PolygonMapLayer;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.server.command.DispatcherSync;
 
 public class PolygonLayerGenerator implements LayerGenerator {

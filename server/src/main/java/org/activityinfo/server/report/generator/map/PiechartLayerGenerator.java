@@ -30,7 +30,7 @@ import org.activityinfo.legacy.shared.reports.model.PointValue;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer.Slice;
 import org.activityinfo.legacy.shared.reports.model.layers.ScalingType;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.server.database.hibernate.entity.Indicator;
 import org.activityinfo.server.report.generator.map.cluster.Cluster;
 import org.activityinfo.server.report.generator.map.cluster.Clusterer;

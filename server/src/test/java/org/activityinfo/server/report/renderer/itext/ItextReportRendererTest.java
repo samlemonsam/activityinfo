@@ -36,7 +36,7 @@ import org.activityinfo.legacy.shared.reports.model.PivotChartReportElement.Type
 import org.activityinfo.legacy.shared.reports.model.layers.BubbleMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.IconMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.server.geo.TestGeometry;
 import org.activityinfo.server.report.DummyPivotTableData;
 import org.activityinfo.server.report.output.StorageProvider;

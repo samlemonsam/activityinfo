@@ -28,7 +28,7 @@ import com.extjs.gxt.ui.client.event.Listener;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.core.shared.type.converter.CoordinateAxis;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 
 public class CoordinateFields {
     private CoordinateField latitudeField;

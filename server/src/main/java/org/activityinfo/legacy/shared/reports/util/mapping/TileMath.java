@@ -24,6 +24,7 @@ package org.activityinfo.legacy.shared.reports.util.mapping;
 
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.reports.content.Point;
+import org.activityinfo.model.type.geo.Extents;
 
 /**
  * Provides a series of utility functions useful for processing map tiles

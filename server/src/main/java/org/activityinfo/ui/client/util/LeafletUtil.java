@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.util;
 
 import org.activityinfo.model.type.geo.AiLatLng;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.discotools.gwt.leaflet.client.types.LatLng;
 import org.discotools.gwt.leaflet.client.types.LatLngBounds;
 

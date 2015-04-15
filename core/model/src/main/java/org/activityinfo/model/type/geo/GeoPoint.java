@@ -9,7 +9,7 @@ import org.activityinfo.model.type.FieldValue;
  * A Field Value containing a geographic point in the WGS84 geographic
  * reference system.
  */
-public class GeoPoint implements FieldValue, IsRecord {
+public class GeoPoint implements GeoFieldValue, IsRecord {
 
     private double latitude;
     private double longitude;
@@ -71,5 +71,10 @@ public class GeoPoint implements FieldValue, IsRecord {
     @Override
     public String toString() {
         return "GeoPoint[" + latitude + "," + longitude + "]";
+    }
+
+    @Override
+    public Extents getEnvelope() {
+        return Extents.fromLatLng(latitude, longitude);
     }
 }

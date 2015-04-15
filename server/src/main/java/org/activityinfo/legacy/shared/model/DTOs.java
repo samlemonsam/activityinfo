@@ -24,7 +24,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.command.result.*;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.*;
 

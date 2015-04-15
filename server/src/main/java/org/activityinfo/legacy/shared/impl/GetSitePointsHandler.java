@@ -31,7 +31,7 @@ import org.activityinfo.legacy.shared.command.result.SitePointList;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.model.SitePointDTO;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.ArrayList;
 import java.util.List;

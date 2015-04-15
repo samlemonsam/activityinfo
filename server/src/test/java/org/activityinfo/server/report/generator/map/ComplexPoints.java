@@ -25,7 +25,7 @@ package org.activityinfo.server.report.generator.map;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.reports.model.PointValue;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.legacy.shared.reports.util.mapping.TileMath;
 import org.activityinfo.server.report.generator.map.cluster.genetic.MarkerGraph;
 

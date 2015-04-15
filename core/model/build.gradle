@@ -12,6 +12,7 @@ dependencies {
     compile libraries.gson 
     compile libraries.rebar.time 
     compile libraries.jsr305
+    compile libraries.jersey.json
 }
 
 jar {

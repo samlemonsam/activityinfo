@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 import net.miginfocom.swing.MigLayout;
 import org.activityinfo.geoadmin.model.*;
+import org.activityinfo.model.type.geo.Extents;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -296,7 +297,7 @@ public class ImportWindow extends JDialog {
                     if (codeAttribute != -1) {
                         entity.setCode(feature.getAttributeStringValue(codeAttribute));
                     }
-                    Bounds bounds = GeoUtils.toBounds(feature.getEnvelope());
+                    Extents bounds = GeoUtils.toBounds(feature.getEnvelope());
                     entity.setBounds(bounds);
 
                     if (importForm.isGeometryImported()) {

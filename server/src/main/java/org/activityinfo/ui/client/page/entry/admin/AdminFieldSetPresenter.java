@@ -34,9 +34,8 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
-import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.HasAdminEntityValues;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.ui.client.component.report.editor.map.symbols.AdminBoundsHelper;
 
 import java.util.*;
