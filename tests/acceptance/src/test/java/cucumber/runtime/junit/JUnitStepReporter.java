@@ -5,11 +5,13 @@ import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
+import gherkin.formatter.model.Step;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 
 import java.util.Iterator;
+import java.util.List;
 
 import static cucumber.runtime.Runtime.isPending;
 
@@ -18,19 +20,19 @@ public class JUnitStepReporter implements Reporter {
     
     private final Reporter reporter;
     private RunNotifier runNotifier;
-    private final Iterator<Description> runnerSteps;
+    private final Iterator<Step> runnerSteps;
     
     private EachTestNotifier executionUnitNotifier;
-    private EachTestNotifier stepNotifier = null;
+   // private EachTestNotifier stepNotifier = null;
     
     private boolean strict = false;
     private boolean ignoredStep;
+    private Step currentStep;
 
-    public JUnitStepReporter(RunNotifier runNotifier, Description description, Reporter reporterProxy) {
+    public JUnitStepReporter(RunNotifier runNotifier, Description description, List<Step> steps, Reporter reporterProxy) {
         this.runNotifier = runNotifier;
-        this.runnerSteps = description.getChildren().iterator();
+        this.runnerSteps = steps.iterator();
         this.reporter = reporterProxy;
-        this.stepNotifier = null;
         this.ignoredStep = false;
 
         this.executionUnitNotifier = new EachTestNotifier(runNotifier, description);
@@ -48,24 +50,26 @@ public class JUnitStepReporter implements Reporter {
     }
 
     public void match(Match match) {
-        stepNotifier = new EachTestNotifier(runNotifier, runnerSteps.next());
+        currentStep = runnerSteps.next();
         reporter.match(match);
     }
 
     public void result(Result result) {
         Throwable error = result.getError();
         if (Result.SKIPPED == result) {
-            stepNotifier.fireTestIgnored();
+            stepResult("Skipped");
+        
         } else if (isPendingOrUndefined(result)) {
             addFailureOrIgnoreStep(result);
+        
         } else {
-            if (stepNotifier != null) {
+            if (currentStep != null) {
                 //Should only fireTestStarted if not ignored
-                stepNotifier.fireTestStarted();
+                stepResult("Started");
                 if (error != null) {
-                    stepNotifier.addFailure(error);
+                    stepResult("Failure");
                 }
-                stepNotifier.fireTestFinished();
+                stepResult("Finished");
             }
             if (error != null) {
                 executionUnitNotifier.addFailure(error);
@@ -75,9 +79,15 @@ public class JUnitStepReporter implements Reporter {
             // We have run all of our steps. Set the stepNotifier to null so that
             // if an error occurs in an After block, it's reported against the scenario
             // instead (via executionUnitNotifier).
-            stepNotifier = null;
+            currentStep = null;
         }
         reporter.result(result);
+    }
+
+    private void stepResult(String result) {
+        if(currentStep != null) {
+            System.out.println(currentStep.getName() + ": " + result);
+        }
     }
 
     private boolean isPendingOrUndefined(Result result) {
@@ -87,12 +97,12 @@ public class JUnitStepReporter implements Reporter {
 
     private void addFailureOrIgnoreStep(Result result) {
         if (strict) {
-            stepNotifier.fireTestStarted();
+            stepResult("Started");
             addFailure(result);
-            stepNotifier.fireTestFinished();
+            stepResult("Finished");
         } else {
             ignoredStep = true;
-            stepNotifier.fireTestIgnored();
+            stepResult("Ignored");
         }
     }
 
@@ -102,7 +112,7 @@ public class JUnitStepReporter implements Reporter {
         if (error == null) {
             error = new PendingException();
         }
-        stepNotifier.addFailure(error);
+        stepResult("Failed");
         executionUnitNotifier.addFailure(error);
     }
 

@@ -61,6 +61,7 @@ public class AuthenticationFilter implements Filter {
     private final Provider<EntityManager> entityManager;
     private final ServerSideAuthProvider authProvider;
     private final BasicAuthentication basicAuthenticator;
+    
 
     private final LoadingCache<String, AuthenticatedUser> authTokenCache;
 
@@ -74,14 +75,14 @@ public class AuthenticationFilter implements Filter {
         this.authProvider = authProvider;
         this.basicAuthenticator = basicAuthenticator;
         authTokenCache = CacheBuilder.newBuilder()
-        .maximumSize(10000)
-        .expireAfterAccess(6, TimeUnit.HOURS)
-        .build(new CacheLoader<String, AuthenticatedUser>() {
-            @Override
-            public AuthenticatedUser load(String authToken) throws Exception {
-                return queryAuthToken(authToken);
-            }
-        });
+            .maximumSize(10000)
+            .expireAfterAccess(6, TimeUnit.HOURS)
+            .build(new CacheLoader<String, AuthenticatedUser>() {
+                @Override
+                public AuthenticatedUser load(String authToken) throws Exception {
+                    return queryAuthToken(authToken);
+                }
+            });
     }
 
     @Override

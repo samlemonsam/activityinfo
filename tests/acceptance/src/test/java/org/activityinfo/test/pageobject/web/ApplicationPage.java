@@ -1,86 +1,135 @@
 package org.activityinfo.test.pageobject.web;
 
-import com.google.common.base.Optional;
-import org.activityinfo.test.pageobject.api.PageObject;
-import org.activityinfo.test.pageobject.api.Path;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import org.activityinfo.test.driver.OfflineMode;
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
-import org.activityinfo.test.webdriver.SessionReporter;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.logging.Logger;
+
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 
 /**
  * Interface to the single-pageobject application
  */
-@Path("/")
-public class ApplicationPage extends PageObject {
+public class ApplicationPage {
 
-    @FindBy(xpath = "//div[text() = 'ActivityInfo']/following-sibling::div[2]")
-    private WebElement settingsButton;
+    private static final Logger LOGGER = Logger.getLogger(ApplicationPage.class.getName());
     
-    /**
-     * The outermost pageobject container
-     */
-    @FindBy(className = Gxt.BORDER_LAYOUT_CONTAINER)
-    private WebElement pageContainer;
+    private static final By SETTINGS_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[2]");
+    private static final By DATA_ENTRY_TAB = By.xpath("//div[contains(text(), 'Data Entry')]");
+    private static final By DESIGN_TAB = By.xpath("//div[contains(text(), 'Design')]");
+    
+    private final FluentElement page;
 
     @Inject
-    private SessionReporter logger;
+    public ApplicationPage(WebDriver webDriver) {
+        this.page = new FluentElement(webDriver);        
+    }
+    
+    public ApplicationPage(FluentElement page) {
+        this.page = page;
+    }
 
-    public <T> T assertCurrentPageIs(Class<T> applicationPageClass) {
-        return binder.create(pageContainer,  applicationPageClass);
+    public Dashboard dashboard() {
+        return new Dashboard(container());
+    }
+    
+    public void waitUntilLoaded() {
+        page.waitUntil(invisibilityOfElementLocated(By.id("loading")));
     }
     
     public SettingsMenu openSettingsMenu() {
-        logger.screenshot();
-        try {
-            settingsButton.click();
-        } catch(Exception ignored) {
-            
-        }
-        return binder.waitFor(SettingsMenu.class);
+        page.findElement(SETTINGS_BUTTON).click();
+        
+        return new SettingsMenu(page);
     }
     
     public OfflineMode getOfflineMode() {
-        
-        return waitFor("offline status", 30, new Callable<Optional<OfflineMode>>() {
+        return page.waitFor(new Function<WebDriver, OfflineMode>() {
+            @Nullable
             @Override
-            public Optional<OfflineMode> call() throws Exception {
+            public OfflineMode apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.className("x-status-text"));
-                for(WebElement element : elements) {
-                    if(element.getText().contains("Working online") || element.getText().contains("Last sync")) {
-                        return Optional.of(OfflineMode.ONLINE);
+                for (WebElement element : elements) {
+                    if (element.getText().contains("Working online") || element.getText().contains("Last sync")) {
+                        return OfflineMode.ONLINE;
 
-                    } else if(element.getText().contains("Working offline")) {
-                        return Optional.of(OfflineMode.OFFLINE);
+                    } else if (element.getText().contains("Working offline")) {
+                        return OfflineMode.OFFLINE;
                     }
                 }
-                return Optional.absent();
+                return null;
             }
         });
     }
 
     public void assertOfflineModeLoads() {
-        waitFor("offline status", 60 * 5, new Callable<Optional<Boolean>>() {
+        page.wait(5, MINUTES).until(new Predicate<WebDriver>() {
+            
+            private String lastStatus = "";
+
             @Override
-            public Optional<Boolean> call() throws Exception {
+            public boolean apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.className("x-status-text"));
                 for (WebElement element : elements) {
-                    if (element.getText().contains("Working offline")) { 
-                        return Optional.of(true);
+                    if (element.getText().contains("Working offline")) {
+                        return true;
 
                     } else if (element.getText().contains("Sync error")) {
                         throw new AssertionError(element.getText());
+
+
                     } else if (element.getText().contains("%")) {
-                        System.out.println(element.getText());
+                        String status = element.getText();
+                        if(!lastStatus.equals(status)) {
+                            LOGGER.info("Offline Status: " + status);
+                            lastStatus = status;
+                        }
                     }
                 }
-                return Optional.absent();
+                return false;
             }
         });
     }
+    
+    public DataEntryTab navigateToDataEntryTab() {
+        try {
+            page.findElement(DATA_ENTRY_TAB).click();
+        } catch(Exception ignored) {
+        }
+        return new DataEntryTab(container());
+    }
+
+    public DesignTab navigateToDesignTab() {
+        try {
+            page.findElement(DESIGN_TAB).click();
+        } catch(Exception ignored) {
+        }
+        return new DesignTab(container());
+    }
+    
+    public ReportsTab navigateToReportsTab() {
+        FluentElement container = container();
+        container.find().div(withText("Reports")).clickWhenReady();
+        
+        return new ReportsTab(container);
+    }
+
+    private FluentElement container() {
+        return page.waitFor(By.className(Gxt.BORDER_LAYOUT_CONTAINER));
+    }
+
 }

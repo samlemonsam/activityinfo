@@ -11,8 +11,7 @@
     </parent>
 
     <artifactId>activityinfo-ui-tests</artifactId>
-    <name>ActivityInfo UI Tests</name>
-    <description>ActivityInfo WebDriver UI Tests</description>
+    <name>ActivityInfo Acceptance Tests</name>
 
     <properties>
         <cucumber.version>1.2.2</cucumber.version>
@@ -33,6 +32,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.27</version>
+        </dependency>
+        <dependency>
             <groupId>com.saucelabs</groupId>
             <artifactId>sauce_junit</artifactId>
             <version>[1.0.0,)</version>
@@ -47,6 +51,16 @@
             <groupId>com.github.detro</groupId>
             <artifactId>phantomjsdriver</artifactId>
             <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
@@ -81,11 +95,39 @@
             <artifactId>commons-pool2</artifactId>
             <version>2.0</version>
         </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.14</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.littleshoot</groupId>
+            <artifactId>littleproxy</artifactId>
+            <version>1.0.0-beta7</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-       
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <exclude>**/*SmokeTest.java</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
         </plugins>
     </build>
 
@@ -119,6 +161,9 @@
                                     <goal>verify</goal>
                                 </goals>
                                 <configuration>
+                                    <includes>
+                                        <include>**/**AT.java</include>
+                                    </includes>
                                     <systemPropertyVariables>
                                         <sauce.username>${sauce.username}</sauce.username>
                                         <sauce.accessKey>${sauce.accessKey}</sauce.accessKey>
