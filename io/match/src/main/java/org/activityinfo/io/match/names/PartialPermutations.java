@@ -9,7 +9,7 @@
  *
  * Created Sep 2, 2009
  */
-package org.activityinfo.core.shared.importing.match.names;
+package org.activityinfo.io.match.names;
 
 
 /**

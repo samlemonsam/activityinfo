@@ -1,9 +1,10 @@
-package org.activityinfo.core.shared.importing.match.names;
+package org.activityinfo.io.match.names;
 
 import static java.lang.Math.min;
 
 /**
- * Compares two words written in latin script.
+ * Calculates the distance between two words written in latin script.
+ * 
  */
 public class LatinWordDistance {
 

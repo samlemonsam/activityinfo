@@ -1,11 +1,8 @@
-package org.activityinfo.geoadmin;
+package org.activityinfo.geoadmin.merge;
 
 import com.google.common.collect.Lists;
 import net.miginfocom.swing.MigLayout;
-import org.activityinfo.geoadmin.merge.MergeAction;
-import org.activityinfo.geoadmin.merge.MergeNode;
-import org.activityinfo.geoadmin.merge.MergeTreeBuilder;
-import org.activityinfo.geoadmin.merge.MergeTreeTableModel;
+import org.activityinfo.geoadmin.*;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;

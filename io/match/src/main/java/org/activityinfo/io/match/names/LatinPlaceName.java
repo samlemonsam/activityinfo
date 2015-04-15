@@ -1,4 +1,4 @@
-package org.activityinfo.core.shared.importing.match.names;
+package org.activityinfo.io.match.names;
 
 /**
  * Contains a fully normalized and parsed latin names name as

@@ -1,4 +1,4 @@
-package org.activityinfo.core.shared.importing.match.names;
+package org.activityinfo.io.match.names;
 
 /**
  *

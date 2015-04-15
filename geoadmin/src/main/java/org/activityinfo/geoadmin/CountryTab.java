@@ -1,7 +1,17 @@
 package org.activityinfo.geoadmin;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import org.activityinfo.geoadmin.locations.LocationWindow;
+import org.activityinfo.geoadmin.merge.UpdateWindow;
+import org.activityinfo.geoadmin.model.*;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -10,30 +20,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
-
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreePath;
-
-import org.activityinfo.geoadmin.locations.LocationWindow;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
-import org.activityinfo.geoadmin.model.AdminLevel;
-import org.activityinfo.geoadmin.model.Country;
-import org.activityinfo.geoadmin.model.LocationType;
-import org.activityinfo.geoadmin.model.VersionMetadata;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 /**
  * Principal tab which lists the countries present in ActivityInfo
