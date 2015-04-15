@@ -9,5 +9,6 @@ include 'store:mysql'
 include 'geoadmin'
 include 'server'
 include 'io:xform'
+include 'io:match'
 include 'tests:acceptance'
 

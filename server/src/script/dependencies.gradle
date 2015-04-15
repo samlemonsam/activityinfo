@@ -6,6 +6,7 @@ dependencies {
     compile project(':core:services')
     compile project(':i18n')
     compile project(':io:xform')
+    compile project(':io:match')
     
     compile project(':store:mysql')
     

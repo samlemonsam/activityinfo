@@ -1,0 +1,23 @@
+
+
+apply plugin: 'gwt-base'
+
+dependencies {
+    compile project(':core:model')
+    compile libraries.guava
+    gwt     libraries.gwt.guava
+}
+
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+            events = ['failed']
+        }
+    }
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}
