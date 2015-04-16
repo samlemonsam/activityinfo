@@ -22,12 +22,13 @@ package org.activityinfo.legacy.shared.adapter;
  */
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.promise.Promise;
+import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.CreateLocation;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class Eraser {
 
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("id", CuidAdapter.getLegacyIdFromCuid(instanceId));
-                properties.put("workflowstatusid", "rejected");
+                properties.put("workflowstatusid", Workflow.REJECTED);
 
                 commands.add(new CreateLocation(properties));
             }

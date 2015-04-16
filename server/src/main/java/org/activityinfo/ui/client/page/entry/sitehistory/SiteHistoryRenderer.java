@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
@@ -32,7 +33,7 @@ import java.util.*;
 
 public class SiteHistoryRenderer {
 
-    private static final Date HISTORY_AVAILABLE_FROM = new Date(2012, 12, 20);
+    private static final Date HISTORY_AVAILABLE_FROM = new LocalDate(2012, 12, 20).atMidnightInMyTimezone();
 
     public String renderLoading() {
         return new Item(I18N.CONSTANTS.loading()).toString();
@@ -43,7 +44,7 @@ public class SiteHistoryRenderer {
     }
 
     public String render(SchemaDTO schema, List<LocationDTO> locations, SiteDTO site, List<SiteHistoryDTO> histories) {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
         items.addAll(items(schema, locations, site, histories));
         items.add(availableFrom(site));
         return Item.appendAll(items);
@@ -53,7 +54,7 @@ public class SiteHistoryRenderer {
                              List<LocationDTO> locations,
                              SiteDTO site,
                              List<SiteHistoryDTO> histories) {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
 
         Map<String, Object> baselineState = histories.get(0).getJsonMap();
         RenderContext ctx = new RenderContext(schema, locations, site, baselineState);
@@ -88,9 +89,12 @@ public class SiteHistoryRenderer {
     }
 
     private List<ItemDetail> details(RenderContext ctx) {
-        List<ItemDetail> details = new ArrayList<ItemDetail>();
+        List<ItemDetail> details = new ArrayList<>();
         for (Map.Entry<String, Object> entry : ctx.getHistory().getJsonMap().entrySet()) {
-            details.add(ItemDetail.create(ctx, entry));
+            ItemDetail detail = ItemDetail.create(ctx, entry);
+            if(detail != null) {
+                details.add(detail);
+            }
         }
         return details;
     }

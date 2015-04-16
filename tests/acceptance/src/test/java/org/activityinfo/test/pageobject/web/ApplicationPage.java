@@ -2,9 +2,11 @@ package org.activityinfo.test.pageobject.web;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -13,7 +15,7 @@ import org.openqa.selenium.WebElement;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
@@ -24,12 +26,13 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
  */
 public class ApplicationPage {
 
+    private static final Logger LOGGER = Logger.getLogger(ApplicationPage.class.getName());
     
     private static final By SETTINGS_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[2]");
+    private static final By DATA_ENTRY_TAB = By.xpath("//div[contains(text(), 'Data Entry')]");
     private static final By DESIGN_TAB = By.xpath("//div[contains(text(), 'Design')]");
     
     private final FluentElement page;
-
 
     @Inject
     public ApplicationPage(WebDriver webDriver) {
@@ -75,6 +78,9 @@ public class ApplicationPage {
 
     public void assertOfflineModeLoads() {
         page.wait(5, MINUTES).until(new Predicate<WebDriver>() {
+            
+            private String lastStatus = "";
+
             @Override
             public boolean apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.className("x-status-text"));
@@ -87,12 +93,24 @@ public class ApplicationPage {
 
 
                     } else if (element.getText().contains("%")) {
-                        System.out.println(element.getText());
+                        String status = element.getText();
+                        if(!lastStatus.equals(status)) {
+                            LOGGER.info("Offline Status: " + status);
+                            lastStatus = status;
+                        }
                     }
                 }
                 return false;
             }
         });
+    }
+    
+    public DataEntryTab navigateToDataEntryTab() {
+        try {
+            page.findElement(DATA_ENTRY_TAB).click();
+        } catch(Exception ignored) {
+        }
+        return new DataEntryTab(container());
     }
 
     public DesignTab navigateToDesignTab() {

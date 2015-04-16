@@ -22,8 +22,11 @@ package org.activityinfo.server.command.handler.crud;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.extjs.gxt.ui.client.data.RpcMap;
 import org.activityinfo.legacy.shared.exception.CommandException;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +35,10 @@ public class PropertyMap {
 
     public PropertyMap(Map<String, Object> map) {
         this.map = map;
+    }
+
+    public PropertyMap(RpcMap properties) {
+        this.map = properties.getTransientMap();
     }
 
     public <X> X get(String propertyName) {
@@ -69,5 +76,46 @@ public class PropertyMap {
             throw new CommandException(String.format("Property '%s' is required", propertyName));
         }
         return value;
+    }
+
+    public String getOptionalString(String propertyName) {
+        if(map.containsKey(propertyName)) {
+            return (String) map.get(propertyName);
+        } else {
+            return null;
+        }
+    }
+    
+    public Double getOptionalDouble(String propertyName) {
+        Object value = map.get(propertyName);
+        if(value == null) {
+            return null;
+        }
+        if(value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        throw new CommandException(String.format("Expected a numeric value for property '%s'", propertyName));
+    }
+
+    public Set<String> getNames() {
+        return map.keySet();
+    }
+
+    public Date getDate(String property) {
+        Object value = getRequiredProperty(property);
+        if(value instanceof Date) {
+            return (Date)value;
+        } else if(value instanceof LocalDate) {
+            return ((LocalDate) value).atMidnightInMyTimezone();
+        } else if(value instanceof String) {
+            return LocalDate.parse((String)value).atMidnightInMyTimezone();
+        }
+        throw new CommandException(String.format("Expected a date value for property '%s' in the format YYYY-MM-dd",
+                property));
+        
+    }
+
+    public Map<String, Object> asMap() {
+        return map;
     }
 }

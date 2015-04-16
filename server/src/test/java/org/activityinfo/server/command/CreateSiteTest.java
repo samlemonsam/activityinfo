@@ -26,7 +26,6 @@ import com.extjs.gxt.ui.client.data.PagingLoadResult;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.CreateSite;
 import org.activityinfo.legacy.shared.command.GetSites;
-import org.activityinfo.legacy.shared.command.UpdateSite;
 import org.activityinfo.legacy.shared.command.exception.NotAuthorizedException;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -51,6 +50,9 @@ public class CreateSiteTest extends CommandTestCase2 {
 
     @Test
     public void test() throws CommandException {
+
+        Logger.getLogger("org.hibernate").setLevel(Level.FINE);
+        
         LocationDTO location = LocationDTOs.newLocation();
         execute(new CreateLocation(location));
 
@@ -68,7 +70,7 @@ public class CreateSiteTest extends CommandTestCase2 {
         SiteDTOs.validateNewSite(secondRead);
     }
 
-    @Test(expected = NotAuthorizedException.class)
+    @Test(expected = IllegalAccessCommandException.class)
     public void unauthorized() throws CommandException {
         // create a new detached, client model
         SiteDTO newSite = SiteDTOs.newSite();

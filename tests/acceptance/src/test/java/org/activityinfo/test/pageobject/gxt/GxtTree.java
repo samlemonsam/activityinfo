@@ -1,6 +1,5 @@
 package org.activityinfo.test.pageobject.gxt;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
@@ -8,24 +7,36 @@ import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
-import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.openqa.selenium.*;
+import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
 public class GxtTree {
-    private FluentElement container;
 
-    public GxtTree(FluentElement container) {
+    private FluentElement container;
+    private XPathProvider xPathProvider;
+
+    private GxtTree(FluentElement container, XPathProvider xPathProvider) {
         this.container = container;
+        this.xPathProvider = xPathProvider;
+    }
+
+    public static GxtTree tree(FluentElement container) {
+        return new GxtTree(container, XPathProvider.TREE_PROVIDER);
+    }
+
+    public static GxtTree treeGrid(FluentElement container) {
+        return new GxtTree(container, XPathProvider.TREE_GRID_PROVIDER);
     }
 
     public void select(String... labels) {
@@ -50,6 +61,12 @@ public class GxtTree {
      *
      */
     public Optional<GxtNode> search(String label) {
+
+        Optional<GxtNode> selected = findSelected();
+        if(selected.isPresent() && selected.get().getLabel().equals(label)) {
+            return selected;
+        }
+
         SearchingVisitor visitor = SearchingVisitor.byLabel(label);
         accept(visitor);
         
@@ -70,6 +87,20 @@ public class GxtTree {
         }
     }
 
+    public void waitUntilLoaded() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        while(isEmpty()) {
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                throw new AssertionError("Interrupted while waiting for nodes to load...");
+            }
+            if(stopwatch.elapsed(TimeUnit.SECONDS) > 10) {
+                throw new AssertionError("Timed out while waiting for nodes to load...");
+            }
+        }
+    }
+    
     /**
      * Advances to the next node in the tree using the Keyboard
      * so that we don't have problems with scrolling
@@ -111,11 +142,15 @@ public class GxtTree {
 
 
     private FluentIterable<GxtNode> findRootNodes() {
-        return container.findElements(By.xpath("table/tbody/tr/td/div[@role = 'presentation']")).as(GxtNode.class);
+        return container.findElements(By.xpath(xPathProvider.root())).as(GxtNode.class);
     }
     
     private Optional<GxtNode> firstRootNode() {
-        return container.findElements(By.xpath("table/tbody/tr/td/div[@role = 'presentation'][1]")).as(GxtNode.class).first();
+        return container.findElements(By.xpath(xPathProvider.firstRoot())).as(GxtNode.class).first();
+    }
+
+    public boolean isEmpty() {
+        return findRootNodes().isEmpty();
     }
 
 
@@ -148,6 +183,7 @@ public class GxtTree {
 
 
     public static class GxtNode {
+
         private FluentElement element;
 
         /**
@@ -158,9 +194,19 @@ public class GxtTree {
         public GxtNode(FluentElement element) {
             this.element = element;
         }
-        
+
         private XPathBuilder treeItem() {
-            return element.find().child().div(withRole("treeitem"));
+
+            XPathBuilder treeItem = element.find().child().div(withRole("treeitem"));
+            if (treeItem.exists()) { // tree
+                return treeItem;
+            }
+            treeItem = element.find().child().div(withClass("x-tree3-el"));
+            if (treeItem.exists()) { // tree grid
+                return treeItem;
+            }
+
+            throw new RuntimeException("Failed to find treeItem");
         }
         
         private XPathBuilder joint() {
@@ -173,7 +219,10 @@ public class GxtTree {
                 return false;
             }
             try {
-                return !joint.get().style().hasValue("background");
+                String style = joint.get().attribute("style");
+                boolean leaf = !style.contains("background");
+                System.out.println(getLabel() + ".leaf = " + leaf);
+                return leaf;
             } catch(StaleElementReferenceException e) {
                 return isLeaf();
             }
@@ -205,17 +254,20 @@ public class GxtTree {
 
             Stopwatch stopwatch = Stopwatch.createStarted();
             while(stopwatch.elapsed(TimeUnit.SECONDS) < 90) {
-                if(isExpanded() || isLeaf()) {
+                if(isExpanded()) {
                     break;
                 }
-                expand();
+                if(isLeaf()) {
+                    break;
+                }
+                tryExpand();
 
                 int checksRemaining = 5;
                 while(checksRemaining > 0) {
-                    sleep(250);
                     if(isExpanded() || isLeaf()) {
                         break;
                     }
+                    sleep(150);
                     checksRemaining --;
                 }
             }
@@ -229,8 +281,12 @@ public class GxtTree {
             }
         }
 
-        private void expand() {
-            joint().clickWhenReady();
+        private void tryExpand() {
+            try {
+                joint().first().click();
+            } catch (WebDriverException ignore) {
+                
+            }
         }
 
         public GxtNode search(String label) {
@@ -248,12 +304,6 @@ public class GxtTree {
             return null;
         }
 
-        private void waitUntilExpanded() {
-            if (!isExpanded()) {
-                expand();
-                childContainer().waitForFirst();
-            }
-        }
         
         private FluentElement checkbox() {
             return treeItem().img(withClass("x-tree3-node-check")).first();
@@ -283,6 +333,49 @@ public class GxtTree {
 
         public String getId() {
             return element.attribute("id");
+        }
+    }
+
+    public static interface XPathProvider {
+
+        public static final XPathProvider TREE_PROVIDER = new TreeXPathProvider();
+
+        public static final XPathProvider TREE_GRID_PROVIDER = new TreeGridXPathProvider();
+
+        String firstRoot();
+
+        String root();
+    }
+
+    public static class TreeXPathProvider implements XPathProvider {
+
+        private TreeXPathProvider() {
+        }
+
+        @Override
+        public String firstRoot() {
+            return root() + "[1]";
+        }
+
+        @Override
+        public String root() {
+            return "table/tbody/tr/td/div[@role = 'presentation']";
+        }
+    }
+
+    public static class TreeGridXPathProvider implements XPathProvider {
+
+        private TreeGridXPathProvider() {
+        }
+
+        @Override
+        public String firstRoot() {
+            return root() + "[1]";
+        }
+
+        @Override
+        public String root() {
+            return "descendant::div[@class='x-grid3-body']/descendant::table/tbody/tr/td/div/div[@class='x-tree3-node']";
         }
     }
 

@@ -41,6 +41,16 @@ public class PermissionOracle {
                getPermissionByUser(database, user).isAllowManageUsers();
     }
 
+    public boolean isVisible(ReportDefinition definition, User user) {
+        if(definition.getOwner().getId() == user.getId()) {
+            return true;
+        }
+        if(definition.getVisibility() == 1) {
+            UserPermission databasePermission = getPermissionByUser(definition.getDatabase(), user);
+            return databasePermission.isAllowView();
+        }
+        return false;
+    }
 
     public boolean isManagePartnersAllowed(UserDatabase db, User user) {
         UserPermission perm = getPermissionByUser(db, user);
@@ -92,7 +102,24 @@ public class PermissionOracle {
                     " site %d", user.getId(), site.getId()));
         }
     }
+    
+    public boolean isEditSiteAllowed(User user, Activity activity, Partner partner) {
+        UserPermission permission = getPermissionByUser(activity.getDatabase(), user);
+        if(permission.isAllowEditAll()) {
+            return true;
+        } else if(permission.isAllowEdit()) {
+            return partner.getId() == permission.getPartner().getId();
+        }
+        return false;
+    }
 
+    public void assertEditSiteAllowed(User user, Activity activity, Partner partner) {
+        if(!isEditSiteAllowed(user, activity, partner)) {
+            throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
+                    " sites in activity %d and partner %d", user.getId(), activity.getId(), partner.getId()));
+        }
+    }
+    
     /**
      * Returns true if the given user is allowed to edit the values of the
      * given site.
@@ -135,6 +162,7 @@ public class PermissionOracle {
             ownersPermission.setAllowEditAll(true);
             ownersPermission.setAllowManageAllUsers(true);
             ownersPermission.setAllowManageUsers(true);
+            ownersPermission.setUser(user);
             return ownersPermission;
         }
 
@@ -186,6 +214,9 @@ public class PermissionOracle {
 
         } else if(entity instanceof TargetValue) {
             assertDesignPrivileges(((TargetValue) entity).getTarget().getUserDatabase(), user);
+
+        } else if(entity instanceof LocationType) {
+            assertDesignPrivileges(((LocationType) entity).getDatabase(), user);
 
         } else {
             LOGGER.log(Level.SEVERE, "Unable to determine permissions for deleting entity of type " + 

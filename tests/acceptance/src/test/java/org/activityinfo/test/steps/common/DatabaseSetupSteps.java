@@ -1,20 +1,20 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import cucumber.api.PendingException;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.ObjectType;
+import org.activityinfo.test.driver.Property;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.activityinfo.test.driver.Property.name;
@@ -22,10 +22,7 @@ import static org.activityinfo.test.driver.Property.property;
 
 @ScenarioScoped
 public class DatabaseSetupSteps {
-    
-    @Inject
-    private ApiApplicationDriver setupDriver;
-    
+
     @Inject
     private ApplicationDriver driver;
     
@@ -33,9 +30,10 @@ public class DatabaseSetupSteps {
     private Accounts accounts;
     
     private String currentDatabase;
+    private String currentForm;
     
     private int targetIndex = 1;
-    
+
     @After
     public final void cleanUp() throws Exception {
         driver.cleanup();
@@ -52,6 +50,16 @@ public class DatabaseSetupSteps {
     @Given("^I have created a form named \"(.*)\" in \"(.*)\"$")
     public void I_have_created_a_form_named_in(String formName, String databaseName) throws Throwable {
         driver.setup().createForm(name(formName), property("database", databaseName));
+        
+        this.currentForm = formName;
+    }
+
+    @Given("^I have created a monthly form named \"([^\"]*)\"$")
+    public void I_have_created_a_monthly_form_named(String formName) throws Throwable {
+        driver.setup().createForm(name(formName), 
+                property("database", currentDatabase),
+                property("reportingFrequency", "monthly"));
+
     }
 
     @Given("^I have created a form named \"([^\"]*)\" with location type \"([^\"]*)\"$")
@@ -67,12 +75,31 @@ public class DatabaseSetupSteps {
         I_have_created_a_form_named_in(formName, getCurrentDatabase());
     }
 
-    @Given("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\"$")
-    public void I_have_created_a_quantity_field_in(String fieldName, String formName) throws Throwable {
+    @Given("^I have created a (text|quantity) field \"([^\"]*)\" in \"([^\"]*)\"$")
+    public void I_have_created_a_field_in(String fieldType, String fieldName, String formName) throws Throwable {
         driver.setup().createField(
                 property("form", formName),
                 property("name", fieldName),
-                property("type", "quantity"));
+                property("type", fieldType));
+    }
+
+
+    @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
+    public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
+        Preconditions.checkState(currentForm != null, "Create a form first");
+        
+        I_have_created_a_field_in(fieldType, fieldName, currentForm);
+    }
+    
+    @Given("^I have created a enumerated field \"([^\"]*)\" with items:$")
+    public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Throwable {
+        Preconditions.checkState(currentForm != null, "No current form");
+        
+        driver.setup().createField(
+                property("form", currentForm),
+                property("name", fieldName),
+                property("type", "enumerated"),
+                property("items", items));
     }
 
     @Given("^I have submitted a \"([^\"]*)\" form with:$")
@@ -207,6 +234,45 @@ public class DatabaseSetupSteps {
                 property("name", name),
                 property("locationType", locationType),
                 property("code", code));
+    }
+
+    @Then("^Location type \"(.*?)\" should be visible\\.$")
+    public void location_type_should_appear_in_tree(String locationTypeName) throws Throwable {
+        driver.assertVisible(ObjectType.LOCATION_TYPE, true,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @When("^I have removed the location type \"(.*?)\"$")
+    public void i_have_removed_the_location_type_in(String locationTypeName) throws Throwable {
+        driver.delete(ObjectType.LOCATION_TYPE,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @Then("^Location type \"(.*?)\" is no longer visible\\.$")
+    public void location_type_should_disappear_from_tree(String locationTypeName) throws Throwable {
+        driver.assertVisible(ObjectType.LOCATION_TYPE, false,
+                new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @Given("^I have imported (\\d+) locations into \"([^\"]*)\"$")
+    public void I_have_imported_locations_into(int locationCount, String locationType) throws Throwable {
+        for(int i=0;i<locationCount;++i) {
+            driver.setup().createLocation(
+                    property("locationType", locationType),
+                    property("name", "Location " + i),
+                    property("code", "LOC" + i));
+        }
+    }
+
+    @And("^I open a new session as (.+)$")
+    public void I_open_a_new_session_as_(String user) throws Throwable {
+        driver.login(accounts.ensureAccountExists(user));
     }
 
 

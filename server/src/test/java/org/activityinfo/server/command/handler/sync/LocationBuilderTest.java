@@ -22,29 +22,37 @@ package org.activityinfo.server.command.handler.sync;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.data.RpcMap;
 import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
+import org.activityinfo.legacy.shared.command.GetSyncRegions;
+import org.activityinfo.legacy.shared.command.result.SyncRegion;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
+import org.activityinfo.legacy.shared.command.result.SyncRegions;
+import org.activityinfo.server.command.handler.GetSyncRegionsHandler;
+import org.activityinfo.server.command.handler.UpdateEntityHandler;
+import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
+import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @Modules({
-        MockHibernateModule.class,
-        LoggingModule.class
+        TestHibernateModule.class,
 })
 public class LocationBuilderTest {
 
@@ -93,9 +101,45 @@ public class LocationBuilderTest {
         update = builder.build(new User(), request);
 
         assertThat(update.isComplete(), equalTo(true));
-        assertThat(update.getVersion(), equalTo("500")); // second chunk
+        assertThat(update.getVersion(), equalTo("3")); // second chunk
         assertThat(update.getSql(), containsString("Boga"));
 
+    }
+
+
+    @Test
+    @OnDataSet("/dbunit/sites-simple1.db.xml")
+    public void locationTypeChange() throws Exception {
+
+        EntityManager em = emf.createEntityManager();
+        
+        User user = em.find(User.class, 1);
+        
+        // Update the location type 1
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("name", "Ishamael");
+        
+        em.getTransaction().begin();
+        LocationTypePolicy locationTypePolicy = new LocationTypePolicy(em);
+        locationTypePolicy.update(user, 1, new PropertyMap(changes)); 
+        em.getTransaction().commit();
+
+
+        // First update should include this change
+        String regionId = "location/" + 1;
+        LocationUpdateBuilder builder = new LocationUpdateBuilder(em);
+        GetSyncRegionUpdates request = new GetSyncRegionUpdates(regionId, null);
+        SyncRegionUpdate update = builder.build(user, request);
+        assertThat(update.isComplete(), equalTo(true));
+        assertThat(update.getSql(), containsString("Ishamael"));
+        
+        // We should be up to date now...
+        GetSyncRegionsHandler getSyncRegionsHandler = new GetSyncRegionsHandler(em);
+        SyncRegions syncRegions = getSyncRegionsHandler.execute(new GetSyncRegions(), user);
+        
+        System.out.println(syncRegions.getList());
+        
+        assertThat(syncRegions, hasItem(new SyncRegion(regionId, update.getVersion())));
     }
 
 }

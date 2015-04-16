@@ -5,25 +5,29 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.StaleElementReferenceException;
 
 public class DesignTab {
 
     private final FluentElement container;
     private GxtTree databaseTree;
-    
+
     public DesignTab(FluentElement container) {
         this.container = container;
         this.databaseTree = GxtPanel.find(container, "Setup").tree();
     }
     
     public DesignTab selectDatabase(String databaseName) {
-        Optional<GxtTree.GxtNode> selected = databaseTree.findSelected();
-        if(!selected.isPresent() || !selected.get().getLabel().equals(databaseName)) {
-            databaseTree.select("Databases", databaseName);
+
+        while(true) {
+            try {
+                Optional<GxtTree.GxtNode> selected = databaseTree.findSelected();
+                if (!selected.isPresent() || !selected.get().getLabel().equals(databaseName)) {
+                    databaseTree.select("Databases", databaseName);
+                }
+                return this;
+            } catch (StaleElementReferenceException ignored) {}
         }
-        return this;
     }
     
     private GalleryView gallery() {
@@ -33,5 +37,10 @@ public class DesignTab {
     public TargetsPage targets() {
         gallery().select("Target");
         return new TargetsPage(container);
+    }
+
+    public DesignPage design() {
+        gallery().select("Design");
+        return new DesignPage(container);
     }
 }

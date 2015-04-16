@@ -5,22 +5,19 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.form.tree.AsyncFormTreeBuilder;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.core.shared.model.AiLatLng;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
-import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.model.formTree.TFormTree;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Matchers;
@@ -67,6 +64,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     public static final ResourceId VILLAGE_CLASS = CuidAdapter.locationFormClass(VILLAGE_TYPE_ID);
 
     public static final int IRUMU = 21;
+
 
     private ResourceLocatorAdaptor resourceLocator;
 
@@ -274,7 +272,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
-        adapter.remove(Arrays.asList(instanceToDelete));
+        assertResolves(adapter.remove(Arrays.asList(instanceToDelete)));
 
         List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
 

@@ -38,7 +38,6 @@ import org.activityinfo.server.endpoint.jsonrpc.JsonRpcModule;
 import org.activityinfo.server.endpoint.kml.KmlModule;
 import org.activityinfo.server.endpoint.odk.ODKModule;
 import org.activityinfo.server.endpoint.rest.RestApiModule;
-import org.activityinfo.server.event.EventModule;
 import org.activityinfo.server.geo.GeometryModule;
 import org.activityinfo.server.login.LoginModule;
 import org.activityinfo.server.mail.MailModule;
@@ -48,8 +47,8 @@ import org.activityinfo.server.util.blob.BlobServiceModule;
 import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.jaxrs.JaxRsModule;
 import org.activityinfo.server.util.locale.LocaleModule;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.activityinfo.server.util.monitoring.MonitoringModule;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.servlet.ServletContextEvent;
 import java.util.logging.Logger;
@@ -70,11 +69,11 @@ public class StartupListener extends GuiceServletContextListener {
     }
 
     @Override
+    @Timed(name = "startup", kind = "getInjector")
     protected Injector getInjector() {
 
         return Guice.createInjector(new HibernateModule(),
                 new ConfigModule(),
-                new LoggingModule(),
                 new TemplateModule(),
                 new MailModule(),
                 new ServerDatabaseModule(),
@@ -83,7 +82,6 @@ public class StartupListener extends GuiceServletContextListener {
                 new AuthenticationModule(),
                 new AttachmentModule(),
                 new ReportModule(),
-                new EventModule(),
                 new DigestModule(),
                 new LoginModule(),
                 new GwtRpcModule(),

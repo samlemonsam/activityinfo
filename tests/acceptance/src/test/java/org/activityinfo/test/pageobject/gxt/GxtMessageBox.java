@@ -16,7 +16,10 @@ public class GxtMessageBox {
     }
 
     public static Optional<GxtMessageBox> get(FluentElement element) {
-        Optional<FluentElement> messageBox = element.root().find().div(withClass("ext-mb-icon")).ancestor().div("x-window").firstIfPresent();
+        Optional<FluentElement> messageBox = element.root().find()
+                .div(withClass("ext-mb-icon"))
+                .ancestor()
+                .div(withClass("x-window")).firstIfPresent();
         if(messageBox.isPresent()) {
             return Optional.of(new GxtMessageBox(messageBox.get()));
         } else {
@@ -29,7 +32,7 @@ public class GxtMessageBox {
     }
     
     public String getMessage() {
-        return element.findElement(By.className("mb-content")).text();
+        return element.findElement(By.className("ext-mb-content")).text();
     }
     
 }

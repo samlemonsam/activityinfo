@@ -31,8 +31,8 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.*;
@@ -43,14 +43,12 @@ import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.Collector;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
-import org.activityinfo.server.command.handler.sync.TimestampHelper;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.TestSqliteDatabase;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.Location;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
-import org.activityinfo.server.util.logging.LoggingModule;
 import org.activityinfo.ui.client.local.LocalModuleStub;
 import org.activityinfo.ui.client.local.sync.pipeline.InstallPipeline;
 import org.hamcrest.CoreMatchers;
@@ -71,13 +69,13 @@ import java.util.logging.Logger;
 import static org.activityinfo.legacy.shared.command.UpdateMonthlyReports.Change;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
 @Modules({
-        MockHibernateModule.class,
+        TestHibernateModule.class,
         GwtRpcModule.class,
-        LoggingModule.class
 })
 public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Inject
@@ -88,12 +86,10 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         Logger.getLogger("org.hibernate").setLevel(Level.ALL);
     }
 
-    private long nowIsh;
-
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void run() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
 
         Collector<Date> lastUpdate = Collector.newCollector();
         syncHistoryTable.get(lastUpdate);
@@ -179,10 +175,9 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @OnDataSet("/dbunit/locations.db.xml")
     public void locationsAreChunked() throws SQLException, InterruptedException {
         addLocationsToServerDatabase(220);
-        synchronizeFirstTime();
+        synchronize();
 
-        assertThat(
-                Integer.valueOf(queryString("select count(*) from Location")),
+        assertThat(Integer.valueOf(queryString("select count(*) from Location")),
                 equalTo(221));
 
         // update a location on the server
@@ -191,15 +186,11 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
                 "select l from Location l where l.name = 'Penekusu 26'")
                 .getSingleResult();
         location.setAxe("Motown");
-        location.setTimeEdited(new Date().getTime());
+        location.setVersion(location.getLocationType().incrementVersion());
         serverEm.getTransaction().commit();
 
         newRequest();
         synchronize();
-
-        // todo: store milliseconds in mysql rather than as
-        // date time which has resolution limited to 1 second
-        Thread.sleep(1000);
 
         assertThat(
                 queryInt("select count(*) from Location where Name='Penekusu 26'"),
@@ -212,9 +203,9 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         Location newLocation = new Location();
         int locationId = keyGenerator.generateInt();
         newLocation.setName("Bukavu");
-        newLocation.setTimeEdited(new Date().getTime());
         newLocation.setId(123456789);
         newLocation.setLocationType(serverEm.find(LocationType.class, 1));
+        newLocation.setVersion(newLocation.getLocationType().incrementVersion());
         newLocation.setId(locationId);
         serverEm.getTransaction().begin();
         serverEm.persist(newLocation);
@@ -232,14 +223,14 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void testGetAdminEntities() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
         executeLocally(new GetAdminEntities(1));
     }
 
     @Test
     @OnDataSet("/dbunit/monthly-calc-indicators.db.xml")
     public void updateMonthlyReports() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
 
         int siteId = 1;
 
@@ -331,41 +322,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
 
     }
-
-    @Test
-    @OnDataSet("/dbunit/locations.db.xml")
-    public void timeStampSurvivesRoundTrip() {
-        EntityManager entityManager = serverEntityManagerFactory
-                .createEntityManager();
-        entityManager.getTransaction().begin();
-        Location loc = new Location();
-        loc.setTimeEdited(nowIsh += 1500);
-        loc.setName("Penekusu");
-        loc.setLocationType(entityManager.find(LocationType.class, 1));
-        entityManager.persist(loc);
-        entityManager.getTransaction().commit();
-        entityManager.clear();
-
-        entityManager.getTransaction().begin();
-        Location loc2 = entityManager.find(Location.class, loc.getId());
-
-        String tsString = TimestampHelper.toString(loc2.getTimeEdited());
-        long ts = TimestampHelper.fromString(tsString);
-
-        assertFalse(loc2 == loc);
-        assertThat(loc2.getTimeEdited(), equalTo(ts));
-        entityManager.getTransaction().commit();
-        entityManager.clear();
-
-        entityManager.getTransaction().begin();
-        Location loc3 = entityManager.find(Location.class, loc.getId());
-
-        assertFalse(ts > loc3.getTimeEdited());
-        assertFalse(ts < loc3.getTimeEdited());
-
-        entityManager.close();
-
-    }
+    
 
     // AI-864 : we know that
     // 1) on customer side location is present but locationadminlink entry is absent.
@@ -435,13 +392,12 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
         final TestSqliteDatabase localDatabase = new TestSqliteDatabase("target/localdbtest"
                 + new java.util.Date().getTime());
-        EntityManager em = serverEntityManagerFactory.createEntityManager();
 
         // before sync, fill in db with locations
         int generatedLocationCount = 50000;
         final List<Integer> locationIds = addLocationsToServerDatabase(generatedLocationCount);
 
-        Dispatcher remoteDispatcher = new RemoteDispatcherStub(servlet, 5);
+        Dispatcher remoteDispatcher = new RemoteDispatcherStub(servlet);
 
         Injector clientSideInjector = Guice.createInjector(new LocalModuleStub(
                 AuthenticationModuleStub.getCurrentUser(),
@@ -487,7 +443,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Test
     @OnDataSet("/dbunit/sites-simple-with-unicode.db.xml")
     public void syncWithUnicodeInNames() throws SQLException, InterruptedException {
-        synchronizeFirstTime();
+        synchronize();
 
         Collector<Date> lastUpdate = Collector.newCollector();
         syncHistoryTable.get(lastUpdate);
@@ -517,24 +473,21 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
 
     private List<Integer> addLocationsToServerDatabase(int count) {
 
-        nowIsh = new Date().getTime();
-
         final List<Integer> locationIds = Lists.newArrayList();
 
-        EntityManager entityManager = serverEntityManagerFactory
-                .createEntityManager();
+        EntityManager entityManager = serverEntityManagerFactory.createEntityManager();
+        LocationType locationType = entityManager.find(LocationType.class, 1);
+
         entityManager.getTransaction().begin();
         for (int i = 1; i <= count; ++i) {
 
             Location loc = new Location();
             loc.setId(i + 10); // first 10 ids are used by data set
-            loc.setTimeEdited(nowIsh += 15000);
+            loc.setVersion(locationType.incrementVersion());
             loc.setName("Penekusu " + i);
-            loc.getAdminEntities().add(
-                    entityManager.getReference(AdminEntity.class, 2));
-            loc.getAdminEntities().add(
-                    entityManager.getReference(AdminEntity.class, 12));
-            loc.setLocationType(entityManager.find(LocationType.class, 1));
+            loc.getAdminEntities().add(entityManager.getReference(AdminEntity.class, 2));
+            loc.getAdminEntities().add(entityManager.getReference(AdminEntity.class, 12));
+            loc.setLocationType(locationType);
             entityManager.persist(loc);
             entityManager.flush();
 

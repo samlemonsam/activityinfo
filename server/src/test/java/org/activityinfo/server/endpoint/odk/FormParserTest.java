@@ -4,9 +4,8 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.fixtures.MockHibernateModule;
 import org.activityinfo.fixtures.Modules;
-import org.activityinfo.server.database.TestDatabaseModule;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,7 +15,7 @@ import static com.google.common.io.Resources.getResource;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(InjectionSupport.class)
-@Modules({TestDatabaseModule.class, MockHibernateModule.class})
+@Modules(TestHibernateModule.class)
 public class FormParserTest {
 
     @Inject

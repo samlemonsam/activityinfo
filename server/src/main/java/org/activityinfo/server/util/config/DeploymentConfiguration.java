@@ -60,4 +60,18 @@ public class DeploymentConfiguration {
     public boolean hasProperty(String key) {
         return !Strings.isNullOrEmpty(getProperty(key));
     }
+
+    public int getIntProperty(String key, int defaultValue) {
+        if(hasProperty(key)) {
+            String stringValue = getProperty(key);
+            try {
+                return Integer.parseInt(stringValue);
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException(String.format("Expected integer value for property '%s', found '%s'",
+                        key, stringValue));
+            }
+        } else {
+            return defaultValue;
+        }
+    }
 }

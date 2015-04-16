@@ -2,7 +2,10 @@ package org.activityinfo.test.pageobject.api;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
 
 public class XPathBuilder {
@@ -12,7 +15,8 @@ public class XPathBuilder {
         CHILD,
         DESCENDANT,
         ANCESTORS,
-        PARENT
+        PARENT,
+        FOLLOWING_SIBLING
     }
     
     private FluentElement context;
@@ -42,15 +46,33 @@ public class XPathBuilder {
         this.axis = Axis.ANCESTORS;
         return this;
     }
+    
+    public XPathBuilder followingSibling() {
+        this.axis = Axis.FOLLOWING_SIBLING;
+        return this;
+    }
 
 
     public XPathBuilder parent() {
         this.axis = Axis.PARENT;
         return this;
     }
-
+    
+    public XPathBuilder li(String... conditions) {
+        return tagName("li", conditions);
+    }
+    
     public XPathBuilder div(String... conditions) {
         return tagName("div", conditions);
+    }
+
+
+    public XPathBuilder p(String... conditions) {
+        return tagName("p", conditions);
+    }
+
+    public XPathBuilder ul(String... conditions) {
+        return tagName("ul", conditions);
     }
 
     public XPathBuilder span(String... conditions) {
@@ -60,6 +82,7 @@ public class XPathBuilder {
     public XPathBuilder button(String... conditions) {
         return tagName("button", conditions);
     }
+
 
     public XPathBuilder label(String... conditions) {
         return tagName("label", conditions);
@@ -75,6 +98,10 @@ public class XPathBuilder {
 
     public XPathBuilder td(String... conditions) {
         return tagName("td", conditions);
+    }
+
+    public XPathBuilder tr(String... conditions) {
+        return tagName("tr", conditions);
     }
 
     public XPathBuilder h4(String... conditions) {
@@ -143,6 +170,8 @@ public class XPathBuilder {
                 xpath.append("ancestor::");
             } else if(axis == Axis.PARENT) {
                 xpath.append("parent::");
+            } else if(axis == Axis.FOLLOWING_SIBLING) {
+                xpath.append("following-sibling::");
             }
             xpath.append(step);
         }
@@ -154,7 +183,7 @@ public class XPathBuilder {
         xpath.append("[1]");
         return By.xpath(xpath.toString());
     }
-
+    
     public FluentElement first() {
         try {
             return context.findElement(firstLocator());
@@ -189,6 +218,17 @@ public class XPathBuilder {
 
 
     public void clickWhenReady() {
-        first().clickWhenReady();
+        context.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                try {
+                    first().click();
+                    return true;
+
+                } catch (WebDriverException e) {
+                    return false;
+                }
+            }
+        });
     }
 }

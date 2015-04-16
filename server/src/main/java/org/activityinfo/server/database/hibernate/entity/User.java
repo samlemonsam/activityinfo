@@ -61,7 +61,9 @@ public class User implements java.io.Serializable {
         dateCreated = new Date();
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "UserId", unique = true, nullable = false)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.AUTO) 
+    @Column(name = "UserId", unique = true, nullable = false)
     public int getId() {
         return this.id;
     }
@@ -89,6 +91,7 @@ public class User implements java.io.Serializable {
     }
 
     @Column(name = "Organization", nullable = true, length = 100)
+    @Offline(sync = false)
     public String getOrganization() {
         return organization;
     }
@@ -98,6 +101,7 @@ public class User implements java.io.Serializable {
     }
 
     @Column(name = "Jobtitle", nullable = true, length = 100)
+    @Offline(sync = false)
     public String getJobtitle() {
         return jobtitle;
     }
@@ -107,6 +111,7 @@ public class User implements java.io.Serializable {
     }
 
     @Column(name = "EmailNotification", nullable = false)
+    @Offline(sync = false)
     public boolean isEmailNotification() {
         return this.emailNotification;
     }
@@ -115,7 +120,9 @@ public class User implements java.io.Serializable {
         this.emailNotification = emailNotification;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "invitedBy", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "invitedBy", nullable = true)
+    @Offline(sync = false)
     public User getInvitedBy() {
         return invitedBy;
     }
@@ -147,6 +154,7 @@ public class User implements java.io.Serializable {
      * @return The hashed password
      */
     @Column(name = "Password", length = 150)
+    @Offline(sync = false)    
     public String getHashedPassword() {
         return this.hashedPassword;
     }
@@ -165,6 +173,7 @@ public class User implements java.io.Serializable {
      * random 128-bit key that can be safely sent to the user by email.
      */
     @Column(length = 34, nullable = true)
+    @Offline(sync = false)
     public String getChangePasswordKey() {
         return changePasswordKey;
     }
@@ -177,6 +186,7 @@ public class User implements java.io.Serializable {
      * Gets the date on which the password key was issued; the application
      * should not let users change passwords with really old keys.
      */
+    @Offline(sync = false)
     public Date getDateChangePasswordKeyIssued() {
         return dateChangePasswordKeyIssued;
     }
@@ -206,6 +216,7 @@ public class User implements java.io.Serializable {
         return this.getEmail().equals(that.getEmail());
     }
 
+    @Offline(sync = false)
     @Temporal(TemporalType.DATE)
     public Date getDateCreated() {
         return dateCreated;

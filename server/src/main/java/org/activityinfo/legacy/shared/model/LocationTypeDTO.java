@@ -49,6 +49,8 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     private Integer databaseId;
     private List<AdminLevelDTO> adminLevels;
     private Extents countryBounds;
+    private long version;
+    private long childVersion;
 
     public LocationTypeDTO() {
     }
@@ -137,5 +139,19 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         this.countryBounds = countryBounds;
     }
 
+    public long getChildVersion() {
+        return childVersion;
+    }
 
+    public void setChildVersion(long childVersion) {
+        this.childVersion = childVersion;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
 }

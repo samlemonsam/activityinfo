@@ -26,22 +26,22 @@ import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
 import org.hamcrest.CoreMatchers;
@@ -190,10 +190,11 @@ public class GetSchemaTest extends CommandTestCase2 {
         assertTrue("no attributes case", schema.getActivityById(3).getAttributeGroups().size() == 0);
 
         ActivityDTO nfi = schema.getActivityById(1);
-        AttributeDTO[] attributes = nfi.getAttributeGroupById(1)
-                .getAttributes().toArray(new AttributeDTO[0]);
-
-        assertTrue("attributes are present", attributes.length == 2);
+        List<AttributeDTO> attributes = nfi.getAttributeGroupById(1).getAttributes();
+        
+        System.out.println(nfi.getAttributeGroupById(1).getName());
+        
+        assertThat("attributes are present", attributes, hasSize(2));
 
         AttributeDTO test = nfi.getAttributeById(1);
 
@@ -253,6 +254,6 @@ public class GetSchemaTest extends CommandTestCase2 {
             System.out.println(child.getStringValue(ApplicationProperties.LABEL_PROPERTY));
         }
 
-        assertThat(children.size(), equalTo(2));
+        assertThat(children, hasSize(4));
     }
 }

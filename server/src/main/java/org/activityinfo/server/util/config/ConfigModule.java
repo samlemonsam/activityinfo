@@ -32,7 +32,6 @@ import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.util.logging.Trace;
 
 import javax.servlet.ServletContext;
 import java.io.*;
@@ -57,7 +56,8 @@ public class ConfigModule extends ServletModule {
         }
     }
 
-    @Provides @Singleton @Trace
+    @Provides 
+    @Singleton
     public DeploymentConfiguration provideDeploymentConfig(ServletContext context) {
         Properties properties = new Properties();
 
@@ -96,7 +96,7 @@ public class ConfigModule extends ServletModule {
             }
             
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Exception while trying to read configuration properties from GCS", e);
+            logger.log(Level.INFO, "Could not read configuration properties from GCS: " + e.getMessage());
         }
     }
 

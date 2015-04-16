@@ -1,13 +1,12 @@
 package org.activityinfo.test.driver;
 
 
-import com.google.inject.ImplementedBy;
 import cucumber.api.DataTable;
-import cucumber.api.Pending;
 import cucumber.api.PendingException;
+import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
-import org.json.JSONException;
 
+import java.io.File;
 import java.util.List;
 
 public abstract class ApplicationDriver {
@@ -35,6 +34,14 @@ public abstract class ApplicationDriver {
     public final void createDatabase(Property... properties) throws Exception {
         createDatabase(new TestObject(aliasTable, properties));
     }
+    
+    public void enableOfflineMode() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public OfflineMode getCurrentOfflineMode() {
+        throw new UnsupportedOperationException();
+    }
 
     protected void createDatabase(TestObject database) throws Exception {
         throw new PendingException();
@@ -59,8 +66,16 @@ public abstract class ApplicationDriver {
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         throw new PendingException();
     }
-    
-    public void delete(String objectType, String name) throws Exception {
+
+    public void delete(ObjectType objectType, String name) throws Exception {
+        throw new PendingException();
+    }
+
+    public void delete(ObjectType objectType, Property... properties) throws Exception {
+        delete(objectType, new TestObject(aliasTable, properties));
+    }
+
+    public void delete(ObjectType objectType, TestObject testObject) throws Exception {
         throw new PendingException();
     }
 
@@ -95,6 +110,7 @@ public abstract class ApplicationDriver {
     public final void grantPermission(Property... properties) throws Exception {
         grantPermission(new TestObject(aliasTable, properties));
     }
+    
 
     protected void grantPermission(TestObject permission) throws Exception {
         throw new PendingException();
@@ -118,6 +134,37 @@ public abstract class ApplicationDriver {
     }
 
     protected void createLocation(TestObject testObject) throws Exception {
+        throw new PendingException();
+    }
+
+    public void assertVisible(ObjectType objectType, boolean exists, Property... properties) {
+        assertVisible(objectType, exists, new TestObject(aliasTable, properties));
+    }
+
+    public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
+        throw new PendingException();
+    }
+
+    public void synchronize() {
+        throw new UnsupportedOperationException();
+    }
+
+    public int countFormSubmissions(String formName) {
+        throw new PendingException();
+    }
+
+    public File exportForm(String formName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return the text of the history of the last site we modified
+     */
+    public List<HistoryEntry> getSubmissionHistory() {
+        throw new PendingException();
+    }
+
+    public void updateSubmission(List<FieldValue> values) throws InterruptedException, Exception {
         throw new PendingException();
     }
 }
