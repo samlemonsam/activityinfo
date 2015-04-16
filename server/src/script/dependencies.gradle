@@ -5,6 +5,8 @@ dependencies {
     compile project(':core:model')
     compile project(':core:services')
 
+    testCompile project(':core:model').sourceSets.test.output
+
     // AppEngine
     appengineSdk libraries.appengine.sdk
     compile libraries.appengine.api
