@@ -50,6 +50,7 @@ public class CountryCollection implements MappingProvider {
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
         mapping.setPrimaryKeyMapping(CuidAdapter.COUNTRY_DOMAIN, "countryId");
+        mapping.setOwnerId(ResourceId.ROOT_ID);
         mapping.addTextField(nameField, "name");
         mapping.addTextField(isoField, "iso2");
         mapping.addGeoAreaField(boundaryField);

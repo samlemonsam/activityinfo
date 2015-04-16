@@ -1,14 +1,25 @@
 package org.activityinfo.geoadmin.model;
 
 import com.bedatadriven.geojson.GeoJsonModule;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.GenericType;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.vividsolutions.jts.geom.Point;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormClassProvider;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.JsonFormTreeBuilder;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -22,12 +33,18 @@ import java.util.logging.Logger;
 /**
  * ActivityInfo REST Client
  */
-public class ActivityInfoClient {
+public class ActivityInfoClient implements FormClassProvider {
 
     public static final Logger LOGGER = Logger.getLogger(ActivityInfoClient.class.getName());
 
     private Client client;
     private URI root;
+
+    @Override
+    public FormClass getFormClass(ResourceId resourceId) {
+        Preconditions.checkArgument(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN);
+        return ActivityInfoClient.this.getFormClass(CuidAdapter.getLegacyIdFromCuid(resourceId));
+    }
 
     public static class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
@@ -251,5 +268,26 @@ public class ActivityInfoClient {
 
     public ObjectMapper getObjectMapper() {
         return new ObjectMapperProvider().getContext(ObjectMapper.class);
+    }
+    
+    
+    public FormClass getFormClass(int adminLevelId) {
+        String json = formResource(adminLevelId).path("class").get(String.class);
+
+        return FormClass.fromResource(Resources.fromJson(json));
+    }
+
+
+
+    public FormTree getFormTree(int adminLevelId) {
+        String json = formResource(adminLevelId).path("tree").get(String.class);
+        JsonObject object = new Gson().fromJson(json, JsonObject.class);
+        return JsonFormTreeBuilder.fromJson(object);
+    }
+    
+    private WebResource formResource(int adminLevelId) {
+        return client.resource(root)
+                .path("form")
+                .path(CuidAdapter.adminLevelFormClass(adminLevelId).toString());
     }
 }

@@ -3,8 +3,8 @@ package org.activityinfo.model.formTree;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by alex on 3/26/14.
+ * Dumps a FormTree to the console for debugging purposes
  */
 public class FormTreePrettyPrinter {
 
@@ -74,9 +74,7 @@ public class FormTreePrettyPrinter {
         }
         return formClasses;
     }
-
-
-
+    
     private String classNode(List<FormClass> formClasses) {
 
         StringBuilder sb = new StringBuilder("[");

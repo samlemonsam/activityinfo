@@ -1,12 +1,21 @@
 package org.activityinfo.geoadmin.merge;
 
-import javax.swing.table.AbstractTableModel;
+import org.activityinfo.model.formTree.FormTree;
 
-/**
- * Created by alex on 15-4-15.
- */
+import javax.swing.table.AbstractTableModel;
+import java.util.List;
+
+
 public class MergeTableModel extends AbstractTableModel {
+
+    private final FormTree targetTree;
+    private final List<FormTree.Node> targetLeaves;
+    private FormTree sourceTree;
     
+    public MergeTableModel(FormTree targetTree) {
+        this.targetTree = targetTree;
+        this.targetLeaves = targetTree.getLeaves();
+    }
     
     @Override
     public int getRowCount() {

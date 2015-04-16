@@ -1,5 +1,6 @@
 package org.activityinfo.service.store;
 
+import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
 
 /**

@@ -2,10 +2,10 @@ package org.activityinfo.store.query.output;
 
 import com.google.gson.stream.JsonWriter;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -13,12 +13,16 @@ import java.util.Map;
 /**
  * Writes a {@code ColumnSet} to an array of JSON Objects
  */
-public class ColumnSetJsonWriter {
+public class RowBasedJsonWriter {
 
     private final JsonWriter writer;
 
-    public ColumnSetJsonWriter(JsonWriter writer) {
+    public RowBasedJsonWriter(JsonWriter writer) {
         this.writer = writer;
+    }
+
+    public RowBasedJsonWriter(Writer writer) {
+        this.writer = new JsonWriter(writer);
     }
 
     public void write(ColumnSet columnSet) throws IOException {
@@ -32,7 +36,7 @@ public class ColumnSetJsonWriter {
 
             writer.beginObject();
             for(int colIndex=0;colIndex!=numCols;++colIndex) {
-                writers[rowIndex].write(rowIndex);
+                writers[colIndex].write(rowIndex);
             }
             writer.endObject();
         }
@@ -49,6 +53,7 @@ public class ColumnSetJsonWriter {
         int index = 0;
         for (Map.Entry<String, ColumnView> column : columnSet.getColumns().entrySet()) {
             writers[index] = createWriter(column.getKey(), column.getValue());
+            index++;
         }
         return writers;
     }

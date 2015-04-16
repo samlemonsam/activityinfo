@@ -8,12 +8,12 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
-import org.activityinfo.store.mysql.mapping.TableMapping;
-import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
+import org.activityinfo.store.mysql.mapping.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
 
 /**
  * Provides access to collections of administrative entities
@@ -38,7 +38,7 @@ public class AdminCollectionProvider implements MappingProvider {
                 "SELECT " +
                         "L.Name, " +
                         "L.parentId ParentId, " +
-                        "P.Name ParentLevelName " +
+                        "P.Name ParentLevelName, " +
                         "L.CountryId " +
                         "FROM adminlevel L " +
                         "LEFT JOIN adminlevel P ON (L.parentId = P.AdminLevelId) " +
@@ -49,11 +49,17 @@ public class AdminCollectionProvider implements MappingProvider {
             }
 
             FormField label = new FormField(CuidAdapter.field(formClassId, CuidAdapter.NAME_FIELD));
-            label.setCode("name");
             label.setLabel(I18N.CONSTANTS.name());
+            label.setCode("name");
             label.setRequired(true);
             label.setType(TextType.INSTANCE);
 
+            FormField code = new FormField(CuidAdapter.field(formClassId, CuidAdapter.CODE_FIELD));
+            code.setCode("code");
+            code.setLabel(I18N.CONSTANTS.codeFieldLabel());
+            code.setRequired(true);
+            code.setType(TextType.INSTANCE);            
+            
             FormField parent = null;
             int parentId = rs.getInt("parentId");
             if(!rs.wasNull()) {
@@ -66,12 +72,15 @@ public class AdminCollectionProvider implements MappingProvider {
 
             // TODO: geometry
             TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, ADMIN_ENTITY_TABLE);
+            mapping.setOwnerId(ResourceId.ROOT_ID);
             mapping.setPrimaryKeyMapping(CuidAdapter.ADMIN_ENTITY_DOMAIN, "adminEntityId");
+            mapping.setBaseFilter("base.AdminLevelId=" + CuidAdapter.getLegacyIdFromCuid(formClassId));
             mapping.setFormLabel(rs.getString("Name"));
             mapping.addTextField(label, "name");
+            mapping.addTextField(code, "code");
 
             if(parent != null) {
-                mapping.addReferenceField(parent, CuidAdapter.ADMIN_ENTITY_DOMAIN, "admin");
+                mapping.add(new FieldMapping(parent, "adminEntityParentId", new ForeignKeyExtractor(ADMIN_ENTITY_DOMAIN)));
             }
             return mapping.build();
         }

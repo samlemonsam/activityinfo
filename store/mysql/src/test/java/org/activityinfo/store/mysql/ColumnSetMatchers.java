@@ -51,10 +51,7 @@ public class ColumnSetMatchers {
                 description.appendText("column with " + length + " null values");
             }
         };
-        
     }
-    
-    
     
     public static TypeSafeMatcher<ColumnView> hasValues(ResourceId... values) {
         String[] strings = new String[values.length];

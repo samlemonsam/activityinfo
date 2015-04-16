@@ -31,6 +31,8 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.model.*;
 import org.activityinfo.server.util.monitoring.Timed;
@@ -56,15 +58,17 @@ public class AdminLevelResource {
 
     private static final Logger LOGGER = Logger.getLogger(AdminLevelResource.class.getName());
 
-    private Provider<EntityManager> entityManager;
-    private AdminLevel level;
+    private final HibernateQueryExecutor queryExecutor;
+    private final Provider<EntityManager> entityManager;
+    private final AdminLevel level;
 
 
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
-    public AdminLevelResource(Provider<EntityManager> entityManager, AdminLevel level) {
+    public AdminLevelResource(HibernateQueryExecutor queryExecutor, Provider<EntityManager> entityManager, AdminLevel level) {
         super();
+        this.queryExecutor = queryExecutor;
         this.entityManager = entityManager;
         this.level = level;
     }
@@ -81,6 +85,11 @@ public class AdminLevelResource {
         return level;
     }
 
+    @Path("/form")
+    public FormResource getForm() {
+        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), queryExecutor);
+    }
+    
     @DELETE
     public Response deleteLevel(@InjectParam AuthenticatedUser user) {
         assertAuthorized(user);

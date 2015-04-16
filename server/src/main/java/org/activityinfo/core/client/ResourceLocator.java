@@ -3,8 +3,9 @@ package org.activityinfo.core.client;
 
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.formTree.AsyncFormClassProvider;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -13,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public interface ResourceLocator {
+public interface ResourceLocator extends AsyncFormClassProvider {
 
     /**
      * Fetches the user form.

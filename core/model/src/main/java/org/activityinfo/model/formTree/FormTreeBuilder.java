@@ -1,11 +1,9 @@
-package org.activityinfo.store.query.impl;
+package org.activityinfo.model.formTree;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.service.store.FormClassProvider;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -50,9 +48,10 @@ public class FormTreeBuilder {
     private void fetchChildren(FormTree.Node parent, Set<ResourceId> formClassIds)  {
         for(ResourceId childClassId : formClassIds) {
             FormClass childClass = store.getFormClass(childClassId);
+            assert childClass != null;
             for(FormField field : childClass.getFields()) {
                 FormTree.Node childNode = parent.addChild(childClass, field);
-                if(childNode.hasChildren()) {
+                if(childNode.isReference()) {
                    fetchChildren(childNode, childNode.getRange());
                 }
             }

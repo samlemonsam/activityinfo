@@ -1,7 +1,12 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.io.Resources;
+import com.google.gson.JsonObject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -15,9 +20,10 @@ import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.activityinfo.model.legacy.CuidAdapter.adminLevelFormClass;
 import static org.activityinfo.model.legacy.CuidAdapter.partnerInstanceId;
-import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
+import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.junit.Assert.assertThat;
 
 
@@ -26,6 +32,7 @@ public class MySqlCatalogTest {
     private static DbUnit dbunit;
     private static ColumnSetBuilder executor;
     private ColumnSet columnSet;
+    private static CollectionCatalog catalogProvider;
 
     @BeforeClass
     public static void setup() throws Throwable {
@@ -37,7 +44,7 @@ public class MySqlCatalogTest {
         dbunit.openDatabase();
         dbunit.dropAllRows();
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "sites-simple1.db.xml"));
-        CollectionCatalog catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
+        catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
         executor = new ColumnSetBuilder(catalogProvider, ColumnCache.NULL);
     }
 
@@ -65,6 +72,24 @@ public class MySqlCatalogTest {
 
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
     }
+    @Test
+    public void testAdmin() {
+        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code");
+        assertThat(column("province.name"), hasValues("Ituri", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
+        assertThat(column("name"), hasValues("Bukavu", "Walungu", "Shabunda", "Kalehe", "Irumu"));
+        assertThat(column("code"), hasValues( "203", "201", "202", "203", "203"));
+    }
+    
+    @Test
+    public void testAdminTree() {
+        FormTreeBuilder builder = new FormTreeBuilder(catalogProvider);
+        FormTree formTree = builder.queryTree(adminLevelFormClass(2));
+        JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
+        formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
+
+        FormTreePrettyPrinter.print(formTree);
+    }
+    
 
     @Test
     public void testSiteSimple() {

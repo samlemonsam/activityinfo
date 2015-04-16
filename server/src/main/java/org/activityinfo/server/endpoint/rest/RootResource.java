@@ -30,7 +30,9 @@ import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.DTOViews;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
@@ -41,7 +43,6 @@ import org.codehaus.jackson.map.annotate.JsonView;
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
@@ -51,15 +52,17 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-
+    private HibernateQueryExecutor queryExecutor;
+    
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config) {
+                        DeploymentConfiguration config, HibernateQueryExecutor queryExecutor) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.config = config;
+        this.queryExecutor = queryExecutor;
     }
 
     @Path("/adminEntity/{id}")
@@ -67,7 +70,8 @@ public class RootResource {
         return new AdminEntityResource(entityManager.get().find(AdminEntity.class, id));
     }
 
-    @GET @Path("/countries")
+    @GET 
+    @Path("/countries")
     @JsonView(DTOViews.List.class)
     @Produces(MediaType.APPLICATION_JSON)
     public List<CountryDTO> getCountries() {
@@ -106,7 +110,8 @@ public class RootResource {
         return new CountryResource(results.get(0));
     }
 
-    @GET @Path("/databases") 
+    @GET 
+    @Path("/databases") 
     @JsonView(DTOViews.List.class) 
     @Produces(MediaType.APPLICATION_JSON)
     public List<UserDatabaseDTO> getDatabases() {
@@ -121,7 +126,7 @@ public class RootResource {
 
     @Path("/adminLevel/{id}")
     public AdminLevelResource getAdminLevel(@PathParam("id") int id) {
-        return new AdminLevelResource(entityManager, entityManager.get().find(AdminLevel.class, id));
+        return new AdminLevelResource(queryExecutor, entityManager, entityManager.get().find(AdminLevel.class, id));
     }
 
     @Path("/sites")
@@ -140,7 +145,7 @@ public class RootResource {
     }
 
     @Path("/form/{id}")
-    public FormResource getForm(@PathParam("id") String id) {
-        return new FormResource(id);
+    public FormResource getForm(@PathParam("id") ResourceId id) {
+        return new FormResource(id, queryExecutor);
     }
 }

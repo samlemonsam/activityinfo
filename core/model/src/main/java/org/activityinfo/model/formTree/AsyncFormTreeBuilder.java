@@ -1,13 +1,10 @@
-package org.activityinfo.core.client.form.tree;
+package org.activityinfo.model.formTree;
 
 import com.google.common.base.Function;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.criteria.FormClassSet;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
 import java.util.Collections;
@@ -20,9 +17,9 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
 
     private static final Logger LOGGER = Logger.getLogger(AsyncFormTreeBuilder.class.getName());
 
-    private final ResourceLocator locator;
+    private final AsyncFormClassProvider locator;
 
-    public AsyncFormTreeBuilder(ResourceLocator locator) {
+    public AsyncFormTreeBuilder(AsyncFormClassProvider locator) {
         this.locator = locator;
     }
 
@@ -67,7 +64,7 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
                     addChildrenToNode(node, formClass);
 
                     outstandingRequests--;
-                    if(outstandingRequests == 0) {
+                    if (outstandingRequests == 0) {
                         callback.onSuccess(tree);
                     }
                 }
@@ -76,7 +73,7 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
 
         /**
          * Now that we have the actual FormClass model that corresponds to this node's
-         * formClassId, add it's children.
+         * formClassId, add its children.
          *
          */
         private void addChildrenToNode(FormTree.Node node, FormClass formClass) {
@@ -94,9 +91,7 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
         }
 
         private void queueNextRequests(FormTree.Node child) {
-            FormClassSet classSet = FormClassSet.of(child.getRange());
-            assert classSet.isClosed() : "trees for open class ranges not yet implemented";
-            for(ResourceId classId : classSet.getElements()) {
+            for(ResourceId classId : child.getRange()) {
                 requestFormClassForNode(child, classId);
             }
         }
