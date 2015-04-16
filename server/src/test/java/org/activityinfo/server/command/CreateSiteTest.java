@@ -207,7 +207,7 @@ public class CreateSiteTest extends CommandTestCase2 {
         Assert.assertEquals(null, secondRead.getIndicatorValue(1));
         Assert.assertEquals(null, secondRead.getIndicatorValue(2));
         Assert.assertEquals(0d, secondRead.getIndicatorValue(11));
-        Assert.assertEquals(null, secondRead.getIndicatorValue(12));
+        Assert.assertEquals(Double.NaN, secondRead.getIndicatorValue(12));
 
     }
 

@@ -141,11 +141,6 @@ public class ExprParserTest {
         evaluate("3*(400/100)", 12);
     }
 
-    @Test(expected = NotNumberException.class)
-    public void evaluateNanExpr() {
-        evaluate("0/0", 100);
-    }
-
     private void expect(String string, Token... tokens) {
         System.out.println("Tokenizing [" + string + "]");
         ExprLexer tokenizer = new ExprLexer(string);

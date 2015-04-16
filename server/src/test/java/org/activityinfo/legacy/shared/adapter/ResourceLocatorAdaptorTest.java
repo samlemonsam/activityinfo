@@ -43,7 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
-@OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
+@OnDataSet("/dbunit/sites-simple1.db.xml")
 public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     private static final int CAUSE_ATTRIBUTE_GROUP_ID = 1;
@@ -121,6 +121,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     }
 
     @Test
+    @OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
     public void persistSiteWithCalculatedIndicators() {
         FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
                 NFI_DIST_FORM_CLASS);
@@ -159,7 +160,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertEquals(null, secondRead.getValue(path(indicatorField(1))));
         assertEquals(null, secondRead.getValue(path(indicatorField(2))));
         assertEquals(0d, secondRead.getValue(path(indicatorField(11))));
-        assertEquals(null, secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
+        assertEquals(Double.NaN, secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
     }
 
     private FieldPath path(ResourceId... fieldIds) {
