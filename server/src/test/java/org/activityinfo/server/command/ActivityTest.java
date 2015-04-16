@@ -24,6 +24,7 @@ package org.activityinfo.server.command;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
@@ -37,6 +38,7 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.TFormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.TextType;
@@ -44,9 +46,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.database.hibernate.entity.AttributeGroup;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,13 +56,8 @@ import java.util.*;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.legacy.shared.adapter.CuidAdapter.activityFormClass;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
@@ -119,9 +113,9 @@ public class ActivityTest extends CommandTestCase2 {
     public void updateSortOrderTest() throws Throwable {
 
         /* Update Sort Order */
-        Map<String, Object> changes1 = new HashMap<String, Object>();
+        Map<String, Object> changes1 = Maps.newHashMap();
         changes1.put("sortOrder", 2);
-        Map<String, Object> changes2 = new HashMap<String, Object>();
+        Map<String, Object> changes2 = Maps.newHashMap();
         changes2.put("sortOrder", 1);
 
         execute(new BatchCommand(
@@ -139,7 +133,7 @@ public class ActivityTest extends CommandTestCase2 {
     public void updatePublished() throws Throwable {
 
         /* Update Sort Order */
-        Map<String, Object> changes = new HashMap<String, Object>();
+        Map<String, Object> changes = Maps.newHashMap();
         changes.put("published", Published.ALL_ARE_PUBLISHED.getIndex());
 
         execute(new UpdateEntity("Activity", 1, changes));
@@ -189,13 +183,13 @@ public class ActivityTest extends CommandTestCase2 {
 
         resourceLocator.persist(formClass);
 
-        FormClass reform = assertResolves(resourceLocator.getFormClass(formClass.getId()));
+        TFormClass reform = new TFormClass(assertResolves(resourceLocator.getFormClass(formClass.getId())));
 
-        System.out.println(Joiner.on("\n").join(reform.getFields()));
+        System.out.println(Joiner.on("\n").join(reform.getFormClass().getFields()));
 
-        int a = indexOf(reform.getFields(), hasProperty("label", equalTo("How old are you?")));
-        int b = indexOf(reform.getFields(), hasProperty("label", equalTo("Gender")));
-        int c = indexOf(reform.getFields(), hasProperty("label", equalTo("What is your name?")));
+        int a = reform.indexOfField("How old are you?");
+        int b = reform.indexOfField("Gender");
+        int c = reform.indexOfField("What is your name?");
 
         assertTrue(a < b && b < c);
 
@@ -295,11 +289,11 @@ public class ActivityTest extends CommandTestCase2 {
     public void updateIndicator() {
 
         ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
+        TFormClass formClass = new TFormClass(assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1))));
 
-        FormField beneficiaries = find(formClass.getFields(), hasProperty("label", equalTo("beneficiaries")));
+        FormField beneficiaries = formClass.getFieldByLabel("beneficiaries");
         beneficiaries.setLabel("Number of benes");
-        resourceLocator.persist(formClass);
+        resourceLocator.persist(formClass.getFormClass());
 
         ActivityDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("name", Matchers.equalTo("Number of benes")));
@@ -310,45 +304,16 @@ public class ActivityTest extends CommandTestCase2 {
     public void updateIndicatorWithLongUnits() {
 
         ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
+        TFormClass formClass = new TFormClass(assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1))));
 
-        FormField beneficiaries = find(formClass.getFields(), hasProperty("label", equalTo("beneficiaries")));
+        FormField beneficiaries = formClass.getFieldByLabel("beneficiaries");
         QuantityType updatedType = new QuantityType().setUnits("imperial tonne with very long qualifying text");
         beneficiaries.setType(updatedType);
-        resourceLocator.persist(formClass);
+        resourceLocator.persist(formClass.getFormClass());
 
         ActivityDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("units", Matchers.equalTo(updatedType.getUnits())));
     }
-
-
-    private <T> T find(List<T> list, Matcher<? super T> matcher) {
-
-        assertThat(list, hasItem(matcher));
-
-        for(T t : list) {
-            if(matcher.matches(t)) {
-                return t;
-            }
-        }
-        throw new AssertionError();
-    }
-
-
-
-    private <T> int indexOf(List<T> list, Matcher<? super T> matcher) {
-
-        assertThat(list, hasItem(matcher));
-
-        for(int i=0;i!=list.size();++i) {
-            if(matcher.matches(list.get(i))) {
-                return i;
-            }
-        }
-        throw new AssertionError();
-    }
-
-
 
     private ActivityDTO getActivity(int activityId) {
         return execute(new GetSchema()).getActivityById(activityId);
@@ -370,8 +335,6 @@ public class ActivityTest extends CommandTestCase2 {
         ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
 
-        int numFields = formClass.getElements().size();
-
         // Remove attribute
         ListIterator<FormElement> it = formClass.getElements().listIterator();
         while(it.hasNext()) {
@@ -385,7 +348,6 @@ public class ActivityTest extends CommandTestCase2 {
         // Ensure deleted
         SchemaDTO schema = execute(new GetSchema());
         assertTrue("Cause attribute is gone", schema.getAttributeGroupById(1) == null);
-
 
     }
 
