@@ -25,6 +25,7 @@ package org.activityinfo.legacy.shared.command.result;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.extjs.gxt.ui.client.data.ModelData;
 import org.activityinfo.legacy.shared.util.CollectionUtil;
+import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -37,14 +37,7 @@ import java.util.Set;
  *
  * @author Alex Bertram
  */
-@Entity @org.hibernate.annotations.FilterDefs({@org.hibernate.annotations.FilterDef(name = "userVisible",
-        parameters = {@org.hibernate.annotations.ParamDef(name = "currentUserId", type = "int")}),
-        @org.hibernate.annotations.FilterDef(name = "hideDeleted")})
-@org.hibernate.annotations.Filters({@org.hibernate.annotations.Filter(name = "userVisible",
-        condition = "(:currentUserId = OwnerUserId  " + "or :currentUserId in (select p.UserId from userpermission p " +
-                    "where p.AllowView and p.UserId=:currentUserId and p.DatabaseId=DatabaseId))"),
-        @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")})
-@NamedQuery(name = "queryAllUserDatabasesAlphabetically", query = "select db from UserDatabase db order by db.name")
+@Entity
 public class UserDatabase implements java.io.Serializable, Deleteable {
 
     private static final long serialVersionUID = 7405094318163898712L;
@@ -74,7 +67,9 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
         this.name = name;
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "DatabaseId", unique = true, nullable = false)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.AUTO) 
+    @Column(name = "DatabaseId", unique = true, nullable = false)
     public int getId() {
         return this.id;
     }
@@ -91,7 +86,8 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      *
      * @return The country assocatited with this database.
      */
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "CountryId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "CountryId", nullable = false)
     public Country getCountry() {
         return this.country;
     }
@@ -105,7 +101,8 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      * started. I.e. provides a minimum bound for the dates of
      * activities.
      */
-    @Temporal(TemporalType.DATE) @Column(name = "StartDate", length = 23)
+    @Temporal(TemporalType.DATE) 
+    @Column(name = "StartDate", length = 23)
     public Date getStartDate() {
         return this.startDate;
     }
@@ -141,7 +138,8 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
     /**
      * @return The user who owns this database
      */
-    @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "OwnerUserId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER) 
+    @JoinColumn(name = "OwnerUserId", nullable = false)
     public User getOwner() {
         return this.owner;
     }
@@ -173,7 +171,6 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "database")
     @org.hibernate.annotations.OrderBy(clause = "sortOrder")
-    @org.hibernate.annotations.Filter(name = "hideDeleted", condition = "DateDeleted is null")
     @BatchSize(size = DEFAULT_BATCH_SIZE)
     public Set<Activity> getActivities() {
         return this.activities;
@@ -226,7 +223,7 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
      */
     @Override @Transient
     public boolean isDeleted() {
-        return getDateDeleted() == null;
+        return getDateDeleted() != null;
     }
 
     /**
@@ -241,6 +238,7 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
         return new Date(version);
     }
 
+    @Offline(sync = false)
     public long getVersion() {
         return version;
     }
@@ -291,5 +289,9 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
     @Override
     public String toString() {
         return id + ": " + name;
+    }
+
+    public void updateVersion() {
+        setVersion(System.currentTimeMillis());
     }
 }

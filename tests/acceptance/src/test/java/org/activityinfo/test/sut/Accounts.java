@@ -7,6 +7,7 @@ public interface Accounts {
 
 
     UserAccount ensureAccountExists(String email);
-
+    
+    UserAccount any();
 
 }

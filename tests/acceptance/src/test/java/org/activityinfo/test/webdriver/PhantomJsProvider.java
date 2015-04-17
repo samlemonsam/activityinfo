@@ -1,10 +1,8 @@
 package org.activityinfo.test.webdriver;
 
-import com.google.common.base.Function;
 import com.google.inject.Singleton;
-import org.openqa.selenium.Dimension;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,19 +12,16 @@ public class PhantomJsProvider implements WebDriverProvider {
 
     public static final BrowserProfile BROWSER_PROFILE = new BrowserProfile(OperatingSystem.host(),
             BrowserVendor.CHROME, "phantom.js");
-    
-    private WebDriverPool pool = new WebDriverPool();
+
+    private final GenericObjectPool<PhantomJsInstance> pool;
 
     public PhantomJsProvider() {
-        pool = new WebDriverPool();
-        pool.setMaxTotalSize(1);
-        pool.setCreator(new Function<BrowserProfile, WebDriver>() {
+        pool = new GenericObjectPool<>(new PhantomJsFactory());
+        pool.setMaxTotal(3);
+        Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
-            public WebDriver apply(BrowserProfile input) {
-                WebDriver driver = new PhantomJSDriver();
-                driver.manage().window().setSize(new Dimension(1400,1000));
-
-                return driver;
+            public void run() {
+                pool.close();
             }
         });
     }
@@ -53,7 +48,11 @@ public class PhantomJsProvider implements WebDriverProvider {
 
     @Override
     public WebDriver start(String name, BrowserProfile profile) {
-        return pool.get(BROWSER_PROFILE);
+        try {
+            return new PooledPhantomJsDriver(pool, pool.borrowObject());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
