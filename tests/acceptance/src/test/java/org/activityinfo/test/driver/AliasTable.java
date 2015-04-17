@@ -4,11 +4,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -186,4 +188,7 @@ public class AliasTable {
         }
     }
 
+    public Map<String, Supplier<Integer>> getTestHandleToId() {
+        return Maps.newHashMap(testHandleToId);
+    }
 }
