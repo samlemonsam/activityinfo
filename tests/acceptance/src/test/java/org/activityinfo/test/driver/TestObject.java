@@ -83,6 +83,10 @@ public class TestObject {
         return get(propertyName, String.class, defaultValue);
     }
 
+    public Boolean getBoolean(String propertyName, Boolean defaultValue) {
+        return get(propertyName, Boolean.class, defaultValue);
+    }
+
     public LocalDate getDate(String propertyName) {
         return get(propertyName, LocalDate.class);
     }

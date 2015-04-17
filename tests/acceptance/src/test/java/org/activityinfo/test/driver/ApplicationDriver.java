@@ -3,6 +3,7 @@ package org.activityinfo.test.driver;
 
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
+import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -166,5 +167,13 @@ public abstract class ApplicationDriver {
 
     public void updateSubmission(List<FieldValue> values) throws InterruptedException, Exception {
         throw new PendingException();
+    }
+
+    public DetailsEntry getDetails() {
+        throw new PendingException();
+    }
+
+    public AliasTable getAliasTable() {
+        return aliasTable;
     }
 }

@@ -5,11 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import org.activityinfo.test.pageobject.gxt.GxtGrid;
-import org.openqa.selenium.support.ui.FluentWait;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +38,18 @@ public class FluentElements implements Iterable<FluentElement> {
 
     public boolean isEmpty() {
         return list.isEmpty();
+    }
+
+    public int size() {
+        return list.size();
+    }
+
+    public List<FluentElement> list() {
+        return Lists.newArrayList(list);
+    }
+
+    public FluentElement get(int index) {
+        return list.get(index);
     }
 
     public Optional<FluentElement> first() {

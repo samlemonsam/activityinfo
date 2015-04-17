@@ -1,21 +1,20 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.ObjectType;
-import org.activityinfo.test.driver.Property;
+import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -65,7 +64,7 @@ public class DatabaseSetupSteps {
     @Given("^I have created a form named \"([^\"]*)\" with location type \"([^\"]*)\"$")
     public void I_have_created_a_form_named_with_location_type(String name, String locationType) throws Throwable {
         driver.setup().createForm(
-                name(name), 
+                name(name),
                 property("locationType", locationType),
                 property("database", getCurrentDatabase()));
     }
@@ -83,6 +82,19 @@ public class DatabaseSetupSteps {
                 property("type", fieldType));
     }
 
+    @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
+    public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
+        for (Map.Entry<String, Supplier<Integer>> entry : driver.getAliasTable().getTestHandleToId().entrySet()) {
+            expression = expression.replaceAll(entry.getKey(), driver.getAliasTable().getAlias(entry.getKey()));
+        }
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("expression", expression),
+                property("calculatedAutomatically", true));
+    }
+
 
     @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
@@ -90,7 +102,7 @@ public class DatabaseSetupSteps {
         
         I_have_created_a_field_in(fieldType, fieldName, currentForm);
     }
-    
+
     @Given("^I have created a enumerated field \"([^\"]*)\" with items:$")
     public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Throwable {
         Preconditions.checkState(currentForm != null, "No current form");
