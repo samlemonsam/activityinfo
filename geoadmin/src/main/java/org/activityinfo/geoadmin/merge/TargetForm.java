@@ -7,11 +7,13 @@ import org.activityinfo.model.type.primitive.TextType;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Describes a form that is the target of updates in a merge operation.
+ */
 public class TargetForm {
     
     private final FormTree tree;
     private final List<FormTree.Node> textFields = new ArrayList<>();
-    private final List<FormTree.Node> areaFields = new ArrayList<>();
 
     public TargetForm(FormTree tree) {
         this.tree = tree;

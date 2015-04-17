@@ -1,7 +1,15 @@
 package org.activityinfo.geoadmin.merge;
 
+import org.activityinfo.model.resource.ResourceId;
+
 /**
- * Created by alex on 16-4-15.
+ * Defines the parameters of the merge
  */
 public class MergeModel {
+    private ResourceId targetFormClassId;
+    private ResourceId sourceFormClassId;
+    
+    
+    
+    
 }
