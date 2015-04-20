@@ -6,7 +6,7 @@ ext {
     
     if(project.hasProperty('env')) {
         environment.projectId = project.property('env')
-        environment.url = "https://${environment.projectId}.appspot.com"
+        environment.url = "https://qa-dot-${environment.projectId}.appspot.com"
         
         // needs to be configured by the 
         environment.database = new MySqlDatabase() 
