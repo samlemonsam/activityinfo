@@ -52,7 +52,6 @@ public class DataEntrySteps {
       
     }
 
-
     @When("^I update the submission with:$")
     public void I_update_the_submission_with(List<FieldValue> values) throws Throwable {
         driver.updateSubmission(values);

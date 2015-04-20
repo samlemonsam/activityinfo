@@ -20,4 +20,8 @@ public class SettingsMenu {
     public void synchronizeNow() {
         menu.find().span(containingText("Sync Now")).clickWhenReady();
     }
+
+    public void logout() {
+        menu.find().div(containingText("Logout")).clickWhenReady();
+    }
 }
