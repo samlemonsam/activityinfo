@@ -22,9 +22,7 @@ package org.activityinfo.test.pageobject.web.entry;
  */
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.Indicator;
 import org.junit.Assert;
 
 import java.util.List;
@@ -35,31 +33,23 @@ import java.util.Map;
  */
 public class DetailsEntry {
 
-    private final List<Indicator> indicators = Lists.newArrayList();
+    private final List<FieldValue> fieldValues = Lists.newArrayList();
 
     public DetailsEntry() {
     }
 
-    public List<Indicator> getIndicators() {
-        return indicators;
-    }
-
-    public Map<String, Indicator> indicatorMapByName() {
-        final Map<String, Indicator> map = Maps.newHashMap();
-        for (Indicator indicator : indicators) {
-            map.put(indicator.getName(), indicator);
-        }
-        return map;
+    public List<FieldValue> getFieldValues() {
+        return fieldValues;
     }
 
     public void assertVisible(List<FieldValue> values) {
-        Map<String, Indicator> map = indicatorMapByName();
+        Map<String, FieldValue> map = FieldValue.toMap(fieldValues);
 
         for (FieldValue value : values) {
-            Indicator indicator = map.get(value.getField());
+            FieldValue fieldValue = map.get(value.getField());
 
-            Assert.assertNotNull("Indicator is not visible, name: " + value.getField(), indicator);
-            Assert.assertEquals("Value for indicator with name: " + value.getField() + " does not match.", value.getValue(), indicator.getValue());
+            Assert.assertNotNull("Indicator is not visible, name: " + value.getField(), fieldValue);
+            Assert.assertEquals("Value for indicator with name: " + value.getField() + " does not match.", value.getValue(), fieldValue.getValue());
         }
     }
 }

@@ -1,20 +1,21 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.*;
+import org.activityinfo.test.driver.ApplicationDriver;
+import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.ObjectType;
+import org.activityinfo.test.driver.Property;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Map;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -82,11 +83,20 @@ public class DatabaseSetupSteps {
                 property("type", fieldType));
     }
 
+    @And("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\"$")
+    public void I_have_created_a_quantity_field_in_with_code(String fieldName, String formName, String fieldCode) throws Throwable {
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("code", fieldCode)
+        );
+
+        this.currentForm = formName;
+    }
+
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
     public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
-        for (Map.Entry<String, Supplier<Integer>> entry : driver.getAliasTable().getTestHandleToId().entrySet()) {
-            expression = expression.replaceAll(entry.getKey(), driver.getAliasTable().getAlias(entry.getKey()));
-        }
         driver.setup().createField(
                 property("form", formName),
                 property("name", fieldName),
@@ -286,6 +296,4 @@ public class DatabaseSetupSteps {
     public void I_open_a_new_session_as_(String user) throws Throwable {
         driver.login(accounts.ensureAccountExists(user));
     }
-
-
 }
