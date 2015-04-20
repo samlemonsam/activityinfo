@@ -145,7 +145,7 @@ public class GxtTree {
         return container.findElements(By.xpath(xPathProvider.root())).as(GxtNode.class);
     }
     
-    private Optional<GxtNode> firstRootNode() {
+    public Optional<GxtNode> firstRootNode() {
         return container.findElements(By.xpath(xPathProvider.firstRoot())).as(GxtNode.class).first();
     }
 

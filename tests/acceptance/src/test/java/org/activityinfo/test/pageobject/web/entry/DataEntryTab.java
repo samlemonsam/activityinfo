@@ -8,7 +8,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.activityinfo.test.driver.DataEntryDriver;
-import org.activityinfo.test.driver.Indicator;
+import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
@@ -40,6 +40,15 @@ public class DataEntryTab {
     public DataEntryTab(FluentElement container) {
         this.container = container;
         this.formTree = GxtPanel.find(container, "Forms").tree();
+
+        // on "Data Entry" tab selection first activity is always selected by default
+        // we have to manually select it to let test framework know "real selection" (e.g. for Details tab)
+        this.formTree.waitUntilLoaded();
+        Optional<GxtTree.GxtNode> formNode = formTree.firstRootNode();
+        if (formNode.isPresent()) {
+            formNode.get().select();
+        }
+
     }
     
     public void navigateToForm(String formName) {
@@ -187,7 +196,7 @@ public class DataEntryTab {
                     String value = values.get(i).text();
                     String unit = units.get(i).text();
 
-                    detailsEntry.getIndicators().add(new Indicator(name, value, unit));
+                    detailsEntry.getFieldValues().add(new FieldValue(name, value));
                 }
                 return detailsEntry;
             }
