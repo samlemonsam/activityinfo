@@ -1,4 +1,4 @@
-package org.activityinfo.test.driver;
+package org.activityinfo.test.driver.mail;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;

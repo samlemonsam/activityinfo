@@ -1,7 +1,12 @@
 package org.activityinfo.test.driver;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 import org.activityinfo.test.config.ConfigurationError;
+import org.activityinfo.test.driver.mail.EmailDriver;
+import org.activityinfo.test.driver.mail.mailinator.MailinatorClient;
+import org.activityinfo.test.driver.mail.postmark.PostmarkStubClient;
+import org.activityinfo.test.driver.mail.postmark.PostmarkStubServer;
 
 public class DriverModule extends AbstractModule {
 
@@ -27,6 +32,13 @@ public class DriverModule extends AbstractModule {
             default:
                 throw new ConfigurationError("Invalid value for system property -Dapp.driver. " +
                         "Must be either 'web' or 'api'");
+        }
+        
+        if(PostmarkStubServer.POSTMARK_STUB_PORT.isPresent()) {
+            bind(EmailDriver.class).to(PostmarkStubClient.class);
+            
+        } else {
+            bind(EmailDriver.class).to(MailinatorClient.class);
         }
     }
 }

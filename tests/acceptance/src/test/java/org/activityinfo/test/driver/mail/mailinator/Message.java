@@ -1,4 +1,4 @@
-package org.activityinfo.test.driver.mail;
+package org.activityinfo.test.driver.mail.mailinator;
 
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Message {
+class Message {
     private String id;
     private final Map<String, String> headers = new HashMap<>();
     private String subject;

@@ -1,4 +1,4 @@
-package org.activityinfo.test.driver.mail;
+package org.activityinfo.test.driver.mail.mailinator;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * An item in the mailinator inbox
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageHeader {
+class MessageHeader {
     @JsonProperty("seconds_ago")
     private long secondsAgo;
     

@@ -1,4 +1,4 @@
-package org.activityinfo.test.driver.mail;
+package org.activityinfo.test.driver.mail.mailinator;
 
 
 import com.google.common.collect.Maps;
@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessagePart {
+class MessagePart {
     
     private final Map<String, String> headers = Maps.newHashMap();
     private String body;

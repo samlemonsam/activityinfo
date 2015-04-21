@@ -1,10 +1,10 @@
-package org.activityinfo.test.driver.mail;
+package org.activityinfo.test.driver.mail.mailinator;
 
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageResult {
+class MessageResult {
     
     private Message data;
 

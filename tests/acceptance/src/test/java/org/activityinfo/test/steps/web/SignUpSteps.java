@@ -7,9 +7,9 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.EmailDriver;
-import org.activityinfo.test.driver.NotificationEmail;
-import org.activityinfo.test.driver.mail.MailinatorClient;
+import org.activityinfo.test.driver.mail.EmailDriver;
+import org.activityinfo.test.driver.mail.NotificationEmail;
+import org.activityinfo.test.driver.mail.mailinator.MailinatorClient;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.ConfirmPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
@@ -30,16 +30,11 @@ public class SignUpSteps {
     @Inject
     private SignUpPage signUpPage;
 
-
     @Inject
     private LoginPage loginPage;
 
-
     @Inject
     private ConfirmPage confirmPage;
-
-    @Inject
-    private MailinatorClient mailinator;
 
     @Inject
     private EmailDriver emailDriver;
@@ -58,8 +53,8 @@ public class SignUpSteps {
 
     @When("^I sign up for a new user account$")
     public void I_sign_up_for_a_new_user_account() throws Throwable {
-
-        newUserAccount = mailinator.newAccount();
+        
+        newUserAccount = emailDriver.newAccount();
 
         signUpTime = System.currentTimeMillis();
         signUpPage.navigateTo().signUp(newUserAccount);
@@ -70,7 +65,7 @@ public class SignUpSteps {
     @Then("^I should receive an email with a link to confirm my address$")
     public void I_should_receive_an_email_with_a_link_to_confirm_my_address() throws Throwable {
 
-        NotificationEmail email = emailDriver.lastNotificationFor(newUserAccount, signUpTime);
+        NotificationEmail email = emailDriver.lastNotificationFor(newUserAccount);
         confirmationUrl = email.extractLink();
 
         System.out.println("Confirmation URL: " + confirmationUrl);
