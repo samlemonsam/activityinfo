@@ -24,46 +24,40 @@ package org.activityinfo.server.command;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
-import org.activityinfo.legacy.shared.command.BatchCommand;
-import org.activityinfo.legacy.shared.command.CreateEntity;
-import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.UpdateEntity;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.TFormClass;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.TextType;
+import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.database.hibernate.entity.AttributeGroup;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.activityFormClass;
+import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
@@ -370,9 +364,6 @@ public class ActivityTest extends CommandTestCase2 {
         // Ensure deleted
         ActivityFormDTO form = execute(new GetActivityForm(1));
         assertTrue("Cause attribute is gone", form.getAttributeGroupById(1) == null);
-
-        SchemaDTO schema = execute(new GetSchema());
-        assertTrue("Cause attribute is gone", schema.getAttributeGroupById(1) == null);
 
     }
 

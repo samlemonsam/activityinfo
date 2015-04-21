@@ -176,6 +176,17 @@ public class CuidAdapter {
     }
 
     /**
+     * @return the {@code FormField} ResourceId for the Partner field of a given Activity {@code FormClass}
+     */
+    public static ResourceId partnerField(int activityId) {
+        return field(activityFormClass(activityId), PARTNER_FIELD);
+    }
+
+    public static ResourceId projectField(int activityId) {
+        return field(activityFormClass(activityId), PROJECT_FIELD);
+    }
+
+    /**
      * @return the {@code FormField} ResourceId for the indicator field within a given
      * Activity {@code FormClass}
      */

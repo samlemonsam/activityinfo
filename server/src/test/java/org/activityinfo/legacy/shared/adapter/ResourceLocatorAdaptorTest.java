@@ -5,19 +5,22 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
+import org.activityinfo.core.client.form.tree.AsyncFormTreeBuilder;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.formTree.TFormTree;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
@@ -33,9 +36,9 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.core.shared.criteria.ParentCriteria.isChildOf;
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.*;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdminFieldId;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -142,8 +145,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertEquals(0.5d, firstRead.getValue(path(indicatorField(12))));
 
         // set indicators to null
-        instance.set(indicatorField(1), null);
-        instance.set(indicatorField(2), null);
+        instance.set(indicatorField(1).asString(), null);
+        instance.set(indicatorField(2).asString(), null);
 
         // persist it
         assertResolves(resourceLocator.persist(instance));
