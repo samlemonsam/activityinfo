@@ -116,6 +116,9 @@ public class CuidAdapter {
         return cuid(PARTNER_DOMAIN, partnerId);
     }
 
+    public static ResourceId projectInstanceId(int projectId) {
+        return cuid(PROJECT_DOMAIN, projectId);
+    }
     /**
      * @return the {@code FormField}  ResourceId for the Location field of a given Activity {@code FormClass}
      */

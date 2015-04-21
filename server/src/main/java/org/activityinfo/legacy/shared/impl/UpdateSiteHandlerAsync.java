@@ -133,6 +133,10 @@ public class UpdateSiteHandlerAsync implements CommandHandlerAsync<UpdateSite, V
                             .value("indicatorId", indicatorId);
 
                     if (value instanceof Double) {
+                        if (((Double)value).isNaN()) {
+                            throw new RuntimeException("It's not allowed to send Double.NaN values for update, indicatorId: " + indicatorId);
+                        }
+
                         sqlInsert.value("value", value).execute(tx);
                     } else if (value instanceof String) {
                         sqlInsert.value("TextValue", value).execute(tx);

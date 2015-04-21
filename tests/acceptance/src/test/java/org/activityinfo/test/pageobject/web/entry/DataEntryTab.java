@@ -2,11 +2,13 @@ package org.activityinfo.test.pageobject.web.entry;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.activityinfo.test.driver.DataEntryDriver;
+import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
@@ -31,12 +33,22 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 
 public class DataEntryTab {
+
     private final GxtTree formTree;
-    private FluentElement container;
+    private final FluentElement container;
 
     public DataEntryTab(FluentElement container) {
         this.container = container;
         this.formTree = GxtPanel.find(container, "Forms").tree();
+
+        // on "Data Entry" tab selection first activity is always selected by default
+        // we have to manually select it to let test framework know "real selection" (e.g. for Details tab)
+        this.formTree.waitUntilLoaded();
+        Optional<GxtTree.GxtNode> formNode = formTree.firstRootNode();
+        if (formNode.isPresent()) {
+            formNode.get().select();
+        }
+
     }
     
     public void navigateToForm(String formName) {
@@ -159,6 +171,34 @@ public class DataEntryTab {
                     }
                 }
                 return entries;
+            }
+        });
+    }
+
+    public DetailsEntry details() {
+        selectTab("Details");
+
+        return container.waitFor(new Function<WebDriver, DetailsEntry>() {
+            @Override
+            public DetailsEntry apply(WebDriver input) {
+                DetailsEntry detailsEntry = new DetailsEntry();
+
+                FluentElement detailsPanel = container.find().div(withClass("details")).first();
+
+                FluentElements names = detailsPanel.find().td(withClass("indicatorHeading")).asList();
+                FluentElements values = detailsPanel.find().td(withClass("indicatorValue")).asList();
+                FluentElements units = detailsPanel.find().td(withClass("indicatorUnits")).asList();
+
+                Preconditions.checkState(names.size() == values.size() && values.size() == units.size());
+
+                for (int i = 0; i < names.size(); i++) {
+                    String name = names.get(i).text();
+                    String value = values.get(i).text();
+                    String unit = units.get(i).text();
+
+                    detailsEntry.getFieldValues().add(new FieldValue(name, value));
+                }
+                return detailsEntry;
             }
         });
     }

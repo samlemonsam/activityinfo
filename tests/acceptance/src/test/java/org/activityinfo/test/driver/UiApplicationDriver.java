@@ -12,6 +12,7 @@ import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
@@ -185,6 +186,16 @@ public class UiApplicationDriver extends ApplicationDriver {
         
         dataEntryTab.selectSubmission(0);
         return dataEntryTab.changes();
+    }
+
+    public DetailsEntry getDetails() {
+        Preconditions.checkState(currentForm != null, "No current form");
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+        dataEntryTab.selectSubmission(0);
+
+        return dataEntryTab.details();
     }
 
     @Override

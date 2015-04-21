@@ -241,6 +241,14 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("type", field.getString("type"));
             properties.put("units", field.getString("units", "parsects"));
 
+            // switch also server nameInExpression -> code
+            properties.put("nameInExpression", field.getString("code", field.getAlias()));
+
+            if (field.getBoolean("calculatedAutomatically", false)) {
+                properties.put("calculatedAutomatically", true);
+                properties.put("expression", field.getString("expression"));
+            }
+
             createEntityAndBindId("Indicator", properties);
         }
     }

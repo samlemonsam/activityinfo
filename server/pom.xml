@@ -26,6 +26,13 @@
       <artifactId>activityinfo-services</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.activityinfo</groupId>
+      <artifactId>activityinfo-model</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.activityinfo.io</groupId>
@@ -560,9 +567,9 @@
         <version>2.18.1</version>
         <configuration>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <forkCount>1C</forkCount>
+          <reuseForks>true</reuseForks>
           <systemPropertyVariables>
-            <forkCount>1C</forkCount>
-            <reuseForks>true</reuseForks>
             <testDatabaseName>testDb${surefire.forkNumber}</testDatabaseName>
             <testDatabaseUsername>${testDatabaseUsername}</testDatabaseUsername>
             <testDatabasePassword>${testDatabasePassword}</testDatabasePassword>
@@ -602,7 +609,7 @@
               <compileReport>true</compileReport>
               <modules>
                 <module>org.activityinfo.ui.ActivityInfoCI</module>
-                <module>org.activityinfo.ui.Embed</module>
+                <module>org.activityinfo.ui.AI</module>
               </modules>
             </configuration>
           </plugin>

@@ -170,11 +170,11 @@ public class CreateSiteHandlerAsync implements CommandHandlerAsync<CreateSite, C
                         .value("IndicatorId", IndicatorDTO.indicatorIdForPropertyName(property.getKey()))
                         .value("ReportingPeriodId", cmd.getReportingPeriodId());
 
-                if (value instanceof Integer) {
-                    value = Double.valueOf(((Integer)value).doubleValue());
-                }
+                if (value instanceof Number) {
+                    if (value instanceof Double && ((Double)value).isNaN()) {
+                        throw new RuntimeException("It's not allowed to send Double.NaN values for update, indicatorId: " + IndicatorDTO.indicatorIdForPropertyName(property.getKey()));
+                    }
 
-                if (value instanceof Double) {
                     sqlInsert.value("Value", value).execute(tx);
                 } else if (value instanceof String) {
                     sqlInsert.value("TextValue", value).execute(tx);
