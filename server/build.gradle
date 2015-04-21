@@ -134,7 +134,7 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     dependsOn appengineDownloadSdk
 
 
-    extraOptions = ["--application=${environment.projectId}", '--version=1']
+    extraOptions = ["--application=${environment.projectId}", '--version=qa']
     oauth2 = true
     
     doFirst {

@@ -2,6 +2,8 @@ package org.activityinfo.test.sut;
 
 import com.google.inject.AbstractModule;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.driver.mail.mailinator.MailinatorClient;
+import org.activityinfo.test.driver.mail.postmark.PostmarkStubServer;
 
 
 public class SystemUnderTest extends AbstractModule {

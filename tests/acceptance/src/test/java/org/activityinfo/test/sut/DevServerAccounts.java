@@ -2,7 +2,6 @@ package org.activityinfo.test.sut;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -15,9 +14,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Level;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 
@@ -161,7 +162,7 @@ public class DevServerAccounts implements Accounts {
         StringBuilder alias = new StringBuilder();
 
         // Add any alphabetic prefix from the test handle,
-        // so that bob@bedatadiven.com becomes bob_xyzzsdff@example.com
+        // so that bob@bedatadiven.com becomes bob_xyzzsdff@mailinator.com
         // and is at least recognizable
         for(int i=0;i!=testHandle.length();++i) {
             char c = testHandle.toLowerCase().charAt(i);
@@ -176,7 +177,7 @@ public class DevServerAccounts implements Accounts {
         }
         alias.append("_");
         alias.append(Long.toHexString(random.nextLong()));
-        alias.append("@example.com");
+        alias.append("@mailinator.com");
 
         return alias.toString();
     }

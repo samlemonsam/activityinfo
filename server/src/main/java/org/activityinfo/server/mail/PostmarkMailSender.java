@@ -15,9 +15,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -36,16 +38,24 @@ import java.util.logging.Logger;
  * http://developer.postmarkapp.com/developer-build.html
  */
 public class PostmarkMailSender extends MailSender {
-
+    
+    public static final String POSTMARK_API_URL = "postmark.url";
     public static final String POSTMARK_API_KEY = "postmark.key";
 
     private final String apiKey;
 
     private static final Logger LOGGER = Logger.getLogger(PostmarkMailSender.class.getName());
+    private final URL url;
 
     @Inject
     public PostmarkMailSender(DeploymentConfiguration deploymentConfig, Configuration templateCfg) {
         super(templateCfg);
+        try {
+            this.url = new URL(deploymentConfig.getProperty(POSTMARK_API_URL, "https://api.postmarkapp.com/email"));
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(String.format("%s contains a malformed URL: %s", POSTMARK_API_URL, 
+                    e.getMessage()));
+        }
         this.apiKey = deploymentConfig.getProperty(POSTMARK_API_KEY);
     }
 
@@ -56,12 +66,11 @@ public class PostmarkMailSender extends MailSender {
             JsonObject json = toJson(message);
             postMessage(json);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to post message to postmark service", e);
         }
     }
 
     private void postMessage(JsonObject node) throws IOException {
-        URL url = new URL("http://api.postmarkapp.com/email");
         URLConnection conn = url.openConnection();
         conn.setDoOutput(true);
         conn.setRequestProperty("X-Postmark-Server-Token", apiKey);
@@ -80,6 +89,8 @@ public class PostmarkMailSender extends MailSender {
         }
         writer.close();
         reader.close();
+        
+        LOGGER.info("Posted message to " + url);
     }
 
     private JsonObject toJson(Message message) throws MessagingException, IOException {

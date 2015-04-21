@@ -69,6 +69,7 @@ class MySqlSetupTask extends DefaultTask {
             runner.setLogWriter(null)
         }
         scripts.each {
+            logger.info("Executing ${it}...")
             it.withReader { reader ->
                 runner.execute(reader)
             }
