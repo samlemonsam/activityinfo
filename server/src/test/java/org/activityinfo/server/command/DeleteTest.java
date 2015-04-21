@@ -113,6 +113,6 @@ public class DeleteTest extends CommandTestCase {
         execute(new Delete("LocationType", locationTypeId));
 
         schema = execute(new GetSchema());
-        assertNull(schema.getLocationTypeById(locationTypeId)); // assert location type do not exist after deletion
+        assertNotNull(schema.getLocationTypeById(locationTypeId).isDeleted()); // assert "delete" flag is set
     }
 }
