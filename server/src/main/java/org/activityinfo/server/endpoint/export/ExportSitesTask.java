@@ -11,6 +11,7 @@ import org.activityinfo.legacy.shared.command.FilterUrlSerializer;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -30,7 +31,7 @@ public class ExportSitesTask extends HttpServlet {
 
     private Provider<DispatcherSync> dispatcher;
     private ServerSideAuthProvider authProvider;
-
+    
     @Inject
     public ExportSitesTask(Provider<DispatcherSync> dispatcher, ServerSideAuthProvider authProvider) {
         this.dispatcher = dispatcher;
@@ -38,6 +39,7 @@ public class ExportSitesTask extends HttpServlet {
     }
 
     @Override
+    @Timed(name = "export", kind = "sites")
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // authenticate this task

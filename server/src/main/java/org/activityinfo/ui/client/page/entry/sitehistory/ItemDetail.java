@@ -32,7 +32,6 @@ class ItemDetail {
     private String stringValue;
 
     static ItemDetail create(RenderContext ctx, Map.Entry<String, Object> entry) {
-        ItemDetail d = new ItemDetail();
 
         Map<String, Object> state = ctx.getState();
         ActivityFormDTO form = ctx.getForm();
@@ -106,13 +105,15 @@ class ItemDetail {
             }
 
         } else if (key.startsWith(AttributeDTO.PROPERTY_PREFIX)) {
-            int id = AttributeDTO.idForPropertyName(key);
-            AttributeDTO dto = form.getAttributeById(id);
-            if (dto != null) {
-                if (Boolean.parseBoolean(newValue.toString())) {
-                    sb.append(I18N.MESSAGES.siteHistoryAttrAdd(dto.getName()));
-                } else {
-                    sb.append(I18N.MESSAGES.siteHistoryAttrRemove(dto.getName()));
+            if(toBool(oldValue) != toBool(newValue)) {
+                int id = AttributeDTO.idForPropertyName(key);
+                AttributeDTO dto = form.getAttributeById(id);
+                if (dto != null) {
+                    if (toBool(newValue)) {
+                        sb.append(I18N.MESSAGES.siteHistoryAttrAdd(dto.getName()));
+                    } else {
+                        sb.append(I18N.MESSAGES.siteHistoryAttrRemove(dto.getName()));
+                    }
                 }
             }
 
@@ -121,9 +122,26 @@ class ItemDetail {
             addValues(sb, key, oldValue, newValue);
         }
 
-        d.stringValue = sb.toString();
+        if(sb.length() > 0) {
 
-        return d;
+            ItemDetail d = new ItemDetail();
+            d.stringValue = sb.toString();
+
+            return d;
+        } else {
+            return null;
+        }
+    }
+
+    private static boolean toBool(Object value) {
+        if(value == null) {
+            return false;
+        } else if(value == Boolean.TRUE) {
+            return true;
+        } else if(Boolean.parseBoolean(value.toString())) {
+            return true;
+        }
+        return false;
     }
 
     private static void addValues(StringBuilder sb, String key, Object oldValue, Object newValue) {

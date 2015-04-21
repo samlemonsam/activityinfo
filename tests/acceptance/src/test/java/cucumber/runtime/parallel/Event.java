@@ -22,9 +22,7 @@ public class Event {
     public void fire() {
         try {
             method.invoke(listener, args);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }

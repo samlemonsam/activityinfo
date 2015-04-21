@@ -17,6 +17,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.AiLatLng;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -120,7 +121,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS),
                 HEALTH_CENTER_CLASS);
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "CS Ubuntu");
-        instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new AiLatLng(-1, 13));
+        instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new GeoPoint(-1, 13));
         instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entity(IRUMU));
 
         assertResolves(resourceLocator.persist(instance));
@@ -216,7 +217,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
-        adapter.remove(Arrays.asList(instanceToDelete));
+        assertResolves(adapter.remove(Arrays.asList(instanceToDelete)));
 
         List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
 

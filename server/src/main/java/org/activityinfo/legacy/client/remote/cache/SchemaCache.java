@@ -76,6 +76,7 @@ public class SchemaCache implements DispatchListener {
         schemaEntityTypes.add("Partner");
         schemaEntityTypes.add("Project");
         schemaEntityTypes.add("LockedPeriod");
+        schemaEntityTypes.add("LocationType");
     }
 
 
@@ -83,8 +84,9 @@ public class SchemaCache implements DispatchListener {
     public void beforeDispatched(Command command) {
         if (command instanceof UpdateEntity || command instanceof CreateEntity || command instanceof Delete) {
             clearCache();
-
         } else if (command instanceof CloneDatabase) {
+            clearCache();
+        } else if (command instanceof Delete && isSchemaEntity(((Delete) command).getEntityName())) {
             clearCache();
 
         } else if (command instanceof AddPartner || command instanceof RemovePartner) {

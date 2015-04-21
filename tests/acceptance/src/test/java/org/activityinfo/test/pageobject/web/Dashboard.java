@@ -1,20 +1,19 @@
 package org.activityinfo.test.pageobject.web;
 
-import org.activityinfo.test.pageobject.api.PageObject;
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-
-import static org.activityinfo.test.pageobject.api.WaitBuilder.anyElement;
-import static org.activityinfo.test.pageobject.api.WaitBuilder.withClass;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 
-public class Dashboard extends PageObject {
+public class Dashboard {
 
-    @FindBy(className = Gxt.COLUMN_LAYOUT_CONTAINER)
-    private WebElement container;
+    private final FluentElement container;
 
-    public void assertThatAtLeastOnePortletIsVisible() {
-        waitFor(anyElement(withClass(Gxt.PORTLET)));
+    public Dashboard(FluentElement container) {
+        this.container = container;
+    }
+    public void assertAtLeastOnePortletIsVisible() {
+        container.waitUntil(ExpectedConditions.visibilityOfElementLocated(By.className(Gxt.PORTLET)));
     }
 }

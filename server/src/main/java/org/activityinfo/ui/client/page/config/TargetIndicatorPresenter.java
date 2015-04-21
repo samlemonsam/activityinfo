@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
+import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -38,6 +39,7 @@ import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.UpdateTargetValue;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.PageId;
@@ -133,6 +135,11 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         Map<String, Link> indicatorCategories = new HashMap<String, Link>();
 
         for (IndicatorDTO indicator : activity.getIndicators()) {
+
+            // yuriy : right now we support only quantity indicators in targets, skip other types
+            if (indicator.getType() != FieldTypeClass.QUANTITY) {
+                continue;
+            }
 
             if (indicator.getCategory() != null) {
                 Link indCategoryLink = indicatorCategories.get(indicator.getCategory());
@@ -273,7 +280,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
             if (record.isDirty()) {
                 UpdateTargetValue cmd = new UpdateTargetValue((Integer) model.get("targetId"),
                         (Integer) model.get("indicatorId"),
-                        this.getChangedProperties(record));
+                        changes(record));
 
                 batch.add(cmd);
             }
@@ -282,6 +289,19 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         for (ModelData child : treeStore.getChildren(model)) {
             prepareBatch(batch, child);
         }
+    }
+
+    private Map<String, Double> changes(Record record) {
+        Map<String, Object> changedProperties = this.getChangedProperties(record);
+        Map<String, Double> changes = Maps.newHashMap();
+        for (Map.Entry<String, Object> entry : changedProperties.entrySet()) {
+            if (entry.getValue() instanceof Double) {
+                changes.put(entry.getKey(), (Double) entry.getValue());
+            } else if (entry.getValue() instanceof String) {
+                changes.put(entry.getKey(), Double.valueOf((String) entry.getValue()));
+            }
+        }
+        return changes;
     }
 
     @Override

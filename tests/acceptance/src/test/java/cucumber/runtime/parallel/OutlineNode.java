@@ -1,19 +1,16 @@
 package cucumber.runtime.parallel;
 
 import com.google.common.collect.Lists;
-import cucumber.runtime.junit.ExamplesRunner;
 import cucumber.runtime.model.CucumberExamples;
 import cucumber.runtime.model.CucumberScenarioOutline;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
+import gherkin.formatter.model.Step;
 import org.junit.runner.Description;
-import org.junit.runner.Runner;
 
+import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by alex on 30-1-15.
- */
 public class OutlineNode implements Node {
 
     private final Description description;
@@ -33,7 +30,7 @@ public class OutlineNode implements Node {
 
     @Override
     public Description getDescription() {
-        return null;
+        return description;
     }
 
     @Override
@@ -43,11 +40,16 @@ public class OutlineNode implements Node {
 
     @Override
     public List<Node> getBranches() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public void finish(Reporter reporter, Formatter formatter) {
 
+    }
+
+    @Override
+    public List<Step> getSteps() {
+        throw new UnsupportedOperationException();
     }
 }

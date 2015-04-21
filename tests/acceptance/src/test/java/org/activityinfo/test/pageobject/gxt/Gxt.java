@@ -15,5 +15,11 @@ public class Gxt {
     public static final String COLUMN_LAYOUT_CONTAINER = "x-column-layout-ct";
 
     public static final String PORTLET = "x-portlet";
+    
+    public static final By WINDOW = By.className("x-window");
+    
+    public static By button(String label) {
+        return By.xpath(String.format("//button[text() = '%s']", label));
+    }
 
 }
