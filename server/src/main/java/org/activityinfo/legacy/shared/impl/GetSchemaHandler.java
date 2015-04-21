@@ -100,13 +100,10 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             SqlQuery query = SqlQuery.select("locationTypeId",
                     "name",
                     "boundAdminLevelId",
+                    "DateDeleted",
                     "countryId",
                     "workflowId",
                     "databaseId").from("locationtype");
-
-            if (context.isRemote()) {
-                query.where("DateDeleted IS NULL");
-            }
 
             return execute(query, new RowHandler() {
 
@@ -124,6 +121,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     if (!row.isNull("boundAdminLevelId")) {
                         type.setBoundAdminLevelId(row.getInt("boundAdminLevelId"));
                     }
+
+                    type.setDeleted(!row.isNull("DateDeleted"));
 
                     int countryId = row.getInt("countryId");
                     CountryDTO country = countries.get(countryId);

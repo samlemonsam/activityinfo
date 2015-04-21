@@ -46,11 +46,13 @@ import java.util.List;
 public final class LocationTypeDTO extends BaseModelData implements EntityDTO, IsFormClass {
 
     public static int NAME_MAX_LENGTH = 50;
+
     private Integer databaseId;
     private List<AdminLevelDTO> adminLevels;
     private Extents countryBounds;
     private long version;
     private long childVersion;
+    private boolean deleted;
 
     public LocationTypeDTO() {
     }
@@ -153,5 +155,13 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
 
     public void setVersion(long version) {
         this.version = version;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

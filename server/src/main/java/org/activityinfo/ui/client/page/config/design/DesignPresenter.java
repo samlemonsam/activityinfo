@@ -176,8 +176,8 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
             }
         }
 
-        for(LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
-            if(Objects.equals(locationType.getDatabaseId(), db.getId())) {
+        for (LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
+            if (Objects.equals(locationType.getDatabaseId(), db.getId()) && !locationType.isDeleted()) {
                 treeStore.add(locationType, false);
             }
         }
