@@ -4,6 +4,7 @@ import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.GenericType;
@@ -18,6 +19,9 @@ import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,7 +31,9 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.ContextResolver;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -272,22 +278,51 @@ public class ActivityInfoClient implements FormClassProvider {
     
     
     public FormClass getFormClass(int adminLevelId) {
-        String json = formResource(adminLevelId).path("class").get(String.class);
+        String json = formResource(CuidAdapter.adminLevelFormClass(adminLevelId)).path("class").get(String.class);
+
 
         return FormClass.fromResource(Resources.fromJson(json));
     }
 
-
-
-    public FormTree getFormTree(int adminLevelId) {
-        String json = formResource(adminLevelId).path("tree").get(String.class);
+    public FormTree getFormTree(ResourceId resourceId) {
+        String json = formResource(resourceId).path("tree").get(String.class);
         JsonObject object = new Gson().fromJson(json, JsonObject.class);
         return JsonFormTreeBuilder.fromJson(object);
     }
+
+    public FormTree getFormTree(int adminLevelId) {
+        return getFormTree(CuidAdapter.adminLevelFormClass(adminLevelId));
+    }
     
-    private WebResource formResource(int adminLevelId) {
+    public ColumnSet queryColumns(QueryModel queryModel) {
+        String json = client.resource(root)
+                .path("query")
+                .path("columns")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .post(String.class, queryModel);
+        
+        JsonObject object = new Gson().fromJson(json, JsonObject.class);
+        int numRows = object.getAsJsonPrimitive("rows").getAsInt();
+        
+        Map<String, ColumnView> columnMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
+            JsonObject columnValue = column.getValue().getAsJsonObject();
+            String storage = columnValue.getAsJsonPrimitive("storage").getAsString();
+            switch (storage) {
+                case "array":
+                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
+                    break;
+                default:
+                    throw new UnsupportedOperationException(storage);
+            }
+        }
+        
+        return new ColumnSet(numRows, columnMap);
+    }
+    
+    private WebResource formResource(ResourceId resourceId) {
         return client.resource(root)
                 .path("form")
-                .path(CuidAdapter.adminLevelFormClass(adminLevelId).toString());
+                .path(resourceId.asString());
     }
 }

@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * A set of features from a file to be imported into ActivityInfo's
  * administrative reference database.
- * 
+ *
  */
 public class ImportRecordSource {
 
@@ -48,7 +48,7 @@ public class ImportRecordSource {
 
     private List<FormField> fields;
     private List<Record> records;
-    
+
     private SimpleFeatureSource featureSource;
     private MathTransform transform;
     private File file;
@@ -56,6 +56,7 @@ public class ImportRecordSource {
 
     private String hash;
     private final FormField geometryField;
+
 
     public ImportRecordSource(File shapefile) throws Exception {
         this.file = shapefile;
@@ -65,7 +66,7 @@ public class ImportRecordSource {
         geometryField = new FormField(ResourceId.generateId());
         geometryField.setLabel("Geometry");
         geometryField.setType(GeoAreaType.INSTANCE);
-        
+
 
         ShapefileDataStore ds = new ShapefileDataStore(shapefile.toURI().toURL());
 
@@ -94,14 +95,14 @@ public class ImportRecordSource {
             if(hasGeometry(feature)) {
                 Record record = new Record();
                 record.set(geometryField.getId(), calcWgs84GeoArea(feature));
-                
+
                 for(FormField field : fields) {
                     record.set(field.getName(), feature.getAttribute(field.getCode()));
                 }
-                
-              this.records.add(record);
+
+                this.records.add(record);
             } else {
-              System.err.println("No geometry: " + fields);
+                System.err.println("No geometry: " + fields);
             }
         }
     }
@@ -114,10 +115,10 @@ public class ImportRecordSource {
     private GeoArea calcWgs84GeoArea(SimpleFeature feature) {
         Geometry geometry = calcWgs84Geometry(feature);
         Extents extents = GeoUtils.toExtents(geometry.getEnvelopeInternal());
-        
+
         return new GeoArea(extents, "blobId");
     }
-    
+
     /**
      * Calculates the geographic envelope of the feature in the WGS 84
      * Geographic Reference system.
@@ -157,7 +158,7 @@ public class ImportRecordSource {
             default:
                 throw new UnsupportedOperationException("type: " + descriptor.getType().getName());
         }
-        
+
     }
 
     public List<FormField> getFields() {
@@ -198,7 +199,7 @@ public class ImportRecordSource {
      * Checks to see whether all geometry at least intersects the country's
      * geographic bounds. This is a good check to ensure that we have correctly
      * understood the source's CRS.
-     * 
+     *
      * @param country
      * @return
      */

@@ -148,4 +148,9 @@ public class RootResource {
     public FormResource getForm(@PathParam("id") ResourceId id) {
         return new FormResource(id, queryExecutor);
     }
+    
+    @Path("/query")
+    public QueryResource query() {
+        return new QueryResource(queryExecutor);
+    }
 }

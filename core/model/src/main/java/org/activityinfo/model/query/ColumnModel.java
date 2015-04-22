@@ -3,6 +3,7 @@ package org.activityinfo.model.query;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
+import org.codehaus.jackson.annotate.JsonSetter;
 
 /**
  * Defines a Column within a query
@@ -48,6 +49,7 @@ public class ColumnModel {
         return this;
     }
 
+    @JsonSetter
     public ColumnModel setExpression(String expression) {
         this.expression = new ExprValue(expression);
         return this;

@@ -3,6 +3,8 @@ package org.activityinfo.service.store;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
+import java.io.IOException;
+
 
 /**
  * Builds a query that returns the requested fields as column streams.
@@ -29,5 +31,5 @@ public interface ColumnQueryBuilder {
     /**
      * Fetches the requested columns.
      */
-    void execute();
+    void execute() throws IOException;
 }

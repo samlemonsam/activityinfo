@@ -32,6 +32,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.model.*;
@@ -106,7 +107,8 @@ public class AdminLevelResource {
     }
 
     private void assertAuthorized(AuthenticatedUser user) {
-        if (user.getId() != SUPER_USER_ID) {
+        if (!DeploymentEnvironment.isAppEngineDevelopment() &&
+                user.getId() != SUPER_USER_ID) {
             throw new WebApplicationException(Status.FORBIDDEN);
         }
     }

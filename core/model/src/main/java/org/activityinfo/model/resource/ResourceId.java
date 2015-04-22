@@ -1,11 +1,11 @@
 package org.activityinfo.model.resource;
 
 
-import org.activityinfo.model.form.annotation.Field;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.codehaus.jackson.annotate.JsonValue;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
@@ -44,6 +44,7 @@ public final class ResourceId {
         this.text = text;
     }
 
+    @JsonValue
     public String asString() {
         return this.text;
     }

@@ -5,7 +5,10 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -23,6 +26,10 @@ public class RowBasedJsonWriter {
 
     public RowBasedJsonWriter(Writer writer) {
         this.writer = new JsonWriter(writer);
+    }
+
+    public RowBasedJsonWriter(OutputStream outputStream, Charset charset) {
+        this.writer = new JsonWriter(new OutputStreamWriter(outputStream, charset));
     }
 
     public void write(ColumnSet columnSet) throws IOException {
@@ -43,11 +50,14 @@ public class RowBasedJsonWriter {
         writer.endArray();
     }
 
+    public void flush() throws IOException {
+        writer.flush();
+    }
+
     private interface FieldWriter {
         void write(int rowIndex) throws IOException;
     }
-
-
+    
     private FieldWriter[] createWriters(ColumnSet columnSet) {
         FieldWriter[] writers = new FieldWriter[columnSet.getColumns().size()];
         int index = 0;

@@ -11,6 +11,7 @@ mainClassName = 'org.activityinfo.geoadmin.GeoAdmin'
 dependencies {
     compile project(':core:model')
     compile project(':io:match')
+    compile project(':store:query')
     
     compile group: 'com.sun.jersey', name: 'jersey-client', version:'1.17'
     compile group: 'com.sun.jersey', name: 'jersey-json', version:'1.17'
@@ -26,5 +27,6 @@ dependencies {
     compile group: 'com.miglayout', name: 'miglayout', version:'3.7.4'
     compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.1'
     compile group: 'commons-lang', name: 'commons-lang', version:'2.6'
+    compile 'net.sourceforge.parallelcolt:parallelcolt:0.10.1'
 }
 

@@ -7,11 +7,11 @@ import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
 import org.activityinfo.geoadmin.model.VersionMetadata;
-import org.jdesktop.swingx.JXTreeTable;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.legacy.CuidAdapter;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,8 +35,8 @@ public class UpdateWindow extends JFrame {
     private AdminLevel level;
     private ActivityInfoClient client;
     private JLabel scoreLabel;
-    private JXTreeTable treeTable;
-    private MergeTreeTableModel treeModel;
+    private MergeTableModel tableModel;
+    private JTable table;
 
     public UpdateWindow(JFrame parent, ImportSource source, AdminLevel level, ActivityInfoClient client) {
         super("Update " + level.getName());
@@ -50,31 +50,20 @@ public class UpdateWindow extends JFrame {
 
         form = new UpdateForm(source);
 
-        MergeTreeBuilder treeBuilder = new MergeTreeBuilder(client, level, source);
-        treeModel = new MergeTreeTableModel(treeBuilder.build(), source);
-
-        treeTable = new JXTreeTable(treeModel);
-
+        FormTree targetTree = client.getFormTree(CuidAdapter.adminLevelFormClass(level.getId()));
+        
+        tableModel = new MergeTableModel(null);
+        table = new JTable(tableModel);
+        
         JComboBox actionCombo = new JComboBox(MergeAction.values());
-
-        treeTable.getColumnModel()
-            .getColumn(MergeTreeTableModel.ACTION_COLUMN)
-            .setCellEditor(new DefaultCellEditor(actionCombo));
-
-        treeTable.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent event) {
-                showScore(event);
-            }
-        });
+        
 
         scoreLabel = new JLabel();
         JLabel countLabel = new JLabel(source.getFeatureCount() + " features");
 
         JPanel panel = new JPanel(new MigLayout("fill"));
         panel.add(form, "wrap");
-        panel.add(new JScrollPane(treeTable), "wrap,grow");
+        panel.add(new JScrollPane(table), "wrap,grow");
 
         panel.add(scoreLabel, "height 25!, wrap, growx");
         panel.add(countLabel);
@@ -114,20 +103,20 @@ public class UpdateWindow extends JFrame {
 
         final JButton mergeButton = new JButton("Merge");
         mergeButton.setEnabled(false);
-        treeTable.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent event) {
-                mergeButton.setEnabled(isSelectionMergeable());
-            }
-        });
-        mergeButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                mergeSelection();
-            }
-        });
+//        treeTable.addTreeSelectionListener(new TreeSelectionListener() {
+//
+//            @Override
+//            public void valueChanged(TreeSelectionEvent event) {
+//                mergeButton.setEnabled(isSelectionMergeable());
+//            }
+//        });
+//        mergeButton.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent arg0) {
+//                mergeSelection();
+//            }
+//        });
 
 
         JButton updateButton = new JButton("Update");
@@ -147,61 +136,61 @@ public class UpdateWindow extends JFrame {
         return toolbar;
     }
 
-    /**
-     * Checks to see if the current selection is candidate for merging.
-     */
-    private boolean isSelectionMergeable() {
-        if (treeTable.getSelectedRowCount() != 2) {
-            return false;
-        }
-
-        MergeNode a = (MergeNode) treeTable.getPathForRow(
-            treeTable.getSelectedRows()[0]).getLastPathComponent();
-        MergeNode b = (MergeNode) treeTable.getPathForRow(
-            treeTable.getSelectedRows()[1]).getLastPathComponent();
-        if (a.isJoined() || b.isJoined()) {
-            return false;
-        }
-        return ((a.getFeature() == null && b.getFeature() != null) || (b.getFeature() == null && a.getFeature() != null));
-    }
+//    /**
+//     * Checks to see if the current selection is candidate for merging.
+//     */
+//    private boolean isSelectionMergeable() {
+//        if (treeTable.getSelectedRowCount() != 2) {
+//            return false;
+//        }
+//
+//        MergeNode a = (MergeNode) treeTable.getPathForRow(
+//            treeTable.getSelectedRows()[0]).getLastPathComponent();
+//        MergeNode b = (MergeNode) treeTable.getPathForRow(
+//            treeTable.getSelectedRows()[1]).getLastPathComponent();
+//        if (a.isJoined() || b.isJoined()) {
+//            return false;
+//        }
+//        return ((a.getFeature() == null && b.getFeature() != null) || (b.getFeature() == null && a.getFeature() != null));
+//    }
 
     private void acceptTheirs() {
-        for (MergeNode node : getLeaves()) {
-            if(node.isLeaf()) {
-                if(node.getFeature() == null) {
-                    treeModel.setValueAt(MergeAction.DELETE, node, MergeTreeTableModel.ACTION_COLUMN);
-                } else if (node.getEntity() == null) {
-                    treeModel.setValueAt(MergeAction.UPDATE, node, MergeTreeTableModel.ACTION_COLUMN);
-                }
-            }
-        }
+//        for (MergeNode node : getLeaves()) {
+//            if(node.isLeaf()) {
+//                if(node.getFeature() == null) {
+//                    treeModel.setValueAt(MergeAction.DELETE, node, MergeTreeTableModel.ACTION_COLUMN);
+//                } else if (node.getEntity() == null) {
+//                    treeModel.setValueAt(MergeAction.UPDATE, node, MergeTreeTableModel.ACTION_COLUMN);
+//                }
+//            }
+//        }
     }
 
     /**
      * Merges an unmatched existing entity with an unmatched imported feature
      */
-    private void mergeSelection() {
-        MergeNode a = (MergeNode) treeTable.getPathForRow(
-            treeTable.getSelectedRows()[0]).getLastPathComponent();
-        MergeNode b = (MergeNode) treeTable.getPathForRow(
-            treeTable.getSelectedRows()[1]).getLastPathComponent();
-
-        MergeNode entityNode;
-        MergeNode featureNode;
-
-        if (a.getEntity() != null) {
-            entityNode = a;
-            featureNode = b;
-        } else {
-            entityNode = b;
-            featureNode = a;
-        }
-
-        entityNode.setFeature(b.getFeature());
-
-        treeModel.fireNodeChanged(entityNode);
-        treeModel.removeNodeFromParent(featureNode);
-    }
+//    private void mergeSelection() {
+//        MergeNode a = (MergeNode) treeTable.getPathForRow(
+//            treeTable.getSelectedRows()[0]).getLastPathComponent();
+//        MergeNode b = (MergeNode) treeTable.getPathForRow(
+//            treeTable.getSelectedRows()[1]).getLastPathComponent();
+//
+//        MergeNode entityNode;
+//        MergeNode featureNode;
+//
+//        if (a.getEntity() != null) {
+//            entityNode = a;
+//            featureNode = b;
+//        } else {
+//            entityNode = b;
+//            featureNode = a;
+//        }
+//
+//        entityNode.setFeature(b.getFeature());
+//
+//        treeModel.fireNodeChanged(entityNode);
+//        treeModel.removeNodeFromParent(featureNode);
+//    }
 
     /**
      * Updates the server with the imported features.
@@ -254,7 +243,8 @@ public class UpdateWindow extends JFrame {
     }
 
 	private List<MergeNode> getLeaves() {
-        List<MergeNode> nodes = ((MergeNode) treeModel.getRoot()).getLeaves();
-        return nodes;
+//        List<MergeNode> nodes = ((MergeNode) treeModel.getRoot()).getLeaves();
+//        return nodes;
+        throw new UnsupportedOperationException();
     }
 }
