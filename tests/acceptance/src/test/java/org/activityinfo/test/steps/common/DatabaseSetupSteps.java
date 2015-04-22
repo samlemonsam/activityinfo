@@ -259,9 +259,17 @@ public class DatabaseSetupSteps {
     }
 
     @Then("^Location type \"(.*?)\" should be visible\\.$")
-    public void location_type_should_appear_in_tree(String locationTypeName) throws Throwable {
+    public void location_type_should_be_visible(String locationTypeName) throws Throwable {
         driver.assertVisible(ObjectType.LOCATION_TYPE, true,
                 new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @Then("^Form \"(.*?)\" should be visible\\.$")
+    public void form_should_be_visible(String formName) throws Throwable {
+        driver.assertVisible(ObjectType.FORM, true,
+                new Property("name", formName),
                 new Property("database", getCurrentDatabase())
         );
     }

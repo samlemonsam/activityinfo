@@ -263,25 +263,16 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
         ensureLoggedIn();
 
-        switch(objectType) {
-            case LOCATION_TYPE:
-                assertLocationTypeVisible(testObject, exists);
-                return;
-        }
-        throw new UnsupportedOperationException("Object type is not supported: " + objectType);
-    }
-
-    private void assertLocationTypeVisible(TestObject testObject, boolean exists) {
-        String locationTypeName = testObject.getAlias("name");
+        String name = testObject.getAlias("name");
 
         DesignTab designTab = applicationPage.navigateToDesignTab();
         designTab.selectDatabase(testObject.getAlias("database"));
-        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(locationTypeName);
+        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(name);
 
         if (exists) {
-            Assert.assertTrue("Location type with name '" + locationTypeName + "' is not present.", node.isPresent());
+            Assert.assertTrue(objectType.name() + " with name '" + name + "' is not present.", node.isPresent());
         } else {
-            Assert.assertTrue("Location type with name '" + locationTypeName + "' is present.", !node.isPresent());
+            Assert.assertTrue(objectType.name() + " with name '" + name + "' is present.", !node.isPresent());
         }
     }
 
