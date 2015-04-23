@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge;
+package org.activityinfo.geoadmin.merge.model;
 
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.model.formTree.FormTree;
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Describes a form that is the target of updates in a merge operation.
  */
-public class MergeFormViewModel {
+public class MergeForm {
 
     private FormTree tree;
     private ColumnSet columnSet;
@@ -29,6 +29,9 @@ public class MergeFormViewModel {
         buildColumns();
     }
 
+    public int getRowCount() {
+        return columnSet.getNumRows();
+    }
 
     public void build(CollectionCatalog catalog, ResourceId resourceId) {
         FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog);

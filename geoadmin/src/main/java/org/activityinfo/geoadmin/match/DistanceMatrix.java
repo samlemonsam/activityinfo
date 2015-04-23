@@ -1,33 +1,19 @@
 package org.activityinfo.geoadmin.match;
 
-import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
-
-
-public class DistanceMatrix {
+public interface DistanceMatrix {
     
-    private SparseDoubleMatrix2D[] matrices;
+    int getDimensionCount();
     
-    public DistanceMatrix(int nx, int ny, int dimensionCount) {
-        matrices = new SparseDoubleMatrix2D[dimensionCount];
-        for(int i=0;i<dimensionCount;++i) {
-            matrices[i] = new SparseDoubleMatrix2D(nx, ny);
-        }
-    }
+    int getRowCount();
+    
+    int getColumnCount();
 
-    public void set(int i, int j, double[] distance) {
-        assert distance.length == matrices.length;
-        for(int d=0;d < distance.length; ++d) {
-            matrices[d].set(i, j, distance[d]);
-        }
-    }
+    /**
+     *
+     * @return {@code true} if the items at {@code rowIndex} and {@code columnIndex} have any
+     * degree of similarity
+     */
+    boolean matches(int rowIndex, int columnIndex);
 
-
-    public boolean isAdjacent(int i, int j) {
-        for(int d=0;d < matrices.length; ++d) {
-            if(matrices[d].get(i, j) > 0) {
-                return true;
-            }
-        } 
-        return false;
-    }
+    double distance(int i, int j);
 }

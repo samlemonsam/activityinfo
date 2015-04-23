@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.model;
 
-import org.activityinfo.geoadmin.merge.MergeFormViewModel;
-import org.activityinfo.geoadmin.merge.MergeModel;
+import org.activityinfo.geoadmin.merge.model.MergeForm;
+import org.activityinfo.geoadmin.merge.model.MergeModel;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -18,8 +18,8 @@ public class ActivityInfoClientTest {
         
         ActivityInfoClient client = new ActivityInfoClient("http://localhost:8898/resources", "test@test.org", "testing123");
 
-        ResourceId targetId = CuidAdapter.adminLevelFormClass(1);
-        MergeFormViewModel target = new MergeFormViewModel();
+        ResourceId targetId = CuidAdapter.adminLevelFormClass(1508);
+        MergeForm target = new MergeForm();
         target.build(client, targetId);
         
         System.out.println(target.getTextFields());
@@ -32,10 +32,10 @@ public class ActivityInfoClientTest {
         FormTree sourceTree = new FormTreeBuilder(catalog).queryTree(importId);
 
 
-        MergeFormViewModel source = new MergeFormViewModel();
+        MergeForm source = new MergeForm();
         source.build(catalog, importId);
 
-        MergeModel model = new MergeModel(source, target);
+        MergeModel model = new MergeModel(target, source);
         model.build();
         
         

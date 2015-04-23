@@ -1,22 +1,28 @@
 package org.activityinfo.geoadmin.merge;
 
-import com.google.common.collect.Lists;
-import net.miginfocom.swing.MigLayout;
-import org.activityinfo.geoadmin.*;
+import org.activityinfo.geoadmin.ImportSource;
+import org.activityinfo.geoadmin.merge.model.MatchRow;
+import org.activityinfo.geoadmin.merge.model.MergeForm;
+import org.activityinfo.geoadmin.merge.model.MergeModel;
+import org.activityinfo.geoadmin.merge.table.ColumnAccessor;
+import org.activityinfo.geoadmin.merge.table.MergeTableModel;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
-import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
-import org.activityinfo.geoadmin.model.VersionMetadata;
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.List;
+import java.util.HashSet;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * Window proving a user interface to match a shapefile to an existing admin
@@ -29,16 +35,14 @@ import java.util.List;
  */
 public class UpdateWindow extends JFrame {
 
-    private List<Join> joins;
-    private ImportSource source;
-    private UpdateForm form;
     private AdminLevel level;
     private ActivityInfoClient client;
-    private JLabel scoreLabel;
-    private MergeTableModel tableModel;
-    private JTable table;
+    private final MergeModel mergeModel;
 
-    public UpdateWindow(JFrame parent, ImportSource source, AdminLevel level, ActivityInfoClient client) {
+    private final MergeTableModel tableModel;
+    private final JTable table;
+
+    public UpdateWindow(JFrame parent, ImportSource source, AdminLevel level, ActivityInfoClient client) throws IOException {
         super("Update " + level.getName());
         setSize(650, 350);
         setLocationRelativeTo(parent);
@@ -46,79 +50,78 @@ public class UpdateWindow extends JFrame {
 
         this.client = client;
         this.level = level;
-        this.source = source;
 
-        form = new UpdateForm(source);
-
-        FormTree targetTree = client.getFormTree(CuidAdapter.adminLevelFormClass(level.getId()));
+        MergeForm targetForm = new MergeForm();
+        targetForm.build(client, CuidAdapter.adminLevelFormClass(level.getId()));
         
-        tableModel = new MergeTableModel(null);
+        ResourceId importId = ResourceId.generateId();
+        FeatureSourceCatalog catalog = new FeatureSourceCatalog();
+        catalog.add(importId, source.getFile().getAbsolutePath());
+
+        MergeForm sourceForm = new MergeForm();
+        sourceForm.build(catalog, importId);
+
+        mergeModel = new MergeModel(targetForm, sourceForm);
+        mergeModel.build();
+        
+        tableModel = new MergeTableModel(mergeModel);
         table = new JTable(tableModel);
         
-        JComboBox actionCombo = new JComboBox(MergeAction.values());
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(true);
         
-
-        scoreLabel = new JLabel();
-        JLabel countLabel = new JLabel(source.getFeatureCount() + " features");
-
-        JPanel panel = new JPanel(new MigLayout("fill"));
-        panel.add(form, "wrap");
-        panel.add(new JScrollPane(table), "wrap,grow");
-
-        panel.add(scoreLabel, "height 25!, wrap, growx");
-        panel.add(countLabel);
+        for(int i=0;i<tableModel.getColumnCount();++i) {
+            ColumnAccessor columnModel = tableModel.getColumnAccessor(i);
+            TableColumn tableColumn = table.getColumnModel().getColumn(i);
+            tableColumn.setCellRenderer(columnModel.getCellRenderer());
+            tableColumn.setResizable(columnModel.isResizable());
+            if(!columnModel.isResizable()) {
+                tableColumn.setWidth(columnModel.getWidth());
+                tableColumn.setMaxWidth(columnModel.getWidth());
+                tableColumn.setPreferredWidth(columnModel.getWidth());
+            }
+        }
 
         getContentPane().add(createToolbar(), BorderLayout.PAGE_START);
-        getContentPane().add(panel, BorderLayout.CENTER);
-    }
-
-    /**
-     * Displays the score of the selected match bet
-     * 
-     * @param event
-     */
-    private void showScore(TreeSelectionEvent event) {
-        MergeNode node = (MergeNode) event.getPath().getLastPathComponent();
-        if (node.getFeature() == null || node.getEntity() == null) {
-            scoreLabel.setText("");
-        } else {
-            double nameSim = node.getFeature().similarity(node.getEntity().getName());
-            double intersection = Joiner.areaOfIntersection(node.getEntity(), node.getFeature());
-
-            scoreLabel.setText(String.format("Name match: %.2f  Intersection: %.2f",
-                nameSim, intersection));
-        }
+        getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
     }
 
     private JToolBar createToolbar() {
-
-        final JButton acceptTheirsButton = new JButton("Accept Theirs");
-        acceptTheirsButton.addActionListener(new ActionListener() {
-
+        final JButton mergeButton = new JButton("Match");
+        mergeButton.setEnabled(false);
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
-            public void actionPerformed(ActionEvent event) {
-                acceptTheirs();
+            public void valueChanged(ListSelectionEvent e) {
+                mergeButton.setEnabled(isSelectionMergeable());
+            }
+        });
+        
+        final JButton unMergeButton = new JButton("Unmatch");
+        unMergeButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                unMatchSelection();
             }
         });
 
-        final JButton mergeButton = new JButton("Merge");
-        mergeButton.setEnabled(false);
-//        treeTable.addTreeSelectionListener(new TreeSelectionListener() {
-//
-//            @Override
-//            public void valueChanged(TreeSelectionEvent event) {
-//                mergeButton.setEnabled(isSelectionMergeable());
-//            }
-//        });
-//        mergeButton.addActionListener(new ActionListener() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent arg0) {
-//                mergeSelection();
-//            }
-//        });
 
+        final JButton deleteButton = new JButton("Delete");
+        deleteButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleSelectionDeleted(true);
+            }
+        });
+        
+        final JButton restoreButton = new JButton("Undelete");
+        restoreButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleSelectionDeleted(false);
+            }
+        });
 
+     
         JButton updateButton = new JButton("Update");
         updateButton.addActionListener(new ActionListener() {
 
@@ -129,13 +132,57 @@ public class UpdateWindow extends JFrame {
         });
 
         JToolBar toolbar = new JToolBar();
-        toolbar.add(acceptTheirsButton);
         toolbar.add(mergeButton);
+        toolbar.add(unMergeButton);
+        toolbar.addSeparator();
+        toolbar.add(deleteButton);
+        toolbar.add(restoreButton);
+        toolbar.addSeparator();
         toolbar.add(updateButton);
-
         return toolbar;
     }
 
+
+
+    private void toggleSelectionDeleted(boolean deleted) {
+        ListSelectionModel selection = table.getSelectionModel();
+        
+        for(int i=selection.getMinSelectionIndex();i<=selection.getMaxSelectionIndex();++i) {
+            if(selection.isSelectedIndex(i)) {
+                MatchRow match = mergeModel.getMatch(table.convertRowIndexToModel(i));
+                match.setDeleted(deleted);
+            }
+        }
+
+        tableModel.fireTableRowsUpdated(selection.getMinSelectionIndex(), selection.getMaxSelectionIndex());
+    }
+
+    private void unMatchSelection() {
+        ListSelectionModel selection = table.getSelectionModel();
+        
+        // first make a list of selected matches as their indices may change
+
+        Set<MatchRow> selected = new HashSet<>();
+        for(int i=selection.getMinSelectionIndex();i<=selection.getMaxSelectionIndex();++i) {
+            if(selection.isSelectedIndex(i)) {
+                selected.add(mergeModel.getMatch(table.convertRowIndexToModel(i)));
+            }
+        }
+
+        ListIterator<MatchRow> it = mergeModel.getMatches().listIterator();
+        while(it.hasNext()) {
+            MatchRow match = it.next();
+            if(selected.contains(match)) {
+                MatchRow newRow = match.split();
+                it.add(newRow);
+            }
+        }
+        
+        tableModel.fireTableDataChanged();
+        
+    }
+    
+    
 //    /**
 //     * Checks to see if the current selection is candidate for merging.
 //     */
@@ -196,55 +243,60 @@ public class UpdateWindow extends JFrame {
      * Updates the server with the imported features.
      */
     private void update() {
-
-        List<AdminEntity> entities = Lists.newArrayList();
-        	
-        for (MergeNode join : getLeaves()) {
-            if (join.getAction() != null && join.getAction() != MergeAction.IGNORE) {
-                AdminEntity unit = new AdminEntity();
-                if (join.getEntity() != null) {
-                    unit.setId(join.getEntity().getId());
-                }
-                if (join.getFeature() != null) {
-                    unit.setName(join.getFeature().getAttributeStringValue(form.getNameProperty()));
-                    if (form.getCodeProperty() != null) {
-                        unit.setCode(join.getFeature().getAttributeStringValue(form.getCodeProperty()));
-                    }
-                    unit.setBounds(GeoUtils.toBounds(join.getFeature().getEnvelope()));
-                    unit.setGeometry(join.getFeature().getGeometry());
-                }
-                unit.setDeleted(join.getAction() == MergeAction.DELETE);
-                entities.add(unit);
-            }
-        }
-
-        VersionMetadata metadata = new VersionMetadata();
-        metadata.setSourceFilename(source.getFile().getName());
-        metadata.setSourceMD5(source.getMd5Hash());
-        metadata.setSourceUrl(form.getSourceUrl());
-        metadata.setMessage(form.getMessage());
-        try {
-            metadata.setSourceMetadata(source.getMetadata());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        AdminLevel updatedLevel = new AdminLevel();
-        updatedLevel.setId(level.getId());
-        updatedLevel.setName(level.getName());
-        updatedLevel.setParentId(level.getParentId());
-        updatedLevel.setEntities(entities);
-        updatedLevel.setVersionMetadata(metadata);
-
-
-        client.updateAdminLevel(updatedLevel);
-        	
-        setVisible(false);
+//
+//        List<AdminEntity> entities = Lists.newArrayList();
+//        	
+//        for (MergeNode join : getLeaves()) {
+//            if (join.getAction() != null && join.getAction() != MergeAction.IGNORE) {
+//                AdminEntity unit = new AdminEntity();
+//                if (join.getEntity() != null) {
+//                    unit.setId(join.getEntity().getId());
+//                }
+//                if (join.getFeature() != null) {
+//                    unit.setName(join.getFeature().getAttributeStringValue(form.getNameProperty()));
+//                    if (form.getCodeProperty() != null) {
+//                        unit.setCode(join.getFeature().getAttributeStringValue(form.getCodeProperty()));
+//                    }
+//                    unit.setBounds(GeoUtils.toBounds(join.getFeature().getEnvelope()));
+//                    unit.setGeometry(join.getFeature().getGeometry());
+//                }
+//                unit.setDeleted(join.getAction() == MergeAction.DELETE);
+//                entities.add(unit);
+//            }
+//        }
+//
+//        VersionMetadata metadata = new VersionMetadata();
+//        metadata.setSourceFilename(source.getFile().getName());
+//        metadata.setSourceMD5(source.getMd5Hash());
+//        metadata.setSourceUrl(form.getSourceUrl());
+//        metadata.setMessage(form.getMessage());
+//        try {
+//            metadata.setSourceMetadata(source.getMetadata());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        
+//        AdminLevel updatedLevel = new AdminLevel();
+//        updatedLevel.setId(level.getId());
+//        updatedLevel.setName(level.getName());
+//        updatedLevel.setParentId(level.getParentId());
+//        updatedLevel.setEntities(entities);
+//        updatedLevel.setVersionMetadata(metadata);
+//
+//
+//        client.updateAdminLevel(updatedLevel);
+//        	
+//        setVisible(false);
     }
 
-	private List<MergeNode> getLeaves() {
-//        List<MergeNode> nodes = ((MergeNode) treeModel.getRoot()).getLeaves();
-//        return nodes;
-        throw new UnsupportedOperationException();
+
+    public boolean isSelectionMergeable() {
+        if (table.getSelectedRowCount() == 2) {
+            int selectedRows[] = table.getSelectedRows();
+            return !mergeModel.getMatch(selectedRows[0]).isMerged() &&
+                   !mergeModel.getMatch(selectedRows[1]).isMerged();
+        } else {
+            return false;
+        }
     }
 }

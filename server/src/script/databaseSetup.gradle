@@ -1,6 +1,5 @@
-import org.activityinfo.store.mysql.MySqlSetupTask
 import org.activityinfo.store.mysql.MySqlReleaseTask
-
+import org.activityinfo.store.mysql.MySqlSetupTask
 
 def setupScripts =
         files("${project.rootDir}/store/mysql/geography.sql",
@@ -29,9 +28,14 @@ task setupDatabase(type: MySqlSetupTask) {
             "${project.rootDir}/store/mysql/dev-user.sql")
 }
 
-task migrateDatabase(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
+task migrateDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
     description =  "Applies schema migrations to the local 'activityinfo' development database"
-    database =      environment.database
+    database =      mysql.localAT
+}
+
+task migrateDatabaseDev(type: MySqlSetupTask) {
+    description =  "Applies schema migrations to the local 'activityinfo_at' development database"
+    database =      mysql.localDev
 }
 
 task setupDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {

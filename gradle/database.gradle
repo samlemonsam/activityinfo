@@ -7,7 +7,7 @@ def localMySqlServer = new MySqlServer(
 
 ext {
     mysql = [ 
-        localDev: localMySqlServer.database('activityinfo_dev'),
+        localDev: localMySqlServer.database('activityinfo'),
         localAT:  localMySqlServer.database('activityinfo_at')
     ]
     

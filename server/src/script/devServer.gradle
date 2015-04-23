@@ -34,7 +34,12 @@ def healthCheck() {
 }
 
 appengineRun {
-    ext.database = mysql.localDev
+
+    dependsOn 'migrateDatabaseDev'
+    
+    doFirst {
+        writeConfiguration mysql.localDev
+    }
 }
 
 task appengineStartAT(type: RunTask) {
@@ -44,7 +49,10 @@ task appengineStartAT(type: RunTask) {
     dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
 
     daemon = true
-    ext.database = mysql.localAT
+    
+    doFirst {
+        writeConfiguration mysql.localAT
+    }
 }
 
 task appengineRunAT(type: RunTask) {
@@ -52,7 +60,10 @@ task appengineRunAT(type: RunTask) {
     description = "Runs a local AppEngine Development Server for Acceptance Testing"
 
     dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
-    ext.database = mysql.localAT
+    
+    doFirst {
+        writeConfiguration mysql.localAT
+    }
 }
 
 task appengineStartInstrumentedAT(type: RunTask) {
@@ -64,7 +75,10 @@ task appengineStartInstrumentedAT(type: RunTask) {
 
     daemon = true
     explodedAppDirectory = appengineExplodeInstrumentedApp.warDir
-    ext.database = mysql.localAT
+    
+    doFirst {
+        writeConfiguration(mysql.localAT)
+    }
 
     doFirst {
         def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
@@ -81,9 +95,6 @@ tasks.withType(RunTask) {
     // Provide a configuration for the server
     jvmFlags = ["-Dactivityinfo.config=${configFile}"]
 
-    doFirst {
-        writeConfiguration ext.database
-    }
     
     doLast {
         if(daemon) {

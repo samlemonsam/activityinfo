@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge;
+package org.activityinfo.geoadmin.merge.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -29,9 +29,21 @@ public class MergeColumn {
         }
         return set;
     }
+    
+    public String getLabel() {
+        if(field.isRoot()) {
+            return field.getField().getLabel();
+        } else {
+            return field.getDefiningFormClass().getLabel() + " " + field.getField().getLabel();
+        }
+    }
 
     @Override
     public String toString() {
-        return "MergeColumn{" + field.getField().getLabel() + "}";
+        return "MergeColumn{" + getLabel() + "}";
+    }
+
+    public ColumnView getView() {
+        return columnView;
     }
 }
