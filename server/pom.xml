@@ -303,6 +303,11 @@
       <artifactId>appengine-metrics</artifactId>
       <version>0.3-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.bedatadriven.appengine</groupId>
+      <artifactId>appengine-hibernate</artifactId>
+      <version>24</version>
+    </dependency>
 
 
     <!-- Dependency Injection Framework -->

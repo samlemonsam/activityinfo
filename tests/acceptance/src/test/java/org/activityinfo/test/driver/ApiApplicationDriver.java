@@ -200,7 +200,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("name", form.getAlias());
         properties.put("databaseId", form.getId("database")); 
         properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC)));
-        
+        properties.put("classicView", form.getBoolean("classicView", true));
+
         switch (form.getString("reportingFrequency", "once")) {
             case "monthly":
                 properties.put("reportingFrequency", 1);
