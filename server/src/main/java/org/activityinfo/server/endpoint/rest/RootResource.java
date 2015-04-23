@@ -33,14 +33,12 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
-import org.activityinfo.server.util.monitoring.Timed;
+import org.activityinfo.service.DeploymentConfiguration;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
@@ -98,41 +96,17 @@ public class RootResource {
         return new CountryResource(results.get(0));
     }
 
-    @GET 
-    @Path("/databases") 
-    @Timed(name = "api.rest.get_databases")
+    @GET @Path("/databases") 
     @JsonView(DTOViews.List.class) 
     @Produces(MediaType.APPLICATION_JSON)
     public List<UserDatabaseDTO> getDatabases() {
-        return dispatcher.execute(new GetSchema()).getDatabases();
+        List<UserDatabaseDTO> databases = dispatcher.execute(new GetSchema()).getDatabases();
+        return databases;
     }
 
-    @GET 
-    @Path("/database/{id}/schema")
-    @Timed(name = "api.rest.get_schema")
-    @JsonView(DTOViews.Schema.class) 
-    @Produces(MediaType.APPLICATION_JSON)
-    public UserDatabaseDTO getDatabaseSchema(@PathParam("id") int id) {
-        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(id);
-        if (db == null) {
-            throw new WebApplicationException(Status.NOT_FOUND);
-        }
-        return db;
-    }
-
-    @GET 
-    @Path("/database/{id}/schema.csv")
-    @Timed(name = "api.rest.get_schema_csv")
-    public Response getDatabaseSchemaCsv(@PathParam("id") int id) {
-        UserDatabaseDTO db = getDatabaseSchema(id);
-        SchemaCsvWriter writer = new SchemaCsvWriter();
-        writer.write(db);
-
-        return Response.ok()
-                       .type("text/css")
-                       .header("Content-Disposition", "attachment; filename=schema_" + id + ".csv")
-                       .entity(writer.toString())
-                       .build();
+    @Path("/database/{id}")
+    public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
+        return new DatabaseResource(dispatcher, id);
     }
 
     @Path("/adminLevel/{id}")
@@ -154,9 +128,9 @@ public class RootResource {
     public LocationsResource getLocations() {
         return new LocationsResource(dispatcher);
     }
-    
-    @Path("/users")
-    public UsersResource getUsers() {
-        return new UsersResource(config, entityManager);
+
+    @Path("/form/{id}")
+    public FormResource getForm(@PathParam("id") String id) {
+        return new FormResource(id);
     }
 }

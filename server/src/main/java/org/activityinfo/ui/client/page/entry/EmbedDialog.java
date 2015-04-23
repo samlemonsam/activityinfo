@@ -60,6 +60,7 @@ public class EmbedDialog extends Dialog {
         layout.setVBoxLayoutAlign(VBoxLayoutAlign.STRETCH);
         layout.setPadding(new Padding(10));
         setLayout(layout);
+        setButtons(CLOSE);
 
         add(new Label("Paste link:"));
         urlText = new TextField<String>();
@@ -95,8 +96,8 @@ public class EmbedDialog extends Dialog {
             public void onSuccess(SchemaDTO result) {
                 Filter filter = place.getFilter();
                 if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Activity)) {
-                    ActivityDTO singleActivity = result.getActivityById(filter.getRestrictedCategory(DimensionType
-                            .Activity));
+                    int activityId = filter.getRestrictedCategory(DimensionType.Activity);
+                    ActivityDTO singleActivity = result.getActivityById(activityId);
                     showPublished(singleActivity, url);
                 } else if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
                     MessageBox.alert("foo", "not impl", null);

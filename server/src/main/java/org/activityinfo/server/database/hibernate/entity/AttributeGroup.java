@@ -22,6 +22,9 @@ package org.activityinfo.server.database.hibernate.entity;
  * #L%
  */
 
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -29,7 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class AttributeGroup implements Serializable, Deleteable, Orderable {
+public class AttributeGroup implements Serializable, Deleteable, Orderable, FormFieldEntity {
 
     private int id;
 
@@ -55,12 +58,30 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
 
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "AttributeGroupId")
+    public AttributeGroup(AttributeGroup group) {
+        this.name = group.name;
+        this.sortOrder = group.sortOrder;
+        this.multipleAllowed = group.multipleAllowed;
+        this.category = group.category;
+        this.dateDeleted = group.dateDeleted;
+        this.mandatory = group.mandatory;
+        this.defaultValue = group.defaultValue;
+        this.workflow = group.workflow;
+    }
+
+    @Id
+    @Column(name = "AttributeGroupId")
     public int getId() {
         return this.id;
     }
 
-    protected void setId(int id) {
+    @Transient
+    @Override
+    public ResourceId getFieldId() {
+        return CuidAdapter.attributeGroupField(getId());
+    }
+
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -73,7 +94,8 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
         this.name = name;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY) @JoinTable(name = "AttributeGroupInActivity",
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "AttributeGroupInActivity",
             joinColumns = {@JoinColumn(name = "AttributeGroupId", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "ActivityId", nullable = false, updatable = false)})
     public Set<Activity> getActivities() {
@@ -96,7 +118,8 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
         this.attributes = attributes;
     }
 
-    @Override @Column(nullable = false)
+    @Override
+    @Column(nullable = false)
     public int getSortOrder() {
         return sortOrder;
     }
@@ -115,7 +138,8 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
         this.multipleAllowed = allowed;
     }
 
-    @Column @Temporal(value = TemporalType.TIMESTAMP)
+    @Column
+    @Temporal(value = TemporalType.TIMESTAMP)
     public Date getDateDeleted() {
         return this.dateDeleted;
     }
@@ -124,7 +148,7 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
         this.dateDeleted = date;
     }
 
-    @Column(name="defaultValue", nullable = true)
+    @Column(name = "defaultValue", nullable = true)
     public Integer getDefaultValue() {
         return this.defaultValue;
     }
@@ -133,7 +157,7 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
         this.defaultValue = defaultValue;
     }
 
-    @Column(name="workflow")
+    @Column(name = "workflow")
     public boolean isWorkflow() {
         return workflow;
     }
@@ -176,8 +200,10 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable {
         this.category = category;
     }
 
-    @Override @Transient
+    @Override
+    @Transient
     public boolean isDeleted() {
         return getDateDeleted() == null;
     }
+
 }

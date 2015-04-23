@@ -23,10 +23,11 @@ package org.activityinfo.server.command;
  */
 
 import org.activityinfo.legacy.shared.command.CreateEntity;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.UpdateEntity;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.fixtures.InjectionSupport;
@@ -38,6 +39,9 @@ import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
@@ -64,28 +68,20 @@ public class AttributeGroupTest extends CommandTestCase {
 
         // check if it has been added
 
-        SchemaDTO schema = execute(new GetSchema());
-
-        ActivityDTO activity = schema.getActivityById(1);
-        AttributeGroupDTO group = activity.getAttributeGroupById(result
-                .getNewId());
+        ActivityFormDTO activity = execute(new GetActivityForm(1));
+        AttributeGroupDTO group = activity.getAttributeGroupById(result.getNewId());
 
         Assert.assertNotNull("attribute group is created", group);
-        Assert.assertEquals("name is correct", group.getName(),
-                "Type de Conflit");
-        Assert.assertTrue("multiple allowed is set to true",
-                group.isMultipleAllowed());
+        Assert.assertEquals("name is correct", group.getName(), "Type de Conflit");
+        Assert.assertTrue("multiple allowed is set to true", group.isMultipleAllowed());
     }
 
     @Test
     public void testUpdate() throws Exception {
 
-        // initial data load
-
-        SchemaDTO schema = execute(new GetSchema());
 
         // change the name of an entity group
-        ActivityDTO activity = schema.getActivityById(1);
+        ActivityFormDTO activity = execute(new GetActivityForm(1));
         AttributeGroupDTO group = activity.getAttributeGroups().get(0);
         group.setName("Foobar");
 
@@ -95,11 +91,8 @@ public class AttributeGroupTest extends CommandTestCase {
         execute(new UpdateEntity(group, changes));
 
         // reload data
-        schema = execute(new GetSchema());
-
+        activity = execute(new GetActivityForm(1));
         // verify the property has been duly changed
-        Assert.assertEquals(group.getName(), schema.getActivityById(1)
-                .getAttributeGroups().get(0).getName());
-
+        assertThat(activity.getAttributeGroups().get(0).getName(), equalTo(group.getName()));
     }
 }

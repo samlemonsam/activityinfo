@@ -34,7 +34,7 @@ class ItemDetail {
     static ItemDetail create(RenderContext ctx, Map.Entry<String, Object> entry) {
 
         Map<String, Object> state = ctx.getState();
-        SchemaDTO schema = ctx.getSchema();
+        ActivityFormDTO form = ctx.getForm();
 
         String key = entry.getKey();
         final Object oldValue = state.get(key);
@@ -67,23 +67,23 @@ class ItemDetail {
         } else if (key.equals("projectId")) {
             String oldName = null;
             if (oldValue != null) {
-                ProjectDTO project = schema.getProjectById(toInt(oldValue));
+                ProjectDTO project = form.getProjectById(toInt(oldValue));
                 if (project != null) {
                     oldName = project.getName();
                 }
             }
-            String newName = schema.getProjectById(toInt(newValue)).getName();
+            String newName = form.getProjectById(toInt(newValue)).getName();
             addValues(sb, I18N.CONSTANTS.project(), oldName, newName);
 
         } else if (key.equals("partnerId")) {
             String oldName = null;
             if (oldValue != null) {
-                PartnerDTO oldPartner = schema.getPartnerById(toInt(oldValue));
+                PartnerDTO oldPartner = form.getPartnerById(toInt(oldValue));
                 if (oldPartner != null) {
                     oldName = oldPartner.getName();
                 }
             }
-            PartnerDTO newPartner = schema.getPartnerById(toInt(newValue));
+            PartnerDTO newPartner = form.getPartnerById(toInt(newValue));
             if (newPartner != null) {
                 String newName = newPartner.getName();
                 addValues(sb, I18N.CONSTANTS.partner(), oldName, newName);
@@ -92,7 +92,7 @@ class ItemDetail {
         } else if (key.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
             // custom
             int id = IndicatorDTO.indicatorIdForPropertyName(key);
-            IndicatorDTO dto = schema.getIndicatorById(id);
+            IndicatorDTO dto = form.getIndicatorById(id);
             if (dto != null) {
                 String name = dto.getName();
 
@@ -107,7 +107,7 @@ class ItemDetail {
         } else if (key.startsWith(AttributeDTO.PROPERTY_PREFIX)) {
             if(toBool(oldValue) != toBool(newValue)) {
                 int id = AttributeDTO.idForPropertyName(key);
-                AttributeDTO dto = schema.getAttributeById(id);
+                AttributeDTO dto = form.getAttributeById(id);
                 if (dto != null) {
                     if (toBool(newValue)) {
                         sb.append(I18N.MESSAGES.siteHistoryAttrAdd(dto.getName()));

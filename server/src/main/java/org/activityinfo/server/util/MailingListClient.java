@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 

@@ -24,7 +24,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
@@ -33,6 +33,7 @@ import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,10 +46,14 @@ import java.util.List;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class LocationTypeDTO extends BaseModelData implements EntityDTO, IsFormClass {
 
-    public static int NAME_MAX_LENGTH = 50;
+    public static final int NOT_NATIONWIDE_LOCATION_TYPE_ID = 20301;
+
+    public static final String NATIONWIDE_NAME = "Country";
+
+    public static final int NAME_MAX_LENGTH = 50;
 
     private Integer databaseId;
-    private List<AdminLevelDTO> adminLevels;
+    private List<AdminLevelDTO> adminLevels = new ArrayList<>();
     private Extents countryBounds;
     private long version;
     private long childVersion;
@@ -93,7 +98,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
 
     public boolean isNationwide() {
         // hack!!
-        return "Country".equals(getName()) && getId() != 20301;
+        return NATIONWIDE_NAME.equals(getName()) && getId() != NOT_NATIONWIDE_LOCATION_TYPE_ID;
     }
 
     @JsonProperty("adminLevelId") @JsonView(DTOViews.Schema.class)

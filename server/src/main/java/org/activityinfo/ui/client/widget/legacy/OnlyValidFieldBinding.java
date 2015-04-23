@@ -26,7 +26,9 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.widget.form.Field;
+import com.extjs.gxt.ui.client.widget.form.RadioGroup;
 
 /**
  * @author yuriyz on 10/23/2014.
@@ -46,7 +48,31 @@ public class OnlyValidFieldBinding extends FieldBinding {
     @Override
     public void updateModel() {
         if (field.isValid()) { // update model only if field value is valid
+
+            if (field instanceof RadioGroup) { // special handing for radio group
+
+                RadioGroup radioGroup = (RadioGroup) field;
+
+                // hack : boolean represented with radio buttons : order is important - true is first button, false is second button
+                if ("classicView".equals(property)) {
+                    Field nestedField = radioGroup.getValue();
+                    int selectedIndex = radioGroup.getAll().indexOf(nestedField);
+                    boolean val = selectedIndex == 0;
+                    if (store != null) {
+                        Record r = store.getRecord(model);
+                        if (r != null) {
+                            r.setValid(property, field.isValid());
+                            r.set(property, val);
+                        }
+                    } else {
+                        model.set(property, val);
+                    }
+                    return;
+                }
+            }
+
             super.updateModel();
+
         }
     }
 
@@ -60,4 +86,24 @@ public class OnlyValidFieldBinding extends FieldBinding {
         });
     }
 
+    @Override
+    public void updateField(boolean updateOriginalValue) {
+        if (field instanceof RadioGroup) { // special handling for radio group
+            RadioGroup radioGroup = (RadioGroup) field;
+
+            Object val = onConvertModelValue(model.get(property));
+
+            // hack : boolean represented with radio buttons : order is important - true is first button, false is second button
+            if (val instanceof Boolean) {
+                Field nestedField = radioGroup.get((Boolean)val ? 0 : 1);
+                nestedField.setValue(Boolean.TRUE);
+                return;
+            }
+
+            // we do not support other cases right now, fallback to default implementation
+
+        }
+
+        super.updateField(updateOriginalValue);
+    }
 }

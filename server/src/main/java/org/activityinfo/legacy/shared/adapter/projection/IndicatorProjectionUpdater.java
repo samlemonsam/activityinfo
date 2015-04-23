@@ -23,6 +23,8 @@ package org.activityinfo.legacy.shared.adapter.projection;
 
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.TextValue;
 
 /**
  * @author yuriyz on 6/3/14.
@@ -43,6 +45,12 @@ public class IndicatorProjectionUpdater implements ProjectionUpdater<Object> {
 
     @Override
     public void update(Projection projection, Object value) {
-        projection.setValue(path, value);
+        if(value instanceof Number) {
+            projection.setValue(path, new Quantity(((Number) value).doubleValue()));
+        } else if(value instanceof String) {
+            projection.setValue(path, TextValue.valueOf(((String) value)));
+        } else if(value != null) {
+            throw new IllegalArgumentException("type: " + value.getClass().getName());
+        }
     }
 }

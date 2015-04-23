@@ -22,7 +22,8 @@ package org.activityinfo.ui.client.widget.coord;
  * #L%
  */
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.core.server.type.converter.JreNumberFormats;
 import org.activityinfo.core.shared.type.converter.CoordinateAxis;
 import org.activityinfo.core.shared.type.converter.CoordinateFormatException;
@@ -31,16 +32,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Locale;
 
 public class CoordinateEditorTest {
     private static final double DELTA = 0.00001;
     private CoordinateParser editor;
 
+    @SuppressWarnings("NonJREEmulationClassesInClientCode")
     @Before
     public void before() {
         LocaleProxy.initialize();
-        LocaleProxy.setLocale(Locale.ENGLISH);
+        ThreadLocalLocaleProvider.pushLocale(java.util.Locale.ENGLISH);
     }
 
     @Test

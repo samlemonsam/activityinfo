@@ -3,9 +3,13 @@ package org.activityinfo.server.command.handler;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.server.database.hibernate.entity.Site;
+import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -34,6 +38,11 @@ public class PermissionOracle {
      */
     public boolean isDesignAllowed(UserDatabase database, User user) {
         return getPermissionByUser(database, user).isAllowDesign();
+    }
+
+    public boolean isViewAllowed(UserDatabase database, User user) {
+        UserPermission permission = getPermissionByUser(database, user);
+        return permission.isAllowView() || permission.isAllowViewAll();
     }
 
     public boolean isManageUsersAllowed(UserDatabase database, User user) {

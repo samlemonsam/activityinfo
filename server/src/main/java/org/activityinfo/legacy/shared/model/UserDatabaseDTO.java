@@ -42,11 +42,12 @@ import java.util.*;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, HasLockedPeriod, ProvidesKey {
 
+    public static final int MAX_NAME_LENGTH = 255;
     private CountryDTO country;
     private List<PartnerDTO> partners = new ArrayList<PartnerDTO>(0);
-    private List<ActivityDTO> activities = new ArrayList<ActivityDTO>(0);
+    private List<ActivityDTO> activities = new ArrayList<>(0);
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
-    private List<ProjectDTO> projects = new ArrayList<ProjectDTO>(0);
+    private List<ProjectDTO> projects = new ArrayList<>(0);
 
     public final static String ENTITY_NAME = "UserDatabase";
 
@@ -391,9 +392,9 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return lockedPeriods;
     }
 
-    public ProjectDTO getProjectById(Integer value) {
+    public ProjectDTO getProjectById(int value) {
         for (ProjectDTO project : getProjects()) {
-            if (value.intValue() == project.getId()) {
+            if (value == project.getId()) {
                 return project;
             }
         }
@@ -409,6 +410,10 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         } else {
             return false;
         }
+    }
+
+    public void addActivity(ActivityFormDTO dist) {
+        activities.add(new ActivityDTO(this, dist));
     }
 
     @JsonIgnore

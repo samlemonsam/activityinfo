@@ -54,6 +54,7 @@ import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogTether;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
+import org.activityinfo.ui.client.page.config.design.dialog.NewDbDialog;
 import org.activityinfo.ui.client.page.config.form.DatabaseForm;
 
 import java.util.HashMap;
@@ -201,20 +202,13 @@ public class DbListPresenter implements ActionListener {
     }
 
     public void onAdd() {
-        final UserDatabaseDTO db = new UserDatabaseDTO();
-
-        DatabaseForm form = new DatabaseForm(dispatcher);
-        form.getBinding().bind(db);
-
-        final FormDialogImpl dialog = new FormDialogImpl(form);
-        dialog.setWidth(400);
-        dialog.setHeight(200);
-        dialog.setHeadingText(I18N.CONSTANTS.newDatabase());
-
-        dialog.show(new FormDialogCallback() {
+        NewDbDialog newDbDialog = new NewDbDialog(dispatcher);
+        newDbDialog.show();
+        newDbDialog.setSuccessCallback(new SuccessCallback<Void>() {
             @Override
-            public void onValidated() {
-                save(db, dialog);
+            public void onSuccess(Void result) {
+                eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
+                loader.load();
             }
         });
     }

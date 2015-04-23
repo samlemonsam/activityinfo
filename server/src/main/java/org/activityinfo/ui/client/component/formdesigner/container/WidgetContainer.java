@@ -22,12 +22,16 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  */
 
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 
 /**
  * @author yuriyz on 7/14/14.
  */
 public interface WidgetContainer {
+
     public Widget asWidget();
 
     public Widget getDragHandle();
+
+    public FormDesigner getFormDesigner();
 }

@@ -24,6 +24,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -201,4 +202,23 @@ public final class CountryDTO extends BaseModelData implements DTO {
         return getId();
     }
 
+    public LocationTypeDTO getNullLocationType() {
+
+        for(LocationTypeDTO type : locationTypes) {
+            if(type.isNationwide()) {
+                return type;
+            }
+        }
+        throw new IllegalStateException("No null LocationType has been defined for " + getName());
+    }
+
+    public LocationTypeDTO getLocationTypeForAdminLevel(int adminLevelId) {
+        for(LocationTypeDTO type : locationTypes) {
+            if(type.isAdminLevel() && type.getBoundAdminLevelId() == adminLevelId) {
+                return type;
+            }
+        }
+        throw new IllegalStateException("No bound LocationType has been defined for admin level " +
+                adminLevelId + " in country " + getName());
+    }
 }

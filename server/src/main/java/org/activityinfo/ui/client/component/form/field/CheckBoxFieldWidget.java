@@ -25,20 +25,21 @@ import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.form.FormInstanceLabeler;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.widget.RadioButton;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -49,11 +50,12 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
 
     private final FlowPanel panel;
     private final List<CheckBox> controls;
-    private SimpleEventBus eventBus;
+    private final List<FormInstance> range;
 
     public CheckBoxFieldWidget(ReferenceType type, List<FormInstance> range, final ValueUpdater valueUpdater) {
         panel = new FlowPanel();
         controls = new ArrayList<>();
+        this.range = range;
 
         ValueChangeHandler<Boolean> changeHandler = new ValueChangeHandler<Boolean>() {
             @Override
@@ -62,23 +64,25 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
             }
         };
 
+        String groupId = Long.toString(new Date().getTime());
         for (final FormInstance instance : range) {
-            CheckBox checkBox = createControl(instance, type.getCardinality());
+            CheckBox checkBox = createControl(groupId, instance, type.getCardinality());
             checkBox.addValueChangeHandler(changeHandler);
             panel.add(checkBox);
             controls.add(checkBox);
         }
     }
 
-    private CheckBox createControl(FormInstance instance, Cardinality cardinality) {
-        CheckBox checkBox;
-        String label = FormInstanceLabeler.getLabel(instance);
-        if(cardinality == Cardinality.SINGLE) {
-            checkBox = new RadioButton(instance.getId().asString(), label);
+
+    private CheckBox createControl(String groupId, FormInstance instance, Cardinality cardinality) {
+        final CheckBox checkBox;
+        final String label = FormInstanceLabeler.getLabel(instance);
+        if (cardinality == Cardinality.SINGLE) {
+            checkBox = new RadioButton(groupId, label);
         } else {
             checkBox = new CheckBox(label);
-            checkBox.setFormValue(instance.getId().asString());
         }
+        checkBox.setFormValue(instance.getId().asString());
         return checkBox;
     }
 
@@ -89,23 +93,29 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
         }
     }
 
-    private Set<ResourceId> updatedValue() {
+    private ReferenceValue updatedValue() {
         final Set<ResourceId> value = Sets.newHashSet();
         for (CheckBox control : controls) {
             if(control.getValue()) {
-                value.add(ResourceId.create(control.getFormValue()));
+                value.add(ResourceId.valueOf(control.getFormValue()));
             }
         }
-        return value;
+        return new ReferenceValue(value);
     }
 
     @Override
-    public Promise<Void> setValue(Set<ResourceId> value) {
+    public Promise<Void> setValue(ReferenceValue value) {
+        Set<ResourceId> ids = value.getResourceIds();
         for (CheckBox entry : controls) {
-            ResourceId resourceId = ResourceId.create(entry.getFormValue());
-            entry.setValue(value.contains(resourceId));
+            ResourceId resourceId = ResourceId.valueOf(entry.getFormValue());
+            entry.setValue(ids.contains(resourceId));
         }
         return Promise.done();
+    }
+
+    @Override
+    public void clearValue() {
+       setValue(ReferenceValue.EMPTY);
     }
 
     @Override

@@ -8,11 +8,9 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CreateEntity;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
@@ -41,7 +39,8 @@ public class SchemaImporterTest extends CommandTestCase2 {
 
         UserDatabaseDTO syria = doImport("schema_1064.csv");
 
-        ActivityDTO cash = syria.getActivities().get(0);
+        int activityId = syria.getActivities().get(0).getId();
+        ActivityFormDTO cash = execute(new GetActivityForm(activityId));
 
         for(AttributeGroupDTO group : cash.getAttributeGroups()) {
             System.out.println(group.getName());
@@ -51,8 +50,8 @@ public class SchemaImporterTest extends CommandTestCase2 {
         assertThat(cash.getAttributeGroups().size(), equalTo(3));
 
 
-        SchemaCsvWriter writer = new SchemaCsvWriter();
-        writer.write(syria);
+        SchemaCsvWriter writer = new SchemaCsvWriter(getDispatcherSync());
+        writer.write(syria.getId());
 
         Files.write(writer.toString(), new File("target/syria.csv"), Charsets.UTF_8);
     }
@@ -60,7 +59,8 @@ public class SchemaImporterTest extends CommandTestCase2 {
     @Test
     public void southSudan() throws IOException {
         UserDatabaseDTO db = doImport("schema_1321.csv");
-        ActivityDTO h2 = db.getActivities().get(0);
+        int activityId = db.getActivities().get(0).getId();
+        ActivityFormDTO h2 = execute(new GetActivityForm(activityId));
         assertThat(h2.getName(), equalTo("H2"));
         assertThat(h2.getCategory(), equalTo("Health"));
     }

@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -47,22 +48,25 @@ import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSe
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldPalette;
 import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPanel;
+import org.activityinfo.ui.client.page.HasNavigationCallback;
+import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.util.GwtUtil;
 import org.activityinfo.ui.client.widget.Button;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 07/04/2014.
  */
-public class FormDesignerPanel extends Composite implements ScrollHandler {
+public class FormDesignerPanel extends Composite implements ScrollHandler, HasNavigationCallback, FormSavedGuard.HasSavedGuard {
 
     private final static OurUiBinder uiBinder = GWT
             .create(OurUiBinder.class);
-
 
     interface OurUiBinder extends UiBinder<Widget, FormDesignerPanel> {
     }
@@ -70,6 +74,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
     private final Map<ResourceId, WidgetContainer> containerMap = Maps.newHashMap();
     private ScrollPanel scrollAncestor;
     private WidgetContainer selectedWidgetContainer;
+    private HasNavigationCallback savedGuard = null;
 
     @UiField
     HTMLPanel containerPanel;
@@ -87,6 +92,8 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
     HTML statusMessage;
     @UiField
     HTML spacer;
+    @UiField
+    HTML paletteSpacer;
 
     public FormDesignerPanel(final ResourceLocator resourceLocator, @Nonnull final FormClass formClass) {
         FormDesignerStyles.INSTANCE.ensureInjected();
@@ -104,6 +111,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
             @Override
             public void execute() {
                 final FormDesigner formDesigner = new FormDesigner(FormDesignerPanel.this, resourceLocator, formClass);
+                savedGuard = formDesigner.getSavedGuard();
                 List<Promise<Void>> promises = Lists.newArrayList();
                 buildWidgetContainers(formDesigner, formClass, 0, promises);
                 Promise.waitAll(promises).then(new AsyncCallback<Void>() {
@@ -134,16 +142,22 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
     }
 
     private void fillPanel(final FormClass formClass, final FormDesigner formDesigner) {
+
+        // Exclude legacy builtin fields that the user won't be able to remove or reorder
+        final Set<ResourceId> builtinFields = builtinFields(formClass.getId());
+
         formClass.traverse(formClass, new TraverseFunction() {
             @Override
             public void apply(FormElement element, FormElementContainer container) {
                 if (element instanceof FormField) {
-                    FormField formField = (FormField) element;
-                    WidgetContainer widgetContainer = containerMap.get(formField.getId());
-                    if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
-                        Widget widget = widgetContainer.asWidget();
-                        formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
-                        dropPanel.add(widget);
+                    if (!builtinFields.contains(element.getId())) {
+                        FormField formField = (FormField) element;
+                        WidgetContainer widgetContainer = containerMap.get(formField.getId());
+                        if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
+                            Widget widget = widgetContainer.asWidget();
+                            formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
+                            dropPanel.add(widget);
+                        }
                     }
                 } else if (element instanceof FormSection) {
                     FormSection section = (FormSection) element;
@@ -151,11 +165,22 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
                     Widget widget = widgetContainer.asWidget();
                     formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
                     dropPanel.add(widget);
+
                 } else {
-                    throw new UnsupportedOperationException("Unknow form element.");
+                    throw new UnsupportedOperationException("Unknown form element.");
                 }
             }
         });
+    }
+
+    private Set<ResourceId> builtinFields(ResourceId formClassId) {
+        Set<ResourceId> fieldIds = new HashSet<>();
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.COMMENT_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PARTNER_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PROJECT_FIELD));
+        return fieldIds;
     }
 
     private void buildWidgetContainers(final FormDesigner formDesigner, FormElementContainer container, int depth, List<Promise<Void>> promises) {
@@ -166,7 +191,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
                 buildWidgetContainers(formDesigner, formSection, depth + 1, promises);
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
-                Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+                Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
                     @Nullable
                     @Override
                     public Void apply(@Nullable FormFieldWidget input) {
@@ -189,18 +214,20 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
         if (verticalScrollPosition > Metrics.MAX_VERTICAL_SCROLL_POSITION) {
             int height = verticalScrollPosition - Metrics.MAX_VERTICAL_SCROLL_POSITION;
 
-            int selectedWidgetTop = 0;
-            if (selectedWidgetContainer != null) {
-                selectedWidgetTop = selectedWidgetContainer.asWidget().getAbsoluteTop();
-            }
-            if (selectedWidgetTop < 0) {
-                height = height + selectedWidgetTop;
-            }
+//            int selectedWidgetTop = 0;
+//            if (selectedWidgetContainer != null) {
+//                selectedWidgetTop = selectedWidgetContainer.asWidget().getAbsoluteTop();
+//            }
+//            if (selectedWidgetTop < 0) {
+//                height = height + selectedWidgetTop;
+//            }
 
             //GWT.log("verticalPos = " + verticalScrollPosition + ", height = " + height + ", selectedWidgetTop = " + selectedWidgetTop);
             spacer.setHeight(height + "px");
+            paletteSpacer.setHeight(height + "px");
         } else {
             spacer.setHeight("0px");
+            paletteSpacer.setHeight("0px");
         }
     }
 
@@ -230,5 +257,20 @@ public class FormDesignerPanel extends Composite implements ScrollHandler {
 
     public HTML getStatusMessage() {
         return statusMessage;
+    }
+
+    public HasNavigationCallback getSavedGuard() {
+        return savedGuard;
+    }
+
+    public void setSavedGuard(HasNavigationCallback savedGuard) {
+        this.savedGuard = savedGuard;
+    }
+
+    @Override
+    public void navigate(NavigationCallback callback) {
+        if (savedGuard != null) {
+            savedGuard.navigate(callback);
+        }
     }
 }

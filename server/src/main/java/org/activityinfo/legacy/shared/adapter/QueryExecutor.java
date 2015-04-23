@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.activityinfo.core.shared.application.ApplicationProperties;
@@ -7,10 +8,12 @@ import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.ConcatList;
 import org.activityinfo.promise.Promise;
 
@@ -19,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.*;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.promise.BiFunctions.concatMap;
 
 /**
@@ -98,8 +101,6 @@ public class QueryExecutor {
                     entityQuery.setEntityIds(ids);
                 }
                 return dispatcher.execute(entityQuery).then(new ListResultAdapter<>(new AdminEntityInstanceAdapter()));
-            case ATTRIBUTE_DOMAIN:
-                return dispatcher.execute(new GetSchema()).then(new AttributeInstanceListAdapter(criteria));
 
             case LOCATION_DOMAIN:
                 return dispatcher.execute(new GetLocations(Lists.newArrayList(ids)))
@@ -131,9 +132,6 @@ public class QueryExecutor {
         }
 
         switch (formClassId.getDomain()) {
-            case ATTRIBUTE_GROUP_DOMAIN:
-                return dispatcher.execute(new GetSchema()).then(new AttributeInstanceListAdapter(criteria));
-
             case ADMIN_LEVEL_DOMAIN:
                 return dispatcher.execute(adminQuery(formClassId))
                                  .then(new ListResultAdapter<>(new AdminEntityInstanceAdapter()));
@@ -146,7 +144,10 @@ public class QueryExecutor {
                 return dispatcher.execute(new GetSchema())
                                  .then(new PartnerListExtractor(criteria))
                                  .then(concatMap(new PartnerInstanceAdapter(formClassId)));
-
+            case PROJECT_CLASS_DOMAIN:
+                return dispatcher.execute(new GetSchema())
+                        .then(new ProjectListExtractor(criteria))
+                        .then(concatMap(new ProjectInstanceAdapter(formClassId)));
             default:
                 return Promise.rejected(new UnsupportedOperationException(
                         "domain not yet implemented: " + formClassId.getDomain()));
@@ -166,9 +167,9 @@ public class QueryExecutor {
                 if (element instanceof FieldCriteria) {
                     FieldCriteria fieldCriteria = (FieldCriteria) element;
                     if (fieldCriteria.getFieldId().equals(CuidAdapter.field(formClassId, ADMIN_PARENT_FIELD))) {
-                        ResourceId id = (ResourceId) fieldCriteria.getValue();
+                        ReferenceValue id = (ReferenceValue) fieldCriteria.getValue();
 
-                        query.setParentId(CuidAdapter.getLegacyIdFromCuid(id));
+                        query.setParentId(CuidAdapter.getLegacyIdFromCuid(Iterables.getOnlyElement(id.getResourceIds())));
                     }
                 }
             }

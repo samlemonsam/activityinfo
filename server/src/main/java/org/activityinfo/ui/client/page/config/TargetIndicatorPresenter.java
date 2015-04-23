@@ -121,17 +121,17 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
                 }
 
                 treeStore.add(actCategoryLink, activity, false);
-                addIndicatorLinks(activity, activity);
+                //addIndicatorLinks(activity, activity);
 
             } else {
                 treeStore.add(activity, false);
-                addIndicatorLinks(activity, activity);
+                //addIndicatorLinks(activity, activity);
             }
 
         }
     }
 
-    private void addIndicatorLinks(ActivityDTO activity, ModelData parent) {
+    private void addIndicatorLinks(ActivityFormDTO activity, ModelData parent) {
         Map<String, Link> indicatorCategories = new HashMap<String, Link>();
 
         for (IndicatorDTO indicator : activity.getIndicators()) {
@@ -226,13 +226,13 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         return treeStore;
     }
 
-    protected ActivityDTO findActivityFolder(ModelData selected) {
+    protected IsActivityDTO findActivityFolder(ModelData selected) {
 
-        while (!(selected instanceof ActivityDTO)) {
+        while (!(selected instanceof IsActivityDTO)) {
             selected = treeStore.getParent(selected);
         }
 
-        return (ActivityDTO) selected;
+        return (IsActivityDTO) selected;
     }
 
     public void updateTargetValue() {

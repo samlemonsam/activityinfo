@@ -23,12 +23,15 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.style.ModalStylesheet;
 import org.activityinfo.ui.client.widget.LoadingPanel;
@@ -60,7 +63,7 @@ public class FormDialog {
         formPanel = new SimpleFormPanel(
                 resourceLocator,
                 new VerticalFieldContainer.Factory(),
-                new FormFieldWidgetFactory(resourceLocator));
+                new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.NORMAL));
 
 
         loadingPanel = new LoadingPanel<>(new PageLoadingPanel());
@@ -78,6 +81,11 @@ public class FormDialog {
 
     public void setDialogTitle(String text) {
         dialog.setDialogTitle(text);
+    }
+
+    public void setDialogTitle(String h3, String h4) {
+        String html = "<h3>" + h3 + "</h3><br/><h4>" + h4 + "</h4>" ;
+        dialog.setDialogTitle(SafeHtmlUtils.fromSafeConstant(html).asString());
     }
 
     public void show(final FormInstance instance, FormDialogCallback callback) {
@@ -105,14 +113,22 @@ public class FormDialog {
     }
 
     public void save() {
+        dialog.getStatusLabel().setText(""); // clear first
+
+        if (!formPanel.validate()) {
+            dialog.getStatusLabel().setText(I18N.CONSTANTS.pleaseFillInAllRequiredFields());
+            return;
+        }
+
         dialog.getStatusLabel().setText(I18N.CONSTANTS.saving());
         dialog.getPrimaryButton().setEnabled(false);
         resourceLocator.persist(formPanel.getInstance()).then(new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
+                Log.error("Save failed", caught);
                 dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(caught));
-                        dialog.getPrimaryButton().setEnabled(true);
+                dialog.getPrimaryButton().setEnabled(true);
             }
 
             @Override

@@ -141,7 +141,7 @@ public class SavePromptMessageBox extends Window implements AsyncMonitor {
     }
 
     @Override
-    public void onServerError() {
+    public void onServerError(Throwable e) {
 
         saveButton.enable();
         cancelButton.enable();

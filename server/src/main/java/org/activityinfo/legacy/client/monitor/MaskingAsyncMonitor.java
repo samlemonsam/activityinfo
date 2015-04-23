@@ -30,6 +30,7 @@ import com.extjs.gxt.ui.client.widget.Container;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 
 /**
  * Uses a GXT loading mask on a component to keep the user updated on the
@@ -101,11 +102,17 @@ public class MaskingAsyncMonitor implements AsyncMonitor {
     }
 
     @Override
-    public void onServerError() {
+    public void onServerError(Throwable e) {
+        unmask();
 
+        if (e instanceof IllegalAccessCommandException) {
+            MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.permissionChangedError(), null);
+            return;
+        }
+
+        // fallback
         MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.serverError(), null);
 
-        unmask();
     }
 
     private void unmask() {

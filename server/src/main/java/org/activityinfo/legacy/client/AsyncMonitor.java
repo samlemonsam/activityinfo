@@ -58,5 +58,5 @@ public interface AsyncMonitor {
      * Called when the async commands fails due to a server error (not just a
      * connection problem)
      */
-    void onServerError();
+    void onServerError(Throwable e);
 }

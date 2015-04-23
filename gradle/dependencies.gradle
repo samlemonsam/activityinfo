@@ -42,7 +42,7 @@ ext {
             user:           "com.google.gwt:gwt-user:${gwtVersion}", 
             servlet:        "com.google.gwt:gwt-servlet:${gwtVersion}",
             dev:            "com.google.gwt:gwt-dev:${gwtVersion}",
-            i18nServer:     "com.teklabs.gwt-i18n-server:gwt-i18n-server:0.7-bedatadriven2",
+            i18nServer:     'net.lightoze.gwt-i18n-server:gwt-i18n-server:0.22',
             dnd:            'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0',
             leaflet:        'org.discotools.gwt.leaflet:gwtl-core:0.3-SNAPSHOT',
             guice:          "com.google.gwt.inject:gin:2.1.2",

@@ -33,10 +33,7 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.dom.client.Element;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.IndicatorGroup;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.Arrays;
@@ -175,18 +172,18 @@ public class IndicatorGridPanel extends ContentPanel {
         store.removeAll();
         for (ActivityDTO activity : db.getActivities()) {
             store.add(activity);
-            for (IndicatorGroup group : activity.groupIndicators()) {
-                if (group.getName() == null) {
-                    for (IndicatorDTO indicator : group.getIndicators()) {
-                        store.add(indicator);
-                    }
-                } else {
-                    store.add(group);
-                    for (IndicatorDTO indicator : group.getIndicators()) {
-                        store.add(indicator);
-                    }
-                }
-            }
+//            for (IndicatorGroup group : activity.groupIndicators()) {
+//                if (group.getName() == null) {
+//                    for (IndicatorDTO indicator : group.getIndicators()) {
+//                        store.add(indicator);
+//                    }
+//                } else {
+//                    store.add(group);
+//                    for (IndicatorDTO indicator : group.getIndicators()) {
+//                        store.add(indicator);
+//                    }
+//                }
+//            }
         }
     }
 

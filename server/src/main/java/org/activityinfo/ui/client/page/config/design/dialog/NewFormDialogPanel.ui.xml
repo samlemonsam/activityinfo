@@ -1,0 +1,47 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+             xmlns:f="urn:import:org.activityinfo.ui.client.widget.form">
+
+  <ui:import field="org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL" />
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+
+  <g:HTMLPanel width="100%" ui:field="panel" addStyleNames="form-horizontal">
+
+    <!-- Name -->
+    <f:FormGroup ui:field="nameFieldGroup" label="{i18n.name}" columnLabelWidth="2"
+                 validationMessage="{i18n.enterNameForNewForm}"
+                 validationStateType="ERROR" showValidationMessage="false">
+      <a:TextBox ui:field="nameField" width="100%"/>
+    </f:FormGroup>
+
+    <!-- Category -->
+    <f:FormGroup ui:field="categoryFieldGroup" label="{i18n.category}" columnLabelWidth="2">
+      <a:TextBox ui:field="categoryField" width="100%"/>
+    </f:FormGroup>
+
+    <!-- Style: form designer (new) -->
+    <f:FormGroup label="{i18n.style}" columnLabelWidth="2">
+      <a:RadioButton ui:field="formDesigner" name="group" width="100%" checked="true">
+        <ui:text from='{i18n.newFormAsFormDesigner}'/>
+        <span class="help-block"><ui:text from='{i18n.recommendedMode}'/></span>
+      </a:RadioButton>
+    </f:FormGroup>
+
+    <!-- Style: classic (old) -->
+    <f:FormGroup columnLabelWidth="2">
+      <a:RadioButton ui:field="classic" name="group" width="100%">
+        <ui:text from='{i18n.newFormAsClassic}'/>
+        <span class="help-block"><ui:text from='{i18n.newFormAsClassicHelpBlock}'/></span>
+      </a:RadioButton>
+    </f:FormGroup>
+
+    <!-- Link that explains the difference between classic and modern view -->
+    <f:FormGroup columnLabelWidth="2">
+      <g:Anchor ui:field="explanationLink" target="_blank"><ui:text from='{i18n.showMeTheDifference}'/></g:Anchor>
+    </f:FormGroup>
+
+  </g:HTMLPanel>
+
+</ui:UiBinder>

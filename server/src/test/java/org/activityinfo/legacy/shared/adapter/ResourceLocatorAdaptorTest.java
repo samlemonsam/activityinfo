@@ -1,7 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
 
-import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
@@ -10,16 +9,19 @@ import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.IdCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.model.AiLatLng;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.TFormTree;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
@@ -35,9 +37,9 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.core.shared.criteria.ParentCriteria.isChildOf;
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.*;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdminFieldId;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -74,11 +76,6 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @Before
     public final void setup() {
         resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-    }
-
-    @Test
-    public void simpleAttributeQuery() {
-        assertThat(queryByClass(attributeGroupFormClass(CAUSE_ATTRIBUTE_GROUP_ID)), Matchers.hasSize(2));
     }
 
     @Test
@@ -143,14 +140,14 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         Projection firstRead = singleSiteProjection(query);
 
-        assertEquals(1d, firstRead.getValue(path(indicatorField(1))));
-        assertEquals(2d, firstRead.getValue(path(indicatorField(2))));
-        assertEquals(3d, firstRead.getValue(path(indicatorField(11))));
-        assertEquals(0.5d, firstRead.getValue(path(indicatorField(12))));
+        assertEquals(new Quantity(1), firstRead.getValue(path(indicatorField(1))));
+        assertEquals(new Quantity(2), firstRead.getValue(path(indicatorField(2))));
+        assertEquals(new Quantity(3), firstRead.getValue(path(indicatorField(11))));
+        assertEquals(new Quantity(0.5), firstRead.getValue(path(indicatorField(12))));
 
         // set indicators to null
-        instance.set(indicatorField(1), null);
-        instance.set(indicatorField(2), null);
+        instance.set(indicatorField(1).asString(), null);
+        instance.set(indicatorField(2).asString(), null);
 
         // persist it
         assertResolves(resourceLocator.persist(instance));
@@ -160,8 +157,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         assertEquals(null, secondRead.getValue(path(indicatorField(1))));
         assertEquals(null, secondRead.getValue(path(indicatorField(2))));
-        assertEquals(0d, secondRead.getValue(path(indicatorField(11))));
-        assertEquals(Double.NaN, secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
+        assertEquals(new Quantity(0), secondRead.getValue(path(indicatorField(11))));
+        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
     }
 
     private FieldPath path(ResourceId... fieldIds) {
@@ -177,9 +174,10 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @Test
     public void persistLocation() {
 
-        FormInstance instance = new FormInstance(CuidAdapter.generateLocationCuid(), HEALTH_CENTER_CLASS);
+        FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS),
+                HEALTH_CENTER_CLASS);
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "CS Ubuntu");
-        instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new AiLatLng(-1, 13));
+        instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new GeoPoint(-1, 13));
         instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entity(IRUMU));
 
         assertResolves(resourceLocator.persist(instance));
@@ -294,7 +292,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
         FieldPath villageName = new FieldPath(getNameFieldId(VILLAGE_CLASS));
         FieldPath provinceName = new FieldPath(getAdminFieldId(VILLAGE_CLASS), field(PROVINCE_CLASS, CuidAdapter.NAME_FIELD));
-        FieldPath partnerName = new FieldPath(partnerField(NFI_DIST_ID), field(partnerClassId, NAME_FIELD));
+        FieldPath partnerName = new FieldPath(field(CuidAdapter.activityFormClass(NFI_DIST_ID), PARTNER_FIELD), field(partnerClassId, NAME_FIELD));
         FieldPath indicator1 = new FieldPath(indicatorField(1));
         FieldPath startDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.START_DATE_FIELD));
         FieldPath endDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.END_DATE_FIELD));

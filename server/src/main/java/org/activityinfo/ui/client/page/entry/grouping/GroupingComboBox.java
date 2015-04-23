@@ -35,6 +35,7 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 

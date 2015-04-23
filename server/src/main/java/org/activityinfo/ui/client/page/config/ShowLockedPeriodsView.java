@@ -23,13 +23,13 @@ package org.activityinfo.ui.client.page.config;
  */
 
 import com.google.gwt.user.client.ui.HasValue;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 
 import java.util.List;
 
 public interface ShowLockedPeriodsView extends HasValue<List<LockedPeriodDTO>> {
-    public void setActivityFilter(ActivityDTO activity);
+    public void setActivityFilter(ActivityFormDTO activity);
 
     public void setHeader(String header);
 }

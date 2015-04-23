@@ -67,7 +67,7 @@ public class LoadingPlaceHolder extends LayoutContainer implements AsyncMonitor 
     }
 
     @Override
-    public void onServerError() {
+    public void onServerError(Throwable e) {
         html.setHtml(I18N.CONSTANTS.serverError());
     }
 }

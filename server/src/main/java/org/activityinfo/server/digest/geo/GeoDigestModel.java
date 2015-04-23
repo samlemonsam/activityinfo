@@ -3,51 +3,27 @@ package org.activityinfo.server.digest.geo;
 import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.reports.content.MapContent;
-import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.DigestModel;
-import org.activityinfo.server.util.date.DateCalc;
+import org.activityinfo.server.digest.UserDigest;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class GeoDigestModel implements DigestModel {
-    private final User user;
-    private final Date date;
-    private final int days;
-    private final long from;
-    private SchemaDTO schemaDTO;
 
+    private final UserDigest userDigest;
+    private SchemaDTO schemaDTO;
     private final Set<DatabaseModel> databases;
 
-    public GeoDigestModel(User user, Date date, int days) {
-        this.user = user;
-        this.date = date;
-        this.days = days;
-        this.from = DateCalc.daysAgo(date, days).getTime();
+    public GeoDigestModel(UserDigest userDigest) {
+        this.userDigest = userDigest;
         this.databases = new TreeSet<DatabaseModel>();
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public int getDays() {
-        return days;
-    }
-
-    public long getFrom() {
-        return from;
-    }
-
-    public Date getFromDate() {
-        return new Date(from);
+    public UserDigest getUserDigest() {
+        return userDigest;
     }
 
     public SchemaDTO getSchemaDTO() {

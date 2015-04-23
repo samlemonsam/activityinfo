@@ -26,6 +26,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.promise.Promise;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -41,26 +42,32 @@ public class FormDesignerActions {
         formDesignerPanel.getSaveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                onSave();
+                save();
             }
         });
     }
 
-    private void onSave() {
+    public Promise<Void> save() {
+
         formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saving());
         formDesignerPanel.getSaveButton().setEnabled(false);
-        formDesigner.getResourceLocator().persist(formDesigner.getFormClass()).then(new AsyncCallback<Void>() {
+
+        Promise<Void> promise = formDesigner.getResourceLocator().persist(formDesigner.getFormClass());
+        promise.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 showFailureDelayed(caught);
+                formDesigner.getSavedGuard().setSaved(false);
             }
 
             @Override
             public void onSuccess(Void result) {
                 formDesignerPanel.getSaveButton().setEnabled(true);
                 formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saved());
+                formDesigner.getSavedGuard().setSaved(true);
             }
         });
+        return promise;
     }
 
     private void showFailureDelayed(final Throwable caught) {

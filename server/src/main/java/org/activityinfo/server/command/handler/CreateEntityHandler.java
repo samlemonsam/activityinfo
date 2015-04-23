@@ -29,6 +29,10 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.handler.crud.ActivityPolicy;
 import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
@@ -42,6 +46,7 @@ import java.util.Map;
 public class CreateEntityHandler extends BaseEntityHandler implements CommandHandler<CreateEntity> {
 
     private final Injector injector;
+    private final KeyGenerator generator = new KeyGenerator();
 
     @Inject
     public CreateEntityHandler(EntityManager em, Injector injector) {
@@ -79,6 +84,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         Activity activity = entityManager().find(Activity.class, properties.get("activityId"));
 
         AttributeGroup group = new AttributeGroup();
+        group.setId(generator.generateInt());
         group.setSortOrder(activity.getAttributeGroups().size() + 1);
         updateAttributeGroupProperties(group, properties);
 
@@ -94,6 +100,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
     private CommandResult createAttribute(CreateEntity cmd, Map<String, Object> properties) {
         Attribute attribute = new Attribute();
+        attribute.setId(generator.generateInt());
         AttributeGroup ag = entityManager().getReference(AttributeGroup.class, properties.get("attributeGroupId"));
         attribute.setGroup(ag);
 
@@ -117,6 +124,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
                                           Map<String, Object> properties) throws IllegalAccessCommandException {
 
         Indicator indicator = new Indicator();
+        indicator.setId(generator.generateInt());
         Activity activity = entityManager().getReference(Activity.class, properties.get("activityId"));
         indicator.setActivity(activity);
 

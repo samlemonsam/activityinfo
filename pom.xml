@@ -5,14 +5,14 @@
   <groupId>org.activityinfo</groupId>
   <artifactId>activityinfo-parent</artifactId>
   <packaging>pom</packaging>
-  <version>2.8.0-SNAPSHOT</version>
+  <version>2.9.1-SNAPSHOT</version>
   <name>ActivityInfo Parent POM</name>
 
   <properties>
     <!-- This is the version displayed to users -->
     <display.version>${project.version}</display.version>
 
-    <gwtVersion>2.6.0-rc3</gwtVersion>
+    <gwtVersion>2.6.1</gwtVersion>
     <rebarVersion>2.4.4</rebarVersion>
     <gae.version>1.9.6</gae.version>
     <jersey.version>1.17</jersey.version>
@@ -100,9 +100,12 @@
 
   <modules>
     <module>core/model</module>
+    <module>core/services</module>
     <module>core/promises</module>
     <module>geoadmin</module>
     <module>server</module>
+    <module>i18n</module>
+    <module>io/xform</module>
   </modules>
 
   <dependencies>
@@ -148,11 +151,15 @@
         <artifactId>guava-gwt</artifactId>
         <version>15.0</version>
       </dependency>
-
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
         <version>2.2.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-library</artifactId>
+        <version>1.3</version>
       </dependency>
 
     </dependencies>
@@ -171,6 +178,28 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <!-- configure the Java Compiler Plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+          <configuration>
+
+            <source>1.7</source>
+            <target>1.7</target>
+
+            <!-- Avoid duplicate class errors for GWT jars that include both source and class files -->
+            <compilerArgs>
+              <arg>-implicit:none</arg>
+            </compilerArgs>
+            <encoding>UTF-8</encoding>
+            <excludes>
+              <!-- Exclude emulation gwt sources -->
+              <exclude>**/emul/**/*.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>license-maven-plugin</artifactId>

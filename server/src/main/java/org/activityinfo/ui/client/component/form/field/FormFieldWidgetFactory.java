@@ -23,22 +23,32 @@ package org.activityinfo.ui.client.component.form.field;
 
 import com.google.common.base.Function;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.event.shared.EventBus;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.application.ApplicationProperties;
-import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.TextType;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.model.type.image.ImageType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
+import org.activityinfo.ui.client.component.form.field.image.ImageUploadFieldWidget;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -62,38 +72,64 @@ public class FormFieldWidgetFactory {
     public static final int SMALL_BALANCE_NUMBER = 10;
     public static final int MEDIUM_BALANCE_NUMBER = 20;
 
-    private ResourceLocator resourceLocator;
+    private final ResourceLocator resourceLocator;
+    private final FieldWidgetMode fieldWidgetMode;
 
-    public FormFieldWidgetFactory(ResourceLocator resourceLocator) {
+    public FormFieldWidgetFactory(ResourceLocator resourceLocator, FieldWidgetMode fieldWidgetMode) {
         this.resourceLocator = resourceLocator;
+        this.fieldWidgetMode = fieldWidgetMode;
     }
 
-    public Promise<? extends FormFieldWidget> createWidget(FormField field, ValueUpdater valueUpdater) {
+    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater) {
+        return createWidget(null, formClass, field, valueUpdater, null, null);
+    }
+
+    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater, @Nullable EventBus eventBus) {
+        return createWidget(null, formClass, field, valueUpdater, null, eventBus);
+    }
+
+    public Promise<? extends FormFieldWidget> createWidget(String resourceId, FormClass formClass, FormField field,
+                                                           ValueUpdater valueUpdater, FormClass validationFormClass, @Nullable EventBus eventBus) {
         FieldType type = field.getType();
 
-        if(type instanceof QuantityType) {
-            return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater));
+        if (type instanceof QuantityType) {
+            return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater, eventBus, field.getId()));
 
-        } else if(type instanceof NarrativeType) {
+        } else if (type instanceof NarrativeType) {
             return Promise.resolved(new NarrativeFieldWidget(valueUpdater));
 
-        } else if(type instanceof TextType) {
+        } else if (type instanceof TextType) {
             return Promise.resolved(new TextFieldWidget(valueUpdater));
 
-        } else if(type instanceof LocalDateType) {
-            return Promise.resolved(new DateFieldWidget(valueUpdater));
+        } else if (type instanceof ExprFieldType) {
+            return Promise.resolved(new ExprFieldWidget(validationFormClass, valueUpdater));
 
-        } else if(type instanceof GeoPointType) {
+        } else if (type instanceof CalculatedFieldType) {
+            return Promise.resolved(new CalculatedFieldWidget(valueUpdater));
+
+        } else if (type instanceof LocalDateType) {
+            return Promise.resolved(new DateFieldWidget(valueUpdater, eventBus, field.getId()));
+
+        } else if (type instanceof LocalDateIntervalType) {
+            return Promise.resolved(new DateIntervalFieldWidget(valueUpdater));
+
+        } else if (type instanceof GeoPointType) {
             return Promise.resolved(new GeographicPointWidget(valueUpdater));
 
-        } else if(type instanceof EnumType) {
-            return Promise.resolved(new EnumFieldWidget((EnumType) field.getType(), valueUpdater));
+        } else if (type instanceof EnumType) {
+            return Promise.resolved(new EnumFieldWidget((EnumType) field.getType(), valueUpdater, fieldWidgetMode));
 
-        } else if(type instanceof ReferenceType) {
-            if(field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
-                return HierarchyFieldWidget.create(resourceLocator, (ReferenceType) type, valueUpdater);
-            }
+        } else if (type instanceof BooleanType) {
+            return Promise.resolved(new BooleanFieldWidget(valueUpdater));
+
+        } else if (type instanceof ImageType) {
+            return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater));
+
+        } else if (type instanceof ReferenceType) {
             return createReferenceWidget(field, valueUpdater);
+
+        } else if (type instanceof BarcodeType) {
+            return Promise.resolved(new BarcodeFieldWidget(valueUpdater));
         }
 
         Log.error("Unexpected field type " + type.getTypeClass());
@@ -101,7 +137,7 @@ public class FormFieldWidgetFactory {
     }
 
     private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, ValueUpdater updater) {
-        if(field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
+        if (field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
             return HierarchyFieldWidget.create(resourceLocator, (ReferenceType) field.getType(), updater);
         } else {
             return createSimpleListWidget((ReferenceType) field.getType(), updater);

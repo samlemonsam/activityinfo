@@ -23,6 +23,7 @@ package org.activityinfo.server.database.hibernate.entity;
  */
 
 import com.google.common.base.Strings;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.mindrot.bcrypt.BCrypt;
 
 import javax.persistence.*;
@@ -240,4 +241,7 @@ public class User implements java.io.Serializable {
         }
     }
 
+    public AuthenticatedUser asAuthenticatedUser() {
+        return new AuthenticatedUser("XYZ", getId(), getEmail(), getLocale());
+    }
 }

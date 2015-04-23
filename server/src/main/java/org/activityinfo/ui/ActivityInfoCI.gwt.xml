@@ -36,4 +36,5 @@
 
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
+  <add-linker name="std"/>
 </module>

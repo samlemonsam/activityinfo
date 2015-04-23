@@ -33,6 +33,7 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
+import org.activityinfo.ui.client.widget.ConfirmDialog;
 
 /**
  * @author yuriyz on 7/8/14.
@@ -82,10 +83,9 @@ public class WidgetContainerPanel {
         });
     }
 
-
     @UiHandler("removeButton")
     public void onRemove(ClickEvent clickEvent) {
-        focusPanel.removeFromParent();
+        ConfirmDialog.confirm(new DeleteFormFieldAction(focusPanel, formDesigner));
     }
 
     public Button getRemoveButton() {

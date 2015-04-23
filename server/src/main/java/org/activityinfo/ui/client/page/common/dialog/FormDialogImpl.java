@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.page.common.dialog;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
@@ -191,7 +190,7 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
     }
 
     @Override
-    public void onServerError() {
+    public void onServerError(Throwable e) {
         form.enable();
         saveButton.enable();
         cancelButton.enable();

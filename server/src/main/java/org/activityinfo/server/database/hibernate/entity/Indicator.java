@@ -22,6 +22,8 @@ package org.activityinfo.server.database.hibernate.entity;
  * #L%
  */
 
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
 
 import javax.persistence.*;
@@ -35,7 +37,7 @@ import java.util.Date;
 @Entity @org.hibernate.annotations.Filter(
         name = "hideDeleted",
         condition = "DateDeleted is null")
-public class Indicator implements java.io.Serializable, Orderable, Deleteable {
+public class Indicator implements java.io.Serializable, Orderable, Deleteable, FormFieldEntity {
 
     private int id;
     private Date dateDeleted;
@@ -55,18 +57,47 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable {
     private String listHeader;
     private String type = FieldTypeClass.QUANTITY.getId();
     private String expression;
+    private String skipExpression;
     private String nameInExpression;
     private boolean calculatedAutomatically;
 
     public Indicator() {
     }
 
+    public Indicator(Indicator indicator) {
+        this.dateDeleted = indicator.dateDeleted;
+
+        this.name = indicator.name;
+        this.units = indicator.units;
+        this.description = indicator.description;
+        this.mandatory = indicator.mandatory;
+
+        this.category = indicator.category;
+        this.activity = indicator.activity;
+        this.aggregation = indicator.aggregation;
+
+        this.sortOrder = indicator.sortOrder;
+        this.listHeader = indicator.listHeader;
+        this.type = indicator.type;
+        this.expression = indicator.expression;
+        this.skipExpression = indicator.skipExpression;
+        this.nameInExpression = indicator.nameInExpression;
+        this.calculatedAutomatically = indicator.calculatedAutomatically;
+    }
+
     /**
      * @return the id of this Indicator
      */
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "IndicatorId", unique = true, nullable = false)
+    @Id
+    @Column(name = "IndicatorId", unique = true, nullable = false)
     public int getId() {
         return this.id;
+    }
+
+    @Transient
+    @Override
+    public ResourceId getFieldId() {
+        return CuidAdapter.indicatorField(getId());
     }
 
     /**
@@ -83,6 +114,15 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable {
 
     public void setExpression(String expression) {
         this.expression = expression;
+    }
+
+    @Column(name = "skipExpression", nullable = true, length = 999)
+    public String getSkipExpression() {
+        return skipExpression;
+    }
+
+    public void setSkipExpression(String skipExpression) {
+        this.skipExpression = skipExpression;
     }
 
     @Column(name = "nameInExpression", nullable = true, length = 999)

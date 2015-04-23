@@ -3,7 +3,7 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.appengine.api.datastore.*;
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;

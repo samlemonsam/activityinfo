@@ -32,14 +32,15 @@ import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
@@ -55,6 +56,7 @@ import java.util.List;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.core.client.PromiseMatchers.resolvesTo;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 
@@ -88,9 +90,6 @@ public class GetSchemaTest extends CommandTestCase2 {
 
 
         ActivityDTO nfi = schema.getDatabaseById(1).getActivities().get(0);
-
-        assertTrue("object graph is preserved (database-activity)",
-                schema.getDatabaseById(1) == nfi.getDatabase());
         assertThat(nfi.getLocationTypeId(), equalTo(1));
         assertThat(nfi.<Integer>get("locationTypeId"), equalTo(1));
 
@@ -101,8 +100,9 @@ public class GetSchemaTest extends CommandTestCase2 {
         assertTrue("CountryId is not null",
                 schema.getCountries().get(0).getAdminLevels().get(0).getCountryId() != 0);
 
-        assertThat("deleted attribute is not present",
-                schema.getActivityById(1).getAttributeGroups().size(), equalTo(3));
+        ActivityFormDTO nfiForm = execute(new GetActivityForm(nfi.getId()));
+
+        assertThat("deleted attribute is not present", nfiForm.getAttributeGroups(), hasSize(3));
     }
 
     @Test
@@ -163,21 +163,20 @@ public class GetSchemaTest extends CommandTestCase2 {
 
         setUser(1); // Alex
 
-        SchemaDTO schema = execute(new GetSchema());
+        ActivityFormDTO schema = execute(new GetActivityForm(2));
 
-        assertTrue("no indicators case", schema.getActivityById(2).getIndicators().size() == 0);
+        assertThat("no indicators case", schema.getIndicators(), hasSize(0));
 
-        ActivityDTO nfi = schema.getActivityById(1);
+        ActivityFormDTO nfi = execute(new GetActivityForm(1));
 
-        assertThat("indicators are present", nfi.getIndicators().size(),
-                equalTo(5));
+        assertThat("indicators are present", nfi.getIndicators(), hasSize(5));
 
         IndicatorDTO test = nfi.getIndicatorById(2);
-        assertThat(test, Matchers.hasProperty("name", equalTo("baches")));
-        assertThat(test, Matchers.hasProperty("aggregation", equalTo(IndicatorDTO.AGGREGATE_SUM)));
-        assertThat(test, Matchers.hasProperty("category", equalTo("outputs")));
-        assertThat(test, Matchers.hasProperty("listHeader", equalTo("header")));
-        assertThat(test, Matchers.hasProperty("description", equalTo("desc")));
+        assertThat(test, hasProperty("name", equalTo("baches")));
+        assertThat(test, hasProperty("aggregation", equalTo(IndicatorDTO.AGGREGATE_SUM)));
+        assertThat(test, hasProperty("category", equalTo("outputs")));
+        assertThat(test, hasProperty("listHeader", equalTo("header")));
+        assertThat(test, hasProperty("description", equalTo("desc")));
     }
 
     @Test
@@ -185,28 +184,25 @@ public class GetSchemaTest extends CommandTestCase2 {
 
         setUser(1); // Alex
 
-        SchemaDTO schema = execute(new GetSchema());
+        ActivityFormDTO form = execute(new GetActivityForm(3));
+        assertThat("no attributes case", form.getAttributeGroups(), hasSize(0));
 
-        assertTrue("no attributes case", schema.getActivityById(3).getAttributeGroups().size() == 0);
-
-        ActivityDTO nfi = schema.getActivityById(1);
-        List<AttributeDTO> attributes = nfi.getAttributeGroupById(1).getAttributes();
-        
-        System.out.println(nfi.getAttributeGroupById(1).getName());
-        
-        assertThat("attributes are present", attributes, hasSize(2));
+        ActivityFormDTO nfi = execute(new GetActivityForm(1));
+        AttributeGroupDTO group = nfi.getAttributeGroupById(1);
+        assertThat(group, notNullValue());
+        assertThat("attributes are present", group.getAttributes(), hasSize(2));
 
         AttributeDTO test = nfi.getAttributeById(1);
 
-        assertEquals("property:name", "Catastrophe Naturelle", test.getName());
+        assertThat(test, hasProperty("name", equalTo("Catastrophe Naturelle")));
     }
 
     @Test
     public void toCSV() {
-        SchemaDTO schema = execute(new GetSchema());
+        int databaseId = 1;
 
-        SchemaCsvWriter writer = new SchemaCsvWriter();
-        writer.write(schema.getDatabaseById(1));
+        SchemaCsvWriter writer = new SchemaCsvWriter(getDispatcherSync());
+        writer.write(databaseId);
 
         System.out.println(writer.toString());
     }
@@ -226,7 +222,7 @@ public class GetSchemaTest extends CommandTestCase2 {
         ResourceLocator locator = new ResourceLocatorAdaptor(getDispatcher());
         List<FormInstance> folders = assertResolves(locator.queryInstances(
                 new CriteriaIntersection(
-                    ParentCriteria.isChildOf(ResourceId.create("home")),
+                    ParentCriteria.isChildOf(ResourceId.valueOf("home")),
                     new ClassCriteria(FolderClass.CLASS_ID))));
 
         for(FormInstance folder : folders) {

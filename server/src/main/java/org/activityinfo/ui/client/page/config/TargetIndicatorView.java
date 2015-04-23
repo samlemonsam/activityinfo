@@ -43,10 +43,7 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.TargetValueDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.page.common.grid.AbstractEditorTreeGridView;
 import org.activityinfo.ui.client.page.common.grid.ImprovedCellTreeGridSelectionModel;
@@ -103,7 +100,7 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
             @Override
             public AbstractImagePrototype getIcon(ModelData model) {
 
-                if (model instanceof ActivityDTO) {
+                if (model instanceof IsActivityDTO) {
                     return IconImageBundle.ICONS.activity();
                 } else if (model instanceof TargetValueDTO) {
                     return IconImageBundle.ICONS.indicator();
@@ -172,8 +169,8 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         });
     }
 
-    private ActivityDTO getActivityDto() {
-        return (ActivityDTO) tree.getStore().getAt(0);
+    private ActivityFormDTO getActivityDto() {
+        return (ActivityFormDTO) tree.getStore().getAt(0);
     }
 
     @Override

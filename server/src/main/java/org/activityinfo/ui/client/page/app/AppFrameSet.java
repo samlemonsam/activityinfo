@@ -35,7 +35,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.local.ui.SyncStatusBar;
 import org.activityinfo.ui.client.page.*;

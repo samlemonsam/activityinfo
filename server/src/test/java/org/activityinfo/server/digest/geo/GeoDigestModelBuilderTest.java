@@ -31,6 +31,7 @@ import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.TestDigestModule;
+import org.activityinfo.server.digest.UserDigest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -105,8 +106,8 @@ public class GeoDigestModelBuilderTest {
         // only notification
         User user = em.find(User.class, 1);
         LocalDate today = new LocalDate(2041, 1, 1);
-        GeoDigestModel model = geoDigestModelBuilder.createModel(user,
-                today.atMidnightInMyTimezone(), 1);
+        UserDigest userDigest = new UserDigest(user, today.atMidnightInMyTimezone(), 1, "testToken");
+        GeoDigestModel model = geoDigestModelBuilder.createModel(userDigest);
         assertThat(model.hasData(), equalTo(false));
     }
 

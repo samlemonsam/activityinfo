@@ -22,16 +22,16 @@ package org.activityinfo.server.digest;
  * #L%
  */
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import com.google.common.base.Preconditions;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.mail.Message;
 import org.activityinfo.server.util.html.HtmlTag;
 import org.activityinfo.server.util.html.HtmlWriter;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.logging.Logger;
 
 public class DigestMessageBuilder {
@@ -41,74 +41,75 @@ public class DigestMessageBuilder {
     private final DigestModelBuilder digestModelBuilder;
     private final DigestRenderer digestRenderer;
 
-    private User user;
-    private Date date;
-    private int days;
+    private UserDigest userDigest;
 
     public DigestMessageBuilder(DigestModelBuilder digestModelBuilder, DigestRenderer digestRenderer) {
         this.digestModelBuilder = digestModelBuilder;
         this.digestRenderer = digestRenderer;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public void setDays(int days) {
-        this.days = days;
+    public DigestMessageBuilder setUserDigest(UserDigest userDigest) {
+        this.userDigest = userDigest;
+        return this;
     }
 
     public Message build() throws IOException, MessagingException {
+
+        Preconditions.checkNotNull(userDigest);
+        Preconditions.checkNotNull(userDigest.getUser());
+
         // set the locale of the messages
-        LocaleProxy.setLocale(user.getLocaleObject());
+        ThreadLocalLocaleProvider.pushLocale(userDigest.getUser().getLocaleObject());
 
-        DigestModel model = digestModelBuilder.createModel(user, date, days);
+        try {
 
-        if (!model.hasData()) {
-            return null;
+            DigestModel model = digestModelBuilder.createModel(userDigest);
+
+            if (!model.hasData()) {
+                return null;
+            }
+
+            // create message, set recipient & bcc
+            Message message = new Message();
+            message.to(userDigest.getUser().getEmail(), userDigest.getUser().getName());
+
+            String subject = I18N.MESSAGES.digestSubject(userDigest.getDate());
+            message.subject(subject);
+
+            // create the html body
+            HtmlWriter htmlWriter = new HtmlWriter();
+
+            htmlWriter.startDocument();
+
+            htmlWriter.startDocumentHeader();
+            htmlWriter.documentTitle(subject);
+            htmlWriter.open(new HtmlTag("style"))
+                    .at("type", "text/css")
+                    .text("body { font-family:Helvetica; } a {color: black; text-decoration:none;} ")
+                    .close();
+            htmlWriter.endDocumentHeader();
+
+            htmlWriter.startDocumentBody();
+
+            htmlWriter.paragraph(I18N.MESSAGES.digestGreeting(userDigest.getUser().getName()));
+
+            // the digest content
+            htmlWriter.paragraph(digestRenderer.renderHtml(model));
+
+            String signature = I18N.MESSAGES.digestSignature();
+            htmlWriter.paragraph(signature);
+
+            htmlWriter.endDocumentBody();
+            htmlWriter.endDocument();
+
+            LOGGER.finest("digest:\n" + htmlWriter.toString());
+
+            message.htmlBody(htmlWriter.toString());
+
+            return message;
+
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
         }
-
-        // create message, set recipient & bcc
-        Message message = new Message();
-        message.to(user.getEmail(), user.getName());
-
-        String subject = I18N.MESSAGES.digestSubject(date);
-        message.subject(subject);
-
-        // create the html body
-        HtmlWriter htmlWriter = new HtmlWriter();
-
-        htmlWriter.startDocument();
-
-        htmlWriter.startDocumentHeader();
-        htmlWriter.documentTitle(subject);
-        htmlWriter.open(new HtmlTag("style"))
-                  .at("type", "text/css")
-                  .text("body { font-family:Helvetica; } a {color: black; text-decoration:none;} ")
-                  .close();
-        htmlWriter.endDocumentHeader();
-
-        htmlWriter.startDocumentBody();
-
-        htmlWriter.paragraph(I18N.MESSAGES.digestGreeting(user.getName()));
-
-        // the digest content
-        htmlWriter.paragraph(digestRenderer.renderHtml(model));
-
-        String signature = I18N.MESSAGES.digestSignature();
-        htmlWriter.paragraph(signature);
-
-        htmlWriter.endDocumentBody();
-        htmlWriter.endDocument();
-
-        LOGGER.finest("digest:\n" + htmlWriter.toString());
-
-        message.htmlBody(htmlWriter.toString());
-
-        return message;
     }
 }

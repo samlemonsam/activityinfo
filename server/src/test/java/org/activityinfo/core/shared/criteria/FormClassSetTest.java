@@ -14,8 +14,8 @@ public class FormClassSetTest {
     @Test
     public void test() {
         CriteriaUnion union = new CriteriaUnion(Arrays.asList(
-                new ClassCriteria(ResourceId.create("a")),
-                new ClassCriteria(ResourceId.create("b"))));
+                new ClassCriteria(ResourceId.valueOf("a")),
+                new ClassCriteria(ResourceId.valueOf("b"))));
 
         FormClassSet set = FormClassSet.of(union);
         assertTrue(set.isClosed());

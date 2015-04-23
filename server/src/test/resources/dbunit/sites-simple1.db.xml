@@ -38,6 +38,8 @@
                 name="Health Center" reuse="1"/>
   <locationType locationTypeId="3" countryId="1" name="Territorie" version="1" locationVersion="1"
                 reuse="1" BoundAdminLevelId="2"/>
+  <locationType locationTypeId="20301" countryId="1" name="Country" version="1" locationVersion="1"
+                reuse="1" BoundAdminLevelId="2"/>
 
   <adminEntity adminLevelId="1" adminEntityId="1" name="Kinshasa"
                code="10" x1="0" y1="0" x2="0" y2="0"/>
@@ -303,7 +305,7 @@
   <attributeValue siteId="1" attributeId="1" value="0"/>
   <attributeValue siteId="1" attributeId="2" value="0"/>
 
-  <indicator indicatorId="12451" aggregation="0" name="calculated" sortOrder="5" units="calculated" activityId="1"
+  <indicator indicatorId="12451" aggregation="0" name="calculated" sortOrder="5" activityId="1"
              calculatedAutomatically="1" mandatory="false" expression="{BENE}+{BACHE}"/>
 
   <reportingPeriod reportingPeriodId="1" siteId="1"

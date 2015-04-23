@@ -23,7 +23,7 @@ package org.activityinfo.server.util.locale;
  */
 
 import com.google.common.base.Strings;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

@@ -15,6 +15,7 @@ import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -47,9 +48,13 @@ class Presenter {
         }
     }
 
-    public Promise<Void> setInitialSelection(Set<ResourceId> resourceIds) {
+    public Promise<Void> setInitialSelection(Iterable<ResourceId> resourceIds) {
+        return setInitialSelection(new ReferenceValue(resourceIds));
+    }
+
+    public Promise<Void> setInitialSelection(ReferenceValue value) {
         final InitialSelection initialSelection = new InitialSelection(tree);
-        return initialSelection.fetch(locator, resourceIds).then(new Function<Void, Void>() {
+        return initialSelection.fetch(locator, value.getResourceIds()).then(new Function<Void, Void>() {
 
             @Nullable
             @Override
@@ -83,7 +88,7 @@ class Presenter {
         valueUpdater.update(getValue());
     }
 
-    private Set<ResourceId> getValue() {
+    private ReferenceValue getValue() {
         // We want to store the values in a normalized fashion -
         // store only the leaf nodes, their parents are redundant
         Set<ResourceId> instanceIds = Sets.newHashSet();
@@ -95,7 +100,7 @@ class Presenter {
                 parentIds.add(parentId.iterator().next());
             }
         }
-        return instanceIds;
+        return new ReferenceValue(instanceIds);
     }
 
     private void clearChildren(Level parent) {
@@ -144,7 +149,7 @@ class Presenter {
 
             query.where(new CriteriaIntersection(
                     new ClassCriteria(level.getClassId()),
-                    new FieldCriteria(level.getParentFieldId(), selectedParent.getRootInstanceId())));
+                    new FieldCriteria(level.getParentFieldId(), new ReferenceValue(selectedParent.getRootInstanceId()))));
         }
 
         return new Supplier<Promise<List<Projection>>>() {

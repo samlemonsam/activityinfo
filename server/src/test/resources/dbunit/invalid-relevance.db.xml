@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <userLogin userId="9944" name="Owner" email="owner@gmail.com" locale="fr" organization="" jobtitle="" emailnotification="1"/>
+  <country CountryId="291" x1="13.4734754562378" y1="7.44106817245483" x2="24.0026607513428" y2="23.4503688812256" ISO2="TD" Name="Chad"/>
+  <locationtype locationtypeid="50573" Name="Country" Reuse="false" CountryId="291" workflowId="closed"/>
+  <location LocationID="50573" Name="Chad" X="18.738068103790297" Y="15.445718526840215" LocationTypeID="50573" timeEdited="1397595403000" workflowStatusId="validated"/>
+  <userdatabase DatabaseId="1470" FullName="Cost per service level for UNHCR Chad" Name="UNHCR LCCA Chad 2014" CountryId="291" OwnerUserId="9944" version="1415310640622"/>
+  <partnerindatabase PartnerId="1734" DatabaseId="1470"/>
+  <partner PartnerId="1734" FullName="The Survey Staff :-)" name="Survey Staff"/>
+  <activity ActivityId="11218" AllowEdit="false" Name="Chad Waterpoint data collection" ReportingFrequency="0" SortOrder="1" DatabaseId="1470" LocationTypeId="50573" published="0"/>
+</dataset>

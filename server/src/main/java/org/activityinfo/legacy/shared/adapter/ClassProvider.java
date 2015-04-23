@@ -2,15 +2,16 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import org.activityinfo.core.client.NotFoundException;
+import org.activityinfo.legacy.shared.command.GetFormClass;
+import org.activityinfo.legacy.shared.command.result.FormClassResult;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.ApplicationClassProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.command.GetFormViewModel;
 import org.activityinfo.legacy.shared.command.GetSchema;
 
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.*;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 
 public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
     private final Dispatcher dispatcher;
@@ -24,9 +25,12 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
     public Promise<FormClass> apply(ResourceId classId) {
         switch (classId.getDomain()) {
             case ACTIVITY_DOMAIN:
-                int activityId = getLegacyIdFromCuid(classId);
-                return dispatcher.execute(new GetFormViewModel(activityId))
-                                 .then(new BuiltinFormClasses.ActivityAdapter(activityId));
+                return dispatcher.execute(new GetFormClass(classId)).then(new Function<FormClassResult, FormClass>() {
+                    @Override
+                    public FormClass apply(FormClassResult input) {
+                        return input.getFormClass();
+                    }
+                });
 
             case PARTNER_FORM_CLASS_DOMAIN:
                 return Promise.resolved(PartnerClassAdapter.create(getLegacyIdFromCuid(classId)));
@@ -34,9 +38,6 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
             case PROJECT_CLASS_DOMAIN:
                 return Promise.resolved(BuiltinFormClasses.projectFormClass(getLegacyIdFromCuid(classId)));
 
-            case ATTRIBUTE_GROUP_DOMAIN:
-                return dispatcher.execute(new GetSchema())
-                                 .then(new AttributeClassAdapter(getLegacyIdFromCuid(classId)));
 
             case ADMIN_LEVEL_DOMAIN:
                 return dispatcher.execute(new GetSchema())

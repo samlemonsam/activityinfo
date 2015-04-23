@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.pageView;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.FolderClass;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.ui.client.style.Icons;
 
 /**

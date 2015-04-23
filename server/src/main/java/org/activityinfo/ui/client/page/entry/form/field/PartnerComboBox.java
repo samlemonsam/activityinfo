@@ -27,14 +27,14 @@ import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 
 import java.util.List;
 
 public class PartnerComboBox extends ComboBox<PartnerDTO> {
 
-    public PartnerComboBox(ActivityDTO activity) {
+    public PartnerComboBox(ActivityFormDTO activity) {
         this(activity.getPartnerRange());
     }
 

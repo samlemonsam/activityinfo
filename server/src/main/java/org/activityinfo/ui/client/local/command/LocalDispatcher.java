@@ -33,11 +33,11 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.AbstractDispatcher;
 import org.activityinfo.legacy.client.remote.Remote;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.MutatingCommand;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.util.Collector;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.local.sync.ServerStateChangeEvent;
 

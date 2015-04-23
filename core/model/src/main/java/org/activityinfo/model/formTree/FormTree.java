@@ -6,9 +6,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.ReferenceType;
 
 import java.util.*;
@@ -164,9 +164,6 @@ public class FormTree {
         }
 
 
-        public String getFieldName() {
-            return field.getName();
-        }
     }
 
     public enum SearchOrder {
@@ -193,6 +190,15 @@ public class FormTree {
 
     public List<Node> getRootFields() {
         return rootFields;
+    }
+
+    public List<FieldPath> getRootPaths() {
+        List<FieldPath> paths = Lists.newArrayList();
+        for (Node node : rootFields) {
+            paths.add(node.getPath());
+        }
+        return paths;
+
     }
 
     public Map<ResourceId, FormClass> getRootFormClasses() {

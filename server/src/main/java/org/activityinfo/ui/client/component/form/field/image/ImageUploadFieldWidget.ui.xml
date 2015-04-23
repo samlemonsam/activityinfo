@@ -1,0 +1,12 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+  <ui:with field="style" type="org.activityinfo.ui.client.widget.loading.LoadingStylesheet"/>
+  <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
+
+  <g:HTMLPanel>
+  </g:HTMLPanel>
+</ui:UiBinder>

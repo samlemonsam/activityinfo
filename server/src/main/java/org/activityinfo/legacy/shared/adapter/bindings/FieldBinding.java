@@ -1,6 +1,6 @@
 package org.activityinfo.legacy.shared.adapter.bindings;
 
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.shared.model.DTO;
 
 import java.util.Map;

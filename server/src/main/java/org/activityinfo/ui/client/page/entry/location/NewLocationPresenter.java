@@ -26,7 +26,7 @@ import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.BaseObservable;
 import com.extjs.gxt.ui.client.event.EventType;
 import com.extjs.gxt.ui.client.event.Listener;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 

@@ -25,12 +25,12 @@ package org.activityinfo.ui.client.page.entry.form.field;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 
 public class ProjectComboBox extends ComboBox<ProjectDTO> {
 
-    public ProjectComboBox(ActivityDTO activity) {
+    public ProjectComboBox(ActivityFormDTO activity) {
 
         ListStore<ProjectDTO> store = new ListStore<ProjectDTO>();
         store.add(activity.getProjects());

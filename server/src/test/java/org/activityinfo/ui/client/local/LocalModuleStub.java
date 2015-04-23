@@ -30,7 +30,7 @@ import com.google.inject.Provides;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.Remote;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.MockEventBus;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;

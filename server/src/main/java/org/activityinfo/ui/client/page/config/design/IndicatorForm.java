@@ -29,17 +29,20 @@ import com.extjs.gxt.ui.client.widget.form.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
-import org.activityinfo.core.shared.expr.ExprLexer;
-import org.activityinfo.core.shared.expr.ExprNode;
-import org.activityinfo.core.shared.expr.ExprParser;
-import org.activityinfo.core.shared.expr.ExprSyntaxException;
-import org.activityinfo.core.shared.expr.FunctionCallNode;
-import org.activityinfo.core.shared.expr.PlaceholderExpr;
+import org.activityinfo.model.expr.ExprLexer;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.expr.ExprSyntaxException;
+import org.activityinfo.model.expr.FunctionCallNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
@@ -51,7 +54,7 @@ class IndicatorForm extends AbstractDesignForm {
     private final UiConstants constants = GWT.create(UiConstants.class);
 
     private final FormBinding binding;
-    private final MappingComboBox<FieldTypeClass> typeCombo;
+    private final MappingComboBox<String> typeCombo;
     private final TextField<String> unitsField;
     private final MappingComboBox aggregationCombo;
     private final TextField<String> expressionField;
@@ -91,9 +94,10 @@ class IndicatorForm extends AbstractDesignForm {
 
         typeCombo = new MappingComboBox<>();
         typeCombo.setFieldLabel(constants.type());
-        typeCombo.add(FieldTypeClass.QUANTITY, I18N.CONSTANTS.fieldTypeQuantity());
-        typeCombo.add(FieldTypeClass.FREE_TEXT, I18N.CONSTANTS.fieldTypeText());
-        typeCombo.add(FieldTypeClass.NARRATIVE, I18N.CONSTANTS.fieldTypeNarrative());
+        typeCombo.add(FieldTypeClass.QUANTITY.getId(), I18N.CONSTANTS.fieldTypeQuantity());
+        typeCombo.add(FieldTypeClass.FREE_TEXT.getId(), I18N.CONSTANTS.fieldTypeText());
+        typeCombo.add(FieldTypeClass.NARRATIVE.getId(), I18N.CONSTANTS.fieldTypeNarrative());
+
         binding.addFieldBinding(new MappingComboBoxBinding(typeCombo, "type"));
         this.add(typeCombo);
 
@@ -117,9 +121,9 @@ class IndicatorForm extends AbstractDesignForm {
                                 "available for activities with monthly reporting. " +
                                 "(We're working on it!)"));
 
-        typeCombo.addSelectionChangedListener(new SelectionChangedListener<MappingComboBox.Wrapper<FieldTypeClass>>() {
+        typeCombo.addSelectionChangedListener(new SelectionChangedListener<MappingComboBox.Wrapper<String>>() {
             @Override
-            public void selectionChanged(SelectionChangedEvent<MappingComboBox.Wrapper<FieldTypeClass>> wrapperSelectionChangedEvent) {
+            public void selectionChanged(SelectionChangedEvent<MappingComboBox.Wrapper<String>> wrapperSelectionChangedEvent) {
                 setState();
             }
         });
@@ -200,12 +204,12 @@ class IndicatorForm extends AbstractDesignForm {
 
             // expr node is created, expression is parsable
             // try to check variable names
-            List<PlaceholderExpr> placeholderExprList = Lists.newArrayList();
+            List<SymbolExpr> placeholderExprList = Lists.newArrayList();
             gatherPlaceholderExprs(expr, placeholderExprList);
             List<String> existingIndicatorCodes = existingIndicatorCodes();
-            for (PlaceholderExpr placeholderExpr : placeholderExprList) {
-                if (!existingIndicatorCodes.contains(placeholderExpr.getPlaceholder())) {
-                    return I18N.MESSAGES.doesNotExist(placeholderExpr.getPlaceholder());
+            for (SymbolExpr placeholderExpr : placeholderExprList) {
+                if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
+                    return I18N.MESSAGES.doesNotExist(placeholderExpr.getName());
                 }
             }
             return null;
@@ -218,9 +222,9 @@ class IndicatorForm extends AbstractDesignForm {
         return constants.calculationExpressionIsInvalid();
     }
 
-    private void gatherPlaceholderExprs(ExprNode node, List<PlaceholderExpr> placeholderExprList) {
-        if (node instanceof PlaceholderExpr) {
-            placeholderExprList.add((PlaceholderExpr) node);
+    private void gatherPlaceholderExprs(ExprNode node, List<SymbolExpr> placeholderExprList) {
+        if (node instanceof SymbolExpr) {
+            placeholderExprList.add((SymbolExpr) node);
         } else if (node instanceof FunctionCallNode) {
             FunctionCallNode functionCallNode = (FunctionCallNode) node;
             List<ExprNode> arguments = functionCallNode.getArguments();
@@ -249,7 +253,7 @@ class IndicatorForm extends AbstractDesignForm {
 
     private void setState() {
         if (typeCombo.getValue() != null) {
-            FieldTypeClass selectedType = typeCombo.getValue().getWrappedValue();
+            FieldTypeClass selectedType = TypeRegistry.get().get().getTypeClass(typeCombo.getValue().getWrappedValue());
 
             unitsField.setVisible(selectedType == FieldTypeClass.QUANTITY);
             unitsField.setAllowBlank(selectedType != FieldTypeClass.QUANTITY);

@@ -27,7 +27,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;

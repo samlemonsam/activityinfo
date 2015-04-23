@@ -24,11 +24,11 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.collect.Lists;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -174,9 +174,9 @@ public final class AttributeGroupDTO extends BaseModelData implements EntityDTO,
     @Override
     public FormField asFormField() {
         Cardinality cardinality = isMultipleAllowed() ? Cardinality.MULTIPLE : Cardinality.SINGLE;
-        List<EnumValue> values = Lists.newArrayList();
+        List<EnumItem> values = Lists.newArrayList();
         for(AttributeDTO attribute : getAttributes()) {
-            values.add(new EnumValue(CuidAdapter.attributeId(attribute.getId()), attribute.getName()));
+            values.add(new EnumItem(CuidAdapter.attributeId(attribute.getId()), attribute.getName()));
         }
 
         return new FormField(CuidAdapter.attributeGroupField(getId()))

@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.component.form.field.suggest;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.form.FormInstanceLabeler;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.core.shared.importing.match.names.LatinPlaceNameScorer;
 
 import java.util.ArrayList;

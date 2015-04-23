@@ -25,10 +25,10 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.type.TextType;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.primitive.TextType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +107,7 @@ public class TargetCollector {
 
             sourceColumns.add(entry.getValue());
 
-            ResourceId fieldId = ResourceId.create(entry.getKey().asString());
+            ResourceId fieldId = ResourceId.valueOf(entry.getKey().asString());
             for (FieldPath path : getFieldPathMap().get(fieldId)) {
                 referenceValues.put(path, columnIndex);
             }

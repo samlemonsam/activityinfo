@@ -11,12 +11,12 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.client.type.DateUtilGWTImpl;
 import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.promise.Promise;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package org.activityinfo.legacy.shared.impl.pivot.bundler;
 
 import com.bedatadriven.rebar.sql.client.SqlResultSetRow;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 
 /**

@@ -1,56 +1,61 @@
 package org.activityinfo.model.type;
 
-import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.component.ComponentReader;
-import org.activityinfo.model.type.component.NullComponentReader;
+import org.activityinfo.model.resource.ResourceIdPrefixType;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class ReferenceType implements FieldType {
+/**
+ * A type that represents a link or reference to another {@code Resource}
+ */
+public class ReferenceType implements ParametrizedFieldType {
 
-    public enum TypeClass implements FieldTypeClass {
-        INSTANCE {
 
-            @Override
-            public String getId() {
-                return "REFERENCE";
-            }
+    public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
-            @Override
-            public String getLabel() {
-                return "Reference";
-            }
-
-            @Override
-            public FieldType createType(Record parameters) {
-                ReferenceType type = new ReferenceType();
-                type.setCardinality(Cardinality.valueOf(parameters.getString("cardinality")));
-                type.setRange(parameters.getStringList("range"));
-                return type;
-            }
-
-            @Override
-            public FieldType createType() {
-                return new ReferenceType()
-                        .setCardinality(Cardinality.SINGLE)
-                        .setRange(Collections.<ResourceId>emptySet());
-            }
-
-            @Override
-            public FormClass getParameterFormClass() {
-                FormClass formClass = new FormClass(ResourceId.create("_ref"));
-                // todo
-                return formClass;
-            }
+        private TypeClass() {
         }
-    }
+
+        @Override
+        public String getId() {
+            return "REFERENCE";
+        }
+
+        @Override
+        public FieldType createType() {
+            return new ReferenceType()
+                    .setCardinality(Cardinality.SINGLE)
+                    .setRange(Collections.<ResourceId>emptySet());
+        }
+
+        @Override
+        public FieldType deserializeType(Record parameters) {
+            ReferenceType type = new ReferenceType();
+            type.setCardinality(Cardinality.valueOf(parameters.getString("cardinality")));
+            type.setRange(parameters.getStringList("range"));
+            return type;
+        }
+
+        @Override
+        public FieldValue deserialize(Record record) {
+            return ReferenceValue.fromRecord(record);
+        }
+
+        @Override
+        public FormClass getParameterFormClass() {
+            FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("ref"));
+            return formClass;
+        }
+    };
+
+    public static final TypeClass TYPE_CLASS = new TypeClass();
 
     private Cardinality cardinality;
     private Set<ResourceId> range;
@@ -59,8 +64,8 @@ public class ReferenceType implements FieldType {
     }
 
     @Override
-    public FieldTypeClass getTypeClass() {
-        return TypeClass.INSTANCE;
+    public ParametrizedFieldTypeClass getTypeClass() {
+        return TYPE_CLASS;
     }
 
     public Cardinality getCardinality() {
@@ -84,11 +89,10 @@ public class ReferenceType implements FieldType {
         this.range = Collections.singleton(formClassId);
     }
 
-
     private void setRange(List<String> range) {
         Set<ResourceId> formClassIds = Sets.newHashSet();
         for(String id : range) {
-            formClassIds.add(ResourceId.create(id));
+            formClassIds.add(ResourceId.valueOf(id));
         }
         setRange(formClassIds);
     }
@@ -102,23 +106,22 @@ public class ReferenceType implements FieldType {
     @Override
     public Record getParameters() {
         return new Record()
-                .set("range", Reference.to(range))
+                .set("classId", getTypeClass().getParameterFormClass().getId())
+                .set("range", toArray(range))
                 .set("cardinality", cardinality);
     }
 
     @Override
-    public ComponentReader<String> getStringReader(final String fieldName, String componentId) {
-        return new ComponentReader<String>() {
-            @Override
-            public String read(Resource resource) {
-                return resource.getRecord(fieldName).getString("id");
-            }
-        };
+    public boolean isValid() {
+        return true;
     }
 
-    @Override
-    public ComponentReader<LocalDate> getDateReader(String name, String componentId) {
-       return new NullComponentReader<>();
+    private List<String> toArray(Set<ResourceId> range) {
+        List<String> ids = Lists.newArrayList();
+        for(ResourceId id : range) {
+            ids.add(id.asString());
+        }
+        return ids;
     }
 
 
@@ -146,4 +149,46 @@ public class ReferenceType implements FieldType {
         return type;
     }
 
+    public static FieldType multiple(Collection<ResourceId> formClassIds) {
+        ReferenceType type = new ReferenceType();
+        type.setCardinality(Cardinality.MULTIPLE);
+        type.setRange(Sets.newHashSet(formClassIds));
+        return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ReferenceType that = (ReferenceType) o;
+
+        if (cardinality != that.cardinality) {
+            return false;
+        }
+        if (!range.equals(that.range)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = cardinality.hashCode();
+        result = 31 * result + range.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ReferenceType{" +
+               "cardinality=" + cardinality +
+               ", range=" + range +
+               '}';
+    }
 }

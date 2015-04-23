@@ -23,8 +23,10 @@ package org.activityinfo.legacy.shared.adapter.projection;
 
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.type.NarrativeValue;
+import org.activityinfo.model.type.time.LocalDate;
 
 /**
  * @author yuriyz on 4/17/14.
@@ -43,13 +45,13 @@ public class SiteProjectionUpdater implements ProjectionUpdater<SiteDTO> {
     public void update(Projection projection, SiteDTO dto) {
         switch (fieldIndex) {
             case CuidAdapter.START_DATE_FIELD:
-                projection.setValue(path, dto.getDate1());
+                projection.setValue(path, LocalDate.valueOf(dto.getDate1()));
                 break;
             case CuidAdapter.END_DATE_FIELD:
-                projection.setValue(path, dto.getDate2());
+                projection.setValue(path, LocalDate.valueOf(dto.getDate2()));
                 break;
             case CuidAdapter.COMMENT_FIELD:
-                projection.setValue(path, dto.getComments());
+                projection.setValue(path, NarrativeValue.valueOf(dto.getComments()));
                 break;
         }
     }

@@ -22,6 +22,7 @@ package org.activityinfo.server.command.handler.crud;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.server.command.handler.PermissionOracle;
@@ -78,6 +79,11 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     private void applyProperties(LocationType locationType, PropertyMap changes) {
         if (changes.containsKey("name")) {
             locationType.setName((String) changes.get("name"));
+        }
+        if (changes.containsKey("workflowId")) {
+            String workflowId = changes.get("workflowId");
+            Preconditions.checkArgument(Workflow.isValidId(workflowId), "invalid workflow id %s", workflowId);
+            locationType.setWorkflowId(workflowId);
         }
         locationType.getDatabase().setLastSchemaUpdate(new Date());
     }

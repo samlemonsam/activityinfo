@@ -22,10 +22,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  * #L%
  */
 
-import org.activityinfo.legacy.shared.model.LocationDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.legacy.shared.model.SiteHistoryDTO;
+import org.activityinfo.legacy.shared.model.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +34,10 @@ class RenderContext {
     private SiteDTO site;
     private SiteHistoryDTO history;
     private Map<String, Object> state;
+    private ActivityFormDTO form;
 
-    RenderContext(SchemaDTO schema, List<LocationDTO> locations, SiteDTO site, Map<String, Object> baselineState) {
-        this.schema = schema;
+    RenderContext(ActivityFormDTO form, List<LocationDTO> locations, SiteDTO site, Map<String, Object> baselineState) {
+        this.form = form;
         this.locations = new HashMap<Integer, LocationDTO>();
         for (LocationDTO dto : locations) {
             this.locations.put(dto.getId(), dto);
@@ -70,5 +68,9 @@ class RenderContext {
 
     Map<String, Object> getState() {
         return state;
+    }
+
+    public ActivityFormDTO getForm() {
+        return form;
     }
 }

@@ -22,11 +22,12 @@
 
 
 <module rename-to="ActivityInfo">
-  <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
+  <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
   <set-property name="gwt.logging.enabled" value="FALSE"/>
 
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
+  <add-linker name="std"/>
 </module>

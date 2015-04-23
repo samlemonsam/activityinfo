@@ -26,12 +26,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
-import org.activityinfo.legacy.shared.command.BatchCommand;
-import org.activityinfo.legacy.shared.command.CreateEntity;
-import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.UpdateEntity;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
@@ -39,22 +35,26 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TFormClass;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.TextType;
+import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.activityFormClass;
+import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -85,10 +85,11 @@ public class ActivityTest extends CommandTestCase2 {
 
         LocationTypeDTO locType = schema.getCountryById(1).getLocationTypes().get(0);
 
-        ActivityDTO act = new ActivityDTO();
+        ActivityFormDTO act = new ActivityFormDTO();
         act.setName("Warshing the dishes");
         act.setLocationType(locType);
-        act.setReportingFrequency(ActivityDTO.REPORT_MONTHLY);
+        act.setReportingFrequency(ActivityFormDTO.REPORT_MONTHLY);
+        act.setClassicView(false);
 
         CreateResult cresult = execute(CreateEntity.Activity(db, act));
 
@@ -98,14 +99,27 @@ public class ActivityTest extends CommandTestCase2 {
          * Reload schema to verify the changes have stuck
          */
 
-        schema = execute(new GetSchema());
 
-        act = schema.getActivityById(newId);
+        act = execute(new GetActivityForm(newId));
 
         assertEquals("name", "Warshing the dishes", act.getName());
         assertEquals("locationType", locType.getName(), act.getLocationType().getName());
-        assertEquals("reportingFrequency", ActivityDTO.REPORT_MONTHLY, act.getReportingFrequency());
+        assertEquals("reportingFrequency", ActivityFormDTO.REPORT_MONTHLY, act.getReportingFrequency());
         assertEquals("public", Published.NOT_PUBLISHED.getIndex(), act.getPublished());
+        assertEquals("classicView", false, act.getClassicView());
+
+    }
+
+
+    @Test
+    @OnDataSet("/dbunit/schema-lt-type.db.xml")
+    public void testActivityFormWithAdminLocationType() throws CommandException {
+
+
+        ActivityFormDTO form = execute(new GetActivityForm(1));
+
+        assertEquals("name", "NFI", form.getName());
+        assertThat("locationType", form.getLocationType().isAdminLevel(), equalTo(true));
 
     }
 
@@ -151,10 +165,10 @@ public class ActivityTest extends CommandTestCase2 {
         UserDatabaseDTO db = schema.getDatabaseById(1);
         LocationTypeDTO locType = schema.getCountryById(1).getLocationTypes().get(0);
 
-        ActivityDTO act = new ActivityDTO();
+        ActivityFormDTO act = new ActivityFormDTO();
         act.setName("Household Survey");
         act.setLocationType(locType);
-        act.setReportingFrequency(ActivityDTO.REPORT_ONCE);
+        act.setReportingFrequency(ActivityFormDTO.REPORT_ONCE);
 
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
@@ -164,24 +178,24 @@ public class ActivityTest extends CommandTestCase2 {
 
         // create three new fields with an order that mixes "attributes" and "indicators"
 
-        FormField newField = new FormField(ResourceId.generateId());
+        FormField newField = new FormField(ResourceId.generateFieldId(QuantityType.TYPE_CLASS));
         newField.setLabel("How old are you?");
         newField.setType(new QuantityType().setUnits("years"));
         formClass.addElement(newField);
 
-        FormField newGenderField = new FormField(ResourceId.generateId());
+        FormField newGenderField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
         newGenderField.setLabel("Gender");
-        EnumValue male = new EnumValue(ResourceId.generateId(), "Male");
-        EnumValue female = new EnumValue(ResourceId.generateId(), "Female");
+        EnumItem male = new EnumItem(EnumItem.generateId(), "Male");
+        EnumItem female = new EnumItem(EnumItem.generateId(), "Female");
         newGenderField.setType(new EnumType(Cardinality.SINGLE, Arrays.asList(male, female)));
         formClass.addElement(newGenderField);
 
-        FormField newTextField = new FormField(ResourceId.generateId());
+        FormField newTextField = new FormField(ResourceId.generateFieldId(TextType.TYPE_CLASS));
         newTextField.setLabel("What is your name?");
         newTextField.setType(TextType.INSTANCE);
         formClass.addElement(newTextField);
 
-        resourceLocator.persist(formClass);
+        assertResolves(resourceLocator.persist(formClass));
 
         TFormClass reform = new TFormClass(assertResolves(resourceLocator.getFormClass(formClass.getId())));
 
@@ -202,10 +216,10 @@ public class ActivityTest extends CommandTestCase2 {
         UserDatabaseDTO db = schema.getDatabaseById(1);
         LocationTypeDTO locType = schema.getCountryById(1).getLocationTypes().get(0);
 
-        ActivityDTO act = new ActivityDTO();
+        ActivityFormDTO act = new ActivityFormDTO();
         act.setName("Household Survey");
         act.setLocationType(locType);
-        act.setReportingFrequency(ActivityDTO.REPORT_ONCE);
+        act.setReportingFrequency(ActivityFormDTO.REPORT_ONCE);
 
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
@@ -213,12 +227,12 @@ public class ActivityTest extends CommandTestCase2 {
         ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(classId));
 
-        FormField newField = new FormField(ResourceId.generateId());
+        FormField newField = new FormField(ResourceId.generateFieldId(QuantityType.TYPE_CLASS));
         newField.setLabel("How old are you?");
         newField.setType(new QuantityType().setUnits("years"));
         formClass.addElement(newField);
 
-        FormField newTextField = new FormField(ResourceId.generateId());
+        FormField newTextField = new FormField(ResourceId.generateFieldId(TextType.TYPE_CLASS));
         newTextField.setLabel("What is your name?");
         newTextField.setType(TextType.INSTANCE);
         formClass.addElement(newTextField);
@@ -236,9 +250,9 @@ public class ActivityTest extends CommandTestCase2 {
         System.out.println(reform.getFields().toString());
         assertThat(reform.getFields(), hasSize(8));
 
-        List<EnumValue> values = Lists.newArrayList();
-        values.add(new EnumValue(ResourceId.generateId(), "Option 1"));
-        values.add(new EnumValue(ResourceId.generateId(), "Option 2"));
+        List<EnumItem> values = Lists.newArrayList();
+        values.add(new EnumItem(EnumItem.generateId(), "Option 1"));
+        values.add(new EnumItem(EnumItem.generateId(), "Option 2"));
     }
 
     @Test
@@ -247,10 +261,10 @@ public class ActivityTest extends CommandTestCase2 {
         ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
 
-        FormField newField = new FormField(ResourceId.generateId());
+        FormField newField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
         newField.setLabel("New Group");
-        EnumValue yes = new EnumValue(ResourceId.generateId(), "Yes");
-        EnumValue no = new EnumValue(ResourceId.generateId(), "No");
+        EnumItem yes = new EnumItem(EnumItem.generateId(), "Yes");
+        EnumItem no = new EnumItem(EnumItem.generateId(), "No");
         newField.setType(new EnumType(Cardinality.SINGLE, Arrays.asList(yes, no)));
 
         formClass.getElements().add(newField);
@@ -258,7 +272,7 @@ public class ActivityTest extends CommandTestCase2 {
         resourceLocator.persist(formClass);
 
         // verify that it appears as attribute group
-        ActivityDTO activity = getActivity(1);
+        ActivityFormDTO activity = getActivity(1);
         AttributeGroupDTO group = findGroup(activity, "New Group");
         assertThat(group.isMultipleAllowed(), equalTo(false));
         assertThat(group.getAttributes(), hasSize(2));
@@ -273,7 +287,8 @@ public class ActivityTest extends CommandTestCase2 {
 
         group = findGroup(getActivity(1), "Do you like ice cream?");
         assertThat(group.isMultipleAllowed(), equalTo(false));
-        assertThat(group.getAttributes(), contains(hasProperty("name", Matchers.equalTo("Oui")),
+        assertThat(group.getAttributes(), contains(
+                hasProperty("name", Matchers.equalTo("Oui")),
                 hasProperty("name", Matchers.equalTo("Non"))));
 
         // Remove one of our new enum values
@@ -295,7 +310,7 @@ public class ActivityTest extends CommandTestCase2 {
         beneficiaries.setLabel("Number of benes");
         resourceLocator.persist(formClass.getFormClass());
 
-        ActivityDTO activity = getActivity(1);
+        ActivityFormDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("name", Matchers.equalTo("Number of benes")));
     }
 
@@ -311,15 +326,16 @@ public class ActivityTest extends CommandTestCase2 {
         beneficiaries.setType(updatedType);
         resourceLocator.persist(formClass.getFormClass());
 
-        ActivityDTO activity = getActivity(1);
+        ActivityFormDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("units", Matchers.equalTo(updatedType.getUnits())));
     }
 
-    private ActivityDTO getActivity(int activityId) {
-        return execute(new GetSchema()).getActivityById(activityId);
+   
+    private ActivityFormDTO getActivity(int activityId) {
+        return execute(new GetActivityForm(activityId));
     }
 
-    private AttributeGroupDTO findGroup(ActivityDTO activityDTO, String label) {
+    private AttributeGroupDTO findGroup(ActivityFormDTO activityDTO, String label) {
         for(AttributeGroupDTO group : activityDTO.getAttributeGroups()) {
             if(group.getName().equals(label)) {
                 return group;
@@ -346,8 +362,8 @@ public class ActivityTest extends CommandTestCase2 {
         resourceLocator.persist(formClass);
 
         // Ensure deleted
-        SchemaDTO schema = execute(new GetSchema());
-        assertTrue("Cause attribute is gone", schema.getAttributeGroupById(1) == null);
+        ActivityFormDTO form = execute(new GetActivityForm(1));
+        assertTrue("Cause attribute is gone", form.getAttributeGroupById(1) == null);
 
     }
 

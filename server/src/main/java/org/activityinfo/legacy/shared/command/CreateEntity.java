@@ -106,7 +106,7 @@ public class CreateEntity implements MutatingCommand<CreateResult> {
         this.properties = properties;
     }
 
-    public static CreateEntity Activity(UserDatabaseDTO db, ActivityDTO act) {
+    public static CreateEntity Activity(UserDatabaseDTO db, ActivityFormDTO act) {
         CreateEntity cmd = new CreateEntity("Activity", act.getProperties());
         cmd.properties.put("locationTypeId", act.getLocationTypeId());
         cmd.properties.put("databaseId", db.getId());

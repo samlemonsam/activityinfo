@@ -52,7 +52,9 @@ import com.extjs.gxt.ui.client.widget.treegrid.TreeGridCellRenderer;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogCallback;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
@@ -69,6 +71,11 @@ import java.util.List;
  * @author Alex Bertram
  */
 public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPresenter> implements DesignPresenter.View {
+
+    private MenuItem newAttributeGroup;
+    private MenuItem newAttribute;
+    private MenuItem newIndicator;
+    private Menu newMenu;
 
     private final class DragDropListener extends DNDListener {
         private final TreeStore treeStore;
@@ -139,7 +146,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         tree.setIconProvider(new ModelIconProvider<ModelData>() {
             @Override
             public AbstractImagePrototype getIcon(ModelData model) {
-                if (model instanceof ActivityDTO) {
+                if (model instanceof IsActivityDTO) {
                     return IconImageBundle.ICONS.activity();
                 } else if (model instanceof Folder) {
                     return GXT.IMAGES.tree_folder_closed();
@@ -201,7 +208,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
             }
         };
 
-        Menu newMenu = new Menu();
+        newMenu = new Menu();
         initNewMenu(newMenu, listener);
 
         Button newButtonMenu = new Button(I18N.CONSTANTS.newText(), IconImageBundle.ICONS.add());
@@ -211,8 +218,8 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
 
         toolBar.add(new SeparatorMenuItem());
 
-        toolBar.addButton(UIActions.EDIT, "Open Form Designer", IconImageBundle.ICONS.edit());
-        toolBar.addButton(UIActions.OPEN_TABLE, "Open Table", IconImageBundle.ICONS.table());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.openFormDesigner(), IconImageBundle.ICONS.edit());
+        toolBar.addButton(UIActions.OPEN_TABLE, I18N.CONSTANTS.openTable(), IconImageBundle.ICONS.table());
         toolBar.addDeleteButton();
 
         toolBar.add(new SeparatorToolItem());
@@ -233,35 +240,40 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         newLocationType.setItemId("LocationType");
         menu.add(newLocationType);
 
-        final MenuItem newAttributeGroup = newMenuItem("AttributeGroup",
+        newAttributeGroup = newMenuItem("AttributeGroup",
                 I18N.CONSTANTS.newAttributeGroup(),
                 IconImageBundle.ICONS.attribute(),
                 listener);
         menu.add(newAttributeGroup);
 
-        final MenuItem newAttribute = newMenuItem("Attribute",
+        newAttribute = newMenuItem("Attribute",
                 I18N.CONSTANTS.newAttribute(),
                 IconImageBundle.ICONS.attribute(),
                 listener);
         menu.add(newAttribute);
 
-        final MenuItem newIndicator = new MenuItem(I18N.CONSTANTS.newIndicator(),
+        newIndicator = new MenuItem(I18N.CONSTANTS.newIndicator(),
                 IconImageBundle.ICONS.indicator(),
                 listener);
         newIndicator.setItemId("Indicator");
         menu.add(newIndicator);
 
-        menu.addListener(Events.BeforeShow, new Listener<BaseEvent>() {
-            @Override
-            public void handleEvent(BaseEvent be) {
+    }
 
-                ModelData sel = getSelection();
+    public Menu getNewMenu() {
+        return newMenu;
+    }
 
-                newAttributeGroup.setEnabled(sel != null);
-                newAttribute.setEnabled(sel instanceof AttributeGroupDTO || sel instanceof AttributeDTO);
-                newIndicator.setEnabled(sel != null);
-            }
-        });
+    public MenuItem getNewAttributeGroup() {
+        return newAttributeGroup;
+    }
+
+    public MenuItem getNewAttribute() {
+        return newAttribute;
+    }
+
+    public MenuItem getNewIndicator() {
+        return newIndicator;
     }
 
     private MenuItem newMenuItem(String itemId,
@@ -306,7 +318,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
 
     protected Class formClassForSelection(ModelData sel) {
 
-        if (sel instanceof ActivityDTO) {
+        if (sel instanceof IsActivityDTO) {
             return ActivityForm.class;
         } else if (sel instanceof AttributeGroupDTO) {
             return AttributeGroupForm.class;
@@ -323,7 +335,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
     }
 
     protected AbstractDesignForm createForm(ModelData sel) {
-        if (sel instanceof ActivityDTO) {
+        if (sel instanceof IsActivityDTO) {
             return new ActivityForm(service, db);
         } else if (sel instanceof AttributeGroupDTO) {
             return new AttributeGroupForm();
@@ -392,7 +404,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         dlg.setHeight(form.getPreferredDialogHeight());
         dlg.setScrollMode(Style.Scroll.AUTOY);
 
-        if (entity instanceof ActivityDTO) {
+        if (entity instanceof IsActivityDTO) {
             dlg.setHeadingText(I18N.CONSTANTS.newActivity());
         } else if (entity instanceof AttributeGroupDTO) {
             dlg.setHeadingText(I18N.CONSTANTS.newAttributeGroup());
@@ -407,5 +419,10 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         dlg.show(callback);
 
         return dlg;
+    }
+
+    @Override
+    public AsyncMonitor getLoadingMonitor() {
+        return new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading());
     }
 }

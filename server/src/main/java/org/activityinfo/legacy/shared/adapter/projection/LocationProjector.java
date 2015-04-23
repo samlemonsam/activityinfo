@@ -6,7 +6,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.command.result.ListResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 

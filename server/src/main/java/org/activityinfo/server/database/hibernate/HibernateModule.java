@@ -28,7 +28,7 @@ import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;

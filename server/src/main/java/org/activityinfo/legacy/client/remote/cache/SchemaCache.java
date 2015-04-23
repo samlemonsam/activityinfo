@@ -30,8 +30,9 @@ import org.activityinfo.legacy.client.DispatchEventSource;
 import org.activityinfo.legacy.client.DispatchListener;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.legacy.CuidAdapter;
 
 import java.util.Map;
 import java.util.Set;
@@ -48,14 +49,13 @@ public class SchemaCache implements DispatchListener {
 
     private SchemaDTO schema = null;
     private Set<String> schemaEntityTypes = Sets.newHashSet();
-    private Map<Integer, ActivityDTO> activityMap = Maps.newHashMap();
-    
+    private Map<Integer, ActivityFormDTO> activityMap = Maps.newHashMap();
+
 
     @Inject
     public SchemaCache(DispatchEventSource source) {
 
         source.registerProxy(GetSchema.class, new SchemaProxy());
-        source.registerProxy(GetFormViewModel.class, new FormViewProxy());
         source.registerListener(GetSchema.class, this);
         source.registerListener(UpdateEntity.class, this);
         source.registerListener(CreateEntity.class, this);
@@ -63,8 +63,8 @@ public class SchemaCache implements DispatchListener {
         source.registerListener(RemovePartner.class, this);
         source.registerListener(RequestChange.class, this);
         source.registerListener(BatchCommand.class, this);
-        source.registerListener(GetFormViewModel.class, this);
-        source.registerListener(BatchCommand.class, this);
+        source.registerListener(CloneDatabase.class, this);
+        source.registerListener(UpdateFormClass.class, this);
         source.registerListener(Delete.class, this);
 
         schemaEntityTypes.add("UserDatabase");
@@ -82,16 +82,23 @@ public class SchemaCache implements DispatchListener {
 
     @Override
     public void beforeDispatched(Command command) {
-        if (command instanceof UpdateEntity) {
+        if (command instanceof UpdateEntity || command instanceof CreateEntity || command instanceof Delete) {
             clearCache();
-        } else if (command instanceof CreateEntity) {
+        } else if (command instanceof CloneDatabase) {
             clearCache();
         } else if (command instanceof Delete && isSchemaEntity(((Delete) command).getEntityName())) {
             clearCache();
+
         } else if (command instanceof AddPartner || command instanceof RemovePartner) {
             clearCache();
+
         } else if (command instanceof RequestChange && isSchemaEntity(((RequestChange) command).getEntityType())) {
             clearCache();
+
+        } else if (command instanceof UpdateFormClass) {
+            String formClassId = ((UpdateFormClass) command).getFormClassId();
+            activityMap.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
+
         } else if (command instanceof BatchCommand) {
             for (Command element : ((BatchCommand) command).getCommands()) {
                 beforeDispatched(element);
@@ -112,8 +119,8 @@ public class SchemaCache implements DispatchListener {
     public void onSuccess(Command command, CommandResult result) {
         if (command instanceof GetSchema) {
             cache((SchemaDTO) result);
-        } else if (command instanceof GetFormViewModel) {
-            ActivityDTO activity = (ActivityDTO) result;
+        } else if (command instanceof GetActivityForm) {
+            ActivityFormDTO activity = (ActivityFormDTO) result;
             activityMap.put(activity.getId(), activity);
         } else if (schema != null) {
             if (command instanceof AddPartner) {
@@ -138,25 +145,6 @@ public class SchemaCache implements DispatchListener {
     }
 
 
-    private class FormViewProxy implements CommandCache<GetFormViewModel> {
-        @Override
-        public CacheResult maybeExecute(GetFormViewModel command) {
-            int activityId = command.getActivityId();
-            if(schema != null) {
-                return new CacheResult<>(schema.getActivityById(activityId));
-            } else if(activityMap.containsKey(activityId)) {
-                return new CacheResult<>(activityMap.get(activityId));
-            } else {
-                return CacheResult.couldNotExecute();
-            }
-        }
-
-        @Override
-        public void clear() {
-            clearCache();
-        }
-    }
-
     private class SchemaProxy implements CommandCache<GetSchema> {
         @Override
         public CacheResult maybeExecute(GetSchema command) {
@@ -169,7 +157,7 @@ public class SchemaCache implements DispatchListener {
 
         @Override
         public void clear() {
-
+            clearCache();
         }
     }
 }

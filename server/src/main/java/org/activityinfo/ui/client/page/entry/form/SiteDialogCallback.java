@@ -22,10 +22,8 @@ package org.activityinfo.ui.client.page.entry.form;
  * #L%
  */
 
-import org.activityinfo.legacy.shared.model.SiteDTO;
-
 public interface SiteDialogCallback {
 
-    void onSaved(SiteDTO site);
+    void onSaved();
 
 }

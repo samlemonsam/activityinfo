@@ -10,6 +10,7 @@
   <ui:with field='style' type='org.activityinfo.ui.client.component.table.InstanceTableStyle'/>
 
   <g:HTMLPanel>
+    <br/>
 
     <!-- Use a div to measure the font size -->
     <div ui:field="emRuler" style="position:absolute; width:100em;"/>

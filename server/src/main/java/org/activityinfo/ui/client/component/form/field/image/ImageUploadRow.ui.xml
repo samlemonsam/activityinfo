@@ -1,0 +1,34 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+  <ui:with field="style" type="org.activityinfo.ui.client.widget.loading.LoadingStylesheet"/>
+  <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
+
+  <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
+    <g:HTMLPanel addStyleNames="form-group">
+      <div class="col-xs-9">
+        <g:FileUpload ui:field="fileUpload" name="file"/>
+      </div>
+      <g:HTMLPanel addStyleNames="col-xs-3">
+        <g:HTMLPanel ui:field="imageContainer" visible="false">
+          <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
+               ui:field="loadingImage"/>
+        </g:HTMLPanel>
+        <g:Image ui:field="thumbnail" visible="false"/>
+        <g:Button addStyleNames="btn btn-default btn-xs" ui:field="downloadButton" visible="false">
+          <span class='{icons.arrowDown}'/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="addButton">
+          <span class="{icons.add}"/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton">
+          <span class='{icons.delete}'/>
+        </g:Button>
+      </g:HTMLPanel>
+      <g:VerticalPanel ui:field="formFieldsContainer"/>
+    </g:HTMLPanel>
+  </g:FormPanel>
+</ui:UiBinder>

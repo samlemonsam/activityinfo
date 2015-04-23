@@ -6,7 +6,7 @@
   <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
 
   <g:HTMLPanel styleName="modal">
-    <div class="bs modal-dialog">
+    <div class="bs modal-dialog" ui:field="dialogDiv">
       <div class="modal-content" ui:field="contentDiv">
         <div class="modal-header">
           <g:Button addStyleNames="close pull-right btn-link" ui:field="closeButton" text="×"/>
@@ -17,7 +17,7 @@
         </div>
         <div class="modal-footer">
           <g:HTMLPanel ui:field="modalFooter">
-            <a:Button style="DEFAULT" text="{i18n.backButton}" ui:field="backButton"
+            <a:Button style="DEFAULT" label="{i18n.backButton}" ui:field="backButton"
                       visible="false" addStyleNames="pull-left"/>
             <g:InlineLabel ui:field="statusLabel"/>
             <a:Button style="DEFAULT" text="{i18n.cancel}" ui:field="cancelButton"/>

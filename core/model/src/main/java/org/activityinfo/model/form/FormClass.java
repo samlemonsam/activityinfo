@@ -1,9 +1,12 @@
 package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.*;
 
+import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
 import java.util.List;
 
@@ -20,14 +23,14 @@ public class FormClass implements IsResource, FormElementContainer {
     /**
      * Because FormClasses are themselves FormInstances, they have a class id of their own
      */
-    public static final ResourceId CLASS_ID = ResourceId.create("_class");
+    public static final ResourceId CLASS_ID = ResourceId.valueOf("_class");
 
     /**
      * Instances of FormClass have one FormField: a label, which has its own
      * FormField id. It is defined at the application level to be a subproperty of
-     * {@code _label}
-     */
-    public static final ResourceId LABEL_FIELD_ID = ResourceId.create("_class_label");
+                                     * {@code _label}
+                                     */
+    public static final String LABEL_FIELD_ID = "_class_label";
 
 
     @Nonnull
@@ -37,20 +40,10 @@ public class FormClass implements IsResource, FormElementContainer {
     private String label;
     private String description;
     private final List<FormElement> elements = Lists.newArrayList();
-    private int cacheId;
 
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
         this.id = id;
-    }
-
-    public FormClass copy() {
-        final FormClass copy = new FormClass(this.getId());
-        copy.setOwnerId(this.getOwnerId());
-        copy.getElements().addAll(this.getElements());
-        copy.setLabel(this.getLabel());
-        copy.setCacheId(this.getCacheId());
-        return copy;
     }
 
     public ResourceId getOwnerId() {
@@ -138,17 +131,39 @@ public class FormClass implements IsResource, FormElementContainer {
 
     public List<FormField> getFields() {
         final List<FormField> fields = Lists.newArrayList();
-        collectFields(fields, getElements());
+        collectFields(fields, getElements(), new Predicate<FormElement>() {
+            @Override
+            public boolean apply(@Nullable FormElement input) {
+                return input instanceof FormField;
+            }
+        });
         return fields;
     }
 
-    private static void collectFields(List<FormField> fields, List<FormElement> elements) {
+    public List<FormSection> getSections() {
+        final List<FormSection> sections = Lists.newArrayList();
+        collectFields(sections, getElements(), new Predicate<FormElement>() {
+            @Override
+            public boolean apply(@Nullable FormElement input) {
+                return input instanceof FormSection;
+            }
+        });
+        return sections;
+
+    }
+
+    private static void collectFields(List result, List<FormElement> elements, Predicate<FormElement> predicate) {
         for (FormElement element : elements) {
+
+            if (predicate.apply(element)) {
+                result.add(element);
+            }
+
             if (element instanceof FormField) {
-                fields.add((FormField) element);
+                // do nothing
             } else if (element instanceof FormSection) {
                 final FormSection formSection = (FormSection) element;
-                collectFields(fields, formSection.getElements());
+                collectFields(result, formSection.getElements(), predicate);
             }
         }
     }
@@ -167,23 +182,16 @@ public class FormClass implements IsResource, FormElementContainer {
         return this;
     }
 
-    public FormClass insertElement(int index, FormElement element) {
-        elements.add(index, element);
-        return this;
-    }
 
-    public FormField addField(String name) {
-        FormField field = new FormField(id, name); // todo is it bug? if we call it two times we will get form field with the same id?
+    public FormField addField(ResourceId fieldId) {
+        FormField field = new FormField(fieldId);
         elements.add(field);
         return field;
     }
 
-    public int getCacheId() {
-        return cacheId;
-    }
-
-    public void setCacheId(int cacheId) {
-        this.cacheId = cacheId;
+    public FormClass insertElement(int index, FormElement element) {
+        elements.add(index, element);
+        return this;
     }
 
     @Override
@@ -193,21 +201,22 @@ public class FormClass implements IsResource, FormElementContainer {
 
     public static FormClass fromResource(Resource resource) {
         FormClass formClass = new FormClass(resource.getId());
-        formClass.setLabel(resource.getString("label"));
-        formClass.elements.addAll(fromRecords(resource.getId(), resource.getRecordList("elements")));
+        formClass.setOwnerId(resource.getOwnerId());
+        formClass.setLabel(Strings.nullToEmpty(resource.isString(LABEL_FIELD_ID)));
+        formClass.elements.addAll(fromRecords(resource.getRecordList("elements")));
         return formClass;
     }
 
-    private static List<FormElement> fromRecords(ResourceId formClassId, List<Record> elementArray) {
+    private static List<FormElement> fromRecords(List<Record> elementArray) {
         List<FormElement> elements = Lists.newArrayList();
         for(Record elementRecord : elementArray) {
-            if("section".equals(elementRecord.getString("type"))) {
-                FormSection section = new FormSection(ResourceId.create(elementRecord.getString("id")));
+            if("section".equals(elementRecord.isString("type"))) {
+                FormSection section = new FormSection(ResourceId.valueOf(elementRecord.getString("id")));
                 section.setLabel(elementRecord.getString("label"));
-                section.getElements().addAll(fromRecords(formClassId, elementRecord.getRecordList("elements")));
+                section.getElements().addAll(fromRecords(elementRecord.getRecordList("elements")));
                 elements.add(section);
             } else {
-                elements.add(FormField.fromRecord(formClassId, elementRecord));
+                elements.add(FormField.fromRecord(elementRecord));
             }
         }
         return elements;
@@ -217,7 +226,8 @@ public class FormClass implements IsResource, FormElementContainer {
         Resource resource = Resources.createResource();
         resource.setId(id);
         resource.setOwnerId(ownerId);
-        resource.set("label", label);
+        resource.set("classId", CLASS_ID);
+        resource.set(LABEL_FIELD_ID, label);
         resource.set("elements", FormElement.asRecordList(elements));
         return resource;
     }

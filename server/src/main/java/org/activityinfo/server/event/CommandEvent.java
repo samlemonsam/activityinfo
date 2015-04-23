@@ -23,11 +23,11 @@ package org.activityinfo.server.event;
  */
 
 import com.extjs.gxt.ui.client.data.RpcMap;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.SiteCommand;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.impl.ExecutionContext;
+import org.activityinfo.model.auth.AuthenticatedUser;
 
 @SuppressWarnings("rawtypes")
 public class CommandEvent {

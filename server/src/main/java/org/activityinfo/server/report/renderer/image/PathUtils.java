@@ -4,7 +4,7 @@ import com.google.code.appengine.awt.geom.GeneralPath;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.reports.content.Point;
 import org.activityinfo.server.report.generator.map.TiledMap;
 

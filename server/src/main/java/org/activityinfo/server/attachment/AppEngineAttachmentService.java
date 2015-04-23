@@ -33,7 +33,7 @@ import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import org.activityinfo.server.util.blob.BlobService;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 

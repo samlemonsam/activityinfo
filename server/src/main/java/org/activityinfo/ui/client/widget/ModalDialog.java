@@ -72,6 +72,8 @@ public class ModalDialog  {
     InlineLabel statusLabel;
 
     @UiField Button backButton;
+    @UiField
+    DivElement dialogDiv;
 
     public ModalDialog() {
         BaseStylesheet.INSTANCE.ensureInjected();
@@ -167,6 +169,10 @@ public class ModalDialog  {
     @UiHandler("cancelButton")
     public void cancelButton(ClickEvent event) {
         hide();
+    }
+
+    public DivElement getDialogDiv() {
+        return dialogDiv;
     }
 
     public FlowPanel getModalBody() {

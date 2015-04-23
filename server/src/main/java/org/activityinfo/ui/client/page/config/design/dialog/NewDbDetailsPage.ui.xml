@@ -1,0 +1,43 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+             xmlns:chzn="urn:import:com.watopi.chosen.client.gwt"
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+
+  <g:HTMLPanel width="100%" ui:field="panel" addStyleNames="form-horizontal">
+
+    <!-- Name -->
+    <f:FormGroup label="{i18n.name}" ui:field="nameField" columnLabelWidth="3"
+                 validationStateType="ERROR" validationMessage="{i18n.enterNameWelcome}" showValidationMessage="false">
+      <a:TextBox ui:field="name"/>
+    </f:FormGroup>
+
+    <!-- Description -->
+    <f:FormGroup label="{i18n.description}" ui:field="descriptionField" columnLabelWidth="3"
+                 validationStateType="ERROR" validationMessage="{i18n.enterDescriptionWelcome}" showValidationMessage="false">
+      <a:TextBox ui:field="description"/>
+    </f:FormGroup>
+
+    <!-- Country -->
+    <f:FormGroup label="{i18n.country}" ui:field="countryField"  columnLabelWidth="3"
+                 validationStateType="ERROR" validationMessage="{i18n.selectCountryWelcome}" showValidationMessage="false">
+      <chzn:ChosenListBox ui:field="country" visibleItemCount="10" multipleSelect="false"
+                          width="100%" allowSingleDeselect="true"/>
+      <a:Button style="DEFAULT" ui:field="loadCountries" text="{i18n.load}" visible="false"/>
+    </f:FormGroup>
+
+    <g:HTMLPanel ui:field="optionsContainer">
+      <f:FormGroup label="{i18n.options}" columnLabelWidth="3">
+        <a:CheckBox ui:field="copyData" text="{i18n.copyDataAsWellAsForms}" visible="false"/>
+        <a:CheckBox ui:field="copyPartners" text="{i18n.copyPartners}"/>
+        <a:CheckBox ui:field="copyUser" text="{i18n.copyUserPermissions}"/>
+      </f:FormGroup>
+    </g:HTMLPanel>
+
+  </g:HTMLPanel>
+
+</ui:UiBinder>

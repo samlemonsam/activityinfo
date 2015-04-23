@@ -1,15 +1,10 @@
 package org.activityinfo.ui.client.component.form;
 
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.LabelElement;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
+import org.activityinfo.ui.client.widget.form.FormGroup;
+import org.activityinfo.ui.client.widget.form.ValidationStateType;
 
 /**
  * Simple field container which displays the label, input, and help text in a vertical
@@ -19,42 +14,31 @@ public class VerticalFieldContainer implements FieldContainer {
 
     public static class Factory implements FieldContainerFactory {
         @Override
-        public FieldContainer createContainer(FormField field, FormFieldWidget widget) {
+        public FieldContainer createContainer(FormField field, FormFieldWidget widget, int columnWidth) {
             return new VerticalFieldContainer(field, widget);
         }
     }
 
-    interface VerticalFieldContainerUiBinder extends UiBinder<HTMLPanel, VerticalFieldContainer> {
-    }
-
-    private static VerticalFieldContainerUiBinder ourUiBinder = GWT.create(VerticalFieldContainerUiBinder.class);
-
-    private final HTMLPanel formGroup;
-
-    @UiField(provided = true)
-    FormFieldWidget fieldWidget;
-
-    @UiField
-    LabelElement label;
-
-    @UiField
-    SpanElement helpText;
-
-    @UiField
-    SpanElement validationMessage;
+    private final FormGroup formGroup;
+    private final FormField field;
+    private final FormFieldWidget fieldWidget;
 
     public VerticalFieldContainer(FormField formField, FormFieldWidget fieldWidget) {
+        this.field = formField;
         this.fieldWidget = fieldWidget;
-        formGroup = ourUiBinder.createAndBindUi(this);
+        formGroup = new FormGroup()
+                .label(formField.getLabel())
+                .description(formField.getDescription())
+                .validationStateType(ValidationStateType.ERROR)
+                .addWidget(fieldWidget);
 
-        label.setInnerText(formField.getLabel());
-
-        if(!Strings.isNullOrEmpty(formField.getDescription())) {
-            helpText.removeClassName("hide");
-            helpText.setInnerText(formField.getDescription());
-        }
     }
 
+
+    @Override
+    public FormField getField() {
+        return field;
+    }
 
     @Override
     public FormFieldWidget getFieldWidget() {
@@ -63,15 +47,12 @@ public class VerticalFieldContainer implements FieldContainer {
 
     @Override
     public void setValid() {
-        formGroup.removeStyleName("has-error");
-        validationMessage.addClassName("hide");
+        formGroup.showValidationMessage(false);
     }
 
     @Override
     public void setInvalid(String message) {
-        formGroup.addStyleName("has-error");
-        validationMessage.removeClassName("hide");
-        validationMessage.setInnerText(message);
+        formGroup.showValidationMessage(message);
     }
 
     @Override

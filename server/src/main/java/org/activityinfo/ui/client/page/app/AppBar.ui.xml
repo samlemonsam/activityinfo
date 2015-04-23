@@ -28,9 +28,7 @@
   <ui:with field="clientContext" type="org.activityinfo.ui.client.ClientContext"/>
 
   <ui:data field="backgroundImage" src="resources/background.gif"/>
-  <ui:data field="gearImage" src="resources/gear.png"></ui:data>
-  <ui:data field="helpImage" src="resources/help.png"></ui:data>
-  <ui:data field="searchImage" src="resources/search.png"></ui:data>
+  <ui:data field="gearImage" src="resources/gear.png"/>
 
   <ui:style>
     @url backgroundUrl backgroundImage;
@@ -39,8 +37,7 @@
     @url searchUrl searchImage;
 
     .bar {
-      background: #dfe8f6 backgroundUrl repeat-x top;
-      background-color: #dfe8f6;
+      background: #dfe8f6 repeat-x top;
       position: relative;
     }
 
@@ -72,8 +69,7 @@
     .icon {
       width: 16px;
       height: 16px;
-      background-position: center bottom;
-      background-repeat: no-repeat;
+      background: no-repeat center bottom;
       padding-top: 12px;
       float: right;
       margin-right: 15px;
@@ -84,15 +80,6 @@
       background-image: gearUrl;
       width: 17px;
     }
-
-    .helpIcon {
-      background-image: helpUrl;
-    }
-
-    .searchIcon {
-      background-image: searchUrl;
-    }
-
 
   </ui:style>
   <g:LayoutPanel styleName="{style.bar}">
@@ -106,10 +93,6 @@
         <b:SectionTabStrip ui:field="sectionTabStrip"/>
         <g:Label styleName="{style.icon} {style.settingsIcon}"
                  ui:field="settingsButton"/>
-        <g:Label styleName="{style.icon} {style.helpIcon}"
-                 ui:field="helpButton"/>
-        <g:Label styleName="{style.icon} {style.searchIcon}"
-                 ui:field="searchButton"/>
 
       </g:HTMLPanel>
     </g:layer>

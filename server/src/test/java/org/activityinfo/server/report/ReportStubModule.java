@@ -24,7 +24,7 @@ package org.activityinfo.server.report;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.report.generator.MapIconPath;
 import org.activityinfo.server.report.output.LocalStorageProvider;
 import org.activityinfo.server.report.output.StorageProvider;

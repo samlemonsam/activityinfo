@@ -13,8 +13,10 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.GetActivityForms;
 import org.activityinfo.legacy.shared.command.GetAttributeGroupsDimension;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.AttributeGroupResult;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
@@ -67,7 +69,7 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
 
             Log.debug("AttributeGroupFilterWidgets called for filter " + filter);
 
-            // retrieve all attributegroups for the current filter
+            // retrieve all attribute groups for the current filter
             service.execute(new GetAttributeGroupsDimension(value), new AsyncCallback<AttributeGroupResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -84,21 +86,21 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
 
                         Log.debug("AttributeGroupFilterWidgets drawing widgets for result: " + attributeGroupResult);
 
-                        service.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+                        service.execute(new GetActivityForms(filter), new AsyncCallback<ActivityFormResults>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 GWT.log("Failed to load schema", caught);
                             }
 
                             @Override
-                            public void onSuccess(final SchemaDTO schema) {
+                            public void onSuccess(final ActivityFormResults schema) {
                                 // clean up old widgets
                                 for (AttributeGroupFilterWidget widget : widgets) {
                                     panel.remove(widget);
                                 }
                                 duplicates.clear();
 
-                                // decorate resultlist from schema
+                                // decorate result list from schema
                                 List<AttributeGroupDTO> pivotData = attributeGroupResult.getData();
                                 groups = new ArrayList<AttributeGroupDTO>();
                                 if (CollectionUtil.isNotEmpty(pivotData)) {

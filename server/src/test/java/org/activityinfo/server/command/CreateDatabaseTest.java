@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
@@ -58,6 +59,7 @@ public class CreateDatabaseTest extends CommandTestCase {
         assertEquals(db.getFullName(), newdb.getFullName());
         assertNotNull(newdb.getCountry());
         assertEquals("Alex", newdb.getOwnerName());
+        assertThat(newdb.getPartners(), hasSize(1));
     }
 
     @Test

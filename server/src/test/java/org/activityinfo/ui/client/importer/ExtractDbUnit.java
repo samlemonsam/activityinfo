@@ -29,21 +29,21 @@ public class ExtractDbUnit {
 //        partialDataSet.addTable("userlogin", "select * from userlogin where userid in " +
 //                "(select owneruserid from userdatabase where databaseid=1100)");
 
-        partialDataSet.addTable("country", "select * from country where countryid=451");
-        partialDataSet.addTable("adminlevel", "select * from adminlevel where countryid=451");
-        partialDataSet.addTable("adminentity", "select AdminEntityId, AdminEntityParentId, AdminLevelId, Name" +
-                " from adminentity where adminlevelid in " +
-                "(select adminlevelid from adminlevel where CountryId=451)");
-        partialDataSet.addTable("locationtype", "select * from locationtype" +
-                " where countryid = 451 and BoundAdminLevelId is null");
-//        partialDataSet.addTable("location", "select * from location where locationtypeid in " +
-//                "(select locationtypeid from locationtype where countryid = 451 and BoundAdminLevelId is null)");
-//        partialDataSet.addTable("locationadminlink", "select * from locationadminlink where locationid in " +
-//                "(select locationid from location where LocationTypeID in " +
-//                "(select locationtypeid from locationtype where countryid = 451 and BoundAdminLevelId is null))");
+        partialDataSet.addTable("country", "select * from country where countryid=291");
+        partialDataSet.addTable("locationtype", "select * from locationtype where locationtypeid = 50573");
+        partialDataSet.addTable("location", "select * from location where locationtypeid = 50573");
+        partialDataSet.addTable("userdatabase", "select * from userdatabase where databaseid=1470");
+        partialDataSet.addTable("partnerindatabase", "select * from partnerindatabase where databaseid=1470");
+        partialDataSet.addTable("partner", "select * from partner where partnerid in (select partnerid from partnerindatabase where databaseid=1470)");
+        partialDataSet.addTable("activity", "select * from activity where activityId=11218");
+        partialDataSet.addTable("indicator", "select * from indicator where activityId=11218");
+        partialDataSet.addTable("attributegroupinactivity", "select * from attributegroupinactivity where activityId=11218");
+        partialDataSet.addTable("attributegroup", "select * from attributegroup where attributegroupid in" +
+                " (select attributegroupid from attributegroupinactivity where activityId=11218)");
+        partialDataSet.addTable("attribute", "select * from attribute where attributegroupid in" +
+                " (select attributegroupid from attributegroupinactivity where activityId=11218)");
 
-
-        FlatXmlDataSet.write(partialDataSet, new FileOutputStream("src/test/resources/dbunit/somalia-admin.db.xml"));
+        FlatXmlDataSet.write(partialDataSet, new FileOutputStream("src/test/resources/dbunit/chad-form.db.xml"));
 
     }
 }

@@ -23,7 +23,7 @@ package org.activityinfo.server.command;
  */
 
 import org.activityinfo.legacy.shared.model.LocationDTO;
-import org.activityinfo.legacy.client.KeyGenerator;
+import org.activityinfo.model.legacy.KeyGenerator;
 
 public class LocationDTOs {
     public static LocationDTO newLocation() {

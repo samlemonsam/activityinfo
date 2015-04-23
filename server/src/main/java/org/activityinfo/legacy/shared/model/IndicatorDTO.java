@@ -24,13 +24,15 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.NarrativeType;
-import org.activityinfo.model.type.TextType;
+import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -55,8 +57,8 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     public static final int MAX_LIST_HEADER_LENGTH = 29;
     public static final int MAX_CATEGORY_LENGTH = 50;
 
-    // ensure that serializer/deserializer is generated for FormFieldType
-    private FieldTypeClass type;
+    private int databaseId;
+    private String databaseName;
 
     public IndicatorDTO() {
         super();
@@ -94,6 +96,23 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("id", id);
     }
 
+
+    public int getDatabaseId() {
+        return databaseId;
+    }
+
+    public void setDatabaseId(int databaseId) {
+        this.databaseId = databaseId;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
     /**
      * Sets the Indicator's name
      */
@@ -112,7 +131,6 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     /**
      * Sets the Indicator's units, for example, "household" or "%"
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
     public void setUnits(String units) {
         set("units", units);
     }
@@ -168,6 +186,15 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("expression", expression);
     }
 
+    @JsonProperty("relevanceCondition") @JsonView(DTOViews.Schema.class)
+    public String getSkipExpression() {
+        return get("skipExpression");
+    }
+
+    public void setSkipExpression(String skipExpression) {
+        set("skipExpression", skipExpression);
+    }
+
     @JsonProperty("code") @JsonView(DTOViews.Schema.class)
     public String getNameInExpression() {
         return get("nameInExpression");
@@ -193,11 +220,17 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public FieldTypeClass getType() {
-        return get("type");
+        return TypeRegistry.get().getTypeClass(getTypeId());
     }
 
     public void setType(FieldTypeClass type) {
-        set("type", type);
+        set("type", type.getId());
+    }
+
+    public void setTypeId(String typeId) { set("type", typeId); }
+
+    private String getTypeId() {
+        return get("type", QuantityType.TYPE_CLASS.getId());
     }
 
     public void setMandatory(boolean mandatory) {
@@ -334,25 +367,29 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         FormField field = new FormField(CuidAdapter.indicatorField(getId()));
         field.setLabel(getName());
         field.setDescription(getDescription());
-        field.setCalculation(getExpression());
-        field.setNameInExpression(getNameInExpression());
-        field.setCalculateAutomatically(getCalculatedAutomatically());
+        field.setRelevanceConditionExpression(getSkipExpression());
 
-        if(getType() == TextType.INSTANCE) {
-            field.setType(TextType.INSTANCE);
+        String code = getNameInExpression();
+        if(!Strings.isNullOrEmpty(code)) {
+            field.setCode(code);
+        }
 
-        } else if(getType() == NarrativeType.INSTANCE) {
-            field.setType(NarrativeType.INSTANCE);
+        if (isCalculated()) {
+            field.setType(new CalculatedFieldType(getExpression()));
 
-        } else {
+        } else if (Strings.isNullOrEmpty(getTypeId()) || getTypeId().equals(QuantityType.TYPE_CLASS.getId())) {
             String units = getUnits();
             if(Strings.isNullOrEmpty(units)) {
                 units = "units";
             }
             field.setType(new QuantityType().setUnits(units));
+
+        } else {
+            field.setType(getType().createType());
         }
         return field;
     }
+
 
     public void setSortOrder(int sortOrder) {
         set("sortOrder", sortOrder);

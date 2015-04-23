@@ -30,6 +30,7 @@ import java.util.Date;
 
 @Entity
 public class LockedPeriod implements Serializable, ReallyDeleteable {
+
     private Date fromDate;
     private Date toDate;
     private String name;
@@ -38,6 +39,19 @@ public class LockedPeriod implements Serializable, ReallyDeleteable {
     private Project project;
     private Activity activity;
     private boolean enabled;
+
+    public LockedPeriod() {
+    }
+
+    public LockedPeriod(LockedPeriod lockedPeriod) {
+        this.fromDate = lockedPeriod.fromDate;
+        this.toDate = lockedPeriod.toDate;
+        this.name = lockedPeriod.name;
+        this.userDatabase = lockedPeriod.userDatabase;
+        this.project = lockedPeriod.project;
+        this.activity = lockedPeriod.activity;
+        this.enabled = lockedPeriod.enabled;
+    }
 
     @Column(nullable = false) @Temporal(TemporalType.DATE)
     public Date getFromDate() {

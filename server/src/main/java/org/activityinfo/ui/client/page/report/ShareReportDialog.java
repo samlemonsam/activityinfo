@@ -38,6 +38,7 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
+import org.activityinfo.legacy.shared.command.result.IndicatorResult;
 import org.activityinfo.legacy.shared.command.result.ReportVisibilityResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
@@ -128,7 +129,7 @@ public class ShareReportDialog extends Dialog {
 
         BatchCommand batch = new BatchCommand();
         batch.add(new GetReportModel(metadata.getId()));
-        batch.add(new GetSchema());
+        batch.add(new GetIndicators(currentReport.getIndicators()));
         batch.add(new GetReportVisibility(metadata.getId()));
 
         dispatcher.execute(batch,
@@ -146,7 +147,7 @@ public class ShareReportDialog extends Dialog {
 
                         currentReport = ((ReportDTO) batch.getResult(0)).getReport();
 
-                        populateGrid((SchemaDTO) batch.getResult(1), (ReportVisibilityResult) batch.getResult(2));
+                        populateGrid((IndicatorResult) batch.getResult(1), (ReportVisibilityResult) batch.getResult(2));
                     }
                 });
     }
@@ -157,10 +158,9 @@ public class ShareReportDialog extends Dialog {
         this.currentReport = report;
 
         // we need to combine the databases which already have visiblity with
-        // those
-        // that could potentially be added
+        // those that could potentially be added
         BatchCommand batch = new BatchCommand();
-        batch.add(new GetSchema());
+        batch.add(new GetIndicators(currentReport.getIndicators()));
         batch.add(new GetReportVisibility(currentReport.getId()));
 
         dispatcher.execute(batch,
@@ -175,30 +175,28 @@ public class ShareReportDialog extends Dialog {
 
                     @Override
                     public void onSuccess(BatchResult batch) {
-                        populateGrid((SchemaDTO) batch.getResult(0), (ReportVisibilityResult) batch.getResult(1));
+                        populateGrid((IndicatorResult) batch.getResult(0), (ReportVisibilityResult) batch.getResult(1));
                     }
                 });
     }
 
-    private void populateGrid(SchemaDTO schema, ReportVisibilityResult visibility) {
+
+    private void populateGrid(IndicatorResult indicators, ReportVisibilityResult visibility) {
         gridStore.removeAll();
-        Set<Integer> indicators = currentReport.getIndicators();
         Map<Integer, ReportVisibilityDTO> databases = Maps.newHashMap();
 
         for (ReportVisibilityDTO model : visibility.getList()) {
             databases.put(model.getDatabaseId(), model);
         }
 
-        for (UserDatabaseDTO db : schema.getDatabases()) {
-            if (hasAny(db, indicators)) {
-                if (databases.containsKey(db.getId())) {
-                    gridStore.add(databases.get(db.getId()));
-                } else {
-                    ReportVisibilityDTO model = new ReportVisibilityDTO();
-                    model.setDatabaseId(db.getId());
-                    model.setDatabaseName(db.getName());
-                    gridStore.add(model);
-                }
+        for (IndicatorDTO indicator : indicators.getIndicators()) {
+            if (databases.containsKey(indicator.getDatabaseId())) {
+                gridStore.add(databases.get(indicator.getDatabaseId()));
+            } else {
+                ReportVisibilityDTO model = new ReportVisibilityDTO();
+                model.setDatabaseId(indicator.getDatabaseId());
+                model.setDatabaseName(indicator.getDatabaseName());
+                gridStore.add(model);
             }
         }
 
@@ -213,17 +211,6 @@ public class ShareReportDialog extends Dialog {
                         }
                     });
         }
-    }
-
-    protected boolean hasAny(UserDatabaseDTO db, Set<Integer> indicators) {
-        for (ActivityDTO activity : db.getActivities()) {
-            for (IndicatorDTO indicator : activity.getIndicators()) {
-                if (indicators.contains(indicator.getId())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override

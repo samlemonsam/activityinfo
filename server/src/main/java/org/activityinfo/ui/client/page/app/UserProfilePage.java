@@ -15,11 +15,11 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.GetUserProfile;
 import org.activityinfo.legacy.shared.command.UpdateUserProfile;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.UserProfileDTO;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
 import org.activityinfo.ui.client.page.*;
 

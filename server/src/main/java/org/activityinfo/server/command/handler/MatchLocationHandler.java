@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import org.activityinfo.legacy.client.KeyGenerator;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.legacy.shared.command.MatchLocation;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;

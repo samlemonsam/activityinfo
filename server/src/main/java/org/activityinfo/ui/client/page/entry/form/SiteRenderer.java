@@ -43,7 +43,7 @@ public class SiteRenderer {
         this.indicatorValueFormatter = indicatorValueFormatter;
     }
 
-    public String renderLocation(SiteDTO site, ActivityDTO activity) {
+    public String renderLocation(SiteDTO site, ActivityFormDTO activity) {
         StringBuilder html = new StringBuilder();
 
         html.append("<table cellspacing='0'>");
@@ -71,7 +71,7 @@ public class SiteRenderer {
         return html.toString();
     }
 
-    public String renderSite(SiteDTO site, ActivityDTO activity, boolean renderComments) {
+    public String renderSite(SiteDTO site, ActivityFormDTO activity, boolean renderComments) {
         StringBuilder html = new StringBuilder();
 
         if (renderComments && site.getComments() != null) {
@@ -86,14 +86,14 @@ public class SiteRenderer {
 
         renderAttributes(html, site, activity);
 
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             html.append(renderIndicators(site, activity));
         }
 
         return html.toString();
     }
 
-    private String renderIndicators(SiteDTO site, ActivityDTO activity) {
+    private String renderIndicators(SiteDTO site, ActivityFormDTO activity) {
         StringBuilder html = new StringBuilder();
         html.append("<br/><p><span class='groupName'>");
         html.append(I18N.CONSTANTS.indicators());
@@ -198,7 +198,7 @@ public class SiteRenderer {
         return "-";
     }
 
-    protected void renderAttributes(StringBuilder html, SiteDTO site, ActivityDTO activity) {
+    protected void renderAttributes(StringBuilder html, SiteDTO site, ActivityFormDTO activity) {
         if (site.hasAttributeDisplayMap()) {
             for (Entry<String, List<String>> entry : site.getAttributeDisplayMap().entrySet()) {
                 renderAttribute(html, entry.getKey(), entry.getValue());

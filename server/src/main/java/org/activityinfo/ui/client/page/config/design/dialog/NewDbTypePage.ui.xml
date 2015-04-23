@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+
+  <g:HTMLPanel width="100%" ui:field="panel">
+
+    <!-- Empty db -->
+    <a:RadioButton name="group" ui:field="newDatabase" checked="true">
+      <ui:text from='{i18n.createEmptyDatabase}'/>
+      <span class="help-block">
+        <ui:text from='{i18n.createEmptyDatabaseExplanation}'/>
+      </span>
+    </a:RadioButton>
+
+    <!-- Copy of existing db -->
+    <a:RadioButton name="group" ui:field="copyDatabase">
+      <ui:text from='{i18n.copyDatabase}'/>
+      <span class="help-block">
+        <ui:text from='{i18n.copyDatabaseExplanation}'/>
+      </span>
+    </a:RadioButton>
+
+  </g:HTMLPanel>
+
+</ui:UiBinder>

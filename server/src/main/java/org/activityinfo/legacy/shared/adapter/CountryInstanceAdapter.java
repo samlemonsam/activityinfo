@@ -2,9 +2,10 @@ package org.activityinfo.legacy.shared.adapter;
 
 
 import com.google.common.base.Function;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.ApplicationProperties;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 
 import javax.annotation.Nullable;

@@ -32,13 +32,13 @@ import org.activityinfo.core.shared.Pair;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.FormClassSet;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 
 import java.util.List;
 import java.util.Map;
@@ -97,7 +97,7 @@ public class HierarchyClassImporter implements FieldImporter {
             ColumnAccessor columnAccessor = sourceColumns.get(i);
             if (!columnAccessor.isMissing(row)) {
                 FieldImporterColumn importedColumn = getImportedColumn(columnAccessor);
-                ResourceId targetSiteId = ResourceId.create(importedColumn.getTarget().getSite().asString());
+                ResourceId targetSiteId = ResourceId.valueOf(importedColumn.getTarget().getSite().asString());
                 if (targetSiteId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
                     final int levelId = CuidAdapter.getBlock(targetSiteId, 0);
                     // todo : recreation of admin level cuid seems to be error prone, check later !

@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
@@ -8,13 +9,23 @@ import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.IdCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
+import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
+import org.activityinfo.legacy.shared.command.GetSites;
+import org.activityinfo.legacy.shared.command.UpdateFormClass;
+import org.activityinfo.legacy.shared.command.result.SiteResult;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +50,53 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<FormInstance> getFormInstance(ResourceId instanceId) {
+        if(instanceId.getDomain() == CuidAdapter.SITE_DOMAIN) {
+            final Promise<SiteResult> site = dispatcher.execute(GetSites.byId(CuidAdapter.getLegacyIdFromCuid(instanceId)));
+            final Promise<ActivityFormDTO> form = site.join(new Function<SiteResult, Promise<ActivityFormDTO>>() {
+                @Nullable
+                @Override
+                public Promise<ActivityFormDTO> apply(@Nullable SiteResult input) {
+                    if (input != null) {
+                        List<SiteDTO> data = input.getData();
+                        if (data != null && !data.isEmpty()) {
+                            SiteDTO siteDTO = data.get(0);
+                            if (siteDTO != null) {
+                                return dispatcher.execute(new GetActivityForm(siteDTO.getActivityId()));
+                            }
+                        }
+                    }
+
+                    return Promise.resolved(null);
+                }
+            });
+            return Promise.waitAll(site, form).then(new Function<Void, FormInstance>() {
+                @Nullable
+                @Override
+                public FormInstance apply(@Nullable Void input) {
+                    if (form != null) {
+                        ActivityFormDTO activityFormDTO = form.get();
+                        if (activityFormDTO != null) {
+                            SiteBinding binding = new SiteBindingFactory().apply(activityFormDTO);
+                            if (site != null) {
+                                SiteResult siteResult = site.get();
+                                if (siteResult != null) {
+                                    List<SiteDTO> data = siteResult.getData();
+                                    if (data != null && !data.isEmpty()) {
+                                        SiteDTO siteDTO = data.get(0);
+                                        if (siteDTO != null) {
+                                            return binding.newInstance(siteDTO);
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return null;
+                }
+            });
+        }
         return queryInstances(new IdCriteria(instanceId)).then(new SelectSingle());
     }
 
@@ -53,7 +111,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
                 return new LocationPersister(dispatcher, instance).persist();
             }
         } else if(resource instanceof FormClass) {
-            return new FormPersister(dispatcher, (FormClass)resource).persist();
+            return dispatcher.execute(new UpdateFormClass((FormClass) resource)).thenDiscardResult();
         }
         return Promise.rejected(new UnsupportedOperationException());
     }

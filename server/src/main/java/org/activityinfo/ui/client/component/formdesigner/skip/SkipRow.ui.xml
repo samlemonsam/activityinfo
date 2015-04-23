@@ -1,0 +1,32 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+
+  <g:HTMLPanel ui:field="skipGroup">
+    <div class="row form-group" style="margin-left: 0px; margin-right: 0px">
+      <div class="col-xs-2">
+        <g:ListBox addStyleNames="form-control" ui:field="joinFunction"/>
+      </div>
+      <div class="col-xs-4">
+        <g:ListBox addStyleNames="form-control" ui:field="formfield"/>
+      </div>
+      <div class="col-xs-2">
+        <g:ListBox addStyleNames="form-control" ui:field="function"/>
+      </div>
+      <g:HTMLPanel addStyleNames="col-xs-3" ui:field="valueContainer"/>
+      <div class="col-xs-1" style="padding-left: 0px">
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="addButton">
+          <span class="{icons.add}"/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton">
+          <span class="{icons.remove}"/>
+        </g:Button>
+      </div>
+    </div>
+  </g:HTMLPanel>
+
+</ui:UiBinder>

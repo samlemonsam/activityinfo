@@ -22,7 +22,7 @@ package org.activityinfo.server.report.renderer.ppt;
  * #L%
  */
 
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.BaseMap;
 import org.activityinfo.legacy.shared.model.TileBaseMap;
 import org.activityinfo.legacy.shared.reports.content.GoogleBaseMap;

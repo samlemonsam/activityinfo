@@ -37,6 +37,7 @@
   <inherits name="com.google.gwt.inject.Inject"/>
   <inherits name="com.extjs.gxt.charts.Chart"/>
   <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
+  <inherits name='com.watopi.chosen.Chosen'/>
 
   <inherits name="com.google.common.collect.Collect"/>
 
@@ -47,6 +48,7 @@
 
   <inherits name="org.activityinfo.i18n.I18n"/>
   <inherits name="org.activityinfo.model.Model"/>
+  <inherits name="org.activityinfo.service.Service"/>
   <inherits name="org.activityinfo.legacy.Legacy"/>
 
   <set-property name="gwt.logging.popupHandler" value="DISABLED"/>

@@ -1,6 +1,6 @@
 package org.activityinfo.server.endpoint.export;
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
@@ -29,22 +29,23 @@ public class SiteExporterTest {
         somalia.getLocationTypes().add(locationType);
 
         UserDatabaseDTO syli = new UserDatabaseDTO();
+        syli.setId(444);
         syli.setName("SYLI");
         syli.setCountry(somalia);
 
-        ActivityDTO activity = new ActivityDTO();
+        ActivityFormDTO activity = new ActivityFormDTO();
         activity.setId(1);
         activity.setDatabase(syli);
         activity.setName("Construction/Rehabilitation of Sec. Schools");
         activity.setLocationType(locationType);
 
-        ActivityDTO activity2 = new ActivityDTO();
+        ActivityFormDTO activity2 = new ActivityFormDTO();
         activity2.setId(2);
         activity2.setDatabase(syli);
         activity2.setName("Construction/Rehabilitation of Primary Schools");
         activity2.setLocationType(locationType);
 
-        ActivityDTO activity3 = new ActivityDTO();
+        ActivityFormDTO activity3 = new ActivityFormDTO();
         activity3.setId(3);
         activity3.setDatabase(syli);
         activity3.setName("Construction Rehabil (2)");

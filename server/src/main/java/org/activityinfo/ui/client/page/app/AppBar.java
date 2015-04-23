@@ -45,10 +45,6 @@ public class AppBar extends Composite {
 
     @UiField Label logo;
 
-    @UiField Label settingsButton;
-
-    @UiField Label searchButton;
-
     private SettingsPopup settingsPopup;
 
     private EventBus eventBus;

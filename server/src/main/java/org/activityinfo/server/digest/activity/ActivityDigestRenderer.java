@@ -1,6 +1,6 @@
 package org.activityinfo.server.digest.activity;
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.digest.DigestModel;
@@ -44,16 +44,16 @@ public class ActivityDigestRenderer implements DigestRenderer {
 
     private void renderHeader(StringBuilder html, ActivityDigestModel model) {
         html.append("<div class='act-header'>");
-        html.append(I18N.MESSAGES.activityDigestIntro(model.getDays()));
+        html.append(I18N.MESSAGES.activityDigestIntro(model.getUserDigest().getDays()));
         html.append("<br/>");
-        html.append(I18N.MESSAGES.digestUnsubscribe());
+        html.append(I18N.MESSAGES.digestUnsubscribe(model.getUserDigest().getUnsubscribeLink()));
         html.append("</div>");
     }
 
     private void renderActiveDatabases(StringBuilder html, ActivityDigestModel model) throws IOException {
         html.append("<div class='act-active'>");
         html.append("<table class='act-data' border='0' cellpadding='0' cellspacing='0' style='width:");
-        html.append(HEADERCELL_WIDTH + SPACERCELL_WIDTH + (model.getDays() * GRAPHCELL_WIDTH));
+        html.append(HEADERCELL_WIDTH + SPACERCELL_WIDTH + (model.getUserDigest().getDays() * GRAPHCELL_WIDTH));
         html.append("px; border-collapse:collapse;'>");
 
         renderTableHeader(html, model);
@@ -71,7 +71,7 @@ public class ActivityDigestRenderer implements DigestRenderer {
         html.append("<tr>");
         html.append("<th style='width:").append(HEADERCELL_WIDTH).append("px;'>&nbsp;</th>");
         html.append("<th style='width:").append(SPACERCELL_WIDTH).append("px;'>&nbsp;</th>");
-        for (int i = 0; i < model.getDays(); i++) {
+        for (int i = 0; i < model.getUserDigest().getDays(); i++) {
             html.append("<th style='width:").append(GRAPHCELL_WIDTH).append("px;'>&nbsp;</th>");
         }
         html.append("</tr>");
@@ -79,7 +79,7 @@ public class ActivityDigestRenderer implements DigestRenderer {
 
     private void renderActiveDatabase(StringBuilder html, DatabaseModel activeDatabase) {
 
-        renderDatabaseRow(html, 2 + activeDatabase.getModel().getDays(), activeDatabase.getName());
+        renderDatabaseRow(html, 2 + activeDatabase.getModel().getUserDigest().getDays(), activeDatabase.getName());
 
         renderUserRow(html, activeDatabase.getOwnerActivityMap());
 
@@ -106,7 +106,7 @@ public class ActivityDigestRenderer implements DigestRenderer {
         if (partnerModel.hasActivity() || RENDER_INACTIVE_ROWS) {
             // spacer
             html.append("<tr><td class='act-partner-spacer' colspan='");
-            html.append(2 + partnerModel.getDatabaseModel().getModel().getDays());
+            html.append(2 + partnerModel.getDatabaseModel().getModel().getUserDigest().getDays());
             html.append("' style='height:8px'>");
             html.append("</td></tr>");
 
@@ -182,8 +182,8 @@ public class ActivityDigestRenderer implements DigestRenderer {
     }
 
     private String determineTitle(DatabaseModel databaseModel, int updates, int dayIndex) {
-        Date today = databaseModel.getModel().getDate();
-        int totalDays = databaseModel.getModel().getDays();
+        Date today = databaseModel.getModel().getUserDigest().getDate();
+        int totalDays = databaseModel.getModel().getUserDigest().getDays();
         Date date = DateCalc.daysAgo(today, (totalDays - dayIndex - 1));
         return I18N.MESSAGES.activityDigestGraphTooltip(updates, date);
     }
@@ -192,7 +192,7 @@ public class ActivityDigestRenderer implements DigestRenderer {
         Collection<DatabaseModel> inactiveDatabases = model.getInactiveDatabases();
         if (!inactiveDatabases.isEmpty()) {
             html.append("<div class='act-inactive' style='margin-top:35px;'>");
-            html.append(I18N.MESSAGES.activityDigestInactiveDatabases(model.getDays()));
+            html.append(I18N.MESSAGES.activityDigestInactiveDatabases(model.getUserDigest().getDays()));
             html.append("<br>");
 
             html.append("<table class='act-data' border='0' cellpadding='0' cellspacing='0' ");

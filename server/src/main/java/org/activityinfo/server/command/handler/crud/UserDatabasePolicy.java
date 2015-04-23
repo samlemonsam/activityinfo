@@ -23,7 +23,10 @@ package org.activityinfo.server.command.handler.crud;
  */
 
 import com.google.inject.Inject;
+import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.server.command.handler.AddPartnerHandler;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
@@ -58,13 +61,28 @@ public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
 
         databaseDAO.persist(database);
 
+        addDefaultPartner(database.getId(), user);
+
         return database.getId();
+    }
+
+    private void addDefaultPartner(int databaseId, User user) {
+        PartnerDTO partner = new PartnerDTO();
+        partner.setName("Default");
+
+        AddPartner command = new AddPartner(databaseId, partner);
+
+        new AddPartnerHandler(em).execute(command, user);
+    }
+
+    public UserDatabase findById(int dbId) {
+        return databaseDAO.findById(dbId);
     }
 
     private Country findCountry(PropertyMap properties) {
         int countryId;
         if (properties.containsKey("countryId")) {
-            countryId = (Integer) properties.get("countryId");
+            countryId = properties.get("countryId");
         } else {
             // this was the default
             countryId = 1;

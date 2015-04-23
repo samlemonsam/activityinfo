@@ -27,8 +27,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.page.entry.grouping.AdminGroupingModel;
@@ -50,30 +51,41 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                   final GroupingModel grouping,
                                   final AsyncCallback<ColumnModel> callback) {
 
-        dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(SchemaDTO result) {
-                if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Activity)) {
-                    ActivityDTO singleActivity = result.getActivityById(filter.getRestrictedCategory(DimensionType
-                            .Activity));
-                    callback.onSuccess(forSingleActivity(grouping, singleActivity));
-
-                } else if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
-                    UserDatabaseDTO singleDatabase = result.getDatabaseById(filter.getRestrictedCategory
-                            (DimensionType.Database));
-                    callback.onSuccess(forSingleDatabase(grouping, singleDatabase));
-
-                } else {
-                    callback.onSuccess(forMultipleDatabases(grouping, result));
+        if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Activity)) {
+            final int activityId = filter.getRestrictedCategory(DimensionType.Activity);
+            dispatcher.execute(new GetActivityForm(activityId)).then(new AsyncCallback<ActivityFormDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
                 }
-            }
-        });
+
+                @Override
+                public void onSuccess(ActivityFormDTO result) {
+                    callback.onSuccess(forSingleActivity(grouping, result));
+                }
+            });
+
+        } else {
+            dispatcher.execute(new GetSchema()).then(new AsyncCallback<SchemaDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
+                }
+
+                @Override
+                public void onSuccess(SchemaDTO result) {
+
+                    if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
+
+                        UserDatabaseDTO singleDatabase = result.getDatabaseById(filter.getRestrictedCategory(DimensionType.Database));
+                        callback.onSuccess(forSingleDatabase(grouping, singleDatabase));
+
+                    } else {
+                        callback.onSuccess(forMultipleDatabases(grouping, result));
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -81,7 +93,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
      *
      * @param activity
      */
-    private ColumnModel forSingleActivity(GroupingModel grouping, ActivityDTO activity) {
+    private ColumnModel forSingleActivity(GroupingModel grouping, ActivityFormDTO activity) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
                                            .maybeAddLockColumn(activity)

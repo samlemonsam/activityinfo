@@ -31,6 +31,14 @@ public final class Resource extends PropertyBag<Resource> {
     Resource() {
     }
 
+    public Resource copy() {
+        Resource copy = new Resource();
+        copy.id = this.id;
+        copy.owner = this.owner;
+        copy.getProperties().putAll(this.getProperties());
+        return copy;
+    }
+
     /**
      * Returns the Resource's globally-unique ID.
      *
@@ -56,7 +64,7 @@ public final class Resource extends PropertyBag<Resource> {
         if(id == null) {
             throw new NullPointerException("id");
         }
-        this.id = ResourceId.create(id);
+        this.id = ResourceId.valueOf(id);
         return this;
     }
 
@@ -86,7 +94,7 @@ public final class Resource extends PropertyBag<Resource> {
         if(owningResourceId == null) {
             throw new NullPointerException("owner");
         }
-        this.owner = ResourceId.create(owningResourceId);
+        this.owner = ResourceId.valueOf(owningResourceId);
         return this;
     }
 

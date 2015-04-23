@@ -15,7 +15,7 @@ import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;

@@ -1,30 +1,42 @@
 package org.activityinfo.server.endpoint.rest;
 
 
+import org.activityinfo.legacy.shared.command.GetActivityForm;
+import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.server.command.DispatcherSync;
 
 public class SchemaCsvWriter {
 
     private final StringBuilder csv = new StringBuilder();
+    private final DispatcherSync dispatcher;
 
-    public void write(UserDatabaseDTO db) {
+    public SchemaCsvWriter(DispatcherSync dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    public void write(int databaseId) {
+
+        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+
         writeHeaders();
 
         for (ActivityDTO activity : db.getActivities()) {
-            writeActivity(activity);
+            writeActivity(dispatcher.execute(new GetActivityForm(activity.getId())));
         }
 
     }
 
-    private void writeActivity(ActivityDTO activity) {
+    private void writeActivity(ActivityFormDTO activity) {
 
+        ActivityFormDTO form = dispatcher.execute(new GetActivityForm(activity.getId()));
 
-        for (IndicatorDTO indicator : activity.getIndicators()) {
+        for (IndicatorDTO indicator : form.getIndicators()) {
             writeElementLine(activity, indicator);
 
         }
 
-        for (AttributeGroupDTO group : activity.getAttributeGroups()) {
+        for (AttributeGroupDTO group : form.getAttributeGroups()) {
             for (AttributeDTO attrib : group.getAttributes()) {
                 writeElementLine(activity, group, attrib);
             }
@@ -59,7 +71,7 @@ public class SchemaCsvWriter {
                 "AttributeValue");
     }
 
-    private void writeElementLine(ActivityDTO activity, IndicatorDTO indicator) {
+    private void writeElementLine(ActivityFormDTO activity, IndicatorDTO indicator) {
         writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
                 activity.getId(),
@@ -75,7 +87,7 @@ public class SchemaCsvWriter {
                 null);
     }
 
-    private void writeElementLine(ActivityDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) {
+    private void writeElementLine(ActivityFormDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) {
         writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
                 activity.getId(),

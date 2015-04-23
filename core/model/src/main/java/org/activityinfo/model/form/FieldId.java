@@ -12,7 +12,7 @@ import org.activityinfo.model.resource.ResourceId;
 public class FieldId {
 
     public static ResourceId fieldId(ResourceId classId, String fieldName) {
-        return ResourceId.create(classId.asString() + "$" + fieldName);
+        return ResourceId.valueOf(classId.asString() + "$" + fieldName);
     }
 
     public static ResourceId getFormClassId(ResourceId fieldId) {
@@ -21,7 +21,7 @@ public class FieldId {
         if(delimiter == -1) {
             throw new IllegalArgumentException("Not a fieldId: " + fieldId);
         }
-        return ResourceId.create(qfn.substring(0, delimiter));
+        return ResourceId.valueOf(qfn.substring(0, delimiter));
     }
 
     public static String getFieldName(ResourceId fieldId) {

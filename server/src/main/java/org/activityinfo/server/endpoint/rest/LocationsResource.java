@@ -1,7 +1,7 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.sun.jersey.api.core.InjectParam;
-import org.activityinfo.legacy.client.KeyGenerator;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;

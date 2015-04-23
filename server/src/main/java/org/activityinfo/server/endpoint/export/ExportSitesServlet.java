@@ -30,7 +30,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.output.StorageProvider;

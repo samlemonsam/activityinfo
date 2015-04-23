@@ -27,10 +27,7 @@ import com.extjs.gxt.ui.client.Style.SortDir;
 import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.common.base.Strings;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.GetSites;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.server.command.DispatcherSync;
@@ -167,7 +164,7 @@ public class SiteExporter {
 
     }
 
-    public void export(ActivityDTO activity, Filter filter) {
+    public void export(ActivityFormDTO activity, Filter filter) {
 
         HSSFSheet sheet = book.createSheet(composeUniqueSheetName(activity));
         sheet.createFreezePane(4, 2);
@@ -178,7 +175,7 @@ public class SiteExporter {
 
     }
 
-    private String composeUniqueSheetName(ActivityDTO activity) {
+    private String composeUniqueSheetName(ActivityFormDTO activity) {
         String sheetName = activity.getDatabaseName() + " - " + activity.getName();
 
         // to avoid conflict with our own disambiguation scheme, remove any trailing "(n)" 
@@ -205,7 +202,7 @@ public class SiteExporter {
         }
     }
 
-    private void createHeaders(ActivityDTO activity, HSSFSheet sheet) {
+    private void createHeaders(ActivityFormDTO activity, HSSFSheet sheet) {
 
         // / The HEADER rows
 
@@ -241,7 +238,7 @@ public class SiteExporter {
         createHeaderCell(headerRow2, column++, "Axe");
 
         indicators = new ArrayList<Integer>(activity.getIndicators().size());
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             for (IndicatorGroup group : activity.groupIndicators()) {
                 if (group.getName() != null) {
                     // create a merged cell on the top row spanning all members
@@ -276,11 +273,13 @@ public class SiteExporter {
         }
 
         levels = new ArrayList<>();
+
         for (AdminLevelDTO level : activity.getAdminLevels()) {
             createHeaderCell(headerRow2, column++, "Code " + level.getName());
             createHeaderCell(headerRow2, column++, level.getName());
             levels.add(level.getId());
         }
+
         int latColumn = column++;
         int lngColumn = column++;
 
@@ -293,7 +292,7 @@ public class SiteExporter {
 
     }
 
-    private SiteResult querySites(ActivityDTO activity, Filter filter, int offset) {
+    private SiteResult querySites(ActivityFormDTO activity, Filter filter, int offset) {
 
         Filter effectiveFilter = new Filter(filter);
         effectiveFilter.addRestriction(DimensionType.Activity, activity.getId());
@@ -307,7 +306,7 @@ public class SiteExporter {
         return dispatcher.execute(query);
     }
 
-    private void createDataRows(ActivityDTO activity, Filter filter, Sheet sheet) {
+    private void createDataRows(ActivityFormDTO activity, Filter filter, Sheet sheet) {
 
         int rowIndex = 2;
 
@@ -445,6 +444,8 @@ public class SiteExporter {
                 cell.setCellValue((Date) value);
             } else if (value instanceof LocalDate) {
                 cell.setCellValue(((LocalDate) value).atMidnightInMyTimezone());
+            } else if (value instanceof Boolean) {
+                cell.setCellValue((Boolean) value);
             }
         }
     }
@@ -490,7 +491,7 @@ public class SiteExporter {
                 for (ActivityDTO activity : db.getActivities()) {
                     if (!filter.isRestricted(DimensionType.Activity) ||
                             filter.getRestrictions(DimensionType.Activity).contains(activity.getId())) {
-                        export(activity, filter);
+                        export(dispatcher.execute(new GetActivityForm(activity.getId())), filter);
                     }
                 }
             }

@@ -36,7 +36,7 @@ import org.activityinfo.server.endpoint.export.ExportModule;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.endpoint.jsonrpc.JsonRpcModule;
 import org.activityinfo.server.endpoint.kml.KmlModule;
-import org.activityinfo.server.endpoint.odk.ODKModule;
+import org.activityinfo.server.endpoint.odk.OdkModule;
 import org.activityinfo.server.endpoint.rest.RestApiModule;
 import org.activityinfo.server.geo.GeometryModule;
 import org.activityinfo.server.login.LoginModule;
@@ -48,7 +48,7 @@ import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.jaxrs.JaxRsModule;
 import org.activityinfo.server.util.locale.LocaleModule;
 import org.activityinfo.server.util.monitoring.MonitoringModule;
-import org.activityinfo.server.util.monitoring.Timed;
+import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 
 import javax.servlet.ServletContextEvent;
 import java.util.logging.Logger;
@@ -69,7 +69,6 @@ public class StartupListener extends GuiceServletContextListener {
     }
 
     @Override
-    @Timed(name = "startup", kind = "getInjector")
     protected Injector getInjector() {
 
         return Guice.createInjector(new HibernateModule(),
@@ -94,7 +93,8 @@ public class StartupListener extends GuiceServletContextListener {
                 new LocaleModule(),
                 new JaxRsModule(),
                 new RestApiModule(),
-                new ODKModule());
+                new OdkModule(),
+                new GcsBlobFieldStorageServiceModule());
     }
 
 }

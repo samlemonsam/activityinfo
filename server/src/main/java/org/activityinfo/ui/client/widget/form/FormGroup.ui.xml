@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+  <!-- Field -->
+  <g:HTMLPanel addStyleNames="form-group" width="100%" ui:field="formGroup">
+    <label class="control-label" ui:field="label"/>
+    <g:HTMLPanel ui:field="widget"/>
+
+    <!-- Description -->
+    <span ui:field="descriptionMargin"/>
+    <span ui:field="description"/>
+
+    <!-- Validation message -->
+    <g:HTMLPanel ui:field="messageContainer">
+      <span ui:field="validationMargin"/>
+      <span ui:field="validationMessage"/>
+    </g:HTMLPanel>
+  </g:HTMLPanel>
+
+</ui:UiBinder>

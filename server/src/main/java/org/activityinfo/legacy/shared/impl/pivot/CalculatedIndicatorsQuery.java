@@ -27,11 +27,14 @@ import org.activityinfo.legacy.shared.reports.model.Dimension;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Aggregates calculated indicators using the GetSites command.
  */
 public class CalculatedIndicatorsQuery implements WorkItem {
+
+    private static final Logger LOGGER = Logger.getLogger(CalculatedIndicatorsQuery.class.getName());
 
     private static final Dimension INDICATOR_DIM = new Dimension(DimensionType.Indicator);
 
@@ -106,6 +109,9 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                 } else {
 
                     for (SqlResultSetRow row : results.getRows()) {
+
+                        LOGGER.info("row = " + row);
+
                         int activityId = row.getInt("activityId");
                         int indicatorId = row.getInt("indicatorId");
 

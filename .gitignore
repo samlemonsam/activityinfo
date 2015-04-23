@@ -22,7 +22,5 @@ libpeerconnection.log
 velocity.log
 atlassian-ide-plugin.xml
 build.log
-atlassian-ide-plugin.xml
-build.log
 build
 .gradle

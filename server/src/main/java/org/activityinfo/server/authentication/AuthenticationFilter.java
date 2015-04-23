@@ -29,8 +29,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
 
 import javax.persistence.EntityManager;
@@ -102,16 +103,16 @@ public class AuthenticationFilter implements Filter {
                 AuthenticatedUser currentUser = authTokenCache.get(authToken);
                 authProvider.set(currentUser);
 
-                LocaleProxy.setLocale(Locale.forLanguageTag(currentUser.getUserLocale()));
-                
                 LOGGER.info("Setting locale to " + currentUser.getUserLocale());
-                
+
             } catch (Exception e) {
                 authProvider.clear();
             }
         }
-        filterChain.doFilter(request, response);
 
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(authProvider.get().getUserLocale()));
+
+        filterChain.doFilter(request, response);
     }
 
     private void allowCrossOriginRequests(HttpServletResponse response) {

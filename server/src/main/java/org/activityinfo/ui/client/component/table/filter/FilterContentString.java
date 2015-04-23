@@ -135,7 +135,7 @@ public class FilterContentString extends Composite implements FilterContent {
                 @Override
                 public void visitFieldCriteria(FieldCriteria fieldCriteria) {
                     for (Projection projection : allItems) {
-                        final Object valueAsObject = column.getValueAsObject(projection);
+                        final Object valueAsObject = column.getFieldValue(projection);
                         if (Objects.equals(valueAsObject, fieldCriteria.getValue())) {
                             selectionModel.setSelected(projection, true);
                         }
@@ -181,8 +181,7 @@ public class FilterContentString extends Composite implements FilterContent {
         final Set<Projection> selectedSet = selectionModel.getSelectedSet();
         final List<Criteria> criteriaList = Lists.newArrayList();
         for (Projection projection : selectedSet) {
-            final Object valueAsObject = column.getValueAsObject(projection);
-            criteriaList.add(new FieldCriteria(column.getNode().getPath(), valueAsObject));
+            criteriaList.add(new FieldCriteria(column.getNode().getPath(), column.getFieldValue(projection)));
         }
         return new CriteriaUnion(criteriaList);
     }

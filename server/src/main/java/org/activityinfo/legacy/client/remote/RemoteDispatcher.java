@@ -24,11 +24,11 @@ package org.activityinfo.legacy.client.remote;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 
 import java.util.Collections;

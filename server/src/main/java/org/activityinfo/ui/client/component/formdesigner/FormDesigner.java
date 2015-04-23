@@ -33,6 +33,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropPanelDropController;
@@ -56,28 +57,39 @@ public class FormDesigner {
     private final HeaderPresenter headerPresenter;
     private final FormDesignerPanel formDesignerPanel;
     private final FormFieldWidgetFactory formFieldWidgetFactory;
+    private final FormSavedGuard savedGuard;
+    private final FormDesignerActions formDesignerActions;
 
     public FormDesigner(@Nonnull FormDesignerPanel formDesignerPanel, @Nonnull ResourceLocator resourceLocator, @Nonnull FormClass formClass) {
         this.formDesignerPanel = formDesignerPanel;
         this.resourceLocator = resourceLocator;
         this.formClass = formClass;
 
-        propertiesPresenter = new PropertiesPresenter(formDesignerPanel.getPropertiesPanel(), eventBus);
+        propertiesPresenter = new PropertiesPresenter(formDesignerPanel.getPropertiesPanel(), this);
 
-        formFieldWidgetFactory = new FormFieldWidgetFactory(resourceLocator);
+        formFieldWidgetFactory = new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.DESIGN);
 
         ForwardDropController forwardDropController = new ForwardDropController(formDesignerPanel.getDropPanel());
         forwardDropController.add(new DropPanelDropController(formDesignerPanel.getDropPanel(), this));
 
-        formDesignerPanel.getFieldPalette().registerDropController(forwardDropController);
+        formDesignerPanel.getFieldPalette().bind(eventBus, forwardDropController);
         formDesignerPanel.bind(eventBus);
 
         headerPresenter = new HeaderPresenter(this);
         headerPresenter.show();
 
-        new FormDesignerActions(this); // init actions
+        savedGuard = new FormSavedGuard(this);
+
+        formDesignerActions = new FormDesignerActions(this);
     }
 
+    public FormDesignerActions getFormDesignerActions() {
+        return formDesignerActions;
+    }
+
+    public FormSavedGuard getSavedGuard() {
+        return savedGuard;
+    }
 
     public FormDesignerPanel getFormDesignerPanel() {
         return formDesignerPanel;
@@ -116,7 +128,7 @@ public class FormDesigner {
         for(int i=0;i!=panel.getWidgetCount();++i) {
             Widget widget = panel.getWidget(i);
             String fieldId = widget.getElement().getAttribute(FieldWidgetContainer.DATA_FIELD_ID);
-            elements.add(fieldMap.get(ResourceId.create(fieldId)));
+            elements.add(fieldMap.get(ResourceId.valueOf(fieldId)));
         }
 
         formClass.getElements().clear();

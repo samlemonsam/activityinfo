@@ -3,12 +3,11 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

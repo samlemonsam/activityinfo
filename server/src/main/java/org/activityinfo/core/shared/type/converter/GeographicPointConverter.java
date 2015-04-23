@@ -21,7 +21,7 @@ package org.activityinfo.core.shared.type.converter;
  * #L%
  */
 
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 
 /**
  * @author yuriyz on 3/7/14.

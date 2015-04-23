@@ -93,4 +93,21 @@ public class GwtUtil {
         }
         return null;
     }
+
+    public static boolean isInt(String integer) {
+        try {
+            Integer.parseInt(integer);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static int getIntSilently(String integer) {
+        try {
+            return Integer.parseInt(integer);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 }

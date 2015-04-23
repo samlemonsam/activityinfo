@@ -16,32 +16,22 @@ import java.util.List;
  */
 public class InstancePlace implements PageState {
 
-    public static final String DEFAULT_VIEW = "table";
-
     private ResourceId instanceId;
-    private String view = DEFAULT_VIEW;
+    private PageId pageId;
 
-    public InstancePlace(ResourceId instanceId) {
-        this.instanceId = instanceId;
-    }
-
-    public InstancePlace(ResourceId resourceId, String part) {
+    public InstancePlace(ResourceId resourceId, PageId part) {
         this.instanceId = resourceId;
-        this.view = part;
+        this.pageId = part;
     }
 
     @Override
     public String serializeAsHistoryToken() {
-        StringBuilder token = new StringBuilder(instanceId.asString());
-        if(view != null) {
-            token.append("/").append(view);
-        }
-        return token.toString();
+        return instanceId.asString();
     }
 
     @Override
     public PageId getPageId() {
-        return InstancePage.PAGE_ID;
+        return pageId;
     }
 
     public ResourceId getInstanceId() {
@@ -50,7 +40,7 @@ public class InstancePlace implements PageState {
 
     @Override
     public List<PageId> getEnclosingFrames() {
-        return Lists.newArrayList(InstancePage.PAGE_ID);
+        return Lists.newArrayList(pageId);
     }
 
     @Override
@@ -58,39 +48,30 @@ public class InstancePlace implements PageState {
         return null;
     }
 
-    public String getView() {
-        return view;
-    }
-
-
-
     public static class Parser implements PageStateParser {
+
+        private PageId pageId;
+
+        public Parser(PageId pageId) {
+            this.pageId = pageId;
+        }
 
         @Override
         public InstancePlace parse(String token) {
-            String parts[] = token.split("/");
-            if(parts.length == 1) {
-                return new InstancePlace(ResourceId.create(parts[0]));
-            } else {
-                return new InstancePlace(ResourceId.create(parts[0]), parts[1]);
-            }
+            return new InstancePlace(ResourceId.valueOf(token), pageId);
         }
     }
-
 
     public static SafeUri safeUri(ResourceId instanceId) {
         return UriUtils.fromTrustedString("#" + historyToken(instanceId));
     }
 
-    public static SafeUri safeUri(ResourceId id, String tab) {
-        return UriUtils.fromTrustedString("#" + historyToken(id, tab));
+    public static SafeUri safeUri(ResourceId id, PageId pageId) {
+        return UriUtils.fromTrustedString("#" + pageId + "/" + id.asString());
     }
 
     public static String historyToken(ResourceId instanceId) {
         return "i/" + instanceId.asString();
     }
 
-    public static String historyToken(ResourceId instanceId, String tab) {
-        return historyToken(instanceId) + "/" + tab;
-    }
 }

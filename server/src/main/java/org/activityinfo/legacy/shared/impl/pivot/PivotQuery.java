@@ -387,48 +387,26 @@ public class PivotQuery implements WorkItem {
     }
 
     private void appendVisibilityFilter() {
-        StringBuilder securityFilter = new StringBuilder();
-        securityFilter.append("(")
 
-                // own databases
+        // Join the user permissions for this user to the database
+        SqlQuery userPermissions = SqlQuery
+                .selectAll()
+                .from(Tables.USER_PERMISSION)
+                .whereTrue("userId=" + userId);
+
+        query.leftJoin(userPermissions, "UP").on("UP.databaseId=UserDatabase.DatabaseId");
+
+        // Filter those visible to this user
+        query.whereTrue(new StringBuilder()
+                .append("(")
+                        // own databases
                 .append("UserDatabase.OwnerUserId = ").append(userId).append(" ")
 
-                // databases with allowviewall
-                .append("OR UserDatabase.DatabaseId IN (")
-                .append(" SELECT ")
-                .append("  p.DatabaseId ")
-                .append(" FROM ")
-                .append("  userpermission p ")
-                .append(" WHERE ")
-                .append("  p.UserId = ")
-                .append(userId)
-                .append("  AND p.AllowViewAll").append(") ")
-
-                // sites of own partner
-                .append("OR UserDatabase.DatabaseId IN (")
-                .append(" SELECT ")
-                .append("  p.DatabaseId ")
-                .append(" FROM ")
-                .append("  userpermission p ")
-                .append(" WHERE ")
-                .append("  p.UserId = ")
-                .append(userId)
-                .append("  AND p.AllowView ")
-                .append("  AND p.PartnerId = Site.PartnerId ").append(") ")
-
-                // or sites of which one or more activities are published
-                .append("OR Site.ActivityId IN (")
-                .append(" SELECT ")
-                .append("  pa.ActivityId ")
-                .append(" FROM ")
-                .append("  activity pa ")
-                .append(" WHERE ")
-                .append("  pa.published > 0 ")
-                .append(")")
-
-                .append(")");
-
-        query.whereTrue(securityFilter.toString());
+                .append(" OR Activity.Published > 0")
+                        // databases with allowviewall
+                .append(" OR UP.AllowViewAll")
+                .append(" OR (UP.AllowView AND UP.PartnerId=Site.PartnerId)")
+                .append(")").toString());
     }
 
     private void appendDimensionRestrictions() {

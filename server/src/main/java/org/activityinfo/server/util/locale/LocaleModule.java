@@ -23,7 +23,7 @@ package org.activityinfo.server.util.locale;
  */
 
 import com.google.inject.AbstractModule;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.i18n.shared.UiMessages;
 

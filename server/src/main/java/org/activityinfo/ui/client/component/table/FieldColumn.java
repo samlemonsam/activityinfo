@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.component.table;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
@@ -7,15 +8,21 @@ import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.ui.client.component.table.renderer.RendererFactory;
-import org.activityinfo.ui.client.component.table.renderer.ValueRenderer;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.number.Quantity;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Column that displays the value of a given field
  */
 public class FieldColumn extends Column<Projection, String> {
+
+    public static final String NON_BREAKING_SPACE = "\u00A0";
 
     private FormTree.Node node;
     private List<FieldPath> fieldPaths;
@@ -35,9 +42,9 @@ public class FieldColumn extends Column<Projection, String> {
         this.fieldPaths = Lists.newArrayList(fieldPath);
     }
 
-    public Object getValueAsObject(Projection projection) {
+    public FieldValue getFieldValue(Projection projection) {
         for (FieldPath path : fieldPaths) {
-            final Object value = projection.getValue(path);
+            final FieldValue value = projection.getValue(path);
             if (value != null) {
                 return value;
             }
@@ -47,13 +54,27 @@ public class FieldColumn extends Column<Projection, String> {
 
     @Override
     public String getValue(Projection projection) {
-        final Object valueAsObject = getValueAsObject(projection);
-        if (valueAsObject != null) {
-            final ValueRenderer valueRenderer = RendererFactory.create(getNode().getTypeClass());
-            return valueRenderer.asString(valueAsObject);
+        final FieldValue fieldValue = getFieldValue(projection);
+
+        if (fieldValue instanceof Quantity) {
+            Double value = ((Quantity) fieldValue).getValue();
+            return value.toString();
+
+        } else if (fieldValue instanceof EnumValue) {
+            EnumValue enumValue = (EnumValue) fieldValue;
+            Set<EnumItem> items = enumValue.getValuesAsItems((EnumType) node.getField().getType());
+            final List<String> values = Lists.newArrayList();
+            for (final EnumItem item : items) {
+                values.add(item.getLabel());
+            }
+            return Joiner.on(", ").join(values);
+
+        } else if (fieldValue != null) {
+            return fieldValue.toString();
+
         }
 
-        return "";
+        return NON_BREAKING_SPACE;
     }
 
     public void addFieldPath(FieldPath path) {
