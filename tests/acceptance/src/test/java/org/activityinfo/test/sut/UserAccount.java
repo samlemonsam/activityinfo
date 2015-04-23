@@ -16,6 +16,26 @@ public class UserAccount {
         return email;
     }
 
+    /**
+     *
+     * @return the user portion of the email address. 
+     */
+    public String nameFromEmail() {
+        int at = email.indexOf('@');
+        if(at == -1) {
+            throw new IllegalStateException("Invalid email address: " + email);
+        }
+        return email.substring(0, at);
+    }
+    
+    public String domainFromEmail() {
+        int at = email.indexOf('@');
+        if(at == -1) {
+            throw new IllegalStateException("Invalid email address: " + email);
+        }
+        return email.substring(at+1);
+    }
+
     public String getPassword() {
         return password;
     }
