@@ -1,7 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
 
-import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
@@ -21,6 +20,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
@@ -139,10 +140,10 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         Projection firstRead = singleSiteProjection(query);
 
-        assertEquals(1d, firstRead.getValue(path(indicatorField(1))));
-        assertEquals(2d, firstRead.getValue(path(indicatorField(2))));
-        assertEquals(3d, firstRead.getValue(path(indicatorField(11))));
-        assertEquals(0.5d, firstRead.getValue(path(indicatorField(12))));
+        assertEquals(new Quantity(1), firstRead.getValue(path(indicatorField(1))));
+        assertEquals(new Quantity(2), firstRead.getValue(path(indicatorField(2))));
+        assertEquals(new Quantity(3), firstRead.getValue(path(indicatorField(11))));
+        assertEquals(new Quantity(0.5), firstRead.getValue(path(indicatorField(12))));
 
         // set indicators to null
         instance.set(indicatorField(1).asString(), null);
@@ -156,8 +157,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         assertEquals(null, secondRead.getValue(path(indicatorField(1))));
         assertEquals(null, secondRead.getValue(path(indicatorField(2))));
-        assertEquals(0d, secondRead.getValue(path(indicatorField(11))));
-        assertEquals(Double.NaN, secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
+        assertEquals(new Quantity(0), secondRead.getValue(path(indicatorField(11))));
+        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
     }
 
     private FieldPath path(ResourceId... fieldIds) {

@@ -298,6 +298,12 @@
       </exclusions>
     </dependency>
 
+    <dependency>
+      <groupId>com.bedatadriven.appengine</groupId>
+      <artifactId>appengine-metrics</artifactId>
+      <version>0.3-SNAPSHOT</version>
+    </dependency>
+
 
     <!-- Dependency Injection Framework -->
     <dependency>
