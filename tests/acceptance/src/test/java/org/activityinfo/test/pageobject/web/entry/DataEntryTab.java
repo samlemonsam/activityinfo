@@ -3,6 +3,7 @@ package org.activityinfo.test.pageobject.web.entry;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
@@ -66,10 +67,13 @@ public class DataEntryTab {
     }
     
     public DataEntryDriver updateSubmission() {
-        FluentElement button = container.find().button(withText("Edit")).first();
-        if("true".equals(button.attribute("aria-disabled"))) {
-            throw new AssertionError("Edit button is disabled");
-        }
+        final FluentElement button = container.find().button(withText("Edit")).first();
+        button.waitUntil(new Predicate<WebDriver>() { // wait until 'Edit' button become enabled (there may be small period before it becomes enabled)
+            @Override
+            public boolean apply(@Nullable WebDriver input) {
+                return button.attribute("aria-disabled").equals("false");
+            }
+        });
         button.click();
 
         return new GxtDataEntryDriver(new GxtModal(container));
@@ -129,7 +133,7 @@ public class DataEntryTab {
     }
 
     public void selectSubmission(int rowIndex) {
-        GxtGrid grid = GxtGrid.findGrids(container).first().get();
+        GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
         grid.waitUntilAtLeastOneRowIsLoaded();
         grid.rows().get(rowIndex).select();
     }
@@ -177,7 +181,7 @@ public class DataEntryTab {
 
     public DetailsEntry details() {
         selectTab("Details");
-
+        container.waitFor(By.className("indicatorHeading"));
         return container.waitFor(new Function<WebDriver, DetailsEntry>() {
             @Override
             public DetailsEntry apply(WebDriver input) {

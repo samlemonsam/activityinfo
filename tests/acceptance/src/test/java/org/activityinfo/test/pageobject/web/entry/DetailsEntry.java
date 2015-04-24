@@ -48,8 +48,12 @@ public class DetailsEntry {
         for (FieldValue value : values) {
             FieldValue fieldValue = map.get(value.getField());
 
-            Assert.assertNotNull("Indicator is not visible, name: " + value.getField(), fieldValue);
-            Assert.assertEquals("Value for indicator with name: " + value.getField() + " does not match.", value.getValue(), fieldValue.getValue());
+            Assert.assertNotNull("Indicator is not visible, name: " + value.getField() + appendValues(values), fieldValue);
+            Assert.assertEquals("Value for indicator with name: " + value.getField() + " does not match." + appendValues(values), value.getValue(), fieldValue.getValue());
         }
+    }
+
+    private String appendValues(List<FieldValue> values) {
+        return "\nActual values: " + fieldValues + "\n" + "Expected values: " + values;
     }
 }

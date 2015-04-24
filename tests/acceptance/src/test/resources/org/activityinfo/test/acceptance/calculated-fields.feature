@@ -13,6 +13,7 @@ Feature: Calculated fields
       | field              | value           |
       | a                  | 1               |
       | b                  | 2               |
+      | partner            | NRC             |
     Then the submission's detail shows:
       | field              | value           |
       | a                  | 1               |
