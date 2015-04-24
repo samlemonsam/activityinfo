@@ -108,11 +108,19 @@ public class GxtGrid {
         public GxtCell(FluentElement element) {
             this.element = element;
         }
-        
+
         public void edit(String value) {
+            edit(value, "x-grid-editor") ;
+        }
+
+        public void editTreeGrid(String value) {
+            edit(value, "x-grid3-col-value");
+        }
+
+        public void edit(String value, String editCellClassName) {
             element.click();
 
-            final FluentElement input = container.find().div(withClass("x-grid-editor")).input().waitForFirst();
+            final FluentElement input = container.find().div(withClass(editCellClassName)).input().waitForFirst();
             input.sendKeys(value);
             input.sendKeys(Keys.TAB);
             container.waitUntil(new Predicate<WebDriver>() {

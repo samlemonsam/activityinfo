@@ -4,8 +4,10 @@ import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
@@ -44,11 +46,21 @@ public class TargetsPage {
     }
     
     public void setValue(String indicatorName, String value) {
-        valueGrid().findCell(indicatorName, "value").edit(value);
+        expandTree(indicatorName); // expand tree first
+        valueGrid().findCell(indicatorName, "value").editTreeGrid(value);
     }
-    
+
     public void setValue(String indicatorName, Double value) {
-        valueGrid().findCell(indicatorName, "value").edit(Double.toString(value));
+        expandTree(indicatorName); // expand tree first
+        valueGrid().findCell(indicatorName, "value").editTreeGrid(Double.toString(value));
+    }
+
+    private void expandTree(String indicatorName) {
+        try {
+            GxtTree.treeGrid(container).search(indicatorName).get().select();
+        } catch (WebDriverException e) { // revisit it later
+            // unknown error: cannot focus element on key down
+        }
     }
 }
 
