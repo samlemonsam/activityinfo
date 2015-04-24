@@ -47,12 +47,12 @@ public class TargetsPage {
     
     public void setValue(String indicatorName, String value) {
         expandTree(indicatorName); // expand tree first
-        valueGrid().findCell(indicatorName, "value").editTreeGrid(value);
+        valueGrid().findCell(indicatorName, "value").edit(value);
     }
 
     public void setValue(String indicatorName, Double value) {
         expandTree(indicatorName); // expand tree first
-        valueGrid().findCell(indicatorName, "value").editTreeGrid(Double.toString(value));
+        valueGrid().findCell(indicatorName, "value").edit(Double.toString(value));
     }
 
     private void expandTree(String indicatorName) {
