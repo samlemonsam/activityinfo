@@ -8,6 +8,8 @@ import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Maintains a pool of WebDriver instances that can be reused
  */
@@ -35,9 +37,16 @@ public class WebDriverPool {
     }
 
     private WebDriver createDriver(BrowserProfile profile) {
-        return creator.apply(profile);
+        WebDriver driver = creator.apply(profile);
+        configureDriver(driver);
+        return driver;
     }
-    
+
+    private static void configureDriver(WebDriver driver) {
+        // increase timeout before NoSuchElementException
+        driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
+    }
+
     public WebDriver get(BrowserProfile profile) {
         try {
             return new Wrapper(profile, pool.borrowObject(profile));
