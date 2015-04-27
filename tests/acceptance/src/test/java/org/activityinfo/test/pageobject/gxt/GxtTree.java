@@ -1,15 +1,16 @@
 package org.activityinfo.test.pageobject.gxt;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
+import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -88,8 +89,17 @@ public class GxtTree {
     }
 
     public void waitUntilLoaded() {
+        waitUntil(new Predicate<GxtTree>() {
+            @Override
+            public boolean apply(GxtTree tree) {
+                return isEmpty();
+            }
+        });
+    }
+
+    public void waitUntil(Predicate<GxtTree> predicate) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        while(isEmpty()) {
+        while(predicate.apply(this)) {
             try {
                 Thread.sleep(150);
             } catch (InterruptedException e) {
@@ -221,7 +231,7 @@ public class GxtTree {
             throw new RuntimeException("Failed to find treeItem");
         }
 
-        private XPathBuilder joint() {
+        public XPathBuilder joint() {
             return treeItem().descendants().img(withClass("x-tree3-node-joint"));
         }
 

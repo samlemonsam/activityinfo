@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.web.design;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
@@ -58,7 +59,14 @@ public class TargetsPage {
     private void expandTree(String indicatorName) {
         try {
             GxtTree tree = GxtTree.treeGrid(container);
-            tree.waitUntilLoaded();
+            tree.waitUntil(new Predicate<GxtTree>() {
+                @Override
+                public boolean apply(GxtTree tree) {
+                    Optional<GxtTree.GxtNode> root = tree.firstRootNode();
+                    boolean loaded = root.isPresent() && root.get().joint().firstIfPresent().isPresent();
+                    return !loaded;
+                }
+            });
             tree.search(indicatorName).get().select();
         } catch (WebDriverException e) { // revisit it later
             // unknown error: cannot focus element on key down
