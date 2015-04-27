@@ -57,7 +57,9 @@ public class TargetsPage {
 
     private void expandTree(String indicatorName) {
         try {
-            GxtTree.treeGrid(container).search(indicatorName).get().select();
+            GxtTree tree = GxtTree.treeGrid(container);
+            tree.waitUntilLoaded();
+            tree.search(indicatorName).get().select();
         } catch (WebDriverException e) { // revisit it later
             // unknown error: cannot focus element on key down
         }
