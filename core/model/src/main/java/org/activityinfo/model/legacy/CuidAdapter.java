@@ -227,11 +227,11 @@ public class CuidAdapter {
     }
 
     /**
-     * @param partnerId the id of the partner
+     * @param databaseId the id of the database
      * @return the {@code FormClass} ResourceId for a given database's list of partners.
      */
-    public static ResourceId partnerFormClass(int partnerId) {
-        return cuid(PARTNER_FORM_CLASS_DOMAIN, partnerId);
+    public static ResourceId partnerFormClass(int databaseId) {
+        return cuid(PARTNER_FORM_CLASS_DOMAIN, databaseId);
     }
 
     /**
