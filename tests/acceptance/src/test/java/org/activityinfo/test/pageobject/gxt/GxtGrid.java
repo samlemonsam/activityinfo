@@ -78,11 +78,9 @@ public class GxtGrid {
     }
 
     public GxtCell findCell(String rowText, String columnId) {
-        return new GxtCell(container.find()
-                .anyElement(withText(rowText))
-                .ancestor().div(withClass("x-grid3-row"))
-                .descendants().td(withClass("x-grid3-td-" + columnId))
-                .first());
+        FluentElement nodeWithText = container.find().anyElement(withText(rowText)).first();
+        FluentElement ancestor = nodeWithText.find().ancestor().div(withClass("x-grid3-row")).first();
+        return new GxtCell(ancestor.find().descendants().td(withClass("x-grid3-td-" + columnId)).first());
     }
 
     public void waitUntilAtLeastOneRowIsLoaded() {
