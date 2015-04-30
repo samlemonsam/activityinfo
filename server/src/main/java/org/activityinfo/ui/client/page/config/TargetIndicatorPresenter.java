@@ -134,6 +134,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
             public Object apply(ActivityFormDTO input) {
                 activities.put(activity, input);
                 addIndicatorLinks(input, parent);
+                view.expandAll();
                 return null;
             }
         });
