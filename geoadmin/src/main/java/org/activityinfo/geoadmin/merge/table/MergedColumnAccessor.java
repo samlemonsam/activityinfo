@@ -3,6 +3,7 @@ package org.activityinfo.geoadmin.merge.table;
 import org.activityinfo.geoadmin.merge.model.MatchRow;
 import org.activityinfo.geoadmin.merge.model.MergeColumn;
 import org.activityinfo.geoadmin.merge.model.MergeModel;
+import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -34,12 +35,13 @@ class MergedColumnAccessor extends ColumnAccessor {
         MatchRow match = mergeModel.getMatch(rowIndex);
         if(match.isDeleted()) {
             return null;
-        
+        } else if(sourceColumn != null && match.isSourceMatched()) {
+            return sourceColumn.getView().get(match.getSource());
+            
         } else if(match.isTargetMatched()) {
             return targetColumn.getView().get(match.getTarget());
 
-        } else if(match.isSourceMatched()) {
-            return sourceColumn.getView().get(match.getSource());
+
         } else {
             return null;
         }
@@ -56,7 +58,7 @@ class MergedColumnAccessor extends ColumnAccessor {
                     MatchRow match = mergeModel.getMatch(table.convertRowIndexToModel(row));
                     if (match.isDeleted()) {
                         c.setBackground(MergeColors.DELETED_COLOR);
-                    } else if (match.isTargetMatched()) {
+                    } else if (match.isTargetMatched() && !isChange(match)) {
                         c.setBackground(MergeColors.TARGET_COLOR);
                     } else {
                         c.setBackground(MergeColors.SOURCE_COLOR);
@@ -65,5 +67,16 @@ class MergedColumnAccessor extends ColumnAccessor {
                 return c;
             }
         };
+    }
+
+    private boolean isChange(MatchRow match) {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+        if(match.isTargetMatched() && match.isSourceMatched()) {
+            String targetValue = targetColumn.getView().getString(match.getTarget());
+            String sourceValue = sourceColumn.getView().getString(match.getSource());
+            return targetValue == null || sourceValue == null || scorer.score(targetValue, sourceValue) < 0.95;
+        } else {
+            return false;
+        }
     }
 }

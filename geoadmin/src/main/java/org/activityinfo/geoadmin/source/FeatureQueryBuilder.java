@@ -1,6 +1,7 @@
 package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Function;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -27,6 +28,7 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
     
     private final SimpleFeatureSource featureSource;
     private final List<QueryField> fields = new ArrayList<>();
+    private final List<CursorObserver<ResourceId>> idObservers = new ArrayList<>();
 
     public FeatureQueryBuilder(SimpleFeatureSource featureSource) {
         this.featureSource = featureSource;
@@ -34,7 +36,7 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addResourceId(CursorObserver<ResourceId> observer) {
-        throw new UnsupportedOperationException();
+        idObservers.add(observer);
     }
 
     @Override
@@ -68,6 +70,10 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
         SimpleFeatureIterator it = featureSource.getFeatures().features();
         while(it.hasNext()) {
             SimpleFeature feature = it.next();
+            ResourceId id = ResourceId.valueOf(feature.getID());
+            for(CursorObserver<ResourceId> idObserver : idObservers) {
+                idObserver.onNext(id);
+            }
             for(QueryField field : fields) {
                 Object value = feature.getAttribute(field.attributeIndex);
                 if(value == null) {
@@ -76,6 +82,9 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
                     field.observer.onNext(field.converter.apply(value));
                 }
             }
+        }
+        for (CursorObserver<ResourceId> idObserver : idObservers) {
+            idObserver.done();
         }
         for(QueryField field : fields) {
             field.observer.done();

@@ -51,9 +51,10 @@ public class CollectionScan {
      * @return a slot that will receive the result when the scan completes
      */
     public Slot<ColumnView> addResourceId() {
-        ColumnViewBuilder builder = columnMap.get(PK_COLUMN_KEY);
+        IdColumnBuilder builder = (IdColumnBuilder) columnMap.get(PK_COLUMN_KEY);
         if(builder == null) {
             builder = new IdColumnBuilder();
+            queryBuilder.addResourceId(builder);
             columnMap.put(PK_COLUMN_KEY, builder);
         }
         return builder;

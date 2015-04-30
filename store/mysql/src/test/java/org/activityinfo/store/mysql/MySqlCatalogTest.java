@@ -59,7 +59,7 @@ public class MySqlCatalogTest {
     public void testDatabase() {
         query(DatabaseCollection.FORM_CLASS_ID, "label", "description", "country", "country.label", "country.code");
         assertThat(column("label"), hasValues("PEAR", "PEAR Plus", "Alpha", "Public"));
-        assertThat(column("description"), hasAllNullValuesWithLengthOf(3));
+        assertThat(column("description"), hasAllNullValuesWithLengthOf(4));
         assertThat(column("country"), hasValues("c0000000001", "c0000000001", "c0000000001", "c0000000001"));
         assertThat(column("country.label"), hasValues("Rdc", "Rdc", "Rdc", "Rdc"));
         assertThat(column("country.code"), hasValues("CD", "CD", "CD", "CD"));
@@ -105,6 +105,7 @@ public class MySqlCatalogTest {
 
     private void query(ResourceId formClassId, String... fields) {
         QueryModel queryModel = new QueryModel(formClassId);
+        queryModel.selectResourceId().as("_id");
         for(String field : fields) {
             queryModel.selectExpr(field).setId(field);
         }

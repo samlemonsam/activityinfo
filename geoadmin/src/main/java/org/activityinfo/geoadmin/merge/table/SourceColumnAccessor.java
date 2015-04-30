@@ -88,7 +88,7 @@ class SourceColumnAccessor extends ColumnAccessor {
         if(match.isTargetMatched()) {
             String targetValue = targetColumn.getView().getString(match.getTarget());
             String sourceValue = sourceColumn.getView().getString(match.getSource());
-            return targetValue != null && sourceValue != null && scorer.score(targetValue, sourceValue) > 0.95;
+            return targetValue == null || sourceValue == null || scorer.score(targetValue, sourceValue) < 1.0;
         } else {
             return false;
         }

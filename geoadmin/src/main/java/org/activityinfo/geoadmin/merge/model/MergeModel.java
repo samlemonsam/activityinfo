@@ -1,6 +1,8 @@
 package org.activityinfo.geoadmin.merge.model;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,5 +68,25 @@ public class MergeModel {
 
     public boolean isMapped(MergeColumn column) {
         return columnMapping.containsKey(column) || columnMapping.containsValue(column);
+    }
+
+    public void match(int ia, int ib) {
+        MatchRow a = getMatch(ia);
+        MatchRow b = getMatch(ib);
+
+        Preconditions.checkArgument(a.canMatch(b));
+        
+        if(!a.isTargetMatched()) {
+            a.setTarget(b.getTarget());
+        } else {
+            b.setSource(b.getSource());
+        }
+        
+        matches.remove(ib);
+    }
+
+    public ResourceId getTargetId(MatchRow match) {
+        Preconditions.checkArgument(match.isTargetMatched());
+        return getTargetForm().getId(match.getTarget());
     }
 }

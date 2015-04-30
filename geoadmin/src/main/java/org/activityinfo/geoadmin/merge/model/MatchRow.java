@@ -41,17 +41,35 @@ public class MatchRow {
         this.deleted = deleted;
     }
     
-    public boolean isMerged() {
+    public boolean isMatched() {
         return isSourceMatched() && isTargetMatched();
     }
 
     public MatchRow split() {
-        Preconditions.checkState(isMerged());
+        Preconditions.checkState(isMatched());
         
         MatchRow newRow = new MatchRow(UNMATCHED, source);
         newRow.deleted = deleted;
         source = UNMATCHED;
         
         return newRow;
+    }
+
+    /**
+     * 
+     * @return {@code true} if this {@code MatchRow} "fits" with an other MatchRow 
+     */
+    public boolean canMatch(MatchRow other) {
+        return !isTargetMatched() && 
+                isTargetMatched() == !other.isTargetMatched() &&
+                isSourceMatched() == !other.isSourceMatched();
+    }
+
+    public void setTarget(int target) {
+        this.target = target;
+    }
+
+    public void setSource(int source) {
+        this.source = source;
     }
 }

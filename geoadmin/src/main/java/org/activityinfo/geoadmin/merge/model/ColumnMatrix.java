@@ -40,7 +40,7 @@ public class ColumnMatrix implements DistanceMatrix {
 
     @Override
     public boolean matches(int rowIndex, int columnIndex) {
-        return computeOverlap(rowIndex, columnIndex) > 0d;
+        return computeOverlap(rowIndex, columnIndex) > 0.25;
     }
 
     @Override

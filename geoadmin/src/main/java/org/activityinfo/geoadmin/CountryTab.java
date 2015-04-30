@@ -3,7 +3,7 @@ package org.activityinfo.geoadmin;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.activityinfo.geoadmin.locations.LocationWindow;
-import org.activityinfo.geoadmin.merge.UpdateWindow;
+import org.activityinfo.geoadmin.merge.MergeWindow;
 import org.activityinfo.geoadmin.model.*;
 
 import javax.swing.*;
@@ -216,7 +216,7 @@ public class CountryTab extends JPanel {
         ImportSource source = chooseSource();
         if (source != null) {
             try {
-                UpdateWindow window = new UpdateWindow(getParentFrame(), source, level, client);
+                MergeWindow window = new MergeWindow(getParentFrame(), source, level, client);
                 window.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();

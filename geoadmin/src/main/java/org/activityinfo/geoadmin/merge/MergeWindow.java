@@ -1,5 +1,8 @@
 package org.activityinfo.geoadmin.merge;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import org.activityinfo.geoadmin.GeoUtils;
 import org.activityinfo.geoadmin.ImportSource;
 import org.activityinfo.geoadmin.merge.model.MatchRow;
 import org.activityinfo.geoadmin.merge.model.MergeForm;
@@ -7,7 +10,9 @@ import org.activityinfo.geoadmin.merge.model.MergeModel;
 import org.activityinfo.geoadmin.merge.table.ColumnAccessor;
 import org.activityinfo.geoadmin.merge.table.MergeTableModel;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
+import org.activityinfo.geoadmin.model.VersionMetadata;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -20,9 +25,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Window proving a user interface to match a shapefile to an existing admin
@@ -33,7 +36,7 @@ import java.util.Set;
  * feature from the shapefile to an existing admin entity.
  * 
  */
-public class UpdateWindow extends JFrame {
+public class MergeWindow extends JFrame {
 
     private AdminLevel level;
     private ActivityInfoClient client;
@@ -42,7 +45,7 @@ public class UpdateWindow extends JFrame {
     private final MergeTableModel tableModel;
     private final JTable table;
 
-    public UpdateWindow(JFrame parent, ImportSource source, AdminLevel level, ActivityInfoClient client) throws IOException {
+    public MergeWindow(JFrame parent, ImportSource source, AdminLevel level, ActivityInfoClient client) throws IOException {
         super("Update " + level.getName());
         setSize(650, 350);
         setLocationRelativeTo(parent);
@@ -87,12 +90,18 @@ public class UpdateWindow extends JFrame {
     }
 
     private JToolBar createToolbar() {
-        final JButton mergeButton = new JButton("Match");
-        mergeButton.setEnabled(false);
+        final JButton matchButton = new JButton("Match");
+        matchButton.setEnabled(false);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                mergeButton.setEnabled(isSelectionMergeable());
+                matchButton.setEnabled(isSelectionMergeable());
+            }
+        });
+        matchButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                matchSelection();
             }
         });
         
@@ -132,7 +141,7 @@ public class UpdateWindow extends JFrame {
         });
 
         JToolBar toolbar = new JToolBar();
-        toolbar.add(mergeButton);
+        toolbar.add(matchButton);
         toolbar.add(unMergeButton);
         toolbar.addSeparator();
         toolbar.add(deleteButton);
@@ -181,77 +190,29 @@ public class UpdateWindow extends JFrame {
         tableModel.fireTableDataChanged();
         
     }
-    
-    
-//    /**
-//     * Checks to see if the current selection is candidate for merging.
-//     */
-//    private boolean isSelectionMergeable() {
-//        if (treeTable.getSelectedRowCount() != 2) {
-//            return false;
-//        }
-//
-//        MergeNode a = (MergeNode) treeTable.getPathForRow(
-//            treeTable.getSelectedRows()[0]).getLastPathComponent();
-//        MergeNode b = (MergeNode) treeTable.getPathForRow(
-//            treeTable.getSelectedRows()[1]).getLastPathComponent();
-//        if (a.isJoined() || b.isJoined()) {
-//            return false;
-//        }
-//        return ((a.getFeature() == null && b.getFeature() != null) || (b.getFeature() == null && a.getFeature() != null));
-//    }
-
-    private void acceptTheirs() {
-//        for (MergeNode node : getLeaves()) {
-//            if(node.isLeaf()) {
-//                if(node.getFeature() == null) {
-//                    treeModel.setValueAt(MergeAction.DELETE, node, MergeTreeTableModel.ACTION_COLUMN);
-//                } else if (node.getEntity() == null) {
-//                    treeModel.setValueAt(MergeAction.UPDATE, node, MergeTreeTableModel.ACTION_COLUMN);
-//                }
-//            }
-//        }
-    }
-
-    /**
-     * Merges an unmatched existing entity with an unmatched imported feature
-     */
-//    private void mergeSelection() {
-//        MergeNode a = (MergeNode) treeTable.getPathForRow(
-//            treeTable.getSelectedRows()[0]).getLastPathComponent();
-//        MergeNode b = (MergeNode) treeTable.getPathForRow(
-//            treeTable.getSelectedRows()[1]).getLastPathComponent();
-//
-//        MergeNode entityNode;
-//        MergeNode featureNode;
-//
-//        if (a.getEntity() != null) {
-//            entityNode = a;
-//            featureNode = b;
-//        } else {
-//            entityNode = b;
-//            featureNode = a;
-//        }
-//
-//        entityNode.setFeature(b.getFeature());
-//
-//        treeModel.fireNodeChanged(entityNode);
-//        treeModel.removeNodeFromParent(featureNode);
-//    }
 
     /**
      * Updates the server with the imported features.
      */
     private void update() {
-//
-//        List<AdminEntity> entities = Lists.newArrayList();
+
+//        java.util.List<AdminEntity> entities = Lists.newArrayList();
 //        	
-//        for (MergeNode join : getLeaves()) {
-//            if (join.getAction() != null && join.getAction() != MergeAction.IGNORE) {
-//                AdminEntity unit = new AdminEntity();
-//                if (join.getEntity() != null) {
-//                    unit.setId(join.getEntity().getId());
+//        for (MatchRow match : mergeModel.getMatches()) {
+//            AdminEntity unit = new AdminEntity();
+//            if(match.isTargetMatched() && match.isDeleted()) {
+//                unit.setId(CuidAdapter.getLegacyIdFromCuid(mergeModel.getTargetId(match)));
+//                unit.setDeleted(true);
+//            
+//            } else if(!match.isDeleted()) {
+//                if(match.isTargetMatched()) {
+//                    unit.setId(CuidAdapter.getLegacyIdFromCuid(mergeModel.getTargetId(match)));
 //                }
+//                unit.setName();
+//            
+//            if (join.getEntity() != null) {
+//                unit.setId(join.getEntity().getId());
+//            }
 //                if (join.getFeature() != null) {
 //                    unit.setName(join.getFeature().getAttributeStringValue(form.getNameProperty()));
 //                    if (form.getCodeProperty() != null) {
@@ -293,10 +254,24 @@ public class UpdateWindow extends JFrame {
     public boolean isSelectionMergeable() {
         if (table.getSelectedRowCount() == 2) {
             int selectedRows[] = table.getSelectedRows();
-            return !mergeModel.getMatch(selectedRows[0]).isMerged() &&
-                   !mergeModel.getMatch(selectedRows[1]).isMerged();
+            MatchRow a = mergeModel.getMatch(selectedRows[0]);
+            MatchRow b = mergeModel.getMatch(selectedRows[1]);
+            
+            return a.canMatch(b);
         } else {
             return false;
         }
+    }
+
+
+    private void matchSelection() {
+        Preconditions.checkState(isSelectionMergeable());
+
+        int[] selectedRows = table.getSelectedRows();
+        
+        mergeModel.match(selectedRows[0], selectedRows[1]);
+        
+        tableModel.fireTableRowsUpdated(selectedRows[0], selectedRows[0]);
+        tableModel.fireTableRowsDeleted(selectedRows[1], selectedRows[1]);
     }
 }

@@ -39,6 +39,7 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addResourceId(CursorObserver<ResourceId> observer) {
+        baseCursor.addResourceId(observer);
     }
 
     @Override

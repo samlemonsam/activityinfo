@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class MergeForm {
 
+    public static final String ID_COLUMN = "_id";
     private FormTree tree;
     private ColumnSet columnSet;
     private List<MergeColumn> textFields = new ArrayList<>();
@@ -46,6 +47,8 @@ public class MergeForm {
 
     private QueryModel queryModel(ResourceId resourceId) {
         QueryModel queryModel = new QueryModel(resourceId);
+        queryModel.selectResourceId().as(ID_COLUMN);
+        
         for (FormTree.Node node : this.tree.getLeaves()) {
             if(node.getType() instanceof TextType) {
                 queryModel
@@ -53,6 +56,9 @@ public class MergeForm {
                         .as(node.getFieldId().asString());
             }
         }
+        
+        
+        
         return queryModel;
     }
 
@@ -76,5 +82,9 @@ public class MergeForm {
 
     public List<MergeColumn> getTextFields() {
         return textFields;
+    }
+    
+    public ResourceId getId(int rowIndex) {
+        return ResourceId.valueOf(columnSet.getColumnView(ID_COLUMN).getString(rowIndex));
     }
 }
