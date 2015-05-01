@@ -37,6 +37,7 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout.VBoxLayoutAlign;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayoutData;
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -161,17 +162,21 @@ public class ExportDialog extends Dialog {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 final String exportId = response.getText();
-                getDownloadUrl(exportId).then(new AsyncCallback<String>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        showError();
-                    }
+                if(Strings.isNullOrEmpty(exportId)) {
+                    showError();
+                } else {
+                    getDownloadUrl(exportId).then(new AsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            showError();
+                        }
 
-                    @Override
-                    public void onSuccess(String downloadUrl) {
-                        initiateDownload(downloadUrl);
-                    }
-                });
+                        @Override
+                        public void onSuccess(String downloadUrl) {
+                            initiateDownload(downloadUrl);
+                        }
+                    });
+                }
             }
 
             @Override
