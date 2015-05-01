@@ -54,18 +54,7 @@ public class SchemaCache implements DispatchListener {
     @Inject
     public SchemaCache(DispatchEventSource source) {
 
-        source.registerProxy(GetSchema.class, new SchemaProxy());
-        source.registerProxy(GetFormViewModel.class, new FormViewProxy());
-        source.registerListener(GetSchema.class, this);
-        source.registerListener(UpdateEntity.class, this);
-        source.registerListener(CreateEntity.class, this);
-        source.registerListener(AddPartner.class, this);
-        source.registerListener(RemovePartner.class, this);
-        source.registerListener(RequestChange.class, this);
-        source.registerListener(BatchCommand.class, this);
-        source.registerListener(GetFormViewModel.class, this);
-        source.registerListener(BatchCommand.class, this);
-        source.registerListener(Delete.class, this);
+        initSource(source, this);
 
         schemaEntityTypes.add("UserDatabase");
         schemaEntityTypes.add("Activity");
@@ -79,6 +68,20 @@ public class SchemaCache implements DispatchListener {
         schemaEntityTypes.add("LocationType");
     }
 
+    public static void initSource(DispatchEventSource source, SchemaCache cache) {
+        source.registerProxy(GetSchema.class, cache.new SchemaProxy());
+        source.registerProxy(GetFormViewModel.class, cache.new FormViewProxy());
+        source.registerListener(GetSchema.class, cache);
+        source.registerListener(UpdateEntity.class, cache);
+        source.registerListener(CreateEntity.class, cache);
+        source.registerListener(AddPartner.class, cache);
+        source.registerListener(RemovePartner.class, cache);
+        source.registerListener(RequestChange.class, cache);
+        source.registerListener(BatchCommand.class, cache);
+        source.registerListener(GetFormViewModel.class, cache);
+        source.registerListener(BatchCommand.class, cache);
+        source.registerListener(Delete.class, cache);
+    }
 
     @Override
     public void beforeDispatched(Command command) {

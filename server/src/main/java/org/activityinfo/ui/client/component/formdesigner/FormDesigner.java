@@ -75,7 +75,7 @@ public class FormDesigner {
         headerPresenter = new HeaderPresenter(this);
         headerPresenter.show();
 
-        new FormDesignerActions(this); // init actions
+        FormDesignerActions.create(this); // init actions
     }
 
 

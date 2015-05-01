@@ -17,11 +17,15 @@ import java.util.logging.Logger;
 
 class IndicatorSymbolResolver implements PlaceholderExprResolver {
 
+    public static interface Updator {
+        void run();
+    }
+
     private SiteDTO site;
     private int activityId;
 
     private Map<String, Supplier<Double>> symbolMap = Maps.newHashMap();
-    private List<Runnable> calculatedValueUpdaters = Lists.newArrayList();
+    private List<Updator> calculatedValueUpdaters = Lists.newArrayList();
 
     private static final Logger LOGGER = Logger.getLogger(IndicatorSymbolResolver.class.getName());
 
@@ -60,7 +64,7 @@ class IndicatorSymbolResolver implements PlaceholderExprResolver {
     }
 
     public void populateCalculatedIndicators() {
-        for(Runnable updaters : calculatedValueUpdaters) {
+        for (Updator updaters : calculatedValueUpdaters) {
             updaters.run();
         }
     }
@@ -140,7 +144,7 @@ class IndicatorSymbolResolver implements PlaceholderExprResolver {
         }
     }
 
-    private class CalculatedValueUpdater implements Runnable {
+    private class CalculatedValueUpdater implements Updator {
 
         private int integerId;
         private Supplier<Double> value;
