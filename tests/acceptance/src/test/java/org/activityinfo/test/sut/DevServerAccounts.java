@@ -50,7 +50,6 @@ public class DevServerAccounts implements Accounts {
     public DevServerAccounts() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            insertUsers(Arrays.asList("qa_manual@bedatadriven.com"));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("MySQL driver is not on the classpath", e);
         }
