@@ -32,8 +32,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.report.output.StorageProvider;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -47,6 +45,7 @@ import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Exports complete data to an Excel file
@@ -56,17 +55,13 @@ import java.util.Map;
 @Singleton
 public class ExportSitesServlet extends HttpServlet {
     public static final String X_AI_STORAGE_PROXY = "X-AI-Storage-Proxy";
-    private DispatcherSync dispatcher;
-    private StorageProvider storageProvider;
     private Provider<AuthenticatedUser> authenticatedUserProvider;
     private SecureRandom random = new SecureRandom();
 
+    private static final Logger LOGGER = Logger.getLogger(ExportSitesServlet.class.getName());
+    
     @Inject
-    public ExportSitesServlet(DispatcherSync dispatcher,
-                              StorageProvider storageProvider,
-                              Provider<AuthenticatedUser> authenticatedUserProvider) {
-        this.dispatcher = dispatcher;
-        this.storageProvider = storageProvider;
+    public ExportSitesServlet(Provider<AuthenticatedUser> authenticatedUserProvider) {
         this.authenticatedUserProvider = authenticatedUserProvider;
     }
 
@@ -93,6 +88,9 @@ public class ExportSitesServlet extends HttpServlet {
 
         QueueFactory.getDefaultQueue().add(options);
 
+        LOGGER.info("Enqueued export with id " + exportId + " on behalf of " +
+            authenticatedUserProvider.get().getEmail());
+        
         resp.setStatus(HttpServletResponse.SC_ACCEPTED);
         resp.getOutputStream().print(exportId);
     }
@@ -101,6 +99,11 @@ public class ExportSitesServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String exportId = req.getParameter("id");
+        
+        if(Strings.isNullOrEmpty(exportId)) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
         // First determine whether the file is available
         GcsService gcs = GcsServiceFactory.createGcsService();
