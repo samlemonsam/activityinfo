@@ -60,7 +60,7 @@ public class FormParser {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             root = builder.parse(source).getDocumentElement();
         } catch (Exception e) {
-            e.printStackTrace();
+            // return null, it's valid value
         }
         return root;
     }

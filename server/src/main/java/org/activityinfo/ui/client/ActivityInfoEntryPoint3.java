@@ -91,7 +91,7 @@ public class ActivityInfoEntryPoint3 implements EntryPoint {
         endpoint.setServiceEntryPoint(moduleRelativeURL);
 
         CacheManager cacheManager = new CacheManager(eventBus);
-        new SchemaCache(cacheManager);
+        SchemaCache.initSource(cacheManager, new SchemaCache(cacheManager));
 
         AuthenticatedUser auth = new ClientSideAuthProvider().get();
 
