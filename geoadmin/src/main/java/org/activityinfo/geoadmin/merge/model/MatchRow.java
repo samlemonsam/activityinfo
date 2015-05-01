@@ -60,7 +60,7 @@ public class MatchRow {
      * @return {@code true} if this {@code MatchRow} "fits" with an other MatchRow 
      */
     public boolean canMatch(MatchRow other) {
-        return !isTargetMatched() && 
+        return !isMatched() && 
                 isTargetMatched() == !other.isTargetMatched() &&
                 isSourceMatched() == !other.isSourceMatched();
     }

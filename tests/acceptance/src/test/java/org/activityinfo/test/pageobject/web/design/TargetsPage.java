@@ -1,11 +1,15 @@
 package org.activityinfo.test.pageobject.web.design;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
@@ -44,11 +48,31 @@ public class TargetsPage {
     }
     
     public void setValue(String indicatorName, String value) {
+        expandTree(indicatorName); // expand tree first
         valueGrid().findCell(indicatorName, "value").edit(value);
     }
-    
+
     public void setValue(String indicatorName, Double value) {
+        expandTree(indicatorName); // expand tree first
         valueGrid().findCell(indicatorName, "value").edit(Double.toString(value));
+    }
+
+    private void expandTree(String indicatorName) {
+        GxtTree tree = GxtTree.treeGrid(container);
+        try {
+            tree.waitUntil(new Predicate<GxtTree>() {
+                @Override
+                public boolean apply(GxtTree tree) {
+                    Optional<GxtTree.GxtNode> root = tree.firstRootNode();
+                    boolean loaded = root.isPresent() && root.get().joint().firstIfPresent().isPresent();
+                    return !loaded;
+                }
+            });
+            tree.search(indicatorName).get().select();
+        } catch (WebDriverException e) { // revisit it later
+            // unknown error: cannot focus element on key down
+        }
+        Preconditions.checkState(tree.firstRootNode().get().joint().firstIfPresent().isPresent());
     }
 }
 

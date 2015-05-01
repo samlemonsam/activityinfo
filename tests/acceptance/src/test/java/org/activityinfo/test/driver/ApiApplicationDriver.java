@@ -200,7 +200,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("name", form.getAlias());
         properties.put("databaseId", form.getId("database")); 
         properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC)));
-        
+        properties.put("classicView", form.getBoolean("classicView", true));
+
         switch (form.getString("reportingFrequency", "once")) {
             case "monthly":
                 properties.put("reportingFrequency", 1);
@@ -240,6 +241,14 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("activityId", field.getId("form"));
             properties.put("type", field.getString("type"));
             properties.put("units", field.getString("units", "parsects"));
+
+            // switch also server nameInExpression -> code
+            properties.put("nameInExpression", field.getString("code", field.getAlias()));
+
+            if (field.getBoolean("calculatedAutomatically", false)) {
+                properties.put("calculatedAutomatically", true);
+                properties.put("expression", field.getString("expression"));
+            }
 
             createEntityAndBindId("Indicator", properties);
         }

@@ -93,7 +93,7 @@ public class FluentElement {
     
     public <T> T waitFor(Function<WebDriver, T> function) {
         WebDriverWait wait = new WebDriverWait(webDriver, 30);
-        return wait.until(function);     
+        return wait.until(function);
     }
     
     public FluentElement findElement(By by) {
@@ -159,5 +159,10 @@ public class FluentElement {
 
     public String getTagName() {
         return element().getTagName();
+    }
+
+    public FluentElement clear() {
+        element.clear();
+        return this;
     }
 }

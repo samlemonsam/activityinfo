@@ -2,6 +2,9 @@ package org.activityinfo.test.sut;
 
 import org.activityinfo.test.config.ConfigProperty;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 /**
  * Provides information about and access to the deployment of the
  * server currently under test
@@ -25,6 +28,14 @@ public class Server {
 
     public String getRootUrl() {
         return path("");
+    }
+    
+    public URI getRootUri() {
+        try {
+            return new URI(getRootUrl());
+        } catch (URISyntaxException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public String path(String path) {

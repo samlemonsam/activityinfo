@@ -141,7 +141,8 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         TextField field = new TextField<String>();
         field.setAllowBlank(true);
 
-        IndicatorDTO indicatorById = getActivityDto().getIndicatorById(targetValueDTO.getIndicatorId());
+        IndicatorDTO indicatorById = presenter.getActivityFormDTO(getActivityDto()).
+                getIndicatorById(targetValueDTO.getIndicatorId());
         FieldTypeClass type = indicatorById.getType();
         if (type == FieldTypeClass.QUANTITY) {
             field = new NumberField();
@@ -169,8 +170,8 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         });
     }
 
-    private ActivityFormDTO getActivityDto() {
-        return (ActivityFormDTO) tree.getStore().getAt(0);
+    private ActivityDTO getActivityDto() {
+        return (ActivityDTO) tree.getStore().getAt(0);
     }
 
     @Override

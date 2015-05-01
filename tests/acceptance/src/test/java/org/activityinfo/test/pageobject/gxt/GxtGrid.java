@@ -5,23 +5,16 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.driver.TableData;
-import org.activityinfo.test.pageobject.api.FluentElements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 
 public class GxtGrid {
@@ -33,6 +26,12 @@ public class GxtGrid {
     public static FluentIterable<GxtGrid> findGrids(FluentElement container) {
         return container.findElements(By.className("x-grid3")).topToBottom().as(GxtGrid.class);
     }
+
+    public static FluentIterable<GxtGrid> waitForGrids(FluentElement container) {
+        container.waitFor(By.className("x-grid3"));
+        return findGrids(container);
+    }
+
     
     public GxtGrid(FluentElement container) {
         this.container = container;
@@ -79,11 +78,9 @@ public class GxtGrid {
     }
 
     public GxtCell findCell(String rowText, String columnId) {
-        return new GxtCell(container.find()
-                .anyElement(withText(rowText))
-                .ancestor().div(withClass("x-grid3-row"))
-                .descendants().td(withClass("x-grid3-td-" + columnId))
-                .first());
+        FluentElement nodeWithText = container.find().anyElement(withText(rowText)).first();
+        FluentElement ancestor = nodeWithText.find().ancestor().div(withClass("x-grid3-row")).first();
+        return new GxtCell(ancestor.find().descendants().td(withClass("x-grid3-td-" + columnId)).first());
     }
 
     public void waitUntilAtLeastOneRowIsLoaded() {
@@ -109,11 +106,19 @@ public class GxtGrid {
         public GxtCell(FluentElement element) {
             this.element = element;
         }
-        
+
         public void edit(String value) {
+            edit(value, "x-grid-editor") ;
+        }
+
+        public void editTreeGrid(String value) {
+            edit(value, "x-grid3-col-value");
+        }
+
+        public void edit(String value, String editCellClassName) {
             element.click();
 
-            final FluentElement input = container.find().div(withClass("x-grid-editor")).input().waitForFirst();
+            final FluentElement input = container.find().div(withClass(editCellClassName)).input().waitForFirst();
             input.sendKeys(value);
             input.sendKeys(Keys.TAB);
             container.waitUntil(new Predicate<WebDriver>() {

@@ -20,6 +20,8 @@ dependencies {
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
     testCompile libraries.bcrypt
     testCompile libraries.metrics.core
+    testCompile libraries.jersey.server
+    testCompile libraries.jersey.simpleServer
 
     testCompile libraries.c3p0
     testCompile 'org.apache.poi:poi:3.8'
@@ -153,7 +155,7 @@ tasks.each { task ->
 
             doFirst {
                 systemProperties.putAll(project.environment.systemProperties)
-      
+
                 // Keep console output to a minimum
                 testLogging {
                     showStandardStreams = false
@@ -163,8 +165,17 @@ tasks.each { task ->
             systemProperty 'webdriver', project.property('webdriver')
             systemProperty 'webdriver.chrome.silentOutput', 'true'
 
+            // When running the tests locally, the test code should start a server to 
+            // listen for postmark mail sending requests at the given port
+            if (project.environment.local) {
+                systemProperty 'postmarkStubPort', project.property('postmarkStubPort')
+            }
 
-            if(project.hasProperty("phantomjsPath")) {
+            if (project.hasProperty('mailinatorApiKey')) {
+                systemProperty 'mailinatorApiKey', project.property('mailinatorApiKey')
+            }
+
+            if (project.hasProperty("phantomjsPath")) {
                 systemProperty "phantomjsPath", project.property("phantomjsPath")
             }
         }

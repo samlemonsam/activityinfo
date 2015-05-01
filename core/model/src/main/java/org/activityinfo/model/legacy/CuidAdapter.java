@@ -118,6 +118,9 @@ public class CuidAdapter {
         return cuid(PARTNER_DOMAIN, partnerId);
     }
 
+    public static ResourceId projectInstanceId(int projectId) {
+        return cuid(PROJECT_DOMAIN, projectId);
+    }
     /**
      * @return the {@code FormField}  ResourceId for the Location field of a given Activity {@code FormClass}
      */
@@ -175,6 +178,17 @@ public class CuidAdapter {
     }
 
     /**
+     * @return the {@code FormField} ResourceId for the Partner field of a given Activity {@code FormClass}
+     */
+    public static ResourceId partnerField(int activityId) {
+        return field(activityFormClass(activityId), PARTNER_FIELD);
+    }
+
+    public static ResourceId projectField(int activityId) {
+        return field(activityFormClass(activityId), PROJECT_FIELD);
+    }
+
+    /**
      * @return the {@code FormField} ResourceId for the indicator field within a given
      * Activity {@code FormClass}
      */
@@ -215,11 +229,11 @@ public class CuidAdapter {
     }
 
     /**
-     * @param partnerId the id of the partner
+     * @param databaseId the id of the database
      * @return the {@code FormClass} ResourceId for a given database's list of partners.
      */
-    public static ResourceId partnerFormClass(int partnerId) {
-        return cuid(PARTNER_FORM_CLASS_DOMAIN, partnerId);
+    public static ResourceId partnerFormClass(int databaseId) {
+        return cuid(PARTNER_FORM_CLASS_DOMAIN, databaseId);
     }
 
     /**

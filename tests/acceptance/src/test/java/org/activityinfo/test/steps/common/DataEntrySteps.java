@@ -52,7 +52,6 @@ public class DataEntrySteps {
       
     }
 
-
     @When("^I update the submission with:$")
     public void I_update_the_submission_with(List<FieldValue> values) throws Throwable {
         driver.updateSubmission(values);
@@ -96,6 +95,16 @@ public class DataEntrySteps {
                 containsString("added the entry"),
                 containsString(new LocalDate().toString("dd-MM-YYYY"))));
     }
-    
 
+    @Then("^the submission's detail shows:$")
+    public void the_submission_s_detail_shows(List<FieldValue> values) throws Throwable {
+        driver.getDetails().assertVisible(changeNamesToAlias(values));
+    }
+
+    private List<FieldValue> changeNamesToAlias(List<FieldValue> values) {
+        for (FieldValue value : values) {
+            value.setField(driver.getAliasTable().getAlias(value.getField()));
+        }
+        return values;
+    }
 }

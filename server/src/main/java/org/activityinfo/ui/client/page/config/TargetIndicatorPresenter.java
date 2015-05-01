@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
@@ -33,10 +34,7 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.state.StateProvider;
-import org.activityinfo.legacy.shared.command.BatchCommand;
-import org.activityinfo.legacy.shared.command.Command;
-import org.activityinfo.legacy.shared.command.Delete;
-import org.activityinfo.legacy.shared.command.UpdateTargetValue;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -66,7 +64,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     private final EventBus eventBus;
     private final Dispatcher service;
     private final View view;
-    private final UiConstants messages;
+    private final Map<ActivityDTO, ActivityFormDTO> activities = Maps.newHashMap();
     private TargetDTO targetDTO;
 
     private UserDatabaseDTO db;
@@ -82,7 +80,6 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         this.eventBus = eventBus;
         this.service = service;
         this.view = view;
-        this.messages = messages;
     }
 
     public void go(UserDatabaseDTO db) {
@@ -121,14 +118,30 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
                 }
 
                 treeStore.add(actCategoryLink, activity, false);
-                //addIndicatorLinks(activity, activity);
+                addIndicator(activity, activity);
 
             } else {
                 treeStore.add(activity, false);
-                //addIndicatorLinks(activity, activity);
+                addIndicator(activity, activity);
             }
 
         }
+    }
+
+    private void addIndicator(final ActivityDTO activity, final ModelData parent) {
+        service.execute(new GetActivityForm(activity.getId())).then(new Function<ActivityFormDTO, Object>() {
+            @Override
+            public Object apply(ActivityFormDTO input) {
+                activities.put(activity, input);
+                addIndicatorLinks(input, parent);
+                view.expandAll();
+                return null;
+            }
+        });
+    }
+
+    public ActivityFormDTO getActivityFormDTO(ActivityDTO activity) {
+        return activities.get(activity);
     }
 
     private void addIndicatorLinks(ActivityFormDTO activity, ModelData parent) {
@@ -321,19 +334,15 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     @Override
     public PageId getPageId() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean navigate(PageState place) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void shutdown() {
-        // TODO Auto-generated method stub
-
     }
 }

@@ -80,7 +80,11 @@ public class LoginSteps {
 
     @Then("^I should receive a message that my browser is not unsupported$")
     public void I_should_receive_a_message_that_my_browser_is_unsupported() throws Throwable {
-        loginPage
-            .assertBrowserUnsupportedPageIsVisible();
+        loginPage.assertBrowserUnsupportedPageIsVisible();
+    }
+
+    @When("^I logout$")
+    public void I_logout() throws Throwable {
+        applicationPage.openSettingsMenu().logout();
     }
 }

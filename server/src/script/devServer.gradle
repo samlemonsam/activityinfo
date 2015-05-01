@@ -14,6 +14,10 @@ def writeConfiguration(MySqlDatabase database) {
     config.setProperty("hibernate.connection.username", database.server.username)
     config.setProperty("hibernate.connection.password", database.server.password)
     config.setProperty("hibernate.connection.url", database.url)
+    
+    // Point to the postmark stub service
+    config.setProperty("postmark.url", "http://localhost:${postmarkStubPort}/email")
+    config.setProperty("postmark.key", "POSTMARK_API_TEST")
 
     configFile.withOutputStream { OutputStream out ->
         config.store(out, "Acceptance Test Configuration")

@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql
 
 import com.mysql.jdbc.Driver
-
+import java.util.logging.Logger
 import java.sql.Connection
 
 /**
@@ -31,6 +31,8 @@ class MySqlServer {
     }
     
     Connection connect(String databaseName) {
+        Logger logger = Logger.getLogger(MySqlServer.class.getName())
+        logger.info("Connecting to database:" + databaseName + ", host: " + host + ", port: " + port + ", user:" + username)
 
         def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true&characterEncoding=UTF-8"
         def driver = new Driver()

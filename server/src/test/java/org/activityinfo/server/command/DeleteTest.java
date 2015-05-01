@@ -40,6 +40,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Collection;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
@@ -117,7 +118,6 @@ public class DeleteTest extends CommandTestCase {
         execute(new Delete("LocationType", locationTypeId));
 
         schema = execute(new GetSchema());
-        assertNull(schema.getLocationTypeById(locationTypeId)); // assert location type do not exist after deletion
-        
+        assertTrue(schema.getLocationTypeById(locationTypeId).isDeleted()); // assert "delete" flag is set
     }
 }

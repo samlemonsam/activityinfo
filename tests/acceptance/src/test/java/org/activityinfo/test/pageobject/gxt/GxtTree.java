@@ -1,15 +1,16 @@
 package org.activityinfo.test.pageobject.gxt;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
+import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -52,10 +53,10 @@ public class GxtTree {
     public GxtNode findNode(String... path) {
         NavigatingVisitor visitor = new NavigatingVisitor(Arrays.asList(path));
         accept(visitor);
-        
+
         return visitor.get();
     }
-    
+
     /**
      * Searches, breadth-first, through the tree for a node with the given label.
      *
@@ -69,7 +70,7 @@ public class GxtTree {
 
         SearchingVisitor visitor = SearchingVisitor.byLabel(label);
         accept(visitor);
-        
+
         return visitor.getMatch();
     }
 
@@ -88,8 +89,17 @@ public class GxtTree {
     }
 
     public void waitUntilLoaded() {
+        waitUntil(new Predicate<GxtTree>() {
+            @Override
+            public boolean apply(GxtTree tree) {
+                return isEmpty();
+            }
+        });
+    }
+
+    public void waitUntil(Predicate<GxtTree> predicate) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        while(isEmpty()) {
+        while(predicate.apply(this)) {
             try {
                 Thread.sleep(150);
             } catch (InterruptedException e) {
@@ -100,7 +110,7 @@ public class GxtTree {
             }
         }
     }
-    
+
     /**
      * Advances to the next node in the tree using the Keyboard
      * so that we don't have problems with scrolling
@@ -112,24 +122,33 @@ public class GxtTree {
         if(!selected.isPresent()) {
             return Optional.absent();
         }
-        
+
         if(selected.get().getId().equals(currentId)) {
             return Optional.absent();
         }
-        
+
         return selected;
     }
 
-    
+
     public Optional<GxtNode> findSelected() {
+        // tree
         Optional<FluentElement> element = container.find().div(withClass("x-ftree2-selected")).parent().div().firstIfPresent();
         if(element.isPresent()) {
             return Optional.of(new GxtNode(element.get()));
         } else {
-            return Optional.absent();            
+            try { // tree grid
+                Optional<FluentElement> selected = container.find().td(withClass("x-grid3-cell-selected")).firstIfPresent();
+                if (selected.isPresent()) {
+                    return Optional.of(new GxtNode(selected.get()));
+                }
+            } catch (Throwable e) {
+                // eat it
+            }
+            return Optional.absent();
         }
     }
-    
+
     public void setChecked(String... labels) {
         setChecked(Sets.newHashSet(labels));
     }
@@ -144,8 +163,8 @@ public class GxtTree {
     private FluentIterable<GxtNode> findRootNodes() {
         return container.findElements(By.xpath(xPathProvider.root())).as(GxtNode.class);
     }
-    
-    private Optional<GxtNode> firstRootNode() {
+
+    public Optional<GxtNode> firstRootNode() {
         return container.findElements(By.xpath(xPathProvider.firstRoot())).as(GxtNode.class).first();
     }
 
@@ -166,7 +185,7 @@ public class GxtTree {
     private AssertionError assertionError(String message, Object... args) {
         return new AssertionError(String.format(message, args) + dumpTree());
     }
-    
+
     private String dumpTree() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nTree:\n");
@@ -197,22 +216,25 @@ public class GxtTree {
 
         private XPathBuilder treeItem() {
 
+            // tree
             XPathBuilder treeItem = element.find().child().div(withRole("treeitem"));
-            if (treeItem.exists()) { // tree
+            if (treeItem.exists()) {
                 return treeItem;
             }
-            treeItem = element.find().child().div(withClass("x-tree3-el"));
-            if (treeItem.exists()) { // tree grid
+
+            // tree grid
+            treeItem = element.find().div(withClass("x-tree3-el"));
+            if (treeItem.exists()) {
                 return treeItem;
             }
 
             throw new RuntimeException("Failed to find treeItem");
         }
-        
-        private XPathBuilder joint() {
+
+        public XPathBuilder joint() {
             return treeItem().descendants().img(withClass("x-tree3-node-joint"));
         }
-        
+
         public boolean isLeaf() {
             Optional<FluentElement> joint = joint().firstIfPresent();
             if(!joint.isPresent()) {
@@ -227,7 +249,7 @@ public class GxtTree {
                 return isLeaf();
             }
         }
-        
+
         private FluentIterable<GxtNode> children() {
             return childContainer()
                     .child().div(withRole("presentation"))
@@ -235,15 +257,28 @@ public class GxtTree {
         }
 
         private XPathBuilder childContainer() {
-            return element.find()
-                    .child().div(withRole("group"));
+            XPathBuilder childContainer = element.find().child().div(withRole("group"));
+            if (childContainer.exists()) { // tree
+                return childContainer;
+            }
+
+            try { // tree grid
+                Optional<FluentElement> parentRow = element.find().ancestor().div(withClass("x-grid3-row")).firstIfPresent();
+                if (parentRow.isPresent()) {
+                    childContainer = parentRow.get().find().followingSibling().div(withClass("x-grid3-row")).first().find().descendants().div(withClass("x-grid3-cell-inner"));
+                }
+            } catch (Throwable e) {
+                // eat it
+            }
+
+            return childContainer;
         }
-        
+
         public boolean isExpanded() {
             Optional<FluentElement> container = childContainer().firstIfPresent();
             return container.isPresent() && container.get().isDisplayed();
         }
-        
+
         public String getLabel() {
             FluentElement treeItem = treeItem().first();
             debugLabel = treeItem.text();
@@ -285,7 +320,7 @@ public class GxtTree {
             try {
                 joint().first().click();
             } catch (WebDriverException ignore) {
-                
+
             }
         }
 
@@ -304,11 +339,11 @@ public class GxtTree {
             return null;
         }
 
-        
+
         private FluentElement checkbox() {
             return treeItem().img(withClass("x-tree3-node-check")).first();
         }
-        
+
         private boolean isChecked(FluentElement checkbox) {
             // Because of the image spriting that GWT does, it's difficult to know which image is being displayed
             // It's unclear how stable the value below is

@@ -57,6 +57,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     private Extents countryBounds;
     private long version;
     private long childVersion;
+    private boolean deleted;
 
     public LocationTypeDTO() {
     }
@@ -130,9 +131,6 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     }
 
     public List<AdminLevelDTO> getAdminLevels() {
-        if (adminLevels == null) {
-            adminLevels = new ArrayList<>();
-        }
         return adminLevels;
     }
 
@@ -162,5 +160,13 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
 
     public void setVersion(long version) {
         this.version = version;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

@@ -9,7 +9,9 @@ dependencies {
     compile project(':io:match')
     
     compile project(':store:mysql')
-    
+
+    testCompile project(':core:model').sourceSets.test.output
+
     // AppEngine
     appengineSdk libraries.appengine.sdk
     compile libraries.appengine.api

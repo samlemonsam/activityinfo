@@ -65,7 +65,7 @@ public class DatabaseSetupSteps {
     @Given("^I have created a form named \"([^\"]*)\" with location type \"([^\"]*)\"$")
     public void I_have_created_a_form_named_with_location_type(String name, String locationType) throws Throwable {
         driver.setup().createForm(
-                name(name), 
+                name(name),
                 property("locationType", locationType),
                 property("database", getCurrentDatabase()));
     }
@@ -83,6 +83,28 @@ public class DatabaseSetupSteps {
                 property("type", fieldType));
     }
 
+    @And("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\"$")
+    public void I_have_created_a_quantity_field_in_with_code(String fieldName, String formName, String fieldCode) throws Throwable {
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("code", fieldCode)
+        );
+
+        this.currentForm = formName;
+    }
+
+    @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
+    public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("expression", expression),
+                property("calculatedAutomatically", true));
+    }
+
 
     @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
@@ -90,7 +112,7 @@ public class DatabaseSetupSteps {
         
         I_have_created_a_field_in(fieldType, fieldName, currentForm);
     }
-    
+
     @Given("^I have created a enumerated field \"([^\"]*)\" with items:$")
     public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Throwable {
         Preconditions.checkState(currentForm != null, "No current form");
@@ -237,9 +259,17 @@ public class DatabaseSetupSteps {
     }
 
     @Then("^Location type \"(.*?)\" should be visible\\.$")
-    public void location_type_should_appear_in_tree(String locationTypeName) throws Throwable {
+    public void location_type_should_be_visible(String locationTypeName) throws Throwable {
         driver.assertVisible(ObjectType.LOCATION_TYPE, true,
                 new Property("name", locationTypeName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
+    @Then("^Form \"(.*?)\" should be visible\\.$")
+    public void form_should_be_visible(String formName) throws Throwable {
+        driver.assertVisible(ObjectType.FORM, true,
+                new Property("name", formName),
                 new Property("database", getCurrentDatabase())
         );
     }
@@ -274,6 +304,4 @@ public class DatabaseSetupSteps {
     public void I_open_a_new_session_as_(String user) throws Throwable {
         driver.login(accounts.ensureAccountExists(user));
     }
-
-
 }

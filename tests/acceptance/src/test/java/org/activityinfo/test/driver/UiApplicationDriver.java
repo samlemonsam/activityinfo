@@ -12,6 +12,7 @@ import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
@@ -187,6 +188,16 @@ public class UiApplicationDriver extends ApplicationDriver {
         return dataEntryTab.changes();
     }
 
+    public DetailsEntry getDetails() {
+        Preconditions.checkState(currentForm != null, "No current form");
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+        dataEntryTab.selectSubmission(0);
+
+        return dataEntryTab.details();
+    }
+
     @Override
     public void updateSubmission(List<FieldValue> values) throws Exception {
 
@@ -252,25 +263,16 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {
         ensureLoggedIn();
 
-        switch(objectType) {
-            case LOCATION_TYPE:
-                assertLocationTypeVisible(testObject, exists);
-                return;
-        }
-        throw new UnsupportedOperationException("Object type is not supported: " + objectType);
-    }
-
-    private void assertLocationTypeVisible(TestObject testObject, boolean exists) {
-        String locationTypeName = testObject.getAlias("name");
+        String name = testObject.getAlias("name");
 
         DesignTab designTab = applicationPage.navigateToDesignTab();
         designTab.selectDatabase(testObject.getAlias("database"));
-        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(locationTypeName);
+        Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(name);
 
         if (exists) {
-            Assert.assertTrue("Location type with name '" + locationTypeName + "' is not present.", node.isPresent());
+            Assert.assertTrue(objectType.name() + " with name '" + name + "' is not present.", node.isPresent());
         } else {
-            Assert.assertTrue("Location type with name '" + locationTypeName + "' is present.", !node.isPresent());
+            Assert.assertTrue(objectType.name() + " with name '" + name + "' is present.", !node.isPresent());
         }
     }
 
