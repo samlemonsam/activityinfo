@@ -38,6 +38,8 @@
                 name="Health Center" reuse="1"/>
   <locationType locationTypeId="3" countryId="1" name="Territorie" version="1" locationVersion="1"
                 reuse="1" BoundAdminLevelId="2"/>
+  <locationType locationTypeId="20301" countryId="1" name="Country"
+                reuse="1" BoundAdminLevelId="2"/>
 
   <adminEntity adminLevelId="1" adminEntityId="1" name="Kinshasa"
                code="10" x1="0" y1="0" x2="0" y2="0"/>

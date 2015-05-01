@@ -46,7 +46,12 @@ import java.util.List;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class LocationTypeDTO extends BaseModelData implements EntityDTO, IsFormClass {
 
-    public static int NAME_MAX_LENGTH = 50;
+    public static final int NOT_NATIONWIDE_LOCATION_TYPE_ID = 20301;
+
+    public static final String NATIONWIDE_NAME = "Country";
+
+    public static final int NAME_MAX_LENGTH = 50;
+
     private Integer databaseId;
     private List<AdminLevelDTO> adminLevels = new ArrayList<>();
     private Extents countryBounds;
@@ -92,7 +97,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
 
     public boolean isNationwide() {
         // hack!!
-        return "Country".equals(getName()) && getId() != 20301;
+        return NATIONWIDE_NAME.equals(getName()) && getId() != NOT_NATIONWIDE_LOCATION_TYPE_ID;
     }
 
     @JsonProperty("adminLevelId") @JsonView(DTOViews.Schema.class)
