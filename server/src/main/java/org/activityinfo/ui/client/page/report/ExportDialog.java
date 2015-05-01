@@ -37,7 +37,7 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout.VBoxLayoutAlign;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayoutData;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
