@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,6 +120,9 @@ public class DataEntryTab {
         }
 
         try {
+
+            System.out.println("Downloading export from " + url);
+            
             File file = File.createTempFile("export", ".xls");
             ByteStreams.copy(Resources.asByteSource(url), Files.asByteSink(file));
             return file;

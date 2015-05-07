@@ -22,6 +22,7 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.InputSupplier;
@@ -65,10 +66,24 @@ public class TempStorageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String keyName = parseBlobKey(req.getRequestURI());
+        String blobPath = "/temp/" + keyName;
 
+        // If this request includes a query string ?status=true, then
+        // just let the client know whether the export is ready for download.
+        if(!Strings.isNullOrEmpty(req.getParameter("status"))) {
+            try {
+                blobService.get(blobPath);
+                resp.setStatus(HttpServletResponse.SC_OK);
+            } catch (BlobNotFoundException e) {
+                resp.setStatus(HttpServletResponse.SC_ACCEPTED);
+            }
+            return;
+        } 
+        
+        // Otherwise serve the actual blob
         InputSupplier<? extends InputStream> inputSupplier;
         try {
-            inputSupplier = blobService.get("/temp/" + keyName);
+            inputSupplier = blobService.get(blobPath);
         } catch (BlobNotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;

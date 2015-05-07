@@ -22,9 +22,11 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
+import com.google.appengine.api.datastore.*;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Domain;
 import org.activityinfo.server.util.blob.BlobService;
 
@@ -33,18 +35,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.security.AuthProvider;
 import java.security.SecureRandom;
+import java.util.Date;
 
 public class BlobServiceStorageProvider implements StorageProvider {
 
     private final SecureRandom random = new SecureRandom();
     private final BlobService blobService;
     private final Provider<Domain> domainProvider;
+    private final Provider<AuthenticatedUser> authProvider;
 
+    private final DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+    
     @Inject
-    public BlobServiceStorageProvider(BlobService blobService, Provider<Domain> domainProvider) {
+    public BlobServiceStorageProvider(BlobService blobService, Provider<Domain> domainProvider, Provider<AuthenticatedUser> authProvider) {
         this.blobService = blobService;
         this.domainProvider = domainProvider;
+        this.authProvider = authProvider;
     }
 
     @Override
@@ -52,15 +60,71 @@ public class BlobServiceStorageProvider implements StorageProvider {
 
         String id = Long.toString(Math.abs(random.nextLong()), 16);
 
-        URI uri = UriBuilder.fromUri("https://" + domainProvider.get().getHost())
-                            .path("generated")
-                            .path(id)
-                            .path(filename)
-                            .build();
+        Entity metadata = new Entity(exportKey(id));
+        metadata.setUnindexedProperty("filename", filename);
+        metadata.setUnindexedProperty("mimeType", mimeType);
+        metadata.setProperty("creationDate", new Date());
+        
+        if(!authProvider.get().isAnonymous()) {
+            metadata.setUnindexedProperty("user", authProvider.get().getEmail());
+        }
+        datastoreService.put(metadata);            
 
-        return new TempStorage(uri.toString(), new TempOutputStream(id));
+        return new BlobExport(id, filename);
     }
 
+    private URI exportUri(String filename, String id) {
+        return UriBuilder.fromUri("https://" + domainProvider.get().getHost())
+                                .path("generated")
+                                .path(id)
+                                .path(filename)
+                                .build();
+    }
+
+    private Key exportKey(String id) {
+        return KeyFactory.createKey("Export", id);
+    }
+
+    @Override
+    public TempStorage get(String exportId) {
+        Entity metadata;
+        try {
+            metadata = datastoreService.get(exportKey(exportId));
+        } catch (EntityNotFoundException e) {
+            throw new IllegalStateException("No such id: " + exportId);
+        }
+        String filename = (String) metadata.getProperty("filename");
+        
+        return new BlobExport(exportId, filename);
+    }
+
+    private class BlobExport implements TempStorage {
+
+        private final String id;
+        private String filename;
+
+
+        private BlobExport(String id, String filename) {
+            this.id = id;
+            this.filename = filename;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String getUrl() {
+            return exportUri(filename, id).toString();
+        }
+
+        @Override
+        public OutputStream getOutputStream() throws IOException {
+            return new TempOutputStream(id);
+        }
+    }
+    
     private class TempOutputStream extends OutputStream {
 
         private ByteArrayOutputStream out = new ByteArrayOutputStream();

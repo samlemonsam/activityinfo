@@ -4,7 +4,6 @@ import com.sun.jersey.api.core.DefaultResourceConfig;
 import com.sun.jersey.simple.container.SimpleServerFactory;
 import org.activityinfo.test.config.ConfigProperty;
 
-import javax.ws.rs.Path;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;

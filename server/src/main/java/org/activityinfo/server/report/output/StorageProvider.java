@@ -36,4 +36,11 @@ public interface StorageProvider {
      */
     TempStorage allocateTemporaryFile(String mimeType, String filename) throws IOException;
 
+    /**
+     * Provides a handle for a previously allocated {@code TempStorage}
+     * @param exportId
+     * @return
+     */
+    TempStorage get(String exportId);
+
 }

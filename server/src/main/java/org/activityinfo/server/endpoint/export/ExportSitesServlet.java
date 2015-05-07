@@ -32,6 +32,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.report.output.StorageProvider;
+import org.activityinfo.server.report.output.TempStorage;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -56,13 +58,15 @@ import java.util.logging.Logger;
 public class ExportSitesServlet extends HttpServlet {
     public static final String X_AI_STORAGE_PROXY = "X-AI-Storage-Proxy";
     private Provider<AuthenticatedUser> authenticatedUserProvider;
+    private StorageProvider storageProvider;
     private SecureRandom random = new SecureRandom();
 
     private static final Logger LOGGER = Logger.getLogger(ExportSitesServlet.class.getName());
     
     @Inject
-    public ExportSitesServlet(Provider<AuthenticatedUser> authenticatedUserProvider) {
+    public ExportSitesServlet(Provider<AuthenticatedUser> authenticatedUserProvider, StorageProvider storageProvider) {
         this.authenticatedUserProvider = authenticatedUserProvider;
+        this.storageProvider = storageProvider;
     }
 
 
@@ -74,7 +78,7 @@ public class ExportSitesServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // Create a unique key from which the user can retrieve the file from GCS
-        String exportId = Long.toString(Math.abs(random.nextLong()), 16);
+        TempStorage export = storageProvider.allocateTemporaryFile("application/vnd.ms-excel", fileName());
 
         TaskOptions options = TaskOptions.Builder.withUrl(ExportSitesTask.END_POINT);
         for(Map.Entry<String, String[]> entry : req.getParameterMap().entrySet()) {
@@ -82,7 +86,7 @@ public class ExportSitesServlet extends HttpServlet {
         }
         options.param("userId", Integer.toString(authenticatedUserProvider.get().getId()));
         options.param("userEmail", authenticatedUserProvider.get().getEmail());
-        options.param("exportId", exportId);
+        options.param("exportId", export.get);
         options.param("filename", fileName());
         options.retryOptions(RetryOptions.Builder.withTaskRetryLimit(3));
 

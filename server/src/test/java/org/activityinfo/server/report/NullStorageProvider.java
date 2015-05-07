@@ -22,6 +22,7 @@ package org.activityinfo.server.report;
  * #L%
  */
 
+import com.google.common.io.ByteStreams;
 import org.activityinfo.server.report.output.StorageProvider;
 import org.activityinfo.server.report.output.TempStorage;
 
@@ -31,15 +32,30 @@ import java.io.OutputStream;
 public class NullStorageProvider implements StorageProvider {
 
     @Override
-    public TempStorage allocateTemporaryFile(String mimeType, String suffix)
-            throws IOException {
+    public TempStorage allocateTemporaryFile(String mimeType, String suffix)  throws IOException {
 
-        return new TempStorage("http://", new OutputStream() {
+        return newNullExport();
+    }
+
+    @Override
+    public TempStorage get(String exportId) {
+        return newNullExport();
+    }
+
+
+    private TempStorage newNullExport() {
+        return new TempStorage() {
 
             @Override
-            public void write(int b) throws IOException {
-                // NOOOP!
+            public String getUrl() {
+                return "http://";
             }
-        });
+
+            @Override
+            public OutputStream getOutputStream() throws IOException {
+                return ByteStreams.nullOutputStream();
+            }
+        };
     }
+
 }

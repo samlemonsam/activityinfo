@@ -56,7 +56,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class ItextReportRendererTest {
-    
+
     @BeforeClass
     public static void initLocale() {
         LocaleProxy.initialize();
@@ -553,12 +553,32 @@ public class ItextReportRendererTest {
         private static int nextId = 1;
 
         @Override
-        public TempStorage allocateTemporaryFile(String mimeType, String suffix)
-                throws IOException {
-            String fileName = (nextId++) + suffix;
-            File file = new File("target/report-tests/" + fileName);
-            return new TempStorage(file.toURI().toURL().toString(),
-                    new FileOutputStream(file));
+        public TempStorage allocateTemporaryFile(String mimeType, String suffix) throws IOException {
+            int id = nextId++;
+            return newExport("export" + id, suffix);
+        }
+
+
+        @Override
+        public TempStorage get(String exportId) {
+            throw new UnsupportedOperationException();
+        }
+
+        private TempStorage newExport(String id, String suffix) {
+            String fileName = id + suffix;
+            final File file = new File("target/report-tests/" + fileName);
+
+            return new TempStorage() {
+                @Override
+                public String getUrl() {
+                    return file.toURI().toString();
+                }
+
+                @Override
+                public OutputStream getOutputStream() throws IOException {
+                    return new FileOutputStream(file);
+                }
+            };
         }
     }
 }

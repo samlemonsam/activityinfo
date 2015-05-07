@@ -38,11 +38,21 @@ public class LocalStorageProvider implements StorageProvider {
     @Override
     public TempStorage allocateTemporaryFile(String mimeType, String suffix)
             throws IOException {
-        String path = folder + "/img" + Long.toString((new Date()).getTime())
-                + suffix;
-        OutputStream stream = new FileOutputStream(path);
+        final String path = folder + "/img" + Long.toString((new Date()).getTime()) + suffix;
 
-        return new TempStorage("file://" + path, stream);
+        return new TempStorage() {
+            @Override
+            public String getUrl() {
+                return "file://" + path;
+            }
+
+            @Override
+            public OutputStream getOutputStream() throws IOException {
+                return new FileOutputStream(path);
+            }
+
+            
+        };
     }
 
 }
