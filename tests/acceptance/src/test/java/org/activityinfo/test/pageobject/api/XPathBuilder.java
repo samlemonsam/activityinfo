@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 
@@ -188,7 +189,7 @@ public class XPathBuilder {
         try {
             return context.findElement(firstLocator());
         } catch (Exception e) {
-            throw new AssertionError("Could not locate element by XPath '" + toString() + "'", e);
+            throw new NoSuchElementException("Could not locate element by XPath '" + toString() + "'", e);
         }
     }
 
