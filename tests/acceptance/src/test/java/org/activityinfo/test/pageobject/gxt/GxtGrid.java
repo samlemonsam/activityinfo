@@ -5,23 +5,18 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.driver.TableData;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 
 public class GxtGrid {
@@ -49,6 +44,31 @@ public class GxtGrid {
         }
         
         return new GxtCell(cell.get());
+    }
+    
+    public void sortBy(String columnId) {
+        columnHeader(columnId).click();
+        try {
+            waitUntilReloaded();
+        } catch (InterruptedException e) {
+            throw new AssertionError("Interrupted while waiting for grid to reload");
+        }
+    }
+    
+    public FluentElement columnHeader(String columnId) {
+        return container.find().div(withClass("x-grid3-hd-" + columnId)).first();
+    }
+    
+    public List<String> columnValues(String columnId) {
+        FluentElements cells = container.find()
+                .div(withClass("x-grid3-cell-inner"), withClass("x-grid3-col-" + columnId))
+                .asList();
+        
+        List<String> values = new ArrayList<>();
+        for (FluentElement cell : cells) {
+            values.add(cell.text().trim());
+        }
+        return values;
     }
 
     private AssertionError makeAssertion(String text) {
@@ -84,6 +104,15 @@ public class GxtGrid {
                 .ancestor().div(withClass("x-grid3-row"))
                 .descendants().td(withClass("x-grid3-td-" + columnId))
                 .first());
+    }
+    
+    public void waitUntilReloaded() throws InterruptedException {
+        
+        // Wait until the loading mask appears
+        FluentElement loadingMask = container.root().waitFor(By.className("ext-el-mask"));
+
+        // Wait until it disappears...
+        loadingMask.waitUntil(ExpectedConditions.stalenessOf(loadingMask.element()));
     }
 
     public void waitUntilAtLeastOneRowIsLoaded() {

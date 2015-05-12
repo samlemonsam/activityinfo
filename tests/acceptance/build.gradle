@@ -61,6 +61,7 @@ task acceptanceTest(type: Test) {
 
     // Run only functional tests
     include "**/Functional*AT*"
+    include "**/*UiTest*"
 }
 
 task browserAcceptanceTest(type: Test) {
@@ -90,6 +91,7 @@ task instrumentedAcceptanceTest(type: Test) {
     systemProperty "gwt.coverage.report.dir", coverageReportDir
 
     include "**/Functional*AT.*"
+    include "**/*UiTest*"
 }
 
 
