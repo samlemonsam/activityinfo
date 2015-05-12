@@ -33,6 +33,7 @@ test {
     // Do not run acceptance tests during normal test phase
     exclude "**/*AT.*"
     exclude "**/*Smoke*.*"
+    exclude "**/*UiTest*"
     
 }
 
