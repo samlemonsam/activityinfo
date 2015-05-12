@@ -32,7 +32,7 @@ public class PivotTableEditor {
 
 
     public void selectMeasure(String name) {
-        indicatorTree().search(name).get().setChecked(true);
+        indicatorTree().waitUntilLoaded().search(name).get().setChecked(true);
     }
 
 

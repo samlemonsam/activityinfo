@@ -18,6 +18,7 @@ import org.openqa.selenium.WebDriver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
@@ -25,6 +26,8 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 
 public class GxtGrid {
+    
+    private static final Logger LOGGER = Logger.getLogger(GxtGrid.class.getName());
     
     private FluentElement container;
 
@@ -52,7 +55,13 @@ public class GxtGrid {
     }
 
     private AssertionError makeAssertion(String text) {
-        return new AssertionError(String.format("Could not find cell with text '%s'.", text) + extractData());
+        String dataTable;
+        try {
+            dataTable = extractData().toString();
+        } catch (Exception e) {
+            dataTable = "<Error: >";
+        }
+        return new AssertionError(String.format("Could not find cell with text '%s'.", text) + dataTable);
     }
     
     public FluentIterable<GxtRow> rows() {
@@ -111,10 +120,24 @@ public class GxtGrid {
         }
         
         public void edit(String value) {
+            
+            // If there is a currently focused cell, clear it first.
+            Optional<FluentElement> focusedElement = element.focusedElement();
+            if(focusedElement.isPresent()) {
+                focusedElement.get().sendKeys(Keys.ESCAPE);
+            }
+
             element.click();
 
-            final FluentElement input = container.find().div(withClass("x-grid-editor")).input().waitForFirst();
-            input.sendKeys(value);
+            final FluentElement input = container.find()
+                    .div(withClass("x-grid-editor"))
+                    .input(withClass("x-form-focus"))
+                    .waitForFirst();
+            
+            input.clear();
+            if(!"<blank>".equals(value)) {
+                input.sendKeys(value);
+            }
             input.sendKeys(Keys.TAB);
             container.waitUntil(new Predicate<WebDriver>() {
                 @Override

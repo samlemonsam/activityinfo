@@ -1,6 +1,7 @@
 package org.activityinfo.test.pageobject.api;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -165,4 +166,14 @@ public class FluentElement {
         element.clear();
         return this;
     }
+
+    public Optional<FluentElement> focusedElement() {
+        WebElement focusedElement = webDriver.switchTo().activeElement();
+        if(focusedElement.getTagName().equalsIgnoreCase("body")) {
+            return Optional.of(new FluentElement(webDriver, focusedElement));
+        } else {
+            return Optional.absent();
+        }
+    }
+    
 }

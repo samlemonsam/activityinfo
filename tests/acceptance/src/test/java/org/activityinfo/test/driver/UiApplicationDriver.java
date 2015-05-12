@@ -37,9 +37,11 @@ public class UiApplicationDriver extends ApplicationDriver {
     private UserAccount currentUser = null;
     
     private ApplicationPage applicationPage;
-    private TargetsPage targetPage;
+    private Object currentPage;
+    
+    private String currentDatabase;
     private String currentForm;
-
+    
     @Inject
     public UiApplicationDriver(ApiApplicationDriver apiDriver, 
                                LoginPage loginPage,
@@ -166,14 +168,16 @@ public class UiApplicationDriver extends ApplicationDriver {
         ensureLoggedIn();
         
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        
         return dataEntryTab.getCurrentSiteCount();
     }
 
     @Override
     public File exportForm(String formName) {
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        
         return dataEntryTab.export();
     }
 
@@ -182,7 +186,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         Preconditions.checkState(currentForm != null, "No current form");
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
         
         dataEntryTab.selectSubmission(0);
         return dataEntryTab.changes();
@@ -192,7 +196,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         Preconditions.checkState(currentForm != null, "No current form");
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
         dataEntryTab.selectSubmission(0);
 
         return dataEntryTab.details();
@@ -202,7 +206,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void updateSubmission(List<FieldValue> values) throws Exception {
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
 
         dataEntryTab.selectSubmission(0);
 
@@ -213,15 +217,25 @@ public class UiApplicationDriver extends ApplicationDriver {
         driver.submit();
     }
 
-    @Override
-    public void createTarget(TestObject target) throws Exception {
+    private TargetsPage navigateToTargetSetupFor(String database) {
         ensureLoggedIn();
 
-        targetPage = applicationPage
-                .navigateToDesignTab()
-                .selectDatabase(target.getAlias("database"))
-                .targets();
+        currentDatabase = database;
+
+        if(currentPage instanceof TargetsPage) {
+            return (TargetsPage) currentPage;
+        }
         
+        return applicationPage
+                    .navigateToDesignTab()
+                    .selectDatabase(database)
+                    .targets();
+    }
+    
+    @Override
+    public void createTarget(TestObject target) throws Exception {
+        TargetsPage targetPage = navigateToTargetSetupFor(target.getAlias("database"));
+
         GxtModal dialog = targetPage.add();
         
         dialog.form().fillTextField("Name", target.getAlias());
@@ -238,9 +252,12 @@ public class UiApplicationDriver extends ApplicationDriver {
         dialog.accept();
     }
 
+
     @Override
     public void setTargetValues(String targetName, List<FieldValue> values) throws Exception {
-        targetPage.select(targetName);
+        Preconditions.checkState(currentDatabase != null, "No current database");
+        TargetsPage targetPage = navigateToTargetSetupFor(currentDatabase);
+        targetPage.select(aliasTable.getAlias(targetName));
         for(FieldValue value : values) {
             targetPage.setValue(aliasTable.getAlias(value.getField()), value.getValue());   
         }
@@ -249,9 +266,13 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     @Override
     public DataTable pivotTable(String measure, List<String> rowDimension) {
+        ensureLoggedIn();
+        
         PivotTableEditor pivotTable = applicationPage
                 .navigateToReportsTab()
                 .createPivotTable();
+        
+        currentPage = pivotTable;
         
         pivotTable.selectMeasure(aliasTable.getAlias(measure));
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());

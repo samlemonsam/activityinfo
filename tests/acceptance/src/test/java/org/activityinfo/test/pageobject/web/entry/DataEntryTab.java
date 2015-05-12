@@ -51,13 +51,15 @@ public class DataEntryTab {
 
     }
     
-    public void navigateToForm(String formName) {
+    public DataEntryTab navigateToForm(String formName) {
         formTree.waitUntilLoaded();
         Optional<GxtTree.GxtNode> formNode = formTree.search(formName);
         if(!formNode.isPresent()) {
             throw new AssertionError(String.format("Form '%s' is not present in data entry tree", formName));
         }
         formNode.get().select();
+        
+        return this;
     }
     
     public DataEntryDriver newSubmission() {
