@@ -254,11 +254,24 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         dimensions.add(new DateDimension(DateUnit.YEAR));
         dimensions.add(new Dimension(DimensionType.Target));
         filter.addRestriction(DimensionType.Indicator, 1);
-        filter.setDateRange(new DateRange(new LocalDate(2008, 1, 1),
-                new LocalDate(2008, 12, 31)));
+        filter.setDateRange(new DateRange(new LocalDate(2008, 1, 1), new LocalDate(2008, 12, 31)));
         execute();
 
         assertThat().thereAre(2).buckets();
+    }
+
+
+    @Test
+    @OnDataSet("/dbunit/sites-simple1.db.xml")
+    public void testNoTargetPivot() {
+        withIndicatorAsDimension();
+        dimensions.add(new DateDimension(DateUnit.YEAR));
+        dimensions.add(new Dimension(DimensionType.Target));
+        filter.addRestriction(DimensionType.Indicator, 1);
+        filter.setDateRange(new DateRange(new LocalDate(2008, 1, 1), new LocalDate(2008, 12, 31)));
+        execute();
+
+        assertThat().thereAre(1).buckets();
     }
 
     @Test

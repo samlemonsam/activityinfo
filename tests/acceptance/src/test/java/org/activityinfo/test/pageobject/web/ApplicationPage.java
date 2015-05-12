@@ -1,6 +1,7 @@
 package org.activityinfo.test.pageobject.web;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 
@@ -118,6 +120,13 @@ public class ApplicationPage {
             page.findElement(DESIGN_TAB).click();
         } catch(Exception ignored) {
         }
+        
+        // check for modal dialog prompting to save
+        Optional<FluentElement> discard = page.root().find().button(containingText("Discard")).firstIfPresent();
+        if(discard.isPresent()) {
+            discard.get().click();
+        }
+
         return new DesignTab(container());
     }
     

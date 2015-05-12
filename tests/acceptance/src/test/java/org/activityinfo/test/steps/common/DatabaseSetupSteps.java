@@ -1,6 +1,7 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
+import cucumber.api.PendingException;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -303,5 +304,10 @@ public class DatabaseSetupSteps {
     @And("^I open a new session as (.+)$")
     public void I_open_a_new_session_as_(String user) throws Throwable {
         driver.login(accounts.ensureAccountExists(user));
+    }
+
+    @Given("^I haven not defined any targets$")
+    public void I_haven_not_defined_any_targets() throws Throwable {
+        // noop!
     }
 }

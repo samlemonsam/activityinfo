@@ -39,7 +39,7 @@ Feature: Indicator Targets
     And I create a target for partner CRS with values:
       | field       | value |
       | nb. kits    | 1500  |
-    And aggregating the indicator "nb. kits" by Partner and Realized / Targeted should yield:
+    Then aggregating the indicator "nb. kits" by Partner and Realized / Targeted should yield:
       |             | Value |
       | CRS         |       |
       |   Realized  | 1,000 |
@@ -68,3 +68,36 @@ Feature: Indicator Targets
       | Realized              | 5.4         |
       | Targeted              | 7.5         |
     
+  Scenario: No targets defined
+    Given I haven not defined any targets
+    Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
+      |                       | Value       |
+      | Realized              | 1,800       |
+      | Targeted              |     0       |
+
+
+  @AI-1066
+  Scenario: Clearing target values
+    When I create a target named "Goals"
+    And I set the targets of "Goals" to:
+      | field                 | value       |
+      | nb. kits              | 4000  kits  |
+      | Satisfaction score    | 7.5         |
+    Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
+      |                       | Value       |
+      | Realized              | 1,800       |
+      | Targeted              | 4,000       |
+    When I set the targets of "Goals" to:
+      | field                 | value       |
+      | nb. kits              | <blank>     |
+    Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
+      |                       | Value       |
+      | Realized              | 1,800       |
+      | Targeted              |     0       |
+    When I set the targets of "Goals" to:
+      | field                 | value       |
+      | nb. kits              | 6000        |
+    Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
+      |                       | Value       |
+      | Realized              | 1,800       |
+      | Targeted              | 6,000       |

@@ -40,15 +40,26 @@ public class TargetsPage {
     
     public void select(String targetName) {
         // Select the target from the upper grid
-        targetGrid().findCell(targetName).click();
+        GxtGrid grid = targetGrid();
+        grid.waitUntilAtLeastOneRowIsLoaded();
+        grid.findCell(targetName).click();
     }
     
     public void setValue(String indicatorName, String value) {
-        valueGrid().findCell(indicatorName, "value").edit(value);
+        GxtGrid.GxtCell cell = valueGrid().findCell(indicatorName, "value");
+        cell.edit(value);
     }
     
     public void setValue(String indicatorName, Double value) {
         valueGrid().findCell(indicatorName, "value").edit(Double.toString(value));
+    }
+
+    /**
+     * 
+     * @return true if the user is currently visiting the targets page
+     */
+    public boolean isCurrentPage() {
+        return container.getCurrentUri().getPath().contains("#targets/");
     }
 }
 

@@ -87,7 +87,7 @@ public class GxtTree {
         }
     }
 
-    public void waitUntilLoaded() {
+    public GxtTree waitUntilLoaded() {
         Stopwatch stopwatch = Stopwatch.createStarted();
         while(isEmpty()) {
             try {
@@ -99,6 +99,7 @@ public class GxtTree {
                 throw new AssertionError("Timed out while waiting for nodes to load...");
             }
         }
+        return this;
     }
 
     /**
