@@ -34,10 +34,6 @@ gwt {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
                 'org.activityinfo.ui.Embed'
     }
-
-    test {
-        hasGwtTests = true
-    }
 }
 
 appengine {
@@ -51,7 +47,6 @@ appengine {
     httpPort = Integer.parseInt(devServerPort)
 
 }
-
 
 war {
     archiveName = "activityinfo-b${buildNumber}.war"
