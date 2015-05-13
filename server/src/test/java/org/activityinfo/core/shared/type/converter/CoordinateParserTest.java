@@ -24,15 +24,12 @@ package org.activityinfo.core.shared.type.converter;
 
 import com.teklabs.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.server.type.converter.JreNumberFormats;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Locale;
 
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class CoordinateParserTest {
@@ -66,14 +63,6 @@ public class CoordinateParserTest {
 
         assertThat(latitude.parse("S 2.45"), closeTo(-2.45, 0d));
         assertThat(latitude.parse("2N"), closeTo(2, 0d));
-
-        
-        // Commas should be accepted as decimal points, even in the English
-        // locale. Thousands separators are not used in coordinates so there
-        // is no ambiguity.
-//        assertThat(parseLatitude("+6,325"), closeTo(6.325, 0d));
-//        assertThat(parseLatitude("-6,325"), closeTo(-6.325, 0d));
-
     }
     
     @Test(expected = CoordinateFormatException.class)
