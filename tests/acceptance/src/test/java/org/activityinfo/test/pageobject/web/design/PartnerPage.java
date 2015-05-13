@@ -1,4 +1,4 @@
-package org.activityinfo.test.pageobject.gxt;
+package org.activityinfo.test.pageobject.web.design;
 /*
  * #%L
  * ActivityInfo Server
@@ -22,27 +22,21 @@ package org.activityinfo.test.pageobject.gxt;
  */
 
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.pageobject.api.FluentElements;
-import org.openqa.selenium.By;
+import org.activityinfo.test.pageobject.gxt.GxtGrid;
 
 /**
- * @author yuriyz on 04/02/2015.
+ * @author yuriyz on 05/13/2015.
  */
-public class ToolbarMenu {
+public class PartnerPage {
 
-    private FluentElement menu;
+    private FluentElement container;
 
-    public ToolbarMenu(FluentElement menu) {
-        this.menu = menu;
+    public PartnerPage(FluentElement container) {
+        this.container = container;
     }
 
-    public void clickButton(String buttonName) {
-        FluentElements buttons = menu.findElements(By.tagName("button"));
-        for (FluentElement button : buttons) {
-            if (button.text().equals(buttonName)) {
-                button.clickWhenReady();
-                return;
-            }
-        }
+    public GxtGrid grid() {
+        return GxtGrid.findGrids(container).get(0);
     }
+
 }

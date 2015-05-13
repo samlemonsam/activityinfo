@@ -72,5 +72,10 @@ public class GxtCommentsForm extends Form {
         public boolean isEnabled() {
             return true;
         }
+
+        @Override
+        public FluentElement getElement() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

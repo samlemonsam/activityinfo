@@ -27,6 +27,8 @@ package org.activityinfo.test.driver;
 public enum ObjectType {
     DATABASE("database"),
     FORM("activity"),
+    FORM_FIELD("formField"),
+    PARTNER("partner"),
     LOCATION_TYPE("locationType");
 
     private final String value;

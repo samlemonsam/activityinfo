@@ -176,4 +176,8 @@ public abstract class ApplicationDriver {
     public AliasTable getAliasTable() {
         return aliasTable;
     }
+
+    public void cloneDatabase(TestObject testObject) {
+        throw new PendingException();
+    }
 }

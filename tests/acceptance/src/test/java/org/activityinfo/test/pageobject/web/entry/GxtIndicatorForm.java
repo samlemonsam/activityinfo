@@ -113,6 +113,11 @@ public class GxtIndicatorForm extends Form {
         public boolean isEnabled() {
             return true;
         }
+
+        @Override
+        public FluentElement getElement() {
+            return row;
+        }
     }
 
 }

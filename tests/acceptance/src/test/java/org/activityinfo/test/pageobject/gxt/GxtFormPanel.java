@@ -128,5 +128,9 @@ public class GxtFormPanel extends Form {
                     getLabel(),
                     Joiner.on("\n").join(itemLabels)));
         }
+
+        public FluentElement getElement() {
+            return element;
+        }
     }
 }
