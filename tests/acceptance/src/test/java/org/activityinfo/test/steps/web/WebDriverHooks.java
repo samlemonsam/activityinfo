@@ -1,5 +1,6 @@
 package org.activityinfo.test.steps.web;
 
+import com.teklabs.gwt.i18n.server.LocaleProxy;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -9,6 +10,7 @@ import org.activityinfo.test.webdriver.*;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,8 @@ public class WebDriverHooks {
         this.scenario = scenario;
         this.session.beforeTest(scenario.getName());
         reporter.start(scenario);
+
+        LocaleProxy.setLocale(Locale.ENGLISH);
     }
 
     @After

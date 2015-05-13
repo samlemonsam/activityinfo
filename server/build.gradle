@@ -34,6 +34,10 @@ gwt {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
                 'org.activityinfo.ui.Embed'
     }
+
+    test {
+        hasGwtTests = true
+    }
 }
 
 appengine {
@@ -47,6 +51,7 @@ appengine {
     httpPort = Integer.parseInt(devServerPort)
 
 }
+
 
 war {
     archiveName = "activityinfo-b${buildNumber}.war"
@@ -149,4 +154,26 @@ task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
 
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
+}
+
+// Define an i18n jar containing only the localized strings
+// so they can be used by the acceptance tests.
+// Only necessary until we've merged with the beta branch
+// where we have this is as a seperate module
+configurations {
+    i18n
+}
+
+task i18nJar(type: Jar, dependsOn: compileJava) {
+    classifier 'i18n'
+    from(sourceSets.main.output.classesDir) {
+        include 'org/activityinfo/i18n/**/*'
+    }
+    from(sourceSets.main.resources) {
+        include 'org/activityinfo/i18n/**/*'
+    }
+}
+
+artifacts {
+    i18n i18nJar
 }

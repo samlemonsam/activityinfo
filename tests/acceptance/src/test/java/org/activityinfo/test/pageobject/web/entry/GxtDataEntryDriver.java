@@ -1,135 +1,66 @@
 package org.activityinfo.test.pageobject.web.entry;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Stopwatch;
+
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.DataEntryDriver;
-import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.pageobject.api.FluentElements;
-import org.activityinfo.test.pageobject.gxt.GxtFormPanel;
-import org.activityinfo.test.pageobject.gxt.GxtMessageBox;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
-import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
-import org.openqa.selenium.By;
-
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
-
 
 public class GxtDataEntryDriver implements DataEntryDriver {
+    
+    private DataEntryDriver current;
+    
+    public GxtDataEntryDriver(GxtModal gxtModal) {
+        if(gxtModal.getTitle().equals(I18N.CONSTANTS.chooseLocation())) {
+            current = new LocationDataEntryDriver(new LocationDialog(gxtModal));
+        } else {
+            current = new GxtFormDataEntryDriver(gxtModal);
+        }
+    }
+    
+    public LocationDialog getLocationDialog() {
+        if(!(current instanceof LocationDataEntryDriver)) {
+            throw new AssertionError("The Location dialog is not displayed");
+        }
+        return ((LocationDataEntryDriver) current).getDialog();
+    }
 
-    private GxtModal modal;
-    private Iterator<FluentElement> sections;
-    private Form currentForm;
-    private Form.FormItem currentField;
-
-    public GxtDataEntryDriver(GxtModal modal) {
-        this.modal = modal;
-
-        sections = this.modal.getWindowElement()
-                .findElements(By.className("formSec"))
-                .iterator();
+    public DataEntryDriver getCurrent() {
+        return current;
     }
 
     @Override
     public boolean nextField() {
-        
-        while(true) {
-            if (currentForm == null || !currentForm.moveToNext()) {
-                // end of this form page, move to next if possible
-                if (!sections.hasNext()) {
-                    return false;
-                } else {
-                    moveToNextSection();
-                }
-            } else {
-                currentField = currentForm.current();
-                if (currentField.isEnabled()) {
-                    return true;
-                }
-                // otherwise see if next field is enabled
-            }
-        }
-    }
-
-
-    private void moveToNextSection() {
-        FluentElement sectionElement = sections.next();
-        sectionElement.click();
-        String sectionName = sectionElement.findElement(By.className("formSecHeader")).text();
-        
-        System.out.println(sectionName);
-        switch (sectionName) {
-            case "Indicators":
-                currentForm = new GxtIndicatorForm(modal.getWindowElement());
-                break;
-            case "Comments":
-                currentForm = new GxtCommentsForm(modal.getWindowElement());
-                break;
-            default:
-                currentForm = findVisibleForm();
-                break;
-        }
-    }
-
-    private GxtFormPanel findVisibleForm() {
-        FluentElements forms = modal.getWindowElement().findElements(By.className("x-form-label-left"));
-        for (FluentElement form : forms) {
-            if(form.isDisplayed()) {
-                return new GxtFormPanel(form);
-            }
-        }
-        throw new IllegalStateException("No visible form panels");
-    }
-
-    @Override
-    public String getLabel() {
-        return currentField.getLabel();
-    }
-
-    @Override
-    public void fill(String text) {
-        if(currentField.isDropDown()) {
-            currentField.select(text);
-        } else {
-            currentField.fill(text);
-        }
-    }
-
-    @Override
-    public void fill(LocalDate date) {
-        currentField.fill(date);
-    }
-
-    @Override
-    public void select(String itemLabel) {
-        currentField.select(itemLabel);
-    }
-
-    @Override
-    public boolean isNextEnabled() {
-        return false;
+        return current.nextField();
     }
 
     @Override
     public void submit() throws InterruptedException {
-        modal.getWindowElement().find().button(withText("Save")).clickWhenReady();
+        current.submit();
+    }
 
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        while(stopwatch.elapsed(TimeUnit.SECONDS) < 15) {
-            // Check for error
-            Optional<GxtMessageBox> messageBox = GxtMessageBox.get(modal.getWindowElement());
-            if(messageBox.isPresent()) {
-                throw new AssertionError(messageBox.get().getMessage());
-            }
-            
-            if(modal.isClosed()) {
-                return;
-            }
-            
-            Thread.sleep(150);
-        }
+    @Override
+    public String getLabel() {
+        return current.getLabel();
+    }
+
+    @Override
+    public void fill(String text) {
+        current.fill(text);
+    }
+
+    @Override
+    public void fill(LocalDate date) {
+        current.fill(date);
+    }
+
+    @Override
+    public void select(String itemLabel) {
+        current.fill(itemLabel);
+    }
+
+    @Override
+    public boolean isNextEnabled() {
+        return current.isNextEnabled();
     }
 }

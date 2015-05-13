@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -39,7 +40,7 @@ public class DataEntryTab {
 
     public DataEntryTab(FluentElement container) {
         this.container = container;
-        this.formTree = GxtPanel.find(container, "Forms").tree();
+        this.formTree = GxtPanel.find(container, I18N.CONSTANTS.activities()).tree();
 
         // on "Data Entry" tab selection first activity is always selected by default
         // we have to manually select it to let test framework know "real selection" (e.g. for Details tab)
@@ -62,8 +63,8 @@ public class DataEntryTab {
         return this;
     }
     
-    public DataEntryDriver newSubmission() {
-        container.find().button(withText("New Submission")).clickWhenReady();
+    public GxtDataEntryDriver newSubmission() {
+        container.find().button(withText(I18N.CONSTANTS.newSite())).clickWhenReady();
         return new GxtDataEntryDriver(new GxtModal(container));
     }
     
@@ -74,7 +75,7 @@ public class DataEntryTab {
         }
         button.click();
 
-        return new GxtDataEntryDriver(new GxtModal(container));
+        return new GxtFormDataEntryDriver(new GxtModal(container));
     }
     
     public int getCurrentSiteCount() {

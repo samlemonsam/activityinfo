@@ -116,6 +116,9 @@ public class XPathBuilder {
     public static String withClass(String className) {
         return String.format("contains(concat(' ', @class, ' '), ' %s ')", className);
     }
+    public static String withoutClass(String className) {
+        return String.format("not(%s)", withClass(className));
+    }
     
     public static String containingText(String text) {
         return String.format("contains(normalize-space(text()), '%s')", text);
