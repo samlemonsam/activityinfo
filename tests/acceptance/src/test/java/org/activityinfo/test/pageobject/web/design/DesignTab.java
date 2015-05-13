@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.web.design;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
@@ -8,7 +9,12 @@ import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
+import java.util.List;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 public class DesignTab {
@@ -63,12 +69,24 @@ public class DesignTab {
     }
 
     private BsModal modalDialog() {
-        return new BsModal(container);
+        return BsModal.find(container);
     }
 
     public BsModal formInstance() {
-        container.waitFor(By.className("form-group")); // at least one form field appeared
-        return modalDialog();
+        FluentElement dialogElement = container.waitFor(new Function<WebDriver, FluentElement>() {
+            @Override
+            public FluentElement apply(WebDriver driver) {
+                List<WebElement> elements = driver.findElements(By.tagName("label"));
+                for (WebElement element : elements) {
+                    if (element.getText().contains("Start Date")) {
+                        return new FluentElement(driver, element).find().ancestor().div(withClass(BsModal.CLASS_NAME)).first();
+                    }
+                }
+
+                return null;
+            }
+        });
+        return new BsModal(dialogElement);
     }
 
 }

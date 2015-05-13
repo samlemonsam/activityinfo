@@ -313,9 +313,10 @@ public class UiApplicationDriver extends ApplicationDriver {
             BsModal dialog = designTab.formInstance();
             BsFormPanel.BsField bsField = (BsFormPanel.BsField) dialog.form().findFieldByLabel(testObject.getString("formFieldName"));
 
-            if (!bsField.itemLabels().containsAll(testObject.getStringList("items"))) {
+            List<String> items = testObject.getAliasList(testObject.getStringList("items"));
+            if (!bsField.itemLabels().containsAll(items)) {
                 throw new AssertionError("Not all elements formfield elements are present, expected: "
-                        + Joiner.on(",").join(testObject.getStringList("items")) + ", actual: " + Joiner.on(",").join(bsField.itemLabels()));
+                        + Joiner.on(",").join(items) + ", actual: " + Joiner.on(",").join(bsField.itemLabels()));
             }
         }
     }

@@ -99,6 +99,14 @@ public class TestObject {
         return map.containsKey(propertyName);
     }
 
+    public List<String> getAliasList(List<String> propertyNames) {
+        List<String> aliases = Lists.newArrayList();
+        for (String s : propertyNames) {
+            aliases.add(aliasTable.getAlias((s)));
+        }
+        return aliases;
+    }
+
     public List<String> getStringList(String propertyName) {
         Object value = map.get(propertyName);
         if(value instanceof String) {

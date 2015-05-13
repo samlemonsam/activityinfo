@@ -36,12 +36,16 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
  */
 public class BsModal extends ModalDialog {
 
-    private static final String CLASS_NAME = "modal-dialog";
+    public static final String CLASS_NAME = "modal-dialog";
 
     private FluentElement windowElement;
 
-    public BsModal(FluentElement parent) {
-        this.windowElement = parent.root().waitFor(By.className(CLASS_NAME));
+    public BsModal(FluentElement windowElement) {
+        this.windowElement = windowElement;
+    }
+
+    public static BsModal find(FluentElement parent) {
+        return new BsModal(parent.waitFor(By.className(CLASS_NAME)));
     }
 
     public String getTitle() {
