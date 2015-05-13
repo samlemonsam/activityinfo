@@ -41,18 +41,8 @@ public class CoordinateEditor implements PropertyEditor<Double>, Validator {
     private double maxValue;
 
     public CoordinateEditor(CoordinateAxis axis) {
-        switch (axis) {
-            case LATITUDE:
-                minValue = -CoordinateParser.MAX_LATITUDE;
-                maxValue = +CoordinateParser.MAX_LATITUDE;
-                break;
-            case LONGITUDE:
-                minValue = -CoordinateParser.MAX_LONGITUDE;
-                maxValue = +CoordinateParser.MAX_LONGITUDE;
-                break;
-            default:
-                throw new IllegalArgumentException("Axis: " + axis);
-        }
+        minValue = axis.getMinimumValue();
+        maxValue = axis.getMaximumValue();
 
         parser = new CoordinateParser(axis, JsCoordinateNumberFormatter.INSTANCE);
 
