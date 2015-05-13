@@ -27,6 +27,8 @@ dependencies {
     testCompile 'org.apache.poi:poi:3.8'
 
     testCompile project(':core:model')
+    testCompile project(path: ':server', configuration: 'i18n')
+    testCompile libraries.gwt.i18nServer
 }
 
 test {
@@ -148,7 +150,6 @@ task smokeTest(type: Test) {
     if(project.hasProperty("testUrl")) {
         systemProperty "test.url", project.property("testUrl")
     }
-
 }
 
 tasks.each { task ->

@@ -1,7 +1,6 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import cucumber.api.PendingException;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -45,6 +44,14 @@ public class DatabaseSetupSteps {
         UserAccount account = accounts.any();
         driver.login(account);
         driver.setup().createDatabase(name(databaseName));
+        this.currentDatabase = databaseName;
+    }
+
+    @Given("I have created a database \"(.*)\" in (.+)")
+    public void createDatabase(String databaseName, String countryName) throws Exception {
+        UserAccount account = accounts.any();
+        driver.login(account);
+        driver.setup().createDatabase(name(databaseName), property("country", countryName));
         this.currentDatabase = databaseName;
     }
 

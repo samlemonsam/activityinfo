@@ -175,5 +175,10 @@ public class FluentElement {
             return Optional.absent();
         }
     }
-    
+
+    public void dragAndDropBy(int pixelsToLeft, int pixelsDown) {
+        Actions actions = new Actions(webDriver);
+        actions.dragAndDropBy(element, pixelsToLeft, pixelsDown);
+        actions.perform();
+    }
 }

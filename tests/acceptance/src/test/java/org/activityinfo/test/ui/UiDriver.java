@@ -2,6 +2,7 @@ package org.activityinfo.test.ui;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.teklabs.gwt.i18n.server.LocaleProxy;
 import cucumber.runtime.java.guice.impl.ScenarioModule;
 import cucumber.runtime.java.guice.impl.SequentialScenarioScope;
 import org.activityinfo.test.driver.AliasTable;
@@ -17,6 +18,8 @@ import org.activityinfo.test.webdriver.WebDriverModule;
 import org.activityinfo.test.webdriver.WebDriverSession;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+
+import java.util.Locale;
 
 public class UiDriver extends TestWatcher {
 
@@ -47,7 +50,7 @@ public class UiDriver extends TestWatcher {
         shutdownWebDriver();
         scenarioScope.exitScope();
     }
-
+    
     private void shutdownWebDriver() {
         WebDriverSession session = injector.getInstance(WebDriverSession.class);
         if(session.isRunning()) {
@@ -82,5 +85,10 @@ public class UiDriver extends TestWatcher {
 
     public String alias(String testHandle) {
         return injector.getInstance(AliasTable.class).getAlias(testHandle);
+    }
+
+    public void setLocale(String locale) {
+        LocaleProxy.setLocale(Locale.forLanguageTag(locale));
+        injector.getInstance(DevServerAccounts.class).setLocale(locale);
     }
 }

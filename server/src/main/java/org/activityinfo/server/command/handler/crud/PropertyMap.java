@@ -78,12 +78,16 @@ public class PropertyMap {
         return value;
     }
 
-    public String getOptionalString(String propertyName) {
+    public String getOptionalString(String propertyName, String defaultValue) {
         if(map.containsKey(propertyName)) {
             return (String) map.get(propertyName);
         } else {
-            return null;
+            return defaultValue;
         }
+    }
+    
+    public String getOptionalString(String property) {
+        return getOptionalString(property, null);
     }
     
     public Double getOptionalDouble(String propertyName) {
@@ -118,4 +122,6 @@ public class PropertyMap {
     public Map<String, Object> asMap() {
         return map;
     }
+
+
 }

@@ -3,6 +3,8 @@ package org.activityinfo.test.pageobject.web;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.teklabs.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
@@ -27,11 +29,14 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
  * Interface to the single-pageobject application
  */
 public class ApplicationPage {
+    
+    static {
+        LocaleProxy.initialize();
+    }
 
     private static final Logger LOGGER = Logger.getLogger(ApplicationPage.class.getName());
     
     private static final By SETTINGS_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[2]");
-    private static final By DATA_ENTRY_TAB = By.xpath("//div[contains(text(), 'Data Entry')]");
     private static final By DESIGN_TAB = By.xpath("//div[contains(text(), 'Design')]");
     
     private final FluentElement page;
@@ -109,7 +114,7 @@ public class ApplicationPage {
     
     public DataEntryTab navigateToDataEntryTab() {
         try {
-            page.findElement(DATA_ENTRY_TAB).click();
+            page.find().div(containingText(I18N.CONSTANTS.dataEntry())).clickWhenReady();
         } catch(Exception ignored) {
         }
         return new DataEntryTab(container());

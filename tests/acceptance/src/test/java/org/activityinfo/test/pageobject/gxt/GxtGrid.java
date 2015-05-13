@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.gxt;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -13,6 +14,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -28,8 +30,20 @@ public class GxtGrid {
 
     
 
-    public static FluentIterable<GxtGrid> findGrids(FluentElement container) {
-        return container.findElements(By.className("x-grid3")).topToBottom().as(GxtGrid.class);
+    public static FluentIterable<GxtGrid> findGrids(final FluentElement container) {
+        FluentElements elements = container.waitFor(new Function<WebDriver, FluentElements>() {
+            @Nullable
+            @Override
+            public FluentElements apply(WebDriver input) {
+                FluentElements grids = container.findElements(By.className("x-grid3"));
+                if(grids.isEmpty()) {
+                    return null;
+                } 
+                return grids;
+            }
+        });
+        
+        return elements.topToBottom().as(GxtGrid.class);
     }
     
     public GxtGrid(FluentElement container) {

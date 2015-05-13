@@ -46,6 +46,7 @@ public class DevServerAccounts implements Accounts {
     private Random random = new Random();
     private boolean batchingEnabled = false;
     private List<String> pendingUsers = Lists.newArrayList();
+    private String locale = "en";
 
     public DevServerAccounts() {
         try {
@@ -61,7 +62,14 @@ public class DevServerAccounts implements Accounts {
                 return createUniqueAccount(key);
             }
         });
+    }
 
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 
     public boolean isBatchingEnabled() {
@@ -141,7 +149,7 @@ public class DevServerAccounts implements Accounts {
                     stmt.setString(1, user);
                     stmt.setString(2, nameForEmail(user));
                     stmt.setString(3, DEV_PASSWORD_HASHED);
-                    stmt.setString(4, "en");
+                    stmt.setString(4, locale);
                     stmt.addBatch();
 
                     this.users.mark();
