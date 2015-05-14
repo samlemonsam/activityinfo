@@ -61,7 +61,7 @@ public class LocationDialog {
         FluentElement marker = dialog.getWindowElement().find()
                 .div(withClass("leaflet-marker-pane"))
                 .div(withClass("leaflet-marker-icon"))
-                .first();
+                .waitForFirst();
         
         marker.dragAndDropBy(pixelsToLeft, pixelsToRight);
 
