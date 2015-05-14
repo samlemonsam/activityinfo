@@ -19,9 +19,9 @@ public class LocationDialog {
 
         formPanel = new GxtFormPanel(dialog.getWindowElement()
                 .find().div(withClass("x-component"), withClass("x-form-label-left")).first());
-        
+
     }
-    
+
     public FluentElement locationInput() {
         return dialog.getWindowElement().find().input(
                 withClass("x-form-field"),
@@ -29,21 +29,21 @@ public class LocationDialog {
                 withoutClass("x-triggerfield-noedit"))
                 .first();
     }
-    
+
     public GxtFormPanel getFormPanel() {
         return formPanel;
     }
-    
+
     public static LocationDialog get(FluentElement root) {
         GxtModal modal = new GxtModal(root);
         if(!modal.getTitle().equals(I18N.CONSTANTS.chooseLocation())) {
-            throw new AssertionError(format("Expected dialog with title '%s', found '%s'", 
+            throw new AssertionError(format("Expected dialog with title '%s', found '%s'",
                     I18N.CONSTANTS.chooseLocation(), modal.getTitle()));
         }
 
         return new LocationDialog(modal);
     }
-    
+
     public GxtFormPanel.GxtField latitudeField() {
         return formPanel.findFieldByLabel(I18N.CONSTANTS.latitude());
     }
@@ -54,9 +54,9 @@ public class LocationDialog {
 
 
     public void addNew() {
-        dialog.getWindowElement().find().button(withText(I18N.CONSTANTS.newLocation())).clickWhenReady();
+        dialog.getWindowElement().find().button(withText(I18N.CONSTANTS.newLocation())).waitForFirst().click();
     }
-    
+
     public void dragMarker(int pixelsToLeft, int pixelsToRight) {
         FluentElement marker = dialog.getWindowElement().find()
                 .div(withClass("leaflet-marker-pane"))
