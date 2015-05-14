@@ -12,7 +12,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,11 +40,12 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     public static final ConfigProperty SAUCE_USERNAME = new ConfigProperty("sauce.username", "Sauce.io username");
     public static final ConfigProperty SAUCE_ACCESS_KEY = new ConfigProperty("sauce.accessKey", "Sauce.io access key");
 
+    public static final ConfigProperty SAUCE_FAST = new ConfigProperty("SAUCE_FAST", "If true, enable sauce speed optimizations");
+
 
     private String userName;
     private String apiKey;
 
-    private boolean fast = false;
 
     public static boolean isEnabled() {
         return !Strings.isNullOrEmpty(System.getenv(JENKINS_SAUCE_USER_NAME)) ||
@@ -130,7 +130,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             capabilities.setCapability("name", name);
         }
 
-        if(fast) {
+        if(SAUCE_FAST.isPresent()) {
             capabilities.setCapability("record-video", false);
             capabilities.setCapability("record-screenshots", false);
         }
