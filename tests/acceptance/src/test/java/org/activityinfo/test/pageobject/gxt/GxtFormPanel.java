@@ -12,6 +12,7 @@ import org.openqa.selenium.NoSuchElementException;
 
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
@@ -35,7 +36,7 @@ public class GxtFormPanel extends Form {
         try {
             return new GxtField(form.find().label(withText(labelText + ":")).ancestor().div(withClass("x-form-item")).first());
         } catch(NoSuchElementException e) {
-            throw new AssertionError(String.format("The form panel has no field with label %s", labelText));
+            throw new AssertionError(format("The form panel has no field with label %s", labelText));
         }
     }
 
@@ -123,10 +124,20 @@ public class GxtFormPanel extends Form {
             }
 
             // Report nice error message
-            throw new AssertionError(String.format("Could not select '%s' from combo box '%s'. Options:\n%s",
+            throw new AssertionError(format("Could not select '%s' from combo box '%s'. Options:\n%s",
                     itemLabel,
                     getLabel(),
                     Joiner.on("\n").join(itemLabels)));
+        }
+        
+        public boolean isValid() {
+            return !element.findElement(By.tagName("input")).attribute("class").contains("x-form-invalid");
+        }
+
+        public void assertValid() {
+            if(!isValid()) {
+                throw new AssertionError(format("Expected field '%s' to be valid", getLabel()));
+            }
         }
 
         public FluentElement getElement() {

@@ -47,6 +47,14 @@ public class DatabaseSetupSteps {
         this.currentDatabase = databaseName;
     }
 
+    @Given("I have created a database \"(.*)\" in (.+)")
+    public void createDatabase(String databaseName, String countryName) throws Exception {
+        UserAccount account = accounts.any();
+        driver.login(account);
+        driver.setup().createDatabase(name(databaseName), property("country", countryName));
+        this.currentDatabase = databaseName;
+    }
+
     @Given("^I have created a form named \"(.*)\" in \"(.*)\"$")
     public void I_have_created_a_form_named_in(String formName, String databaseName) throws Throwable {
         driver.setup().createForm(name(formName), property("database", databaseName));
@@ -303,5 +311,10 @@ public class DatabaseSetupSteps {
     @And("^I open a new session as (.+)$")
     public void I_open_a_new_session_as_(String user) throws Throwable {
         driver.login(accounts.ensureAccountExists(user));
+    }
+
+    @Given("^I haven not defined any targets$")
+    public void I_haven_not_defined_any_targets() throws Throwable {
+        // noop!
     }
 }

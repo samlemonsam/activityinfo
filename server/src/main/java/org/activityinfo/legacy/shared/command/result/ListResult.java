@@ -25,7 +25,6 @@ package org.activityinfo.legacy.shared.command.result;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.extjs.gxt.ui.client.data.ModelData;
 import org.activityinfo.legacy.shared.util.CollectionUtil;
-import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +79,15 @@ public abstract class ListResult<D extends ModelData> implements CommandResult, 
         if (obj == null || !(obj instanceof ListResult<?>)) {
             return false;
         }
-
         return CollectionUtil.containsEqual(this.getData(), ((ListResult<D>) obj).getData());
+    }
+
+    @Override
+    public int hashCode() {
+        if(data == null) {
+            return 0;
+        } else {
+            return data.hashCode();
+        }
     }
 }

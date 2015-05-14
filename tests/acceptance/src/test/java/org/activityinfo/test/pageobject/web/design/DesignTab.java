@@ -49,6 +49,12 @@ public class DesignTab {
         return new TargetsPage(container);
     }
 
+    public UsersPage users() {
+        gallery().select("Users");
+        return new UsersPage(container);
+    }
+
+
     public PartnerPage partners() {
         gallery().select("Partner");
         return new PartnerPage(container);

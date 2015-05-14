@@ -88,16 +88,17 @@ public class GxtTree {
         }
     }
 
-    public void waitUntilLoaded() {
+    public GxtTree waitUntilLoaded() {
         waitUntil(new Predicate<GxtTree>() {
             @Override
             public boolean apply(GxtTree tree) {
                 return isEmpty();
             }
         });
+        return this;
     }
 
-    public void waitUntil(Predicate<GxtTree> predicate) {
+    public GxtTree waitUntil(Predicate<GxtTree> predicate) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         while(predicate.apply(this)) {
             try {
@@ -109,6 +110,7 @@ public class GxtTree {
                 throw new AssertionError("Timed out while waiting for nodes to load...");
             }
         }
+        return this;
     }
 
     /**

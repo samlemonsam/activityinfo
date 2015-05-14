@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 
@@ -115,6 +116,9 @@ public class XPathBuilder {
     public static String withClass(String className) {
         return String.format("contains(concat(' ', @class, ' '), ' %s ')", className);
     }
+    public static String withoutClass(String className) {
+        return String.format("not(%s)", withClass(className));
+    }
     
     public static String containingText(String text) {
         return String.format("contains(normalize-space(text()), '%s')", text);
@@ -188,7 +192,7 @@ public class XPathBuilder {
         try {
             return context.findElement(firstLocator());
         } catch (Exception e) {
-            throw new AssertionError("Could not locate element by XPath '" + toString() + "'", e);
+            throw new NoSuchElementException("Could not locate element by XPath '" + toString() + "'", e);
         }
     }
 

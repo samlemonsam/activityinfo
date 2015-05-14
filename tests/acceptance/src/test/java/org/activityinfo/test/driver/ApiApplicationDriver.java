@@ -430,7 +430,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         JSONObject properties = new JSONObject();
         properties.put("name", locationType.getAlias());
         properties.put("databaseId", locationType.getId("database"));
-        
+        properties.put("workflowId", locationType.getString("workflowId", "closed"));
         createEntityAndBindId("LocationType", properties);
     }
 
