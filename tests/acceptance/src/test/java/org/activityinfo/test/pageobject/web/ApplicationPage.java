@@ -3,7 +3,7 @@ package org.activityinfo.test.pageobject.web;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
