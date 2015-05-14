@@ -260,6 +260,14 @@ public class CuidAdapter {
         return Integer.parseInt(block, ResourceId.RADIX);
     }
 
+    public static int getBlockSilently(ResourceId resourceId, int blockIndex) {
+        try {
+            return getBlock(resourceId, blockIndex);
+        } catch (Exception e) {
+            return -1; // ignore exception
+        }
+    }
+
     public static ResourceId databaseId(int databaseId) {
         return cuid(DATABASE_DOMAIN, databaseId);
     }

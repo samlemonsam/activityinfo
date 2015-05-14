@@ -88,15 +88,15 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
 
         FormClass formClass = FormClass.fromResource(Resources.fromJson(json));
         for (FormField formField : formClass.getFields()) {
-            char domain = formField.getId().getDomain();
-            if (domain == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN) {
+            int fieldIndex = CuidAdapter.getBlockSilently(formField.getId(), 1);
+            if (fieldIndex == CuidAdapter.PARTNER_FIELD) {
                 ReferenceType sourceType = (ReferenceType) formField.getType();
 
                 formField.setType(new ReferenceType()
                         .setCardinality(sourceType.getCardinality())
                         .setRange(CuidAdapter.partnerFormClass(activityDTO.getDatabaseId())));
                 hasPartner = true;
-            } else if (domain == CuidAdapter.PROJECT_CLASS_DOMAIN) {
+            } else if (fieldIndex == CuidAdapter.PROJECT_FIELD) {
                 ReferenceType sourceType = (ReferenceType) formField.getType();
 
                 formField.setType(new ReferenceType()
@@ -104,9 +104,9 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
                         .setRange(CuidAdapter.projectFormClass(activityDTO.getDatabaseId())));
 
                 hasProject = true;
-            } else if (domain == CuidAdapter.START_DATE_FIELD) {
+            } else if (fieldIndex == CuidAdapter.START_DATE_FIELD) {
                 hasStartDate = true;
-            } else if (domain == CuidAdapter.END_DATE_FIELD) {
+            } else if (fieldIndex == CuidAdapter.END_DATE_FIELD) {
                 hasEndDate = true;
             }
 
