@@ -71,6 +71,7 @@ public class FolderPageView implements InstancePageView {
         stylesheet.ensureInjected();
     }
 
+    @Override
     public Promise<Void> show(InstanceViewModel view) {
         this.instance = view.getInstance();
         pageHeader.setPageTitle(instance.getString(FolderClass.LABEL_FIELD_ID));
@@ -121,26 +122,7 @@ public class FolderPageView implements InstancePageView {
                     ApplicationProperties.DESCRIPTION_PROPERTY)
             .where(ParentCriteria.isChildOf(instance.getId())).build();
     }
-//
-//    @UiHandler("newFormButton")
-//    public void onNewFormButton(ClickEvent event) {
-//        final FormClass formClass = new FormClass(CuidGenerator.INSTANCE.nextCuid());
-//        formClass.setLabel(new LocalizedString("New Form"));
-//        formClass.setParentId(instance.getId());
-//        resources.resourceLocator.persist(formClass).then(new AsyncCallback<Void>() {
-//            @Override
-//            public void onFailure(Throwable caught) {
-//                Window.alert(caught.getMessage());
-//            }
-//
-//            @Override
-//            public void onSuccess(Void result) {
-//                Window.Location.replace(Window.Location.createUrlBuilder()
-//                        .setHash("#i/" + formClass.getId().asString() + "/design")
-//                        .buildString());
-//            }
-//        });
-//    }
+
 
     @Override
     public Widget asWidget() {

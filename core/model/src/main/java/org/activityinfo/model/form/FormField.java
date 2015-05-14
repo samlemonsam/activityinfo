@@ -48,6 +48,7 @@ public class FormField extends FormElement {
 
     public String getName() { return name; }
 
+    @Override
     @Nonnull
     public String getLabel() {
         return label;

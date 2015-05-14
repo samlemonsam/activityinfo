@@ -60,6 +60,7 @@ public class FormClassPageView implements InstancePageView {
         Icons.INSTANCE.ensureInjected();
     }
 
+    @Override
     public Promise<Void> show(InstanceViewModel view) {
 
         pageHeader.setPageTitle(view.getInstance().getString(FormClass.LABEL_FIELD_ID));

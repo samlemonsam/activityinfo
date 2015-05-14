@@ -55,8 +55,9 @@ import java.util.logging.Logger;
 @Singleton
 public class ExportSitesServlet extends HttpServlet {
     public static final String X_AI_STORAGE_PROXY = "X-AI-Storage-Proxy";
-    private Provider<AuthenticatedUser> authenticatedUserProvider;
-    private SecureRandom random = new SecureRandom();
+    
+    private final Provider<AuthenticatedUser> authenticatedUserProvider;
+    private final SecureRandom random = new SecureRandom();
 
     private static final Logger LOGGER = Logger.getLogger(ExportSitesServlet.class.getName());
     

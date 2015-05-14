@@ -29,8 +29,8 @@ public class ExportSitesTask extends HttpServlet {
 
     public static final String EXPORT_BUCKET_NAME = "activityinfo-generated";
 
-    private Provider<DispatcherSync> dispatcher;
-    private ServerSideAuthProvider authProvider;
+    private final Provider<DispatcherSync> dispatcher;
+    private final ServerSideAuthProvider authProvider;
     
     @Inject
     public ExportSitesTask(Provider<DispatcherSync> dispatcher, ServerSideAuthProvider authProvider) {

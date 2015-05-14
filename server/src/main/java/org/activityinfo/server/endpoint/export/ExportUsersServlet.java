@@ -45,7 +45,7 @@ import java.util.Date;
 @Singleton
 public class ExportUsersServlet extends HttpServlet {
 
-    private DispatcherSync dispatcher;
+    private final DispatcherSync dispatcher;
 
     @Inject
     public ExportUsersServlet(DispatcherSync dispatcher) {

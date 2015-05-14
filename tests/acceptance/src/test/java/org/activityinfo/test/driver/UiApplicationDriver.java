@@ -192,6 +192,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         return dataEntryTab.changes();
     }
 
+    @Override
     public DetailsEntry getDetails() {
         Preconditions.checkState(currentForm != null, "No current form");
 

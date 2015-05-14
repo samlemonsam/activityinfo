@@ -1,7 +1,6 @@
 package cucumber.runtime.junit;
 
 import cucumber.api.PendingException;
-import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.Match;
 import gherkin.formatter.model.Result;
@@ -49,11 +48,13 @@ public class JUnitStepReporter implements Reporter {
         reporter.write(text);
     }
 
+    @Override
     public void match(Match match) {
         currentStep = runnerSteps.next();
         reporter.match(match);
     }
 
+    @Override
     public void result(Result result) {
         Throwable error = result.getError();
         if (Result.SKIPPED == result) {
