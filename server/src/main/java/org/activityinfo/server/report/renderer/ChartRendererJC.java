@@ -302,10 +302,9 @@ public class ChartRendererJC {
     }
 
     protected Paint[] getDefaultPaints(int count) {
-        String[] accents = Theme.getAccents();
         Paint[] paints = new Paint[count];
         for (int i = 0; i != paints.length; ++i) {
-            paints[i] = Color.decode(accents[i % accents.length]);
+            paints[i] = Color.decode(Theme.getAccent(i));
         }
         return paints;
     }

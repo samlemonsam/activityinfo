@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.reports;
  */
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Alex Bertram
@@ -45,8 +46,8 @@ public final class Theme {
 
     }
 
-    public static String[] getAccents() {
-        return Arrays.copyOf(ACCENTS, ACCENTS.length);
+    public static List<String> getAccents() {
+        return Arrays.asList(ACCENTS);
     }
 
     public static String getAccent(int index) {
