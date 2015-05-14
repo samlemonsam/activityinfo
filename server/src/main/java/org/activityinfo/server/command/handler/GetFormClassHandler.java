@@ -14,7 +14,6 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
@@ -27,18 +26,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 public class GetFormClassHandler implements CommandHandler<GetFormClass> {
 
-    private PermissionOracle permissionOracle;
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcherSync;
 
     @Inject
-    public GetFormClassHandler(PermissionOracle permissionOracle, Provider<EntityManager> entityManager, DispatcherSync dispatcherSync) {
-        this.permissionOracle = permissionOracle;
+    public GetFormClassHandler(Provider<EntityManager> entityManager, DispatcherSync dispatcherSync) {
         this.entityManager = entityManager;
         this.dispatcherSync = dispatcherSync;
     }
@@ -47,16 +43,18 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
     public CommandResult execute(GetFormClass cmd, User user) throws CommandException {
 
         Activity activity = entityManager.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(cmd.getResourceId()));
+        ActivityFormDTO activityDTO = dispatcherSync.execute(new GetActivityForm(activity.getId()));
 
-        String json = readJson(activity);
-        return new FormClassResult(json);
+        String json = readJson(activity, activityDTO);
+
+        return new FormClassResult(fixIfNeeded(json, activityDTO));
     }
 
-    private String readJson(Activity activity)  {
-        if(activity.getGzFormClass() != null) {
-            try(Reader reader = new InputStreamReader(
-                                    new GZIPInputStream(
-                                        new ByteArrayInputStream(activity.getGzFormClass())), Charsets.UTF_8)) {
+    private String readJson(Activity activity, ActivityFormDTO activityDTO) {
+        if (activity.getGzFormClass() != null) {
+            try (Reader reader = new InputStreamReader(
+                    new GZIPInputStream(
+                            new ByteArrayInputStream(activity.getGzFormClass())), Charsets.UTF_8)) {
 
                 return CharStreams.toString(reader);
 
@@ -64,45 +62,69 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
                 throw new UnexpectedCommandException(e);
             }
 
-        } else if(activity.getFormClass() != null) {
+        } else if (activity.getFormClass() != null) {
             return activity.getFormClass();
 
         } else {
-            return constructFromLegacy(activity.getId());
+            return constructFromLegacy(activityDTO);
         }
     }
 
 
-    private String constructFromLegacy(final int activityId) {
-        ActivityFormDTO activityDTO = dispatcherSync.execute(new GetActivityForm(activityId));
+    private String constructFromLegacy(final ActivityFormDTO activityDTO) {
+
         ActivityFormClassBuilder builder = new ActivityFormClassBuilder(activityDTO);
         FormClass formClass = builder.build();
-        fixIfNeeded(formClass, activityDTO);
         return Resources.toJson(formClass.asResource());
     }
 
     // AI-1057 - Fix forms corrupted during cloning, partner and project range must reference to db id instead of partner id.
-    private void fixIfNeeded(FormClass formClass, ActivityFormDTO activityDTO) {
+    private String fixIfNeeded(String json, ActivityFormDTO activityDTO) {
+
+        boolean hasPartner = false;
+        boolean hasProject = false;
+        boolean hasStartDate = false;
+        boolean hasEndDate = false;
+
+        FormClass formClass = FormClass.fromResource(Resources.fromJson(json));
         for (FormField formField : formClass.getFields()) {
-            if (formField.getType() instanceof ReferenceType) {
+            char domain = formField.getId().getDomain();
+            if (domain == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN) {
                 ReferenceType sourceType = (ReferenceType) formField.getType();
 
-                Set<ResourceId> sourceRange = sourceType.getRange();
-                ReferenceType targetType = new ReferenceType()
-                        .setCardinality(sourceType.getCardinality());
+                formField.setType(new ReferenceType()
+                        .setCardinality(sourceType.getCardinality())
+                        .setRange(CuidAdapter.partnerFormClass(activityDTO.getDatabaseId())));
+                hasPartner = true;
+            } else if (domain == CuidAdapter.PROJECT_CLASS_DOMAIN) {
+                ReferenceType sourceType = (ReferenceType) formField.getType();
 
-                switch (sourceRange.iterator().next().getDomain()) {
-                    case CuidAdapter.PARTNER_FORM_CLASS_DOMAIN:
-                        targetType.setRange(CuidAdapter.partnerFormClass(activityDTO.getDatabaseId()));
-                        formField.setType(targetType);
-                        break;
-                    case CuidAdapter.PROJECT_CLASS_DOMAIN:
-                        targetType.setRange(CuidAdapter.projectFormClass(activityDTO.getDatabaseId()));
-                        formField.setType(targetType);
-                        break;
-                }
+                formField.setType(new ReferenceType()
+                        .setCardinality(sourceType.getCardinality())
+                        .setRange(CuidAdapter.projectFormClass(activityDTO.getDatabaseId())));
 
+                hasProject = true;
+            } else if (domain == CuidAdapter.START_DATE_FIELD) {
+                hasStartDate = true;
+            } else if (domain == CuidAdapter.END_DATE_FIELD) {
+                hasEndDate = true;
             }
+
         }
+
+        if (!hasPartner) {
+            formClass.addElement(ActivityFormClassBuilder.createPartnerField(formClass.getId(), activityDTO));
+        }
+        if (!hasStartDate) {
+            formClass.addElement(ActivityFormClassBuilder.createStartDateField(formClass.getId()));
+        }
+        if (!hasEndDate) {
+            formClass.addElement(ActivityFormClassBuilder.createEndDateField(formClass.getId()));
+        }
+        if (!hasProject) {
+            formClass.addElement(ActivityFormClassBuilder.createProjectField(formClass.getId(), activityDTO));
+        }
+
+        return Resources.toJson(formClass.asResource());
     }
 }
