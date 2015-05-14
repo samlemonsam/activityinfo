@@ -93,6 +93,7 @@ public class MailinatorClient implements EmailDriver {
     }
 
 
+    @Override
     public NotificationEmail lastNotificationFor(UserAccount account) throws IOException {
 
         List<MessageHeader> messages = queryInbox(account);

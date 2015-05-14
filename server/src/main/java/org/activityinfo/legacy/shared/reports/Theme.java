@@ -22,12 +22,14 @@ package org.activityinfo.legacy.shared.reports;
  * #L%
  */
 
+import java.util.Arrays;
+
 /**
  * @author Alex Bertram
  */
 public final class Theme {
 
-    public static final String[] ACCENTS = new String[]{"#4F81BD", // 79, 129, 189
+    private static final String[] ACCENTS = new String[]{"#4F81BD", // 79, 129, 189
             "#C0504D", // 192, 80, 77
             "#98BB59", // 155, 187, 89
             "#8064A2", // 128, 100, 162
@@ -44,7 +46,7 @@ public final class Theme {
     }
 
     public static String[] getAccents() {
-        return ACCENTS;
+        return Arrays.copyOf(ACCENTS, ACCENTS.length);
     }
 
     public static String getAccent(int index) {

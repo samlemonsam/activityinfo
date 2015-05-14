@@ -72,16 +72,6 @@ public class GetSites extends PagingGetCommand<SiteResult> implements Cloneable 
         this.filter = filter;
     }
 
-    public GetSites clone() {
-        GetSites c = new GetSites();
-        c.filter = new Filter(filter);
-        c.setLimit(getLimit());
-        c.setOffset(getOffset());
-        c.setSortInfo(getSortInfo());
-
-        return c;
-    }
-
     public static GetSites byId(int siteId) {
         GetSites cmd = new GetSites();
         cmd.filter().addRestriction(DimensionType.Site, siteId);

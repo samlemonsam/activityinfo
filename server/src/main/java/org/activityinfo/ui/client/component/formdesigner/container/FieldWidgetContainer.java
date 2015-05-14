@@ -91,10 +91,12 @@ public class FieldWidgetContainer implements WidgetContainer {
         formFieldWidget.setType(formField.getType());
     }
 
+    @Override
     public Widget asWidget() {
         return widgetContainer.asWidget();
     }
 
+    @Override
     public Widget getDragHandle() {
         return widgetContainer.getDragHandle();
     }

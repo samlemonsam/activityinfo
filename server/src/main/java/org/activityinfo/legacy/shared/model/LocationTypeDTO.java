@@ -23,9 +23,9 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.resource.ResourceId;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -71,6 +71,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("id", id);
     }
 
+    @Override
     @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public int getId() {
@@ -86,6 +87,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("name", value);
     }
 
+    @Override
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public String getName() {
         return get("name");

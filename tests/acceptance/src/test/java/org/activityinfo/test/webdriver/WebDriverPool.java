@@ -19,6 +19,7 @@ public class WebDriverPool {
     public WebDriverPool() {
         pool = new GenericKeyedObjectPool<>(new Factory());
         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
             public void run() {
                 pool.close();
             }

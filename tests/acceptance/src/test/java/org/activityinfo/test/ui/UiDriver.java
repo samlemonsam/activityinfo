@@ -42,6 +42,8 @@ public class UiDriver extends TestWatcher {
     @Override
     protected void starting(Description description) {
         scenarioScope.enterScope();
+        injector.getInstance(WebDriverSession.class).beforeTest(
+                description.getTestClass().getName() + "." + description.getMethodName());
     }
 
 

@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  * #L%
  */
 
+import com.google.common.base.Objects;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.legacy.shared.model.*;
@@ -158,7 +159,7 @@ class ItemDetail {
             sb.append(units);
         }
 
-        if (!equals(oldValue, newValue)) {
+        if (!Objects.equal(oldValue, newValue)) {
             sb.append(" (");
             if (oldValue == null) {
                 sb.append(I18N.MESSAGES.siteHistoryOldValueBlank());
@@ -167,16 +168,6 @@ class ItemDetail {
             }
             sb.append(")");
         }
-    }
-
-    private static boolean equals(Object oldValue, Object newValue) {
-        if (oldValue == newValue) {
-            return true;
-        }
-        if ((oldValue == null) || (newValue == null)) {
-            return false;
-        }
-        return oldValue.equals(newValue);
     }
 
     private static int toInt(Object val) {
