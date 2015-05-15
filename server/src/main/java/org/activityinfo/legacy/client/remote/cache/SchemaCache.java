@@ -80,6 +80,7 @@ public class SchemaCache implements DispatchListener {
         source.registerListener(BatchCommand.class, cache);
         source.registerListener(BatchCommand.class, cache);
         source.registerListener(Delete.class, cache);
+        source.registerListener(CloneDatabase.class, cache);
     }
 
     @Override
