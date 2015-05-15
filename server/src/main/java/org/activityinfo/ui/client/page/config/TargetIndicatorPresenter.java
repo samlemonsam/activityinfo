@@ -374,13 +374,14 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
                 }
 
                 if (indicator.getCategory() != null) {
-                    Link indCategoryLink = indicatorCategories.get(indicator.getCategory());
+                    String key = indicator.getCategory() + result.getId();
+                    Link indCategoryLink = indicatorCategories.get(key);
 
                     if (indCategoryLink == null) {
                         indCategoryLink = createIndicatorCategoryLink(indicator, indicatorCategories);
-                        indicatorCategories.put(indicator.getCategory(), indCategoryLink);
-                        childs.add(indCategoryLink);
+                        indicatorCategories.put(key, indCategoryLink);
                     }
+                    childs.add(indCategoryLink);
 
                     TargetValueDTO targetValueDTO = getTargetValueByIndicatorId(indicator.getId());
                     if (null != targetValueDTO) {
