@@ -34,7 +34,9 @@ public class UiDriver extends TestWatcher {
 
     private ApplicationPage applicationPage;
     private UserAccount currentUser;
-
+    private File attachmentDir;
+    private String methodName; 
+    
     public UiDriver() {
         scenarioScope = new SequentialScenarioScope();
         injector = Guice.createInjector(
@@ -50,21 +52,27 @@ public class UiDriver extends TestWatcher {
         scenarioScope.enterScope();
         injector.getInstance(WebDriverSession.class).beforeTest(
                 description.getTestClass().getName() + "." + description.getMethodName());
+        try {
+            attachmentDir = attachmentDir(description);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not create attachment directory");
+        }
+        methodName = description.getMethodName();
     }
 
     @Override
     protected void failed(Throwable e, Description description) {
         WebDriverSession session = injector.getInstance(WebDriverSession.class);
         if(session.isRunning()) {
-            attachScreenshot(description);
+            attachScreenshot("failure");
         }
     }
 
-    private void attachScreenshot(Description description) {
+    public void attachScreenshot(final String name) {
         try {
             WebDriver webDriver = injector.getInstance(WebDriver.class);
             byte[] screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
-            File screenshotFile = new File(attachmentDir(description), description.getMethodName() + "-failure.png");
+            File screenshotFile = new File(attachmentDir, methodName + "-" + name + ".png");
             Files.write(screenshot, screenshotFile);
             
         } catch (Exception e) {
@@ -81,7 +89,7 @@ public class UiDriver extends TestWatcher {
      */
     private File attachmentDir(Description description) throws IOException {
         String relPath = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-        File dir = new File(relPath + "../../build/test-results/" + description.getClassName());
+        File dir = new File(relPath + "../../test-results/" + description.getClassName());
         if(!dir.exists()) {
             boolean created = dir.mkdirs();
             if(!created) {

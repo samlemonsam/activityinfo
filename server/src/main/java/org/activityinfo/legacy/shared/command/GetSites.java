@@ -33,7 +33,7 @@ import java.util.Set;
  *
  * @author Alex Bertram
  */
-public class GetSites extends PagingGetCommand<SiteResult> implements Cloneable {
+public class GetSites extends PagingGetCommand<SiteResult> {
 
     private Filter filter = new Filter();
 
