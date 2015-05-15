@@ -104,7 +104,6 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     public void load(TargetDTO targetDTO) {
         this.targetDTO = targetDTO;
         this.treeStore.getLoader().load();
-        this.view.expandAll();
     }
 
     public ActivityFormDTO getActivityFormDTO(ActivityDTO activity) {
@@ -400,7 +399,6 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
                 }
             }
             callback.onSuccess(childs);
-            view.expandAll();
         }
 
         public void addIndicatorLinkChild(Link indCategoryLink, TargetValueDTO targetValueDTO) {
