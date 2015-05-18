@@ -214,14 +214,14 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         BatchCommand batch = new BatchCommand();
 
         for (ModelData model : treeStore.getRootItems()) {
-            prepareBatch(batch, model);
+            prepareBatch(batch, model, true);
         }
         return batch;
     }
 
     private final Set<TargetValueDTO> modifiedValues = Sets.newHashSet();
 
-    protected void prepareBatch(BatchCommand batch, ModelData model) {
+    protected void prepareBatch(BatchCommand batch, ModelData model, boolean clearModifiedValues) {
         modifiedValues.clear();
 
         if (model instanceof EntityDTO) {
@@ -238,7 +238,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         }
 
         for (ModelData child : treeStore.getChildren(model)) {
-            prepareBatch(batch, child);
+            prepareBatch(batch, child, false);
         }
     }
 
