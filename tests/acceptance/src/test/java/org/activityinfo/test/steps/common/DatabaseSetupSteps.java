@@ -10,10 +10,7 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.ObjectType;
-import org.activityinfo.test.driver.Property;
+import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -23,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
 
@@ -73,6 +71,8 @@ public class DatabaseSetupSteps {
         driver.setup().createForm(name(formName),
                 property("database", currentDatabase),
                 property("reportingFrequency", "monthly"));
+        
+        currentForm = formName;
 
     }
 
@@ -106,7 +106,6 @@ public class DatabaseSetupSteps {
         for(int row=1;row<dataTable.getGherkinRows().size();++row) {
             submitRow(formName, dataTable, row);
         }
-        
     }
 
 
@@ -218,6 +217,37 @@ public class DatabaseSetupSteps {
         driver.setup().submitForm(formName, values);
     }
 
+
+    @Given("^I have submitted a \"([^\"]*)\" form with partner (.+) with monthly reports:$")
+    public void I_have_submitted_a_form_with_partner(String formName, String partner, DataTable dataTable) throws Throwable {
+
+        List<String> headers = dataTable.getGherkinRows().get(0).getCells();
+        if(!headers.get(0).equalsIgnoreCase("month")) {
+            throw new AssertionError(format("First column of table must be the 'month', found: %s", headers.get(0)));
+        }
+        
+        List<MonthlyFieldValue> fieldValues = new ArrayList<>();
+        
+        for(int row=1;row < dataTable.getGherkinRows().size();++row) {
+            List<String> cells = dataTable.getGherkinRows().get(row).getCells();
+            
+            String parts[] = cells.get(0).split("-");
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            
+            for(int column=1; column<cells.size();++column) {
+                MonthlyFieldValue fieldValue = new MonthlyFieldValue();
+                fieldValue.setMonth(month);
+                fieldValue.setYear(year);
+                fieldValue.setField(headers.get(column));
+                fieldValue.setValue(cells.get(column));
+                fieldValues.add(fieldValue);
+            }
+        }
+
+        driver.setup().submitForm(formName, partner, fieldValues);
+    }
+    
 
     @Given("^I have added partner \"([^\"]*)\" to \"([^\"]*)\"$")
     public void I_have_added_partner_to(String partnerName, String databaseName) throws Throwable {

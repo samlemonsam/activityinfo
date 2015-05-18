@@ -45,6 +45,8 @@ public class NullStorageProvider implements StorageProvider {
 
     private GeneratedResource newNullExport() {
         return new GeneratedResource() {
+            
+            private double progress = 0;
 
             @Override
             public String getId() {
@@ -64,6 +66,16 @@ public class NullStorageProvider implements StorageProvider {
             @Override
             public OutputStream openOutputStream() throws IOException {
                 return ByteStreams.nullOutputStream();
+            }
+
+            @Override
+            public void updateProgress(double percentageComplete) {
+                progress = 0;   
+            }
+
+            @Override
+            public double getProgress() {
+                return progress;
             }
 
             @Override

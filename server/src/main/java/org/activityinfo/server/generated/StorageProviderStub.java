@@ -60,7 +60,8 @@ public class StorageProviderStub implements StorageProvider {
     private class LocalGeneratedResource implements GeneratedResource {
         private final String id;
         private final String path;
-
+        
+        private double progress;
         public LocalGeneratedResource(String id, String path) {
             this.id = id;
             this.path = path;
@@ -84,6 +85,16 @@ public class StorageProviderStub implements StorageProvider {
         @Override
         public OutputStream openOutputStream() throws IOException {
             return new FileOutputStream(path);
+        }
+
+        @Override
+        public void updateProgress(double percentageComplete) {
+            progress = percentageComplete;
+        }
+
+        @Override
+        public double getProgress() {
+            return progress;
         }
 
         @Override

@@ -73,6 +73,17 @@ class GcsGeneratedResource implements GeneratedResource {
     }
 
     @Override
+    public void updateProgress(double percentageComplete) {
+        metadata.setPercentageComplete(percentageComplete);
+        metadata.save();
+    }
+
+    @Override
+    public double getProgress() {
+        return metadata.getPercentageComplete();
+    }
+
+    @Override
     public Response serve() throws IOException {
         if(DeploymentEnvironment.isAppEngineDevelopment()) {
             return serveContent();

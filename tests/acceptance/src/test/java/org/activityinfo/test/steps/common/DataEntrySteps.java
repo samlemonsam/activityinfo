@@ -93,6 +93,8 @@ public class DataEntrySteps {
 
     }
 
+    
+
     private void dumpChanges(List<HistoryEntry> entries) {
         StringBuilder s = new StringBuilder();
         for(HistoryEntry entry: entries) {
@@ -218,5 +220,6 @@ public class DataEntrySteps {
         System.out.println(exportedDataTable(file));
 
     }
+
 
 }

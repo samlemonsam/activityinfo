@@ -14,6 +14,7 @@ class GcsGeneratedMetadata {
     private String filename;
     private String contentType;
     private boolean completed;
+    private Double percentageComplete;
     private Date creationTime;
     
     public GcsGeneratedMetadata(String id) {
@@ -30,6 +31,7 @@ class GcsGeneratedMetadata {
         metadata.owner = (Long)entity.getProperty("owner");
         metadata.completed = (entity.getProperty("completed") == Boolean.TRUE);
         metadata.creationTime = (Date) entity.getProperty("creationTime");
+        metadata.percentageComplete = (Double)entity.getProperty("percentageComplete");
         return metadata;
     }
     
@@ -41,8 +43,10 @@ class GcsGeneratedMetadata {
         entity.setProperty("creationTime", creationTime);
         entity.setUnindexedProperty("completed", completed);
         entity.setProperty("owner", owner);
+        entity.setProperty("percentageComplete", percentageComplete);
         datastoreService.put(entity);
     }
+    
     
     public void markComplete() {
         DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
@@ -93,6 +97,20 @@ class GcsGeneratedMetadata {
 
     public Date getCreationTime() {
         return creationTime;
+    }
+
+    public double getPercentageComplete() {
+        if(completed) {
+            return 1.0;
+        } else if(percentageComplete != null) {
+            return percentageComplete;
+        } else {
+            return 0d;
+        }
+    }
+
+    public void setPercentageComplete(Double percentageComplete) {
+        this.percentageComplete = percentageComplete;
     }
 
     public String getId() {

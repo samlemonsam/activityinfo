@@ -22,6 +22,7 @@ package org.activityinfo.server.generated;
  * #L%
  */
 
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 
 import javax.ws.rs.GET;
@@ -68,11 +69,15 @@ public class GeneratedResources {
 
             LOGGER.info("Generated Resource " + id + " completed: " + generatedResource.isComplete());
 
+            JsonObject status = new JsonObject();
+            status.addProperty("progress", generatedResource.getProgress());
+            
             if(generatedResource.isComplete()) {
-                return Response.ok(generatedResource.getDownloadUri(), MediaType.TEXT_PLAIN_TYPE).build();
-            } else {
-                return Response.status(Response.Status.ACCEPTED).build();
+                status.addProperty("downloadUri", generatedResource.getDownloadUri());
             }
+            
+            return Response.ok(status.toString(), MediaType.APPLICATION_JSON_TYPE).build();
+            
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }

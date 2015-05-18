@@ -45,6 +45,11 @@ public interface GeneratedResource {
      * written. The stream MUST be closed by the caller.
      */
     public OutputStream openOutputStream() throws IOException;
+    
+    public void updateProgress(double percentageComplete);
+    
+    public double getProgress();
+    
 
     /**
      * Serves this resource's content

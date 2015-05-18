@@ -25,8 +25,6 @@ public class ExportSitesTask extends HttpServlet {
 
     public static final String END_POINT = "/tasks/export";
 
-    public static final String EXPORT_BUCKET_NAME = "activityinfo-generated";
-
     private final Provider<DispatcherSync> dispatcher;
     private final ServerSideAuthProvider authProvider;
     private final StorageProvider storageProvider;
@@ -53,8 +51,10 @@ public class ExportSitesTask extends HttpServlet {
 
 
         // create the workbook
+        
         Filter filter = FilterUrlSerializer.fromQueryParameter(req.getParameter("filter"));
-        SiteExporter export = new SiteExporter(dispatcher.get()).buildExcelWorkbook(filter);
+        TaskContext context = new TaskContext(dispatcher.get(), storageProvider, exportId);
+        SiteExporter export = new SiteExporter(context).buildExcelWorkbook(filter);
 
         // Save to Export storage
         GeneratedResource storage = storageProvider.get(exportId);
