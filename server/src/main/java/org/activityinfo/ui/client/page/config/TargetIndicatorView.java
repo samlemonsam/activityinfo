@@ -95,6 +95,7 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         tree.setClicksToEdit(EditorGrid.ClicksToEdit.ONE);
         tree.setLoadMask(true);
         tree.setStateId("TargetValueGrid" + db.getId());
+        tree.setStateful(true);
 
         tree.setIconProvider(new ModelIconProvider<ModelData>() {
             @Override

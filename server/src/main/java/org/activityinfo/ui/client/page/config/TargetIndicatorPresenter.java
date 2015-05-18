@@ -22,23 +22,15 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.data.BaseTreeLoader;
-import com.extjs.gxt.ui.client.data.DataProxy;
-import com.extjs.gxt.ui.client.data.DataReader;
-import com.extjs.gxt.ui.client.data.ModelData;
+import com.extjs.gxt.ui.client.data.*;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
@@ -85,8 +77,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     public TargetIndicatorPresenter(EventBus eventBus,
                                     Dispatcher service,
                                     StateProvider stateMgr,
-                                    View view,
-                                    UiConstants messages) {
+                                    View view) {
         super(eventBus, service, stateMgr, view);
         this.eventBus = eventBus;
         this.service = service;
@@ -97,6 +88,21 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         this.db = db;
         this.treeStore = new TreeStore<ModelData>(loader);
 
+        // key provider is required to keep TreeGrid stateful (see GXT 2 com.extjs.gxt.ui.client.widget.treegrid.TreeGrid.setExpanded(M, boolean, boolean))
+        this.treeStore.setKeyProvider(new ModelKeyProvider<ModelData>() {
+            @Override
+            public String getKey(ModelData model) {
+                if (model instanceof ActivityDTO) {
+                    return Integer.toString(((ActivityDTO)model).getId());
+                } else if (model instanceof Link) {
+                    return ((Link) model).getKey();
+                } else if (model instanceof TargetValueDTO) {
+                    TargetValueDTO v = (TargetValueDTO) model;
+                    return v.getTargetId() + "" + v.getIndicatorId();
+                }
+                return "";
+            }
+        });
         initListeners(treeStore, null);
 
         this.view.init(this, db, treeStore);
