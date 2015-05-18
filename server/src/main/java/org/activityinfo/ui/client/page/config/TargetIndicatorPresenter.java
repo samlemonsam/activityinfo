@@ -33,6 +33,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -59,6 +60,7 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelData> {
 
@@ -73,6 +75,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     private final Dispatcher service;
     private final View view;
     private final Map<ActivityDTO, ActivityFormDTO> activities = Maps.newHashMap();
+    private final Loader loader = new Loader();
     private TargetDTO targetDTO;
 
     private UserDatabaseDTO db;
@@ -92,8 +95,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     public void go(UserDatabaseDTO db) {
         this.db = db;
-
-        this.treeStore = new TreeStore<ModelData>(new Loader());
+        this.treeStore = new TreeStore<ModelData>(loader);
 
         initListeners(treeStore, null);
 
@@ -103,7 +105,8 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     public void load(TargetDTO targetDTO) {
         this.targetDTO = targetDTO;
-        this.treeStore.getLoader().load();
+        this.loader.clearCache();
+        this.loader.load();
     }
 
     public ActivityFormDTO getActivityFormDTO(ActivityDTO activity) {
@@ -210,10 +213,16 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         return batch;
     }
 
+    private final Set<TargetValueDTO> modifiedValues = Sets.newHashSet();
+
     protected void prepareBatch(BatchCommand batch, ModelData model) {
+        modifiedValues.clear();
+
         if (model instanceof EntityDTO) {
             Record record = treeStore.getRecord(model);
             if (record.isDirty()) {
+                modifiedValues.add((TargetValueDTO) model);
+
                 UpdateTargetValue cmd = new UpdateTargetValue((Integer) model.get("targetId"),
                         (Integer) model.get("indicatorId"),
                         changes(record));
@@ -253,6 +262,23 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     @Override
     protected void onSaved() {
         treeStore.commitChanges();
+
+        if (targetDTO != null) {
+            List<TargetValueDTO> targetValues = targetDTO.getTargetValues();
+            if (targetValues == null) {
+                targetValues = Lists.newArrayList();
+            }
+            for (TargetValueDTO targetValueDTO : targetValues) {
+                for (TargetValueDTO modified : modifiedValues) {
+                    if (targetValueDTO.getTargetId() == modified.getTargetId() && targetValueDTO.getIndicatorId() == modified.getIndicatorId()) {
+                        targetValueDTO.setValue(modified.getValue());
+                    } else {
+                        targetValues.add(modified);
+                    }
+                }
+            }
+            targetDTO.setTargetValues(targetValues);
+        }
     }
 
     @Override
@@ -288,13 +314,17 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         public boolean hasChildren(ModelData parent) {
             return !(parent instanceof TargetValueDTO);
         }
+
+        public void clearCache() {
+            ((Proxy)proxy).clearCache();
+        }
     }
 
     private class Proxy implements DataProxy<List<ModelData>> {
 
         private final BiMap<String, Link> categories = HashBiMap.create();
-        private final BiMap<String, Link> indicatorCategories = HashBiMap.create();
-        private final BiMap<Link, List<TargetValueDTO>> indicatorLinkChilds = HashBiMap.create();
+        private final Map<String, Link> indicatorCategories = Maps.newHashMap();
+        private final Map<Link, Set<TargetValueDTO>> indicatorLinkChilds = Maps.newHashMap();
 
         @Override
         public void load(DataReader<List<ModelData>> listDataReader,
@@ -335,7 +365,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
                 }
 
                 if (childs.isEmpty()) { // try maybe it's indicator links
-                    List<TargetValueDTO> targetValueDTOs = indicatorLinkChilds.get(parent);
+                    Set<TargetValueDTO> targetValueDTOs = indicatorLinkChilds.get(parent);
                     if (targetValueDTOs != null && !targetValueDTOs.isEmpty()) {
                         childs.addAll(targetValueDTOs);
                     }
@@ -363,7 +393,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         }
 
         private void activityChilds(ActivityFormDTO result, ActivityDTO activity, AsyncCallback<List<ModelData>> callback) {
-            List<ModelData> childs = Lists.newArrayList();
+            Set<ModelData> childs = Sets.newHashSet();
 
 
             for (IndicatorDTO indicator : result.getIndicators()) {
@@ -399,17 +429,22 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
                     }
                 }
             }
-            callback.onSuccess(childs);
+            callback.onSuccess(Lists.newArrayList(childs));
         }
 
         public void addIndicatorLinkChild(Link indCategoryLink, TargetValueDTO targetValueDTO) {
-            List<TargetValueDTO> list = indicatorLinkChilds.get(indCategoryLink);
+            Set<TargetValueDTO> list = indicatorLinkChilds.get(indCategoryLink);
             if (list == null) {
-                list = Lists.newArrayList();
+                list = Sets.newHashSet();
                 indicatorLinkChilds.put(indCategoryLink, list);
             }
             list.add(targetValueDTO);
         }
 
+        public void clearCache() {
+            categories.clear();
+            indicatorCategories.clear();
+            indicatorLinkChilds.clear();
+        }
     }
 }
