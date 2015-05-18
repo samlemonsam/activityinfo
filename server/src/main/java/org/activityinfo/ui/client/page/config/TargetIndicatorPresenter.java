@@ -222,7 +222,9 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     private final Set<TargetValueDTO> modifiedValues = Sets.newHashSet();
 
     protected void prepareBatch(BatchCommand batch, ModelData model, boolean clearModifiedValues) {
-        modifiedValues.clear();
+        if (clearModifiedValues) {
+            modifiedValues.clear();
+        }
 
         if (model instanceof EntityDTO) {
             Record record = treeStore.getRecord(model);
