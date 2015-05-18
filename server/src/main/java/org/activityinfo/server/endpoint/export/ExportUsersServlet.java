@@ -58,28 +58,22 @@ public class ExportUsersServlet extends HttpServlet {
 
         int dbId = Integer.valueOf(req.getParameter("dbUsers"));
 
-        try {
 
-            UserResult userResult = dispatcher.execute(new GetUsers(dbId));
+        UserResult userResult = dispatcher.execute(new GetUsers(dbId));
 
-            DbUserExport export = new DbUserExport(userResult.getData());
-            export.createSheet();
+        DbUserExport export = new DbUserExport(userResult.getData());
+        export.createSheet();
 
-            resp.setContentType("application/vnd.ms-excel");
-            if (req.getHeader("User-Agent").contains("MSIE")) {
-                resp.addHeader("Content-Disposition", "attachment; filename=ActivityInfo.xls");
-            } else {
-                resp.addHeader("Content-Disposition",
-                        "attachment; filename=" +
-                        ("ActivityInfo Export " + new Date().toString() + ".xls").replace(" ", "_"));
-            }
-
-            OutputStream os = resp.getOutputStream();
-            export.getBook().write(os);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            resp.setStatus(500);
+        resp.setContentType("application/vnd.ms-excel");
+        if (req.getHeader("User-Agent").contains("MSIE")) {
+            resp.addHeader("Content-Disposition", "attachment; filename=ActivityInfo.xls");
+        } else {
+            resp.addHeader("Content-Disposition",
+                    "attachment; filename=" +
+                            ("ActivityInfo Export " + new Date().toString() + ".xls").replace(" ", "_"));
         }
+
+        OutputStream os = resp.getOutputStream();
+        export.getBook().write(os);
     }
 }

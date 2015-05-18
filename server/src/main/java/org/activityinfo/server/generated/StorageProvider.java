@@ -1,4 +1,4 @@
-package org.activityinfo.server.report.output;
+package org.activityinfo.server.generated;
 
 /*
  * #%L
@@ -34,6 +34,17 @@ public interface StorageProvider {
      * @return
      * @throws IOException
      */
-    TempStorage allocateTemporaryFile(String mimeType, String filename) throws IOException;
+    GeneratedResource create(String mimeType, String filename) throws IOException;
+
+    /**
+     * Provides a handle for a previously created {@code GeneratedResource}
+     * 
+     * @param id the id of the  {@code GeneratedResource}
+     * @return a handle to the  {@code GeneratedResource} identified by the given {@code id}
+     * @throws java.lang.IllegalArgumentException if a {@code GeneratedResource} with given {@code id}
+     * could not be found.
+     */
+    GeneratedResource get(String id);
+
 
 }

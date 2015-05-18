@@ -266,7 +266,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("date2", "2014-02-01");  
         
         for(FieldValue value : values) {
-            switch (value.getField()) {
+            switch (value.getField().toLowerCase()) {
                 case "partner":
                     properties.put("partnerId", aliases.getId(value.getValue()));
                     break;
@@ -276,10 +276,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "location":
                     properties.put("locationId", aliases.getId(value.getValue()));
                     break;
-                case "fromDate":
+                case "fromdate":
                     properties.put("date1", value.getValue());
                     break;
-                case "toDate":
+                case "todate":
                     properties.put("date2", value.getValue());
                     break;
                 default:

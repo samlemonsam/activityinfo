@@ -1,4 +1,4 @@
-package org.activityinfo.server.report.output;
+package org.activityinfo.server.generated;
 
 /*
  * #%L
@@ -22,30 +22,32 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.OutputStream;
 
-public class TempStorage {
+public interface GeneratedResource {
+    
+    public String getId();
 
-    private String url;
-    private OutputStream outputStream;
-
-    public TempStorage(String url, OutputStream stream) {
-        this.url = url;
-        this.outputStream = stream;
-    }
+    /**
+     * @return true if the resource has been generated and is ready to read.
+     */
+    public boolean isComplete();
 
     /**
      * @return the publicly-accessible URL for this temporary resource
      */
-    public String getUrl() {
-        return url;
-    }
+    public String getDownloadUri();
 
     /**
      * @return the output stream to which the contents of the file should be
      * written. The stream MUST be closed by the caller.
      */
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
+    public OutputStream openOutputStream() throws IOException;
+
+    /**
+     * Serves this resource's content
+     */
+    Response serve() throws IOException;
 }

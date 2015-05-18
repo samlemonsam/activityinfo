@@ -1,10 +1,13 @@
-package org.activityinfo.server.endpoint.export;
+package org.activityinfo.server.generated;
 
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
+import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
+import javax.ws.rs.core.UriBuilder;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Calendar;
 
@@ -15,20 +18,17 @@ public class GcsAppIdentityServiceUrlSigner  {
 
     private final AppIdentityService identityService = AppIdentityServiceFactory.getAppIdentityService();
 
-    public String getSignedUrl(final String httpVerb, final String path) throws Exception {
+    public URI signUri(final String httpVerb, final String path) {
         final long expiration = expiration();
         final String unsigned = stringToSign(expiration, path, httpVerb);
         final String signature = sign(unsigned);
 
-        return new StringBuilder(BASE_URL)
-        .append("/")
-        .append(path)
-        .append("?GoogleAccessId=")
-        .append(clientId())
-        .append("&Expires=")
-        .append(expiration)
-        .append("&Signature=")
-        .append(URLEncoder.encode(signature, "UTF-8")).toString();
+        return UriBuilder.fromUri(BASE_URL)
+                .path(path)
+                .queryParam("GoogleAccessId", clientId())
+                .queryParam("Expires", expiration)
+                .queryParam("Signature", signature)
+                .build();
     }
 
     private static long expiration() {
@@ -44,14 +44,19 @@ public class GcsAppIdentityServiceUrlSigner  {
         final String canonicalizedExtensionHeaders = "";
         final String canonicalizedResource = "/" + path;
         return httpVerb + "\n" + contentMD5 + "\n" + contentType + "\n"
-                        + expiration + "\n" + canonicalizedExtensionHeaders + canonicalizedResource;
+                + expiration + "\n" + canonicalizedExtensionHeaders + canonicalizedResource;
     }
 
-    protected String sign(final String stringToSign) throws UnsupportedEncodingException {
+    protected String sign(final String stringToSign) {
         final AppIdentityService.SigningResult signingResult = identityService
                 .signForApp(stringToSign.getBytes());
 
-        return BaseEncoding.base64().encode(signingResult.getSignature());
+        String signature = BaseEncoding.base64().encode(signingResult.getSignature());
+        try {
+            return URLEncoder.encode(signature, Charsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e1) {
+            throw new IllegalStateException("JVM Does not support " + Charsets.UTF_8);
+        }
     }
 
     protected String clientId() {

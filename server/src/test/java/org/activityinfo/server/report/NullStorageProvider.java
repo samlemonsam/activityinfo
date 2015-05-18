@@ -22,24 +22,55 @@ package org.activityinfo.server.report;
  * #L%
  */
 
-import org.activityinfo.server.report.output.StorageProvider;
-import org.activityinfo.server.report.output.TempStorage;
+import com.google.common.io.ByteStreams;
+import org.activityinfo.server.generated.GeneratedResource;
+import org.activityinfo.server.generated.StorageProvider;
 
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class NullStorageProvider implements StorageProvider {
 
     @Override
-    public TempStorage allocateTemporaryFile(String mimeType, String suffix)
-            throws IOException {
+    public GeneratedResource create(String mimeType, String suffix)  throws IOException {
+        return newNullExport();
+    }
 
-        return new TempStorage("http://", new OutputStream() {
+    @Override
+    public GeneratedResource get(String exportId) {
+        return newNullExport();
+    }
+    
+
+    private GeneratedResource newNullExport() {
+        return new GeneratedResource() {
 
             @Override
-            public void write(int b) throws IOException {
-                // NOOOP!
+            public String getId() {
+                throw new UnsupportedOperationException();
             }
-        });
+
+            @Override
+            public boolean isComplete() {
+                return false;
+            }
+
+            @Override
+            public String getDownloadUri() {
+                return "http://";
+            }
+
+            @Override
+            public OutputStream openOutputStream() throws IOException {
+                return ByteStreams.nullOutputStream();
+            }
+
+            @Override
+            public Response serve() throws IOException {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
+
 }

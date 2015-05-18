@@ -208,25 +208,31 @@ public class ExportDialog extends Dialog {
     }
 
     private void pollServer(final String exportId, final Promise<String> downloadUrl) {
-        RequestBuilder request = new RequestBuilder(RequestBuilder.GET, "/ActivityInfo/export?id=" + exportId);
-        request.setCallback(new RequestCallback() {
-            @Override
-            public void onResponseReceived(Request request, Response response) {
-                if(response.getStatusCode() == 200) {
-                    downloadUrl.onSuccess(response.getText());
-                } else {
-                    schedulePoll(exportId, downloadUrl);
+        if (!canceled) {
+
+            RequestBuilder request = new RequestBuilder(RequestBuilder.GET, "/generated/status/" + exportId);
+            request.setCallback(new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == Response.SC_OK) {
+                        downloadUrl.onSuccess(response.getText());
+                    } else if (response.getStatusCode() == Response.SC_ACCEPTED) {
+                        schedulePoll(exportId, downloadUrl);
+                    } else {
+                        showError();
+                    }
                 }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    downloadUrl.onFailure(exception);
+                }
+            });
+            try {
+                request.send();
+            } catch (RequestException e) {
+                downloadUrl.onFailure(e);
             }
-            @Override
-            public void onError(Request request, Throwable exception) {
-                downloadUrl.onFailure(exception);
-            }
-        });
-        try {
-            request.send();
-        } catch (RequestException e) {
-            downloadUrl.onFailure(e);
         }
     }
 

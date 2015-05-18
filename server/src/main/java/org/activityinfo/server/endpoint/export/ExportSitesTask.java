@@ -1,9 +1,6 @@
 package org.activityinfo.server.endpoint.export;
 
-import com.google.appengine.tools.cloudstorage.GcsFileOptions;
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
@@ -11,6 +8,8 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.FilterUrlSerializer;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.generated.GeneratedResource;
+import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.inject.Provider;
@@ -20,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.channels.Channels;
 
 @Singleton
 public class ExportSitesTask extends HttpServlet {
@@ -31,17 +29,23 @@ public class ExportSitesTask extends HttpServlet {
 
     private final Provider<DispatcherSync> dispatcher;
     private final ServerSideAuthProvider authProvider;
+    private final StorageProvider storageProvider;
     
     @Inject
-    public ExportSitesTask(Provider<DispatcherSync> dispatcher, ServerSideAuthProvider authProvider) {
+    public ExportSitesTask(Provider<DispatcherSync> dispatcher, 
+                           ServerSideAuthProvider authProvider,
+                           StorageProvider storageProvider) {
         this.dispatcher = dispatcher;
         this.authProvider = authProvider;
+        this.storageProvider = storageProvider;
     }
 
     @Override
     @Timed(name = "export", kind = "sites")
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        String exportId = req.getParameter("exportId");
+        
         // authenticate this task
         authProvider.set(new AuthenticatedUser("",
                 Integer.parseInt(req.getParameter("userId")),
@@ -52,17 +56,10 @@ public class ExportSitesTask extends HttpServlet {
         Filter filter = FilterUrlSerializer.fromQueryParameter(req.getParameter("filter"));
         SiteExporter export = new SiteExporter(dispatcher.get()).buildExcelWorkbook(filter);
 
-        // Save to GCS
-        GcsService gcs = GcsServiceFactory.createGcsService();
-        GcsFileOptions fileOptions = new GcsFileOptions.Builder()
-                .mimeType("application/vnd.ms-excel")
-                .contentDisposition("attachment; filename=" + req.getParameter("filename"))
-                .build();
-        GcsFilename fileName = new GcsFilename(EXPORT_BUCKET_NAME,
-                req.getParameter("exportId"));
-
-        try(OutputStream outputStream = Channels.newOutputStream(gcs.createOrReplace(fileName, fileOptions))) {
-            export.getBook().write(outputStream);
+        // Save to Export storage
+        GeneratedResource storage = storageProvider.get(exportId);
+        try(OutputStream out = storage.openOutputStream()) {
+            export.getBook().write(out);
         }
     }
 }
