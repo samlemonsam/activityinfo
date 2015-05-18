@@ -101,3 +101,24 @@ Feature: Indicator Targets
       |                       | Value       |
       | Realized              | 1,800       |
       | Targeted              | 6,000       |
+
+  @AI-1007
+  Scenario: Test various UI scenarios based on database-level target
+    When I create a target named "Target1"
+    And I set the targets of "Target1" to:
+      | field                 | value       |
+      | nb. kits              | 4000  kits  |
+      | Satisfaction score    | 7.5         |
+    And I create a target named "Target2"
+    And I set the targets of "Target2" to:
+      | field                 | value       |
+      | nb. kits              | 5000  kits  |
+      | Satisfaction score    | 8.3         |
+    Then selecting target "Target1" shows:
+      | field                 | value       |
+      | nb. kits              | 4000  kits  |
+      | Satisfaction score    | 7.5         |
+    And selecting target "Target2" shows:
+      | field                 | value       |
+      | nb. kits              | 5000  kits  |
+      | Satisfaction score    | 8.3         |

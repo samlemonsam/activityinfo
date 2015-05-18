@@ -68,7 +68,7 @@ public class TargetsPage {
         return container.getCurrentUri().getPath().contains("#targets/");
     }
 
-    private void expandTree(String indicatorName) {
+    public void expandTree(String indicatorName) {
         GxtTree tree = GxtTree.treeGrid(container);
         try {
             tree.waitUntil(new Predicate<GxtTree>() {

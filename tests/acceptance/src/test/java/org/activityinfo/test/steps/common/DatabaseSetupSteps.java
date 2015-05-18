@@ -317,4 +317,9 @@ public class DatabaseSetupSteps {
     public void I_haven_not_defined_any_targets() throws Throwable {
         // noop!
     }
+
+    @Then("^selecting target \"([^\"]*)\" shows:$")
+    public void selecting_target_shows(String targetName, List<FieldValue> targetValues) throws Throwable {
+        driver.assertTargetValues(targetName, targetValues);
+    }
 }

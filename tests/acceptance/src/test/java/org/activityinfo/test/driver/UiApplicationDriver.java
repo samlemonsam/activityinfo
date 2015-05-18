@@ -343,6 +343,17 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    public void assertTargetValues(String targetName, List<FieldValue> targetValues) {
+        Preconditions.checkState(currentDatabase != null, "No current database");
+        TargetsPage targetPage = navigateToTargetSetupFor(currentDatabase);
+        targetPage.select(aliasTable.getAlias(targetName));
+
+        for (FieldValue value : targetValues) {
+            targetPage.expandTree(value.getField());
+            targetPage.valueGrid().findCell(value.getValue());
+        }
+    }
+
     @Override
     public void delete(ObjectType objectType, TestObject testObject) throws Exception {
         switch (objectType) {

@@ -180,4 +180,8 @@ public abstract class ApplicationDriver {
     public void cloneDatabase(TestObject testObject) {
         throw new PendingException();
     }
+
+    public void assertTargetValues(String targetName, List<FieldValue> targetValues) {
+        throw new PendingException();
+    }
 }
