@@ -116,9 +116,9 @@ Feature: Indicator Targets
       | Satisfaction score    | 8.3         |
     Then selecting target "Target1" shows:
       | field                 | value       |
-      | nb. kits              | 4000  kits  |
+      | nb. kits              | 4000        |
       | Satisfaction score    | 7.5         |
     And selecting target "Target2" shows:
       | field                 | value       |
-      | nb. kits              | 5000  kits  |
+      | nb. kits              | 5000        |
       | Satisfaction score    | 8.3         |
