@@ -22,18 +22,20 @@ package org.activityinfo.server.servlet;
  * #L%
  */
 
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.DTOs;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.export.DbUserExport;
 import org.activityinfo.server.endpoint.export.SiteExporter;
+import org.activityinfo.server.endpoint.export.TaskContext;
+import org.activityinfo.server.report.NullStorageProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -53,7 +55,8 @@ public class ExportIntegrationTest extends CommandTestCase2 {
 
         SchemaDTO schema = execute(new GetSchema());
 
-        SiteExporter export = new SiteExporter(getDispatcherSync());
+        TaskContext context = new TaskContext(getDispatcherSync(), new NullStorageProvider(), "XYZ");
+        SiteExporter export = new SiteExporter(context);
         for (UserDatabaseDTO db : schema.getDatabases()) {
             for (ActivityDTO activity : db.getActivities()) {
                 export.export(activity, new Filter());

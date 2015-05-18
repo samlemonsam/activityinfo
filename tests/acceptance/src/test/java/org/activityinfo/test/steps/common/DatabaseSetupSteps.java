@@ -1,22 +1,26 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
+import cucumber.api.DataTable;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.ObjectType;
-import org.activityinfo.test.driver.Property;
+import org.activityinfo.model.type.TextType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import static java.lang.String.format;
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
 
@@ -64,9 +68,11 @@ public class DatabaseSetupSteps {
 
     @Given("^I have created a monthly form named \"([^\"]*)\"$")
     public void I_have_created_a_monthly_form_named(String formName) throws Throwable {
-        driver.setup().createForm(name(formName), 
+        driver.setup().createForm(name(formName),
                 property("database", currentDatabase),
                 property("reportingFrequency", "monthly"));
+        
+        currentForm = formName;
 
     }
 
@@ -83,6 +89,80 @@ public class DatabaseSetupSteps {
         I_have_created_a_form_named_in(formName, getCurrentDatabase());
     }
 
+
+    @Given("^I have created a form named \"([^\"]*)\" with the submissions:$")
+    public void I_have_created_a_form_named_with_the_submissions(String formName, DataTable dataTable) throws Throwable {
+
+        // Create the form
+        I_have_created_a_form_named_in(formName, getCurrentDatabase());
+
+        // Create each of the fields as a column
+        List<String> columns = dataTable.getGherkinRows().get(0).getCells();
+        for(int i=0;i!=columns.size();++i) {
+            createFieldForColumn(formName, dataTable, i);
+        }
+        
+        // Submit the forms
+        for(int row=1;row<dataTable.getGherkinRows().size();++row) {
+            submitRow(formName, dataTable, row);
+        }
+    }
+
+
+    private void createFieldForColumn(String form, DataTable dataTable, int columnIndex) throws Exception {
+        String label = dataTable.getGherkinRows().get(0).getCells().get(columnIndex);
+        // Find set of distinct values
+        Set<String> values = new HashSet<>();
+        for (int row = 1; row < dataTable.getGherkinRows().size(); ++row) {
+            values.add(dataTable.getGherkinRows().get(row).getCells().get(columnIndex));
+        }
+
+        if(!isPredefinedField(label)) {
+            driver.setup().createField(
+                    property("form", form),
+                    property("name", label),
+                    property("type", detectType(values)));
+        }
+    }
+
+    private boolean isPredefinedField(String label) {
+        return label.equalsIgnoreCase("partner");
+    }
+
+    private String detectType(Set<String> values) {
+        if(isQuantity(values)) {
+            return QuantityType.TypeClass.INSTANCE.getId();
+        } else {
+            return TextType.INSTANCE.getId();
+        }
+    }
+
+    private boolean isQuantity(Set<String> values) {
+        try {
+            for (String value : values) {
+                //noinspection ResultOfMethodCallIgnored
+                Double.parseDouble(value);
+            }
+            return true;
+            
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
+    private void submitRow(String formName, DataTable dataTable, int row) throws Exception {
+        List<String> headers = dataTable.getGherkinRows().get(0).getCells();
+        List<String> columns = dataTable.getGherkinRows().get(row).getCells();
+        List<FieldValue> fieldValues = new ArrayList<>();
+        
+        for(int column=0; column<columns.size();++column) {
+            fieldValues.add(new FieldValue(headers.get(column),  columns.get(column)));
+        }
+        
+        driver.setup().submitForm(formName, fieldValues);
+        
+    }
+    
     @Given("^I have created a (text|quantity) field \"([^\"]*)\" in \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName, String formName) throws Throwable {
         driver.setup().createField(
@@ -117,14 +197,14 @@ public class DatabaseSetupSteps {
     @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
         Preconditions.checkState(currentForm != null, "Create a form first");
-        
+
         I_have_created_a_field_in(fieldType, fieldName, currentForm);
     }
 
     @Given("^I have created a enumerated field \"([^\"]*)\" with items:$")
     public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Throwable {
         Preconditions.checkState(currentForm != null, "No current form");
-        
+
         driver.setup().createField(
                 property("form", currentForm),
                 property("name", fieldName),
@@ -138,11 +218,42 @@ public class DatabaseSetupSteps {
     }
 
 
+    @Given("^I have submitted a \"([^\"]*)\" form with partner (.+) with monthly reports:$")
+    public void I_have_submitted_a_form_with_partner(String formName, String partner, DataTable dataTable) throws Throwable {
+
+        List<String> headers = dataTable.getGherkinRows().get(0).getCells();
+        if(!headers.get(0).equalsIgnoreCase("month")) {
+            throw new AssertionError(format("First column of table must be the 'month', found: %s", headers.get(0)));
+        }
+        
+        List<MonthlyFieldValue> fieldValues = new ArrayList<>();
+        
+        for(int row=1;row < dataTable.getGherkinRows().size();++row) {
+            List<String> cells = dataTable.getGherkinRows().get(row).getCells();
+            
+            String parts[] = cells.get(0).split("-");
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            
+            for(int column=1; column<cells.size();++column) {
+                MonthlyFieldValue fieldValue = new MonthlyFieldValue();
+                fieldValue.setMonth(month);
+                fieldValue.setYear(year);
+                fieldValue.setField(headers.get(column));
+                fieldValue.setValue(cells.get(column));
+                fieldValues.add(fieldValue);
+            }
+        }
+
+        driver.setup().submitForm(formName, partner, fieldValues);
+    }
+    
+
     @Given("^I have added partner \"([^\"]*)\" to \"([^\"]*)\"$")
     public void I_have_added_partner_to(String partnerName, String databaseName) throws Throwable {
         driver.setup().addPartner(partnerName, databaseName);
     }
-    
+
     @Given("^I have added partner \"([^\"]*)\"$")
     public void I_have_added_partner_to(String partnerName) throws Throwable {
         I_have_added_partner_to(partnerName, getCurrentDatabase());
@@ -182,8 +293,8 @@ public class DatabaseSetupSteps {
                 property("name", targetName));
 
     }
-    
-    
+     
+   
     @When("^I create a target named \"([^\"]*)\" for partner (.*) in database (.*)$")
     public void I_create_a_target_for_partner(String targetName, String partnerName, String databaseName) throws Throwable {
         driver.createTarget(
@@ -191,7 +302,7 @@ public class DatabaseSetupSteps {
                 property("partner", partnerName),
                 property("name", targetName));
     }
-   
+
 
     @When("^I create a target named \"([^\"]*)\" for partner \"([^\"]*)\" and project \"([^\"]*)\"$")
     public void I_create_a_target_named_for_partner_and_project(String target, String partner, String project) throws Throwable {
@@ -211,7 +322,7 @@ public class DatabaseSetupSteps {
                 property("database", getCurrentDatabase()),
                 property("project", project));
         driver.setTargetValues(targetName, values);
-    
+
     }
 
     @When("^I set the targets of \"(.*)\" to:$")

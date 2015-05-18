@@ -6,6 +6,7 @@ import cucumber.api.PendingException;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
+import org.json.JSONException;
 
 import java.io.File;
 import java.util.List;
@@ -67,6 +68,11 @@ public abstract class ApplicationDriver {
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         throw new PendingException();
     }
+
+    public void submitForm(String formName, String partner, List<MonthlyFieldValue> fieldValues) throws JSONException, Exception {
+        throw new PendingException();
+    }
+
 
     public void delete(ObjectType objectType, String name) throws Exception {
         throw new PendingException();
@@ -176,4 +182,6 @@ public abstract class ApplicationDriver {
     public AliasTable getAliasTable() {
         return aliasTable;
     }
+
+    
 }

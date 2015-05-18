@@ -1,4 +1,4 @@
-package org.activityinfo.server.report.output;
+package org.activityinfo.server.generated;
 
 /*
  * #%L
@@ -22,30 +22,29 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
-import java.io.OutputStream;
+import java.io.IOException;
 
-public class TempStorage {
-
-    private String url;
-    private OutputStream outputStream;
-
-    public TempStorage(String url, OutputStream stream) {
-        this.url = url;
-        this.outputStream = stream;
-    }
+public interface StorageProvider {
 
     /**
-     * @return the publicly-accessible URL for this temporary resource
+     * Creates a web-accessible temporary file
+     *
+     * @param mimeType the mime type of the file
+     * @param filename The name of the user-facing file
+     * @return
+     * @throws IOException
      */
-    public String getUrl() {
-        return url;
-    }
+    GeneratedResource create(String mimeType, String filename) throws IOException;
 
     /**
-     * @return the output stream to which the contents of the file should be
-     * written. The stream MUST be closed by the caller.
+     * Provides a handle for a previously created {@code GeneratedResource}
+     * 
+     * @param id the id of the  {@code GeneratedResource}
+     * @return a handle to the  {@code GeneratedResource} identified by the given {@code id}
+     * @throws java.lang.IllegalArgumentException if a {@code GeneratedResource} with given {@code id}
+     * could not be found.
      */
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
+    GeneratedResource get(String id);
+
+
 }

@@ -175,6 +175,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     @Override
     public File exportForm(String formName) {
+        ensureLoggedIn();
+        
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
         

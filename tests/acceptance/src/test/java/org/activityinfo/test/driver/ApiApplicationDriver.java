@@ -266,7 +266,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("date2", "2014-02-01");  
         
         for(FieldValue value : values) {
-            switch (value.getField()) {
+            switch (value.getField().toLowerCase()) {
                 case "partner":
                     properties.put("partnerId", aliases.getId(value.getValue()));
                     break;
@@ -276,10 +276,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "location":
                     properties.put("locationId", aliases.getId(value.getValue()));
                     break;
-                case "fromDate":
+                case "fromdate":
                     properties.put("date1", value.getValue());
                     break;
-                case "toDate":
+                case "todate":
                     properties.put("date2", value.getValue());
                     break;
                 default:
@@ -289,11 +289,50 @@ public class ApiApplicationDriver extends ApplicationDriver {
             }
         }
 
+        executeCreateSite(properties);
+    }
+
+    @Override
+    public void submitForm(String formName, String partner, List<MonthlyFieldValue> fieldValues) throws Exception {
+        int activityId = aliases.getId(formName);
+        int siteId = aliases.generateId();
+
+        JSONObject properties = new JSONObject();
+        properties.put("activityId", activityId);
+        properties.put("id", siteId);
+        properties.put("locationId", queryNullaryLocationType(RDC));
+        properties.put("partnerId", aliases.getId(partner));
+        
+        executeCreateSite(properties);
+        
+        JSONArray changes = new JSONArray();
+        for (MonthlyFieldValue fieldValue : fieldValues) {
+            JSONObject month = new JSONObject();
+            month.put("month", fieldValue.getMonth());
+            month.put("year", fieldValue.getYear());
+            
+            JSONObject change = new JSONObject();
+            change.put("month", month);
+            change.put("indicatorId", aliases.getId(fieldValue.getField()));
+            change.put("value", Double.parseDouble(fieldValue.getValue()));
+            changes.put(changes.length(), change);
+        }
+        
+        JSONObject updateCommand = new JSONObject();
+        updateCommand.put("changes", changes);
+        updateCommand.put("siteId", siteId);
+        
+        executeCommand("UpdateMonthlyReports", updateCommand);
+    }
+
+
+    private void executeCreateSite(JSONObject properties) throws JSONException {
         JSONObject command = new JSONObject();
         command.put("properties", properties);
-    
+
         executeCommand("CreateSite", command);
     }
+
 
     @Override
     public void delete(ObjectType objectType, String name) throws Exception {

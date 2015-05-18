@@ -33,24 +33,14 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.server.command.DispatcherSync;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.WorkbookUtil;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,7 +67,7 @@ public class SiteExporter {
     private static final int CHARACTERS_PER_WIDTH_UNIT = 255;
     private static final int SITE_BATCH_SIZE = 100;
 
-    private final DispatcherSync dispatcher;
+    private final TaskContext context;
 
     private final HSSFWorkbook book;
     private final CreationHelper creationHelper;
@@ -104,13 +94,13 @@ public class SiteExporter {
     private List<Integer> levels;
     private HSSFCellStyle dateTimeStyle;
 
-    public SiteExporter(DispatcherSync dispatcher) {
-        this.dispatcher = dispatcher;
+    public SiteExporter(TaskContext context) {
+        this.context = context;
 
         book = new HSSFWorkbook();
         creationHelper = book.getCreationHelper();
 
-        sheetNames = new HashMap<String, Integer>();
+        sheetNames = new HashMap<>();
 
         declareStyles();
     }
@@ -240,26 +230,25 @@ public class SiteExporter {
 
         createHeaderCell(headerRow2, column++, "Axe");
 
-        indicators = new ArrayList<Integer>(activity.getIndicators().size());
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
-            for (IndicatorGroup group : activity.groupIndicators()) {
-                if (group.getName() != null) {
-                    // create a merged cell on the top row spanning all members
-                    // of the group
-                    createHeaderCell(headerRow1, column, group.getName());
-                    sheet.addMergedRegion(new CellRangeAddress(0,
-                            0,
-                            column,
-                            column + group.getIndicators().size() - 1));
-                }
-                for (IndicatorDTO indicator : group.getIndicators()) {
-                    indicators.add(indicator.getId());
-                    createHeaderCell(headerRow2, column, indicator.getName(), indicatorHeaderStyle);
-                    sheet.setColumnWidth(column, characters(INDICATOR_COLUMN_WIDTH));
-                    column++;
-                }
+        indicators = new ArrayList<>(activity.getIndicators().size());
+        for (IndicatorGroup group : activity.groupIndicators()) {
+            if (group.getName() != null) {
+                // create a merged cell on the top row spanning all members
+                // of the group
+                createHeaderCell(headerRow1, column, group.getName());
+                sheet.addMergedRegion(new CellRangeAddress(0,
+                        0,
+                        column,
+                        column + group.getIndicators().size() - 1));
+            }
+            for (IndicatorDTO indicator : group.getIndicators()) {
+                indicators.add(indicator.getId());
+                createHeaderCell(headerRow2, column, indicator.getName(), indicatorHeaderStyle);
+                sheet.setColumnWidth(column, characters(INDICATOR_COLUMN_WIDTH));
+                column++;
             }
         }
+    
         attributes = new ArrayList<>();
         for (AttributeGroupDTO group : activity.getAttributeGroups()) {
             if (group.getAttributes().size() != 0) {
@@ -304,7 +293,19 @@ public class SiteExporter {
         query.setOffset(offset);
         query.setLimit(SITE_BATCH_SIZE);
 
-        return dispatcher.execute(query);
+        if(activity.getReportingFrequency() == ActivityDTO.REPORT_MONTHLY) {
+            query.setFetchAllReportingPeriods(true);
+            query.setFetchLinks(false);
+            query.setLimit(SITE_BATCH_SIZE / 2);
+        }
+
+        SiteResult result = context.execute(query);
+        
+        if(result.getTotalLength() > 0) {
+            context.updateProgress(Math.max(1.0, (double) offset) / ((double) result.getTotalLength()));
+        }
+        
+        return result;
     }
 
     private void createDataRows(ActivityDTO activity, Filter filter, Sheet sheet) {
@@ -375,7 +376,6 @@ public class SiteExporter {
         if (!Strings.isNullOrEmpty(site.getComments())) {
             createCell(row, column, site.getComments());
         }
-        column++;
     }
 
     private Cell createHeaderCell(Row headerRow, int columnIndex, String text, CellStyle style) {
@@ -482,7 +482,7 @@ public class SiteExporter {
 
     public SiteExporter buildExcelWorkbook(Filter filter) {
 
-        SchemaDTO schema = dispatcher.execute(new GetSchema());
+        SchemaDTO schema = context.execute(new GetSchema());
 
         for (UserDatabaseDTO db : schema.getDatabases()) {
             if (!filter.isRestricted(DimensionType.Database) ||

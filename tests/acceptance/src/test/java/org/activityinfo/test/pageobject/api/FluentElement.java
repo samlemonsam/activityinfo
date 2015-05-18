@@ -82,18 +82,18 @@ public class FluentElement {
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, 60);
         wait.until(condition);
     }
 
     public FluentElement waitFor(By by) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, 60);
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
         return new FluentElement(webDriver, element);
     }
     
     public <T> T waitFor(Function<WebDriver, T> function) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, 60);
         return wait.until(function);
     }
     

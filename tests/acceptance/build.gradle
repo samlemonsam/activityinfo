@@ -1,6 +1,10 @@
 
 dependencies {
 
+
+    compile 'org.apache.poi:poi-ooxml:3.12-beta1'
+    compile 'org.apache.poi:poi:3.12-beta1'
+    
     testCompile libraries.junit
     testCompile libraries.guice
     testCompile libraries.jersey.client
@@ -24,7 +28,6 @@ dependencies {
     testCompile libraries.jersey.simpleServer
 
     testCompile libraries.c3p0
-    testCompile 'org.apache.poi:poi:3.8'
 
     testCompile project(':core:model')
     testCompile project(path: ':server', configuration: 'i18n')

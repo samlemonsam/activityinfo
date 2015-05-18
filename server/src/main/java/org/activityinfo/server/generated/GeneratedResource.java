@@ -1,4 +1,4 @@
-package org.activityinfo.server.report.output;
+package org.activityinfo.server.generated;
 
 /*
  * #%L
@@ -22,27 +22,37 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
-import java.io.FileOutputStream;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Date;
 
-public class LocalStorageProvider implements StorageProvider {
+public interface GeneratedResource {
+    
+    public String getId();
 
-    private String folder;
+    /**
+     * @return true if the resource has been generated and is ready to read.
+     */
+    public boolean isComplete();
 
-    public LocalStorageProvider(String folder) {
-        this.folder = folder.replace('\\', '/');
-    }
+    /**
+     * @return the publicly-accessible URL for this temporary resource
+     */
+    public String getDownloadUri();
 
-    @Override
-    public TempStorage allocateTemporaryFile(String mimeType, String suffix)
-            throws IOException {
-        String path = folder + "/img" + Long.toString((new Date()).getTime())
-                + suffix;
-        OutputStream stream = new FileOutputStream(path);
+    /**
+     * @return the output stream to which the contents of the file should be
+     * written. The stream MUST be closed by the caller.
+     */
+    public OutputStream openOutputStream() throws IOException;
+    
+    public void updateProgress(double percentageComplete);
+    
+    public double getProgress();
+    
 
-        return new TempStorage("file://" + path, stream);
-    }
-
+    /**
+     * Serves this resource's content
+     */
+    Response serve() throws IOException;
 }
