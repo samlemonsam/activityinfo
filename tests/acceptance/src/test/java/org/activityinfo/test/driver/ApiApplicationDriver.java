@@ -39,8 +39,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import static java.lang.String.format;
 
 @ScenarioScoped
 public class ApiApplicationDriver extends ApplicationDriver {
@@ -350,7 +353,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 executeDelete("UserDatabase", aliases.getId(name));
                 break;
             default:
-                throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
+                throw new IllegalArgumentException(format("Invalid object type '%s'", objectType));
         }
     }
 
@@ -458,7 +461,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         command.put("databaseId", aliases.getId(properties.getString("database")));
         command.put("model", model);
 
-        LOGGER.fine(String.format("Granting access to database '%s' [%d] to %s [%s] within %s [%d]",
+        LOGGER.fine(format("Granting access to database '%s' [%d] to %s [%s] within %s [%d]",
                 properties.getString("database"), command.getInt("databaseId"),
                 properties.getString("user"), email.getEmail(),
                 properties.getString("partner"), model.getInt("partnerId")));
@@ -563,7 +566,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         }
 
         File file = File.createTempFile("export", ".xls");
-        try(InputStream inputStream = root.uri(new URI(downloadUri)).get(InputStream.class)) {
+        try(InputStream inputStream = new URI(downloadUri).toURL().openStream()) {
             ByteStreams.copy(inputStream, Files.asByteSink(file));
         }
 
@@ -618,7 +621,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     throw new RuntimeException("Exception parsing locationType list", e);
                 }
 
-                throw new IllegalStateException(String.format("Country %d has no nullary location type: expected" +
+                throw new IllegalStateException(format("Country %d has no nullary location type: expected" +
                         " location type with name 'Country'", countryId));
             }
         });
@@ -674,7 +677,15 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .post(ClientResponse.class, json.toString());
         } catch (ClientHandlerException e) {
-            throw new Error("Post failed: " + e.getMessage(), e);
+            LOGGER.fine(format("Command %s failed: %s", json.getString("type"), e.getMessage()));
+            ERROR_RATE.markError();
+
+            if(retriesRemaining > 0) {
+                backoff();
+                return doCommand(json, retriesRemaining-1);
+            }
+            
+            throw new RuntimeException(format("Command %s failed: %s", json.getString("type"), e.getMessage()));
         }
         
         ClientResponse.Status status = response.getClientResponseStatus();
@@ -685,7 +696,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         } else {
             ERROR_RATE.markError();
 
-            LOGGER.fine(String.format("Command %s failed: %d %s", 
+            LOGGER.fine(format("Command %s failed: %d %s",
                     json.getString("type"), status.getStatusCode(), status.getReasonPhrase()));
             
             if (retriesRemaining > 0 &&
@@ -701,6 +712,14 @@ public class ApiApplicationDriver extends ApplicationDriver {
             }
             
             throw new RuntimeException(message);
+        }
+    }
+
+    private void backoff() {
+        try {
+            Thread.sleep(ThreadLocalRandom.current().nextInt(1000, 2000));
+        } catch (InterruptedException ignored) {
+            throw new RuntimeException("Interrupted");
         }
     }
 
