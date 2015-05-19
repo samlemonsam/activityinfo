@@ -1,6 +1,5 @@
 package org.activityinfo.test.steps.common;
 
-import com.google.common.io.Files;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -12,7 +11,6 @@ import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,8 +20,8 @@ import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -164,9 +162,7 @@ public class DataEntrySteps {
 
     private static DataTable exportedDataTable(File file) throws IOException, InvalidFormatException {
 
-        byte[] bytes = Files.toByteArray(file);
-
-        HSSFWorkbook workbook = new HSSFWorkbook(new ByteArrayInputStream(bytes));
+        HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter formatter = new DataFormatter();
         
@@ -191,26 +187,12 @@ public class DataEntrySteps {
             }
             rows.add(row);
         }
+        
+        if(rows.isEmpty()) {
+            throw new AssertionError("Export contained no data");
+        }
 
         return DataTable.create(rows);
-    }
-
-    private static String toString(Cell cell) {
-        if(cell == null) {
-            return "";
-        } else {
-            switch (cell.getCellType()) {
-                case Cell.CELL_TYPE_BLANK:
-                    return "";
-                case Cell.CELL_TYPE_BOOLEAN:
-                    return cell.getBooleanCellValue() ? "true" : "false";
-                case Cell.CELL_TYPE_STRING:
-                    return cell.getStringCellValue();
-                case Cell.CELL_TYPE_NUMERIC:
-                    return Double.toString(cell.getNumericCellValue());
-            }
-        }
-        throw new UnsupportedOperationException("cellType: " + cell.getCellType());
     }
 
     public static void main(String[] args) throws IOException, InvalidFormatException {

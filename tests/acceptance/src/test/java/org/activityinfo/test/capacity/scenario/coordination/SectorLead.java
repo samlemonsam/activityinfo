@@ -9,7 +9,10 @@ import org.activityinfo.test.capacity.action.UserAction;
 import org.activityinfo.test.capacity.model.DatabaseBuilder;
 import org.activityinfo.test.capacity.model.UserRole;
 import org.activityinfo.test.driver.ApiApplicationDriver;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -52,14 +55,18 @@ public class SectorLead implements UserRole {
                 // these two activities occurring together
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateForms(formsToCreate.get(1)),
+                        new ExportDatabase(),
                         SyncOfflineWithApi.INSTANCE));
             case 2:
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateForms(formsToCreate.get(2)),
+                        new ExportDatabase(),
                         SyncOfflineWithApi.INSTANCE));
 
             default:
-                return Optional.of(SyncOfflineWithApi.INSTANCE);
+                return Optional.<UserAction>of(new CompositeAction(
+                        SyncOfflineWithApi.INSTANCE,
+                        new ExportDatabase()));
 
         }
     }
@@ -136,6 +143,26 @@ public class SectorLead implements UserRole {
         @Override
         public String toString() {
             return "CreateForms";
+        }
+    }
+    
+    private class ExportDatabase implements UserAction {
+
+        @Override
+        public void execute(ApiApplicationDriver driver) throws Exception {
+            File file = driver.exportDatabase(sector.getDatabaseName());
+            try {
+                HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
+                
+                LOGGER.info(getNickName() + " exported results to Excel [" + workbook.getNumberOfSheets() + " sheets]");
+                
+            } finally {
+                boolean deleted = file.delete();
+                if(!deleted) {
+                    LOGGER.fine("Failed to delete temporary file " + file);
+                }
+            }
+
         }
     }
 
