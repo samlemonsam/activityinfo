@@ -18,6 +18,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -211,7 +212,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("name", form.getAlias());
         properties.put("databaseId", form.getId("database")); 
         properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC)));
-        
+        properties.put("published", form.getInteger("published", Published.NOT_PUBLISHED.getIndex()));
+
         switch (form.getString("reportingFrequency", "once")) {
             case "monthly":
                 properties.put("reportingFrequency", 1);

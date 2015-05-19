@@ -29,7 +29,14 @@ class JsonChecker {
 
     public void check(String path, JsonNode expected, JsonNode actual) {
         if(expected.asText().startsWith(Placeholders.ID_PREFIX)) {
-            bindPlaceholder(expected, actual);
+            try {
+                bindPlaceholder(expected, actual);
+            } catch (RuntimeException e) {
+                if (actual.getTextValue().startsWith( placeholders.parseName(expected.asText()) + "_")) {
+                    return;
+                }
+                throw e;
+            }
 
         } else if (expected.isTextual()) {
             if(!actual.isTextual()) {
@@ -78,7 +85,6 @@ class JsonChecker {
         String alias = placeholders.parseName(expected.asText());
         int id = actual.getIntValue();
         placeholders.bind(alias, id);
-
     }
 
     private void checkObject(String path, ObjectNode expectedObject, ObjectNode actualObject) {
@@ -87,7 +93,18 @@ class JsonChecker {
             String fieldName = it.next();
             JsonNode expectedValue = expectedObject.get(fieldName);
             JsonNode actualValue = actualObject.get(fieldName);
-            if(actualValue == null) {
+            if (actualValue == null && fieldName.startsWith(Placeholders.ID_PREFIX)) { // cover case when field name may be placeholder
+                Iterator<String> actualFieldNames = actualObject.getFieldNames();
+                while(actualFieldNames.hasNext()) {
+                    String current = actualFieldNames.next();
+                    if (current.startsWith(placeholders.parseName(fieldName) + "_")) {
+                        fieldName = current;
+                        break;
+                    }
+                }
+                actualValue = actualObject.get(fieldName);
+            }
+            if (actualValue == null) {
                 throw new AssertionError(String.format("Missing field '%s'", fieldName));
             }
             check(String.format("%s.%s", path, fieldName), expectedValue, actualValue);
@@ -97,6 +114,13 @@ class JsonChecker {
         while(it.hasNext()) {
             String fieldName = it.next();
             if(expectedObject.get(fieldName) == null) {
+                // check, maybe we have placeholder in expected object
+                if (fieldName.contains("_")) {
+                    String placeholder = Placeholders.ID_PREFIX + fieldName.substring(0, fieldName.indexOf("_"));
+                    if (expectedObject.get(placeholder) != null) {
+                        return;
+                    }
+                }
                 throw new AssertionError(String.format("Unexpected field '%s' in response", fieldName));
             }
         }

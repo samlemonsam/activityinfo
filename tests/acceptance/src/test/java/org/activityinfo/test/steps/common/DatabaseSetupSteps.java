@@ -8,6 +8,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.test.driver.*;
@@ -63,6 +64,17 @@ public class DatabaseSetupSteps {
     public void I_have_created_a_form_named_in(String formName, String databaseName) throws Throwable {
         driver.setup().createForm(name(formName), property("database", databaseName));
         
+        this.currentForm = formName;
+    }
+
+    @Given("^I have created a published form named \"([^\"]*)\"$")
+    public void I_have_created_a_published_form_named(String formName) throws Throwable {
+        driver.setup().createForm(
+                name(formName),
+                property("database", getCurrentDatabase()),
+                property("published", Published.ALL_ARE_PUBLISHED.getIndex())
+        );
+
         this.currentForm = formName;
     }
 

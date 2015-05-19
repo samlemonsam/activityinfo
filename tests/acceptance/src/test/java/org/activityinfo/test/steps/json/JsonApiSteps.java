@@ -16,6 +16,8 @@ import org.activityinfo.test.sut.UserAccount;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -79,11 +81,18 @@ public class JsonApiSteps {
                 .post(ClientResponse.class));
     }
 
+    @When("^Unauthenticated user requests (.*)$")
+    public void Unauthenticated_user_requests(String url) throws Throwable {
+        request(url, null);
+    }
+
     @When("^I request (.*)$")
     public void I_request(String url) throws Throwable {
-        
-        
-        WebResource resource = root(currentAccount)
+        request(url, currentAccount);
+    }
+
+    private void request(@Nonnull String url, @Nullable UserAccount account) {
+        WebResource resource = root(account)
                 .path(placeholders.resolvePath(url))
                 .queryParams(placeholders.resolveQueryParams(url));
 
@@ -128,9 +137,11 @@ public class JsonApiSteps {
 
     }
 
-    private WebResource root(UserAccount account) {
+    private WebResource root(@Nullable UserAccount account) {
         Client client = new Client();
-        client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
+        if (account != null) {
+            client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
+        }
 
         return client.resource(server.getRootUrl());
     }
