@@ -11,14 +11,12 @@ import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.capacity.model.UserRole;
 import org.activityinfo.test.capacity.scripts.CapacityTestScript;
 import org.activityinfo.test.capacity.scripts.DatabaseStress;
+import org.activityinfo.test.capacity.scripts.SingleDatabase;
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 /**
@@ -26,14 +24,15 @@ import java.util.logging.Logger;
  */
 public class CapacityTest {
 
-    private static final int MAX_CONCURRENT_USERS = 150;
+    public static final int MAX_CONCURRENT_USERS = 150;
+
+    public static final double MINIMUM_SUCCESS_RATE = 98;
 
     private static final Logger LOGGER = Logger.getLogger(CapacityTest.class.getName());
 
 
     private final TestContext context;
     private final List<Scenario> scenarios = Lists.newArrayList();
-    public static final double MINIMUM_SUCCESS_RATE = 98;
 
 
     public CapacityTest() {
@@ -65,7 +64,12 @@ public class CapacityTest {
 
 
         ExecutorService scenarioExecutionService = Executors.newCachedThreadPool();
-        ExecutorService userExecutorService = Executors.newCachedThreadPool();
+        
+        
+        // Allocate 10 threads per core as most of the time will be spent waiting on
+        // a response from the server
+        int numExecutors = Runtime.getRuntime().availableProcessors() * 10;
+        ExecutorService userExecutorService = Executors.newFixedThreadPool(numExecutors);
 
         List<Callable<Void>> runs = Lists.newArrayList();
         for(Scenario scenario : scenarios) {
