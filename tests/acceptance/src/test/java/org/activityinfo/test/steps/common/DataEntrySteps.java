@@ -194,14 +194,4 @@ public class DataEntrySteps {
 
         return DataTable.create(rows);
     }
-
-    public static void main(String[] args) throws IOException, InvalidFormatException {
-
-        //File file = new File("/tmp/export4589625550230824900.xls");
-        File file = new File("/home/alex/Downloads/ActivityInfo_Export_2015-05-01_235920.xls");
-        System.out.println(exportedDataTable(file));
-
-    }
-
-
 }

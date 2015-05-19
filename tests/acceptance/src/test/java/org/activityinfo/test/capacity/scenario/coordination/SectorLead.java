@@ -162,7 +162,11 @@ public class SectorLead implements UserRole {
                     LOGGER.fine("Failed to delete temporary file " + file);
                 }
             }
+        }
 
+        @Override
+        public String toString() {
+            return "ExportDatabase";
         }
     }
 

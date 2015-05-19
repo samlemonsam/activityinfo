@@ -2,16 +2,11 @@ package org.activityinfo.test.capacity.model;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.test.capacity.TestContext;
-import org.activityinfo.test.capacity.agent.Agent;
 import org.activityinfo.test.driver.AliasTable;
-import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.Server;
-import org.activityinfo.test.sut.UserAccount;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents an independent test scenario which might involve multiple simulated users.
@@ -22,9 +17,7 @@ public class ScenarioContext {
     private TestContext testContext;
     private DevServerAccounts accounts;
     private AliasTable aliasTable;
-    
-    private Map<String, Integer> nextNumber = new HashMap<>();
-    
+
     private List<User> users = Lists.newArrayList();
 
     public ScenarioContext(TestContext context) {
