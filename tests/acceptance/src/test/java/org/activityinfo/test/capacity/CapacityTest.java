@@ -15,7 +15,10 @@ import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -62,8 +65,7 @@ public class CapacityTest {
 
 
         ExecutorService scenarioExecutionService = Executors.newCachedThreadPool();
-        ExecutorService userExecutorService = new ThreadPoolExecutor(10, MAX_CONCURRENT_USERS,
-                5, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+        ExecutorService userExecutorService = Executors.newCachedThreadPool();
 
         List<Callable<Void>> runs = Lists.newArrayList();
         for(Scenario scenario : scenarios) {

@@ -20,13 +20,15 @@ public class CoordinationScenario implements Scenario {
     
     private final int partnerCount;
     private final int usersPerPartner;
+    private String name;
     private final int databaseCount;
 
     
     private final List<Sector> sectors = Lists.newArrayList();
     private final List<PartnerOrganization> partners = Lists.newArrayList();
 
-    public CoordinationScenario(int databaseCount, int partnerCount, int usersPerPartner) {
+    public CoordinationScenario(String name, int databaseCount, int partnerCount, int usersPerPartner) {
+        this.name = name;
         this.databaseCount = databaseCount;
         this.partnerCount = partnerCount;
         this.usersPerPartner = usersPerPartner;
@@ -74,6 +76,6 @@ public class CoordinationScenario implements Scenario {
 
     @Override
     public String toString() {
-        return "CoordinationScenario";
+        return name + " Coordination Scenario";
     }
 }
