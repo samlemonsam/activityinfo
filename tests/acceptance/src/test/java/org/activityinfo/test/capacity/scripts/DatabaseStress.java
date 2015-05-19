@@ -18,7 +18,7 @@ public class DatabaseStress implements CapacityTestScript {
 
     private CoordinationScenario countryCoordination(String name) {
         int databaseCount = 11;
-        int partnerCount = 50;
+        int partnerCount = 100;
         int usersPerPartner = 10;
         return new CoordinationScenario(name, databaseCount, partnerCount, usersPerPartner);
     }
