@@ -32,7 +32,8 @@ class JsonChecker {
             try {
                 bindPlaceholder(expected, actual);
             } catch (RuntimeException e) {
-                if (actual.getTextValue().startsWith( placeholders.parseName(expected.asText()) + "_")) {
+                // in case we can't bind id, check whether actual value is alias and starts from prefix "<name>_"
+                if (actual.getTextValue().startsWith(placeholders.parseName(expected.asText()) + "_")) {
                     return;
                 }
                 throw e;

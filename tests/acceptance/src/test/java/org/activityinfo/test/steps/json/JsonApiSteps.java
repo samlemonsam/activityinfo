@@ -1,5 +1,6 @@
 package org.activityinfo.test.steps.json;
 
+import com.google.common.base.Optional;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -17,7 +18,6 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -75,7 +75,7 @@ public class JsonApiSteps {
 
         System.out.println(request.toString());
 
-        recordResponse(root(account)
+        recordResponse(root(Optional.of(account))
                 .path("/command")
                 .entity(request.toString(), MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class));
@@ -83,15 +83,15 @@ public class JsonApiSteps {
 
     @When("^Unauthenticated user requests (.*)$")
     public void Unauthenticated_user_requests(String url) throws Throwable {
-        request(url, null);
+        request(url, Optional.<UserAccount>absent());
     }
 
     @When("^I request (.*)$")
     public void I_request(String url) throws Throwable {
-        request(url, currentAccount);
+        request(url, Optional.of(currentAccount));
     }
 
-    private void request(@Nonnull String url, @Nullable UserAccount account) {
+    private void request(@Nonnull String url, Optional<UserAccount> account) {
         WebResource resource = root(account)
                 .path(placeholders.resolvePath(url))
                 .queryParams(placeholders.resolveQueryParams(url));
@@ -137,10 +137,10 @@ public class JsonApiSteps {
 
     }
 
-    private WebResource root(@Nullable UserAccount account) {
+    private WebResource root(Optional<UserAccount> account) {
         Client client = new Client();
-        if (account != null) {
-            client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
+        if (account.isPresent()) {
+            client.addFilter(new HTTPBasicAuthFilter(account.get().getEmail(), account.get().getPassword()));
         }
 
         return client.resource(server.getRootUrl());

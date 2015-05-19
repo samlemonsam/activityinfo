@@ -5,16 +5,16 @@ Feature: Site API
     Given I have created a database "RRMP"
     And I have added partner "NRC" to "RRMP"
     And I have created a published form named "Distributions"
-    And I have created a quantity field "a" in "Distributions" with code "a"
-    And I have created a quantity field "b" in "Distributions" with code "b"
+    And I have created a quantity field "kits" in "Distributions" with code "kits"
+    And I have created a quantity field "score" in "Distributions" with code "score"
     And I have created a enumerated field "donor" with items:
       | USAID  |
       | ECHO   |
       | NRC    |
     When I have submitted a "Distributions" form with:
       | field     | value      |
-      | a         | 1          |
-      | b         | 2          |
+      | kits      | 1          |
+      | score     | 2          |
       | partner   | NRC        |
       | donor     | USAID      |
       | fromDate  | 2014-01-01 |
@@ -38,8 +38,8 @@ Feature: Site API
           startDate : 2014-01-01
           endDate : 2014-04-10
           indicators :
-            $a : 1.0
-            $b : 2.0
+            $kits : 1.0
+            $score : 2.0
         geometry :
           type : Point
           coordinates :
@@ -65,8 +65,8 @@ Feature: Site API
           startDate : 2014-01-01
           endDate : 2014-04-10
           indicators :
-            $a : 1.0
-            $b : 2.0
+            $kits : 1.0
+            $score : 2.0
         geometry :
           type : Point
           coordinates :
