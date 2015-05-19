@@ -160,8 +160,12 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public File exportForm(String formName) {
-        throw new UnsupportedOperationException();
+    public File exportForm(String formName) throws Exception {
+        throw new PendingException();
+    }
+    
+    public File exportDatabase(String databaseName) throws Exception {
+        throw new PendingException();
     }
 
     /**

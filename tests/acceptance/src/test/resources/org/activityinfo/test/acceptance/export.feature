@@ -1,4 +1,4 @@
-@web
+@web @api
 Feature: Export to Excel
 
   Scenario: Export single form to Excel
@@ -35,7 +35,7 @@ Feature: Export to Excel
       | 2015-01  |                         1000 |
       | 2015-02  |                          500 |
       | 2015-03  |                          250 |
-    When I export the form "LCRP-R WASH"
+    When I export the form "Site"
     Then the exported spreadsheet contains:
       | Date1  | Date2   | Partner | # with improved water supply |
       | 1/1/15 | 1/31/15 | ACF     |                        1,000 |

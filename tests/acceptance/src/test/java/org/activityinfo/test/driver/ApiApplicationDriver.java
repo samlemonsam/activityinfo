@@ -3,6 +3,7 @@ package org.activityinfo.test.driver;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
@@ -10,11 +11,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingOutputStream;
+import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -27,14 +30,19 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+@ScenarioScoped
 public class ApiApplicationDriver extends ApplicationDriver {
 
     public static final Logger LOGGER = Logger.getLogger(ApiApplicationDriver.class.getName());
@@ -521,6 +529,45 @@ public class ApiApplicationDriver extends ApplicationDriver {
             
             executeCommand("UpdateTargetValue", command);
         }
+    }
+
+    @Override
+    public File exportForm(String formName) throws Exception {
+        return export("filter=Activity+" + aliases.getId(formName));
+    }
+
+    @Override
+    public File exportDatabase(String databaseName) throws Exception {
+        return export("filter=Database+" + aliases.getId(databaseName));
+    }
+
+    private File export(String exportModel) throws Exception {
+        WebResource root = root();
+        String id = root.path("ActivityInfo").path("export")
+                .entity(exportModel, MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+                .post(String.class);
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        String downloadUri;
+        while(true) {
+            JSONObject status = new JSONObject(root.path("generated").path("status").path(id).get(String.class));
+            if(status.has("downloadUri")) {
+                downloadUri = status.getString("downloadUri");
+                break;
+            }
+            if(stopwatch.elapsed(TimeUnit.MINUTES) > 5) {
+                throw new AssertionError("Download timed out.");
+            }
+            
+            Thread.sleep(1000);
+        }
+
+        File file = File.createTempFile("export", ".xls");
+        try(InputStream inputStream = root.uri(new URI(downloadUri)).get(InputStream.class)) {
+            ByteStreams.copy(inputStream, Files.asByteSink(file));
+        }
+
+        return file;
     }
 
     private PendingId createEntityAndBindId(String entityType, JSONObject properties) throws JSONException {
