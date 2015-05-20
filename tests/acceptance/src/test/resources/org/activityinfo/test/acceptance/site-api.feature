@@ -43,8 +43,8 @@ Feature: Site API
         geometry :
           type : Point
           coordinates :
-           -  0.0
-           -  0.0
+           -  21.746970920000003
+           -  -4.034950903
     """
 
   @AI-574
@@ -70,6 +70,6 @@ Feature: Site API
         geometry :
           type : Point
           coordinates :
-           -  0.0
-           -  0.0
+           -  21.746970920000003
+           -  -4.034950903
     """
