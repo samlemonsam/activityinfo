@@ -296,13 +296,12 @@ public class SiteExporter {
         if(activity.getReportingFrequency() == ActivityDTO.REPORT_MONTHLY) {
             query.setFetchAllReportingPeriods(true);
             query.setFetchLinks(false);
-            query.setLimit(SITE_BATCH_SIZE / 2);
         }
 
         SiteResult result = context.execute(query);
         
         if(result.getTotalLength() > 0) {
-            context.updateProgress(Math.max(1.0, (double) offset) / ((double) result.getTotalLength()));
+            context.updateProgress(Math.min(1.0, (double) offset) / ((double) result.getTotalLength()));
         }
         
         return result;
@@ -324,10 +323,7 @@ public class SiteExporter {
             for (SiteDTO site : batch.getData()) {
                 addDataRow(sheet, rowIndex++, site);
             }
-            offset += batch.getData().size();
-            if (offset >= batch.getTotalLength()) {
-                break;
-            }
+            offset += SITE_BATCH_SIZE;
         }
     }
 

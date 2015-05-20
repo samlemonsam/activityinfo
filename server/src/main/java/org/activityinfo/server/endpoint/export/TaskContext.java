@@ -22,7 +22,7 @@ public class TaskContext implements DispatcherSync {
 
     public void updateProgress(double percentComplete) {
         Preconditions.checkArgument(percentComplete >= 0 && percentComplete <= 1.0d, 
-                "percentComplete must be in the range [0, 1]");
+                "percentComplete must be in the range [0, 1], was: %f", percentComplete);
     
         storageProvider.get(taskId).updateProgress(percentComplete);
     }
