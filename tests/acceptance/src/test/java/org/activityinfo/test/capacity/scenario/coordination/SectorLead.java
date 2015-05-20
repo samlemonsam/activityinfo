@@ -4,7 +4,7 @@ package org.activityinfo.test.capacity.scenario.coordination;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.capacity.action.CompositeAction;
-import org.activityinfo.test.capacity.action.SyncOfflineWithApi;
+import org.activityinfo.test.capacity.action.SynchronizeAction;
 import org.activityinfo.test.capacity.action.UserAction;
 import org.activityinfo.test.capacity.model.DatabaseBuilder;
 import org.activityinfo.test.capacity.model.UserRole;
@@ -25,16 +25,19 @@ public class SectorLead implements UserRole {
 
     private final DatabaseBuilder builder;
     private final List<List<String>> formsToCreate;
+    
+    private final SynchronizeAction synchronizeAction;
 
     public SectorLead(Sector sector) {
         this.sector = sector;
         builder = new DatabaseBuilder();
         formsToCreate = Lists.partition(sector.getActivityForms(), 3);
+        synchronizeAction = new SynchronizeAction();
     }
 
     @Override
     public String getNickName() {
-        return sector + " Sector Lead";
+        return sector.getScenario().getName() + " " + sector + " Sector Lead";
     }
 
     @Override
@@ -46,9 +49,9 @@ public class SectorLead implements UserRole {
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateDatabase(),
                         new CreateForms(formsToCreate.get(0)),
-                        SyncOfflineWithApi.INSTANCE,
+                        synchronizeAction,
                         new InviteUsers(),
-                        SyncOfflineWithApi.INSTANCE));
+                        synchronizeAction));
             case 1:
                 // Continue to create forms while reporting users are 
                 // synchronizing and adding data to see the effects of the
@@ -56,16 +59,16 @@ public class SectorLead implements UserRole {
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateForms(formsToCreate.get(1)),
                         new ExportDatabase(),
-                        SyncOfflineWithApi.INSTANCE));
+                        synchronizeAction));
             case 2:
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateForms(formsToCreate.get(2)),
                         new ExportDatabase(),
-                        SyncOfflineWithApi.INSTANCE));
+                        synchronizeAction));
 
             default:
                 return Optional.<UserAction>of(new CompositeAction(
-                        SyncOfflineWithApi.INSTANCE,
+                        synchronizeAction,
                         new ExportDatabase()));
 
         }
@@ -153,8 +156,15 @@ public class SectorLead implements UserRole {
             File file = driver.exportDatabase(sector.getDatabaseName());
             try {
                 HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
+                int totalRows = 0;
+                for(int i=0;i!=workbook.getNumberOfSheets();++i) {
+                    totalRows += workbook.getSheetAt(i).getLastRowNum();   
+                }
                 
-                LOGGER.info(getNickName() + " exported results to Excel [" + workbook.getNumberOfSheets() + " sheets]");
+                LOGGER.info(String.format("%s exported results to Excel [%d sheets / %d rows]", 
+                        getNickName(),
+                        workbook.getNumberOfSheets(), 
+                        totalRows));
                 
             } finally {
                 boolean deleted = file.delete();

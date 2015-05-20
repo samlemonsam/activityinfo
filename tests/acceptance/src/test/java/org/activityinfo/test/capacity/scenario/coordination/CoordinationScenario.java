@@ -41,6 +41,10 @@ public class CoordinationScenario implements Scenario {
             addPartner(i);
         }
     }
+
+    public String getName() {
+        return name;
+    }
     
     public List<UserRole> getUsers() {
         List<UserRole> users = Lists.newArrayList();
@@ -78,4 +82,6 @@ public class CoordinationScenario implements Scenario {
     public String toString() {
         return name + " Coordination Scenario";
     }
+
+
 }

@@ -3,6 +3,7 @@ package org.activityinfo.test.capacity.load;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import org.activityinfo.test.capacity.CapacityTest;
 import org.activityinfo.test.capacity.TestContext;
 import org.activityinfo.test.capacity.action.ActionExecution;
 import org.activityinfo.test.capacity.action.UserAction;
@@ -63,7 +64,7 @@ public class ScenarioRun implements Runnable {
 
         // Enqueue and wait for all users to finish
         LoadExecutor loadExecutor = new LoadExecutor(executorService);
-        loadExecutor.setMaxConcurrent(LogisticGrowthFunction.rampUpTo(50).during(Period.seconds(90)));
+        loadExecutor.setMaxConcurrent(LogisticGrowthFunction.rampUpTo(CapacityTest.MAX_CONCURRENT_USERS).during(Period.seconds(90)));
         loadExecutor.execute(tasks);
         
         LOGGER.info(String.format("%s: Run complete.", scenario.toString()));

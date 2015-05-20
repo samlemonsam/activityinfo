@@ -708,7 +708,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             
         
             String message = status.getStatusCode() + " " + status.getReasonPhrase();
-            if(response.getType().equals(MediaType.TEXT_PLAIN_TYPE)) {
+            if(MediaType.TEXT_PLAIN_TYPE.equals(response.getType())) {
                 message += ": " + response.getEntity(String.class);
             }
             
@@ -725,7 +725,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
 
 
-    public List<String> getSyncRegions() throws Exception {
+    public List<SyncRegion> getSyncRegions() throws Exception {
         Preconditions.checkState(currentUser != null, "Authentication required");
         
         flush();
@@ -739,19 +739,25 @@ public class ApiApplicationDriver extends ApplicationDriver {
         JSONObject response = new JSONObject(responseJson);
         
         JSONArray array = response.getJSONArray("list");
-        List<String> regions = Lists.newArrayList();
+        List<SyncRegion> regions = Lists.newArrayList();
         for(int i=0;i<array.length();++i) {
-            regions.add(array.getJSONObject(i).getString("id"));
+            regions.add(new SyncRegion(
+                    array.getJSONObject(i).getString("id"),
+                    array.getJSONObject(i).getString("currentVersion")));
         }
         
         return regions;
     }
     
-    public long fetchSyncRegion(String id) throws Exception {
+    public SyncUpdate fetchSyncRegion(String id, String version) throws Exception {
         Preconditions.checkState(currentUser != null, "Authentication required");
 
         JSONObject command = new JSONObject();
         command.put("regionPath", id);
+        
+        if(version != null) {
+            command.put("localVersion", version);
+        }
         
         JSONObject request = new JSONObject();
         request.put("type", "GetSyncRegionUpdates");
@@ -760,11 +766,15 @@ public class ApiApplicationDriver extends ApplicationDriver {
         ClientResponse response = doCommand(request, getRetryCount());
         
         // Read response to exercise server.. not sure if necessary
-        CountingOutputStream countingOutputStream = new CountingOutputStream(ByteStreams.nullOutputStream());
-        ByteStreams.copy(response.getEntityInputStream(), countingOutputStream);
+        String json = response.getEntity(String.class);
+        JSONObject update = new JSONObject(json);
         
-        return countingOutputStream.getCount();
+        SyncUpdate syncUpdate = new SyncUpdate();
+        syncUpdate.setByteCount(json.length());
+        syncUpdate.setComplete(update.getBoolean("complete"));
+        syncUpdate.setVersion(update.getString("version"));
         
+        return syncUpdate;
     }
     
     public void flush() throws JSONException {
