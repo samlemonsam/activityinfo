@@ -49,7 +49,7 @@ public class PhantomJsProvider implements WebDriverProvider {
     @Override
     public WebDriver start(String name, BrowserProfile profile) {
         try {
-            return new PooledPhantomJsDriver(pool, pool.borrowObject());
+            return new PhantomJsPooledDriver(pool, pool.borrowObject());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

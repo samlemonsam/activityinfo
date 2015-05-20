@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
  * Light-weight wrapper around WebDriver
  */
 public class FluentElement {
+
+    private static final int TIMEOUT_SECONDS = 90;
     
     private WebDriver webDriver;
     private WebElement element;
@@ -77,23 +79,23 @@ public class FluentElement {
     }
 
     public void waitUntil(Predicate<WebDriver> predicate) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         wait.until(predicate);
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 60);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         wait.until(condition);
     }
 
     public FluentElement waitFor(By by) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 60);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
         return new FluentElement(webDriver, element);
     }
     
     public <T> T waitFor(Function<WebDriver, T> function) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 60);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         return wait.until(function);
     }
     

@@ -38,10 +38,11 @@ public class WebDriverSession {
     private WebDriver proxy;
     private Server server;
     private String testName;
+    private WebDriverConnection webDriverConnection;
     private BrowserProfile browserProfile = new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME);
 
     @Inject
-    public WebDriverSession(WebDriverProvider provider, ProxyController proxyController, Server server) {
+    public WebDriverSession(WebDriverProvider provider, Server server) {
         this.provider = provider;
         this.server = server;
         this.proxy =  (WebDriver) Proxy.newProxyInstance(getClass().getClassLoader(),
@@ -111,6 +112,12 @@ public class WebDriverSession {
 
     public BrowserProfile getBrowserProfile() {
         return browserProfile;
+    }
+
+    public void setConnected(boolean connected) {
+        if(driver instanceof WebDriverConnection) {
+            ((WebDriverConnection) driver).setConnected(connected);
+        }
     }
 
     private class WebDriverProxy implements InvocationHandler {
