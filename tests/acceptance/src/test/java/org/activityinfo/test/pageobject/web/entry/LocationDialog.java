@@ -54,7 +54,8 @@ public class LocationDialog {
 
 
     public void addNew() {
-        dialog.getWindowElement().find().button(withText(I18N.CONSTANTS.newLocation())).waitForFirst().element().click();
+        dialog.getWindowElement().find().button(withText(I18N.CONSTANTS.newLocation()))
+                .waitForFirst().click();
     }
 
     public void dragMarker(int pixelsToLeft, int pixelsToRight) {
