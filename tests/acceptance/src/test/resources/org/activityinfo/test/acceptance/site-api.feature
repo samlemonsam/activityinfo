@@ -31,7 +31,7 @@ Feature: Site API
         type : Feature
         id : $SiteId
         properties :
-          locationName : Rdc
+          locationName : RDC
           partnerName : $NRC
           activity : $Distributions
           activityName : Distributions
@@ -58,7 +58,7 @@ Feature: Site API
         type : Feature
         id : $SiteId
         properties :
-          locationName : Rdc
+          locationName : RDC
           partnerName : $NRC
           activity : $Distributions
           activityName : Distributions
