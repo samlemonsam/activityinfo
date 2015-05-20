@@ -66,6 +66,17 @@ public class DatabaseSetupSteps {
         this.currentForm = formName;
     }
 
+    @Given("^I have created a published form named \"([^\"]*)\"$")
+    public void I_have_created_a_published_form_named(String formName) throws Throwable {
+        driver.setup().createForm(
+                name(formName),
+                property("database", getCurrentDatabase()),
+                property("published", 1) // all are published
+        );
+
+        this.currentForm = formName;
+    }
+
     @Given("^I have created a monthly form named \"([^\"]*)\"$")
     public void I_have_created_a_monthly_form_named(String formName) throws Throwable {
         driver.setup().createForm(name(formName),
