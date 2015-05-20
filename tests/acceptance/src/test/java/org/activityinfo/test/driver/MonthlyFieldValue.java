@@ -21,4 +21,5 @@ public class MonthlyFieldValue extends FieldValue {
     public void setMonth(int month) {
         this.month = month;
     }
+
 }

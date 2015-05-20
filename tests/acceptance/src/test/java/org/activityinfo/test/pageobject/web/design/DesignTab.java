@@ -5,7 +5,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
-import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
 
 public class DesignTab {
 
@@ -26,7 +26,7 @@ public class DesignTab {
                     databaseTree.select("Databases", databaseName);
                 }
                 return this;
-            } catch (StaleElementReferenceException ignored) {}
+            } catch (WebDriverException ignored) {}
         }
     }
     

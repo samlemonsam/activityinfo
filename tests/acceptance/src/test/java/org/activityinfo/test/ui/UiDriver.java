@@ -145,4 +145,8 @@ public class UiDriver extends TestWatcher {
         LocaleProxy.setLocale(Locale.forLanguageTag(locale));
         injector.getInstance(DevServerAccounts.class).setLocale(locale);
     }
+
+    public String getAlias(String testHandle) {
+        return setup().getAliasTable().getAlias(testHandle);
+    }
 }
