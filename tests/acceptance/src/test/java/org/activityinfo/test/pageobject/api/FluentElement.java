@@ -70,7 +70,7 @@ public class FluentElement {
 
     public void click() {
         Actions actions = new Actions(webDriver);
-        actions.click(element()).perform();
+        actions.moveToElement(element(), 5, 5).click().perform();
     }
 
     public WebElement element() {
