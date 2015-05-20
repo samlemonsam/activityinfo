@@ -8,7 +8,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.test.driver.*;
@@ -72,7 +71,7 @@ public class DatabaseSetupSteps {
         driver.setup().createForm(
                 name(formName),
                 property("database", getCurrentDatabase()),
-                property("published", Published.ALL_ARE_PUBLISHED.getIndex())
+                property("published", 1) // all are published
         );
 
         this.currentForm = formName;
