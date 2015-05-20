@@ -81,7 +81,7 @@ public class WebDriverPool {
         }
     }
 
-    public class Wrapper extends EventFiringWebDriver {
+    public class Wrapper extends EventFiringWebDriver implements WebDriverConnection {
     
         private BrowserProfile profile;
     
@@ -93,6 +93,11 @@ public class WebDriverPool {
         @Override
         public void quit() {
             pool.returnObject(profile, getWrappedDriver());
+        }
+
+        @Override
+        public void setConnected(boolean connected) {
+            ((WebDriverConnection) getWrappedDriver()).setConnected(connected);
         }
     }
 }

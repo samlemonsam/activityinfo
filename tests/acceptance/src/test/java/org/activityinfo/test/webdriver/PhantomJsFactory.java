@@ -38,7 +38,7 @@ public class PhantomJsFactory implements PooledObjectFactory<PhantomJsInstance> 
 
     @Override
     public void destroyObject(PooledObject<PhantomJsInstance> p) throws Exception {
-        p.getObject().getWebDriver().quit();
+        p.getObject().stop();
     }
 
 }

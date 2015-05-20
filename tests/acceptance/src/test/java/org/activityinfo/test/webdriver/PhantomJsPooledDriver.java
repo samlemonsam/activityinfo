@@ -4,12 +4,12 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 
-public class PooledPhantomJsDriver extends EventFiringWebDriver {
+public class PhantomJsPooledDriver extends EventFiringWebDriver implements WebDriverConnection {
 
     private GenericObjectPool<PhantomJsInstance> pool;
     private PhantomJsInstance instance;
 
-    public PooledPhantomJsDriver(GenericObjectPool<PhantomJsInstance> pool, PhantomJsInstance instance) {
+    public PhantomJsPooledDriver(GenericObjectPool<PhantomJsInstance> pool, PhantomJsInstance instance) {
         super(instance.getWebDriver());
         this.pool = pool;
         this.instance = instance;
@@ -18,5 +18,10 @@ public class PooledPhantomJsDriver extends EventFiringWebDriver {
     @Override
     public void quit() {
         pool.returnObject(instance);
+    }
+
+    @Override
+    public void setConnected(boolean connected) {
+        
     }
 }

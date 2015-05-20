@@ -1,10 +1,8 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Function;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.remote.CapabilityType;
@@ -17,29 +15,34 @@ import java.util.List;
  */
 @Singleton
 public class ChromeWebDriverProvider implements WebDriverProvider {
-
-    private WebDriverPool pool;
+    
+    
+    private static final WebDriverPool POOL = initPool();
     
     private static final BrowserProfile PROFILE = new BrowserProfile(OperatingSystem.host(), BrowserVendor.CHROME);
 
     public ChromeWebDriverProvider() {
-        pool = new WebDriverPool();
-        pool.setMaxTotalSize(1);
+    }
+
+    private static WebDriverPool initPool() {
+        WebDriverPool pool = new WebDriverPool();
+        pool.setMaxTotalSize(3);
         pool.setCreator(new Function<BrowserProfile, WebDriver>() {
             @Override
             public WebDriver apply(BrowserProfile input) {
+                
+                // Start a local http proxy that we can use to control the 
+                // the connection's properties
+                ProxyController proxyController = new ProxyController();
+                proxyController.start();
+                
                 DesiredCapabilities capabilities = new DesiredCapabilities();
-                String proxyServer = System.getProperty("webdriver.proxy");
-                if(!Strings.isNullOrEmpty(proxyServer)) {
-                    Proxy proxy = new Proxy();
-                    proxy.setHttpProxy(proxyServer);
-                    
-                    capabilities.setCapability(CapabilityType.PROXY, proxy);
-                }
-                        
-                return new ChromeDriver(capabilities);
+                capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
+                
+                return new ProxiedWebDriver(new ChromeDriver(capabilities), proxyController);
             }
         });
+        return pool;
     }
 
     @Override
@@ -54,6 +57,6 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
 
     @Override
     public WebDriver start(String name, BrowserProfile profile) {
-       return pool.get(PROFILE);
+       return POOL.get(PROFILE);
     }
 }

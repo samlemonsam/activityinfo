@@ -14,6 +14,7 @@ Scenario: Offline Data Entry
     | nb. kits           | 1000            |
     And I have enabled offline mode
    When I open the application without an internet connection
+   Then the application should be in offline mode
    Then the "NFI Distribution" form should have one submission
    When I submit a "NFI Distribution" form with:
     | field              | value           |
