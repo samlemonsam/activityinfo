@@ -91,6 +91,11 @@ public class JsonApiSteps {
         request(url, Optional.of(currentAccount));
     }
 
+    @When("([^ ]+) requests (.*)$")
+    public void requests(String email, String url) {
+        request(url, Optional.of(accounts.ensureAccountExists(email)));
+    }
+
     private void request(@Nonnull String url, Optional<UserAccount> account) {
         WebResource resource = root(account)
                 .path(placeholders.resolvePath(url))

@@ -48,8 +48,35 @@ Feature: Site API
     """
 
   @AI-574
-  Scenario: Querying site's points on public database with authenticated user
+  Scenario: Querying site's points on public database with owner user
     When I request /resources/sites/points?activity=$Distributions
+    Then the response should be:
+    """
+    type : FeatureCollection
+    features :
+     -
+        type : Feature
+        id : $SiteId
+        properties :
+          locationName : RDC
+          partnerName : $NRC
+          activity : $Distributions
+          activityName : Distributions
+          startDate : 2014-01-01
+          endDate : 2014-04-10
+          indicators :
+            $kits : 1.0
+            $score : 2.0
+        geometry :
+          type : Point
+          coordinates :
+           -  21.746970920000003
+           -  -4.034950903
+    """
+
+  @AI-574
+  Scenario: Querying site's points on public database with another user (not owner)
+    When bob@bedatadriven.com requests /resources/sites/points?activity=$Distributions
     Then the response should be:
     """
     type : FeatureCollection
