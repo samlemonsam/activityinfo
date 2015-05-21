@@ -38,7 +38,7 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
             @Nullable
             @Override
             public Promise<ActivityDTO> apply(ActivityDTO form) {
-                if (form.get("ownerId") == context.getUser().getId()) {
+                if ((Integer) form.get("ownerId") == context.getUser().getId()) {
                     form.getDatabase().setEditAllowed(true);
                     form.getDatabase().setEditAllAllowed(true);
                     form.getDatabase().setDesignAllowed(true);
@@ -205,7 +205,7 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
 
 //                    activity.setClassicView(row.getBoolean("classicView"));
                     activity.setLocationType(locationType);
-                    activity.set("ownderId", row.getInt("ownerUserId"));
+                    activity.set("ownerId", row.getInt("ownerUserId"));
 
                     database.setId(databaseId);
                     database.setName(row.getString("databaseName"));
