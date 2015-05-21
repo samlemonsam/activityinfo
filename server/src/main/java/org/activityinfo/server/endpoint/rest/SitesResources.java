@@ -169,7 +169,19 @@ public class SitesResources {
         json.writeStringField("type", "FeatureCollection");
         json.writeArrayFieldStart("features");
 
-        final SchemaDTO schemaDTO = dispatcher.execute(new GetSchema());
+        writeSites(sites, json);
+
+        json.writeEndArray();
+        json.writeEndObject();
+        json.close();
+    }
+
+    private void writeSites(List<SiteDTO> sites, JsonGenerator json) throws IOException {
+        if (sites.isEmpty()) {
+            return;
+        }
+
+        final ActivityDTO activity = dispatcher.execute(new GetFormViewModel(sites.get(0).getActivityId()));
 
         for (SiteDTO site : sites) {
             if (site.hasLatLong()) {
@@ -177,8 +189,6 @@ public class SitesResources {
                 json.writeStringField("type", "Feature");
                 json.writeNumberField("id", site.getId());
                 //                json.writeNumberField("timestamp", site.getTimeEdited());
-
-                final ActivityDTO activity = schemaDTO.getActivityById(site.getActivityId());
 
                 // write out the properties object
                 json.writeObjectFieldStart("properties");
@@ -208,7 +218,7 @@ public class SitesResources {
                     if (propertyName.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
                         Object value = site.get(propertyName);
                         final int indicatorId = IndicatorDTO.indicatorIdForPropertyName(propertyName);
-                        final IndicatorDTO dto = schemaDTO.getIndicatorById(indicatorId);
+                        final IndicatorDTO dto = activity.getIndicatorById(indicatorId);
                         if (value instanceof Number) {
                             final double doubleValue = ((Number) value).doubleValue();
                             indicatorsMap.put(dto.getName(), doubleValue);
@@ -257,9 +267,6 @@ public class SitesResources {
                 json.writeEndObject();
             }
         }
-        json.writeEndArray();
-        json.writeEndObject();
-        json.close();
     }
 
     private Set<Integer> getIndicatorIds(SiteDTO site) {
