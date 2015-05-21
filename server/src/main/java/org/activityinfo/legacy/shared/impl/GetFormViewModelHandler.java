@@ -15,11 +15,11 @@ import org.activityinfo.legacy.shared.command.GetFormViewModel;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -116,7 +116,7 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
 
         private ActivityDTO activity;
         private UserDatabaseDTO database;
-        private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<Integer, AttributeGroupDTO>();
+        private final Map<Integer, AttributeGroupDTO> attributeGroups = Maps.newHashMap();
 
         private SqlTransaction tx;
 
@@ -156,7 +156,6 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
                     .appendColumn("t.workflowId", "locationTypeWorkflowId")
                     .appendColumn("a.reportingFrequency", "reportingFrequency")
                     .appendColumn("a.databaseId", "databaseId")
-                    .appendColumn("a.classicView", "classicView")
                     .appendColumn("a.published", "published")
                     .appendColumn("db.name", "databaseName")
                     .appendColumn("db.ownerUserId", "ownerUserId")
@@ -203,7 +202,6 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
                     activity.setReportingFrequency(row.getInt("reportingFrequency"));
                     activity.setPublished(row.getInt("published"));
 
-//                    activity.setClassicView(row.getBoolean("classicView"));
                     activity.setLocationType(locationType);
                     activity.set("ownerId", row.getInt("ownerUserId"));
 
@@ -233,7 +231,7 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
 
                         @Override
                         public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                            Map<Integer, AdminLevelDTO> levels = new HashMap<Integer, AdminLevelDTO>();
+                            Map<Integer, AdminLevelDTO> levels = Maps.newHashMap();
                             for (SqlResultSetRow row : results.getRows()) {
                                 AdminLevelDTO level = new AdminLevelDTO();
                                 level.setId(row.getInt("adminLevelId"));
@@ -398,7 +396,6 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
                     "name",
                     "type",
                     "expression",
-                    "skipExpression",
                     "nameInExpression",
                     "calculatedAutomatically",
                     "category",
@@ -421,9 +418,8 @@ public class GetFormViewModelHandler implements CommandHandlerAsync<GetFormViewM
                     IndicatorDTO indicator = new IndicatorDTO();
                     indicator.setId(rs.getInt("indicatorId"));
                     indicator.setName(rs.getString("name"));
-//                    indicator.setTypeId(rs.getString("type"));
+                    indicator.setType(TypeRegistry.get().getTypeClass(rs.getString("type")));
                     indicator.setExpression(rs.getString("expression"));
-//                    indicator.setSkipExpression(rs.getString("skipExpression"));
                     indicator.setNameInExpression(rs.getString("nameInExpression"));
                     indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
                     indicator.setCategory(rs.getString("category"));
