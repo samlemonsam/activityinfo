@@ -9,6 +9,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URI;
@@ -45,16 +46,13 @@ public class FluentElement {
     }
     
     public void clickWhenReady() {
-        waitUntil(new Predicate<WebDriver>() {
+        FluentWait<FluentElement> wait = new FluentWait<>(this);
+        wait.ignoring(WebDriverException.class);
+        wait.until(new Predicate<FluentElement>() {
             @Override
-            public boolean apply(WebDriver input) {
-                try {
-                    element().click();
-                    return true;
-                    
-                } catch (WebDriverException e) {
-                    return false;
-                }
+            public boolean apply(FluentElement input) {
+                input.click();
+                return true;
             }
         });
     }
@@ -70,7 +68,7 @@ public class FluentElement {
 
     public void click() {
         Actions actions = new Actions(webDriver);
-        actions.moveToElement(element(), 5, 5).click().perform();
+        actions.click(element).perform();
     }
 
     public WebElement element() {

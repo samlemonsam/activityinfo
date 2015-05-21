@@ -17,6 +17,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import static java.lang.String.format;
+
 
 @Singleton
 public class SauceLabsDriverProvider implements WebDriverProvider {
@@ -74,12 +76,12 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         String host = JENKINS_SELENIUM_HOST.getOr("ondemand.saucelabs.com");
         String port = JENKINS_SELENIUM_PORT.getOr("80");
 
-        String url = String.format("http://%s:%s@%s:%s/wd/hub", userName, apiKey, host, port);
+        String url = format("http://%s:%s@%s:%s/wd/hub", userName, apiKey, host, port);
 
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
-            throw new ConfigurationError(String.format("Sauce labs remote address [%s] is malformed.", url), e);
+            throw new ConfigurationError(format("Sauce labs remote address [%s] is malformed.", url), e);
         }
     }
 
@@ -135,7 +137,10 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             capabilities.setCapability("record-screenshots", false);
         }
 
-        return new RemoteWebDriver(getWebDriverServer(), capabilities);
+        RemoteWebDriver remoteWebDriver = new RemoteWebDriver(getWebDriverServer(), capabilities);
+        System.out.println(format("SauceOnDemandSessionID=%s job-name=%s", remoteWebDriver.getSessionId(), name));
+        
+        return remoteWebDriver;
     }
 
 
