@@ -42,17 +42,17 @@ Feature: Calculated fields
     And I have created a quantity field "withHelmet" in "NFI Distribution" with code "helmet"
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({helmet}/{total})*100" with aggregation "Average"
     And I submit a "NFI Distribution" form with:
-      | field    | value  |
-      | total    | 300    |
-      | helmet   | 150    |
+      | field      | value  |
+      | total      | 300    |
+      | withHelmet | 150    |
     And I submit a "NFI Distribution" form with:
-      | field    | value  |
-      | total    | 500    |
-      | helmet   | 50     |
+      | field      | value  |
+      | total      | 500    |
+      | withHelmet | 50     |
     And I submit a "NFI Distribution" form with:
-      | field    | value  |
-      | total    | 100    |
-      | helmet   | 90     |
+      | field      | value  |
+      | total      | 100    |
+      | withHelmet | 90     |
     Then aggregating the indicator "percent" by Indicator should yield:
       |                  | Value |
       | percent          | 50    |
