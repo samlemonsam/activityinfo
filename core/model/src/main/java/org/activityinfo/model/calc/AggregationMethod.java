@@ -1,4 +1,4 @@
-package org.activityinfo.server.database.hibernate.entity;
+package org.activityinfo.model.calc;
 
 /*
  * #%L

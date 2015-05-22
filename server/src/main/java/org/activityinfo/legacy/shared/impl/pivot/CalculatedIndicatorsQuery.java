@@ -45,6 +45,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
     private Map<Integer, DimensionCategory> activityCategoryMap = Maps.newHashMap();
     private Map<Integer, DimensionCategory> activityToDatabaseMap = Maps.newHashMap();
     private Map<Integer, EntityCategory> indicatorMap = Maps.newHashMap();
+    private Map<Integer, Integer> indicatorAggregationMap = Maps.newHashMap();
 
     private Multimap<Integer, EntityCategory> attributes = HashMultimap.create();
 
@@ -65,6 +66,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                 .appendColumn("i.name", "indicatorName")
                 .appendColumn("i.activityId", "activityId")
                 .appendColumn("i.sortOrder", "indicatorOrder")
+                .appendColumn("i.aggregation", "aggregation")
                 .appendColumn("a.name", "activityName")
                 .appendColumn("a.category", "activityCategory")
                 .appendColumn("a.sortOrder", "activityOrder")
@@ -124,6 +126,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                             new EntityCategory(indicatorId,
                                 row.getString("indicatorName"),
                                 row.getInt("indicatorOrder")));
+                        indicatorAggregationMap.put(indicatorId, row.getInt("aggregation"));
                     }
 
                     if (queryContext.getCommand().isPivotedBy(DimensionType.AttributeGroup)) {
@@ -311,6 +314,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                     Bucket bucket = buckets.get(key);
                     if (bucket == null) {
                         bucket = new Bucket();
+                        bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));
                         bucket.setCategory(INDICATOR_DIM, indicator);
                         for (int j = 0; j != dimAccessors.size(); ++j) {
                             bucket.setCategory(dimAccessors.get(j).getDimension(), siteDims[j]);

@@ -8,6 +8,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.test.driver.*;
@@ -196,10 +197,16 @@ public class DatabaseSetupSteps {
 
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
     public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
+        I_have_created_a_calculated_field_in_with_aggregation(fieldName, formName, expression, AggregationMethod.Sum.name());
+    }
+
+    @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\" with aggregation \"([^\"]*)\"$")
+    public void I_have_created_a_calculated_field_in_with_aggregation(String fieldName, String formName, String expression, String aggregation) throws Throwable {
         driver.setup().createField(
                 property("form", formName),
                 property("name", fieldName),
                 property("type", "quantity"),
+                property("aggregation", AggregationMethod.valueOf(aggregation).code()),
                 property("expression", expression),
                 property("calculatedAutomatically", true));
     }
