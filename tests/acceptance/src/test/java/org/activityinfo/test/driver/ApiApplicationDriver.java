@@ -10,7 +10,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CountingOutputStream;
 import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -18,6 +17,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -252,6 +252,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("activityId", field.getId("form"));
             properties.put("type", field.getString("type"));
             properties.put("units", field.getString("units", "parsects"));
+            properties.put("aggregation", field.getInteger("aggregation", AggregationMethod.Sum.code()));
 
             // switch also server nameInExpression -> code
             properties.put("nameInExpression", field.getString("code", field.getAlias()));

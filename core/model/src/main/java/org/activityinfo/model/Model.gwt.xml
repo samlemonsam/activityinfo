@@ -36,5 +36,6 @@
   <source path="type"/>
   <source path="table"/>
   <source path="type"/>
+  <source path="calc"/>
 
 </module>
