@@ -61,6 +61,23 @@ public class HungarianAlgorithm {
     private final int[] parentTargetByCommittedSource;
     private final boolean[] committedTargets;
 
+
+
+    public static double[][] toArray(DistanceMatrix matrix) {
+        double[][] array = new double[matrix.getRowCount()][matrix.getColumnCount()];
+        for(int i=0;i<matrix.getRowCount();++i) {
+            for(int j=0;j<matrix.getColumnCount();++j) {
+                array[i][j] = matrix.distance(i, j);
+            }
+        }
+        return array;
+    }
+
+    public HungarianAlgorithm(DistanceMatrix matrix) {
+        this(toArray(matrix));
+    }
+
+
     /**
      * Construct an instance of the algorithm.
      *

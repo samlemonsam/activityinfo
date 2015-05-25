@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import org.activityinfo.geoadmin.match.DistanceMatrix;
 import org.activityinfo.geoadmin.merge.model.MergeColumn;
 import org.activityinfo.geoadmin.merge.model.MergeForm;
+import org.activityinfo.geoadmin.merge2.view.swing.merge.MergeSide;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.model.query.ColumnView;
 
@@ -35,6 +36,10 @@ public class RowMatrix implements DistanceMatrix {
             source[columnIndex] = mapping.getValue().getView();
             columnIndex++;
         }
+    }
+
+    public RowMatrix(FormMapping formMapping) {
+        this(formMapping.getTarget(), formMapping.getSource(), formMapping.asMap(MergeSide.TARGET, MergeSide.SOURCE));
     }
 
     @Override
@@ -82,6 +87,5 @@ public class RowMatrix implements DistanceMatrix {
             }
         }
         return distance;
-
     }
 }

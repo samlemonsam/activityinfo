@@ -3,14 +3,14 @@ package org.activityinfo.store.mysql.collections;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 
-public class SimpleTableCollection implements CollectionAccessor {
+public class SimpleTableCollection implements ResourceCollection {
 
     private final TableMapping mapping;
     private QueryExecutor executor;

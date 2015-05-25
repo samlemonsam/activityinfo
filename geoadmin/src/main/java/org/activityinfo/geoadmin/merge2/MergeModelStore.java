@@ -2,16 +2,17 @@ package org.activityinfo.geoadmin.merge2;
 
 import org.activityinfo.geoadmin.merge2.state.MergeModel2;
 import org.activityinfo.geoadmin.merge2.state.ResourceStore;
-import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
-import org.activityinfo.geoadmin.merge2.view.model.FormProfile;
-import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
+import org.activityinfo.geoadmin.merge2.view.model.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+
 
 public class MergeModelStore extends Observable<MergeModel2> {
-    
+
     private ResourceStore resourceStore;
     private MergeModel2 value;
     private Observable<FormTree> sourceTree;
@@ -19,7 +20,8 @@ public class MergeModelStore extends Observable<MergeModel2> {
     private Observable<FormTree> targetTree;
     private Observable<FormProfile> targetProfile;
     private Observable<FormMapping> fieldMapping;
-    private Observable<RowMatching> rowMatching;
+    private Observable<AutoRowMatching> autoRowMatching;
+    private final Observable<RowMatching> rowMatching;
 
     public MergeModelStore(final ResourceStore resourceStore, ResourceId source, ResourceId target) {
         this.resourceStore = resourceStore;
@@ -32,7 +34,8 @@ public class MergeModelStore extends Observable<MergeModel2> {
         this.sourceProfile = FormProfile.profile(resourceStore, sourceTree);
         this.targetProfile = FormProfile.profile(resourceStore, targetTree);
         this.fieldMapping = FormMapping.compute(sourceProfile, targetProfile);
-        
+        this.autoRowMatching = fieldMapping.transform(new AutoMatcher());
+        this.rowMatching = RowMatching.compute(autoRowMatching);
     }
 
     @Override
@@ -64,5 +67,9 @@ public class MergeModelStore extends Observable<MergeModel2> {
 
     public Observable<FormMapping> getFieldMapping() {
         return fieldMapping;
+    }
+
+    public Observable<RowMatching> getRowMatching() {
+        return rowMatching;
     }
 }

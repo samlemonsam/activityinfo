@@ -3,7 +3,7 @@ package org.activityinfo.store.mysql.collections;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -11,7 +11,7 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 /**
  * Collection of Sites
  */
-public class SiteCollection implements CollectionAccessor {
+public class SiteCollection implements ResourceCollection {
     
     private final Activity activity;
     private final TableMapping baseMapping;

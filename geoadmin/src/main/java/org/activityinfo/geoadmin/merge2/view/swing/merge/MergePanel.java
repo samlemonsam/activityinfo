@@ -2,77 +2,117 @@ package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
 
 import org.activityinfo.geoadmin.merge2.MergeModelStore;
+import org.activityinfo.geoadmin.merge2.view.model.FieldProfile;
+import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
+import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
+import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Observer;
+import org.activityinfo.observable.Subscription;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 public class MergePanel extends StepPanel {
 
-    private final DefaultTableModel tableModel;
-    private final JSplitPane horizontalSplitPane;
-    private final UnmatchedTable sourceTable;
-    private final UnmatchedTable targetTable;
+    private final MergeModelStore store;
+
+    private final MergeTableModel tableModel;
+    private final JTable table;
+
+    private final Subscription columnsSubscription;
 
     public MergePanel(MergeModelStore store) {
+        this.store = store;
         setLayout(new BorderLayout());
 
-        sourceTable = new UnmatchedTable(MergeSide.SOURCE, store.getFieldMapping());
-        targetTable = new UnmatchedTable(MergeSide.TARGET, store.getFieldMapping());
-        
-        sourceTable.syncColumnsWith(targetTable);
-        targetTable.syncColumnsWith(sourceTable);
-        
-        tableModel = new DefaultTableModel(new String[3][0], new String[]{"A", "B", "C"});
+        tableModel = new MergeTableModel(store);
+        table = new JTable(tableModel);
+        table.setAutoCreateColumnsFromModel(false);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                createMatchedPanel(),
-                new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                        createUnmatched(targetTable),
-                        createUnmatched(sourceTable)));
-        
-        add(horizontalSplitPane, BorderLayout.CENTER);
+        columnsSubscription = store.getFieldMapping().subscribe(new Observer<FormMapping>() {
+            @Override
+            public void onChange(Observable<FormMapping> observable) {
+                if(!observable.isLoading()) {
+                    onColumnsChanged(observable.get());
+                }
+            }
+        });
 
-        
+        add(new JScrollPane(table,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
     }
 
-    /**
-     * Table which shows the combinations of rows that will be merged
-     */
-    private JPanel createMatchedPanel() {
+    private void onColumnsChanged(FormMapping formMapping) {
+        java.util.List<MergeTableColumn> columns = new ArrayList<>();
 
-        JPanel panel = new JPanel(new BorderLayout());
+        // On the left hand side, show the existing "Target" features
+        for (FieldProfile targetField : formMapping.getTarget().getFields()) {
+            if(targetField.getView() != null) {
+                columns.add(new TargetColumn(store.getRowMatching(), targetField,
+                        formMapping.getMappingForTarget(targetField)));
+            }
+        }
 
-        JLabel headingLabel = new JLabel("Matched Rows");
-        panel.add(headingLabel, BorderLayout.PAGE_START);
-        
-        
-        JTable table = new JTable(tableModel);
-        
-        JScrollPane scrollPane = new JScrollPane(table);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        columns.add(new SeparatorColumn());
 
-        return panel;
+        // On the right, show the imported features, in the same order
+        // as the columns to which they're mapped
+        for (FieldProfile targetField : formMapping.getTarget().getFields()) {
+            java.util.List<SourceFieldMapping> mappings = formMapping.getMappingForTarget(targetField);
+            for(SourceFieldMapping mapping : mappings) {
+                columns.add(new SourceColumn(store.getRowMatching(), mapping));
+            }
+        }
+        // Also include the unmatched source columns as reference
+        for (SourceFieldMapping sourceMapping : formMapping.getMappings()) {
+            if(!sourceMapping.getTargetField().isPresent() &&
+                    sourceMapping.getSourceField().getView() != null) {
+                columns.add(new SourceColumn(store.getRowMatching(), sourceMapping));
+            }
+        }
+
+        TableColumnModel tableColumnModel = buildColumnModel(columns);
+        table.setColumnModel(tableColumnModel);
+
+        JTableHeader tableHeader = new JTableHeader(tableColumnModel);
+        tableHeader.setResizingAllowed(true);
+        tableHeader.setReorderingAllowed(false);
+        table.setTableHeader(tableHeader);
+
+        tableModel.updateColumns(columns);
     }
-    
-    private JPanel createUnmatched(UnmatchedTable tableModel) {
-        JPanel sourcePanel = new JPanel(new BorderLayout());
 
-        JLabel headingLabel = new JLabel(tableModel.getHeader());
-        sourcePanel.add(headingLabel, BorderLayout.PAGE_START);
-        
+    private TableColumnModel buildColumnModel(List<MergeTableColumn> columns) {
+        DefaultTableColumnModel model = new DefaultTableColumnModel();
+        for (int i = 0; i < columns.size(); i++) {
+            MergeTableColumn column = columns.get(i);
+            TableColumn tableColumn = new TableColumn(i);
+            tableColumn.setHeaderValue(column.getHeader());
+            tableColumn.setCellRenderer(new MergeColumnRenderer(column));
 
-        JScrollPane scrollPane = new JScrollPane(tableModel.getTable());
-
-        sourcePanel.add(scrollPane, BorderLayout.CENTER);
-        
-        return sourcePanel;
+            tableColumn.setResizable(column.isResizable());
+            if(column.getWidth() > 0) {
+                tableColumn.setWidth(column.getWidth());
+            }
+            model.addColumn(tableColumn);
+        }
+        return model;
     }
+
 
     @Override
     public void stop() {
-        sourceTable.stop();
-        targetTable.stop();
+        columnsSubscription.unsubscribe();
+        tableModel.stop();
     }
 }

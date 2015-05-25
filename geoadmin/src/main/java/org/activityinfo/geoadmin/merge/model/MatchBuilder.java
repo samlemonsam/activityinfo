@@ -109,7 +109,7 @@ public class MatchBuilder {
         return indices;
     }
 
-    public <T, S> BiMap<T, S> buildMap(List<T> target, List<S> source) {
+    public <T, S> BiMap<T, S> buildMap(List<S> source, List<T> target) {
 
         BiMap<T, S> matches = HashBiMap.create();
 

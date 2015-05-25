@@ -25,6 +25,7 @@ public abstract class ObservableFunction<T> extends Observable<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void onConnect() {
         for(int i=0;i<subscriptions.length;++i) {
             assert subscriptions[i] == null;

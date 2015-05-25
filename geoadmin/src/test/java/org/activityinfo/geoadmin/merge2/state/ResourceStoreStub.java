@@ -9,7 +9,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -61,7 +61,7 @@ public class ResourceStoreStub implements ResourceStore {
     private class MergedCatalog implements CollectionCatalog {
 
         @Override
-        public CollectionAccessor getCollection(ResourceId resourceId) {
+        public ResourceCollection getCollection(ResourceId resourceId) {
             if (testCatalog.contains(resourceId)) {
                 return testCatalog.getCollection(resourceId);
             } else {

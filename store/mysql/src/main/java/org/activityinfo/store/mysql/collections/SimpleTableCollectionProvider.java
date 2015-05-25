@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.collections;
 
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.MappingProvider;
 
@@ -22,7 +22,7 @@ public class SimpleTableCollectionProvider implements CollectionProvider {
     }
 
     @Override
-    public CollectionAccessor getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         return new SimpleTableCollection(mappingProvider.getMapping(executor, formClassId), executor);
     }
 }

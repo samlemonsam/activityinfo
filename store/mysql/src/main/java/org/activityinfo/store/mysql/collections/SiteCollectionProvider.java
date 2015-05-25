@@ -2,8 +2,7 @@ package org.activityinfo.store.mysql.collections;
 
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionAccessor;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.*;
 
@@ -22,7 +21,7 @@ public class SiteCollectionProvider implements CollectionProvider {
     }
 
     @Override
-    public CollectionAccessor getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         
         Activity activity = Activity.query(executor, CuidAdapter.getLegacyIdFromCuid(formClassId));
         ActivityTableMappingBuilder mapping = ActivityTableMappingBuilder.site(activity);

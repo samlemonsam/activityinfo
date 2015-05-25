@@ -16,7 +16,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class JsonCollectionAccessor implements CollectionAccessor {
+public class JsonResourceCollection implements ResourceCollection {
     
     private int id;
     private int parentId;
@@ -36,7 +36,7 @@ public class JsonCollectionAccessor implements CollectionAccessor {
     private final FormClass formClass;
     private final JsonArray instances;
     
-    public JsonCollectionAccessor(String resourceName) throws IOException {
+    public JsonResourceCollection(String resourceName) throws IOException {
         formClass = loadFormClass(resourceName);
         instances = loadInstances(resourceName);
     }

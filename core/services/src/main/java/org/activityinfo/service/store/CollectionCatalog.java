@@ -4,11 +4,11 @@ import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
- * Contract for obtaining a {@link CollectionAccessor}
+ * Contract for obtaining a {@link ResourceCollection}
  * for a given {@code Collection}
  */
 public interface CollectionCatalog extends FormClassProvider {
 
-    CollectionAccessor getCollection(ResourceId resourceId);
+    ResourceCollection getCollection(ResourceId resourceId);
 
 }

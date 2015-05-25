@@ -4,19 +4,19 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.PropertyDescriptor;
 
 
-public class FeatureSourceAccessor implements CollectionAccessor {
+public class FeatureSourceCollection implements ResourceCollection {
 
     private final ResourceId resourceId;
     private final SimpleFeatureSource featureSource;
 
-    public FeatureSourceAccessor(ResourceId resourceId, SimpleFeatureSource featureSource) {
+    public FeatureSourceCollection(ResourceId resourceId, SimpleFeatureSource featureSource) {
         this.resourceId = resourceId;
         this.featureSource = featureSource;
     }

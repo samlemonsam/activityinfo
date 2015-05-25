@@ -33,7 +33,7 @@ public class MergeModel {
         List<MergeColumn> sourceColumns = new ArrayList<>(source.getTextFields());
 
         MatchBuilder columnGraph = new MatchBuilder(new ColumnMatrix(targetColumns, sourceColumns));
-        columnMapping = columnGraph.buildMap(targetColumns, sourceColumns);
+        columnMapping = columnGraph.buildMap(sourceColumns, targetColumns);
         columnGraph.dumpSubGraphs(targetColumns, sourceColumns);
     }
 

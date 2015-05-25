@@ -71,8 +71,8 @@ public class MergeDialog extends JFrame {
         ResourceStore resourceStore = new ResourceStoreImpl(client);
         
         MergeModelStore modelStore = new MergeModelStore(resourceStore, 
-                CuidAdapter.adminLevelFormClass(1511),
-                ResourceId.valueOf("file:///home/alex/dev/activityinfo-beta/geoadmin/src/test/resources/mg/communes.shp"));
+                ResourceId.valueOf("file:///home/alexander/dev/activityinfo-beta/geoadmin/src/test/resources/mg/communes.shp"),
+                CuidAdapter.adminLevelFormClass(1511));
         
         MergeDialog dialog = new MergeDialog(modelStore);
         dialog.setVisible(true);

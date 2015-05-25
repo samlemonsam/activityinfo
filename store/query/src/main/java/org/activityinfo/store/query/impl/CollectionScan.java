@@ -27,7 +27,7 @@ public class CollectionScan {
     private static final Logger LOGGER = Logger.getLogger(CollectionScan.class.getName());
     private static final String PK_COLUMN_KEY = "__id";
 
-    private final CollectionAccessor collection;
+    private final ResourceCollection collection;
     private final ColumnQueryBuilder queryBuilder;
 
     private ColumnCache cache;
@@ -38,7 +38,7 @@ public class CollectionScan {
 
     private Optional<PendingSlot<Integer>> rowCount = Optional.absent();
 
-    public CollectionScan(CollectionAccessor collection, ColumnCache cache) {
+    public CollectionScan(ResourceCollection collection, ColumnCache cache) {
         this.collection = collection;
         this.cache = cache;
         this.queryBuilder = collection.newColumnQuery();

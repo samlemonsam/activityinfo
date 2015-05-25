@@ -31,7 +31,7 @@ public class FormMapping {
         this.distanceMatrix = new FieldMatrix(source.getFields(), target.getFields());
 
         MatchBuilder fieldGraph = new MatchBuilder(distanceMatrix);
-        BiMap<FieldProfile, FieldProfile> columnMapping = fieldGraph.buildMap(target.getFields(), source.getFields());
+        BiMap<FieldProfile, FieldProfile> columnMapping = fieldGraph.buildMap(source.getFields(), target.getFields());
 
         for (FieldProfile sourceField : source.getFields()) {
             mappings.add(new SourceFieldMapping(sourceField, Optional.fromNullable(columnMapping.inverse().get(sourceField))));
@@ -82,14 +82,34 @@ public class FormMapping {
     }
 
     public List<FieldProfile> getFields(MergeSide side) {
-        return getProfile(side).getFields();
+        return getForm(side).getFields();
     }
 
-    public FormProfile getProfile(MergeSide side) {
+    public FormProfile getForm(MergeSide side) {
         if(side == MergeSide.SOURCE) {
             return source;
         } else {
             return target;
         }
+    }
+
+    public SourceFieldMapping getMappingForSource(String fieldCode) {
+        for (SourceFieldMapping mapping : mappings) {
+            if(mapping.getSourceField().getCode().equals(fieldCode)) {
+                return mapping;
+            }
+        }
+        throw new IllegalArgumentException("No field with code '" + fieldCode + "'");
+    }
+
+    public List<SourceFieldMapping> getMappingForTarget(FieldProfile targetField) {
+        List<SourceFieldMapping> list = new ArrayList<>();
+        for (SourceFieldMapping mapping : mappings) {
+            if(mapping.getTargetField().isPresent() &&
+               mapping.getTargetField().get().getPath().equals(targetField.getPath())) {
+                list.add(mapping);
+            }
+        }
+        return list;
     }
 }

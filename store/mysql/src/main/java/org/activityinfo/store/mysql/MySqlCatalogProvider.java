@@ -1,13 +1,11 @@
 package org.activityinfo.store.mysql;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionAccessor;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.collections.*;
-import org.activityinfo.store.mysql.mapping.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.SQLException;
@@ -31,7 +29,7 @@ public class MySqlCatalogProvider {
     public CollectionCatalog openCatalog(final QueryExecutor executor) {
         return new CollectionCatalog() {
             @Override
-            public CollectionAccessor getCollection(ResourceId resourceId) {
+            public ResourceCollection getCollection(ResourceId resourceId) {
                 for(CollectionProvider mapping : mappings) {
                     if(mapping.accept(resourceId)) {
                         try {

@@ -7,13 +7,12 @@ import org.activityinfo.model.resource.ResourceId;
 /**
  * Internal interface used to construct table queries.
  */
-public interface CollectionAccessor {
+public interface ResourceCollection {
 
     /**
      * Retrieves a single resource from the ResourceStore.
      * @param resourceId the id of the resource to retrieve
      * @return the Resource
-     * @throws
      */
     Resource get(ResourceId resourceId);
 
