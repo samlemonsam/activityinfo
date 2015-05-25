@@ -18,26 +18,37 @@ public class AnalysisSteps {
     
     @Inject
     private AliasTable aliasTable;
-    
+
+    @Then("^aggregating the indicators (.*) by (.*) should yield:$")
+    public void aggregating_the_indicators_by_should_yield(String indicators, String dimensions, DataTable expected) throws Throwable {
+        DataTable actual = driver.pivotTable(parseStringList(indicators), parseStringList(dimensions));
+        expected.unorderedDiff(aliasTable.deAlias(actual));
+    }
    
     @Then("^aggregating the indicator \"([^\"]*)\" by (.*) should yield:$")
     public void aggregating_the_indicator_by_should_yield(String indicatorName, String dimensions, DataTable expected) throws Throwable {
-        DataTable actual = driver.pivotTable(indicatorName, parseDimensions(dimensions));
+        DataTable actual = driver.pivotTable(indicatorName, parseStringList(dimensions));
         expected.diff(aliasTable.deAlias(actual));
     }
 
-    private List<String> parseDimensions(String dimensionList) {
-        String[] parts = dimensionList.split("and");
-        List<String> dimensions = Lists.newArrayList();
+    private List<String> parseStringList(String stringList) {
+        String[] parts = stringList.split("and");
+        List<String> strings = Lists.newArrayList();
         if(parts.length == 1) {
-            dimensions.add(parts[0]);
+            strings.add(parts[0]);
         } else if(parts.length == 2) {
             String[] items = parts[0].split(",");
             for (String item : items) {
-                dimensions.add(item.trim());
+                strings.add(item.trim());
             }
-            dimensions.add(parts[1].trim());
+            strings.add(parts[1].trim());
         }
-        return dimensions;
+        return strings;
+    }
+
+    @Then("^drill down on \"([^\"]*)\" should yield:$")
+    public void drill_down_on_should_yield(String cellValue, DataTable expected) throws Throwable {
+        DataTable actual = driver.drillDown(cellValue);
+        expected.diff(aliasTable.deAlias(actual));
     }
 }

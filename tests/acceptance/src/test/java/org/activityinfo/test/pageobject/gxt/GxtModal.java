@@ -39,6 +39,10 @@ public class GxtModal extends ModalDialog {
         return form;
     }
 
+    public void close() {
+        windowElement.find().button(XPathBuilder.withText("Close")).clickWhenReady();
+    }
+
     @Override
     public void accept() {
         windowElement.find().button(XPathBuilder.withText("Save")).clickWhenReady();

@@ -1,6 +1,7 @@
 package org.activityinfo.test.driver;
 
 
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
@@ -111,13 +112,20 @@ public abstract class ApplicationDriver {
     }
 
     public DataTable pivotTable(String measure, List<String> rowDimensions) throws Exception {
+        return pivotTable(Lists.newArrayList(measure), rowDimensions);
+    }
+
+    public DataTable pivotTable(List<String> measure, List<String> rowDimensions) throws Exception {
         throw new PendingException();
     }
 
     public final void grantPermission(Property... properties) throws Exception {
         grantPermission(new TestObject(aliasTable, properties));
     }
-    
+
+    public DataTable drillDown(String cellValue) {
+        throw new PendingException();
+    }
 
     protected void grantPermission(TestObject permission) throws Exception {
         throw new PendingException();
@@ -187,5 +195,4 @@ public abstract class ApplicationDriver {
         return aliasTable;
     }
 
-    
 }

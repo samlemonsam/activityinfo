@@ -101,16 +101,22 @@ public class GxtGrid {
     public FluentIterable<GxtRow> rows() {
         return container.findElements(By.className("x-grid3-row")).as(GxtRow.class);
     }
-    
+
     public DataTable extractData() {
+        return extractData(true);
+    }
+    
+    public DataTable extractData(boolean withHeader) {
         List<List<String>> rows = new ArrayList<>();
-        
-        List<String> headers = new ArrayList<>();
-        for (FluentElement headerCell : container.findElements(By.xpath("//div[@role='columnheader']/span"))) {
-            headers.add(headerCell.text().trim());
+
+        if (withHeader) {
+            List<String> headers = new ArrayList<>();
+            for (FluentElement headerCell : container.findElements(By.xpath("//div[@role='columnheader']/span"))) {
+                headers.add(headerCell.text().trim());
+            }
+            rows.add(headers);
         }
-        rows.add(headers);
-        
+
         for (FluentElement row : container.findElements(By.className("x-grid3-row"))) {
             List<String> cells = Lists.newArrayList();
             for (FluentElement cell : row.findElements(By.className("x-grid3-cell"))) {
@@ -129,17 +135,19 @@ public class GxtGrid {
                 .first());
     }
     
-    public void waitUntilReloaded() throws InterruptedException {
+    public GxtGrid waitUntilReloaded() throws InterruptedException {
         
         // Wait until the loading mask appears
         FluentElement loadingMask = container.root().waitFor(By.className("ext-el-mask"));
 
         // Wait until it disappears...
         loadingMask.waitUntil(ExpectedConditions.stalenessOf(loadingMask.element()));
+        return this;
     }
 
-    public void waitUntilAtLeastOneRowIsLoaded() {
+    public GxtGrid waitUntilAtLeastOneRowIsLoaded() {
         container.waitFor(By.className("x-grid3-row"));
+        return this;
     }
 
 
@@ -196,6 +204,10 @@ public class GxtGrid {
 
         public void click() {
             element.click();
+        }
+
+        public void doubleClick() {
+            element.doubleClick();
         }
     }
     
