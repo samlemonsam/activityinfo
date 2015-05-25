@@ -71,6 +71,11 @@ public class FluentElement {
         actions.click(element).perform();
     }
 
+    public void doubleClick() {
+        Actions actions = new Actions(webDriver);
+        actions.doubleClick(element).perform();
+    }
+
     public WebElement element() {
         Preconditions.checkState(element != null, "no element has been selected yet");
         return element;
