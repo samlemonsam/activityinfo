@@ -134,6 +134,15 @@ public class GxtGrid {
                 .descendants().td(withClass("x-grid3-td-" + columnId))
                 .first());
     }
+
+    public GxtGrid waitUntilReloadedSilently() {
+        try {
+            waitUntilAtLeastOneRowIsLoaded();
+        } catch (Exception e) {
+            // ignore, we don't care even if loading mask didn't appear
+        }
+        return this;
+    }
     
     public GxtGrid waitUntilReloaded() throws InterruptedException {
         

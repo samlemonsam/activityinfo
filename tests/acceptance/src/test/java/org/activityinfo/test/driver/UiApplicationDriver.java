@@ -300,13 +300,10 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         PivotTableEditor pivotTable = (PivotTableEditor) currentPage;
         DrillDownDialog drillDown = pivotTable.drillDown(cellValue);
-        try {
-            DataTable dataTable = drillDown.table().waitUntilReloaded().extractData(false);
-            drillDown.close();
-            return dataTable;
-        } catch (InterruptedException e) {
-            throw new AssertionError(e);
-        }
+
+        DataTable dataTable = drillDown.table().waitUntilReloadedSilently().extractData(false);
+        drillDown.close();
+        return dataTable;
     }
 
     @Override
