@@ -2,6 +2,7 @@ package org.activityinfo.model.formTree;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
@@ -17,6 +18,7 @@ import java.util.*;
  * Contains a tree of fields based on references to other {@code FormClasses}
  */
 public class FormTree {
+
 
 
     public class Node {
@@ -224,9 +226,12 @@ public class FormTree {
             paths.add(node.getPath());
         }
         return paths;
-
     }
 
+    public FormClass getRootFormClass() {
+        return Iterables.getOnlyElement(getRootFormClasses().values());
+    }
+    
     public Map<ResourceId, FormClass> getRootFormClasses() {
         Map<ResourceId, FormClass> map = Maps.newHashMap();
         for(Node node : rootFields) {

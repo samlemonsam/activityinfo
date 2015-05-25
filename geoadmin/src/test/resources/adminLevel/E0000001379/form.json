@@ -1,0 +1,28 @@
+{
+  "@id": "E0000001379",
+  "@owner": "_root",
+  "classId": "_class",
+  "elements": [
+    {
+      "code": "name",
+      "visible": true,
+      "id": "E00000013790000000001",
+      "label": "Name",
+      "type": {
+        "typeClass": "FREE_TEXT"
+      },
+      "required": true
+    },
+    {
+      "code": "code",
+      "visible": true,
+      "id": "E00000013790000000003",
+      "label": "Code",
+      "type": {
+        "typeClass": "FREE_TEXT"
+      },
+      "required": true
+    }
+  ],
+  "_class_label": "Region"
+}

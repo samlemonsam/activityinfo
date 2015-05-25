@@ -1,0 +1,45 @@
+{
+  "@id": "E0000001512",
+  "@owner": "_root",
+  "classId": "_class",
+  "_class_label": "Fokontany",
+  "elements": [
+    {
+      "code": "name",
+      "visible": true,
+      "id": "E00000015120000000001",
+      "label": "Name",
+      "type": {
+        "typeClass": "FREE_TEXT"
+      },
+      "required": true
+    },
+    {
+      "code": "code",
+      "visible": true,
+      "id": "E00000015120000000003",
+      "label": "Code",
+      "type": {
+        "typeClass": "FREE_TEXT"
+      },
+      "required": true
+    },
+    {
+      "code": "parent",
+      "visible": true,
+      "id": "E00000015120000000007",
+      "label": "Commune",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "E0000001511"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": true
+    }
+  ]
+}

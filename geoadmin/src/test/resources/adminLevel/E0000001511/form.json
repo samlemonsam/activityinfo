@@ -1,0 +1,46 @@
+
+{
+  "@id": "E0000001511",
+  "@owner": "_root",
+  "classId": "_class",
+  "elements": [
+    {
+      "code": "name",
+      "visible": true,
+      "id": "E00000015110000000001",
+      "label": "Name",
+      "type": {
+        "typeClass": "FREE_TEXT"
+      },
+      "required": true
+    },
+    {
+      "code": "code",
+      "visible": true,
+      "id": "E00000015110000000003",
+      "label": "Code",
+      "type": {
+        "typeClass": "FREE_TEXT"
+      },
+      "required": true
+    },
+    {
+      "code": "parent",
+      "visible": true,
+      "id": "E00000015110000000007",
+      "label": "District",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "E0000001508"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": true
+    }
+  ],
+  "_class_label": "Commune"
+}

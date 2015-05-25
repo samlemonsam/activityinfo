@@ -1,6 +1,10 @@
 package org.activityinfo.geoadmin.source;
 
+import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.RowSource;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionAccessor;
 import org.activityinfo.service.store.CollectionCatalog;
@@ -13,9 +17,22 @@ import java.util.Map;
 
 
 public class FeatureSourceCatalog implements CollectionCatalog {
-    
+
+    public static final String FILE_PREFIX = "file://";
     private Map<ResourceId, FeatureSourceAccessor> sources = new HashMap<>();
     
+    public boolean isLocalResource(ResourceId resourceId) {
+        return resourceId.asString().startsWith(FILE_PREFIX);
+    }
+
+    public boolean isLocalQuery(QueryModel queryModel) {
+        for (RowSource rowSource : queryModel.getRowSources()) {
+            if(!isLocalResource(rowSource.getRootFormClass())) {
+                return false;
+            }
+        }
+        return true;
+    }
     
     public void add(ResourceId id, String path) throws IOException {
         File shapeFile = new File(path);
@@ -25,9 +42,20 @@ public class FeatureSourceCatalog implements CollectionCatalog {
     
     @Override
     public CollectionAccessor getCollection(ResourceId resourceId) {
+        Preconditions.checkArgument(resourceId.asString().startsWith(FILE_PREFIX),
+                "FeatureSourceCatalog supports only resourceIds starting with file://");
+        
         FeatureSourceAccessor accessor = sources.get(resourceId);
         if(accessor == null) {
-            throw new IllegalArgumentException(resourceId.asString());
+            try {
+                File shapeFile = new File(resourceId.asString().substring(FILE_PREFIX.length()));
+                ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
+                accessor = new FeatureSourceAccessor(resourceId, dataStore.getFeatureSource());
+                sources.put(resourceId, accessor);
+
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Could not load " + resourceId, e);
+            }
         }
         return accessor;
     }
@@ -36,4 +64,6 @@ public class FeatureSourceCatalog implements CollectionCatalog {
     public FormClass getFormClass(ResourceId resourceId) {
         return getCollection(resourceId).getFormClass();
     }
+
+
 }

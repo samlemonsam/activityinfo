@@ -14,9 +14,11 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.vividsolutions.jts.geom.Point;
+import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
@@ -24,6 +26,8 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
+import org.activityinfo.store.query.impl.ColumnCache;
+import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -45,6 +49,8 @@ public class ActivityInfoClient implements FormClassProvider {
 
     private Client client;
     private URI root;
+    
+    private FeatureSourceCatalog localCatalog = new FeatureSourceCatalog();
 
     @Override
     public FormClass getFormClass(ResourceId resourceId) {
@@ -278,6 +284,7 @@ public class ActivityInfoClient implements FormClassProvider {
     
     
     public FormClass getFormClass(int adminLevelId) {
+        
         String json = formResource(CuidAdapter.adminLevelFormClass(adminLevelId)).path("class").get(String.class);
 
 
@@ -285,9 +292,17 @@ public class ActivityInfoClient implements FormClassProvider {
     }
 
     public FormTree getFormTree(ResourceId resourceId) {
-        String json = formResource(resourceId).path("tree").get(String.class);
-        JsonObject object = new Gson().fromJson(json, JsonObject.class);
-        return JsonFormTreeBuilder.fromJson(object);
+        
+        if(localCatalog.isLocalResource(resourceId)) {
+            FormTreeBuilder treeBuilder = new FormTreeBuilder(localCatalog);
+            return treeBuilder.queryTree(resourceId);
+        
+        } else {
+
+            String json = formResource(resourceId).path("tree").get(String.class);
+            JsonObject object = new Gson().fromJson(json, JsonObject.class);
+            return JsonFormTreeBuilder.fromJson(object);
+        }
     }
 
     public FormTree getFormTree(int adminLevelId) {
@@ -295,15 +310,27 @@ public class ActivityInfoClient implements FormClassProvider {
     }
     
     public ColumnSet queryColumns(QueryModel queryModel) {
+        
+        if(localCatalog.isLocalQuery(queryModel)) {
+            ColumnSetBuilder builder = new ColumnSetBuilder(localCatalog, ColumnCache.NULL);
+            return builder.build(queryModel);
+
+        } else {
+
+            return queryColumnsRemotely(queryModel);
+        }
+    }
+
+    private ColumnSet queryColumnsRemotely(QueryModel queryModel) {
         String json = client.resource(root)
                 .path("query")
                 .path("columns")
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .post(String.class, queryModel);
-        
+
         JsonObject object = new Gson().fromJson(json, JsonObject.class);
         int numRows = object.getAsJsonPrimitive("rows").getAsInt();
-        
+
         Map<String, ColumnView> columnMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
             JsonObject columnValue = column.getValue().getAsJsonObject();
@@ -316,10 +343,10 @@ public class ActivityInfoClient implements FormClassProvider {
                     throw new UnsupportedOperationException(storage);
             }
         }
-        
+
         return new ColumnSet(numRows, columnMap);
     }
-    
+
     private WebResource formResource(ResourceId resourceId) {
         return client.resource(root)
                 .path("form")

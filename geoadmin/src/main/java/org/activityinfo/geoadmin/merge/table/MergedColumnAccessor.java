@@ -11,7 +11,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 /**
- * Created by alex on 22-4-15.
+ * Displays a column showing the result of the target and source merges
  */
 class MergedColumnAccessor extends ColumnAccessor {
     private MergeModel mergeModel;
@@ -71,7 +71,8 @@ class MergedColumnAccessor extends ColumnAccessor {
 
     private boolean isChange(MatchRow match) {
         LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
-        if(match.isTargetMatched() && match.isSourceMatched()) {
+        if(match.isTargetMatched() && match.isSourceMatched() &&
+            sourceColumn != null && targetColumn != null) {
             String targetValue = targetColumn.getView().getString(match.getTarget());
             String sourceValue = sourceColumn.getView().getString(match.getSource());
             return targetValue == null || sourceValue == null || scorer.score(targetValue, sourceValue) < 0.95;
