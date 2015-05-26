@@ -9,8 +9,8 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.calc.AggregationMethod;
-import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
@@ -143,9 +143,9 @@ public class DatabaseSetupSteps {
 
     private String detectType(Set<String> values) {
         if(isQuantity(values)) {
-            return QuantityType.TypeClass.INSTANCE.getId();
+            return QuantityType.TYPE_CLASS.getId();
         } else {
-            return TextType.INSTANCE.getId();
+            return TextType.TYPE_CLASS.getId();
         }
     }
 
