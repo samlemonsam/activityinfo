@@ -14,7 +14,13 @@ import java.util.concurrent.ExecutorService;
 public class MergeModelStore extends Observable<MergeModel2> {
 
     private ResourceStore resourceStore;
+    private Map<>chn
+    
+    
     private MergeModel2 value;
+    
+    
+    
     private Observable<FormTree> sourceTree;
     private Observable<FormProfile> sourceProfile;
     private Observable<FormTree> targetTree;

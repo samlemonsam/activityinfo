@@ -4,12 +4,13 @@ import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
 import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.observable.Observable;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
  * Source Column
  */
-public class SourceColumn implements MergeTableColumn {
+public class SourceColumn extends MergeTableColumn {
 
     private Observable<RowMatching> matching;
     private SourceFieldMapping mapping;
@@ -47,7 +48,7 @@ public class SourceColumn implements MergeTableColumn {
 
     @Override
     public int getTextAlignment() {
-        return 0;
+        return SwingConstants.LEFT;
     }
 
     @Override

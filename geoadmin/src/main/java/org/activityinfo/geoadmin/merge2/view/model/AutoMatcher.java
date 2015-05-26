@@ -22,6 +22,6 @@ public class AutoMatcher implements Function<FormMapping, AutoRowMatching> {
 
         LOGGER.info("Finished row matching...");
 
-        return new AutoRowMatching(formMapping, assignment);
+        return new AutoRowMatching(formMapping, matrix, assignment);
     }
 }

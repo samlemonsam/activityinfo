@@ -1,22 +1,33 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
  * Single column in the merge table
  */
-public interface MergeTableColumn {
+public abstract class MergeTableColumn {
 
-    String getHeader();
+    public abstract String getHeader();
 
-    String getValue(int rowIndex);
+    public abstract String getValue(int rowIndex);
 
-    Color getColor(int rowIndex);
+    public Color getColor(int rowIndex) {
+        return Color.WHITE;
+    }
 
-    int getTextAlignment();
+    public int getTextAlignment() {
+        return SwingConstants.LEFT;
+    }
 
-    int getWidth();
+    public int getWidth() {
+        return -1;
+    }
+    
+    public boolean isResizable() {
+        return true;
+    }
 
-    boolean isResizable();
-
+    public void onClick(int rowIndex) {
+    }
 }

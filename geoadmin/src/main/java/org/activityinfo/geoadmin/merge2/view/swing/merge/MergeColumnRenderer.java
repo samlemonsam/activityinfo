@@ -9,6 +9,7 @@ public class MergeColumnRenderer extends DefaultTableCellRenderer {
 
     public MergeColumnRenderer(MergeTableColumn column) {
         this.column = column;
+        setHorizontalAlignment(column.getTextAlignment());
     }
 
     @Override

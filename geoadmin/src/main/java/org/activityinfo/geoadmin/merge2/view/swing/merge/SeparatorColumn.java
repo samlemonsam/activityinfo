@@ -6,7 +6,7 @@ import java.awt.*;
 /**
  * Provides a visual separation between the source and target columns
  */
-public class SeparatorColumn implements MergeTableColumn {
+public class SeparatorColumn extends MergeTableColumn {
     @Override
     public String getHeader() {
         return "";

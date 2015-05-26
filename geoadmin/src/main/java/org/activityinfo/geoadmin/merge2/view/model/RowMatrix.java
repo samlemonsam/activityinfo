@@ -2,8 +2,6 @@ package org.activityinfo.geoadmin.merge2.view.model;
 
 import com.google.common.collect.BiMap;
 import org.activityinfo.geoadmin.match.DistanceMatrix;
-import org.activityinfo.geoadmin.merge.model.MergeColumn;
-import org.activityinfo.geoadmin.merge.model.MergeForm;
 import org.activityinfo.geoadmin.merge2.view.swing.merge.MergeSide;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.model.query.ColumnView;
@@ -22,6 +20,7 @@ public class RowMatrix implements DistanceMatrix {
     private int sourceRowCount;
 
     private int dimensionCount;
+    private final LatinPlaceNameScorer placeNameScorer = new LatinPlaceNameScorer();
 
     public RowMatrix(FormProfile targetForm, FormProfile sourceForm, BiMap<FieldProfile, FieldProfile> columnMapping) {
         dimensionCount = columnMapping.size();
@@ -77,15 +76,30 @@ public class RowMatrix implements DistanceMatrix {
     public double distance(int targetRowIndex, int sourceRowIndex) {
         double distance = 0;
 
-        LatinPlaceNameScorer placeNameScorer = new LatinPlaceNameScorer();
         for(int d=0;d<dimensionCount;++d) {
-            String targetValue = target[d].getString(targetRowIndex);
-            String sourceValue = source[d].getString(sourceRowIndex);
-            if(targetValue != null && sourceValue != null) {
-                double score = placeNameScorer.score(targetValue, sourceValue);
-                distance += (1.0 - score);
-            }
+            distance += (1.0 - getScore(d, targetRowIndex, sourceRowIndex));
         }
         return distance;
+    }
+    
+    public double[] getScores(int targetRowIndex, int sourceRowIndex) {
+        double[] scores = new double[dimensionCount];
+        for(int d=0;d<dimensionCount;++d) {
+            scores[d] = getScore(d, targetRowIndex, sourceRowIndex);
+        }
+        return scores;
+        
+    }
+
+    private double getScore(int dimensionIndex, int targetRowIndex, int sourceRowIndex) {
+        String targetValue = target[dimensionIndex].getString(targetRowIndex);
+        String sourceValue = source[dimensionIndex].getString(sourceRowIndex);
+        if (targetValue == null && sourceValue == null) {
+            return 1.0;
+        } else if (targetValue == null || sourceValue == null) {
+            return 0.0d;
+        } else {
+            return placeNameScorer.score(targetValue, sourceValue);
+        }
     }
 }

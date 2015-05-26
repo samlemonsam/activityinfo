@@ -40,9 +40,11 @@ public class RowMatching {
                 // Add a row for each target row
                 for (int targetRow = 0; targetRow < formMapping.getTarget().getRowCount(); ++targetRow) {
                     int sourceRow = input.getBestSourceMatchForTarget(targetRow);
-                    rows.add(new RowMatch(targetRow, sourceRow));
+                    if(sourceRow == -1) {
+                        rows.add(new RowMatch(-1, targetRow, null));
 
-                    if (sourceRow != -1) {
+                    } else {
+                        rows.add(new RowMatch(sourceRow, targetRow, input.getScores(sourceRow, targetRow)));
                         matchedSources.add(sourceRow);
                     }
                 }
@@ -50,10 +52,10 @@ public class RowMatching {
                 // Add finally add an output row for each unmatched source
                 for (int sourceRow = 0; sourceRow < formMapping.getSource().getRowCount(); ++sourceRow) {
                     if (!matchedSources.contains(sourceRow)) {
-                        rows.add(new RowMatch(-1, sourceRow));
+                        rows.add(new RowMatch(sourceRow, -1, null));
                     }
                 }
-
+                
                 return new RowMatching(formMapping, rows);
             }
         });

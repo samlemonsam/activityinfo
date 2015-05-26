@@ -6,11 +6,12 @@ import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.observable.Observable;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 
-public class TargetColumn implements MergeTableColumn {
+public class TargetColumn extends MergeTableColumn {
 
     private final Observable<RowMatching> matching;
     private final FieldProfile targetField;
@@ -68,7 +69,7 @@ public class TargetColumn implements MergeTableColumn {
         if (sourceValue instanceof String && targetValue instanceof String) {
             double score = scorer.score((String) sourceValue, (String) targetValue);
             if (score > 0.99) {
-                return Color.decode("#006600");
+                return Color.GREEN; 
             } else if (score > 0.80) {
                 return Color.decode("#FF6600");
             }
@@ -78,7 +79,7 @@ public class TargetColumn implements MergeTableColumn {
 
     @Override
     public int getTextAlignment() {
-        return 0;
+        return SwingConstants.LEFT;
     }
 
     @Override

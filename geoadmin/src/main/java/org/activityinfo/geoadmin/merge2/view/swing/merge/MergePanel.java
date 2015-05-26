@@ -4,7 +4,6 @@ package org.activityinfo.geoadmin.merge2.view.swing.merge;
 import org.activityinfo.geoadmin.merge2.MergeModelStore;
 import org.activityinfo.geoadmin.merge2.view.model.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
-import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
 import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
 import org.activityinfo.observable.Observable;
@@ -17,6 +16,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class MergePanel extends StepPanel {
     private final JTable table;
 
     private final Subscription columnsSubscription;
+    private List<MergeTableColumn> columns;
 
     public MergePanel(MergeModelStore store) {
         this.store = store;
@@ -36,13 +38,23 @@ public class MergePanel extends StepPanel {
         tableModel = new MergeTableModel(store);
         table = new JTable(tableModel);
         table.setAutoCreateColumnsFromModel(false);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         columnsSubscription = store.getFieldMapping().subscribe(new Observer<FormMapping>() {
             @Override
             public void onChange(Observable<FormMapping> observable) {
                 if(!observable.isLoading()) {
                     onColumnsChanged(observable.get());
+                }
+            }
+        });
+        
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(columns != null) {
+                    int row = table.getSelectedRow();
+                    int column = table.getSelectedColumn();
+                    columns.get(column).onClick(row);
                 }
             }
         });
@@ -53,7 +65,9 @@ public class MergePanel extends StepPanel {
     }
 
     private void onColumnsChanged(FormMapping formMapping) {
-        java.util.List<MergeTableColumn> columns = new ArrayList<>();
+        columns = new ArrayList<>();
+        
+        columns.add(new ResolutionColumn(store.getRowMatching()));
 
         // On the left hand side, show the existing "Target" features
         for (FieldProfile targetField : formMapping.getTarget().getFields()) {
@@ -100,7 +114,7 @@ public class MergePanel extends StepPanel {
             tableColumn.setHeaderValue(column.getHeader());
             tableColumn.setCellRenderer(new MergeColumnRenderer(column));
 
-            tableColumn.setResizable(column.isResizable());
+//            tableColumn.setResizable(column.isResizable());
             if(column.getWidth() > 0) {
                 tableColumn.setWidth(column.getWidth());
             }

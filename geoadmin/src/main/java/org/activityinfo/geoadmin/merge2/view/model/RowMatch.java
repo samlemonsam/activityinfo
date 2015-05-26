@@ -1,23 +1,51 @@
 package org.activityinfo.geoadmin.merge2.view.model;
 
-/**
- * Created by alexander on 5/25/15.
- */
+
 public class RowMatch {
 
-    private final int targetRow;
+    public static final int UNMATCHED = -1;
+    
     private final int sourceRow;
+    private final int targetRow;
+    private final double scores[];
 
-    public RowMatch(int targetRow, int sourceRow) {
+    public RowMatch(int sourceRow, int targetRow, double scores[]) {
         this.targetRow = targetRow;
         this.sourceRow = sourceRow;
-    }
-
-    public int getTargetRow() {
-        return targetRow;
+        this.scores = scores;
     }
 
     public int getSourceRow() {
         return sourceRow;
+    }
+    
+    public int getTargetRow() {
+        return targetRow;
+    }
+
+    public double[] getScores() {
+        return scores;
+    }
+
+    /**
+     * 
+     * @return the lowest score among all the dimensions
+     */
+    public double getMinScore() {
+        if(scores == null) {
+            return Double.NaN;
+        } else {
+            double minScore = scores[0];
+            for(int i=1;i<scores.length;++i) {
+                if(scores[i] < minScore) {
+                    minScore = scores[i];
+                }
+            }
+            return minScore;
+        }
+    }
+    
+    public boolean isMatched() {
+        return sourceRow != UNMATCHED && targetRow != UNMATCHED;
     }
 }
