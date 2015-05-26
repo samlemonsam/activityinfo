@@ -1,8 +1,7 @@
 package org.activityinfo.geoadmin.merge2.state;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
-import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -10,13 +9,13 @@ import java.io.IOException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class MergeModelStoreTest {
+public class ImportModelTest {
 
     @Test
     public void fieldMapping() throws IOException {
 
         ResourceStoreStub resourceStore = new ResourceStoreStub();
-        MergeModelStore store = new MergeModelStore(resourceStore, 
+        ImportModel store = new ImportModel(resourceStore, 
                 ResourceStoreStub.COMMUNE_SOURCE_ID, 
                 ResourceStoreStub.COMMUNE_TARGET_ID);
 

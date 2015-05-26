@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.state;
+package org.activityinfo.store;
 
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;

@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.model;
 
 import com.google.common.base.Function;
-import org.activityinfo.geoadmin.merge2.state.ResourceStore;
+import org.activityinfo.store.ResourceStore;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;

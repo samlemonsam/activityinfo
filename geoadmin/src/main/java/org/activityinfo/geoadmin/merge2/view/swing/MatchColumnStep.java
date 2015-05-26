@@ -1,13 +1,13 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
 
 
 public class MatchColumnStep implements Step {
 
-    private final MergeModelStore store;
+    private final ImportModel store;
 
-    public MatchColumnStep(MergeModelStore store) {
+    public MatchColumnStep(ImportModel store) {
         this.store = store;
     }
 

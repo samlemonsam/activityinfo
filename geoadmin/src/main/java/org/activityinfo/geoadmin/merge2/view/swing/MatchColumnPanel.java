@@ -1,6 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
 import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.model.formTree.FormTree;
@@ -23,7 +23,7 @@ public class MatchColumnPanel extends StepPanel {
     private Subscription sourceSubscription;
     private Subscription targetSubscription;
 
-    public MatchColumnPanel(MergeModelStore modelStore) {
+    public MatchColumnPanel(ImportModel modelStore) {
         setLayout(new GridBagLayout());
 
         addStepTitle();
@@ -57,7 +57,7 @@ public class MatchColumnPanel extends StepPanel {
         add(description, constraints);
     }
 
-    private void addSourceList(MergeModelStore modelStore) {
+    private void addSourceList(ImportModel modelStore) {
         sourceHeader = new JLabel();
         add(sourceHeader, constraints(0, 2));
 
@@ -86,7 +86,7 @@ public class MatchColumnPanel extends StepPanel {
         });
     }
 
-    private void addTargetList(MergeModelStore modelStore) {
+    private void addTargetList(ImportModel modelStore) {
         
         targetHeader = new JLabel();
         add(targetHeader, constraints(2, 2));

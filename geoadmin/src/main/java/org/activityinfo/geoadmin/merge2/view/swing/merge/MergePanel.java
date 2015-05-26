@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.model.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
 import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class MergePanel extends StepPanel {
 
-    private final MergeModelStore store;
+    private final ImportModel store;
 
     private final MergeTableModel tableModel;
     private final JTable table;
@@ -31,7 +31,7 @@ public class MergePanel extends StepPanel {
     private final Subscription columnsSubscription;
     private List<MergeTableColumn> columns;
 
-    public MergePanel(MergeModelStore store) {
+    public MergePanel(ImportModel store) {
         this.store = store;
         setLayout(new BorderLayout());
 
@@ -67,7 +67,7 @@ public class MergePanel extends StepPanel {
     private void onColumnsChanged(FormMapping formMapping) {
         columns = new ArrayList<>();
         
-        columns.add(new ResolutionColumn(store.getRowMatching()));
+        columns.add(new ResolutionColumn(store));
 
         // On the left hand side, show the existing "Target" features
         for (FieldProfile targetField : formMapping.getTarget().getFields()) {

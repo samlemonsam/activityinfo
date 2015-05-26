@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
 import org.activityinfo.geoadmin.merge2.view.model.FieldProfile;
-import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
+import org.activityinfo.geoadmin.merge2.view.model.MatchTable;
 import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.observable.Observable;
@@ -13,12 +13,12 @@ import java.util.List;
 
 public class TargetColumn extends MergeTableColumn {
 
-    private final Observable<RowMatching> matching;
+    private final Observable<MatchTable> matching;
     private final FieldProfile targetField;
     private final java.util.List<SourceFieldMapping> mappings;
     private final LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
 
-    public TargetColumn(Observable<RowMatching> matching, FieldProfile targetField, List<SourceFieldMapping> mappings) {
+    public TargetColumn(Observable<MatchTable> matching, FieldProfile targetField, List<SourceFieldMapping> mappings) {
         this.matching = matching;
         this.targetField = targetField;
         this.mappings = mappings;

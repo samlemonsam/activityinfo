@@ -1,8 +1,8 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
-import org.activityinfo.geoadmin.merge2.state.ResourceStore;
-import org.activityinfo.geoadmin.merge2.state.ResourceStoreImpl;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.store.ResourceStore;
+import org.activityinfo.store.ResourceStoreImpl;
 import org.activityinfo.geoadmin.merge2.view.swing.merge.MergeStep;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -22,7 +22,7 @@ public class MergeDialog extends JFrame {
     
     private java.util.List<Step> steps;
 
-    public MergeDialog(MergeModelStore store) {
+    public MergeDialog(ImportModel store) {
         super("Merge");
         setSize(650, 350);
         setLocationRelativeTo(null);
@@ -70,7 +70,7 @@ public class MergeDialog extends JFrame {
         ActivityInfoClient client = new ActivityInfoClient("http://localhost:8898/resources", "akbertram@gmail.com", "notasecret");
         ResourceStore resourceStore = new ResourceStoreImpl(client);
         
-        MergeModelStore modelStore = new MergeModelStore(resourceStore, 
+        ImportModel modelStore = new ImportModel(resourceStore, 
                 ResourceId.valueOf("file:///home/alex/dev/activityinfo-beta/geoadmin/src/test/resources/mg/communes.shp"),
                 CuidAdapter.adminLevelFormClass(1511));
         

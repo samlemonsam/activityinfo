@@ -9,19 +9,20 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Describes the
+ * Represents the matching of FormInstances in two collections as a flat table in which each
+ * row represents either 
  */
-public class RowMatching {
+public class MatchTable {
 
     private FormMapping mapping;
-    private List<RowMatch> rows;
+    private List<MatchRow> rows;
 
-    public RowMatching(FormMapping mapping, List<RowMatch> rows) {
+    public MatchTable(FormMapping mapping, List<MatchRow> rows) {
         this.mapping = mapping;
         this.rows = rows;
     }
 
-    public RowMatch get(int index) {
+    public MatchRow get(int index) {
         return rows.get(index);
     }
 
@@ -29,22 +30,22 @@ public class RowMatching {
         return rows.size();
     }
 
-    public static Observable<RowMatching> compute(Observable<AutoRowMatching> autoMatching) {
-        return autoMatching.transform(new Function<AutoRowMatching, RowMatching>() {
+    public static Observable<MatchTable> compute(Observable<AutoRowMatching> autoMatching) {
+        return autoMatching.transform(new Function<AutoRowMatching, MatchTable>() {
             @Override
-            public RowMatching apply(AutoRowMatching input) {
+            public MatchTable apply(AutoRowMatching input) {
                 FormMapping formMapping = input.getFormMapping();
-                List<RowMatch> rows = new ArrayList<RowMatch>();
+                List<MatchRow> rows = new ArrayList<MatchRow>();
                 Set<Integer> matchedSources = new HashSet<>();
 
                 // Add a row for each target row
                 for (int targetRow = 0; targetRow < formMapping.getTarget().getRowCount(); ++targetRow) {
                     int sourceRow = input.getBestSourceMatchForTarget(targetRow);
                     if(sourceRow == -1) {
-                        rows.add(new RowMatch(-1, targetRow, null));
+                        rows.add(new MatchRow(-1, targetRow, null));
 
                     } else {
-                        rows.add(new RowMatch(sourceRow, targetRow, input.getScores(sourceRow, targetRow)));
+                        rows.add(new MatchRow(sourceRow, targetRow, input.getScores(sourceRow, targetRow)));
                         matchedSources.add(sourceRow);
                     }
                 }
@@ -52,11 +53,11 @@ public class RowMatching {
                 // Add finally add an output row for each unmatched source
                 for (int sourceRow = 0; sourceRow < formMapping.getSource().getRowCount(); ++sourceRow) {
                     if (!matchedSources.contains(sourceRow)) {
-                        rows.add(new RowMatch(sourceRow, -1, null));
+                        rows.add(new MatchRow(sourceRow, -1, null));
                     }
                 }
                 
-                return new RowMatching(formMapping, rows);
+                return new MatchTable(formMapping, rows);
             }
         });
     }

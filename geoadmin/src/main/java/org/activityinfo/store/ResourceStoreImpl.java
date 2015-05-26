@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.state;
+package org.activityinfo.store;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;

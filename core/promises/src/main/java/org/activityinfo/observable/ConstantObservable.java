@@ -1,7 +1,5 @@
 package org.activityinfo.observable;
 
-import org.activityinfo.observable.Observable;
-
 public class ConstantObservable<T> extends Observable<T> {
     
     private final T value;

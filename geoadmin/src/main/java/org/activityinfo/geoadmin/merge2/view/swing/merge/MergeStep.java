@@ -1,17 +1,15 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.swing.Step;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
-
-import javax.swing.*;
 
 public class MergeStep implements Step {
 
 
-    private final MergeModelStore store;
+    private final ImportModel store;
 
-    public MergeStep(MergeModelStore store) {
+    public MergeStep(ImportModel store) {
         this.store = store;
     }
 

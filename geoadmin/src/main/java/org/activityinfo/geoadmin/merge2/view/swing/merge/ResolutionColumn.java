@@ -1,8 +1,8 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
-import org.activityinfo.geoadmin.merge2.view.model.RowMatch;
-import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.geoadmin.merge2.view.model.MatchRow;
+import org.activityinfo.geoadmin.merge2.view.model.MatchTable;
 import org.activityinfo.observable.Observable;
 
 import javax.swing.*;
@@ -18,9 +18,9 @@ public class ResolutionColumn extends MergeTableColumn {
     public static final String CHECK_ICON = "\u2713";
     
     
-    private final Observable<RowMatching> rows;
+    private final Observable<MatchTable> rows;
 
-    public ResolutionColumn(MergeModelStore model) {
+    public ResolutionColumn(ImportModel model) {
         this.rows = model.getRowMatching();
     }
 
@@ -57,7 +57,7 @@ public class ResolutionColumn extends MergeTableColumn {
     @Override
     public void onClick(int rowIndex) {
         if(!rows.isLoading()) {
-            RowMatch row = rows.get().get(rowIndex);
+            MatchRow row = rows.get().get(rowIndex);
             if(row.isMatched()) {
                 
             }

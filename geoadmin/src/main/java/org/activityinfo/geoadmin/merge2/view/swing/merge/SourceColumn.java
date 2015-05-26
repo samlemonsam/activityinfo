@@ -1,6 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
-import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
+import org.activityinfo.geoadmin.merge2.view.model.MatchTable;
 import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
 import org.activityinfo.observable.Observable;
 
@@ -12,10 +12,10 @@ import java.awt.*;
  */
 public class SourceColumn extends MergeTableColumn {
 
-    private Observable<RowMatching> matching;
+    private Observable<MatchTable> matching;
     private SourceFieldMapping mapping;
 
-    public SourceColumn(Observable<RowMatching> matching, SourceFieldMapping mapping) {
+    public SourceColumn(Observable<MatchTable> matching, SourceFieldMapping mapping) {
         this.matching = matching;
         this.mapping = mapping;
     }

@@ -1,39 +1,30 @@
-package org.activityinfo.geoadmin.merge2;
+package org.activityinfo.geoadmin.merge2.model;
 
-import org.activityinfo.geoadmin.merge2.state.MergeModel2;
-import org.activityinfo.geoadmin.merge2.state.ResourceStore;
+import org.activityinfo.store.ResourceStore;
 import org.activityinfo.geoadmin.merge2.view.model.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
+import org.activityinfo.observable.StatefulValue;
 
 
-public class MergeModelStore extends Observable<MergeModel2> {
+public class ImportModel {
 
     private ResourceStore resourceStore;
-    private Map<>chn
-    
-    
-    private MergeModel2 value;
-    
-    
-    
+    private StatefulValue<ResourceId> sourceFormId = new StatefulValue<>();
+    private StatefulValue<ResourceId> targetFormId = new StatefulValue<>();
     private Observable<FormTree> sourceTree;
     private Observable<FormProfile> sourceProfile;
     private Observable<FormTree> targetTree;
     private Observable<FormProfile> targetProfile;
     private Observable<FormMapping> fieldMapping;
     private Observable<AutoRowMatching> autoRowMatching;
-    private final Observable<RowMatching> rowMatching;
+    private final Observable<MatchTable> rowMatching;
 
-    public MergeModelStore(final ResourceStore resourceStore, ResourceId source, ResourceId target) {
+    public ImportModel(final ResourceStore resourceStore, ResourceId source, ResourceId target) {
         this.resourceStore = resourceStore;
-        this.value = new MergeModel2();
-        this.value.setSourceFormId(source);
-        this.value.setTargetFormId(target);
+        this.sourceFormId.updateValue(source);
+        this.targetFormId.updateValue(target);
         
         this.sourceTree = resourceStore.getFormTree(source);
         this.targetTree = resourceStore.getFormTree(target);
@@ -41,19 +32,15 @@ public class MergeModelStore extends Observable<MergeModel2> {
         this.targetProfile = FormProfile.profile(resourceStore, targetTree);
         this.fieldMapping = FormMapping.compute(sourceProfile, targetProfile);
         this.autoRowMatching = fieldMapping.transform(new AutoMatcher());
-        this.rowMatching = RowMatching.compute(autoRowMatching);
+        this.rowMatching = MatchTable.compute(autoRowMatching);
     }
 
-    @Override
-    public boolean isLoading() {
-        return false;
+    /**
+     * @return the {@code ResourceId} of the form into which we are importing new data
+     */
+    public Observable<ResourceId> getTargetFormId() {
+        return targetFormId;
     }
-
-    @Override
-    public MergeModel2 get() {
-        return value;
-    }
-
 
     public Observable<FormTree> getSourceTree() {
         return sourceTree;
@@ -75,7 +62,7 @@ public class MergeModelStore extends Observable<MergeModel2> {
         return fieldMapping;
     }
 
-    public Observable<RowMatching> getRowMatching() {
+    public Observable<MatchTable> getRowMatching() {
         return rowMatching;
     }
 }

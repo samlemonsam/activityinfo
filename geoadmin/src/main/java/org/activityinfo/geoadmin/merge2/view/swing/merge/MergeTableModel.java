@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
-import org.activityinfo.geoadmin.merge2.MergeModelStore;
-import org.activityinfo.geoadmin.merge2.view.model.RowMatching;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.geoadmin.merge2.view.model.MatchTable;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.Subscription;
@@ -18,10 +18,10 @@ public class MergeTableModel extends AbstractTableModel {
 
     private int rowCount = 200;
 
-    public MergeTableModel(MergeModelStore store) {
-        subscription = store.getRowMatching().subscribe(new Observer<RowMatching>() {
+    public MergeTableModel(ImportModel store) {
+        subscription = store.getRowMatching().subscribe(new Observer<MatchTable>() {
             @Override
-            public void onChange(Observable<RowMatching> observable) {
+            public void onChange(Observable<MatchTable> observable) {
                 if(observable.isLoading()) {
                     rowCount = 0;
                 } else {

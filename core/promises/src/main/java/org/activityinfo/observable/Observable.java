@@ -17,9 +17,18 @@ import java.util.List;
 public abstract class Observable<T> {
     
     private final List<Observer<T>> observers = new ArrayList<>();
-    
+
+    /**
+     * @return true if the value is being loaded across the network, is being calculated, or
+     * is otherwise not yet available. 
+     */
     public abstract boolean isLoading();
-    
+
+    /**
+     * 
+     * @return the current value
+     * @throws java.lang.IllegalStateException if the value is currently loading
+     */
     public abstract T get();
 
     public final Subscription subscribe(final Observer<T> observer) {
@@ -40,23 +49,41 @@ public abstract class Observable<T> {
         };
     }
 
+    /**
+     * Called when the first {@link org.activityinfo.observable.Observer} subscribes to notifications.
+     *
+     */
     protected void onConnect() {
         
     }
 
+    /**
+     * Called when the last {@link org.activityinfo.observable.Observer} unsubscribes.
+     */
     protected void onDisconnect() {
 
-    }    
-    
+    }
+
+    /**
+     * Notify subscribers that the value has changed by invoking the {@link org.activityinfo.observable.Observer#onChange(Observable)} 
+     * method of all subscribed {@link org.activityinfo.observable.Observer}s.
+     */
     protected final void fireChange() {
         for(Observer<T> observer : observers) {
             observer.onChange(this);
         }
     }
-    
+
+    /**
+     * Transforms this {@code Observable}'s using the given {@code function} 
+     * @param function a function that is applied to the current any subsequent value of this {@code Observable}
+     * @param <R> the type of the result returned by the given {@code function}
+     * @return a new {@code Observable}
+     */
     public <R> Observable<R> transform(final Function<T, R> function) {
         return new ObservableFunction<R>(this) {
             @Override
+            @SuppressWarnings("unchecked")
             protected R compute(Object[] arguments) {
                 T argumentValue = (T) arguments[0];
                 return Preconditions.checkNotNull(function.apply(argumentValue));

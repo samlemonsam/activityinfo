@@ -1,7 +1,9 @@
 package org.activityinfo.observable;
 
+import java.util.Set;
+
 /**
- * Provides a mechanism for receiving push-based notifications.
+ * Provides a mechanism for receiving push-based notifications of changes to a {@code Set}.
  * <p>
  * After an Observer calls an {@link org.activityinfo.observable.Observable}'s {@link org.activityinfo.observable.Observable#subscribe subscribe} method, the
  * {@code Observable} calls the Observer's {@link #onChange} method to provide notifications.
@@ -9,7 +11,10 @@ package org.activityinfo.observable;
  * @param <T>
  *          the type of item the Observer expects to observe
  */
-public interface Observer<T> {
+public interface SetObserver<T> extends Observer<Set<T>> {
     
-    void onChange(Observable<T> observable);
+    void onElementAdded(T element);
+    
+    void onElementRemoved(T element);
+    
 }

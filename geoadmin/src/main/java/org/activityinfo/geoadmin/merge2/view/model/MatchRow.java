@@ -1,7 +1,8 @@
 package org.activityinfo.geoadmin.merge2.view.model;
 
 
-public class RowMatch {
+
+public class MatchRow {
 
     public static final int UNMATCHED = -1;
     
@@ -9,7 +10,7 @@ public class RowMatch {
     private final int targetRow;
     private final double scores[];
 
-    public RowMatch(int sourceRow, int targetRow, double scores[]) {
+    public MatchRow(int sourceRow, int targetRow, double scores[]) {
         this.targetRow = targetRow;
         this.sourceRow = sourceRow;
         this.scores = scores;
