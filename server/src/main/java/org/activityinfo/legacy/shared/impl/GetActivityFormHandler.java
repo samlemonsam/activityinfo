@@ -95,13 +95,21 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 .execute(context.getTransaction(), new SqlResultCallback() {
                     @Override
                     public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                        if(results.getRows().isEmpty()) {
-                            result.reject(new IllegalAccessCommandException());
+                        if (results.getRows().isEmpty()) {
+                            if (form.getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
+                                result.resolve(form);
+                            } else {
+                                result.reject(new IllegalAccessCommandException());
+                            }
                             return;
                         }
                         SqlResultSetRow row = results.getRow(0);
                         if(!row.getBoolean("allowView")) {
-                            result.reject(new IllegalAccessCommandException());
+                            if (form.getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
+                                result.resolve(form);
+                            } else {
+                                result.reject(new IllegalAccessCommandException());
+                            }
                             return;
                         }
                         form.setEditAllowed(row.getBoolean("allowEdit"));
