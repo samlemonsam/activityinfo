@@ -227,26 +227,25 @@ public class SiteExporter {
 
         createHeaderCell(headerRow2, column++, "Axe");
 
-        indicators = new ArrayList<Integer>(activity.getIndicators().size());
-        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            for (IndicatorGroup group : activity.groupIndicators()) {
-                if (group.getName() != null) {
-                    // create a merged cell on the top row spanning all members
-                    // of the group
-                    createHeaderCell(headerRow1, column, group.getName());
-                    sheet.addMergedRegion(new CellRangeAddress(0,
-                            0,
-                            column,
-                            column + group.getIndicators().size() - 1));
-                }
-                for (IndicatorDTO indicator : group.getIndicators()) {
-                    indicators.add(indicator.getId());
-                    createHeaderCell(headerRow2, column, indicator.getName(), indicatorHeaderStyle);
-                    sheet.setColumnWidth(column, characters(INDICATOR_COLUMN_WIDTH));
-                    column++;
-                }
+        indicators = new ArrayList<>(activity.getIndicators().size());
+        for (IndicatorGroup group : activity.groupIndicators()) {
+            if (group.getName() != null) {
+                // create a merged cell on the top row spanning all members
+                // of the group
+                createHeaderCell(headerRow1, column, group.getName());
+                sheet.addMergedRegion(new CellRangeAddress(0,
+                        0,
+                        column,
+                        column + group.getIndicators().size() - 1));
+            }
+            for (IndicatorDTO indicator : group.getIndicators()) {
+                indicators.add(indicator.getId());
+                createHeaderCell(headerRow2, column, indicator.getName(), indicatorHeaderStyle);
+                sheet.setColumnWidth(column, characters(INDICATOR_COLUMN_WIDTH));
+                column++;
             }
         }
+
         attributes = new ArrayList<>();
         for (AttributeGroupDTO group : activity.getAttributeGroups()) {
             if (group.getAttributes().size() != 0) {
