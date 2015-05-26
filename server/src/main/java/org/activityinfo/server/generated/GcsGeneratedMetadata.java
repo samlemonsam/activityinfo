@@ -1,7 +1,7 @@
 package org.activityinfo.server.generated;
 
 import com.google.appengine.api.datastore.*;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 
 import java.util.Date;
 
