@@ -66,24 +66,28 @@ Feature: Calculated fields
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 300        |
       | i2         | 150        |
       | Start Date | 2014-05-21 |
       | End Date   | 2014-05-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 100        |
       | i2         | 10         |
       | Start Date | 2014-07-21 |
       | End Date   | 2014-07-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 4          |
       | i2         | 20         |
       | Start Date | 2015-05-21 |
       | End Date   | 2015-05-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 5          |
       | i2         | 50         |
       | Start Date | 2015-07-21 |
