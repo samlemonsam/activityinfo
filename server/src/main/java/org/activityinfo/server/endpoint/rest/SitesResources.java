@@ -171,8 +171,21 @@ public class SitesResources {
         json.writeStringField("type", "FeatureCollection");
         json.writeArrayFieldStart("features");
 
-        Map<Integer, ActivityFormDTO> forms = Maps.newHashMap();
+        writeSites(sites, json);
 
+        json.writeEndArray();
+        json.writeEndObject();
+        json.close();
+    }
+
+    private void writeSites(List<SiteDTO> sites, JsonGenerator json) throws IOException {
+        if (sites.isEmpty()) {
+            return;
+        }
+
+
+        Map<Integer, ActivityFormDTO> forms = Maps.newHashMap();
+        
         for (SiteDTO site : sites) {
             if (site.hasLatLong()) {
                 json.writeStartObject();
@@ -265,9 +278,6 @@ public class SitesResources {
                 json.writeEndObject();
             }
         }
-        json.writeEndArray();
-        json.writeEndObject();
-        json.close();
     }
 
     private Set<Integer> getIndicatorIds(SiteDTO site) {

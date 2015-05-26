@@ -48,6 +48,8 @@ import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.command.LocationDTOs;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.export.SiteExporter;
+import org.activityinfo.server.endpoint.export.TaskContext;
+import org.activityinfo.server.report.NullStorageProvider;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -192,7 +194,7 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
         // Export to excel
         ActivityFormDTO activity = execute(new GetActivityForm(activityId));
 
-        SiteExporter exporter = new SiteExporter(getDispatcherSync());
+        SiteExporter exporter = new SiteExporter(new TaskContext(getDispatcherSync(), new NullStorageProvider(), "XYZ"));
         exporter.export(activity, Filter.filter().onActivity(activityId));
 
         exporter.done();

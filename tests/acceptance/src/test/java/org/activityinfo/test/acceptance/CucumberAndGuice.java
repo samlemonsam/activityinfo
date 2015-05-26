@@ -2,25 +2,21 @@ package org.activityinfo.test.acceptance;
 
 import com.google.inject.Injector;
 import cucumber.api.junit.Cucumber;
-import cucumber.runtime.*;
-import cucumber.runtime.Runtime;
+import cucumber.runtime.ClassFinder;
+import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
 import cucumber.runtime.java.JavaBackend;
 import cucumber.runtime.java.ObjectFactory;
 import cucumber.runtime.java.guice.ScenarioScope;
-import cucumber.runtime.java.guice.impl.InjectorSourceFactory;
-import cucumber.runtime.java.guice.impl.PropertiesLoader;
 import org.junit.runners.model.InitializationError;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.isStatic;
 
 public class CucumberAndGuice extends Cucumber {
 
@@ -73,16 +69,20 @@ public class CucumberAndGuice extends Cucumber {
             this.injector = injector;
         }
 
+        @Override
         public void addClass(Class<?> clazz) {}
 
+        @Override
         public void start() {
             injector.getInstance(ScenarioScope.class).enterScope();
         }
 
+        @Override
         public void stop() {
             injector.getInstance(ScenarioScope.class).exitScope();
         }
 
+        @Override
         public <T> T getInstance(Class<T> clazz) {
             return injector.getInstance(clazz);
         }

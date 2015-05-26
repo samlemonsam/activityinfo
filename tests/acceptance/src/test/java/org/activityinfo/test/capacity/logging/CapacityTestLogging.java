@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.io.Resources;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.capacity.action.ActionExecution;
-import org.activityinfo.test.capacity.action.SyncOfflineWithApi;
+import org.activityinfo.test.capacity.action.SynchronizeAction;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class CapacityTestLogging {
         private ActionExecution.ActionMetrics syncMetrics;
         
         public MetricLogger() {
-            syncMetrics = ActionExecution.getMetrics(SyncOfflineWithApi.class);
+            syncMetrics = ActionExecution.getMetrics(SynchronizeAction.class);
         }
 
         @Override
@@ -77,7 +77,7 @@ public class CapacityTestLogging {
         
         private String sync() {
             long concurrentUser = ActionExecution.CONCURRENT_USERS.getCount();
-            double meanSizeKb = SyncOfflineWithApi.TOTAL_SIZE_METRIC.getSnapshot().getMedian() / 1024d;
+            double meanSizeKb = SynchronizeAction.TOTAL_SIZE_METRIC.getSnapshot().getMedian() / 1024d;
             long latency = syncMetrics.getOneMinuteLatencySeconds();
             double successRate = syncMetrics.getOneMinuteSuccessRate();
             return String.format("sync[ %3d %4.0fkb %2ds %2.0f%%]", concurrentUser, meanSizeKb, latency, successRate);

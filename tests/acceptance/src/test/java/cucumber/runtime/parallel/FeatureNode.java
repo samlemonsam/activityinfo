@@ -45,6 +45,7 @@ public class FeatureNode implements Node {
         return feature.getKeyword() + ": " + feature.getName();
     }
 
+    @Override
     public Description getDescription() {
         return description;
     }

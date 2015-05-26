@@ -21,6 +21,7 @@ public class WebDriverPool {
     public WebDriverPool() {
         pool = new GenericKeyedObjectPool<>(new Factory());
         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
             public void run() {
                 pool.close();
             }
@@ -89,7 +90,7 @@ public class WebDriverPool {
         }
     }
 
-    public class Wrapper extends EventFiringWebDriver {
+    public class Wrapper extends EventFiringWebDriver implements WebDriverConnection {
     
         private BrowserProfile profile;
     
@@ -101,6 +102,11 @@ public class WebDriverPool {
         @Override
         public void quit() {
             pool.returnObject(profile, getWrappedDriver());
+        }
+
+        @Override
+        public void setConnected(boolean connected) {
+            ((WebDriverConnection) getWrappedDriver()).setConnected(connected);
         }
     }
 }

@@ -20,8 +20,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static com.google.common.io.Files.write;
 
@@ -40,10 +38,11 @@ public class WebDriverSession {
     private WebDriver proxy;
     private Server server;
     private String testName;
+    private WebDriverConnection webDriverConnection;
     private BrowserProfile browserProfile = new BrowserProfile(OperatingSystem.WINDOWS_7, BrowserVendor.CHROME);
 
     @Inject
-    public WebDriverSession(WebDriverProvider provider, ProxyController proxyController, Server server) {
+    public WebDriverSession(WebDriverProvider provider, Server server) {
         this.provider = provider;
         this.server = server;
         this.proxy =  (WebDriver) Proxy.newProxyInstance(getClass().getClassLoader(),
@@ -84,9 +83,12 @@ public class WebDriverSession {
     }
 
     private void recordCoverage()  {
+        
+        Preconditions.checkState(testName != null, "No test name is set");
+        
         try {
             File outputDir = COVERAGE_REPORT_DIR.getDir();
-            Path reportFile = Files.createTempFile(outputDir.toPath(), testName, ".json");
+            File reportFile = new File(outputDir, testName +".json");
 
             // Trigger the 'onLoad' event which should write the statistics to local storage
             driver.navigate().to(server.path("coverage.html"));
@@ -97,7 +99,7 @@ public class WebDriverSession {
                     "return localStorage.getItem('%s');", "gwt_coverage"));
 
             if (!Strings.isNullOrEmpty(json)) {
-                write(json, reportFile.toFile(), Charsets.UTF_8);
+                write(json, reportFile, Charsets.UTF_8);
             }
         } catch (Exception e) {
             throw new RuntimeException("Exception retrieving coverage results", e);
@@ -110,6 +112,12 @@ public class WebDriverSession {
 
     public BrowserProfile getBrowserProfile() {
         return browserProfile;
+    }
+
+    public void setConnected(boolean connected) {
+        if(driver instanceof WebDriverConnection) {
+            ((WebDriverConnection) driver).setConnected(connected);
+        }
     }
 
     private class WebDriverProxy implements InvocationHandler {

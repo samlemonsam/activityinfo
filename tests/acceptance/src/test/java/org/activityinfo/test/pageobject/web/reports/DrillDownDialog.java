@@ -1,5 +1,4 @@
-package org.activityinfo.server.report.output;
-
+package org.activityinfo.test.pageobject.web.reports;
 /*
  * #%L
  * ActivityInfo Server
@@ -22,27 +21,27 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
+import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.gxt.GxtGrid;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.openqa.selenium.By;
 
-public class LocalStorageProvider implements StorageProvider {
+/**
+ * @author yuriyz on 05/25/2015.
+ */
+public class DrillDownDialog {
 
-    private String folder;
+    private FluentElement dialog;
 
-    public LocalStorageProvider(String folder) {
-        this.folder = folder.replace('\\', '/');
+    public DrillDownDialog(FluentElement root) {
+        this.dialog = root.root().waitFor(By.className("x-window-body"));
     }
 
-    @Override
-    public TempStorage allocateTemporaryFile(String mimeType, String suffix)
-            throws IOException {
-        String path = folder + "/img" + Long.toString((new Date()).getTime())
-                + suffix;
-        OutputStream stream = new FileOutputStream(path);
-
-        return new TempStorage("file://" + path, stream);
+    public GxtGrid table() {
+        return GxtGrid.findGrids(dialog).first().get();
     }
 
+    public void close() {
+        new GxtModal(dialog).close();
+    }
 }

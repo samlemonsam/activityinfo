@@ -1,4 +1,4 @@
-package org.activityinfo.server.report.output;
+package org.activityinfo.model.calc;
 
 /*
  * #%L
@@ -22,30 +22,20 @@ package org.activityinfo.server.report.output;
  * #L%
  */
 
-import java.io.OutputStream;
+public enum AggregationMethod {
 
-public class TempStorage {
+    Sum(0),
+    Average(1),
+    SiteCount(2);
 
-    private String url;
-    private OutputStream outputStream;
+    private final int code;
 
-    public TempStorage(String url, OutputStream stream) {
-        this.url = url;
-        this.outputStream = stream;
+    private AggregationMethod(int code) {
+        this.code = code;
     }
 
-    /**
-     * @return the publicly-accessible URL for this temporary resource
-     */
-    public String getUrl() {
-        return url;
+    public final Integer code() {
+        return code;
     }
 
-    /**
-     * @return the output stream to which the contents of the file should be
-     * written. The stream MUST be closed by the caller.
-     */
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
 }

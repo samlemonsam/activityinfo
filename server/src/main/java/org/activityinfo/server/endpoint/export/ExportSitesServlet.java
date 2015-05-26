@@ -25,13 +25,11 @@ package org.activityinfo.server.endpoint.export;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.RetryOptions;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.tools.cloudstorage.*;
-import com.google.common.base.Strings;
-import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.server.generated.GeneratedResource;
+import org.activityinfo.server.generated.StorageProvider;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -39,9 +37,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.Channels;
-import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -54,17 +49,16 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class ExportSitesServlet extends HttpServlet {
-    public static final String X_AI_STORAGE_PROXY = "X-AI-Storage-Proxy";
-    private Provider<AuthenticatedUser> authenticatedUserProvider;
-    private SecureRandom random = new SecureRandom();
+    private final Provider<AuthenticatedUser> authenticatedUserProvider;
+    private final StorageProvider storageProvider;
 
     private static final Logger LOGGER = Logger.getLogger(ExportSitesServlet.class.getName());
     
     @Inject
-    public ExportSitesServlet(Provider<AuthenticatedUser> authenticatedUserProvider) {
+    public ExportSitesServlet(Provider<AuthenticatedUser> authenticatedUserProvider, StorageProvider storageProvider) {
         this.authenticatedUserProvider = authenticatedUserProvider;
+        this.storageProvider = storageProvider;
     }
-
 
     /**
      * Initiates an export to Excel task. A token is send back to the client as plain text
@@ -74,7 +68,7 @@ public class ExportSitesServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // Create a unique key from which the user can retrieve the file from GCS
-        String exportId = Long.toString(Math.abs(random.nextLong()), 16);
+        GeneratedResource export = storageProvider.create("application/vnd.ms-excel", fileName());
 
         TaskOptions options = TaskOptions.Builder.withUrl(ExportSitesTask.END_POINT);
         for(Map.Entry<String, String[]> entry : req.getParameterMap().entrySet()) {
@@ -82,71 +76,17 @@ public class ExportSitesServlet extends HttpServlet {
         }
         options.param("userId", Integer.toString(authenticatedUserProvider.get().getId()));
         options.param("userEmail", authenticatedUserProvider.get().getEmail());
-        options.param("exportId", exportId);
+        options.param("exportId", export.getId());
         options.param("filename", fileName());
         options.retryOptions(RetryOptions.Builder.withTaskRetryLimit(3));
 
         QueueFactory.getDefaultQueue().add(options);
 
-        LOGGER.info("Enqueued export with id " + exportId + " on behalf of " +
+        LOGGER.info("Enqueued export with id " + export.getId() + " on behalf of " +
             authenticatedUserProvider.get().getEmail());
         
         resp.setStatus(HttpServletResponse.SC_ACCEPTED);
-        resp.getOutputStream().print(exportId);
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        String exportId = req.getParameter("id");
-        
-        if(Strings.isNullOrEmpty(exportId)) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        // First determine whether the file is available
-        GcsService gcs = GcsServiceFactory.createGcsService();
-        GcsFilename fileName = new GcsFilename("activityinfo-generated", exportId);
-        GcsFileMetadata metadata = gcs.getMetadata(fileName);
-
-        if(metadata == null) {
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-
-        } else if(DeploymentEnvironment.isAppEngineDevelopment()) {
-            if("true".equals(req.getParameter("download"))) {
-                resp.setContentType(metadata.getOptions().getMimeType());
-                resp.setHeader("Content-Disposition", metadata.getOptions().getContentDisposition());
-                
-                GcsInputChannel readChannel = gcs.openReadChannel(fileName, 1024);
-                try(InputStream inputStream = Channels.newInputStream(readChannel)) {
-                    ByteStreams.copy(inputStream, resp.getOutputStream());
-                }
-            } else {
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getOutputStream().print("/ActivityInfo/export?id=" + exportId + "&download=true");
-            }
-        } else {
-            // First determine whether the file is available
-
-            GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
-            String url;
-            try {
-                url = signer.getSignedUrl("GET", ExportSitesTask.EXPORT_BUCKET_NAME + "/" + exportId);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to sign url", e);
-            }
-
-            // Workaround for the great embargo of 2014
-            // This will allow download links through our proxy instead of
-            // through google's network.
-            if(!Strings.isNullOrEmpty(req.getHeader(X_AI_STORAGE_PROXY))) {
-                url = url.replace("https://storage.googleapis.com", "http://" + req.getHeader(X_AI_STORAGE_PROXY));
-            }
-            
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getOutputStream().print(url);
-        }
+        resp.getOutputStream().print(export.getId());
     }
 
     private String fileName() {

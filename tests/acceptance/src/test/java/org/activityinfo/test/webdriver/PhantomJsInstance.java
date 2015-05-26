@@ -8,6 +8,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
@@ -16,12 +17,16 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Wraps a single PhantomJS process with its own home directory
  * to avoid errors due to local storage and AppCache filling up
  */
 public class PhantomJsInstance {
+    
+    private static final Logger LOGGER = Logger.getLogger(PhantomJsInstance.class.getName());
 
     public static final ConfigProperty PHANTOM_JS_PATH = new ConfigProperty("phantomjsPath", "PhantomJS binary path");
 
@@ -29,6 +34,7 @@ public class PhantomJsInstance {
     private WebDriver webDriver;
     private File logFile;
     private File localStoragePath = null;
+    private ProxyController proxyController;
     
     public PhantomJsInstance() {
         this.homeDir = Files.createTempDir();
@@ -53,6 +59,9 @@ public class PhantomJsInstance {
             if (homeDir != null) {
                 environment.put("HOME", homeDir.getAbsolutePath());
             }
+            
+            proxyController = new ProxyController();
+            proxyController.start();
 
             PhantomJSDriverService service = new PhantomJSDriverService.Builder()
                     .usingPhantomJSExecutable(PHANTOM_JS_PATH.getFile())
@@ -63,6 +72,7 @@ public class PhantomJsInstance {
                     .build();
 
             DesiredCapabilities capabilities = new DesiredCapabilities();
+            capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
 
             webDriver = new PhantomJSDriver(service, capabilities);
             webDriver.manage().window().setSize(new Dimension(1400, 1000));
@@ -82,5 +92,14 @@ public class PhantomJsInstance {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void stop() {
+        try {
+            proxyController.stop();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to shutdown proxy", e);
+        }
+        getWebDriver().quit();
     }
 }

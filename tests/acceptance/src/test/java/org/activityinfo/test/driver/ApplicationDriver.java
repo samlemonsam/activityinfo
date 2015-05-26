@@ -1,11 +1,13 @@
 package org.activityinfo.test.driver;
 
 
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
+import org.json.JSONException;
 
 import java.io.File;
 import java.util.List;
@@ -68,6 +70,11 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public void submitForm(String formName, String partner, List<MonthlyFieldValue> fieldValues) throws JSONException, Exception {
+        throw new PendingException();
+    }
+
+
     public void delete(ObjectType objectType, String name) throws Exception {
         throw new PendingException();
     }
@@ -105,13 +112,20 @@ public abstract class ApplicationDriver {
     }
 
     public DataTable pivotTable(String measure, List<String> rowDimensions) throws Exception {
+        return pivotTable(Lists.newArrayList(measure), rowDimensions);
+    }
+
+    public DataTable pivotTable(List<String> measure, List<String> rowDimensions) throws Exception {
         throw new PendingException();
     }
 
     public final void grantPermission(Property... properties) throws Exception {
         grantPermission(new TestObject(aliasTable, properties));
     }
-    
+
+    public DataTable drillDown(String cellValue) {
+        throw new PendingException();
+    }
 
     protected void grantPermission(TestObject permission) throws Exception {
         throw new PendingException();
@@ -154,8 +168,12 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public File exportForm(String formName) {
-        throw new UnsupportedOperationException();
+    public File exportForm(String formName) throws Exception {
+        throw new PendingException();
+    }
+    
+    public File exportDatabase(String databaseName) throws Exception {
+        throw new PendingException();
     }
 
     /**
@@ -176,6 +194,7 @@ public abstract class ApplicationDriver {
     public AliasTable getAliasTable() {
         return aliasTable;
     }
+
 
     public void cloneDatabase(TestObject testObject) {
         throw new PendingException();

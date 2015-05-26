@@ -3,18 +3,21 @@ package org.activityinfo.test.driver;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CountingOutputStream;
+import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -27,14 +30,22 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static java.lang.String.format;
+
+@ScenarioScoped
 public class ApiApplicationDriver extends ApplicationDriver {
 
     public static final Logger LOGGER = Logger.getLogger(ApiApplicationDriver.class.getName());
@@ -200,6 +211,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("name", form.getAlias());
         properties.put("databaseId", form.getId("database")); 
         properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC)));
+        properties.put("published", form.getInteger("published", 0)); // not published
         properties.put("classicView", form.getBoolean("classicView", true));
 
         switch (form.getString("reportingFrequency", "once")) {
@@ -241,6 +253,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("activityId", field.getId("form"));
             properties.put("type", field.getString("type"));
             properties.put("units", field.getString("units", "parsects"));
+            properties.put("aggregation", field.getInteger("aggregation", AggregationMethod.Sum.code()));
 
             // switch also server nameInExpression -> code
             properties.put("nameInExpression", field.getString("code", field.getAlias()));
@@ -267,7 +280,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("date2", "2014-02-01");  
         
         for(FieldValue value : values) {
-            switch (value.getField()) {
+            switch (value.getField().toLowerCase()) {
                 case "partner":
                     properties.put("partnerId", aliases.getId(value.getValue()));
                     break;
@@ -277,10 +290,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "location":
                     properties.put("locationId", aliases.getId(value.getValue()));
                     break;
-                case "fromDate":
+                case "fromdate":
                     properties.put("date1", value.getValue());
                     break;
-                case "toDate":
+                case "todate":
                     properties.put("date2", value.getValue());
                     break;
                 default:
@@ -290,11 +303,50 @@ public class ApiApplicationDriver extends ApplicationDriver {
             }
         }
 
+        executeCreateSite(properties);
+    }
+
+    @Override
+    public void submitForm(String formName, String partner, List<MonthlyFieldValue> fieldValues) throws Exception {
+        int activityId = aliases.getId(formName);
+        int siteId = aliases.generateId();
+
+        JSONObject properties = new JSONObject();
+        properties.put("activityId", activityId);
+        properties.put("id", siteId);
+        properties.put("locationId", queryNullaryLocationType(RDC));
+        properties.put("partnerId", aliases.getId(partner));
+        
+        executeCreateSite(properties);
+        
+        JSONArray changes = new JSONArray();
+        for (MonthlyFieldValue fieldValue : fieldValues) {
+            JSONObject month = new JSONObject();
+            month.put("month", fieldValue.getMonth());
+            month.put("year", fieldValue.getYear());
+            
+            JSONObject change = new JSONObject();
+            change.put("month", month);
+            change.put("indicatorId", aliases.getId(fieldValue.getField()));
+            change.put("value", Double.parseDouble(fieldValue.getValue()));
+            changes.put(changes.length(), change);
+        }
+        
+        JSONObject updateCommand = new JSONObject();
+        updateCommand.put("changes", changes);
+        updateCommand.put("siteId", siteId);
+        
+        executeCommand("UpdateMonthlyReports", updateCommand);
+    }
+
+
+    private void executeCreateSite(JSONObject properties) throws JSONException {
         JSONObject command = new JSONObject();
         command.put("properties", properties);
-    
+
         executeCommand("CreateSite", command);
     }
+
 
     @Override
     public void delete(ObjectType objectType, String name) throws Exception {
@@ -304,7 +356,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 executeDelete("UserDatabase", aliases.getId(name));
                 break;
             default:
-                throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
+                throw new IllegalArgumentException(format("Invalid object type '%s'", objectType));
         }
     }
 
@@ -412,7 +464,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         command.put("databaseId", aliases.getId(properties.getString("database")));
         command.put("model", model);
 
-        LOGGER.fine(String.format("Granting access to database '%s' [%d] to %s [%s] within %s [%d]",
+        LOGGER.fine(format("Granting access to database '%s' [%d] to %s [%s] within %s [%d]",
                 properties.getString("database"), command.getInt("databaseId"),
                 properties.getString("user"), email.getEmail(),
                 properties.getString("partner"), model.getInt("partnerId")));
@@ -485,6 +537,45 @@ public class ApiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    @Override
+    public File exportForm(String formName) throws Exception {
+        return export("filter=Activity+" + aliases.getId(formName));
+    }
+
+    @Override
+    public File exportDatabase(String databaseName) throws Exception {
+        return export("filter=Database+" + aliases.getId(databaseName));
+    }
+
+    private File export(String exportModel) throws Exception {
+        WebResource root = root();
+        String id = root.path("ActivityInfo").path("export")
+                .entity(exportModel, MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+                .post(String.class);
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        String downloadUri;
+        while(true) {
+            JSONObject status = new JSONObject(root.path("generated").path("status").path(id).get(String.class));
+            if(status.has("downloadUri")) {
+                downloadUri = status.getString("downloadUri");
+                break;
+            }
+            if(stopwatch.elapsed(TimeUnit.MINUTES) > 5) {
+                throw new AssertionError("Download timed out.");
+            }
+            
+            Thread.sleep(1000);
+        }
+
+        File file = File.createTempFile("export", ".xls");
+        try(InputStream inputStream = new URI(downloadUri).toURL().openStream()) {
+            ByteStreams.copy(inputStream, Files.asByteSink(file));
+        }
+
+        return file;
+    }
+
     private PendingId createEntityAndBindId(String entityType, JSONObject properties) throws JSONException {
 
         PendingId pendingId = createEntity(entityType, properties);
@@ -533,7 +624,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     throw new RuntimeException("Exception parsing locationType list", e);
                 }
 
-                throw new IllegalStateException(String.format("Country %d has no nullary location type: expected" +
+                throw new IllegalStateException(format("Country %d has no nullary location type: expected" +
                         " location type with name 'Country'", countryId));
             }
         });
@@ -589,7 +680,15 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .post(ClientResponse.class, json.toString());
         } catch (ClientHandlerException e) {
-            throw new Error("Post failed: " + e.getMessage(), e);
+            LOGGER.fine(format("Command %s failed: %s", json.getString("type"), e.getMessage()));
+            ERROR_RATE.markError();
+
+            if(retriesRemaining > 0) {
+                backoff();
+                return doCommand(json, retriesRemaining-1);
+            }
+            
+            throw new RuntimeException(format("Command %s failed: %s", json.getString("type"), e.getMessage()));
         }
         
         ClientResponse.Status status = response.getClientResponseStatus();
@@ -600,7 +699,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         } else {
             ERROR_RATE.markError();
 
-            LOGGER.fine(String.format("Command %s failed: %d %s", 
+            LOGGER.fine(format("Command %s failed: %d %s",
                     json.getString("type"), status.getStatusCode(), status.getReasonPhrase()));
             
             if (retriesRemaining > 0 &&
@@ -611,7 +710,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             
         
             String message = status.getStatusCode() + " " + status.getReasonPhrase();
-            if(response.getType().equals(MediaType.TEXT_PLAIN_TYPE)) {
+            if(MediaType.TEXT_PLAIN_TYPE.equals(response.getType())) {
                 message += ": " + response.getEntity(String.class);
             }
             
@@ -619,8 +718,16 @@ public class ApiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    private void backoff() {
+        try {
+            Thread.sleep(ThreadLocalRandom.current().nextInt(1000, 2000));
+        } catch (InterruptedException ignored) {
+            throw new RuntimeException("Interrupted");
+        }
+    }
 
-    public List<String> getSyncRegions() throws Exception {
+
+    public List<SyncRegion> getSyncRegions() throws Exception {
         Preconditions.checkState(currentUser != null, "Authentication required");
         
         flush();
@@ -634,19 +741,25 @@ public class ApiApplicationDriver extends ApplicationDriver {
         JSONObject response = new JSONObject(responseJson);
         
         JSONArray array = response.getJSONArray("list");
-        List<String> regions = Lists.newArrayList();
+        List<SyncRegion> regions = Lists.newArrayList();
         for(int i=0;i<array.length();++i) {
-            regions.add(array.getJSONObject(i).getString("id"));
+            regions.add(new SyncRegion(
+                    array.getJSONObject(i).getString("id"),
+                    array.getJSONObject(i).getString("currentVersion")));
         }
         
         return regions;
     }
     
-    public long fetchSyncRegion(String id) throws Exception {
+    public SyncUpdate fetchSyncRegion(String id, String version) throws Exception {
         Preconditions.checkState(currentUser != null, "Authentication required");
 
         JSONObject command = new JSONObject();
         command.put("regionPath", id);
+        
+        if(version != null) {
+            command.put("localVersion", version);
+        }
         
         JSONObject request = new JSONObject();
         request.put("type", "GetSyncRegionUpdates");
@@ -655,11 +768,15 @@ public class ApiApplicationDriver extends ApplicationDriver {
         ClientResponse response = doCommand(request, getRetryCount());
         
         // Read response to exercise server.. not sure if necessary
-        CountingOutputStream countingOutputStream = new CountingOutputStream(ByteStreams.nullOutputStream());
-        ByteStreams.copy(response.getEntityInputStream(), countingOutputStream);
+        String json = response.getEntity(String.class);
+        JSONObject update = new JSONObject(json);
         
-        return countingOutputStream.getCount();
+        SyncUpdate syncUpdate = new SyncUpdate();
+        syncUpdate.setByteCount(json.length());
+        syncUpdate.setComplete(update.getBoolean("complete"));
+        syncUpdate.setVersion(update.getString("version"));
         
+        return syncUpdate;
     }
     
     public void flush() throws JSONException {

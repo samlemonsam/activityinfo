@@ -41,6 +41,7 @@ public class SauceReporter implements SessionReporter {
         }
     }
 
+    @Override
     public void finished(Scenario scenario) {
 
 

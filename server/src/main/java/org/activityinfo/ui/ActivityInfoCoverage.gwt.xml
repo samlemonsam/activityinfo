@@ -26,8 +26,6 @@
   
   
   <!-- Compile to a single permutation -->
-  <set-property name="locale" value="en"/>
   <set-property name="user.agent" value="safari"/>
-  
 
 </module>

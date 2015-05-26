@@ -83,6 +83,10 @@ public class TestObject {
         return get(propertyName, String.class, defaultValue);
     }
 
+    public Integer getInteger(String propertyName, Integer defaultValue) {
+        return get(propertyName, Integer.class, defaultValue);
+    }
+
     public Boolean getBoolean(String propertyName, Boolean defaultValue) {
         return get(propertyName, Boolean.class, defaultValue);
     }

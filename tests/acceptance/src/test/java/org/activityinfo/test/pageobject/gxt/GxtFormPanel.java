@@ -32,6 +32,7 @@ public class GxtFormPanel extends Form {
     }
 
     
+    @Override
     public GxtField findFieldByLabel(String labelText) {
         try {
             return new GxtField(form.find().label(withText(labelText + ":")).ancestor().div(withClass("x-form-item")).first());
@@ -71,6 +72,7 @@ public class GxtFormPanel extends Form {
             this.element = element;
         }
 
+        @Override
         public String getLabel() {
             String label = this.element.find().label(withClass(ITEM_LABEL_CLASS)).first().text();
             if(label.endsWith(":")) {

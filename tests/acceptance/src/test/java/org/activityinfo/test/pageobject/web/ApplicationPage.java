@@ -18,6 +18,7 @@ import org.openqa.selenium.WebElement;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -84,7 +85,11 @@ public class ApplicationPage {
     }
 
     public void assertOfflineModeLoads() {
-        page.wait(5, MINUTES).until(new Predicate<WebDriver>() {
+        assertOfflineModeLoads(5, MINUTES);
+    }
+
+    public void assertOfflineModeLoads(int timeout, TimeUnit timeoutUnits) {
+        page.wait(timeout, timeoutUnits).until(new Predicate<WebDriver>() {
             
             private String lastStatus = "";
 

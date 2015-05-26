@@ -6,7 +6,6 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
-import org.activityinfo.test.driver.TableData;
 
 import java.util.List;
 
@@ -50,5 +49,10 @@ public class PivotTableEditor {
 
         GxtGrid grid = dataTable();
         return grid.extractData();
+    }
+
+    public DrillDownDialog drillDown(String cellText) {
+        dataTable().findCell(cellText).doubleClick();
+        return new DrillDownDialog(container);
     }
 }

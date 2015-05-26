@@ -170,6 +170,8 @@ subprojects {
                     details.useVersion jacksonVersion
                 } else if(details.requested.group == 'com.google.appengine') {
                     details.useVersion gaeVersion
+                } else if(details.requested.group == 'org.apache.poi' && details.requested.name == 'poi') {
+                    details.useVersion '3.12-beta1'
                 }
             }
         }

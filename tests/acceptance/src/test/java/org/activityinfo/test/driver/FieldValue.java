@@ -47,6 +47,11 @@ public class FieldValue {
         this.value = value;
     }
 
+
+    public void setValue(double value) {
+        this.value = Double.toString(value);
+    }
+
     public Object maybeNumberValue() {
         try {
             Matcher matcher = NUMBER_PATTERN.matcher(value);

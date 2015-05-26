@@ -9,6 +9,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URI;
@@ -20,6 +21,8 @@ import java.util.concurrent.TimeUnit;
  * Light-weight wrapper around WebDriver
  */
 public class FluentElement {
+
+    private static final int TIMEOUT_SECONDS = 90;
     
     private WebDriver webDriver;
     private WebElement element;
@@ -43,16 +46,13 @@ public class FluentElement {
     }
     
     public void clickWhenReady() {
-        waitUntil(new Predicate<WebDriver>() {
+        FluentWait<FluentElement> wait = new FluentWait<>(this);
+        wait.ignoring(WebDriverException.class);
+        wait.until(new Predicate<FluentElement>() {
             @Override
-            public boolean apply(WebDriver input) {
-                try {
-                    element().click();
-                    return true;
-                    
-                } catch (WebDriverException e) {
-                    return false;
-                }
+            public boolean apply(FluentElement input) {
+                input.click();
+                return true;
             }
         });
     }
@@ -68,7 +68,12 @@ public class FluentElement {
 
     public void click() {
         Actions actions = new Actions(webDriver);
-        actions.click(element()).perform();
+        actions.click(element).perform();
+    }
+
+    public void doubleClick() {
+        Actions actions = new Actions(webDriver);
+        actions.doubleClick(element).perform();
     }
 
     public WebElement element() {
@@ -77,23 +82,23 @@ public class FluentElement {
     }
 
     public void waitUntil(Predicate<WebDriver> predicate) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         wait.until(predicate);
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         wait.until(condition);
     }
 
     public FluentElement waitFor(By by) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
         return new FluentElement(webDriver, element);
     }
     
     public <T> T waitFor(Function<WebDriver, T> function) {
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
         return wait.until(function);
     }
     

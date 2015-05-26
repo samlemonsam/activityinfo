@@ -18,6 +18,7 @@ import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
+import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
@@ -116,10 +117,18 @@ public class UiApplicationDriver extends ApplicationDriver {
                     }
                     break;
                 case "Start Date":
-                    driver.fill(new LocalDate(2014, 1, 1));
+                    if (valueMap.containsKey("Start Date")) {
+                        driver.fill(LocalDate.parse(valueMap.get("Start Date").getValue()));
+                    } else {
+                        driver.fill(new LocalDate(2014, 1, 1));
+                    }
                     break;
                 case "End Date":
-                    driver.fill(new LocalDate(2014, 1, 1));
+                    if (valueMap.containsKey("End Date")) {
+                        driver.fill(LocalDate.parse(valueMap.get("End Date").getValue()));
+                    } else {
+                        driver.fill(new LocalDate(2014, 1, 1));
+                    }
                     break;
                 case "Comments":
                     if (valueMap.containsKey("comments")) {
@@ -179,6 +188,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     @Override
     public File exportForm(String formName) {
+        ensureLoggedIn();
+        
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
         
@@ -196,6 +207,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         return dataEntryTab.changes();
     }
 
+    @Override
     public DetailsEntry getDetails() {
         Preconditions.checkState(currentForm != null, "No current form");
 
@@ -288,21 +300,34 @@ public class UiApplicationDriver extends ApplicationDriver {
 
 
     @Override
-    public DataTable pivotTable(String measure, List<String> rowDimension) {
+    public DataTable pivotTable(List<String> measures, List<String> rowDimension) {
         ensureLoggedIn();
-        
+
         PivotTableEditor pivotTable = applicationPage
                 .navigateToReportsTab()
                 .createPivotTable();
-        
-        currentPage = pivotTable;
-        
 
-        pivotTable.selectMeasure(aliasTable.getAlias(measure));
+        currentPage = pivotTable;
+
+        for (String measure : measures) {
+            pivotTable.selectMeasure(aliasTable.getAlias(measure));
+        }
+
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
         return pivotTable.extractData();
     }
 
+    @Override
+    public DataTable drillDown(String cellValue) {
+        Preconditions.checkState(currentPage instanceof PivotTableEditor, "No pivot results. Please pivot data first before using drill down.");
+
+        PivotTableEditor pivotTable = (PivotTableEditor) currentPage;
+        DrillDownDialog drillDown = pivotTable.drillDown(cellValue);
+
+        DataTable dataTable = drillDown.table().waitUntilReloadedSilently().extractData(false);
+        drillDown.close();
+        return dataTable;
+    }
 
     @Override
     public void assertVisible(ObjectType objectType, boolean exists, TestObject testObject) {

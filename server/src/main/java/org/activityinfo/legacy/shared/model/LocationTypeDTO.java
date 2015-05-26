@@ -22,7 +22,7 @@ package org.activityinfo.legacy.shared.model;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.extjs.gxt.ui.client.data.BaseModelData;;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
@@ -76,6 +76,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("id", id);
     }
 
+    @Override
     @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public int getId() {
@@ -91,6 +92,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("name", value);
     }
 
+    @Override
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public String getName() {
         return get("name");

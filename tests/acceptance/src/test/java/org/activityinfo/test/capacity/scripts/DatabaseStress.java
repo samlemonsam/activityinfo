@@ -12,9 +12,14 @@ import java.util.Collection;
 public class DatabaseStress implements CapacityTestScript {
     @Override
     public Collection<Scenario> get() {
+        return Arrays.<Scenario>asList(
+                countryCoordination("Lebanon"));
+    }
+
+    private CoordinationScenario countryCoordination(String name) {
         int databaseCount = 11;
-        int partnerCount = 10;
+        int partnerCount = 100;
         int usersPerPartner = 10;
-        return Arrays.<Scenario>asList(new CoordinationScenario(databaseCount, partnerCount, usersPerPartner));
+        return new CoordinationScenario(name, databaseCount, partnerCount, usersPerPartner);
     }
 }
