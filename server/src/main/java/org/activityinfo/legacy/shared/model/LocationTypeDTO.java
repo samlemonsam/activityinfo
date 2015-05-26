@@ -22,7 +22,7 @@ package org.activityinfo.legacy.shared.model;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.data.BaseModelData;;
+import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
