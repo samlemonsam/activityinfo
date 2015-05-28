@@ -21,11 +21,14 @@ import java.net.URL;
 import static com.google.common.io.Resources.getResource;
 
 public class ResourceStoreStub implements ResourceStore {
-    
+
+    public static final ResourceId REGION_TARGET_ID = ResourceId.valueOf("E0000001379");
     public static final ResourceId COMMUNE_TARGET_ID = ResourceId.valueOf("E0000001511");
     
     public static final ResourceId COMMUNE_SOURCE_ID = ResourceId.valueOf("/mg/communes.shp");
-    
+    public static final ResourceId GADM_PROVINCE_SOURCE_ID = ResourceId.valueOf("/mg/MDG_adm2.shp");
+
+
     private final FeatureSourceCatalog featureSourceCatalog;
     private final CollectionCatalogStub testCatalog; 
     private final MergedCatalog catalog = new MergedCatalog();
@@ -33,6 +36,7 @@ public class ResourceStoreStub implements ResourceStore {
     public ResourceStoreStub() throws IOException {
         featureSourceCatalog = new FeatureSourceCatalog();
         addShapefile(COMMUNE_SOURCE_ID);
+        addShapefile(GADM_PROVINCE_SOURCE_ID);
         
         // Madagascar Admin Levels
         testCatalog = new CollectionCatalogStub();

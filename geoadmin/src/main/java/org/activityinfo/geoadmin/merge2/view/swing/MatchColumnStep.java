@@ -1,14 +1,14 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
-import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.geoadmin.merge2.view.ImportView;
 
 
 public class MatchColumnStep implements Step {
 
-    private final ImportModel store;
+    private final ImportView viewModel;
 
-    public MatchColumnStep(ImportModel store) {
-        this.store = store;
+    public MatchColumnStep(ImportView viewModel) {
+        this.viewModel = viewModel;
     }
 
     @Override
@@ -18,6 +18,6 @@ public class MatchColumnStep implements Step {
     
     @Override
     public MatchColumnPanel createView() {
-        return new MatchColumnPanel(store);
+        return new MatchColumnPanel(viewModel);
     }
 }

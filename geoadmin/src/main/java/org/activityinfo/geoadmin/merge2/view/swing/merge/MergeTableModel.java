@@ -1,10 +1,10 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
-import org.activityinfo.geoadmin.merge2.model.ImportModel;
-import org.activityinfo.geoadmin.merge2.view.model.MatchTable;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
+import org.activityinfo.geoadmin.merge2.view.ImportView;
+import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
+import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.observable.TableObserver;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -14,28 +14,39 @@ import java.util.List;
 public class MergeTableModel extends AbstractTableModel {
 
     private final Subscription subscription;
-    private List<MergeTableColumn> columns = new ArrayList<>();
+    private List<MatchTableColumn> columns = new ArrayList<>();
 
     private int rowCount = 200;
 
-    public MergeTableModel(ImportModel store) {
-        subscription = store.getRowMatching().subscribe(new Observer<MatchTable>() {
+    public MergeTableModel(ImportView view) {
+        final MatchTable matchTable = view.getMatchTable();
+        subscription = matchTable.subscribe(new TableObserver() {
             @Override
-            public void onChange(Observable<MatchTable> observable) {
-                if(observable.isLoading()) {
+            public void onRowsChanged() {
+                if (matchTable.isLoading()) {
                     rowCount = 0;
                 } else {
-                    rowCount = observable.get().getRowCount();
+                    rowCount = matchTable.getRowCount();
                 }
                 fireTableDataChanged();
+            }
+
+            @Override
+            public void onRowChanged(int index) {
+
             }
         });
     }
 
 
-    public void updateColumns(List<MergeTableColumn> columns) {
+    public void updateColumns(List<MatchTableColumn> columns) {
         this.columns = columns;
         fireTableStructureChanged();
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return columns.get(column).getHeader();
     }
 
     @Override
@@ -50,7 +61,10 @@ public class MergeTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        return columns.get(columnIndex).getValue(rowIndex);
+        if(columnIndex < columns.size()) {
+            return columns.get(columnIndex).getValue(rowIndex);
+        }
+        return null;
     }
 
     public void stop() {

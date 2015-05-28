@@ -4,7 +4,7 @@
              xmlns:a="urn:import:org.activityinfo.ui.client.widget"
              xmlns:f="urn:import:org.activityinfo.ui.client.widget.form">
 
-  <ui:import field="org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL" />
+  <ui:import sourceField="org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL" />
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
 
   <g:HTMLPanel width="100%" ui:field="panel" addStyleNames="form-horizontal">

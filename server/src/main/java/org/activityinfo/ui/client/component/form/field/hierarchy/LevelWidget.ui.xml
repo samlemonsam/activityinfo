@@ -4,7 +4,7 @@
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
 
-  <g:HTMLPanel styleName="field-element">
+  <g:HTMLPanel styleName="sourceField-element">
       <label class="control-label" ui:field="levelLabel"/>
       <g:ListBox ui:field="listBox" styleName="form-control"/>
       <a:CloseButton ui:field="clearButton" addStyleNames="clear-button"/>

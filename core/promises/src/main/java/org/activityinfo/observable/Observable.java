@@ -80,8 +80,18 @@ public abstract class Observable<T> {
      * @param <R> the type of the result returned by the given {@code function}
      * @return a new {@code Observable}
      */
-    public <R> Observable<R> transform(final Function<T, R> function) {
-        return new ObservableFunction<R>(this) {
+    public final <R> Observable<R> transform(final Function<T, R> function) {
+        return transform(SynchronousScheduler.INSTANCE, function);
+    }
+
+    /**
+     * Transforms this {@code Observable}'s using the given {@code function} 
+     * @param <R> the type of the result returned by the given {@code function}
+     * @param scheduler
+     *@param function a function that is applied to the current any subsequent value of this {@code Observable}  @return a new {@code Observable}
+     */
+    public final <R> Observable<R> transform(Scheduler scheduler, final Function<T, R> function) {
+        return new ObservableFunction<R>(scheduler, this) {
             @Override
             @SuppressWarnings("unchecked")
             protected R compute(Object[] arguments) {
@@ -90,9 +100,13 @@ public abstract class Observable<T> {
             }
         };
     }
-    
+
     public static <T, U, R> Observable<R> transform(Observable<T> t, Observable<U> u, final BiFunction<T, U, R> function) {
-        return new ObservableFunction<R>(t, u) {
+        return transform(SynchronousScheduler.INSTANCE, t, u, function);
+    }
+
+    public static <T, U, R> Observable<R> transform(Scheduler scheduler, Observable<T> t, Observable<U> u, final BiFunction<T, U, R> function) {
+        return new ObservableFunction<R>(scheduler, t, u) {
 
             @Override
             @SuppressWarnings("unchecked")

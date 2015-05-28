@@ -1,12 +1,14 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
+import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
+
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Provides a visual separation between the source and target columns
  */
-public class SeparatorColumn extends MergeTableColumn {
+public class SeparatorColumn extends MatchTableColumn {
     @Override
     public String getHeader() {
         return "";

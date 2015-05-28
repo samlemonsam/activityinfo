@@ -1,6 +1,7 @@
 package org.activityinfo.io.match.names;
 
 import com.google.common.collect.Lists;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -81,6 +82,16 @@ public class LatinPlaceNameScorerTest {
         System.out.println(score);
         assertThat(score, greaterThan(MINIMUM_SCORE));
     }
+    
+    @Test
+    @Ignore("merging not implemented yet")
+    public void joffreVille() {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+        assertThat(scorer.score("Joffre Ville", "Joffreville"), equalTo(1.0));
+        assertThat(scorer.score("Joffreville", "Joffre Ville"), equalTo(1.0));
+
+    }
+
 //
 //    @Test
 //    public void profileNames() throws IOException {

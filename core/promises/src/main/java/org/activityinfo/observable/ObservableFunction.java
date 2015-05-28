@@ -4,11 +4,15 @@ import com.google.common.base.Optional;
 
 public abstract class ObservableFunction<T> extends Observable<T> {
 
+    private Scheduler scheduler;
     private final Observable[] arguments;
     private final Subscription[] subscriptions;
     private Optional<T> value = Optional.absent();
     
-    protected ObservableFunction(Observable... arguments) {
+    private int lastUpdate = 0;
+    
+    protected ObservableFunction(Scheduler scheduler, Observable... arguments) {
+        this.scheduler = scheduler;
         this.arguments = arguments;
         this.subscriptions = new Subscription[arguments.length];
         computeValue();
@@ -33,22 +37,73 @@ public abstract class ObservableFunction<T> extends Observable<T> {
                 @Override
                 public void onChange(Observable observable) {
                     computeValue();
-                    ObservableFunction.this.fireChange();
                 }
             });
         }
     }
 
     private void computeValue() {
-        value = Optional.absent();
-        Object[] argumentValues = new Object[arguments.length];
-        for(int i=0;i<argumentValues.length;++i) {
-            if(arguments[i].isLoading()) {
-                return;
-            }
-            argumentValues[i] = arguments[i].get();
+
+        lastUpdate ++;
+        
+        /*
+         * Clear the current value, setting our state to "Loading..." and notify observers
+         */
+        if(value.isPresent()) {
+            value = Optional.absent();
+            ObservableFunction.this.fireChange();
         }
-        value = Optional.of(compute(argumentValues));
+        
+        final int thisUpdate = lastUpdate;
+        
+        /*
+         * Schedule the re-computation using our provided scheduler.
+         */
+        scheduler.schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                Object[] argumentValues = evaluateArguments();
+                
+                Optional<T> result;
+
+                if (argumentValues == null) {
+                    result = Optional.absent();
+                } else {
+                    result = Optional.of(compute(argumentValues));
+                }
+                
+                if(thisUpdate == lastUpdate) {
+                    if(result.isPresent()) {
+                        value = result;
+                        fireChange();
+                    } else {
+                        // if the result is "Loading", then only fire if this is a change.
+                        if(!isLoading()) {
+                            value = result;
+                            fireChange();
+                        }
+                    }
+                }
+            }
+
+            /**
+             * 
+             * @return an array of argument values, or {@code null} if any 
+             * of the arguments are loading.
+             */
+            private Object[] evaluateArguments() {
+                Object[] argumentValues = new Object[arguments.length];
+                for(int i=0;i<argumentValues.length;++i) {
+                    if(arguments[i].isLoading()) {
+                        return null;
+                    }
+                    argumentValues[i] = arguments[i].get();
+                }
+                return argumentValues;
+            }
+        });
+       
     }
 
     protected abstract T compute(Object[] arguments);

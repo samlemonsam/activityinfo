@@ -17,11 +17,15 @@ public class MockObserver<T> implements Observer<T> {
     }
 
     public void assertChangeFiredOnce() {
+        assertFired(1);
+    }
+
+    public void assertFired(int expectedCount) {
         if(changeCount == 0) {
             throw new AssertionError("onChange() has not been called.");
         }
-        if(changeCount > 1) {
-            throw new AssertionError("onChange() was called " + changeCount + " times");
+        if(changeCount != expectedCount) {
+            throw new AssertionError("onChange() was called " + changeCount + " times, expected " + expectedCount);
         }
         changeCount = 0;
     }

@@ -1,19 +1,21 @@
 package org.activityinfo.observable;
 
+import com.google.common.base.Preconditions;
+
 public class StatefulValue<T> extends Observable<T> {
     
-    private boolean loading = true;
     private T value;
     
     @Override
     public boolean isLoading() {
-        return loading;
+        return value == null;
     }
 
     /**
      * Updates the reference to this state's value and notifies subscribers.
      */
     public void updateValue(T value) {
+        Preconditions.checkNotNull(value, "value cannot be null");
         this.value = value;
         fireChange();
     }
@@ -26,16 +28,15 @@ public class StatefulValue<T> extends Observable<T> {
     }
     
     public void clear() {
-        if(!loading) {
+        if(value != null) {
             value = null;
-            loading = true;
             fireChange();
         };
     }
 
     @Override
     public T get() {
-        if(loading) {
+        if(value == null) {
             throw new IllegalStateException();
         }
         return value;

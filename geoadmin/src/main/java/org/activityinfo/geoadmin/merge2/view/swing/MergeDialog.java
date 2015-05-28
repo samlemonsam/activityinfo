@@ -1,6 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.store.ResourceStore;
 import org.activityinfo.store.ResourceStoreImpl;
 import org.activityinfo.geoadmin.merge2.view.swing.merge.MergeStep;
@@ -22,15 +23,15 @@ public class MergeDialog extends JFrame {
     
     private java.util.List<Step> steps;
 
-    public MergeDialog(ImportModel store) {
+    public MergeDialog(ImportView viewModel) {
         super("Merge");
         setSize(650, 350);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         steps = new ArrayList<>();
-        steps.add(new MatchColumnStep(store));
-        steps.add(new MergeStep(store));
+        steps.add(new MatchColumnStep(viewModel));
+        steps.add(new MergeStep(viewModel));
         
         stepPanel = new JPanel(new BorderLayout());
         
@@ -74,7 +75,9 @@ public class MergeDialog extends JFrame {
                 ResourceId.valueOf("file:///home/alex/dev/activityinfo-beta/geoadmin/src/test/resources/mg/communes.shp"),
                 CuidAdapter.adminLevelFormClass(1511));
         
-        MergeDialog dialog = new MergeDialog(modelStore);
+        ImportView viewModel = new ImportView(resourceStore, modelStore);
+        
+        MergeDialog dialog = new MergeDialog(viewModel);
         dialog.setVisible(true);
         
     }

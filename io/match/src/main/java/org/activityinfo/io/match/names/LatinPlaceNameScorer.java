@@ -183,7 +183,7 @@ public class LatinPlaceNameScorer {
                 int rightLength = right.charCount(rightPart);
 
                 // we use the minimum length of the word as the weight
-                // to inflating short words that match longer words because
+                // to avoid inflating short words that match longer words because
                 // of lots of vowels
                 int minLength = Math.min(leftLength, rightLength);
                 numerator += score * (double)minLength;

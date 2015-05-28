@@ -41,11 +41,6 @@ public class ObservableStub<T> extends Observable<T> {
     }
 
     @Override
-    public <R> Observable<R> transform(Function<T, R> function) {
-        return super.transform(function);
-    }
-
-    @Override
     public boolean isLoading() {
         return loading;
     }

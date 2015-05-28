@@ -1,11 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
-import org.activityinfo.geoadmin.merge2.model.ImportModel;
-import org.activityinfo.geoadmin.merge2.view.model.FormMapping;
-import org.activityinfo.geoadmin.merge2.view.model.SourceFieldMapping;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
+import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.observable.Subscription;
 
 import javax.swing.*;
@@ -17,19 +12,18 @@ public class MatchColumnPanel extends StepPanel {
     private java.awt.List sourceList;
     private java.awt.List targetList;
     
-    private java.util.List<Subscription> subscriptions;
     private JLabel sourceHeader;
     private JLabel targetHeader;
     private Subscription sourceSubscription;
     private Subscription targetSubscription;
 
-    public MatchColumnPanel(ImportModel modelStore) {
+    public MatchColumnPanel(ImportView viewModel) {
         setLayout(new GridBagLayout());
 
         addStepTitle();
         addStepDescription();
-        addSourceList(modelStore);
-        addTargetList(modelStore);
+        addSourceList(viewModel);
+        addTargetList(viewModel);
 
         validate();
         
@@ -57,7 +51,7 @@ public class MatchColumnPanel extends StepPanel {
         add(description, constraints);
     }
 
-    private void addSourceList(ImportModel modelStore) {
+    private void addSourceList(ImportView viewModel) {
         sourceHeader = new JLabel();
         add(sourceHeader, constraints(0, 2));
 
@@ -70,23 +64,23 @@ public class MatchColumnPanel extends StepPanel {
 
         add(sourceList, listConstraints);
         
-        sourceSubscription = modelStore.getFieldMapping().subscribe(new Observer<FormMapping>() {
-            @Override
-            public void onChange(Observable<FormMapping> mapping) {
-                if(mapping.isLoading()) {
-                    sourceHeader.setText("Loading...");
-                    sourceList.removeAll();
-                } else {
-                    sourceHeader.setText(mapping.get().getSource().getLabel());
-                    for (SourceFieldMapping fieldMapping : mapping.get().getMappings()) {
-                        sourceList.add(fieldMapping.toString());
-                    }
-                }
-            }
-        });
+//        sourceSubscription = viewModel.getFieldMapping().subscribe(new Observer<FormMapping>() {
+//            @Override
+//            public void onChange(Observable<FormMapping> mapping) {
+//                if(mapping.isLoading()) {
+//                    sourceHeader.setText("Loading...");
+//                    sourceList.removeAll();
+//                } else {
+////                    sourceHeader.setText(mapping.get().getSource().getLabel());
+////                    for (SourceFieldMapping fieldMapping : mapping.get().getMappings()) {
+////                        sourceList.add(fieldMapping.toString());
+////                    }
+//                }
+//            }
+//        });
     }
 
-    private void addTargetList(ImportModel modelStore) {
+    private void addTargetList(ImportView modelStore) {
         
         targetHeader = new JLabel();
         add(targetHeader, constraints(2, 2));
@@ -99,20 +93,20 @@ public class MatchColumnPanel extends StepPanel {
         targetList = new List();
         add(targetList, listConstraints);
 
-        targetSubscription = modelStore.getTargetTree().subscribe(new Observer<FormTree>() {
-            @Override
-            public void onChange(Observable<FormTree> formTree) {
-                if(formTree.isLoading()) {
-                    targetHeader.setText("Loading...");
-                    targetList.removeAll();
-                } else {
-                    targetHeader.setText(formTree.get().getRootFormClass().getLabel());
-                    for (FormTree.Node node : formTree.get().getLeaves()) {
-                        targetList.add(node.debugPath());
-                    }
-                }
-            }
-        });
+//        targetSubscription = modelStore.getTargetTree().subscribe(new Observer<FormTree>() {
+//            @Override
+//            public void onChange(Observable<FormTree> formTree) {
+//                if(formTree.isLoading()) {
+//                    targetHeader.setText("Loading...");
+//                    targetList.removeAll();
+//                } else {
+//                    targetHeader.setText(formTree.get().getRootFormClass().getLabel());
+//                    for (FormTree.Node node : formTree.get().getLeaves()) {
+//                        targetList.add(node.debugPath());
+//                    }
+//                }
+//            }
+//        });
     }
 
     private GridBagConstraints constraints(int x, int y) {

@@ -16,10 +16,6 @@ public class StatefulSet<T> extends ObservableSet<T> {
         return false;
     }
 
-    @Override
-    public Set<T> get() {
-        return Collections.unmodifiableSet(set);
-    }
     
     public void add(T element) {
         boolean added = set.add(element);

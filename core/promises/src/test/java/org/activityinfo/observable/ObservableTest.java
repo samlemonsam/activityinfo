@@ -38,7 +38,9 @@ public class ObservableTest {
     @Test
     public void transform() {
         ObservableStub<Integer> number = new ObservableStub<>();
-        Observable<Integer> twice = number.transform(new Function<Integer, Integer>() {
+        SchedulerStub scheduler = new SchedulerStub();
+
+        Observable<Integer> twice = number.transform(scheduler, new Function<Integer, Integer>() {
             @Override
             public Integer apply(Integer input) {
                 return input * 2;
@@ -51,9 +53,15 @@ public class ObservableTest {
 
         assertTrue(number.isLoading());
         assertTrue(twice.isLoading());
-        
-        number.updateValue(42);
 
+        // When we update the source value, the calculated value should
+        // remain in the loading state but enqueue the recomputation
+        number.updateValue(42);
+        assertTrue(twice.isLoading());
+
+        // When then the scheduler runs, the value should be recomputed and 
+        // the observer notified with the resulting value
+        scheduler.runAll();        
         twiceObserver.assertChangeFiredOnce();
         assertFalse(twice.isLoading());
         assertThat(twice.get(), equalTo(42 * 2));
@@ -62,7 +70,15 @@ public class ObservableTest {
         twiceObserver.assertChangeFiredOnce();
         assertTrue(twice.isLoading());
 
+        // When the value is changed, we expect the computed value
+        // to REMAIN in the loading state, so no change is fired
         number.updateValue(13);
+        twiceObserver.assertChangeNotFired();
+        assertTrue(twice.isLoading());
+        
+        // ... and when the scheduler runs, the change event
+        // is fired upon recalculation
+        scheduler.runAll();
         twiceObserver.assertChangeFiredOnce();
         assertFalse(twice.isLoading());
         assertThat(twice.get(), equalTo(13 * 2));

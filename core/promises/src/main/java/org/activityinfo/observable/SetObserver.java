@@ -11,7 +11,9 @@ import java.util.Set;
  * @param <T>
  *          the type of item the Observer expects to observe
  */
-public interface SetObserver<T> extends Observer<Set<T>> {
+public interface SetObserver<T> {
+    
+    void onChange();
     
     void onElementAdded(T element);
     
