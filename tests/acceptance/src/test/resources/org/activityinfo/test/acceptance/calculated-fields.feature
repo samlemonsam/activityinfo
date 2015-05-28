@@ -4,6 +4,7 @@ Feature: Calculated fields
   Background:
     Given I have created a database "RRMP"
     And I have added partner "NRC" to "RRMP"
+    And I have added partner "UPS" to "RRMP"
     And I have created a form named "NFI Distribution"
 
   @AI-991
@@ -94,3 +95,71 @@ Feature: Calculated fields
     Then drill down on "280" should yield:
       | NRC      | RDC  | 2014-07-21 | | 110   |
       | NRC      | RDC  | 2014-05-21 | | 450   |
+
+  @AI-1082
+  Scenario: Calculated indicators pivoted by Partner.
+    Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
+    And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
+    And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
+    And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | NRC        |
+      | i1         | 300        |
+      | i2         | 150        |
+      | Start Date | 2014-05-21 |
+      | End Date   | 2014-05-21 |
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | NRC        |
+      | i1         | 300        |
+      | i2         | 150        |
+      | Start Date | 2014-05-21 |
+      | End Date   | 2014-05-21 |
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | UPS        |
+      | i1         | 100        |
+      | i2         | 10         |
+      | Start Date | 2014-07-21 |
+      | End Date   | 2014-07-21 |
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | UPS        |
+      | i1         | 10         |
+      | i2         | 2          |
+      | Start Date | 2014-10-21 |
+      | End Date   | 2014-10-21 |
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | NRC        |
+      | i1         | 4          |
+      | i2         | 20         |
+      | Start Date | 2015-05-21 |
+      | End Date   | 2015-05-21 |
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | UPS        |
+      | i1         | 5          |
+      | i2         | 50         |
+      | Start Date | 2015-07-21 |
+      | End Date   | 2015-07-21 |
+    And I submit a "NFI Distribution" form with:
+      | field      | value      |
+      | partner    | NRC        |
+      | i1         | 7          |
+      | i2         | 0          |
+      | Start Date | 2016-07-21 |
+      | End Date   | 2016-07-21 |
+    Then aggregating the indicators percent by Partner and Year should yield:
+      |         | 2014  | 2015 | 2016 |
+      | NRC     | 700   | 20   | NaN  |
+      | UPS     | 1,000 | 10   |      |
+    Then aggregating the indicators plus by Partner and Year should yield:
+      |         | 2014  | 2015 | 2016 |
+      | NRC     | 231   | 24   | 3.5  |
+      | UPS     | 110   | 55   |      |
+    Then aggregating the indicators plus and percent by Partner and Year should yield:
+      |         | 2014  | 2015 | 2016 |
+      | NRC     | 1162  | 44   | 7    |
+      | UPS     | 1110  | 65   |      |

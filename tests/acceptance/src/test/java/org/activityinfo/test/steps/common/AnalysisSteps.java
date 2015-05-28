@@ -49,6 +49,6 @@ public class AnalysisSteps {
     @Then("^drill down on \"([^\"]*)\" should yield:$")
     public void drill_down_on_should_yield(String cellValue, DataTable expected) throws Throwable {
         DataTable actual = driver.drillDown(cellValue);
-        expected.diff(aliasTable.deAlias(actual));
+        expected.unorderedDiff(aliasTable.deAlias(actual));
     }
 }

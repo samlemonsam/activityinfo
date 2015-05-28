@@ -19,6 +19,7 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.content.SimpleCategory;
+import org.activityinfo.legacy.shared.reports.content.TargetCategory;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
@@ -295,40 +296,26 @@ public class CalculatedIndicatorsQuery implements WorkItem {
 
     private void aggregateSites(SiteResult result) {
 
-
-        Map<BucketKey, Bucket> buckets = Maps.newHashMap();
-
-        for(int i=0;i!=result.getTotalLength();++i) {
+        for (int i = 0; i != result.getTotalLength(); ++i) {
             SiteDTO site = result.getData().get(i);
 
-            // These dimensions apply to the site as a whole
-            DimensionCategory siteDims[] = new DimensionCategory[dimAccessors.size()];
-            for (int j = 0; j != dimAccessors.size(); ++j) {
-                siteDims[j] = dimAccessors.get(j).getCategory(site);
-            }
-
             // Now loop over each value
-            for(EntityCategory indicator : indicatorMap.values()) {
+            for (EntityCategory indicator : indicatorMap.values()) {
                 Double value = site.getIndicatorDoubleValue(indicator.getId());
 
-                if(value != null) {
-                    BucketKey key = new BucketKey(indicator, siteDims);
-                    Bucket bucket = buckets.get(key);
-                    if (bucket == null) {
-                        bucket = new Bucket();
-                        bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));
-                        bucket.setCategory(INDICATOR_DIM, indicator);
-                        for (int j = 0; j != dimAccessors.size(); ++j) {
-                            bucket.setCategory(dimAccessors.get(j).getDimension(), siteDims[j]);
-                        }
-                        buckets.put(key, bucket);
-                        queryContext.addBucket(bucket);
+                if (value != null) {
+
+                    Bucket bucket = new Bucket(value);
+                    bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));
+
+                    bucket.setCategory(new Dimension(DimensionType.Target), TargetCategory.REALIZED);
+                    for (int j = 0; j != dimAccessors.size(); ++j) {
+                        bucket.setCategory(dimAccessors.get(j).getDimension(), dimAccessors.get(j).getCategory(site));
                     }
-                    bucket.appendValue(value);
+                    queryContext.addBucket(bucket);
                 }
             }
         }
-
     }
 
 }
