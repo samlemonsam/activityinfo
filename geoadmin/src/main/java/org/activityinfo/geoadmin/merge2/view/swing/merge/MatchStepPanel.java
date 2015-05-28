@@ -1,8 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
 
-import org.activityinfo.geoadmin.merge2.model.ImportModel;
-import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.match.MatchRow;
@@ -26,10 +24,11 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public class MergePanel extends StepPanel {
+public class MatchStepPanel extends StepPanel {
 
     public static final String LOADING_COMPONENT = "loading";
     public static final String TABLE_COMPONENT = "table";
+    
     private ImportView viewModel;
 
     private final MergeTableModel tableModel;
@@ -38,7 +37,7 @@ public class MergePanel extends StepPanel {
     private final SubscriptionSet subscriptions = new SubscriptionSet();
     private List<MatchTableColumn> columns;
 
-    public MergePanel(ImportView view) {
+    public MatchStepPanel(ImportView view) {
         this.viewModel = view;
         
         setLayout(new BorderLayout());
@@ -180,23 +179,6 @@ public class MergePanel extends StepPanel {
 //   //     tableHeader.setReorderingAllowed(false);
 //        table.setTableHeader(tableHeader);
 
-    }
-
-    private TableColumnModel buildColumnModel(List<MatchTableColumn> columns) {
-        DefaultTableColumnModel model = new DefaultTableColumnModel();
-        for (int i = 0; i < columns.size(); i++) {
-            MatchTableColumn column = columns.get(i);
-            TableColumn tableColumn = new TableColumn(i);
-            tableColumn.setHeaderValue(column.getHeader());
-//            tableColumn.setCellRenderer(new MergeColumnRenderer(column));
-//            tableColumn.setResizable(true);
-//            tableColumn.setResizable(column.isResizable());
-//            if(column.getWidth() > 0) {
-//                tableColumn.setWidth(column.getWidth());
-//            }
-            model.addColumn(tableColumn);
-        }
-        return model;
     }
 
 

@@ -2,12 +2,12 @@ package org.activityinfo.geoadmin.merge2.view.swing;
 
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
-import org.activityinfo.store.ResourceStore;
-import org.activityinfo.store.ResourceStoreImpl;
-import org.activityinfo.geoadmin.merge2.view.swing.merge.MergeStep;
+import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchStep;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.ResourceStore;
+import org.activityinfo.store.ResourceStoreImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +30,7 @@ public class MergeDialog extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         steps = new ArrayList<>();
-        steps.add(new MatchColumnStep(viewModel));
-        steps.add(new MergeStep(viewModel));
+        steps.add(new MatchStep(viewModel));
         
         stepPanel = new JPanel(new BorderLayout());
         

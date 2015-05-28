@@ -1,8 +1,6 @@
 package org.activityinfo.observable;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Encapsulates model state represented as a set

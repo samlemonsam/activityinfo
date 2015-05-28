@@ -1,16 +1,15 @@
 package org.activityinfo.geoadmin.merge2.view.swing.merge;
 
-import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.swing.Step;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
 
-public class MergeStep implements Step {
+public class MatchStep implements Step {
 
 
     private final ImportView viewModel;
 
-    public MergeStep(ImportView viewModel) {
+    public MatchStep(ImportView viewModel) {
         this.viewModel = viewModel;
     }
 
@@ -21,6 +20,6 @@ public class MergeStep implements Step {
 
     @Override
     public StepPanel createView() {
-        return new MergePanel(viewModel);
+        return new MatchStepPanel(viewModel);
     }
 }
