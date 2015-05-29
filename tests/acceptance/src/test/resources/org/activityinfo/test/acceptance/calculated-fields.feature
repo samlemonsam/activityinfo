@@ -2,9 +2,9 @@
 Feature: Calculated fields
 
   Background:
-    Given I have created a database "A"
-    And I have added partner "NRC" to "A"
-    And I have added partner "UPS" to "A"
+    Given I have created a database "RRMP"
+    And I have added partner "NRC" to "RRMP"
+    And I have added partner "UPS" to "RRMP"
     And I have created a form named "NFI Distribution"
 
   @AI-991
