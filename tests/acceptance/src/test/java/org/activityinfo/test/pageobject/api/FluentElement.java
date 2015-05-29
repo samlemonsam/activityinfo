@@ -92,7 +92,11 @@ public class FluentElement {
     }
 
     public FluentElement waitFor(By by) {
-        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+        return waitFor(by, TIMEOUT_SECONDS);
+    }
+
+    public FluentElement waitFor(By by, int timeout) {
+        WebDriverWait wait = new WebDriverWait(webDriver, timeout);
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
         return new FluentElement(webDriver, element);
     }

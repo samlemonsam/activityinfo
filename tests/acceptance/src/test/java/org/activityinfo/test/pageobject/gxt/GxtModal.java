@@ -23,6 +23,10 @@ public class GxtModal extends ModalDialog {
         this.windowElement = parent.root().waitFor(By.className(CLASS_NAME));
     }
 
+    public GxtModal(FluentElement parent, int timeout) {
+        this.windowElement = parent.root().waitFor(By.className(CLASS_NAME), timeout);
+    }
+
     public FluentElement getWindowElement() {
         return windowElement;
     }
@@ -40,7 +44,15 @@ public class GxtModal extends ModalDialog {
     }
 
     public void close() {
-        windowElement.find().button(XPathBuilder.withText("Close")).clickWhenReady();
+        clickButton("Close");
+    }
+
+    public void discardChanges() {
+        clickButton("Discard Changes");
+    }
+
+    public void clickButton(String buttonLabel) {
+        windowElement.find().button(XPathBuilder.withText(buttonLabel)).clickWhenReady();
     }
 
     @Override
