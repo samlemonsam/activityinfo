@@ -108,6 +108,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
 
                 } else {
 
+                    boolean hasSumAggregation = false;
                     for (SqlResultSetRow row : results.getRows()) {
                         int activityId = row.getInt("activityId");
                         int indicatorId = row.getInt("indicatorId");
@@ -128,6 +129,17 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                                 row.getString("indicatorName"),
                                 row.getInt("indicatorOrder")));
                         indicatorAggregationMap.put(indicatorId, row.getInt("aggregation"));
+
+                        if (!hasSumAggregation) {
+                            hasSumAggregation = row.getInt("aggregation") == 0;
+                        }
+                    }
+
+                    // set aggregation to Sum for all indicators if at least one indicator has different aggregation
+                    if (hasSumAggregation) {
+                        for (Map.Entry<Integer, Integer> entry : indicatorAggregationMap.entrySet()) {
+                            entry.setValue(0); // set to Sum
+                        }
                     }
 
                     if (queryContext.getCommand().isPivotedBy(DimensionType.AttributeGroup)) {

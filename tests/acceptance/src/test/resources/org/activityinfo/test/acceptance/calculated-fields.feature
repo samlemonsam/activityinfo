@@ -2,9 +2,9 @@
 Feature: Calculated fields
 
   Background:
-    Given I have created a database "RRMP"
-    And I have added partner "NRC" to "RRMP"
-    And I have added partner "UPS" to "RRMP"
+    Given I have created a database "A"
+    And I have added partner "NRC" to "A"
+    And I have added partner "UPS" to "A"
     And I have created a form named "NFI Distribution"
 
   @AI-991
@@ -111,13 +111,6 @@ Feature: Calculated fields
       | End Date   | 2014-05-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
-      | partner    | NRC        |
-      | i1         | 300        |
-      | i2         | 150        |
-      | Start Date | 2014-05-21 |
-      | End Date   | 2014-05-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
       | partner    | UPS        |
       | i1         | 100        |
       | i2         | 10         |
@@ -125,7 +118,7 @@ Feature: Calculated fields
       | End Date   | 2014-07-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
-      | partner    | UPS        |
+      | partner    | NRC        |
       | i1         | 10         |
       | i2         | 2          |
       | Start Date | 2014-10-21 |
@@ -153,13 +146,17 @@ Feature: Calculated fields
       | End Date   | 2016-07-21 |
     Then aggregating the indicators percent by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
-      | NRC     | 700   | 20   | NaN  |
+      | NRC     | 700   | 20   | ∞   |
       | UPS     | 1,000 | 10   |      |
     Then aggregating the indicators plus by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
-      | NRC     | 231   | 24   | 3.5  |
+      | NRC     | 231   | 24   | 7    |
       | UPS     | 110   | 55   |      |
+    Then aggregating the indicators i1 and plus by Partner and Year should yield:
+      |         | 2014 | 2015 | 2016 |
+      | NRC     | 772  | 28   | 14   |
+      | UPS     | 210  | 60   |      |
     Then aggregating the indicators plus and percent by Partner and Year should yield:
-      |         | 2014  | 2015 | 2016 |
-      | NRC     | 1162  | 44   | 7    |
-      | UPS     | 1110  | 65   |      |
+      |         | 2014   | 2015 | 2016 |
+      | NRC     | 1,162  | 44   | ∞   |
+      | UPS     | 1,110  | 65   |      |
