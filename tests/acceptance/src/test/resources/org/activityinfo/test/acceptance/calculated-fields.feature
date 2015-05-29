@@ -14,6 +14,7 @@ Feature: Calculated fields
     And I have created a calculated field "c" in "NFI Distribution" with expression "{a}/{b}"
     When I submit a "NFI Distribution" form with:
       | field              | value           |
+      | partner            | NRC             |
       | a                  | 1               |
       | b                  | 2               |
     Then the submission's detail shows:
@@ -44,14 +45,17 @@ Feature: Calculated fields
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({helmet}/{total})*100" with aggregation "Average"
     And I submit a "NFI Distribution" form with:
       | field      | value  |
+      | partner    | NRC    |
       | total      | 300    |
       | withHelmet | 150    |
     And I submit a "NFI Distribution" form with:
       | field      | value  |
+      | partner    | NRC    |
       | total      | 500    |
       | withHelmet | 50     |
     And I submit a "NFI Distribution" form with:
       | field      | value  |
+      | partner    | NRC    |
       | total      | 100    |
       | withHelmet | 90     |
     Then aggregating the indicator "percent" by Indicator should yield:
@@ -66,33 +70,37 @@ Feature: Calculated fields
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 300        |
       | i2         | 150        |
       | Start Date | 2014-05-21 |
       | End Date   | 2014-05-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 100        |
       | i2         | 10         |
       | Start Date | 2014-07-21 |
       | End Date   | 2014-07-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 4          |
       | i2         | 20         |
       | Start Date | 2015-05-21 |
       | End Date   | 2015-05-21 |
     And I submit a "NFI Distribution" form with:
       | field      | value      |
+      | partner    | NRC        |
       | i1         | 5          |
       | i2         | 50         |
       | Start Date | 2015-07-21 |
       | End Date   | 2015-07-21 |
     Then aggregating the indicators plus and percent by Indicator and Year should yield:
       |                  | 2014  | 2015 |
-      | plus             | 280   | 39.5 |
+      | plus             | 560   | 79   |
       | percent          | 1,200 | 30   |
-    Then drill down on "280" should yield:
+    Then drill down on "560" should yield:
       | NRC      | RDC  | 2014-07-21 | | 110   |
       | NRC      | RDC  | 2014-05-21 | | 450   |
 
