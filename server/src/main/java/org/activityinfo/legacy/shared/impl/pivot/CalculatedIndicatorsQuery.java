@@ -309,6 +309,9 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                     bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));
 
                     bucket.setCategory(new Dimension(DimensionType.Target), TargetCategory.REALIZED);
+                    if (query.isPivotedBy(DimensionType.Indicator)) {
+                        bucket.setCategory(new Dimension(DimensionType.Indicator), new EntityCategory(indicator.getId()));
+                    }
                     for (int j = 0; j != dimAccessors.size(); ++j) {
                         bucket.setCategory(dimAccessors.get(j).getDimension(), dimAccessors.get(j).getCategory(site));
                     }
