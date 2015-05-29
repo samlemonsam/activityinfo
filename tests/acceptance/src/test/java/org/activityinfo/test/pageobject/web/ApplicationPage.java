@@ -8,6 +8,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
@@ -143,8 +144,19 @@ public class ApplicationPage {
     public ReportsTab navigateToReportsTab() {
         FluentElement container = container();
         container.find().div(withText("Reports")).clickWhenReady();
+
+        // we may got "Save" dialog before leaving the current page
+        closeSaveDialogSilently();
         
         return new ReportsTab(container);
+    }
+
+    public void closeSaveDialogSilently() {
+        try {
+            new GxtModal(page, 2).discardChanges();
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     private FluentElement container() {
