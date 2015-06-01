@@ -14,9 +14,12 @@ import java.sql.SQLException;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class AttributeBuffer implements ValueBuffer {
 
+    private static final Logger LOGGER = Logger.getLogger(AttributeBuffer.class.getName());
+    
     private final CursorObserver<FieldValue> observer;
     private BitSet bitSet = new BitSet();
     private List<EnumValue> values = Lists.newArrayList();
@@ -36,8 +39,12 @@ public class AttributeBuffer implements ValueBuffer {
         if(value) {
             int id = rs.getInt(ATTRIBUTE_ID_COLUMN);
             if (!rs.wasNull()) {
-                int index = attributeMap.get(id);
-                bitSet.set(index);
+                Integer index = attributeMap.get(id);
+                if(index == null) {
+                    LOGGER.info("Unknown attribute " + id);
+                } else {
+                    bitSet.set(index);
+                }
             }
         }
     }

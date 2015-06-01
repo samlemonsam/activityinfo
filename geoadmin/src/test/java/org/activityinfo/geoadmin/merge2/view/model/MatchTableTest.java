@@ -6,10 +6,10 @@ import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.state.ResourceStoreStub;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
-import org.activityinfo.geoadmin.merge2.view.match.FormMapping;
+import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
-import org.activityinfo.geoadmin.merge2.view.match.ReferenceColumn;
+import org.activityinfo.geoadmin.merge2.view.match.UnmatchedColumn;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.TableObserver;
@@ -63,8 +63,8 @@ public class MatchTableTest {
         dump(matchTable);
     }
     
-    public void dump(FormMapping formMapping) {
-        for (Map.Entry<FieldProfile, FieldProfile> mapping : formMapping.asMap().entrySet()) {
+    public void dump(FieldMatching fieldMatching) {
+        for (Map.Entry<FieldProfile, FieldProfile> mapping : fieldMatching.asMap().entrySet()) {
             System.out.println(mapping.getKey() + " -> " + mapping.getValue());
         }
     }
@@ -77,7 +77,7 @@ public class MatchTableTest {
         System.out.print(formatCol("sourceId"));
         System.out.print(formatCol("targetId"));
         for (MatchTableColumn column : columns) {
-            if(!(column instanceof ReferenceColumn)) {
+            if(!(column instanceof UnmatchedColumn)) {
                 System.out.print(formatCol(column.getHeader()));
             }
         }
@@ -87,7 +87,7 @@ public class MatchTableTest {
             System.out.print(formatCol(table.get(i).getSourceId()));
             System.out.print(formatCol(table.get(i).getTargetId()));
             for (MatchTableColumn column : columns) {
-                if(!(column instanceof ReferenceColumn)) {
+                if(!(column instanceof UnmatchedColumn)) {
                     System.out.print(formatCol(column.getValue(i)));
                 }
             }

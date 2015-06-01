@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.promise.BiFunction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -65,7 +66,8 @@ public abstract class Observable<T> {
     }
 
     /**
-     * Notify subscribers that the value has changed by invoking the {@link org.activityinfo.observable.Observer#onChange(Observable)} 
+     * Notify subscribers that the value has changed by invoking the 
+     * {@link org.activityinfo.observable.Observer#onChange(Observable)} 
      * method of all subscribed {@link org.activityinfo.observable.Observer}s.
      */
     protected final void fireChange() {
@@ -88,7 +90,8 @@ public abstract class Observable<T> {
      * Transforms this {@code Observable}'s using the given {@code function} 
      * @param <R> the type of the result returned by the given {@code function}
      * @param scheduler
-     *@param function a function that is applied to the current any subsequent value of this {@code Observable}  @return a new {@code Observable}
+     * @param function a function that is applied to the current any subsequent value of this {@code Observable}  
+     * @return a new {@code Observable}
      */
     public final <R> Observable<R> transform(Scheduler scheduler, final Function<T, R> function) {
         return new ObservableFunction<R>(scheduler, this) {
@@ -120,5 +123,19 @@ public abstract class Observable<T> {
     
     public <R> Observable<R> join(final Function<T, Observable<R>> function) {
         return new ChainedObservable<>(transform(function));
+    }
+
+    public static <T> Observable<T> just(T value) {
+        return new ConstantObservable<>(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Observable<List<T>> flatten(Scheduler scheduler, List<Observable<T>> list) {
+        return new ObservableFunction<List<T>>(scheduler, (List)list) {
+            @Override
+            protected List<T> compute(Object[] arguments) {
+                return (List<T>) Arrays.asList(arguments);
+            }
+        };
     }
 }

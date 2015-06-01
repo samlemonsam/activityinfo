@@ -2,18 +2,18 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 
 public class AutoRowMatching {
-    private final FormMapping formMapping;
+    private final FieldMatching fieldMatching;
     private RowDistanceMatrix matrix;
     private final int[] assignment;
 
-    public AutoRowMatching(FormMapping formMapping, RowDistanceMatrix matrix, int[] assignment) {
-        this.formMapping = formMapping;
+    public AutoRowMatching(FieldMatching fieldMatching, RowDistanceMatrix matrix, int[] assignment) {
+        this.fieldMatching = fieldMatching;
         this.matrix = matrix;
         this.assignment = assignment;
     }
 
-    public FormMapping getFormMapping() {
-        return formMapping;
+    public FieldMatching getFieldMatching() {
+        return fieldMatching;
     }
 
     public int getBestSourceMatchForTarget(int targetRowIndex) {

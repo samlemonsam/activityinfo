@@ -2,6 +2,8 @@ package org.activityinfo.observable;
 
 import com.google.common.base.Optional;
 
+import java.util.List;
+
 public abstract class ObservableFunction<T> extends Observable<T> {
 
     private Scheduler scheduler;
@@ -11,11 +13,15 @@ public abstract class ObservableFunction<T> extends Observable<T> {
     
     private int lastUpdate = 0;
     
-    protected ObservableFunction(Scheduler scheduler, Observable... arguments) {
+    public ObservableFunction(Scheduler scheduler, Observable... arguments) {
         this.scheduler = scheduler;
         this.arguments = arguments;
         this.subscriptions = new Subscription[arguments.length];
         computeValue();
+    }
+
+    public ObservableFunction(Scheduler scheduler, List<Observable<?>> arguments) {
+        this(scheduler, arguments.toArray(new Observable[arguments.size()]));
     }
 
     @Override
@@ -103,7 +109,6 @@ public abstract class ObservableFunction<T> extends Observable<T> {
                 return argumentValues;
             }
         });
-       
     }
 
     protected abstract T compute(Object[] arguments);

@@ -16,13 +16,13 @@ import org.activityinfo.promise.BiFunction;
  * <p>This view is a function of the {@link org.activityinfo.geoadmin.merge2.model.ImportModel} and 
  * the {@code FormClass}es and instances of the source and target forms.</p>
  */
-public class FormMapping {
+public class FieldMatching {
     
     private FormProfile source;
     private FormProfile target;
     private final BiMap<FieldProfile, FieldProfile> targetToSource;
 
-    public FormMapping(FormProfile source, FormProfile target) {
+    public FieldMatching(FormProfile source, FormProfile target) {
         this.source = source;
         this.target = target;
 
@@ -41,11 +41,11 @@ public class FormMapping {
     }
 
     
-    public static Observable<FormMapping> compute(Observable<FormProfile> source, Observable<FormProfile> target) {
-        return Observable.transform(source, target, new BiFunction<FormProfile, FormProfile, FormMapping>() {
+    public static Observable<FieldMatching> compute(Observable<FormProfile> source, Observable<FormProfile> target) {
+        return Observable.transform(source, target, new BiFunction<FormProfile, FormProfile, FieldMatching>() {
             @Override
-            public FormMapping apply(FormProfile source, FormProfile target) {
-                return new FormMapping(source, target);
+            public FieldMatching apply(FormProfile source, FormProfile target) {
+                return new FieldMatching(source, target);
             }
         });
     }

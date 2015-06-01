@@ -12,12 +12,12 @@ public class MatchRow {
     private final AutoRowMatching matching;
 
     private boolean resolved;
-    private final FormMapping mapping;
+    private final FieldMatching mapping;
     private int sourceRow = UNMATCHED;
     private int targetRow = UNMATCHED;
 
     public MatchRow(AutoRowMatching rowMatching) {
-        this.mapping = rowMatching.getFormMapping();
+        this.mapping = rowMatching.getFieldMatching();
         this.matching = rowMatching;
     }
 

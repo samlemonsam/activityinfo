@@ -276,6 +276,12 @@ public class FormTree {
         return paths;
     }
 
+    public List<FieldPath> search(SearchOrder order, Node parent) {
+        List<FieldPath> paths = Lists.newArrayList();
+        search(paths, parent.getChildren(), order, Predicates.alwaysTrue(), Predicates.alwaysTrue());
+        return paths;
+    }
+    
     private void search(List<FieldPath> paths,
                         Iterable<Node> childNodes,
                         SearchOrder searchOrder,

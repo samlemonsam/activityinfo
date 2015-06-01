@@ -42,12 +42,33 @@ public class FormProfile {
         }
     }
 
+    public FormTree getFormTree() {
+        return formTree;
+    }
+
     public ResourceId getRowId(int rowIndex) {
         return ResourceId.valueOf(id.getString(rowIndex));
     }
-    
+
     public List<FieldProfile> getFields() {
         return fields;
+    }
+
+
+    public String getLabel() {
+        return formTree.getRootFormClass().getLabel();
+    }
+
+    public int getRowCount() {
+        return columnSet.getNumRows();
+    }
+
+    public int indexOf(ResourceId resourceId) {
+        return idMap.get(resourceId);
+    }
+
+    public static Observable<FormProfile> profile(final ResourceStore resourceStore, ResourceId formClassId) {  
+        return profile(resourceStore, resourceStore.getFormTree(formClassId));
     }
 
     public static Observable<FormProfile> profile(final ResourceStore resourceStore, final Observable<FormTree> formTree) {
@@ -64,28 +85,15 @@ public class FormProfile {
                                 .as(node.getFieldId().asString());
                     }
                 }
-                return resourceStore.queryColumns(queryModel);      
+                return resourceStore.queryColumns(queryModel);
             }
         });
-        
+
         return Observable.transform(formTree, columnSet, new BiFunction<FormTree, ColumnSet, FormProfile>() {
             @Override
             public FormProfile apply(FormTree tree, ColumnSet columnSet) {
                 return new FormProfile(formTree.get(), columnSet);
             }
         });
-    }
-
-
-    public String getLabel() {
-        return formTree.getRootFormClass().getLabel();
-    }
-
-    public int getRowCount() {
-        return columnSet.getNumRows();
-    }
-
-    public int indexOf(ResourceId resourceId) {
-        return idMap.get(resourceId);
     }
 }

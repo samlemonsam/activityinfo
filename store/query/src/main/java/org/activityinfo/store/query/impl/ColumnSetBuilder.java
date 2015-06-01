@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.form.FormClass;
@@ -40,7 +41,8 @@ public class ColumnSetBuilder {
         ResourceId classId = table.getRowSources().get(0).getRootFormClass();
         FormTree tree = formTreeService.queryTree(classId);
 
-        FormClass formClass = tree.getRootFormClasses().get(classId);
+        FormClass formClass = tree.getRootFormClass();
+        Preconditions.checkNotNull(formClass);
 
         // We want to make at most one pass over every row set we need to scan,
         // so first queue up all necessary work before executing
@@ -85,6 +87,9 @@ public class ColumnSetBuilder {
         Map<String, ColumnView> dataMap = Maps.newHashMap();
         for(Map.Entry<String, Slot<ColumnView>> entry : columnViews.entrySet()) {
             ColumnView view = filter.apply(entry.getValue().get());
+
+            dataMap.put(entry.getKey(), view);
+
             if(numRows == -1) {
                 numRows = view.numRows();
             } else {
@@ -93,7 +98,6 @@ public class ColumnSetBuilder {
                 }
             }
 
-            dataMap.put(entry.getKey(), view);
         }
 
         LOGGER.info("TableBuilder complete");

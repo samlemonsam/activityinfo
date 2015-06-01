@@ -11,11 +11,9 @@ import org.activityinfo.store.mysql.Join;
 import org.activityinfo.store.mysql.collections.Activity;
 import org.activityinfo.store.mysql.collections.ActivityField;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.activityinfo.model.legacy.CuidAdapter.field;
 
 
 public class ActivityTableMappingBuilder {
@@ -47,6 +45,8 @@ public class ActivityTableMappingBuilder {
         mapping.baseFilter = "base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
+        mapping.formClass.setLabel(activity.getName());
+        mapping.formClass.setOwnerId(CuidAdapter.databaseId(activity.getDatabaseId()));
         mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.SITE_DOMAIN, "siteId");
 
         if(activity.getReportingFrequency() == Activity.REPORT_ONCE) {

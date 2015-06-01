@@ -6,7 +6,6 @@ import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
-import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchLevel;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
@@ -28,9 +27,10 @@ public class MatchTable {
     private ImportModel model;
     private Scheduler scheduler;
 
-    private final Observable<FormMapping> formMapping;
-    private final Observable<AutoRowMatching> autoRowMatching;
     private final InstanceMatchSet matchSet;
+
+    private final Observable<FieldMatching> fieldMatching;
+    private final Observable<AutoRowMatching> autoRowMatching;
 
     private List<TableObserver> observers = new CopyOnWriteArrayList<>();
     
@@ -39,19 +39,17 @@ public class MatchTable {
     private Observable<List<MatchTableColumn>> columns;
     private List<MatchRow> rows = new ArrayList<>();
     
-    public MatchTable(ImportModel model, Scheduler scheduler, 
-                      Observable<FormProfile> sourceProfile, 
-                      Observable<FormProfile> targetProfile) {
+    public MatchTable(ImportModel model, Scheduler scheduler, Observable<FieldMatching> fieldMatching) {
         this.model = model;
         this.scheduler = scheduler;
-        matchSet = model.getInstanceMatchSet();
-        formMapping = FormMapping.compute(sourceProfile, targetProfile);
-        autoRowMatching = formMapping.transform(scheduler, new AutoMatcher());
+        this.matchSet = model.getInstanceMatchSet();
+        this.fieldMatching = fieldMatching;
+        autoRowMatching = fieldMatching.transform(scheduler, new AutoMatcher());
         columns = autoRowMatching.transform(new ColumnListBuilder());
     }
 
-    public Observable<FormMapping> getFieldMapping() {
-        return formMapping;
+    public Observable<FieldMatching> getFieldMapping() {
+        return fieldMatching;
     }
 
     public Subscription subscribe(final TableObserver observer) {
@@ -158,19 +156,19 @@ public class MatchTable {
         if(autoRowMatching.isLoading() || matchSet.isLoading()) {
             return;
         }
-        FormMapping formMapping = autoRowMatching.get().getFormMapping();
+        FieldMatching fieldMatching = autoRowMatching.get().getFieldMatching();
         AutoRowMatching autoMatching = autoRowMatching.get();
         
         List<MatchRow> rows = new ArrayList<>();
         Set<Integer> matchedSources = new HashSet<>();
 
         // Add a row for each target row
-        for (int targetRow = 0; targetRow < formMapping.getTarget().getRowCount(); ++targetRow) {
+        for (int targetRow = 0; targetRow < fieldMatching.getTarget().getRowCount(); ++targetRow) {
             
             MatchRow row = new MatchRow(autoMatching);
             row.setTargetRow(targetRow);
             
-            ResourceId targetId = formMapping.getTarget().getRowId(targetRow);
+            ResourceId targetId = fieldMatching.getTarget().getRowId(targetRow);
             Optional<InstanceMatch> explicitMatch = matchSet.find(targetId);
             
             if(explicitMatch.isPresent()) {
@@ -178,7 +176,7 @@ public class MatchTable {
                 // the user has provided an explicit match between the two rows
 
                 ResourceId sourceId = explicitMatch.get().getSourceId();
-                int sourceRow = formMapping.getSource().indexOf(sourceId);
+                int sourceRow = fieldMatching.getSource().indexOf(sourceId);
 
                 row.setSourceRow(sourceRow);
                 row.setResolved(true);
@@ -202,7 +200,7 @@ public class MatchTable {
         }
 
         // Add finally add an output row for each unmatched source
-        for (int sourceRow = 0; sourceRow < formMapping.getSource().getRowCount(); ++sourceRow) {
+        for (int sourceRow = 0; sourceRow < fieldMatching.getSource().getRowCount(); ++sourceRow) {
             if (!matchedSources.contains(sourceRow)) {
                 MatchRow row = new MatchRow(autoRowMatching.get());
                 row.setSourceRow(sourceRow);
@@ -244,25 +242,25 @@ public class MatchTable {
         @Override
         public List<MatchTableColumn> apply(AutoRowMatching input) {
             List<MatchTableColumn> columns = new ArrayList<>();
-            FormMapping formMapping = input.getFormMapping();
+            FieldMatching fieldMatching = input.getFieldMatching();
 
             columns.add(new ResolutionColumn(MatchTable.this, matchSet));
 
             // Show the existing instances, paired with the matching column
-            for (FieldProfile targetField : formMapping.getTarget().getFields()) {
-                Optional<FieldProfile> sourceField = formMapping.targetToSource(targetField);
+            for (FieldProfile targetField : fieldMatching.getTarget().getFields()) {
+                Optional<FieldProfile> sourceField = fieldMatching.targetToSource(targetField);
                 if(sourceField.isPresent()) {
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.TARGET));
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.SOURCE));
                 } else {
-                    columns.add(new ReferenceColumn(targetField, fromTarget(targetField.getView())));
+                    columns.add(new UnmatchedColumn(targetField, fromTarget(targetField.getView())));
                 }
             }
             
             // Also include the unmatched source columns as reference
-            for (FieldProfile sourceField : formMapping.getSource().getFields()) {
-                if(!formMapping.sourceToTarget(sourceField).isPresent()) {
-                    columns.add(new ReferenceColumn(sourceField, fromSource(sourceField.getView())));
+            for (FieldProfile sourceField : fieldMatching.getSource().getFields()) {
+                if(!fieldMatching.sourceToTarget(sourceField).isPresent()) {
+                    columns.add(new UnmatchedColumn(sourceField, fromSource(sourceField.getView())));
                 }
             }
 

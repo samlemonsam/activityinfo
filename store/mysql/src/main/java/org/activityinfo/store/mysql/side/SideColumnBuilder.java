@@ -17,8 +17,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SideColumnBuilder {
+    private static final Logger LOGGER = Logger.getLogger(SideColumnBuilder.class.getName());
 
     /**
      * Maps indicatorId to the value buffer
@@ -32,7 +35,11 @@ public class SideColumnBuilder {
     }
     
     public void add(ActivityField field, final CursorObserver<FieldValue> observer) {
-        fieldMap.put(field.getId(), createBuffer(field.getFormField().getType(), observer));
+        ValueBuffer buffer = createBuffer(field.getFormField().getType(), observer);
+        
+        LOGGER.log(Level.INFO, field.getId() + ": Created buffer of type " + buffer.getClass().getSimpleName());
+        
+        fieldMap.put(field.getId(), buffer);
     }
 
     private ValueBuffer createBuffer(FieldType type, CursorObserver<FieldValue> observer) {
@@ -58,7 +65,7 @@ public class SideColumnBuilder {
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN reportingperiod rp ON (site.siteId = rp.siteId)").append(newLine);
         sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId)").append(newLine);
-        sql.append("WHERE site.activityId=").append(activityId).append(newLine);
+        sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
         sql.append("  AND (iv.indicatorId IS NULL OR iv.indicatorId IN (");
         Joiner.on(", ").appendTo(sql, fieldMap.keySet());
         sql.append("))").append(newLine);
@@ -75,7 +82,7 @@ public class SideColumnBuilder {
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
         sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId)").append(newLine);
-        sql.append("WHERE site.activityId=").append(activityId).append(newLine);
+        sql.append("WHERE site.dateDeleted IS NULL AND site.activityId=").append(activityId).append(newLine);
         sql.append("  AND (a.attributeGroupId IS NULL OR a.attributeGroupId IN (");
         Joiner.on(", ").appendTo(sql, fieldMap.keySet());
         sql.append("))").append(newLine);

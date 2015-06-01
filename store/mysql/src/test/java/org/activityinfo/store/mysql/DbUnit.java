@@ -29,7 +29,7 @@ public class DbUnit {
 
     public void openDatabase() throws ClassNotFoundException, SQLException {
         String url = Preconditions.checkNotNull(System.getProperty(URL_PROPERTY,
-                "jdbc:mysql://127.0.0.1:3306/aitest?user=root&password=root&zeroDateTimeBehavior=convertToNull&useUnicode=true"));
+                "jdbc:mysql://127.0.0.1:3306/aitest_1?user=root&password=root&zeroDateTimeBehavior=convertToNull&useUnicode=true"));
         String username = Preconditions.checkNotNull(System.getProperty(USERNAME_PROPERTY, "root"), USERNAME_PROPERTY);
         String password = Preconditions.checkNotNull(System.getProperty(PASSWORD_PROPERTY, "root"), PASSWORD_PROPERTY);
 

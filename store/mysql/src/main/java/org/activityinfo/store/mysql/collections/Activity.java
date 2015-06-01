@@ -1,13 +1,17 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -17,12 +21,14 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 public class Activity {
 
@@ -38,6 +44,7 @@ public class Activity {
     private String category;
     private String locationTypeName;
     private int adminLevelId;
+    private String name;
 
     private List<ActivityField> fields = Lists.newArrayList();
 
@@ -73,7 +80,11 @@ public class Activity {
     public List<ActivityField> getFields() {
         return fields;
     }
-    
+
+    public String getName() {
+        return name;
+    }
+
     public Iterable<ActivityField> getSiteFields() {
         if(reportingFrequency == REPORT_ONCE) {
             return fields;
@@ -113,6 +124,8 @@ public class Activity {
         Activity activity = new Activity();
         activity.activityId = activityId;
 
+        FormClass serializedFormClass = null;
+        
         try (ResultSet rs = executor.query(
                 "SELECT " +
                         "A.ActivityId, " +
@@ -122,7 +135,9 @@ public class Activity {
                         "A.DatabaseId, " +
                         "A.LocationTypeId, " +
                         "L.Name locationTypeName, " +
-                        "L.BoundAdminLevelId " +
+                        "L.BoundAdminLevelId, " +
+                        "A.formClass, " + 
+                        "A.gzFormClass " + 
                         "FROM activity A " +
                         "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                         "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -134,17 +149,57 @@ public class Activity {
 
             activity.databaseId = rs.getInt("DatabaseId");
             activity.category = rs.getString("category");
+            activity.name = rs.getString("name");
             activity.reportingFrequency = rs.getInt("reportingFrequency");
             activity.locationTypeId = rs.getInt("locationTypeId");
             activity.locationTypeName = rs.getString("locationTypeName");
             activity.adminLevelId = rs.getInt("boundAdminLevelId");
 
+            serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
+            
         }
 
-        activity.queryFields(executor);
+        if(serializedFormClass == null) {
+            activity.queryFields(executor);
+        } else {
+            activity.addFields(serializedFormClass);
+        }
 
         return activity;
     }
+
+    private static FormClass tryDeserialize(String formClass, byte[] formClassGz) {
+        try {
+            Reader reader;
+            if (formClassGz != null) {
+                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)));
+            } else if (!Strings.isNullOrEmpty(formClass)) {
+                reader = new StringReader(formClass);
+            } else {
+                return null;
+            }
+
+            Gson gson = new Gson();
+            JsonObject object = gson.fromJson(reader, JsonObject.class);
+            return FormClass.fromResource(Resources.fromJson(object));
+        } catch (IOException e) {
+            throw new IllegalStateException("Error deserializing form class", e);
+        }
+    }
+
+
+    private void addFields(FormClass formClass) {
+        for (FormField formField : formClass.getFields()) {
+            switch (formField.getId().getDomain()) {
+                case CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN:
+                case CuidAdapter.INDICATOR_DOMAIN:
+                    int fieldId = CuidAdapter.getLegacyIdFromCuid(formField.getId());
+                    fields.add(new ActivityField(fieldId, null, formField));
+                    break;
+            }
+        }
+    }
+
 
     private void queryFields(QueryExecutor executor) throws SQLException {
 

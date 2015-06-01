@@ -102,6 +102,13 @@ public class MySqlCatalogTest {
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
     }
+    
+    @Test
+    public void testSiteIndicator() {
+        query(CuidAdapter.activityFormClass(1), "_id",
+                CuidAdapter.indicatorField(1).asString(), "contact")    ;
+        
+    }
 
     private void query(ResourceId formClassId, String... fields) {
         QueryModel queryModel = new QueryModel(formClassId);

@@ -7,12 +7,12 @@ import org.activityinfo.model.query.ColumnView;
 /**
  * Displays the contents of a Field in the source or target collection that is not matched. 
  */
-public class ReferenceColumn extends MatchTableColumn {
+public class UnmatchedColumn extends MatchTableColumn {
 
     private final FieldProfile field;
     private ColumnView columnView;
 
-    public ReferenceColumn(FieldProfile field, ColumnView columnView) {
+    public UnmatchedColumn(FieldProfile field, ColumnView columnView) {
         this.field = field;
         this.columnView = columnView;
     }

@@ -2,21 +2,29 @@ package org.activityinfo.geoadmin.merge2.view.swing;
 
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
+import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
+import org.activityinfo.geoadmin.merge2.view.mapping.ReferenceFieldMapping;
+import org.activityinfo.geoadmin.merge2.view.swing.lookup.LookupStep;
 import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchStep;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Observer;
 import org.activityinfo.store.ResourceStore;
 import org.activityinfo.store.ResourceStoreImpl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 
 public class MergeDialog extends JFrame {
+
+    private final ImportView viewModel;
 
     private List stepList;
     private JPanel stepPanel;
@@ -25,13 +33,12 @@ public class MergeDialog extends JFrame {
 
     public MergeDialog(ImportView viewModel) {
         super("Merge");
+        this.viewModel = viewModel;
         setSize(650, 350);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         steps = new ArrayList<>();
-        steps.add(new MatchStep(viewModel));
-        
         stepPanel = new JPanel(new BorderLayout());
         
         stepList = new List();
@@ -44,9 +51,20 @@ public class MergeDialog extends JFrame {
             }
         });
         
-        updateStepList();
+        viewModel.getMapping().subscribe(new Observer<FormMapping>() {
+            @Override
+            public void onChange(Observable<FormMapping> formMapping) {
+                updateStepList(formMapping);
+            }
+        });
         
-        JButton okButton = new JButton("Merge");
+        JButton okButton = new JButton("Import");
+        okButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                runImport();
+            }
+        });
         JButton cancelButton = new JButton("Cancel");
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
@@ -58,11 +76,26 @@ public class MergeDialog extends JFrame {
         getContentPane().add(buttonPanel, BorderLayout.PAGE_END);
     }
 
-    private void updateStepList() {
+    
+    private void updateStepList(Observable<FormMapping> formMapping) {
+        steps.clear();
+        steps.add(new MatchStep(viewModel));
+        
+        if(!formMapping.isLoading()) {
+            for (ReferenceFieldMapping referenceFieldMapping : formMapping.get().getReferenceFieldMappings()) {
+                steps.add(new LookupStep(referenceFieldMapping));
+            }
+        }
+
         stepList.removeAll();
+        
         for(Step step : steps) {
             stepList.add(step.getLabel());
         }
+    }
+    
+    private void runImport() {
+
     }
 
     public static void main(String[] args) {
@@ -80,5 +113,6 @@ public class MergeDialog extends JFrame {
         dialog.setVisible(true);
         
     }
+
     
 }

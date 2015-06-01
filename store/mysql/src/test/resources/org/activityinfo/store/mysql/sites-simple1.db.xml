@@ -172,7 +172,8 @@
   <indicator indicatorId="499" activityId="1" name="Local contact name" 
              calculatedAutomatically="0"
              aggregation="0"
-             type="TEXT" sortOrder="5" mandatory="0"/>
+             nameInExpression="contact"
+             type="FREE_TEXT" sortOrder="5" mandatory="0"/>
 
   <!-- PEAR Activity 2 : Kits Scolaire -->
 

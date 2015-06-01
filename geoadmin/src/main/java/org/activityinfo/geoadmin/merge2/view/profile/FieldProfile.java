@@ -1,6 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.profile;
 
 import com.google.common.base.Strings;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnView;
@@ -63,6 +64,14 @@ public class FieldProfile {
 
     public FieldPath getPath() {
         return node.getPath();
+    }
+
+    public FormTree.Node getNode() {
+        return node;
+    }
+    
+    public FormField getFormField() {
+        return node.getField();
     }
 
     @Override

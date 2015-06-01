@@ -38,8 +38,8 @@ public class RowDistanceMatrix implements DistanceMatrix {
         }
     }
 
-    public RowDistanceMatrix(FormMapping formMapping) {
-        this(formMapping.getTarget(), formMapping.getSource(), formMapping.asMap());
+    public RowDistanceMatrix(FieldMatching fieldMatching) {
+        this(fieldMatching.getTarget(), fieldMatching.getSource(), fieldMatching.asMap());
     }
 
     @Override

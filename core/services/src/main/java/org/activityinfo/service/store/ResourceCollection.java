@@ -21,7 +21,7 @@ public interface ResourceCollection {
      * @return this collection's schema
      */
     FormClass getFormClass();
-
+    
 
     ColumnQueryBuilder newColumnQuery();
 

@@ -1,8 +1,11 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
 /**
- * Maps a source field to a target field
+ * Maps one or more source fields to the target form.
+ *
+ * <p>In contrast to the <em>FieldMatching</em> process, FieldMappings s</p>
  */
-public class FieldMapping {
+public interface FieldMapping {
+    
     
 }
