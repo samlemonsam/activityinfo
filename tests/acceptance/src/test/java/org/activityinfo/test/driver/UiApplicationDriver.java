@@ -385,9 +385,22 @@ public class UiApplicationDriver extends ApplicationDriver {
             case LOCATION_TYPE:
                 deleteLocationType(testObject);
                 break;
+            case TARGET:
+                deleteTarget(testObject);
+                break;
             default:
                 throw new IllegalArgumentException(String.format("Invalid object type '%s'", objectType));
         }
+    }
+
+    private void deleteTarget(TestObject testObject) {
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+        designTab.selectDatabase(testObject.getAlias("database"));
+
+        TargetsPage targetsPage = designTab.targets();
+        targetsPage.select(testObject.getAlias("name"));
+        targetsPage.getToolbarMenu().clickButton("Delete");
+
     }
 
     private void deleteLocationType(TestObject testObject) {

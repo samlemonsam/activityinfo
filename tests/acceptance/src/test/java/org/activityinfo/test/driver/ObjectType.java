@@ -29,6 +29,7 @@ public enum ObjectType {
     FORM("activity"),
     FORM_FIELD("formField"),
     PARTNER("partner"),
+    TARGET("target"),
     LOCATION_TYPE("locationType");
 
     private final String value;

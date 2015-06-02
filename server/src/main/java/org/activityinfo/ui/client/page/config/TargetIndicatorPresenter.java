@@ -27,15 +27,14 @@ import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
 import com.google.common.collect.*;
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.client.callback.SuccessCallback;
-import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -109,10 +108,13 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         this.view.setActionEnabled(UIActions.DELETE, false);
     }
 
-    public void load(TargetDTO targetDTO) {
-        this.targetDTO = targetDTO;
+    public void load(Optional<TargetDTO> targetDTO) {     
         this.loader.clearCache();
-        this.loader.load();
+
+        if (targetDTO.isPresent()) {
+            this.targetDTO = targetDTO.get();
+            this.loader.load();
+        } 
     }
 
     public ActivityFormDTO getActivityFormDTO(ActivityDTO activity) {

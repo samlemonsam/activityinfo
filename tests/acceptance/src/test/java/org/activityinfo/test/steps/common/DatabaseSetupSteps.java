@@ -419,6 +419,14 @@ public class DatabaseSetupSteps {
         );
     }
 
+    @And("^I have removed the target \"([^\"]*)\"$")
+    public void I_have_removed_the_target(String targetName) throws Throwable {
+        driver.delete(ObjectType.TARGET,
+                new Property("name", targetName),
+                new Property("database", getCurrentDatabase())
+        );
+    }
+
     @Then("^Location type \"(.*?)\" is no longer visible\\.$")
     public void location_type_should_disappear_from_tree(String locationTypeName) throws Throwable {
         driver.assertVisible(ObjectType.LOCATION_TYPE, false,

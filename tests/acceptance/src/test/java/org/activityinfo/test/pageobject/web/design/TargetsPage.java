@@ -6,6 +6,7 @@ import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -16,11 +17,12 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 public class TargetsPage {
 
-
+    private ToolbarMenu toolbarMenu;
     private FluentElement container;
 
     public TargetsPage(FluentElement container) {
         this.container = container;
+        this.toolbarMenu = new ToolbarMenu(container.findElement(By.className("x-toolbar-ct")));;
     }
 
     public GxtModal add() {
@@ -32,6 +34,10 @@ public class TargetsPage {
             }
         });
         return new GxtModal(container);
+    }
+
+    public ToolbarMenu getToolbarMenu() {
+        return toolbarMenu;
     }
 
     public GxtGrid targetGrid() {
