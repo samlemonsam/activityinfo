@@ -21,6 +21,7 @@ public class LookupTable {
 
     private final LookupGraph graph;
     private final SourceKeySet sourceKeySet;
+    private final BitSet resolved;
 
     /**
      * Matches 
@@ -32,6 +33,8 @@ public class LookupTable {
         this.sourceKeySet = lookupGraph.getSourceKeySet();
         
         matching = new int[sourceKeySet.size()];
+        resolved = new BitSet(sourceKeySet.size());
+        
         Map<SourceLookupKey, Integer> userMap = buildUserMap(referenceMatches);
         
         for(int i=0;i<sourceKeySet.size();++i) {
@@ -40,9 +43,19 @@ public class LookupTable {
             if(targetIndex != null) {
                 // User has provided an explicit lookup result
                 matching[i] = targetIndex;
+                resolved.set(i);
             } else {
                 // Otherwise use pareto optimal if available
-                matching[i] = graph.getParetoOptimalMatch(i);
+                int paretoOptimal = graph.getParetoOptimalMatch(i);
+                if(paretoOptimal != -1) {
+                    matching[i] = paretoOptimal;
+                    boolean exactMatch = graph.getLookupConfidence(i, paretoOptimal) == MatchLevel.EXACT;
+                    if(exactMatch) {
+                        resolved.set(i);
+                    }
+                } else {
+                    matching[i] = -1;
+                }
             }
         }
     }
@@ -59,7 +72,6 @@ public class LookupTable {
             }
         });
     }
-    
     
     private Map<SourceLookupKey, Integer> buildUserMap(Set<ReferenceMatch> matchSet) {
         Map<SourceLookupKey, Integer> map = new HashMap<>();
@@ -167,5 +179,9 @@ public class LookupTable {
     
     public FormProfile getTargetForm() {
         return graph.getTargetForm();
+    }
+    
+    public boolean isResolved(int sourceKeyIndex) {
+        return resolved.get(sourceKeyIndex);
     }
 }

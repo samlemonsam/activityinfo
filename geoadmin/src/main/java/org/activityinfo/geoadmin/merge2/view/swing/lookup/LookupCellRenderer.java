@@ -27,17 +27,21 @@ public class LookupCellRenderer extends DefaultTableCellRenderer {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if(!isSelected && !lookupTable.isLoading()) {
             int sourceKeyIndex = table.convertRowIndexToModel(row);
-            int targetIndex = lookupTable.get().getTargetMatchRow(sourceKeyIndex); 
-            switch (graph.getLookupConfidence(sourceKeyIndex, targetIndex)) {
-                case EXACT:
-                    component.setBackground(Color.GREEN);
-                    break;
-                case WARNING:
-                    component.setBackground(MatchedColumn.WARNING_COLOR);
-                    break;
-                case POOR:
-                    component.setBackground(Color.RED);
-                    break;
+            if (lookupTable.get().isResolved(sourceKeyIndex)) {
+                component.setBackground(Color.GREEN);
+            } else {
+                int targetIndex = lookupTable.get().getTargetMatchRow(sourceKeyIndex);
+                switch (graph.getLookupConfidence(sourceKeyIndex, targetIndex)) {
+                    case EXACT:
+                        component.setBackground(Color.GREEN);
+                        break;
+                    case WARNING:
+                        component.setBackground(MatchedColumn.WARNING_COLOR);
+                        break;
+                    case POOR:
+                        component.setBackground(Color.RED);
+                        break;
+                }
             }
         }
         return component;
