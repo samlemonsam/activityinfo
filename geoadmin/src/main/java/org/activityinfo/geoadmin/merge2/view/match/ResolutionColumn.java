@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
+import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
-import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchLevel;
 
 import javax.swing.*;
 import java.awt.*;

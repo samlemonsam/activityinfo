@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.view.swing.merge;
+package org.activityinfo.geoadmin.match;
 
 
 public enum MatchLevel {

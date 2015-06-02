@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.view.swing.merge;
+package org.activityinfo.geoadmin.merge2.view.swing.match;
 
 import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
 
@@ -6,10 +6,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
-public class MergeColumnRenderer extends DefaultTableCellRenderer {
+public class MatchColumnRenderer extends DefaultTableCellRenderer {
     private final MatchTableColumn column;
 
-    public MergeColumnRenderer(MatchTableColumn column) {
+    public MatchColumnRenderer(MatchTableColumn column) {
         this.column = column;
         setHorizontalAlignment(column.getTextAlignment());
     }

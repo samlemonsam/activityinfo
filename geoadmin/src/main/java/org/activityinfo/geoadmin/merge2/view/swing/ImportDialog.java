@@ -5,7 +5,7 @@ import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
 import org.activityinfo.geoadmin.merge2.view.mapping.ReferenceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.lookup.LookupStep;
-import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchStep;
+import org.activityinfo.geoadmin.merge2.view.swing.match.MatchStep;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -22,7 +22,7 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 
-public class MergeDialog extends JFrame {
+public class ImportDialog extends JFrame {
 
     private final ImportView viewModel;
 
@@ -31,7 +31,7 @@ public class MergeDialog extends JFrame {
     
     private java.util.List<Step> steps;
 
-    public MergeDialog(ImportView viewModel) {
+    public ImportDialog(ImportView viewModel) {
         super("Merge");
         this.viewModel = viewModel;
         setSize(650, 350);
@@ -109,7 +109,7 @@ public class MergeDialog extends JFrame {
         
         ImportView viewModel = new ImportView(resourceStore, modelStore);
         
-        MergeDialog dialog = new MergeDialog(viewModel);
+        ImportDialog dialog = new ImportDialog(viewModel);
         dialog.setVisible(true);
         
     }

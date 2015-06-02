@@ -2,9 +2,9 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
-import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchLevel;
 
 import java.util.Collection;
 import java.util.List;

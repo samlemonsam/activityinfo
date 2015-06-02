@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.view.swing.merge;
+package org.activityinfo.geoadmin.merge2.view.swing.match;
 
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MergeTableModel extends AbstractTableModel {
+public class MatchTableModel extends AbstractTableModel {
 
     private final Subscription subscription;
     private List<MatchTableColumn> columns = new ArrayList<>();
 
-    private int rowCount = 200;
+    private int rowCount = 0;
 
-    public MergeTableModel(ImportView view) {
+    public MatchTableModel(ImportView view) {
         final MatchTable matchTable = view.getMatchTable();
         subscription = matchTable.subscribe(new TableObserver() {
             @Override

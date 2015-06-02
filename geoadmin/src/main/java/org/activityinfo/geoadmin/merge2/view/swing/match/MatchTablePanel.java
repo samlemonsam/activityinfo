@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.view.swing.merge;
+package org.activityinfo.geoadmin.merge2.view.swing.match;
 
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
@@ -32,7 +32,7 @@ public class MatchTablePanel extends JPanel {
     public static final String TABLE_COMPONENT = "table";
     private ImportView viewModel;
 
-    private final MergeTableModel tableModel;
+    private final MatchTableModel tableModel;
     private final JTable table;
 
     private final SubscriptionSet subscriptions = new SubscriptionSet();
@@ -48,7 +48,7 @@ public class MatchTablePanel extends JPanel {
         JTableHeader tableHeader = new JTableHeader(tableColumnModel);
         tableHeader.setResizingAllowed(true);
 
-        tableModel = new MergeTableModel(viewModel);
+        tableModel = new MatchTableModel(viewModel);
         table = new JTable(tableModel);
         table.setAutoCreateColumnsFromModel(false);
         table.setColumnModel(tableColumnModel);
@@ -164,7 +164,7 @@ public class MatchTablePanel extends JPanel {
         for (int i = 0; i < columns.size(); i++) {
             TableColumn newColumn = new TableColumn(i);
             newColumn.setHeaderValue(columns.get(i).getHeader());
-            newColumn.setCellRenderer(new MergeColumnRenderer(columns.get(i)));
+            newColumn.setCellRenderer(new MatchColumnRenderer(columns.get(i)));
             table.addColumn(newColumn);
         }
 

@@ -2,8 +2,8 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 
 import com.google.common.base.Optional;
+import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
-import org.activityinfo.geoadmin.merge2.view.swing.merge.MatchLevel;
 import org.activityinfo.model.resource.ResourceId;
 
 public class MatchRow {

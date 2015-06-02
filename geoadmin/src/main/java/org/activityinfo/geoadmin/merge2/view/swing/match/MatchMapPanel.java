@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge2.view.swing.merge;
+package org.activityinfo.geoadmin.merge2.view.swing.match;
 
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.geotools.feature.FeatureCollection;

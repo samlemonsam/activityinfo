@@ -4,9 +4,7 @@ import org.activityinfo.observable.Scheduler;
 
 import java.util.concurrent.ExecutorService;
 
-/**
- * Created by alex on 27-5-15.
- */
+
 public class SwingSchedulers {
     
     public static Scheduler fromExecutor(final ExecutorService executorService) {
