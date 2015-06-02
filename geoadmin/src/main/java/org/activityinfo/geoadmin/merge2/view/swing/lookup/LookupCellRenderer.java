@@ -1,7 +1,9 @@
 package org.activityinfo.geoadmin.merge2.view.swing.lookup;
 
+import org.activityinfo.geoadmin.merge2.view.mapping.LookupGraph;
 import org.activityinfo.geoadmin.merge2.view.mapping.LookupTable;
 import org.activityinfo.geoadmin.merge2.view.match.MatchedColumn;
+import org.activityinfo.observable.Observable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -12,18 +14,21 @@ import java.awt.*;
  */
 public class LookupCellRenderer extends DefaultTableCellRenderer {
     
-    private final LookupTable lookupTable;
+    private final LookupGraph graph;
+    private final Observable<LookupTable> lookupTable;
 
-    public LookupCellRenderer(LookupTable lookupTable) {
-        this.lookupTable = lookupTable;
+    public LookupCellRenderer(LookupGraph graph, Observable<LookupTable> table) {
+        this.graph = graph;
+        this.lookupTable = table;
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        if(!isSelected) {
+        if(!isSelected && !lookupTable.isLoading()) {
             int sourceKeyIndex = table.convertRowIndexToModel(row);
-            switch (lookupTable.getLookupConfidence(sourceKeyIndex)) {
+            int targetIndex = lookupTable.get().getTargetMatchRow(sourceKeyIndex); 
+            switch (graph.getLookupConfidence(sourceKeyIndex, targetIndex)) {
                 case EXACT:
                     component.setBackground(Color.GREEN);
                     break;

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.geoadmin.merge2.view.mapping.LookupTable;
 import org.activityinfo.geoadmin.merge2.view.mapping.SourceLookupKey;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.swing.table.AbstractTableModel;
 import java.text.DecimalFormat;
@@ -20,8 +21,10 @@ public class LookupDialogTableModel extends AbstractTableModel {
     private List<Integer> targetCandidateRows;
     private double scores[];
     private NumberFormat scoreFormat = new DecimalFormat("0.00");
+    private LookupTable lookupTable;
 
     public LookupDialogTableModel(LookupTable lookupTable, int sourceKeyIndex) {
+        this.lookupTable = lookupTable;
         this.targetKeyFields = lookupTable.getTargetKeyFields();
         this.targetCandidateRows = Lists.newArrayList(lookupTable.getTargetCandidateRows(sourceKeyIndex));
         this.sourceKey = lookupTable.getSourceKey(sourceKeyIndex);
@@ -56,6 +59,11 @@ public class LookupDialogTableModel extends AbstractTableModel {
             
             return targetField.getView().getString(targetRow);
         }
+    }
+    
+    public ResourceId getTargetInstanceId(int candidateIndex) {
+        Integer targetIndex = targetCandidateRows.get(candidateIndex);
+        return lookupTable.getTargetForm().getRowId(targetIndex);
     }
 
     @Override

@@ -138,4 +138,9 @@ public abstract class Observable<T> {
             }
         };
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Observable<List<T>> flatten(List<Observable<T>> list) {
+        return flatten(SynchronousScheduler.INSTANCE, list);
+    }
 }

@@ -3,6 +3,7 @@ package org.activityinfo.observable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public abstract class ObservableSet<T>  {
 
@@ -49,5 +50,49 @@ public abstract class ObservableSet<T>  {
             observer.onElementRemoved(element);
         }
     }
-     
+    
+    public abstract Set<T> asSet();
+
+    public final Observable<Set<T>> asObservable() {
+        return new Observable<Set<T>>() {
+            
+            private Subscription subscription;
+            
+            @Override
+            public boolean isLoading() {
+                return ObservableSet.this.isLoading();
+            }
+
+            @Override
+            public Set<T> get() {
+                return ObservableSet.this.asSet();
+            }
+
+            @Override
+            protected void onConnect() {
+                final Observable<Set<T>> thisObservable = this;
+                subscription = ObservableSet.this.subscribe(new SetObserver<T>() {
+                    @Override
+                    public void onChange() {
+                        thisObservable.fireChange();
+                    }
+
+                    @Override
+                    public void onElementAdded(T element) {
+                        thisObservable.fireChange();
+                    }
+
+                    @Override
+                    public void onElementRemoved(T element) {
+                        thisObservable.fireChange();
+                    }
+                });
+            }
+
+            @Override
+            protected void onDisconnect() {
+                subscription.unsubscribe();
+            }
+        };
+    }
 }

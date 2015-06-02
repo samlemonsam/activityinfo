@@ -1,8 +1,10 @@
 package org.activityinfo.geoadmin.merge2.view.swing.lookup;
 
 import org.activityinfo.geoadmin.merge2.view.ImportView;
+import org.activityinfo.geoadmin.merge2.view.mapping.LookupTable;
 import org.activityinfo.geoadmin.merge2.view.mapping.ReferenceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
+import org.activityinfo.observable.Observable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,22 +17,24 @@ import java.awt.event.MouseEvent;
  */
 public class LookupStepPanel extends StepPanel {
 
-    private ImportView importModel;
-    private ReferenceFieldMapping mapping;
+    private final Observable<LookupTable> table;
+    private ImportView viewModel;
+    private final LookupTableModel tableModel;
 
-    public LookupStepPanel(ImportView importModel, ReferenceFieldMapping mapping) {
-        this.importModel = importModel;
-        this.mapping = mapping;
+    public LookupStepPanel(ImportView viewModel, ReferenceFieldMapping mapping) {
+        this.viewModel = viewModel;
+        table = LookupTable.compute(mapping, viewModel);
 
-        LookupTableModel tableModel = new LookupTableModel(mapping.getLookupTable());
-        final JTable table = new JTable(tableModel);
-        table.setDefaultRenderer(Object.class, new LookupCellRenderer(mapping.getLookupTable()));
-        table.addMouseListener(new MouseAdapter() {
+        tableModel = new LookupTableModel(mapping, table);
+        final JTable tableComponent = new JTable(tableModel);
+        
+        tableComponent.setDefaultRenderer(Object.class, new LookupCellRenderer(mapping.getLookupGraph(), table));
+        tableComponent.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int sourceKeyIndex = table.rowAtPoint(e.getPoint());
-                    if(sourceKeyIndex != -1) {
+                    int sourceKeyIndex = tableComponent.rowAtPoint(e.getPoint());
+                    if (sourceKeyIndex != -1) {
                         choose(sourceKeyIndex);
                     }
                 }
@@ -38,18 +42,18 @@ public class LookupStepPanel extends StepPanel {
         });
         setLayout(new BorderLayout());
         
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(new JScrollPane(tableComponent), BorderLayout.CENTER);
     }
 
     private void choose(int sourceKeyIndex) {
-        LookupDialog dialog = new LookupDialog(this, mapping.getLookupTable(), sourceKeyIndex);
-        dialog.setSelection(mapping.getLookupTable().getTargetMatchRow(sourceKeyIndex));
+        LookupDialog dialog = new LookupDialog(this, viewModel.getModel(), table.get(), sourceKeyIndex);
+        dialog.setSelection(table.get().getTargetMatchRow(sourceKeyIndex));
         dialog.setVisible(true);
     }
 
 
     @Override
     public void stop() {
-            
+        tableModel.stop();
     }
 }

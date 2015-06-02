@@ -2,7 +2,6 @@ package org.activityinfo.geoadmin.merge2.model;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.ObservableSet;
 import org.activityinfo.observable.StatefulSet;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.ResourceStore;
@@ -14,7 +13,7 @@ public class ImportModel {
     private StatefulValue<ResourceId> sourceFormId = new StatefulValue<>();
     private StatefulValue<ResourceId> targetFormId = new StatefulValue<>();
     private InstanceMatchSet instanceMatchSet = new InstanceMatchSet();
-    private ObservableSet<ReferenceMatch> referenceMatches = new StatefulSet<>();
+    private StatefulSet<ReferenceMatch> referenceMatches = new StatefulSet<>();
 
 
     public ImportModel(final ResourceStore resourceStore, ResourceId source, ResourceId target) {
@@ -39,7 +38,7 @@ public class ImportModel {
         return targetFormId;
     }
 
-    public ObservableSet<ReferenceMatch> getReferenceMatches() {
+    public StatefulSet<ReferenceMatch> getReferenceMatches() {
         return referenceMatches;
     }
 }

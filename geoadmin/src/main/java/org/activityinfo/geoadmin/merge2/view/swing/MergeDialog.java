@@ -83,7 +83,7 @@ public class MergeDialog extends JFrame {
         
         if(!formMapping.isLoading()) {
             for (ReferenceFieldMapping referenceFieldMapping : formMapping.get().getReferenceFieldMappings()) {
-                steps.add(new LookupStep(referenceFieldMapping));
+                steps.add(new LookupStep(viewModel, referenceFieldMapping));
             }
         }
 

@@ -4,10 +4,7 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ObservableSet;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Set of user-defined matchings between <em>source</em> form instances
@@ -23,7 +20,11 @@ public class InstanceMatchSet extends ObservableSet<InstanceMatch> {
         return false;
     }
 
-    
+    @Override
+    public Set<InstanceMatch> asSet() {
+        return Collections.unmodifiableSet(set);
+    }
+
     public void add(InstanceMatch match) {
         if(!set.contains(match)) {
             removeMatchesWith(match.getSourceId());

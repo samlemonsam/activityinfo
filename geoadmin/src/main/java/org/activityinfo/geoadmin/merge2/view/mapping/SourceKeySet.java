@@ -68,4 +68,8 @@ public class SourceKeySet {
     public int size() {
         return distinctKeys.size();
     }
+
+    public SourceLookupKey get(int i) {
+        return distinctKeys.get(i);
+    }
 }

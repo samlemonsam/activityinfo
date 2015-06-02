@@ -1,6 +1,8 @@
 package org.activityinfo.observable;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Encapsulates model state represented as a set
@@ -14,7 +16,12 @@ public class StatefulSet<T> extends ObservableSet<T> {
         return false;
     }
 
-    
+    @Override
+    public Set<T> asSet() {
+        return Collections.unmodifiableSet(set);
+    }
+
+
     public void add(T element) {
         boolean added = set.add(element);
         if(added) {

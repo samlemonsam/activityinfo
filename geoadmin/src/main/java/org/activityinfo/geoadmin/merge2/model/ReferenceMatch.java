@@ -18,20 +18,20 @@ public class ReferenceMatch {
     /**
      * The target form instance 
      */
-    private final ResourceId targetId;
+    private final ResourceId targetInstanceId;
 
 
-    public ReferenceMatch(Map<FieldPath, String> sourceValues, ResourceId targetId) {
+    public ReferenceMatch(Map<FieldPath, String> sourceValues, ResourceId targetInstanceId) {
         this.sourceValues = sourceValues;
-        this.targetId = targetId;
+        this.targetInstanceId = targetInstanceId;
     }
 
     public Map<FieldPath, String> getSourceValues() {
         return sourceValues;
     }
 
-    public ResourceId getTargetId() {
-        return targetId;
+    public ResourceId getTargetInstanceId() {
+        return targetInstanceId;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ReferenceMatch {
         ReferenceMatch that = (ReferenceMatch) o;
 
         if (!sourceValues.equals(that.sourceValues)) return false;
-        if (!targetId.equals(that.targetId)) return false;
+        if (!targetInstanceId.equals(that.targetInstanceId)) return false;
 
         return true;
     }
@@ -50,7 +50,7 @@ public class ReferenceMatch {
     @Override
     public int hashCode() {
         int result = sourceValues.hashCode();
-        result = 31 * result + targetId.hashCode();
+        result = 31 * result + targetInstanceId.hashCode();
         return result;
     }
 }
