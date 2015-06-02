@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.ImplementedBy;
@@ -36,6 +37,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.state.StateProvider;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.AddTarget;
 import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.GetTargets;
@@ -140,7 +142,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
         service.execute(new Delete(model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
-
+                Log.error("Failed to remove target. ", caught);
             }
 
             @Override
@@ -262,8 +264,8 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
 
     @Override
     public void onSelectionChanged(ModelData selectedItem) {
-        view.setActionEnabled(UIActions.DELETE, true);
-        view.setActionEnabled(UIActions.EDIT, true);
-        targetIndicatorPresenter.load(view.getSelection());
+        view.setActionEnabled(UIActions.DELETE, selectedItem != null);
+        view.setActionEnabled(UIActions.EDIT, selectedItem != null);
+        targetIndicatorPresenter.load(Optional.fromNullable(view.getSelection()));
     }
 }

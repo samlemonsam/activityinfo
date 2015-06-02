@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
@@ -33,6 +34,7 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.state.StateProvider;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.Delete;
@@ -66,7 +68,6 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     private final EventBus eventBus;
     private final Dispatcher service;
     private final View view;
-    private final UiConstants messages;
     private TargetDTO targetDTO;
 
     private UserDatabaseDTO db;
@@ -82,7 +83,6 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         this.eventBus = eventBus;
         this.service = service;
         this.view = view;
-        this.messages = messages;
     }
 
     public void go(UserDatabaseDTO db) {
@@ -97,12 +97,15 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         this.view.setActionEnabled(UIActions.DELETE, false);
     }
 
-    public void load(TargetDTO targetDTO) {
-        this.targetDTO = targetDTO;
+    public void load(Optional<TargetDTO> targetDTO) {
         treeStore.removeAll();
 
-        fillStore();
-        view.expandAll();
+        if (targetDTO.isPresent()) {
+            this.targetDTO = targetDTO.get();
+
+            fillStore();
+            view.expandAll();
+        }
     }
 
     private void fillStore() {
@@ -248,7 +251,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         service.execute(new Delete((EntityDTO) model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
-
+                Log.error("Failed to remove target. ", caught);
             }
 
             @Override

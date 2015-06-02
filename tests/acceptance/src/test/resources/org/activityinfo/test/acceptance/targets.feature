@@ -101,3 +101,19 @@ Feature: Indicator Targets
       |                       | Value       |
       | Realized              | 1,800       |
       | Targeted              | 6,000       |
+
+  @AI-1096
+  Scenario: Pivoting on deleted target
+    When I create a target named "Goals"
+    And I set the targets of "Goals" to:
+      | field                 | value       |
+      | nb. kits              | 4000  kits  |
+    And I have removed the target "Goals"
+    And I create a target named "Goals"
+    And I set the targets of "Goals" to:
+      | field                 | value       |
+      | nb. kits              | 5000  kits  |
+    Then aggregating the indicator "nb. kits" by Realized / Targeted and Year  should yield:
+      |                       | 2014        |
+      | Realized              | 1,800       |
+      | Targeted              | 5,000       |
