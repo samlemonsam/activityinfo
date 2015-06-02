@@ -5,7 +5,8 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.primitive.TextType;
 
 /**
- * Maps a root field directly to another root field
+ * Maps a root field directly to another root field.
+ * 
  */
 public class SimpleFieldMapping implements FieldMapping {
 

@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class LookupDialogTableModel extends AbstractTableModel {
 
+    public static final int SCORE_COLUMN = 0;
+    
     private final SourceLookupKey sourceKey;
     private List<FieldProfile> targetKeyFields;
     private List<Integer> targetCandidateRows;
@@ -51,7 +53,7 @@ public class LookupDialogTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if(columnIndex == 0) {
+        if(columnIndex == SCORE_COLUMN) {
             return scoreFormat.format(scores[rowIndex]);
         } else {
             int targetRow = targetCandidateRows.get(rowIndex);
@@ -68,7 +70,7 @@ public class LookupDialogTableModel extends AbstractTableModel {
 
     @Override
     public String getColumnName(int column) {
-        if(column == 0) {
+        if(column == SCORE_COLUMN) {
             return "Score";
         } else {
             return sourceKey.get(column-1);

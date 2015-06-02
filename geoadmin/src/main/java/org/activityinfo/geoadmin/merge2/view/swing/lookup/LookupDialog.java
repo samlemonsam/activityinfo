@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Dialog that allows a user to choose from among close matches
+ * Dialog that allows a user to choose/override the look up value.
  */
 public class LookupDialog extends JDialog {
 
@@ -42,9 +42,14 @@ public class LookupDialog extends JDialog {
         tableModel = new LookupDialogTableModel(lookupTable, sourceKeyIndex);
 
         table = new JTable(tableModel);
+        
+        // Sort the table by score, descending, so the best match is at the top
         table.setAutoCreateRowSorter(true);
-        table.getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(0, SortOrder.DESCENDING)));
+        table.getRowSorter().setSortKeys(Arrays.asList(
+                new RowSorter.SortKey(LookupDialogTableModel.SCORE_COLUMN, SortOrder.DESCENDING)));
+
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -61,8 +66,6 @@ public class LookupDialog extends JDialog {
         });
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-
-        
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new AbstractAction() {
             @Override
@@ -85,7 +88,7 @@ public class LookupDialog extends JDialog {
         
         add(buttonPanel, BorderLayout.PAGE_END);
     }
-
+    
     private void changeMatch(int candidateIndex) {
         
         // Update our import model

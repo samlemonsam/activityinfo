@@ -7,8 +7,12 @@ import org.activityinfo.observable.ObservableSet;
 import java.util.*;
 
 /**
- * Set of user-defined matchings between <em>source</em> form instances
- * and <em>target</em> instances.
+ * Set of explicit {@link org.activityinfo.geoadmin.merge2.model.InstanceMatch}es
+ * between <em>source</em> form instances and <em>target</em> instances.
+ * 
+ * <p>This {@link org.activityinfo.observable.ObservableSet} implementation ensures that 
+ * all source instances are matched to at most one target instance, and that all
+ * target instances are matched to at most one source instance.</p>
  */
 public class InstanceMatchSet extends ObservableSet<InstanceMatch> {
     
@@ -25,6 +29,14 @@ public class InstanceMatchSet extends ObservableSet<InstanceMatch> {
         return Collections.unmodifiableSet(set);
     }
 
+    /**
+     * Adds the given {@code InstanceMatch} to the set, and removes any existing matches between
+     * the given {@code match}'s source or target instance ids.
+     * 
+     * <p>Registered {@link org.activityinfo.observable.SetObserver}s are notified of the addition
+     * as well as removes of any existing matches linked to the added match's source or target instances.</p>
+     * 
+     */
     public void add(InstanceMatch match) {
         if(!set.contains(match)) {
             removeMatchesWith(match.getSourceId());
@@ -45,6 +57,11 @@ public class InstanceMatchSet extends ObservableSet<InstanceMatch> {
         }
     }
 
+    /**
+     * Removes the given match between target and source instances from the set, notifying
+     * any registered 
+     * @param match
+     */
     public void remove(InstanceMatch match) {
         boolean removed = set.remove(match);
         map.remove(match.getTargetId());
@@ -54,6 +71,9 @@ public class InstanceMatchSet extends ObservableSet<InstanceMatch> {
         }
     }
 
+    /**
+     * Returns a match involving the given {@code resourceId} if one is present.
+     */
     public Optional<InstanceMatch> find(ResourceId resourceId) {
         return Optional.fromNullable(map.get(resourceId));
     }

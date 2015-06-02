@@ -13,7 +13,6 @@ import java.util.Set;
 
 /**
  * Describes the contents of a field in the source or target form.
- * 
  */
 public class FieldProfile {
 

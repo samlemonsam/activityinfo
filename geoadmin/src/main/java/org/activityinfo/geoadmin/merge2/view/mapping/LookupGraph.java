@@ -104,7 +104,6 @@ public class LookupGraph {
 
 
     /**
-
      * @return true if {@code x[i] > y[i]} for all {@code i}
      */
     private boolean dominates(double[] x, double[] y) {

@@ -7,8 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Unique tuple of values from the source collection used
- * to look up a referenced value.
+ * Unique tuple of values from the source collection used to look up a referenced value.
+ * 
+ * 
  */
 public class SourceLookupKey {
     private final String[] values;

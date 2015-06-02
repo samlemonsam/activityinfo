@@ -17,7 +17,6 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -126,25 +125,6 @@ public class MatchStepPanel extends StepPanel {
                 instanceMatchSet.remove(row.asInstanceMatch());
             }
         }
-    }
-    
-    private void showContextMenu(MouseEvent e) {
-        final MatchRow row = viewModel.getMatchTable().get(table.getSelectedRow());
-    
-        JMenuItem unmatch = new JMenuItem("Unmatch");
-        unmatch.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                unmatch(row);
-            }
-        });
-        
-        JPopupMenu popupMenu = new JPopupMenu();
-        popupMenu.add(unmatch);
-
-        Point point = SwingUtilities.convertPoint(table, e.getPoint(), this);
-
-        popupMenu.show(this, (int)point.getX(), (int)point.getY());
     }
 
     private void unmatch(MatchRow row) {

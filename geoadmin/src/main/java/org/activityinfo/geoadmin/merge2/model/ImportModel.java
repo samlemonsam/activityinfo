@@ -7,6 +7,21 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.ResourceStore;
 
 
+/**
+ * Models the process of importing a <em>source</em> collection of resources into an existing 
+ * <em>target</em> collection.
+ * 
+ * <p>The import process is essentially one of reshaping semi-structured data into a well-defined
+ * schema, or form class as we call it.</p>
+ *
+ * <p>Throughout, we refer to the data to be imported as the <em>source</em> form or collection, which 
+ * serves as source of changes to a <em>target</em> collection.</p>
+ * 
+ * <p>For example, when updating an existing collection/form of Afghan provinces with a shapefile containing
+ * higher resolution boundaries and more accurate province names, the shapefile would be the <em>source</em>
+ * form and the existing Afghan provinces administrative level would be the <em>target</em> form.</p>
+ * 
+ */
 public class ImportModel {
 
     private ResourceStore resourceStore;
@@ -22,10 +37,11 @@ public class ImportModel {
         this.targetFormId.updateValue(target);
     }
 
-    public InstanceMatchSet getInstanceMatchSet() {
-        return instanceMatchSet;
-    }
 
+    /**
+     * 
+     * @return the identity of the form to be imported.
+     */
     public StatefulValue<ResourceId> getSourceFormId() {
         return sourceFormId;
     }
@@ -38,6 +54,10 @@ public class ImportModel {
         return targetFormId;
     }
 
+    public InstanceMatchSet getInstanceMatchSet() {
+        return instanceMatchSet;
+    }
+    
     public StatefulSet<ReferenceMatch> getReferenceMatches() {
         return referenceMatches;
     }

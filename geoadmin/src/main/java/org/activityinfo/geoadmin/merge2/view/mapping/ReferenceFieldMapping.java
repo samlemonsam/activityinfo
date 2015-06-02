@@ -7,7 +7,17 @@ import org.activityinfo.model.form.FormField;
 import java.util.List;
 
 /**
- * Maps a source field to a target field
+ * Maps a source field to a reference target field using a set of key field pairs.
+ * 
+ * <p>A "student profile" form might have, for example, a "school" reference field which links the
+ * student to the school in which s/he is enrolled.</p>
+ * 
+ * <p>When importing a student roster from a <em>source</em> CSV file, we will most likely need to "look up"
+ * the ActivityInfo id of the student's school using one or more "key" fields in the CSV file, such 
+ * as "School name" and "School type". Key fields may also include fields nested in the reference field tree,
+ * for example, the name of the province in which the school is located, which might appear as a text field in
+ * the source flat file, but as a field on a referenced form in the target.
+ * 
  */
 public class ReferenceFieldMapping implements FieldMapping {
 
