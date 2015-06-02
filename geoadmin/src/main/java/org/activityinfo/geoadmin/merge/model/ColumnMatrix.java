@@ -11,7 +11,7 @@ import java.util.Set;
  * Computes the "distance" between two columns as a value between 0 and 1 where
  * at 0, 
  */
-public class ColumnMatrix implements DistanceMatrix {
+public class ColumnMatrix extends DistanceMatrix {
 
     private List<MergeColumn> targetColumns;
     private List<MergeColumn> sourceColumns;
@@ -40,15 +40,11 @@ public class ColumnMatrix implements DistanceMatrix {
 
     @Override
     public boolean matches(int rowIndex, int columnIndex) {
-        return computeOverlap(rowIndex, columnIndex) > 0.25;
+        return sumScores(rowIndex, columnIndex) > 0.25;
     }
 
     @Override
-    public double distance(int i, int j) {
-        throw new UnsupportedOperationException();
-    }
-
-    private double computeOverlap(int i, int j) {
+    public double score(int i, int j, int d) {
         Set<String> targetValues = targetColumns.get(i).uniqueValues();
         Set<String> sourceValues = sourceColumns.get(j).uniqueValues();
 

@@ -11,7 +11,7 @@ import java.util.Set;
  * Computes the "distance" between the <em>contents</em> of two fields
  *
  */
-public class FieldDistanceMatrix implements DistanceMatrix {
+public class FieldDistanceMatrix extends DistanceMatrix {
     private List<FieldProfile> sourceColumns;
     private List<FieldProfile> targetColumns;
 
@@ -38,15 +38,11 @@ public class FieldDistanceMatrix implements DistanceMatrix {
 
     @Override
     public boolean matches(int rowIndex, int columnIndex) {
-        return computeOverlap(rowIndex, columnIndex) > 0.25;
+        return sumScores(rowIndex, columnIndex) > 0.25;
     }
 
     @Override
-    public double distance(int i, int j) {
-        throw new UnsupportedOperationException();
-    }
-
-    private double computeOverlap(int i, int j) {
+    public double score(int i, int j, int d) {
         Set<String> targetValues = targetColumns.get(i).uniqueValues();
         Set<String> sourceValues = sourceColumns.get(j).uniqueValues();
         

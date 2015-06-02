@@ -29,6 +29,7 @@ public class MatchTableTest {
     public static final int COLUMN_WIDTH = 25;
     private ImportModel model;
     private MatchTable matchTable;
+    private ImportView importView;
 
     @Before
     public void setUp() throws IOException {
@@ -37,17 +38,11 @@ public class MatchTableTest {
                 ResourceStoreStub.GADM_PROVINCE_SOURCE_ID,
                 ResourceStoreStub.REGION_TARGET_ID);
 
-        ImportView importView = new ImportView(resourceStore, model);
+        importView = new ImportView(resourceStore, model);
         matchTable = importView.getMatchTable();
         matchTable.subscribe(new MockTableObserver());
     }
     
-    @Test
-    public void test() {
-        dump(matchTable.getFieldMapping().get());
-        dump(matchTable);
-        
-    }
     
     @Test
     public void resolveMatch() {
@@ -62,6 +57,7 @@ public class MatchTableTest {
         
         dump(matchTable);
     }
+    
     
     public void dump(FieldMatching fieldMatching) {
         for (Map.Entry<FieldProfile, FieldProfile> mapping : fieldMatching.asMap().entrySet()) {

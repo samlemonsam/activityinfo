@@ -48,27 +48,30 @@ class LatinPlaceName {
         numParts = 0;
         numChars = 0;
 
-        int currentClass = OTHER;
+        if(input != null) {
 
-        for(int i=0;i!=input.length();++i) {
-            String ch = characterNormalizer.normalizeCharacter(input.substring(i, i + 1));
+            int currentClass = OTHER;
 
-            // For words like N'Goutjina we just drop the apostrophe
-            if(ch.equals(APOSTROPHE) && currentClass == LETTER_CLASS) {
-                continue;
-            }
+            for (int i = 0; i != input.length(); ++i) {
+                String ch = characterNormalizer.normalizeCharacter(input.substring(i, i + 1));
 
-            int characterClass = classify(ch);
-            if(isBreak(currentClass, characterClass)) {
-                partOffsets[numParts] = numChars;
-                numParts++;
-            }
+                // For words like N'Goutjina we just drop the apostrophe
+                if (ch.equals(APOSTROPHE) && currentClass == LETTER_CLASS) {
+                    continue;
+                }
 
-            currentClass = characterClass;
+                int characterClass = classify(ch);
+                if (isBreak(currentClass, characterClass)) {
+                    partOffsets[numParts] = numChars;
+                    numParts++;
+                }
 
-            if(currentClass != OTHER) {
-                for(int j=0;j!=ch.length();++j) {
-                    chars[numChars++] = ch.charAt(j);
+                currentClass = characterClass;
+
+                if (currentClass != OTHER) {
+                    for (int j = 0; j != ch.length(); ++j) {
+                        chars[numChars++] = ch.charAt(j);
+                    }
                 }
             }
         }

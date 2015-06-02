@@ -20,6 +20,6 @@ public class LookupStep implements Step {
 
     @Override
     public StepPanel createView() {
-        return new LookupStepPanel();
+        return new LookupStepPanel(null, fieldMapping);
     }
 }

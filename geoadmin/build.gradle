@@ -26,7 +26,6 @@ dependencies {
         exclude(module: 'xercesImpl')
     }
     compile group: 'org.swinglabs', name: 'swingx', version:'1.6.1'
-    compile group: 'com.miglayout', name: 'miglayout', version:'3.7.4'
     compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.1'
     compile group: 'commons-lang', name: 'commons-lang', version:'2.6'
     compile 'net.sourceforge.parallelcolt:parallelcolt:0.10.1'

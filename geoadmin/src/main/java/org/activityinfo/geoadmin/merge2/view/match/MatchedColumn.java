@@ -12,6 +12,7 @@ import java.awt.*;
  */
 public class MatchedColumn extends MatchTableColumn {
 
+    public static final Color WARNING_COLOR = Color.decode("#FF6600");
     private final MatchTable matching;
     private final FieldProfile sourceField;
     private final FieldProfile targetField;
@@ -88,7 +89,7 @@ public class MatchedColumn extends MatchTableColumn {
             if (score > 0.99) {
                 return Color.GREEN; 
             } else if (score > 0.80) {
-                return Color.decode("#FF6600");
+                return WARNING_COLOR;
             }
         }
         return Color.RED;

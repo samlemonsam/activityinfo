@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Matrix representing the distance between two sets of rows
  */
-public class RowDistanceMatrix implements DistanceMatrix {
+public class RowDistanceMatrix extends DistanceMatrix {
 
     private ColumnView target[];
     private ColumnView source[];
@@ -72,27 +72,18 @@ public class RowDistanceMatrix implements DistanceMatrix {
         }
         return false;
     }
-
-    @Override
-    public double distance(int targetRowIndex, int sourceRowIndex) {
-        double distance = 0;
-
-        for(int d=0;d<dimensionCount;++d) {
-            distance += (1.0 - getScore(d, targetRowIndex, sourceRowIndex));
-        }
-        return distance;
-    }
     
     public double[] getScores(int targetRowIndex, int sourceRowIndex) {
         double[] scores = new double[dimensionCount];
         for(int d=0;d<dimensionCount;++d) {
-            scores[d] = getScore(d, targetRowIndex, sourceRowIndex);
+            scores[d] = score(targetRowIndex, sourceRowIndex, d);
         }
         return scores;
         
     }
-
-    private double getScore(int dimensionIndex, int targetRowIndex, int sourceRowIndex) {
+    
+    @Override
+    public double score(int targetRowIndex, int sourceRowIndex, int dimensionIndex) {
         String targetValue = target[dimensionIndex].getString(targetRowIndex);
         String sourceValue = source[dimensionIndex].getString(sourceRowIndex);
         if (targetValue == null && sourceValue == null) {
