@@ -7,10 +7,9 @@ import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -39,6 +38,11 @@ public class DesignTab {
                 return this;
             } catch (WebDriverException ignored) {}
         }
+    }
+
+    public LinkIndicatorsPage linkIndicators() {
+        databaseTree.select("Link Indicators");
+        return new LinkIndicatorsPage(container);
     }
     
     private GalleryView gallery() {

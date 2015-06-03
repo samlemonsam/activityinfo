@@ -17,7 +17,9 @@ public class XPathBuilder {
         DESCENDANT,
         ANCESTORS,
         PARENT,
-        FOLLOWING_SIBLING
+        FOLLOWING_SIBLING,
+        PRECEDING_SIBLING,
+        PRECEDING
     }
     
     private FluentElement context;
@@ -50,6 +52,16 @@ public class XPathBuilder {
     
     public XPathBuilder followingSibling() {
         this.axis = Axis.FOLLOWING_SIBLING;
+        return this;
+    }
+
+    public XPathBuilder preceding() {
+        this.axis = Axis.PRECEDING;
+        return this;
+    }
+
+    public XPathBuilder precedingSibling() {
+        this.axis = Axis.PRECEDING_SIBLING;
         return this;
     }
 
@@ -143,8 +155,8 @@ public class XPathBuilder {
         return this;
     }
     
-    private XPathBuilder tagName(String div, String... conditions) {
-        StringBuilder xpath = new StringBuilder(div);
+    private XPathBuilder tagName(String tagName, String... conditions) {
+        StringBuilder xpath = new StringBuilder(tagName);
         if(conditions.length > 0) {
             xpath.append("[");
             Joiner.on(" and ").appendTo(xpath, conditions);
@@ -176,6 +188,10 @@ public class XPathBuilder {
                 xpath.append("parent::");
             } else if(axis == Axis.FOLLOWING_SIBLING) {
                 xpath.append("following-sibling::");
+            } else if (axis == Axis.PRECEDING) {
+                xpath.append("preceding::");
+            } else if (axis == Axis.PRECEDING_SIBLING) {
+                xpath.append("preceding-sibling::");
             }
             xpath.append(step);
         }

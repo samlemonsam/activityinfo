@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.driver.model.LinkedIndicatorRow;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
@@ -14,6 +15,7 @@ import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
@@ -410,6 +412,45 @@ public class UiApplicationDriver extends ApplicationDriver {
         DesignPage designPage = designTab.design();
         designPage.getDesignTree().select(testObject.getAlias("name"));
         designPage.getToolbarMenu().clickButton("Delete");
+    }
+
+    @Override
+    public void createLinkIndicators(List<LinkedIndicatorRow> linkedIndicatorRows) {
+        ensureLoggedIn();
+
+        LinkIndicatorsPage linkIndicatorsPage = applicationPage.navigateToDesignTab().linkIndicators();
+        linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
+
+        for (LinkedIndicatorRow row : linkedIndicatorRows) {
+
+            linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).click();
+            linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).click();
+
+            GxtGrid sourceIndicator = linkIndicatorsPage.getSourceIndicator().waitUntilAtLeastOneRowIsLoaded();
+            GxtGrid targetIndicator = linkIndicatorsPage.getTargetIndicator().waitUntilAtLeastOneRowIsLoaded();
+
+            sourceIndicator.findCell(aliasTable.getAlias(row.getSourceIndicator())).click();
+            targetIndicator.findCell(aliasTable.getAlias(row.getDestIndicator())).click();
+
+            linkIndicatorsPage.clickLinkButton();
+        }
+    }
+
+    public void assertLinkedIndicatorsMarked(List<LinkedIndicatorRow> linkedIndicatorRows, boolean marked) {
+        LinkIndicatorsPage linkIndicatorsPage = applicationPage.navigateToDesignTab().linkIndicators();
+        linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
+
+        for (LinkedIndicatorRow row : linkedIndicatorRows) {
+
+            Preconditions.checkState(linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).hasIcon(), marked);
+            Preconditions.checkState(linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).hasIcon(), marked);
+
+            GxtGrid sourceIndicator = linkIndicatorsPage.getSourceIndicator().waitUntilAtLeastOneRowIsLoaded();
+            GxtGrid targetIndicator = linkIndicatorsPage.getTargetIndicator().waitUntilAtLeastOneRowIsLoaded();
+
+            Preconditions.checkState(sourceIndicator.findCell(aliasTable.getAlias(row.getSourceIndicator())).hasIcon(), marked);
+            Preconditions.checkState(targetIndicator.findCell(aliasTable.getAlias(row.getDestIndicator())).hasIcon(), marked);
+        }
     }
 
     @Override

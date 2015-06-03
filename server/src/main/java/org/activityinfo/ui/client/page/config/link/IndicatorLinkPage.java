@@ -274,15 +274,15 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
         IndicatorDTO source = sourceIndicatorGrid.getSelectedItem();
         IndicatorDTO dest = destIndicatorGrid.getSelectedItem();
 
-        final boolean link = !linkGraph.linked(source, dest);
-        linkButton.toggle(link);
+        final boolean isLinked = !linkGraph.linked(source, dest);
+        linkButton.toggle(isLinked);
 
-        LinkIndicators update = new LinkIndicators();
-        update.setLink(link);
-        update.setSourceIndicatorId(source.getId());
-        update.setDestIndicatorId(dest.getId());
+        LinkIndicators updateCommand = new LinkIndicators();
+        updateCommand.setLink(isLinked);
+        updateCommand.setSourceIndicatorId(source.getId());
+        updateCommand.setDestIndicatorId(dest.getId());
 
-        if (link) {
+        if (isLinked) {
             linkGraph.link(sourceDatabaseGrid.getSelectedItem(), source, destDatabaseGrid.getSelectedItem(), dest);
         } else {
             linkGraph.unlink(source, dest);
@@ -291,7 +291,7 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
         sourceDatabaseGrid.setLinked(linkGraph.sourceDatabases());
         onDatabaseLinksChanged();
 
-        dispatcher.execute(update, new AsyncCallback<VoidResult>() {
+        dispatcher.execute(updateCommand, new AsyncCallback<VoidResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -300,7 +300,7 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
 
             @Override
             public void onSuccess(VoidResult result) {
-                Info.display(I18N.CONSTANTS.saved(), link ? "Link created" : "Link removed");
+                Info.display(I18N.CONSTANTS.saved(), isLinked ? "Link created" : "Link removed");
             }
         });
 

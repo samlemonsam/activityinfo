@@ -61,7 +61,13 @@ public class GxtGrid {
                 .firstIfPresent();
         
         if(!cell.isPresent()) {
-            throw makeAssertion(text);
+            cell = container.find()
+                    .div(withClass("x-grid3-cell-inner")).div(containingText(text))
+                    .ancestor().td(withClass("x-grid3-cell"))
+                    .firstIfPresent();
+            if (!cell.isPresent()) {
+                throw makeAssertion(text);
+            }
         }
         
         return new GxtCell(cell.get());
@@ -219,6 +225,12 @@ public class GxtGrid {
                     }
                 }
             });
+        }
+
+        public boolean hasIcon() {
+            return element.find().precedingSibling().
+                    td(withClass("x-grid3-td-icon")).div(withClass("x-grid3-col-icon")).
+                    img().firstIfPresent().isPresent();
         }
 
         public void click() {
