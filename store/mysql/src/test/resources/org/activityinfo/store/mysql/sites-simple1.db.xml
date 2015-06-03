@@ -154,6 +154,8 @@
              units="menages" aggregation="0" category="outputs" listHeader="header"
              description="desc" sortOrder="1" mandatory="0"/>
 
+
+
   <!-- NFI Indicator 3: Number of Distributions -->
 
   <indicator indicatorId="103" activityId="1"
@@ -174,6 +176,13 @@
              aggregation="0"
              nameInExpression="contact"
              type="FREE_TEXT" sortOrder="5" mandatory="0"/>
+
+  <indicator indicatorId="88884" activityId="1" name="empty" nameInExpression="q"
+             calculatedAutomatically="0"
+             type="FREE_TEXT"
+             units="menages" aggregation="0" category="outputs" listHeader="header"
+             description="desc" sortOrder="1" mandatory="0"/>
+
 
   <!-- PEAR Activity 2 : Kits Scolaire -->
 

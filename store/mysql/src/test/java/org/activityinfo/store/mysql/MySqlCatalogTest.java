@@ -110,6 +110,12 @@ public class MySqlCatalogTest {
         
     }
 
+
+    @Test
+    public void emptyIndicator() {
+        query(CuidAdapter.activityFormClass(1), "_id", "q");
+    }
+
     private void query(ResourceId formClassId, String... fields) {
         QueryModel queryModel = new QueryModel(formClassId);
         queryModel.selectResourceId().as("_id");

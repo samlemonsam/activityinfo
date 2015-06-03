@@ -42,7 +42,7 @@ public class ActivityTableMappingBuilder {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
         mapping.tableName = "site";
-        mapping.baseFilter = "base.activityId=" + activity.getId();
+        mapping.baseFilter = "base.dateDeleted is NULL AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
         mapping.formClass.setLabel(activity.getName());
@@ -70,7 +70,7 @@ public class ActivityTableMappingBuilder {
     public static ActivityTableMappingBuilder reportingPeriod(int activityId) {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.tableName = "reportingperiod base LEFT JOIN site on (site.siteId=base.siteId)";
-        mapping.baseFilter = "site.activityId=" + activityId;
+        mapping.baseFilter = "site.dateDeleted IS NULL AND site.activityId=" + activityId;
         mapping.classId = CuidAdapter.reportingPeriodFormClass(activityId);
         mapping.formClass = new FormClass(mapping.classId);
         mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.MONTHLY_REPORT, "base.reportingPeriodId");

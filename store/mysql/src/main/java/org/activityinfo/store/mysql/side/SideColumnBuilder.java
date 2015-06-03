@@ -64,13 +64,12 @@ public class SideColumnBuilder {
         sql.append("SELECT site.siteId, iv.indicatorId, iv.value, iv.textValue").append(newLine);
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN reportingperiod rp ON (site.siteId = rp.siteId)").append(newLine);
-        sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId)").append(newLine);
-        sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
-        sql.append("  AND (iv.indicatorId IS NULL OR iv.indicatorId IN (");
+        sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId ");
+        sql.append("  AND iv.indicatorId IN (");
         Joiner.on(", ").appendTo(sql, fieldMap.keySet());
-        sql.append("))").append(newLine);
+        sql.append("))").append(newLine);                
+        sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
         sql.append("ORDER BY site.siteId");
-
         System.out.println(sql);
         
         execute(executor, sql);
@@ -83,9 +82,6 @@ public class SideColumnBuilder {
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
         sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId)").append(newLine);
         sql.append("WHERE site.dateDeleted IS NULL AND site.activityId=").append(activityId).append(newLine);
-        sql.append("  AND (a.attributeGroupId IS NULL OR a.attributeGroupId IN (");
-        Joiner.on(", ").appendTo(sql, fieldMap.keySet());
-        sql.append("))").append(newLine);
         sql.append("ORDER BY site.siteId");
         
         execute(executor, sql);
