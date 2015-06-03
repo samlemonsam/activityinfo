@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.RateLimiter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -80,7 +81,7 @@ public class MailinatorClient implements EmailDriver {
                     .get(String.class);
 
             return objectMapper.readValue(json, Inbox.class).getMessages();
-        } catch (ClientHandlerException e) {
+        } catch (ClientHandlerException | UniformInterfaceException e) {
 
             // in case client handler fail to retrieve the results retry it
 
