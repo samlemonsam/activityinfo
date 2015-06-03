@@ -4,7 +4,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulSet;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.store.ResourceStore;
 
 
 /**
@@ -24,15 +23,13 @@ import org.activityinfo.store.ResourceStore;
  */
 public class ImportModel {
 
-    private ResourceStore resourceStore;
     private StatefulValue<ResourceId> sourceFormId = new StatefulValue<>();
     private StatefulValue<ResourceId> targetFormId = new StatefulValue<>();
     private InstanceMatchSet instanceMatchSet = new InstanceMatchSet();
     private StatefulSet<ReferenceMatch> referenceMatches = new StatefulSet<>();
 
 
-    public ImportModel(final ResourceStore resourceStore, ResourceId source, ResourceId target) {
-        this.resourceStore = resourceStore;
+    public ImportModel(ResourceId source, ResourceId target) {
         this.sourceFormId.updateValue(source);
         this.targetFormId.updateValue(target);
     }

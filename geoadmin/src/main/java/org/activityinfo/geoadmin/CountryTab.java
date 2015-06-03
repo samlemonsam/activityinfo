@@ -3,8 +3,13 @@ package org.activityinfo.geoadmin;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.activityinfo.geoadmin.locations.LocationWindow;
-import org.activityinfo.geoadmin.merge.MergeWindow;
+import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.geoadmin.merge2.view.ImportView;
+import org.activityinfo.geoadmin.merge2.view.swing.ImportDialog;
 import org.activityinfo.geoadmin.model.*;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.ResourceStoreImpl;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -216,8 +221,12 @@ public class CountryTab extends JPanel {
         ImportSource source = chooseSource();
         if (source != null) {
             try {
-                MergeWindow window = new MergeWindow(getParentFrame(), source, level, client);
-                window.setVisible(true);
+                ResourceId targetId = CuidAdapter.adminLevelFormClass(level.getId());
+                ResourceId sourceId = ResourceId.valueOf("file://" + source.getFile().getAbsolutePath());
+                ImportModel model = new ImportModel(sourceId, targetId);
+                ImportView viewModel = new ImportView(new ResourceStoreImpl(client), model);
+                ImportDialog dialog = new ImportDialog(viewModel);
+                dialog.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

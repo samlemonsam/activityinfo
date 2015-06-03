@@ -1,11 +1,9 @@
-package org.activityinfo.geoadmin.merge.model;
+package org.activityinfo.geoadmin.match;
 
 import cern.colt.list.tint.IntArrayList;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
-import org.activityinfo.geoadmin.match.DistanceMatrix;
-import org.activityinfo.geoadmin.match.HungarianAlgorithm;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

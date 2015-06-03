@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.merge.model;
+package org.activityinfo.geoadmin.match;
 
 
 import com.google.common.base.Preconditions;

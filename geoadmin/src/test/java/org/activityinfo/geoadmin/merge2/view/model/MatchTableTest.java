@@ -12,6 +12,8 @@ import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
 import org.activityinfo.geoadmin.merge2.view.match.UnmatchedColumn;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.observable.MockObserver;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.TableObserver;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +36,7 @@ public class MatchTableTest {
     @Before
     public void setUp() throws IOException {
         ResourceStoreStub resourceStore = new ResourceStoreStub();
-        model = new ImportModel(resourceStore,
+        model = new ImportModel(
                 ResourceStoreStub.GADM_PROVINCE_SOURCE_ID,
                 ResourceStoreStub.REGION_TARGET_ID);
 
@@ -49,7 +51,7 @@ public class MatchTableTest {
         ResourceId sourceId = ResourceId.valueOf("MDG_adm2.7");   // Amoron'i mania
         ResourceId targetId = ResourceId.valueOf("z0000041751");  // Amoron i Mania
 
-        assertThat(matchTable.getUnresolvedCount().get(), equalTo(2));
+        assertThat(waitFor(matchTable.getUnresolvedCount()), equalTo(2));
 
         model.getInstanceMatchSet().add(new InstanceMatch(sourceId, targetId));
 
@@ -57,8 +59,16 @@ public class MatchTableTest {
         
         dump(matchTable);
     }
-    
-    
+
+    private <T> T waitFor(Observable<T> observable) {
+        if(observable.isLoading()) {
+            observable.subscribe(new MockObserver<T>());
+        }
+        assert !observable.isLoading();
+        return observable.get();
+    }
+
+
     public void dump(FieldMatching fieldMatching) {
         for (Map.Entry<FieldProfile, FieldProfile> mapping : fieldMatching.asMap().entrySet()) {
             System.out.println(mapping.getKey() + " -> " + mapping.getValue());

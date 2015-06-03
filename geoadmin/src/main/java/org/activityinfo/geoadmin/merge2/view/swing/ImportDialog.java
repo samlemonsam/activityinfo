@@ -103,7 +103,7 @@ public class ImportDialog extends JFrame {
         ActivityInfoClient client = new ActivityInfoClient("http://localhost:8898/resources", "akbertram@gmail.com", "notasecret");
         ResourceStore resourceStore = new ResourceStoreImpl(client);
         
-        ImportModel modelStore = new ImportModel(resourceStore, 
+        ImportModel modelStore = new ImportModel(
                 ResourceId.valueOf("file:///home/alex/dev/activityinfo-beta/geoadmin/src/test/resources/mg/communes.shp"),
                 CuidAdapter.adminLevelFormClass(1511));
         

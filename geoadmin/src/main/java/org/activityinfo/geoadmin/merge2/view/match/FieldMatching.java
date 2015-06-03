@@ -4,7 +4,7 @@ package org.activityinfo.geoadmin.merge2.view.match;
 import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
 import org.activityinfo.geoadmin.match.DistanceMatrix;
-import org.activityinfo.geoadmin.merge.model.MatchBuilder;
+import org.activityinfo.geoadmin.match.MatchBuilder;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.observable.Observable;
