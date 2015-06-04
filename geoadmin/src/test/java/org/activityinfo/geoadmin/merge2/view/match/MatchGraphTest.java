@@ -10,6 +10,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,8 +22,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class MatchGraphTest {
-
-
 
     public static final int COLUMN_WIDTH = 25;
     private ImportModel model;
@@ -49,6 +48,7 @@ public class MatchGraphTest {
     }
     
     @Test
+    @Ignore
     public void pcaTest() {
 
         for (KeyFieldPair keyField : keyFields) {
@@ -130,43 +130,70 @@ public class MatchGraphTest {
         Collection<MatchGraph.Candidate> frontier = graph.getParetoFrontierForSource(sourceIndex);
         
         assertThat(frontier.size(), equalTo(1));
-
+ 
         MatchGraph.Candidate optimal = Iterables.getOnlyElement(frontier);
 
         assertThat(targetForm.getField("Name").getView().getString(optimal.getTargetIndex()), equalTo("Komajia"));
     }
-    
+
+
+    /**
+     * The simplest case is when the pareto frontier consists of a single match.
+     */
     @Test
-    public void mandritsara() {
-        int sourceIndex = findSourceIndex("COMMUNE", "Mandritsara");
-        graph.buildParetoFrontierForSource(sourceIndex);
-        
-        dumpCandidatesForSource(sourceIndex);
-    }
-    
-    @Test
-    public void bestTest() {
+    public void singleParetoOptimal() {
         graph.build();
-        
+
         int sourceIndex = findTargetIndex("Name", "Komajia");
         int targetIndex = graph.getBestMatchForTarget(sourceIndex);
+
+        assertThat(targetIndex, equalTo(findSourceIndex("COMMUNE", "Komajia")));
         
-        assertThat(targetIndex, equalTo(900000));
+        // Am
 
     }
+    @Test
+    public void elonty() {
+        graph.rankScoreMatrix();
+        int sourceIndex = findSourceIndex("COMMUNE", "Elonty");
+    
+        graph.buildParetoFrontierForSource(sourceIndex);
+    
+    }
+    
+
+    /**
+     * If there are multiple pareto optimums, we choose the best using
+     */
+    @Test
+    public void multipleParetoOptimums() {
+        
+        graph.build();
+
+       //checkMatch("Mandritsara", "Ambohijato Mandritsara");
+        checkMatch( "Elonty", "Ambolofotsy");
+    }
+
+    private void checkMatch(String source, String target) {
+        int sourceIndex = findSourceIndex("COMMUNE", source);
+
+        System.out.println("SOURCE");
+        sourceForm.dump(sourceIndex);
+
+        System.out.println("TARGET");
+        dumpCandidatesForSource(sourceIndex);
+
+        int matchedSourceIndex = graph.getBestMatchForTarget(findTargetIndex("Name", target));
+        assertThat(matchedSourceIndex, equalTo(sourceIndex));
+    }
+
 
     private void dumpCandidatesForSource(int sourceIndex) {
         
         Collection<MatchGraph.Candidate> candidates = graph.getParetoFrontierForSource(sourceIndex);
 
         for (MatchGraph.Candidate candidate : candidates) {
-            for (KeyFieldPair keyField : keyFields) {
-                System.out.print(format("[%s = %s]",
-                        keyField.getTargetField().getLabel(),
-                        keyField.getTargetField().getView().getString(candidate.getTargetIndex())));
-
-            }
-            System.out.println();
+            targetForm.dump(candidate.getTargetIndex());
         }
         
     }

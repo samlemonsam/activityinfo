@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
 import com.google.common.collect.Sets;
-import org.activityinfo.geoadmin.match.DistanceMatrix;
+import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 
 import java.util.List;
@@ -11,11 +11,11 @@ import java.util.Set;
  * Computes the "distance" between the <em>contents</em> of two fields
  *
  */
-public class FieldDistanceMatrix extends DistanceMatrix {
+public class FieldScoreMatrix extends ScoreMatrix {
     private List<FieldProfile> sourceColumns;
     private List<FieldProfile> targetColumns;
 
-    public FieldDistanceMatrix(List<FieldProfile> sourceColumns, List<FieldProfile> targetColumns) {
+    public FieldScoreMatrix(List<FieldProfile> sourceColumns, List<FieldProfile> targetColumns) {
         this.sourceColumns = sourceColumns;
         this.targetColumns = targetColumns;
     }

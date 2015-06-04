@@ -236,16 +236,23 @@ public class MatchTable {
  
             columns.add(new ResolutionColumn(MatchTable.this, matchSet));
 
-            // Show the existing instances, paired with the matching column
+            // Show the target fields 
             for (FieldProfile targetField : keyFields.getTarget().getFields()) {
                 Optional<FieldProfile> sourceField = keyFields.targetToSource(targetField);
                 if(sourceField.isPresent()) {
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.TARGET));
-                    columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.SOURCE));
                 } else {
                     columns.add(new UnmatchedColumn(targetField, fromTarget(targetField.getView())));
                 }
             }
+            
+            // Now show the source fields, but in the same order as the target fields
+            for (FieldProfile targetField : keyFields.getTarget().getFields()) {
+                Optional<FieldProfile> sourceField = keyFields.targetToSource(targetField);
+                if(sourceField.isPresent()) {
+                    columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.SOURCE));
+                } 
+            }            
             
             // Also include the unmatched source columns as reference
             for (FieldProfile sourceField : keyFields.getSource().getFields()) {

@@ -34,13 +34,13 @@ public class MatchBuilder {
     /**
      * A matrix providing distances between items in the target set (rows) and the column set
      */
-    private final DistanceMatrix matrix;
+    private final ScoreMatrix matrix;
     
     private int[] targetSubGraph;
     private int[] sourceSubGraph;
     private int subGraphCount;
 
-    public MatchBuilder(DistanceMatrix matrix) {
+    public MatchBuilder(ScoreMatrix matrix) {
         this.numTargets = matrix.getRowCount();
         this.numSources = matrix.getColumnCount();
         this.matrix = matrix;

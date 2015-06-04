@@ -63,7 +63,7 @@ public class HungarianAlgorithm {
 
 
 
-    public static double[][] toArray(DistanceMatrix matrix) {
+    public static double[][] toArray(ScoreMatrix matrix) {
         double[][] array = new double[matrix.getRowCount()][matrix.getColumnCount()];
         for(int i=0;i<matrix.getRowCount();++i) {
             for(int j=0;j<matrix.getColumnCount();++j) {
@@ -73,7 +73,7 @@ public class HungarianAlgorithm {
         return array;
     }
 
-    public HungarianAlgorithm(DistanceMatrix matrix) {
+    public HungarianAlgorithm(ScoreMatrix matrix) {
         this(toArray(matrix));
     }
 

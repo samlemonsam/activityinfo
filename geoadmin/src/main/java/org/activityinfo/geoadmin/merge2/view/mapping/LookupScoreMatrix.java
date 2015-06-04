@@ -1,13 +1,13 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
-import org.activityinfo.geoadmin.match.DistanceMatrix;
+import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 
 /**
  * Calculates distance between source lookup keys (rows) and target form instances (columns)
  */
-public class LookupDistanceMatrix extends DistanceMatrix {
+public class LookupScoreMatrix extends ScoreMatrix {
     
     private final SourceKeySet sourceKeySet;
     private final FormProfile targetForm;
@@ -16,7 +16,7 @@ public class LookupDistanceMatrix extends DistanceMatrix {
     private final LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
 
 
-    public LookupDistanceMatrix(SourceKeySet sourceKeySet, FormProfile targetForm) {
+    public LookupScoreMatrix(SourceKeySet sourceKeySet, FormProfile targetForm) {
         this.sourceKeySet = sourceKeySet;
         this.targetForm = targetForm;
         dimCount = sourceKeySet.getSourceFields().size();

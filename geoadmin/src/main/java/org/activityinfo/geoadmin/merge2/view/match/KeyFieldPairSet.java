@@ -4,8 +4,8 @@ package org.activityinfo.geoadmin.merge2.view.match;
 import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableList;
-import org.activityinfo.geoadmin.match.DistanceMatrix;
 import org.activityinfo.geoadmin.match.MatchBuilder;
+import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.observable.Observable;
@@ -43,8 +43,8 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
      */
     public static KeyFieldPairSet matchKeys(FormProfile source, FormProfile target) {
 
-        DistanceMatrix distanceMatrix = new FieldDistanceMatrix(source.getFields(), target.getFields());
-        MatchBuilder fieldGraph = new MatchBuilder(distanceMatrix);
+        ScoreMatrix scoreMatrix = new FieldScoreMatrix(source.getFields(), target.getFields());
+        MatchBuilder fieldGraph = new MatchBuilder(scoreMatrix);
 
         BiMap<FieldProfile, FieldProfile> map = fieldGraph.buildMap(source.getFields(), target.getFields());
         

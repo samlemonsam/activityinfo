@@ -4,7 +4,12 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
-public abstract class DistanceMatrix {
+/**
+ * Multidimensional matrix which scores the similarity between two sets of objects along
+ * one or more dimensions.
+ * 
+ */
+public abstract class ScoreMatrix {
 
     public abstract int getDimensionCount();
 
@@ -204,5 +209,6 @@ public abstract class DistanceMatrix {
         
         return scores;
     }
+
     
 }

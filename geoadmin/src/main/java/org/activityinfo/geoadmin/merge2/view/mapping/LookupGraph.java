@@ -18,7 +18,7 @@ public class LookupGraph {
 
     private final SourceKeySet sourceKeySet;
     private final FormProfile targetForm;
-    private final LookupDistanceMatrix matrix;
+    private final LookupScoreMatrix matrix;
     private final Multimap<Integer, Integer> candidates = HashMultimap.create();
     private final int optimalMatches[];
 
@@ -26,7 +26,7 @@ public class LookupGraph {
     public LookupGraph(SourceKeySet sourceKeySet, FormProfile targetForm) {
         this.sourceKeySet = sourceKeySet;
         this.targetForm = targetForm;
-        this.matrix = new LookupDistanceMatrix(sourceKeySet, targetForm);
+        this.matrix = new LookupScoreMatrix(sourceKeySet, targetForm);
         
         for(int i=0;i!=sourceKeySet.distinct().size();++i) {
             for(int j=0;j<targetForm.getRowCount();++j) {

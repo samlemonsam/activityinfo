@@ -1,13 +1,13 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
-import org.activityinfo.geoadmin.match.DistanceMatrix;
+import org.activityinfo.geoadmin.match.ScoreMatrix;
 
 import java.util.List;
 
 /**
  * Matrix representing the distance between two sets of form instances.
  */
-public class InstanceMatrix extends DistanceMatrix {
+public class InstanceMatrix extends ScoreMatrix {
 
     private int sourceCount;
     private int targetCount;
