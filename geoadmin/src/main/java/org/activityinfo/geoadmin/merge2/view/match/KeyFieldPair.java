@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
+import com.google.common.base.Strings;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 
@@ -37,6 +38,10 @@ public class KeyFieldPair {
     public double score(int sourceIndex, int targetIndex) {
         String sourceValue = sourceField.getView().getString(sourceIndex);
         String targetValue = targetField.getView().getString(targetIndex);
-        return scorer.score(sourceValue, targetValue);
+        if (Strings.isNullOrEmpty(sourceValue) || Strings.isNullOrEmpty(targetValue)) {
+            return Double.NaN;
+        } else {
+            return scorer.score(sourceValue, targetValue);
+        }
     }
 }

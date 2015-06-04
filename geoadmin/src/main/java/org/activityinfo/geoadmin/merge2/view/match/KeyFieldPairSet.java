@@ -96,4 +96,8 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
     public List<KeyFieldPair> asList() {
         return pairs;
     }
+
+    public KeyFieldPair get(int i) {
+        return pairs.get(i);
+    }
 }

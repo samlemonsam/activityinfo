@@ -105,4 +105,11 @@ public class FormProfile {
         }
         throw new IllegalArgumentException("No such field: " + fieldName);
     }
+
+    public void dump(int index) {
+        for (FieldProfile field : fields) {
+            System.out.print("[" + field.getLabel() + " = " + field.getView().getString(index) + "]");
+        }
+        System.out.println();
+    }
 }
