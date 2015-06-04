@@ -64,7 +64,11 @@ public class IndicatorGridPanel extends ContentPanel {
 
         @Override
         public void load(DataReader<List<ModelData>> reader, Object loadConfig, final AsyncCallback<List<ModelData>> callback) {
+
+            showEmptyText(I18N.CONSTANTS.loading());
+
             if (selectedDb == null) {
+                setEmptyText();
                 callback.onSuccess(Lists.<ModelData>newArrayList());
                 return;
             }
@@ -72,11 +76,14 @@ public class IndicatorGridPanel extends ContentPanel {
             dispatcher.execute(new GetActivityForms().setFilter(activityIdsFilter())).then(new AsyncCallback<ActivityFormResults>() {
                 @Override
                 public void onFailure(Throwable caught) {
+                    showEmptyText(I18N.CONSTANTS.failedToLoadEntries());
+
                     callback.onFailure(caught);
                 }
 
                 @Override
                 public void onSuccess(ActivityFormResults result) {
+                    setEmptyText();
                     callback.onSuccess(constructResult(result.getData()));
                 }
             });
@@ -138,7 +145,7 @@ public class IndicatorGridPanel extends ContentPanel {
                 return model instanceof IndicatorDTO;
             }
         });
-        grid.getView().setEmptyText(I18N.CONSTANTS.selectDatabaseHelp());
+        setEmptyText();
         grid.setAutoExpandColumn("name");
         grid.setHideHeaders(true);
 
@@ -154,7 +161,15 @@ public class IndicatorGridPanel extends ContentPanel {
         });
         setLayout(new FitLayout());
         add(grid);
+    }
 
+    private void setEmptyText() {
+        showEmptyText(I18N.CONSTANTS.selectDatabaseHelp());
+    }
+
+    private void showEmptyText(String text) {
+        grid.getView().setEmptyText(text);
+        grid.getView().refresh(false);
     }
 
     public HighlightingGridView getGridView() {
