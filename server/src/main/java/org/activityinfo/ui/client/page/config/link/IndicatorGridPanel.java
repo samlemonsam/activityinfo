@@ -45,6 +45,7 @@ import org.activityinfo.legacy.shared.command.GetActivityForms;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.ListResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.Arrays;
@@ -96,12 +97,16 @@ public class IndicatorGridPanel extends ContentPanel {
                 for (IndicatorGroup group : activity.groupIndicators()) {
                     if (group.getName() == null) {
                         for (IndicatorDTO indicator : group.getIndicators()) {
-                            result.add(indicator);
+                            if (indicator.getType() == QuantityType.TYPE_CLASS) {
+                                result.add(indicator);
+                            }
                         }
                     } else {
                         result.add(group);
                         for (IndicatorDTO indicator : group.getIndicators()) {
-                            result.add(indicator);
+                            if (indicator.getType() == QuantityType.TYPE_CLASS) {
+                                result.add(indicator);
+                            }
                         }
                     }
                 }
