@@ -96,4 +96,13 @@ public class FormProfile {
             }
         });
     }
+
+    public FieldProfile getField(String fieldName) {
+        for (FieldProfile field : fields) {
+            if(field.getLabel().equals(fieldName)) {
+                return field;
+            }
+        }
+        throw new IllegalArgumentException("No such field: " + fieldName);
+    }
 }

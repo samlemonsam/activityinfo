@@ -3,7 +3,8 @@ package org.activityinfo.geoadmin.merge2.view;
 import com.google.common.base.Function;
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
-import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
+import org.activityinfo.geoadmin.merge2.view.match.MatchGraph;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.geoadmin.merge2.view.swing.SwingSchedulers;
@@ -25,7 +26,8 @@ public class ImportView {
     
     private final Observable<FormProfile> sourceProfile;
     private final Observable<FormProfile> targetProfile;
-    private final Observable<FieldMatching> fieldMatching;
+    private final Observable<MatchGraph> matchGraph;
+    private final Observable<KeyFieldPairSet> keyFields;
     private final MatchTable matchTable;
     private final Observable<FormMapping> mapping;
 
@@ -38,9 +40,10 @@ public class ImportView {
         
         sourceProfile = profile(model.getSourceFormId());
         targetProfile = profile(model.getTargetFormId());
-        fieldMatching = FieldMatching.compute(sourceProfile, targetProfile);
-        matchTable = new MatchTable(model, scheduler, fieldMatching);
-        mapping = FormMapping.computeFromMatching(store, fieldMatching);
+        keyFields = KeyFieldPairSet.compute(sourceProfile, targetProfile);
+        matchGraph = MatchGraph.build(scheduler, keyFields);
+        matchTable = new MatchTable(model, matchGraph);
+        mapping = FormMapping.computeFromMatching(store, keyFields);
     }
 
     private Observable<FormProfile> profile(Observable<ResourceId> formId) {

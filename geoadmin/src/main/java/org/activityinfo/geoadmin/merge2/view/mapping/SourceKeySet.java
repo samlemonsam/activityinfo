@@ -2,7 +2,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class SourceKeySet {
      */
     private final List<SourceLookupKey> distinctKeys;
 
-    public SourceKeySet(FieldMatching fieldMatching) {
+    public SourceKeySet(KeyFieldPairSet fieldMatching) {
 
         // Which columns do we use to lookup the reference field? 
         // For example: if we are looking up the id of a territory, then 

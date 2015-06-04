@@ -2,23 +2,22 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 
 import com.google.common.base.Optional;
-import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.model.resource.ResourceId;
 
 public class MatchRow {
 
     public static final int UNMATCHED = -1;
-    private final AutoRowMatching matching;
 
-    private boolean resolved;
-    private final FieldMatching mapping;
+    private boolean inputRequired = false;
+    private boolean resolved = false;
+    
+    private final KeyFieldPairSet keyFields;
     private int sourceRow = UNMATCHED;
     private int targetRow = UNMATCHED;
 
-    public MatchRow(AutoRowMatching rowMatching) {
-        this.mapping = rowMatching.getFieldMatching();
-        this.matching = rowMatching;
+    public MatchRow(KeyFieldPairSet keyFields) {
+        this.keyFields = keyFields;
     }
 
     public void setSourceRow(int sourceRow) {
@@ -33,14 +32,14 @@ public class MatchRow {
         if(sourceRow == UNMATCHED) {
             return Optional.absent();
         } 
-        return Optional.of(mapping.getSource().getRowId((sourceRow)));
+        return Optional.of(keyFields.getSource().getRowId((sourceRow)));
     }
     
     public Optional<ResourceId> getTargetId() {
         if(targetRow == UNMATCHED) {
             return Optional.absent();
         }
-        return Optional.of(mapping.getTarget().getRowId(targetRow));
+        return Optional.of(keyFields.getTarget().getRowId(targetRow));
     }
 
     public int getSourceRow() {
@@ -55,30 +54,14 @@ public class MatchRow {
         return resolved;
     }
 
-    /**
-     * 
-     * @return the lowest score among all the dimensions
-     */
-    public double getMinScore() {
-        
-        if(!isMatched()) {
-            return Double.NaN;
-        } else {
-            double[] scores = matching.getScores(sourceRow, targetRow);
-            if (scores == null || scores.length == 0) {
-                return Double.NaN;
-            } else {
-                double minScore = scores[0];
-                for (int i = 1; i < scores.length; ++i) {
-                    if (scores[i] < minScore) {
-                        minScore = scores[i];
-                    }
-                }
-                return minScore;
-            }
-        }
+    public boolean isInputRequired() {
+        return inputRequired;
     }
-    
+
+    public void setInputRequired(boolean inputRequired) {
+        this.inputRequired = inputRequired;
+    }
+
     public boolean isMatched() {
         return sourceRow != UNMATCHED && targetRow != UNMATCHED;
     }
@@ -87,10 +70,6 @@ public class MatchRow {
         this.resolved = resolved;
     }
 
-    public MatchLevel getMatchLevel() {
-        return MatchLevel.of(getMinScore());
-    }
-    
     public InstanceMatch asInstanceMatch() {
         return new InstanceMatch(getSourceId().get(), getTargetId().get());
     }

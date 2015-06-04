@@ -54,4 +54,5 @@ public abstract class DistanceMatrix {
         }
         return min;    
     }
+    
 }

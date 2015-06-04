@@ -18,7 +18,14 @@ public class MatchColumnRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (!isSelected) {
-            c.setBackground(this.column.getColor(table.convertRowIndexToModel(row)));
+            Color highlightColor = this.column.getColor(table.convertRowIndexToModel(row));
+            c.setBackground(highlightColor);
+            
+            if(highlightColor.equals(Color.RED)) {
+                c.setForeground(Color.WHITE);
+            } else {
+                c.setForeground(Color.BLACK);
+            }
         }
         return c;
     }

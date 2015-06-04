@@ -6,11 +6,9 @@ import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.state.ResourceStoreStub;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
-import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
 import org.activityinfo.geoadmin.merge2.view.match.UnmatchedColumn;
-import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.MockObserver;
 import org.activityinfo.observable.Observable;
@@ -20,7 +18,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -69,12 +66,6 @@ public class MatchTableTest {
     }
 
 
-    public void dump(FieldMatching fieldMatching) {
-        for (Map.Entry<FieldProfile, FieldProfile> mapping : fieldMatching.asMap().entrySet()) {
-            System.out.println(mapping.getKey() + " -> " + mapping.getValue());
-        }
-    }
-    
     public void dump(MatchTable table) {
         
         List<MatchTableColumn> columns = table.getColumns().get();

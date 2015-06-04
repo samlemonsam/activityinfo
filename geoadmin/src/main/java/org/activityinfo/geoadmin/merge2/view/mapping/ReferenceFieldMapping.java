@@ -1,6 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
-import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.form.FormField;
 
@@ -29,7 +29,7 @@ public class ReferenceFieldMapping implements FieldMapping {
     private final LookupGraph lookupGraph;
 
     
-    public ReferenceFieldMapping(FormField targetReferenceField, FieldMatching fieldMatching) {
+    public ReferenceFieldMapping(FormField targetReferenceField, KeyFieldPairSet fieldMatching) {
         this.targetReferenceField = targetReferenceField;
         this.sourceKeySet = new SourceKeySet(fieldMatching);
         this.lookupGraph = new LookupGraph(sourceKeySet, fieldMatching.getTarget());

@@ -3,7 +3,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.model.form.FormField;
@@ -28,12 +28,12 @@ public class FormMappingBuilder {
     private final FormProfile source;
     private final FormProfile target;
     
-    private final FieldMatching fieldMatching;
+    private final KeyFieldPairSet fieldMatching;
 
     private List<Observable<FieldMapping>> mappings = new ArrayList<>();
 
     public FormMappingBuilder(ResourceStore resourceStore,
-                              FieldMatching fieldMatching) {
+                              KeyFieldPairSet fieldMatching) {
         this.resourceStore = resourceStore;
         this.source = fieldMatching.getSource();
         this.target = fieldMatching.getTarget();
@@ -91,7 +91,7 @@ public class FormMappingBuilder {
             Observable<FieldMapping> mapping = targetReferencedFormProfile.transform(new Function<FormProfile, FieldMapping>() {
                 @Override
                 public FieldMapping apply(FormProfile target) {
-                    return new ReferenceFieldMapping(targetField, new FieldMatching(source, target));
+                    return new ReferenceFieldMapping(targetField, KeyFieldPairSet.matchKeys(source, target));
                 }
             });
             mappings.add(mapping);

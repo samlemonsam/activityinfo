@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
 import com.google.common.base.Function;
-import org.activityinfo.geoadmin.merge2.view.match.FieldMatching;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.ResourceStore;
 
@@ -33,10 +33,10 @@ public class FormMapping {
         return referenceFieldMappings;
     }
 
-    public static Observable<FormMapping> computeFromMatching(final ResourceStore store, final Observable<FieldMatching> matching) {
-        return matching.join(new Function<FieldMatching, Observable<FormMapping>>() {
+    public static Observable<FormMapping> computeFromMatching(final ResourceStore store, final Observable<KeyFieldPairSet> matching) {
+        return matching.join(new Function<KeyFieldPairSet, Observable<FormMapping>>() {
             @Override
-            public Observable<FormMapping> apply(FieldMatching input) {
+            public Observable<FormMapping> apply(KeyFieldPairSet input) {
                 FormMappingBuilder builder = new FormMappingBuilder(store, input);
                 return builder.build().transform(new Function<List<FieldMapping>, FormMapping>() {
                     @Override

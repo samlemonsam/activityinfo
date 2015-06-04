@@ -2,7 +2,6 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
@@ -24,32 +23,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class MatchTable {
     
-    private ImportModel model;
-    private Scheduler scheduler;
-
     private final InstanceMatchSet matchSet;
 
-    private final Observable<FieldMatching> fieldMatching;
-    private final Observable<AutoRowMatching> autoRowMatching;
+    private final Observable<MatchGraph> graph;
+    private final Observable<List<MatchTableColumn>> columns;
 
     private List<TableObserver> observers = new CopyOnWriteArrayList<>();
     
     private final SubscriptionSet subscriptions = new SubscriptionSet();
     
-    private Observable<List<MatchTableColumn>> columns;
     private List<MatchRow> rows = new ArrayList<>();
     
-    public MatchTable(ImportModel model, Scheduler scheduler, Observable<FieldMatching> fieldMatching) {
-        this.model = model;
-        this.scheduler = scheduler;
+    public MatchTable(ImportModel model, Observable<MatchGraph> graph) {
         this.matchSet = model.getInstanceMatchSet();
-        this.fieldMatching = fieldMatching;
-        autoRowMatching = fieldMatching.transform(scheduler, new AutoMatcher());
-        columns = autoRowMatching.transform(new ColumnListBuilder());
-    }
-
-    public Observable<FieldMatching> getFieldMapping() {
-        return fieldMatching;
+        this.columns = graph.transform(new ColumnListBuilder());
+        this.graph = graph;
     }
 
     public Subscription subscribe(final TableObserver observer) {
@@ -69,9 +57,9 @@ public class MatchTable {
     }
 
     private void onConnect() {
-        subscriptions.add(autoRowMatching.subscribe(new Observer<AutoRowMatching>() {
+        subscriptions.add(graph.subscribe(new Observer<MatchGraph>() {
             @Override
-            public void onChange(Observable<AutoRowMatching> observable) {
+            public void onChange(Observable<MatchGraph> observable) {
                 recompute();
             }
         }));
@@ -139,7 +127,7 @@ public class MatchTable {
                 int count = 0;
                 for (int i = 0; i < input.getRowCount(); i++) {
                     MatchRow row = input.get(i);
-                    if(row.getMatchLevel() != MatchLevel.EXACT && !row.isResolved()) {
+                    if(!row.isResolved()) {
                         count++;
                     }
                 }
@@ -153,22 +141,22 @@ public class MatchTable {
     }
 
     private void recompute() {
-        if(autoRowMatching.isLoading() || matchSet.isLoading()) {
+        if(graph.isLoading() || matchSet.isLoading()) {
             return;
         }
-        FieldMatching fieldMatching = autoRowMatching.get().getFieldMatching();
-        AutoRowMatching autoMatching = autoRowMatching.get();
+        KeyFieldPairSet keyFields = graph.get().getKeyFields();
+        MatchGraph graph = this.graph.get();
         
         List<MatchRow> rows = new ArrayList<>();
         Set<Integer> matchedSources = new HashSet<>();
 
         // Add a row for each target row
-        for (int targetRow = 0; targetRow < fieldMatching.getTarget().getRowCount(); ++targetRow) {
+        for (int targetRow = 0; targetRow < keyFields.getTarget().getRowCount(); ++targetRow) {
             
-            MatchRow row = new MatchRow(autoMatching);
+            MatchRow row = new MatchRow(keyFields);
             row.setTargetRow(targetRow);
             
-            ResourceId targetId = fieldMatching.getTarget().getRowId(targetRow);
+            ResourceId targetId = keyFields.getTarget().getRowId(targetRow);
             Optional<InstanceMatch> explicitMatch = matchSet.find(targetId);
             
             if(explicitMatch.isPresent()) {
@@ -176,10 +164,11 @@ public class MatchTable {
                 // the user has provided an explicit match between the two rows
 
                 ResourceId sourceId = explicitMatch.get().getSourceId();
-                int sourceRow = fieldMatching.getSource().indexOf(sourceId);
+                int sourceRow = keyFields.getSource().indexOf(sourceId);
 
                 row.setSourceRow(sourceRow);
                 row.setResolved(true);
+                row.setInputRequired(true);
                 
                 matchedSources.add(sourceRow);
             
@@ -187,12 +176,13 @@ public class MatchTable {
                 
                 // Use the closest automatic match
                 
-                int sourceRow = autoMatching.getBestSourceMatchForTarget(targetRow);
-                if(sourceRow != MatchRow.UNMATCHED) {
-                    
-                    // If we don't have complete confidence in the match, flag the row
-                    // for resolution by the user
+                int sourceRow = graph.getBestMatchForTarget(targetRow);
+                if(sourceRow == MatchRow.UNMATCHED) {
+                    row.setResolved(false);
+                    row.setInputRequired(true);
+                } else {
                     row.setSourceRow(sourceRow);
+                    row.setResolved(true);
                     matchedSources.add(sourceRow);
                 }
             }
@@ -200,9 +190,9 @@ public class MatchTable {
         }
 
         // Add finally add an output row for each unmatched source
-        for (int sourceRow = 0; sourceRow < fieldMatching.getSource().getRowCount(); ++sourceRow) {
+        for (int sourceRow = 0; sourceRow < keyFields.getSource().getRowCount(); ++sourceRow) {
             if (!matchedSources.contains(sourceRow)) {
-                MatchRow row = new MatchRow(autoRowMatching.get());
+                MatchRow row = new MatchRow(keyFields);
                 row.setSourceRow(sourceRow);
                 row.setResolved(false);
                 rows.add(row);
@@ -230,25 +220,25 @@ public class MatchTable {
 
 
     public boolean isLoading() {
-        return autoRowMatching.isLoading() || matchSet.isLoading();
+        return graph.isLoading() || matchSet.isLoading();
     }
 
     public Observable<List<MatchTableColumn>> getColumns() {
         return columns;
     }
 
-    private class ColumnListBuilder implements Function<AutoRowMatching, List<MatchTableColumn>> {
+    private class ColumnListBuilder implements Function<MatchGraph, List<MatchTableColumn>> {
 
         @Override
-        public List<MatchTableColumn> apply(AutoRowMatching input) {
+        public List<MatchTableColumn> apply(MatchGraph graph) {
+            KeyFieldPairSet keyFields = graph.getKeyFields();
             List<MatchTableColumn> columns = new ArrayList<>();
-            FieldMatching fieldMatching = input.getFieldMatching();
-
+ 
             columns.add(new ResolutionColumn(MatchTable.this, matchSet));
 
             // Show the existing instances, paired with the matching column
-            for (FieldProfile targetField : fieldMatching.getTarget().getFields()) {
-                Optional<FieldProfile> sourceField = fieldMatching.targetToSource(targetField);
+            for (FieldProfile targetField : keyFields.getTarget().getFields()) {
+                Optional<FieldProfile> sourceField = keyFields.targetToSource(targetField);
                 if(sourceField.isPresent()) {
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.TARGET));
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.SOURCE));
@@ -258,8 +248,8 @@ public class MatchTable {
             }
             
             // Also include the unmatched source columns as reference
-            for (FieldProfile sourceField : fieldMatching.getSource().getFields()) {
-                if(!fieldMatching.sourceToTarget(sourceField).isPresent()) {
+            for (FieldProfile sourceField : keyFields.getSource().getFields()) {
+                if(!keyFields.sourceToTarget(sourceField).isPresent()) {
                     columns.add(new UnmatchedColumn(sourceField, fromSource(sourceField.getView())));
                 }
             }

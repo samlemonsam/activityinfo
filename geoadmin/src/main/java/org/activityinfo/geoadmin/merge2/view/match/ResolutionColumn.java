@@ -1,6 +1,5 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
-import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
 
 import javax.swing.*;
@@ -35,7 +34,7 @@ public class ResolutionColumn extends MatchTableColumn {
             return null;
         }
         MatchRow row = rows.get(rowIndex);
-        if(row.getMatchLevel() != MatchLevel.EXACT) {
+        if(row.isInputRequired()) {
             if(row.isResolved()) {
                 return CHECK_ICON;
             } else {
