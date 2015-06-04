@@ -24,17 +24,17 @@ package org.activityinfo.test.driver.model;
 /**
  * @author yuriyz on 06/03/2015.
  */
-public class LinkedIndicatorRow {
+public class IndicatorLink {
 
     private String sourceDb;
     private String sourceIndicator;
     private String destDb;
     private String destIndicator;
 
-    public LinkedIndicatorRow() {
+    public IndicatorLink() {
     }
 
-    public LinkedIndicatorRow(String sourceDb, String sourceIndicator, String destDb, String destIndicator) {
+    public IndicatorLink(String sourceDb, String sourceIndicator, String destDb, String destIndicator) {
         this.sourceDb = sourceDb;
         this.sourceIndicator = sourceIndicator;
         this.destDb = destDb;
@@ -78,7 +78,7 @@ public class LinkedIndicatorRow {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LinkedIndicatorRow that = (LinkedIndicatorRow) o;
+        IndicatorLink that = (IndicatorLink) o;
 
         if (destDb != null ? !destDb.equals(that.destDb) : that.destDb != null) return false;
         if (destIndicator != null ? !destIndicator.equals(that.destIndicator) : that.destIndicator != null)
@@ -99,7 +99,7 @@ public class LinkedIndicatorRow {
 
     @Override
     public String toString() {
-        return "LinkedIndicatorRow{" +
+        return "IndicatorLink{" +
                 "sourceDb='" + sourceDb + '\'' +
                 ", sourceIndicator='" + sourceIndicator + '\'' +
                 ", destDb='" + destDb + '\'' +

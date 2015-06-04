@@ -5,7 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.model.LinkedIndicatorRow;
+import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
@@ -415,13 +415,13 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void createLinkIndicators(List<LinkedIndicatorRow> linkedIndicatorRows) {
+    public void createLinkIndicators(List<IndicatorLink> linkedIndicatorRows) {
         ensureLoggedIn();
 
         LinkIndicatorsPage linkIndicatorsPage = applicationPage.navigateToDesignTab().linkIndicators();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
 
-        for (LinkedIndicatorRow row : linkedIndicatorRows) {
+        for (IndicatorLink row : linkedIndicatorRows) {
 
             linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).click();
             linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).click();
@@ -436,11 +436,11 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
-    public void assertLinkedIndicatorsMarked(List<LinkedIndicatorRow> linkedIndicatorRows, boolean marked) {
+    public void assertLinkedIndicatorsMarked(List<IndicatorLink> linkedIndicatorRows, boolean marked) {
         LinkIndicatorsPage linkIndicatorsPage = applicationPage.navigateToDesignTab().linkIndicators();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
 
-        for (LinkedIndicatorRow row : linkedIndicatorRows) {
+        for (IndicatorLink row : linkedIndicatorRows) {
 
             Preconditions.checkState(linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).hasIcon(), marked);
             Preconditions.checkState(linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).hasIcon(), marked);

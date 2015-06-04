@@ -12,7 +12,7 @@ import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.test.driver.*;
-import org.activityinfo.test.driver.model.LinkedIndicatorRow;
+import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -462,12 +462,12 @@ public class DatabaseSetupSteps {
     }
 
     @When("^I link indicators:$")
-    public void I_link_indicators(List<LinkedIndicatorRow> linkedIndicatorRows) throws Throwable {
+    public void I_link_indicators(List<IndicatorLink> linkedIndicatorRows) throws Throwable {
         driver.createLinkIndicators(linkedIndicatorRows);
     }
 
     @Then("^Linked indicators marked by icon:$")
-    public void Linked_indicators_marked_by_icon(List<LinkedIndicatorRow> linkedIndicatorRows) throws Throwable {
+    public void Linked_indicators_marked_by_icon(List<IndicatorLink> linkedIndicatorRows) throws Throwable {
         driver.assertLinkedIndicatorsMarked(linkedIndicatorRows, true);
     }
 }
