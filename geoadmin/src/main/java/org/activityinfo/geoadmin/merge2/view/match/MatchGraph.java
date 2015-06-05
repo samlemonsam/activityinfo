@@ -38,6 +38,8 @@ public class MatchGraph {
 
     private static final double MIN_SCORE = 0.5;
 
+
+
     public static class Candidate {
         private int targetIndex;
         private double[] scores;
@@ -70,6 +72,12 @@ public class MatchGraph {
 
         public int getTargetIndex() {
             return targetIndex;
+        }
+
+
+        @Override
+        public String toString() {
+            return targetIndex + ": " + Arrays.toString(scores);
         }
     }
     
@@ -164,7 +172,6 @@ public class MatchGraph {
         // For each potential target...
         for(int j=0;j< keyFields.getTargetCount();++j) {
 
-            //keyFields.getTarget().dump(j);
 
             // Compute scores across all dimensions
             double maxScore = 0;
@@ -179,6 +186,7 @@ public class MatchGraph {
             // Must have a substantial score on at least ONE dimension
             // to be considered a viable candidate
             if(maxScore >= MIN_SCORE) {
+                keyFields.dumpPair(sourceIndex, j);
                 candidates.add(new Candidate(j, scores));
             }
         }
@@ -247,8 +255,34 @@ public class MatchGraph {
         return -1;
     }
     
+    public int getBestMatchForSource(int sourceIndex) {
+        Integer targetIndex = sourceMatches.get(sourceIndex);
+        if(targetIndex == null) {
+            return -1;
+        } else {
+            return targetIndex;
+        }
+    }
+
+    public List<Integer> getParetoFrontier(int index, MatchSide side) {
+        List<Integer> frontier = new ArrayList<>();
+        if(side == MatchSide.SOURCE) {
+            for (Candidate candidate : sourceFrontier.get(index)) {
+                frontier.add(candidate.getTargetIndex());
+            }
+        } else {
+            frontier.addAll(targetFrontier.get(index));
+        }
+        return frontier;
+    }
     
     public Collection<Candidate> getParetoFrontierForSource(int sourceIndex) {
         return sourceFrontier.get(sourceIndex);
+    }
+
+
+    public double rank(Candidate candidate) {
+        return rankedScoreMatrix.meanRank(candidate.scores);
+
     }
 }

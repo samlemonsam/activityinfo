@@ -19,7 +19,7 @@ class MySqlServer {
     }
 
     String getUrl(String databaseName) {
-        def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true&characterEncoding=UTF-8"
+        def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull"
         if(keyStore) {
             url += "&useSSL=true"
         }

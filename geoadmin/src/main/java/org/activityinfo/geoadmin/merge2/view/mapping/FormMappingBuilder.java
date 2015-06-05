@@ -33,11 +33,11 @@ public class FormMappingBuilder {
     private List<Observable<FieldMapping>> mappings = new ArrayList<>();
 
     public FormMappingBuilder(ResourceStore resourceStore,
-                              KeyFieldPairSet fieldMatching) {
+                              KeyFieldPairSet keyFields) {
         this.resourceStore = resourceStore;
-        this.source = fieldMatching.getSource();
-        this.target = fieldMatching.getTarget();
-        this.fieldMatching = fieldMatching;
+        this.source = keyFields.getSource();
+        this.target = keyFields.getTarget();
+        this.fieldMatching = keyFields;
     }
     
     public Observable<List<FieldMapping>> build() {

@@ -26,6 +26,20 @@ public class ScoreDistributionTest {
         assertThat(distribution.percentile(0.0), equalTo(0.00));
         assertThat(distribution.percentile(0.3), equalTo(0.00));
         assertThat(distribution.percentile(0.5), equalTo(0.60));
-        assertThat(distribution.percentile(1.0), equalTo(1.00));
+        assertThat(distribution.percentile(1.0), equalTo(0.60));
+    }
+    
+    @Test
+    public void frequentHighScoresAreWeightedLow() {
+        ScoreDistribution.Builder builder = new ScoreDistribution.Builder();
+        builder.add(1.00);
+        builder.add(1.00);
+        builder.add(1.00);
+        builder.add(1.00);
+        builder.add(1.00);
+        ScoreDistribution distribution = builder.build();
+
+        assertThat(distribution.percentile(1.00), equalTo(0.00));
+        
     }
 }

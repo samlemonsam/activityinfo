@@ -41,22 +41,8 @@ public class CellRenderers {
     
     private static class Separator extends DefaultTableCellRenderer {
         public Separator() {
-            setBackground(Color.GRAY);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            if(g != null) {
-                Graphics scratchGraphics = g.create();
-                try {
-                    Graphics2D g2d = (Graphics2D) scratchGraphics;
-                    g2d.setPaint(Color.LIGHT_GRAY);
-                    g2d.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
-
-                } finally {
-                    scratchGraphics.dispose();
-                }
-            }
+            setBackground(Color.LIGHT_GRAY);
+            setHorizontalAlignment(CENTER);
         }
     }
     
@@ -84,40 +70,13 @@ public class CellRenderers {
 
             matched = matchRow.isMatched(side);
             if(matchRow.isMatched()) {
-                matchConfidenceColor(c, matchIndex);
+                MatchColors.update(c, columnModel.getMatchConfidence(matchIndex));
             } else {
                 c.setBackground(Color.WHITE);
                 c.setForeground(Color.BLACK);
             }
             return c;
         }
-
-
-        private Color matchConfidenceColor(Component c, int matchIndex) {
-            // If this is a matching, color code the confidence level
-            Optional<MatchLevel> matchConfidence = columnModel.getMatchConfidence(matchIndex);
-            if (matchConfidence.isPresent()) {
-                switch (matchConfidence.get()) {
-                    case EXACT:
-                        c.setBackground(MatchColors.MATCH_EXACT);
-                        c.setForeground(Color.BLACK);
-                        break;
-                    case WARNING:
-                        c.setBackground(MatchColors.MATCH_WARNING);
-                        c.setForeground(Color.BLACK);
-                        break;
-                    case POOR:
-                        c.setBackground(MatchColors.MATCH_POOR);
-                        c.setForeground(Color.WHITE);
-                        break;
-                }
-            } else {
-                c.setBackground(Color.WHITE);
-                c.setForeground(Color.decode("#333333"));
-            }
-            return Color.WHITE;
-        }
-
 
         @Override
         protected void paintComponent(Graphics g) {

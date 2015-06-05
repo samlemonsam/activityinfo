@@ -31,8 +31,11 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
         this.targetToSource = targetToSource;
 
         ImmutableList.Builder<KeyFieldPair> pairs = ImmutableList.builder();
-        for (FieldProfile targetField : targetToSource.keySet()) {
-            pairs.add(new KeyFieldPair(targetToSource.get(targetField), targetField));
+        for (FieldProfile targetField : target.getFields()) {
+            FieldProfile sourceField = targetToSource.get(targetField);
+            if(sourceField != null) {
+                pairs.add(new KeyFieldPair(sourceField, targetField));
+            }
         }
         this.pairs = pairs.build();
     }
@@ -99,5 +102,40 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
 
     public KeyFieldPair get(int i) {
         return pairs.get(i);
+    }
+
+    public FieldProfile getField(int keyIndex, MatchSide side) {
+        KeyFieldPair pair = get(keyIndex);
+        if(side == MatchSide.SOURCE) {
+            return pair.getSourceField();
+        } else {
+            return pair.getTargetField();
+        }
+    }
+
+    public FormProfile getForm(MatchSide side) {
+        if(side == MatchSide.SOURCE) {
+            return getSource();
+        } else {
+            return getTarget();
+        }
+    }
+    
+    public String toDebugString(int source, int target) {
+        StringBuilder sb = new StringBuilder();
+        for (KeyFieldPair pair : pairs) {
+            sb.append("[")
+                .append(pair.getSourceField().getView().get(source))
+                .append(" <> ")
+                .append(pair.getTargetField().getView().get(target))
+                .append(" = ")
+                .append(pair.score(source, target))
+                .append("]");
+        }
+        return sb.toString();
+    }
+    
+    public void dumpPair(int source, int target) {
+        System.out.println(toDebugString(source, target));
     }
 }

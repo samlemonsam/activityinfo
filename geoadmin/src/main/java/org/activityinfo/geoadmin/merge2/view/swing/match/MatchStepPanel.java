@@ -6,6 +6,7 @@ import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
+import org.activityinfo.geoadmin.merge2.view.swing.match.select.SelectDialog;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.SubscriptionSet;
@@ -26,7 +27,8 @@ public class MatchStepPanel extends StepPanel {
 
     public static final String LOADING_COMPONENT = "loading";
     public static final String TABLE_COMPONENT = "table";
-    
+    public static final int SEPARATOR_COLUMN_WIDTH = 25;
+
     private final ImportView viewModel;
     private final SubscriptionSet subscriptions = new SubscriptionSet();
 
@@ -130,8 +132,8 @@ public class MatchStepPanel extends StepPanel {
     private void onDoubleClick(int modelRow, int modelColumn) {
         Optional<MatchSide> side = columns.get(modelColumn).getSide();
         if(side.isPresent()) {
-            SelectDialog dialog = new SelectDialog(this, viewModel, modelRow);
-            
+            SelectDialog dialog = new SelectDialog(this, viewModel, modelRow, MatchSide.SOURCE);
+            dialog.setVisible(true);
         }
     }
 
@@ -171,9 +173,9 @@ public class MatchStepPanel extends StepPanel {
             newColumn.setCellRenderer(cellRenderers.rendererFor(matchColumn));
             if(matchColumn instanceof SeparatorColumn) {
                 newColumn.setResizable(false);
-                newColumn.setWidth(10);
-                newColumn.setMaxWidth(10);
-                newColumn.setMinWidth(10);
+                newColumn.setWidth(SEPARATOR_COLUMN_WIDTH);
+                newColumn.setMaxWidth(SEPARATOR_COLUMN_WIDTH);
+                newColumn.setMinWidth(SEPARATOR_COLUMN_WIDTH);
             }
             table.addColumn(newColumn);
         }

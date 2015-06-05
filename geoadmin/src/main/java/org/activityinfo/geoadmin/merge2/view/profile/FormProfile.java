@@ -1,6 +1,9 @@
 package org.activityinfo.geoadmin.merge2.view.profile;
 
 import com.google.common.base.Function;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPair;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
+import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -107,11 +110,27 @@ public class FormProfile {
     }
 
     public void dump(int index) {
+        System.out.println(toString(index));
+    }
+
+    public String toString(int index) {
+        StringBuilder s = new StringBuilder();
         for (FieldProfile field : fields) {
             if(field.getView() != null) {
-                System.out.print("[" + field.getLabel() + " = " + field.getView().getString(index) + "]");
+                s.append("[").append(field.getLabel()).append(" = ").append(field.getView().getString(index)).append("]");
             }
         }
-        System.out.println();
+        return s.toString();
     }
+
+//    /**
+//     * Create new, synthetic FormProfile that contains distinct 
+//     * @param fieldPath
+//     * @return
+//     */
+//    public FormProfile distinct(List<FieldPath> fieldPath) {
+//        
+//        
+//        
+//    }
 }

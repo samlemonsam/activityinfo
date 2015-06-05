@@ -143,6 +143,15 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     }
 }
 
+task deployBetaApi(type: com.google.appengine.task.appcfg.UpdateTask) {
+
+    dependsOn appengineDownloadSdk
+
+    extraOptions = ["--application=activityinfoeu", '--version=beta-api']
+    oauth2 = true
+
+}
+
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"
 

@@ -208,6 +208,10 @@ public class MatchTable {
             observer.onRowsChanged();
         }
     }
+    
+    public KeyFieldPairSet getKeyFields() {
+        return graph.get().getKeyFields();
+    }
 
 
     public MatchRow get(int index) {
@@ -227,6 +231,10 @@ public class MatchTable {
         return columns;
     }
 
+    public Observable<MatchGraph> getGraph() {
+        return graph;
+    }
+
     private class ColumnListBuilder implements Function<MatchGraph, List<MatchTableColumn>> {
 
         @Override
@@ -236,18 +244,6 @@ public class MatchTable {
  
             columns.add(new ResolutionColumn(MatchTable.this, matchSet));
 
-            // Show the target fields 
-            for (FieldProfile targetField : keyFields.getTarget().getFields()) {
-                Optional<FieldProfile> sourceField = keyFields.targetToSource(targetField);
-                if(sourceField.isPresent()) {
-                    columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.TARGET));
-                } else {
-                    columns.add(new UnmatchedColumn(targetField, MatchSide.TARGET, fromTarget(targetField.getView())));
-                }
-            }
-            
-            columns.add(new SeparatorColumn());
-            
             // Now show the source fields, but in the same order as the target fields
             for (FieldProfile targetField : keyFields.getTarget().getFields()) {
                 Optional<FieldProfile> sourceField = keyFields.targetToSource(targetField);
@@ -258,11 +254,24 @@ public class MatchTable {
             
             // Also include the unmatched source columns as reference
             for (FieldProfile sourceField : keyFields.getSource().getFields()) {
-                if(!keyFields.sourceToTarget(sourceField).isPresent()) {
+                if(!keyFields.sourceToTarget(sourceField).isPresent() &&
+                        sourceField.getView() != null) {
                     columns.add(new UnmatchedColumn(sourceField, MatchSide.SOURCE, fromSource(sourceField.getView())));
                 }
             }
 
+            columns.add(new SeparatorColumn(MatchTable.this));
+
+
+            // Show the target fields 
+            for (FieldProfile targetField : keyFields.getTarget().getFields()) {
+                Optional<FieldProfile> sourceField = keyFields.targetToSource(targetField);
+                if(sourceField.isPresent()) {
+                    columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.TARGET));
+                } else {
+                    columns.add(new UnmatchedColumn(targetField, MatchSide.TARGET, fromTarget(targetField.getView())));
+                }
+            }
             return columns;
         }
     }

@@ -28,6 +28,15 @@ public class MatchRow {
         this.targetRow = targetRow;
     }
 
+
+    public int getRow(MatchSide side) {
+        if(side == MatchSide.SOURCE) {
+            return getSourceRow();
+        } else {
+            return getTargetRow();
+        }
+    }
+    
     public Optional<ResourceId> getSourceId() {
         if(sourceRow == UNMATCHED) {
             return Optional.absent();
@@ -81,4 +90,5 @@ public class MatchRow {
             return targetRow != UNMATCHED;
         }
     }
+
 }

@@ -14,6 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
@@ -155,10 +156,20 @@ public class MatchGraphTest {
     @Test
     public void elonty() {
         graph.rankScoreMatrix();
-        int sourceIndex = findSourceIndex("COMMUNE", "Elonty");
+        int sourceIndex = findSourceIndex("COMMUNE", "Niherenana");
+        int targetIndex = findTargetIndex("Name", "Nierenana");
     
         graph.buildParetoFrontierForSource(sourceIndex);
-    
+
+        int matchedTargetIndex = graph.getBestMatchForSource(sourceIndex);
+
+        dumpCandidatesForSource(sourceIndex);
+
+        targetForm.dump(matchedTargetIndex);
+        
+        
+       // assertThat(matchedSourceIndex, equalTo(sourceIndex));
+
     }
     
 
@@ -171,7 +182,7 @@ public class MatchGraphTest {
         graph.build();
 
        //checkMatch("Mandritsara", "Ambohijato Mandritsara");
-        checkMatch( "Elonty", "Ambolofotsy");
+        checkMatch( "Niherenana", "Nierenana");
     }
 
     private void checkMatch(String source, String target) {
@@ -193,7 +204,10 @@ public class MatchGraphTest {
         Collection<MatchGraph.Candidate> candidates = graph.getParetoFrontierForSource(sourceIndex);
 
         for (MatchGraph.Candidate candidate : candidates) {
-            targetForm.dump(candidate.getTargetIndex());
+            System.out.println(format("%s[%3.2f]%s",
+                    candidate.toString(),
+                    graph.rank(candidate), 
+                    targetForm.toString(candidate.getTargetIndex())));
         }
         
     }

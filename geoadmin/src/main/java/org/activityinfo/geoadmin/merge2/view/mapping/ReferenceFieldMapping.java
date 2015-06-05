@@ -29,10 +29,10 @@ public class ReferenceFieldMapping implements FieldMapping {
     private final LookupGraph lookupGraph;
 
     
-    public ReferenceFieldMapping(FormField targetReferenceField, KeyFieldPairSet fieldMatching) {
+    public ReferenceFieldMapping(FormField targetReferenceField, KeyFieldPairSet keyFields) {
         this.targetReferenceField = targetReferenceField;
-        this.sourceKeySet = new SourceKeySet(fieldMatching);
-        this.lookupGraph = new LookupGraph(sourceKeySet, fieldMatching.getTarget());
+        this.sourceKeySet = new SourceKeySet(keyFields);
+        this.lookupGraph = new LookupGraph(sourceKeySet, keyFields.getTarget());
     }
     
     public List<FieldProfile> getSourceKeyFields() {

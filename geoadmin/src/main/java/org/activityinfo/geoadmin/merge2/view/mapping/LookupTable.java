@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.ReferenceMatch;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
+import org.activityinfo.geoadmin.merge2.view.match.MatchGraph;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.model.formTree.FieldPath;

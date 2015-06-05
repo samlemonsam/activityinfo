@@ -38,6 +38,12 @@ public class LatinPlaceNameScorerTest {
                 "KAYES COMMUNE",
                 "KAYES DE"));
     }
+    
+    @Test
+    public void matchCodes() {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+        assertThat(scorer.score("MDG21", "MDG11"), closeTo(0.43, 0.01));
+    }
 
     @Test
     public void bestPermutations() {

@@ -49,12 +49,20 @@ public class ScoreDistribution {
     /**
      * Returns a given score's percentile as a proportion in the range [0, 1].
      * 
-     * <p>A percentile rank of 1.0 means that the score is equal to or better than 100% of 
+     * <p>A percentile rank of 0.99 means that the score is better than 99% of 
      * scores between all possible matches.</p>
      */
     public double percentile(double score) {
-        double cumulativeCount = cumulativeCounts[binIndexOf(score)];
-        return cumulativeCount / totalCount;
+
+        int bin = binIndexOf(score);
+        if(bin == 0) {
+            // if the score falls in the lowest bin, this score cannot be greater than
+            // any other scores (at least given the information captured by the histogram we built)
+            return 0;
+        } else {
+            double cumulativeCount = cumulativeCounts[bin-1];
+            return cumulativeCount / totalCount;            
+        }
     }
 
 }
