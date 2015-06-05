@@ -528,7 +528,6 @@ public class UiApplicationDriver extends ApplicationDriver {
         try {
             while (true) {
                 dataEntryTab.selectSubmission(row);
-                Thread.sleep(500); // sometimes it's too fast and we read details of previous row, give it time to switch
                 result.add(dataEntryTab.details());
                 row++;
                 if (row > 10000) { // safe escape

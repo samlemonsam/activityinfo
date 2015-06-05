@@ -14,7 +14,7 @@ public class FieldValue {
     
     private String field;
     private String value;
-    private Optional<? extends FieldTypeClass> type;
+    private Optional<? extends FieldTypeClass> type = Optional.absent();
 
     public FieldValue() {
     }
