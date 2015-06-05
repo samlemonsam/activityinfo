@@ -56,4 +56,11 @@ public class DetailsEntry {
     private String appendValues(List<FieldValue> values) {
         return "\nActual values: " + fieldValues + "\n" + "Expected values: " + values;
     }
+
+    @Override
+    public String toString() {
+        return "DetailsEntry{" +
+                "fieldValues=" + fieldValues +
+                '}';
+    }
 }

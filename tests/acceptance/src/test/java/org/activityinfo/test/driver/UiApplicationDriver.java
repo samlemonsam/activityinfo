@@ -31,10 +31,7 @@ import org.junit.Assert;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @ScenarioScoped
@@ -497,8 +494,21 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
 
         if (matchedRows.size() != (expectedTable.getGherkinRows().size() - 1)) { // -1 because of first row is header
+            List<DataTableRow> notMatched = Lists.newArrayList(expectedTable.getGherkinRows());
+            notMatched.remove(expectedTable.getGherkinRows().get(0)); // remove header
+            notMatched.removeAll(matchedRows);
+
+            String notMatchedString = "";
+            for (DataTableRow row : notMatched) {
+                notMatchedString += Joiner.on(" | ").join(row.getCells()) + "\n";
+            }
+
+            String detailsEntriesString = "";
+            for (DetailsEntry entry : detailsEntries) {
+                detailsEntriesString += Joiner.on(" | ").join(entry.getFieldValues()) + "\n";
+            }
             throw new AssertionError("Data entry table does not match. Expected: \n"
-                    + expectedTable + "\n But got: " + detailsEntries);
+                    + expectedTable + "\n But got: \n" + detailsEntriesString + "\n Not matched rows:\n" + notMatchedString);
         }
     }
 
@@ -512,9 +522,9 @@ public class UiApplicationDriver extends ApplicationDriver {
                 }
 
                 String cell = gherkinRow.getCells().get(column);
-                if (cell.equals(value.getValue()) && columns.get(column).equals(value.getField())) {
+                if (cell.isEmpty() ||
+                        (cell.equals(value.getValue()) && columns.get(column).equals(value.getField()))) {
                     matchedCellIndexes.add(column);
-                    break;
                 }
             }
         }

@@ -116,7 +116,7 @@ public class DatabaseSetupSteps {
         List<String> columns = dataTable.getGherkinRows().get(0).getCells();
         Map<Integer, FieldTypeClass> columnTypeMap = Maps.newHashMap();
         for (int i = 0; i != columns.size(); ++i) {
-            Optional<FieldTypeClass> columnType = createFieldForColumn(formName, dataTable, i, true);
+            Optional<FieldTypeClass> columnType = createFieldForColumn(formName, dataTable, i);
             if (columnType.isPresent()) {
                 columnTypeMap.put(i, columnType.get());
             }
@@ -142,11 +142,10 @@ public class DatabaseSetupSteps {
      * @param form form name
      * @param dataTable table
      * @param columnIndex column index
-     * @param ignoreDuplicatedIds ignore duplication exception from test handle and go on with field creation (used in link-indicator.feature)
      * @return column type (field type)
      * @throws Exception
      */
-    private Optional<FieldTypeClass> createFieldForColumn(String form, DataTable dataTable, int columnIndex, boolean ignoreDuplicatedIds) throws Exception {
+    private Optional<FieldTypeClass> createFieldForColumn(String form, DataTable dataTable, int columnIndex) throws Exception {
         String label = dataTable.getGherkinRows().get(0).getCells().get(columnIndex);
         if (isPredefinedField(label)) {
             return Optional.absent();
@@ -167,7 +166,6 @@ public class DatabaseSetupSteps {
             }
         }
 
-        try {
             if (typeClass == EnumType.TYPE_CLASS) {
                 I_have_created_a_enumerated_field_with_options(label, Lists.newArrayList(values));
             } else {
@@ -176,11 +174,6 @@ public class DatabaseSetupSteps {
                         property("name", label),
                         property("type", typeClass.getId()));
             }
-        } catch (IdAlreadyBoundException e) {
-            if (!ignoreDuplicatedIds) {
-                throw e;
-            }
-        }
         return Optional.of(typeClass);
     }
 

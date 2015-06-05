@@ -93,7 +93,7 @@ public class AliasTable {
      */
     public void bindAliasToId(String alias, Supplier<Integer> id) {
         Preconditions.checkNotNull(alias, "alias");
-            bindTestHandleToId(getTestHandleForAlias(alias), id);
+        bindTestHandleToId(getTestHandleForAlias(alias), id);
     }
 
     public void bindTestHandleToIdIfAbsent(String handle, Supplier<Integer> newId) {
@@ -111,7 +111,7 @@ public class AliasTable {
         
         if(existingId != null) {
             if (!Objects.equals(existingId.get(), newId.get())) {
-                throw new IdAlreadyBoundException(String.format(
+                throw new IllegalStateException(String.format(
                         "Cannot bind test handle %s to id %d: it was previously bound to %d", handle,
                         newId.get(),
                         existingId.get()));
