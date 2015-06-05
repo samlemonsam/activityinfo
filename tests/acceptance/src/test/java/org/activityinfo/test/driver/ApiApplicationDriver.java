@@ -303,7 +303,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     break;
                 default:
 
-                    if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                    if (value.getType() != null && value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
                         for (String item : StringUtils.split(value.getValue(), ",", true)) {
                             int attributeId = aliases.getId(item);
                             properties.put("ATTRIB" + attributeId, true);
