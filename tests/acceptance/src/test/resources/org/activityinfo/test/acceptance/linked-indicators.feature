@@ -39,7 +39,7 @@ Feature: Link indicators
       | Number of patients | Donor | Diseases treated this month  |
       | 230                | USAID | cholera,malaria,tuberculosis |
       | 23                 | ECHO  | cholera                      |
-      | 45				   | ECHO  | malaria,tuberculosis         |
+      | 45                 | ECHO  | malaria,tuberculosis         |
       | 23                 | USAID | cholera                      |
 
   @AI-857

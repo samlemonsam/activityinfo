@@ -473,8 +473,10 @@ public class UiApplicationDriver extends ApplicationDriver {
             aliasTable.deAlias(entry.getFieldValues());
         }
 
+        assertTableEquals(expectedTable, detailsEntries);
+    }
 
-        // compare table with detail entries
+    public static void assertTableEquals(DataTable expectedTable, List<DetailsEntry> detailsEntries) {
         List<DataTableRow> matchedRows = Lists.newArrayList();
         List<DetailsEntry> matchedDetailsEntries = Lists.newArrayList();
         for (int i = 1; i < expectedTable.getGherkinRows().size(); i++) {
@@ -495,12 +497,12 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
 
         if (matchedRows.size() != (expectedTable.getGherkinRows().size() - 1)) { // -1 because of first row is header
-            throw new AssertionError("Data entry table does not match for form: " + formName +
-                    ". Expected: \n" + expectedTable + "\n But got: " + detailsEntries);
+            throw new AssertionError("Data entry table does not match. Expected: \n"
+                    + expectedTable + "\n But got: " + detailsEntries);
         }
     }
 
-    public boolean equals(List<String> columns, DataTableRow gherkinRow, List<FieldValue> values) {
+    public static boolean equals(List<String> columns, DataTableRow gherkinRow, List<FieldValue> values) {
         Set<Integer> matchedCellIndexes = Sets.newHashSet();
         for (FieldValue value : values) {
 
