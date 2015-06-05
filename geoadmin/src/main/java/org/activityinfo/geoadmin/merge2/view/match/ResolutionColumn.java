@@ -1,9 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
+import com.google.common.base.Optional;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
-
-import javax.swing.*;
-import java.awt.*;
 
 /**
  * Displays the resolution status of the row
@@ -45,22 +43,7 @@ public class ResolutionColumn extends MatchTableColumn {
     }
 
     @Override
-    public Color getColor(int rowIndex) {
-        return Color.WHITE;
-    }
-
-    @Override
-    public int getTextAlignment() {
-        return SwingConstants.CENTER;
-    }
-
-    @Override
-    public int getWidth() {
-        return 10;
-    }
-
-    @Override
-    public boolean isResizable() {
-        return false;
+    public Optional<MatchSide> getSide() {
+        return Optional.absent();
     }
 }

@@ -1,9 +1,11 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 
-import javax.swing.*;
 import java.awt.*;
 
 
@@ -54,59 +56,40 @@ public class MatchedColumn extends MatchTableColumn {
         return value.toString();
     }
 
-    private Object getTargetValue(int rowIndex) {
+    private String getTargetValue(int rowIndex) {
         int targetRow = matching.get(rowIndex).getTargetRow();
         if(targetRow == -1) {
             return null;
         }
-        return targetField.getView().get(targetRow);
+        return targetField.getView().getString(targetRow);
     }
 
-    private Object getSourceValue(int rowIndex) {
+    private String getSourceValue(int rowIndex) {
         int sourceRow = matching.get(rowIndex).getSourceRow();
         if(sourceRow == -1) {
             return null;
         }
-        return sourceField.getView().get(sourceRow);
+        return sourceField.getView().getString(sourceRow);
     }
 
-    @Override
-    public Color getColor(int rowIndex) {
-        if (matching.isLoading()) {
-            return Color.WHITE;
-        }
-        Object sourceValue = getSourceValue(rowIndex);
-        Object targetValue = getTargetValue(rowIndex);
+    public Optional<MatchLevel> getMatchConfidence(int rowIndex) {
+        String sourceValue = getSourceValue(rowIndex);
+        String targetValue = getTargetValue(rowIndex);
 
-        // If the user has marked this field as resolved, "mute" the 
-        // the warning colors
-        if(matching.get(rowIndex).isResolved()) {
-            return Color.GREEN;
-        }
+        if(Strings.isNullOrEmpty(sourceValue) && Strings.isNullOrEmpty(targetValue)) {
+            return Optional.absent();
+
+        } else if(Strings.isNullOrEmpty(sourceValue) || Strings.isNullOrEmpty(targetValue)) {
+            return Optional.of(MatchLevel.POOR);
         
-        if (sourceValue instanceof String && targetValue instanceof String) {
-            double score = scorer.score((String) sourceValue, (String) targetValue);
-            if (score > 0.99) {
-                return Color.GREEN; 
-            } else if (score > 0.80) {
-                return WARNING_COLOR;
-            }
+        } else {
+            double score = scorer.score(sourceValue, targetValue);
+            return Optional.of(MatchLevel.of(score));            
         }
-        return Color.RED;
     }
 
     @Override
-    public int getTextAlignment() {
-        return SwingConstants.LEFT;
-    }
-
-    @Override
-    public int getWidth() {
-        return -1;
-    }
-
-    @Override
-    public boolean isResizable() {
-        return true;
+    public Optional<MatchSide> getSide() {
+        return Optional.of(side);
     }
 }

@@ -242,9 +242,11 @@ public class MatchTable {
                 if(sourceField.isPresent()) {
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.TARGET));
                 } else {
-                    columns.add(new UnmatchedColumn(targetField, fromTarget(targetField.getView())));
+                    columns.add(new UnmatchedColumn(targetField, MatchSide.TARGET, fromTarget(targetField.getView())));
                 }
             }
+            
+            columns.add(new SeparatorColumn());
             
             // Now show the source fields, but in the same order as the target fields
             for (FieldProfile targetField : keyFields.getTarget().getFields()) {
@@ -257,7 +259,7 @@ public class MatchTable {
             // Also include the unmatched source columns as reference
             for (FieldProfile sourceField : keyFields.getSource().getFields()) {
                 if(!keyFields.sourceToTarget(sourceField).isPresent()) {
-                    columns.add(new UnmatchedColumn(sourceField, fromSource(sourceField.getView())));
+                    columns.add(new UnmatchedColumn(sourceField, MatchSide.SOURCE, fromSource(sourceField.getView())));
                 }
             }
 

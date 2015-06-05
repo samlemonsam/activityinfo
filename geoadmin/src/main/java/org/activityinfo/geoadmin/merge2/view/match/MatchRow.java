@@ -73,4 +73,12 @@ public class MatchRow {
     public InstanceMatch asInstanceMatch() {
         return new InstanceMatch(getSourceId().get(), getTargetId().get());
     }
+
+    public boolean isMatched(MatchSide matchSide) {
+        if(matchSide == MatchSide.SOURCE) {
+            return sourceRow != UNMATCHED;
+        } else {
+            return targetRow != UNMATCHED;
+        }
+    }
 }

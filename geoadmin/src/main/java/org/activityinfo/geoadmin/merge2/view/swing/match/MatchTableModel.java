@@ -3,8 +3,6 @@ package org.activityinfo.geoadmin.merge2.view.swing.match;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
 import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
-import org.activityinfo.observable.Subscription;
-import org.activityinfo.observable.TableObserver;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -13,31 +11,13 @@ import java.util.List;
 
 public class MatchTableModel extends AbstractTableModel {
 
-    private final Subscription subscription;
     private List<MatchTableColumn> columns = new ArrayList<>();
 
-    private int rowCount = 0;
+    private MatchTable matchTable;
 
     public MatchTableModel(ImportView view) {
-        final MatchTable matchTable = view.getMatchTable();
-        subscription = matchTable.subscribe(new TableObserver() {
-            @Override
-            public void onRowsChanged() {
-                if (matchTable.isLoading()) {
-                    rowCount = 0;
-                } else {
-                    rowCount = matchTable.getRowCount();
-                }
-                fireTableDataChanged();
-            }
-
-            @Override
-            public void onRowChanged(int index) {
-
-            }
-        });
+        matchTable = view.getMatchTable();
     }
-
 
     public void updateColumns(List<MatchTableColumn> columns) {
         this.columns = columns;
@@ -51,7 +31,11 @@ public class MatchTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return rowCount;
+        if(matchTable.isLoading()) {
+            return 0;
+        } else {
+            return matchTable.getRowCount();
+        }
     }
 
     @Override
@@ -68,6 +52,5 @@ public class MatchTableModel extends AbstractTableModel {
     }
 
     public void stop() {
-        subscription.unsubscribe();
     }
 }

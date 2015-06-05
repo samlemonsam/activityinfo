@@ -1,11 +1,10 @@
 package org.activityinfo.geoadmin.merge2.view.swing.match;
 
 
+import com.google.common.base.Optional;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
-import org.activityinfo.geoadmin.merge2.view.match.MatchRow;
-import org.activityinfo.geoadmin.merge2.view.match.MatchTableColumn;
-import org.activityinfo.geoadmin.merge2.view.match.ResolutionColumn;
+import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
@@ -28,29 +27,40 @@ public class MatchStepPanel extends StepPanel {
     public static final String LOADING_COMPONENT = "loading";
     public static final String TABLE_COMPONENT = "table";
     
-    private ImportView viewModel;
-
-    private final MatchTableModel tableModel;
-    private final JTable table;
-
+    private final ImportView viewModel;
     private final SubscriptionSet subscriptions = new SubscriptionSet();
+
+    private final JTable table;
+    private final MatchTableModel tableModel;
+    private final MatchTableSelection tableSelection;
+    private final CellRenderers cellRenderers;
+    
     private List<MatchTableColumn> columns;
 
-    public MatchStepPanel(ImportView view) {
+
+    public MatchStepPanel(final ImportView view) {
         this.viewModel = view;
         
         setLayout(new BorderLayout());
 
+        cellRenderers = new CellRenderers(view.getMatchTable());
+        
         TableColumnModel tableColumnModel = new DefaultTableColumnModel();
-
+        
+        
         JTableHeader tableHeader = new JTableHeader(tableColumnModel);
         tableHeader.setResizingAllowed(true);
         
         tableModel = new MatchTableModel(viewModel);
+        
+        tableSelection = new MatchTableSelection();
+        
         table = new JTable(tableModel);
         table.setAutoCreateColumnsFromModel(false);
         table.setColumnModel(tableColumnModel);
         table.setTableHeader(tableHeader);
+        table.setRowSelectionAllowed(false);
+        table.setCellSelectionEnabled(true);
         table.setAutoCreateRowSorter(true);
         
 
@@ -85,14 +95,18 @@ public class MatchStepPanel extends StepPanel {
                     MatchTableColumn column = columns.get(table.getSelectedColumn());
                     if(column instanceof ResolutionColumn) {
                         toggleResolution(table.getSelectedRow());
-                    } else {
-                     //   showContextMenu(e);
+                    } else if(e.getClickCount() == 2) {
+                        int viewRow = table.rowAtPoint(e.getPoint());
+                        int modelRow = table.convertRowIndexToModel(viewRow);
+                        int viewColumn = table.columnAtPoint(e.getPoint());
+                        int modelColumn = table.convertColumnIndexToModel(viewColumn);
+                        onDoubleClick(modelRow, modelColumn);
                     }
 
                 }
             }
         });
-
+        
         final JLabel unresolvedCount = new JLabel();
         subscriptions.add(viewModel.getMatchTable().getUnresolvedCount().subscribe(new Observer<Integer>() {
             @Override
@@ -111,6 +125,14 @@ public class MatchStepPanel extends StepPanel {
         statusPanel.add(unresolvedCount);
         
         add(statusPanel, BorderLayout.PAGE_END);
+    }
+
+    private void onDoubleClick(int modelRow, int modelColumn) {
+        Optional<MatchSide> side = columns.get(modelColumn).getSide();
+        if(side.isPresent()) {
+            SelectDialog dialog = new SelectDialog(this, viewModel, modelRow);
+            
+        }
     }
 
 
@@ -144,8 +166,15 @@ public class MatchStepPanel extends StepPanel {
         // Create new columns from the data model info
         for (int i = 0; i < columns.size(); i++) {
             TableColumn newColumn = new TableColumn(i);
-            newColumn.setHeaderValue(columns.get(i).getHeader());
-            newColumn.setCellRenderer(new MatchColumnRenderer(columns.get(i)));
+            MatchTableColumn matchColumn = columns.get(i);
+            newColumn.setHeaderValue(matchColumn.getHeader());
+            newColumn.setCellRenderer(cellRenderers.rendererFor(matchColumn));
+            if(matchColumn instanceof SeparatorColumn) {
+                newColumn.setResizable(false);
+                newColumn.setWidth(10);
+                newColumn.setMaxWidth(10);
+                newColumn.setMinWidth(10);
+            }
             table.addColumn(newColumn);
         }
 

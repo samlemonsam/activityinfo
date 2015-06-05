@@ -164,7 +164,7 @@ public class MatchGraph {
         // For each potential target...
         for(int j=0;j< keyFields.getTargetCount();++j) {
 
-            keyFields.getTarget().dump(j);
+            //keyFields.getTarget().dump(j);
 
             // Compute scores across all dimensions
             double maxScore = 0;
@@ -211,7 +211,7 @@ public class MatchGraph {
 
             for (Candidate candidate : candidates) {
                 double score = rankedScoreMatrix.meanRank(candidate.scores);
-                keyFields.getTarget().dump(candidate.getTargetIndex());
+                //keyFields.getTarget().dump(candidate.getTargetIndex());
                 if (score > bestScore) {
                     bestScore = score;
                     bestCandidate = candidate;

@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
+import com.google.common.base.Optional;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.query.ColumnView;
 
@@ -10,10 +11,12 @@ import org.activityinfo.model.query.ColumnView;
 public class UnmatchedColumn extends MatchTableColumn {
 
     private final FieldProfile field;
+    private final MatchSide side;
     private ColumnView columnView;
 
-    public UnmatchedColumn(FieldProfile field, ColumnView columnView) {
+    public UnmatchedColumn(FieldProfile field, MatchSide side, ColumnView columnView) {
         this.field = field;
+        this.side = side;
         this.columnView = columnView;
     }
 
@@ -31,6 +34,11 @@ public class UnmatchedColumn extends MatchTableColumn {
             }
         }
         return null;
+    }
+
+    @Override
+    public Optional<MatchSide> getSide() {
+        return Optional.of(side);
     }
 
 }

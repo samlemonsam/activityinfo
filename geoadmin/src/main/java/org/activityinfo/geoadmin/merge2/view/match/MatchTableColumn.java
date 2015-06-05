@@ -1,7 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
-import javax.swing.*;
-import java.awt.*;
+import com.google.common.base.Optional;
+import org.activityinfo.geoadmin.match.MatchLevel;
 
 /**
  * Single column in the merge table
@@ -12,20 +12,10 @@ public abstract class MatchTableColumn {
 
     public abstract String getValue(int rowIndex);
 
-    public Color getColor(int rowIndex) {
-        return Color.WHITE;
-    }
-
-    public int getTextAlignment() {
-        return SwingConstants.LEFT;
-    }
-
-    public int getWidth() {
-        return -1;
-    }
+    public abstract Optional<MatchSide> getSide();
     
-    public boolean isResizable() {
-        return true;
+    public Optional<MatchLevel> getMatchConfidence(int rowIndex) {
+        return Optional.absent();
     }
 
 }
