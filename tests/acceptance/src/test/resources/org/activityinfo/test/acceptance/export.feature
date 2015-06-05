@@ -6,6 +6,7 @@ Feature: Export to Excel
     And I have added partner "NRC" to "RRMP"
     And I have created a form named "NFI Distribution" with the submissions:
       | Partner | Donor | Nb. kits  |
+      | enum    | enum  | quantity  |
       | NRC     | USAID |  1000     |
       | NRC     | ECHO  |   500     |
       | NRC     | ECHO  |  2000     |
