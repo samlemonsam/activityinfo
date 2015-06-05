@@ -9,6 +9,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -192,19 +193,43 @@ public class DataEntryTab {
 
                 FluentElement detailsPanel = container.find().div(withClass("details")).first();
 
-                FluentElements names = detailsPanel.find().td(withClass("indicatorHeading")).asList();
-                FluentElements values = detailsPanel.find().td(withClass("indicatorValue")).asList();
-                FluentElements units = detailsPanel.find().td(withClass("indicatorUnits")).asList();
+                FluentElements indicatorNames = detailsPanel.find().td(withClass("indicatorHeading")).asList();
+                FluentElements indicatorValues = detailsPanel.find().td(withClass("indicatorValue")).asList();
+                FluentElements indicatorUnits = detailsPanel.find().td(withClass("indicatorUnits")).asList();
 
-                Preconditions.checkState(names.size() == values.size() && values.size() == units.size());
+                Preconditions.checkState(indicatorNames.size() == indicatorValues.size() && indicatorValues.size() == indicatorUnits.size());
 
-                for (int i = 0; i < names.size(); i++) {
-                    String name = names.get(i).text();
-                    String value = values.get(i).text();
-                    String unit = units.get(i).text();
+                for (int i = 0; i < indicatorNames.size(); i++) {
+                    String name = indicatorNames.get(i).text();
+                    String value = indicatorValues.get(i).text();
+                    String unit = indicatorUnits.get(i).text();
 
                     detailsEntry.getFieldValues().add(new FieldValue(name, value));
                 }
+
+                FluentElements attributeGroupNames = detailsPanel.find().p(withClass("attribute")).span(withClass("groupName")).asList();
+                FluentElements attributeValues = detailsPanel.find().p(withClass("attribute")).span(withClass("attValues")).asList();
+
+                Preconditions.checkState(attributeGroupNames.size() == attributeValues.size());
+
+                for (int i = 0; i < attributeGroupNames.size(); i++) {
+                    String name = attributeGroupNames.get(i).text();
+                    String value = attributeValues.get(i).text();
+
+                    if (name.endsWith(":")) {
+                        name = name.substring(0, name.length() - 1);
+                    }
+
+                    FieldValue fieldValue = new FieldValue(name, value).
+                            setType(Optional.of(EnumType.TYPE_CLASS));
+                    detailsEntry.getFieldValues().add(fieldValue);
+                }
+
+                Optional<FluentElement> commentValue = detailsPanel.find().p(withClass("comments")).span(withClass("attValues")).firstIfPresent();
+                if (commentValue.isPresent()) {
+                    detailsEntry.getFieldValues().add(new FieldValue("Comments", commentValue.get().text()));
+                }
+
                 return detailsEntry;
             }
         });

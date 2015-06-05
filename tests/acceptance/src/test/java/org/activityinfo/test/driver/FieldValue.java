@@ -1,5 +1,8 @@
 package org.activityinfo.test.driver;
 
+import com.google.common.base.Optional;
+import org.activityinfo.model.type.FieldTypeClass;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -11,6 +14,7 @@ public class FieldValue {
     
     private String field;
     private String value;
+    private Optional<? extends FieldTypeClass> type;
 
     public FieldValue() {
     }
@@ -35,8 +39,9 @@ public class FieldValue {
         return field;
     }
 
-    public void setField(String field) {
+    public FieldValue setField(String field) {
         this.field = field;
+        return this;
     }
 
     public String getValue() {
@@ -72,7 +77,16 @@ public class FieldValue {
                     field, value, e.getMessage()), e);
         }
     }
-    
+
+    public Optional<? extends FieldTypeClass> getType() {
+        return type;
+    }
+
+    public FieldValue setType(Optional<? extends FieldTypeClass> type) {
+        this.type = type;
+        return this;
+    }
+
     public static Map<String, FieldValue> toMap(Iterable<FieldValue> values) {
         Map<String, FieldValue> map = new HashMap<>();
         for(FieldValue value : values) {

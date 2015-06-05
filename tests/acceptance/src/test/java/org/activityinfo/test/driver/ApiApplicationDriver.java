@@ -11,13 +11,16 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+import com.mysql.jdbc.StringUtils;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.model.calc.AggregationMethod;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -296,9 +299,20 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "todate":
                     properties.put("date2", value.getValue());
                     break;
+                case "comments":
+                    properties.put("comments", value.getValue());
+                    break;
                 default:
-                    int indicatorId = aliases.getId(value.getField());
-                    properties.put("I" + indicatorId, value.maybeNumberValue());
+
+                    if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                        for (String item : StringUtils.split(value.getValue(), ",", true)) {
+                            int attributeId = aliases.getId(item);
+                            properties.put(AttributeDTO.PROPERTY_PREFIX + attributeId, true);
+                        }
+                    } else {
+                        int indicatorId = aliases.getId(value.getField());
+                        properties.put("I" + indicatorId, value.maybeNumberValue());
+                    }
                     break;
             }
         }
@@ -837,7 +851,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         itemProperties.put("name", name);
         itemProperties.put("attributeGroupId", parentId.get());
 
-        createEntity("Attribute", itemProperties);
+        createEntityAndBindId("Attribute", itemProperties);
     }
 
 

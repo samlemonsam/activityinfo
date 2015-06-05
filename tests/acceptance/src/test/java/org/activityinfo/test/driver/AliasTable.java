@@ -1,10 +1,12 @@
 package org.activityinfo.test.driver;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mysql.jdbc.StringUtils;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
@@ -109,7 +111,7 @@ public class AliasTable {
         
         if(existingId != null) {
             if (!Objects.equals(existingId.get(), newId.get())) {
-                throw new IllegalStateException(String.format(
+                throw new IdAlreadyBoundException(String.format(
                         "Cannot bind test handle %s to id %d: it was previously bound to %d", handle,
                         newId.get(),
                         existingId.get()));
@@ -168,6 +170,31 @@ public class AliasTable {
             rows.add(cells);
         }
         return DataTable.create(rows);
+    }
+
+    public List<FieldValue> deAlias(List<FieldValue> values) {
+        for (FieldValue value : values) {
+            deAlias(value);
+        }
+        return values;
+    }
+
+    public FieldValue deAlias(FieldValue value) {
+        value.setField(getTestHandleForAlias(value.getField()));
+
+        List<String> rowValuesWithAlias = StringUtils.split(value.getValue(), ",", true);
+        List<String> rowValues = Lists.newArrayListWithCapacity(rowValuesWithAlias.size());
+        for (String row : rowValuesWithAlias) {
+            try {
+                rowValues.add(getTestHandleForAlias(row));
+            } catch (IllegalStateException e) {
+                // for double values we don't have alias
+                rowValues.add(row);
+            }
+        }
+        value.setValue(Joiner.on(",").join(rowValues));
+
+        return value;
     }
 
 

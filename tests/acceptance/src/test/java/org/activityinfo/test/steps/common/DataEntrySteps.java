@@ -194,4 +194,9 @@ public class DataEntrySteps {
 
         return DataTable.create(rows);
     }
+
+    @Then("^submissions for \"([^\"]*)\" form are:$")
+    public void submissions_for_form_from_database_are(String formName, DataTable dataTable) throws Throwable {
+        driver.assertDataEntryTableForForm(formName, dataTable);
+    }
 }

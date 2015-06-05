@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import org.activityinfo.test.driver.model.IndicatorLink;
+import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
@@ -205,11 +206,19 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public LinkIndicatorsPage getLinkIndicatorPage() {
+        throw new PendingException();
+    }
+
     public void createLinkIndicators(List<IndicatorLink> linkedIndicatorRows) {
         throw new PendingException();
     }
 
     public void assertLinkedIndicatorsMarked(List<IndicatorLink> linkedIndicatorRows, boolean marked) {
+        throw new PendingException();
+    }
+
+    public void assertDataEntryTableForForm(String formName, DataTable expectedTable) {
         throw new PendingException();
     }
 }

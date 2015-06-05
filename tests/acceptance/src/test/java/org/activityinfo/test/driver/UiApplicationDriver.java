@@ -1,10 +1,13 @@
 package org.activityinfo.test.driver;
 
+import com.google.api.client.util.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
@@ -31,6 +34,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @ScenarioScoped
@@ -415,10 +419,15 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void createLinkIndicators(List<IndicatorLink> linkedIndicatorRows) {
+    public LinkIndicatorsPage getLinkIndicatorPage() {
         ensureLoggedIn();
 
-        LinkIndicatorsPage linkIndicatorsPage = applicationPage.navigateToDesignTab().linkIndicators();
+        return applicationPage.navigateToDesignTab().linkIndicators();
+    }
+
+    @Override
+    public void createLinkIndicators(List<IndicatorLink> linkedIndicatorRows) {
+        LinkIndicatorsPage linkIndicatorsPage = getLinkIndicatorPage();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
 
         for (IndicatorLink row : linkedIndicatorRows) {
@@ -437,7 +446,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     public void assertLinkedIndicatorsMarked(List<IndicatorLink> linkedIndicatorRows, boolean marked) {
-        LinkIndicatorsPage linkIndicatorsPage = applicationPage.navigateToDesignTab().linkIndicators();
+        LinkIndicatorsPage linkIndicatorsPage = getLinkIndicatorPage();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
 
         for (IndicatorLink row : linkedIndicatorRows) {
@@ -451,6 +460,84 @@ public class UiApplicationDriver extends ApplicationDriver {
             Preconditions.checkState(sourceIndicator.findCell(aliasTable.getAlias(row.getSourceIndicator())).hasIcon(), marked);
             Preconditions.checkState(targetIndicator.findCell(aliasTable.getAlias(row.getDestIndicator())).hasIcon(), marked);
         }
+    }
+
+    public void assertDataEntryTableForForm(String formName, DataTable expectedTable) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        List<DetailsEntry> detailsEntries = collectDetails(dataEntryTab);
+        for (DetailsEntry entry : detailsEntries) {
+            aliasTable.deAlias(entry.getFieldValues());
+        }
+
+
+        // compare table with detail entries
+        List<DataTableRow> matchedRows = Lists.newArrayList();
+        List<DetailsEntry> matchedDetailsEntries = Lists.newArrayList();
+        for (int i = 1; i < expectedTable.getGherkinRows().size(); i++) {
+            DataTableRow row = expectedTable.getGherkinRows().get(i);
+            if (matchedRows.contains(row)) {
+                continue;
+            }
+            for (DetailsEntry detailsEntry : detailsEntries) {
+                if (matchedDetailsEntries.contains(detailsEntry)) {
+                    continue;
+                }
+                if (equals(expectedTable.getGherkinRows().get(0).getCells(), row, detailsEntry.getFieldValues())) {
+                    matchedRows.add(row);
+                    matchedDetailsEntries.add(detailsEntry);
+                    break;
+                }
+            }
+        }
+
+        if (matchedRows.size() != (expectedTable.getGherkinRows().size() - 1)) { // -1 because of first row is header
+            throw new AssertionError("Data entry table does not match for form: " + formName +
+                    ". Expected: \n" + expectedTable + "\n But got: " + detailsEntries);
+        }
+    }
+
+    public boolean equals(List<String> columns, DataTableRow gherkinRow, List<FieldValue> values) {
+        Set<Integer> matchedCellIndexes = Sets.newHashSet();
+        for (FieldValue value : values) {
+
+            for (int column = 0; column < gherkinRow.getCells().size(); column++) {
+                if (matchedCellIndexes.contains(column)) {
+                    continue;
+                }
+
+                String cell = gherkinRow.getCells().get(column);
+                if (cell.equals(value.getValue()) && columns.get(column).equals(value.getField())) {
+                    matchedCellIndexes.add(column);
+                    break;
+                }
+            }
+        }
+
+        return matchedCellIndexes.size() == gherkinRow.getCells().size();
+    }
+
+    private List<DetailsEntry> collectDetails(DataEntryTab dataEntryTab) {
+        List<DetailsEntry> result = Lists.newArrayList();
+        int row = 0;
+        try {
+            while (true) {
+                dataEntryTab.selectSubmission(row);
+                Thread.sleep(500); // sometimes it's too fast and we read details of previous row, give it time to switch
+                result.add(dataEntryTab.details());
+                row++;
+                if (row > 10000) { // safe escape
+                    throw new AssertionError("Failed to fetch details for submissions on Data Entry tab.");
+                }
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            // no rows anymore
+        }
+        return result;
     }
 
     @Override
