@@ -18,7 +18,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.capacity.Metrics;
@@ -307,7 +306,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
                         for (String item : StringUtils.split(value.getValue(), ",", true)) {
                             int attributeId = aliases.getId(item);
-                            properties.put(AttributeDTO.PROPERTY_PREFIX + attributeId, true);
+                            properties.put("ATTRIB" + attributeId, true);
                         }
                     } else {
                         int indicatorId = aliases.getId(value.getField());
