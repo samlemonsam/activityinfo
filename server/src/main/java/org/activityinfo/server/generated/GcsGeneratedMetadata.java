@@ -54,6 +54,10 @@ class GcsGeneratedMetadata {
         Entity entity = null;
         try {
             entity = datastoreService.get(tx, entityKey(id));
+            Boolean completed = (Boolean) entity.getProperty("completed");
+            if(completed) {
+                throw new IllegalStateException(id + " is already completed.");
+            }
         } catch (EntityNotFoundException e) {
             tx.rollback();
             throw new IllegalStateException("Metadata entity " + entityKey(id) + " has not been saved.");

@@ -20,6 +20,7 @@ class GcsOutputStream extends OutputStream {
 
     private final GcsGeneratedMetadata metadata;
     private final OutputStream out;
+    private boolean closed = false;
 
     public GcsOutputStream(String bucket, GcsGeneratedMetadata metadata) throws IOException {
         GcsService gcs = GcsServiceFactory.createGcsService();
@@ -55,8 +56,13 @@ class GcsOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
-        LOGGER.info("Closing and finalizing generated resource " + metadata.getId());
-        out.close();
-        metadata.markComplete();
+        if(closed) {
+            LOGGER.warning("Output stream for " + metadata + " is already closed.");
+        } else {
+            closed = true;
+            LOGGER.info("Closing and finalizing generated resource " + metadata.getId());
+            out.close();
+            metadata.markComplete();
+        }
     }
 }

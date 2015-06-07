@@ -36,7 +36,7 @@ import org.activityinfo.server.report.generator.ReportGenerator;
 import org.activityinfo.server.report.renderer.Renderer;
 import org.activityinfo.server.report.renderer.RendererFactory;
 
-import java.util.logging.Level;
+import java.io.OutputStream;
 import java.util.logging.Logger;
 
 /**
@@ -70,15 +70,9 @@ public class RenderElementHandler implements CommandHandler<RenderElement> {
 
             LOGGER.fine("Rendering element: " + cmd + "\nURL: " + storage.getDownloadUri());
 
-            try {
+            try(OutputStream out = storage.openOutputStream()) {
                 generator.generateElement(user, cmd.getElement(), new Filter(), new DateRange());
-                renderer.render(cmd.getElement(), storage.openOutputStream());
-            } finally {
-                try {
-                    storage.openOutputStream().close();
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Exception while closing storage: " + e.getMessage(), e);
-                }
+                renderer.render(cmd.getElement(), out);
             }
             return new UrlResult(storage.getDownloadUri());
         } catch (Exception e) {
