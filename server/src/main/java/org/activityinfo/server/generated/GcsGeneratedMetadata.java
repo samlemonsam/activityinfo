@@ -122,6 +122,10 @@ class GcsGeneratedMetadata {
     }
     
     public String getGcsPath() {
-        return "generated/" + id;
+        // Include the user-friendly filename in the GCS object path, which
+        // will eliminate the need to include the filename in the Content-disposition header,
+        // support for which is extremely unpredictable in IE.
+        // http://www.jtricks.com/bits/content_disposition.html
+        return "generated/" + id + "/" + filename;
     }
 }

@@ -25,7 +25,7 @@ class GcsOutputStream extends OutputStream {
         GcsService gcs = GcsServiceFactory.createGcsService();
         GcsFileOptions fileOptions = new GcsFileOptions.Builder()
                 .mimeType(metadata.getContentType())
-                .contentDisposition("attachment; filename=" + metadata.getFilename())
+                .contentDisposition("attachment")
                 .build();
         GcsFilename fileName = new GcsFilename(bucket, metadata.getGcsPath());
 
