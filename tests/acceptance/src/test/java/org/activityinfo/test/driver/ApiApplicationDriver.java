@@ -298,9 +298,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "location":
                     properties.put("locationId", aliases.getId(value.getValue()));
                     break;
+                case "start date":
                 case "fromdate":
                     properties.put("date1", value.getValue());
                     break;
+                case "end date":
                 case "todate":
                     properties.put("date2", value.getValue());
                     break;
