@@ -271,6 +271,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
+        submitForm(formName, values, Lists.<String>newArrayList());
+    }
+
+    @Override
+    public void submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
         int activityId = aliases.getId(formName);
 
         JSONObject properties = new JSONObject();
@@ -281,7 +286,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("date1", "2014-01-01");
         properties.put("date2", "2014-02-01");  
         
-        for(FieldValue value : values) {
+        for(int i = 0; i < values.size(); i++) {
+            FieldValue value = values.get(i);
             switch (value.getField().toLowerCase()) {
                 case "partner":
                     properties.put("partnerId", aliases.getId(value.getValue()));
@@ -305,7 +311,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
                     if (value.getType() != null && value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
                         for (String item : StringUtils.split(value.getValue(), ",", true)) {
-                            int attributeId = aliases.getId(item);
+                            int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
                             properties.put("ATTRIB" + attributeId, true);
                         }
                     } else {
@@ -850,7 +856,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
         itemProperties.put("name", name);
         itemProperties.put("attributeGroupId", parentId.get());
 
-        createEntityAndBindId("Attribute", itemProperties);
+        PendingId pendingId = createEntity("Attribute", itemProperties);
+        String testHandle = aliases.getTestHandleForAlias(name);
+
+        aliases.bindTestHandleToId(new AliasTable.TestHandle(testHandle, parentId.get()), pendingId);
     }
 
 

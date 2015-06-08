@@ -12,18 +12,18 @@ Feature: Link indicators
     And I have created a database "Goma project"
     And I have added partner "NRC" to "Goma project"
     And I have created a form named "Activities at Goma hospital" with the submissions:
-      | Patients Goma | Patients Goma Name | Provider | Diseases treated          | Comments         | Partner |
-      | quantity      | text               | enum     | enum                      | text             | enum    |
-      | 45            | Mike               | ABC      | malaria2, tuberculosis2   | rainy season     | NRC     |
-      | 23            | Bob                | BC       | cholera2                  | cholera epidemic | NRC     |
+      | Patients Goma | Patients Goma Name | Provider | Diseases treated        | Comments         | Partner |
+      | quantity      | text               | enum     | enum                    | text             | enum    |
+      | 45            | Mike               | ABC      | malaria, tuberculosis   | rainy season     | NRC     |
+      | 23            | Bob                | BC       | cholera                 | cholera epidemic | NRC     |
     And I have created a database "Khartoum project"
     And I have added partner "NRC" to "Khartoum project"
     And I have created a form named "Activities at Khartoum hospital" with the submissions:
-      | Patients Khartoum | Funder | Diseases                | Comments         | Partner |
-      | quantity          | enum   | enum                    | text             | enum    |
-      | 12                | ECHO2  | malaria3, tuberculosis3 | no comment       | NRC     |
-      | 2450              | ECHO2  | cholera3                | cholera epidemic | NRC     |
-      | 3                 | UNICEF | tuberculosis3           | no comment       | NRC     |
+      | Patients Khartoum | Funder | Diseases              | Comments         | Partner |
+      | quantity          | enum   | enum                  | text             | enum    |
+      | 12                | ECHO   | malaria, tuberculosis | no comment       | NRC     |
+      | 2450              | ECHO   | cholera               | cholera epidemic | NRC     |
+      | 3                 | UNICEF | tuberculosis          | no comment       | NRC     |
 
   Scenario: Only the quantity form fields of the forms appearing as indicators
     When selecting "Goma project" as the source link database
@@ -36,11 +36,11 @@ Feature: Link indicators
       | sourceDb     | sourceIndicator | destDb   | destIndicator      |
       | Goma project | Patients Goma   | Overview | Number of patients |
     Then submissions for "Medical Activities" form are:
-      | Number of patients | Donor | Provider | Diseases treated this month  | Diseases treated        |
-      | 230                | USAID |          | cholera,malaria,tuberculosis |                         |
-      | 23                 | ECHO  |          | cholera                      |                         |
-      | 45                 |       | ABC      |                              | malaria2,tuberculosis2  |
-      | 23                 |       | BC       |                              | cholera2                |
+      | Number of patients | Donor | Provider | Diseases treated this month  | Diseases treated      |
+      | 230                | USAID |          | cholera,malaria,tuberculosis |                       |
+      | 23                 | ECHO  |          | cholera                      |                       |
+      | 45                 |       | ABC      |                              | malaria,tuberculosis  |
+      | 23                 |       | BC       |                              | cholera               |
 
   Scenario: Linking form field to multiple fields
     And I link indicators:
@@ -48,14 +48,14 @@ Feature: Link indicators
       | Goma project     | Patients Goma     | Overview | Number of patients |
       | Khartoum project | Patients Khartoum | Overview | Number of patients |
     Then submissions for "Medical Activities" form are:
-      | Number of patients | Donor | Provider | Diseases treated this month  | Diseases treated       | Funder | Diseases                |
-      | 230                | USAID |          | cholera,malaria,tuberculosis |                        |        |                         |
-      | 23                 | ECHO  |          | cholera                      |                        |        |                         |
-      | 45                 |       | ABC      |                              | malaria2,tuberculosis2 |        |                         |
-      | 23                 |       | BC       |                              | cholera2               |        |                         |
-      | 12                 |       |          |                              |                        | ECHO2  | malaria3,tuberculosis3 |
-      | 2,450              |       |          |                              |                        | ECHO2  | cholera3                |
-      | 3                  |       |          |                              |                        | UNICEF | tuberculosis3           |
+      | Number of patients | Donor | Provider | Diseases treated this month  | Diseases treated     | Funder | Diseases             |
+      | 230                | USAID |          | cholera,malaria,tuberculosis |                      |        |                      |
+      | 23                 | ECHO  |          | cholera                      |                      |        |                      |
+      | 45                 |       | ABC      |                              | malaria,tuberculosis |        |                      |
+      | 23                 |       | BC       |                              | cholera              |        |                      |
+      | 12                 |       |          |                              |                      | ECHO   | malaria,tuberculosis |
+      | 2,450              |       |          |                              |                      | ECHO   | cholera              |
+      | 3                  |       |          |                              |                      | UNICEF | tuberculosis         |
 
   @AI-857
   Scenario: Design link indicators UI test

@@ -191,7 +191,7 @@ public class DatabaseSetupSteps {
                     .setType(Optional.fromNullable(columnTypeMap.get(column))));
         }
         
-        driver.setup().submitForm(formName, fieldValues);
+        driver.setup().submitForm(formName, fieldValues, headers);
         
     }
     

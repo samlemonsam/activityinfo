@@ -72,6 +72,10 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public void submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
+        throw new PendingException();
+    }
+
     public void submitForm(String formName, String partner, List<MonthlyFieldValue> fieldValues) throws JSONException, Exception {
         throw new PendingException();
     }

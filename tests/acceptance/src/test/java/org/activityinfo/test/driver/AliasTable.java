@@ -35,8 +35,8 @@ public class AliasTable {
 
     private final String uniqueSuffix;
 
-    private ConcurrentHashMap<String, Supplier<Integer>> testHandleToId = new ConcurrentHashMap<>();
-    
+    private ConcurrentHashMap<TestHandle, Supplier<Integer>> testHandleToId = new ConcurrentHashMap<>();
+
 
     public AliasTable() {
         this.uniqueSuffix = "_" + Long.toHexString(ThreadLocalRandom.current().nextLong());
@@ -57,6 +57,10 @@ public class AliasTable {
     }
 
     public int getId(String testHandle) {
+        return getId(new TestHandle(testHandle));
+    }
+
+    public int getId(TestHandle testHandle) {
         Supplier<Integer> id = testHandleToId.get(testHandle);
         if(id == null) {
             throw missingHandle("Test handle '%s' has not been bound to an id.", testHandle);
@@ -64,13 +68,14 @@ public class AliasTable {
         return id.get();
     }
 
+
     private IllegalStateException missingHandle(String message, Object... arguments) {
         StringBuilder s = new StringBuilder();
         s.append(String.format(message, arguments));
         s.append("\n");
         s.append("Test handles:\n");
-        for (String handle : testHandleToId.keySet()) {
-            s.append(String.format("  %s [%s] = %d\n", handle, createAlias(handle),
+        for (TestHandle handle : testHandleToId.keySet()) {
+            s.append(String.format("  %s [%s] = %d\n", handle, createAlias(handle.getTestHandle()),
                     testHandleToId.get(handle).get()));
         }
         return new IllegalStateException(s.toString());
@@ -98,7 +103,25 @@ public class AliasTable {
 
     public void bindTestHandleToIdIfAbsent(String handle, Supplier<Integer> newId) {
         Preconditions.checkNotNull(handle, "handle");
-        testHandleToId.putIfAbsent(handle, newId);
+        testHandleToId.putIfAbsent(new TestHandle(handle), newId);
+    }
+
+    /**
+     * Maps a test handle to its server-generated ID
+     */
+    public void bindTestHandleToId(TestHandle testHandle, Supplier<Integer> newId) {
+        Preconditions.checkNotNull(testHandle, "testHandle");
+
+        Supplier<Integer> existingId = testHandleToId.putIfAbsent(testHandle, newId);
+
+        if(existingId != null) {
+            if (!Objects.equals(existingId.get(), newId.get())) {
+                throw new IllegalStateException(String.format(
+                        "Cannot bind test handle %s to id %d: it was previously bound to %d", testHandle,
+                        newId.get(),
+                        existingId.get()));
+            }
+        }
     }
     
     /**
@@ -106,17 +129,7 @@ public class AliasTable {
      */
     public void bindTestHandleToId(String handle, Supplier<Integer> newId) {
         Preconditions.checkNotNull(handle, "handle");
-
-        Supplier<Integer> existingId = testHandleToId.putIfAbsent(handle, newId);
-        
-        if(existingId != null) {
-            if (!Objects.equals(existingId.get(), newId.get())) {
-                throw new IllegalStateException(String.format(
-                        "Cannot bind test handle %s to id %d: it was previously bound to %d", handle,
-                        newId.get(),
-                        existingId.get()));
-            }
-        }
+        bindTestHandleToId(new TestHandle(handle), newId);
     }
     
     public void bindTestHandleToId(String handle, int newId) {
@@ -198,16 +211,16 @@ public class AliasTable {
     }
 
 
-    /**
-     * @return a random 32-bit integer key
-     */
-    public int generateInt() {
-        return ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
-    }
+//    /**
+//     * @return a random 32-bit integer key
+//     */
+//    public int generateInt() {
+//        return ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
+//    }
     
     public int getOrGenerateId(String testHandle) {
         int newId = generateId();
-        Supplier<Integer> existingId = testHandleToId.putIfAbsent(testHandle, Suppliers.ofInstance(newId));
+        Supplier<Integer> existingId = testHandleToId.putIfAbsent(new TestHandle(testHandle), Suppliers.ofInstance(newId));
         if(existingId == null) {
             return newId;
         } else  {
@@ -215,7 +228,65 @@ public class AliasTable {
         }
     }
 
-    public Map<String, Supplier<Integer>> getTestHandleToId() {
+    public Map<TestHandle, Supplier<Integer>> getTestHandleToId() {
         return Maps.newHashMap(testHandleToId);
+    }
+
+    public static class TestHandle {
+
+        private String testHandle;
+        private Object owner;
+
+        public TestHandle(String testHandle) {
+            this.testHandle = testHandle;
+        }
+
+        public TestHandle(String testHandle, Object owner) {
+            this.testHandle = testHandle;
+            this.owner = owner;
+        }
+
+        public String getTestHandle() {
+            return testHandle;
+        }
+
+        public void setTestHandle(String testHandle) {
+            this.testHandle = testHandle;
+        }
+
+        public Object getOwner() {
+            return owner;
+        }
+
+        public void setOwner(Object owner) {
+            this.owner = owner;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            TestHandle that = (TestHandle) o;
+
+            if (owner != null ? !owner.equals(that.owner) : that.owner != null) return false;
+            return !(testHandle != null ? !testHandle.equals(that.testHandle) : that.testHandle != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = testHandle != null ? testHandle.hashCode() : 0;
+            result = 31 * result + (owner != null ? owner.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "TestHandle{" +
+                    "testHandle='" + testHandle + '\'' +
+                    ", owner=" + owner +
+                    '}';
+        }
     }
 }
