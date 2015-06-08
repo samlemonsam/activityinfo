@@ -24,7 +24,7 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
 public class GxtTree {
 
-    private static final int MAX_WAIT_TIME = 30;
+    private static final int MAX_WAIT_TIME = 120;
 
     private FluentElement container;
     private XPathProvider xPathProvider;
