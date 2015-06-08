@@ -12,10 +12,10 @@ Feature: Export to Excel
       | NRC     | ECHO  |  2000     |
     When I export the form "NFI Distribution"
     Then the exported spreadsheet contains:
-      | Partner | Donor | Nb. kits  |
-      | NRC     | USAID | 1,000     |
-      | NRC     | ECHO  |   500     |
-      | NRC     | ECHO  | 2,000     |
+      | Partner | USAID | ECHO  | Nb. kits  |
+      | NRC     | true  | false | 1,000     |
+      | NRC     | false | true  | 500       |
+      | NRC     | false | true  | 2,000     |
 
   Scenario: Export single form without submissions to Excel
     Given I have created a database "RRMP"
