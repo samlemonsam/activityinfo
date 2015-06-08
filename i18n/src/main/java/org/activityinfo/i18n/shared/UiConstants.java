@@ -3698,5 +3698,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please specify 'From' date before 'To' date.")
     String fromDateIsBeforeToDate();
+
+    @DefaultStringValue("Please type to search for results")
+    String suggestBoxPlaceholder();
 }
 
