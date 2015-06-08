@@ -10,6 +10,7 @@ import org.activityinfo.geoadmin.merge2.view.swing.match.select.SelectDialog;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.SubscriptionSet;
+import org.activityinfo.observable.TableObserver;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableColumnModel;
@@ -89,7 +90,20 @@ public class MatchStepPanel extends StepPanel {
                 }
             }
         }));
+        
 
+        subscriptions.add(viewModel.getMatchTable().subscribe(new TableObserver() {
+            @Override
+            public void onRowsChanged() {
+                tableModel.fireTableDataChanged();
+            }
+
+            @Override
+            public void onRowChanged(int index) {
+                tableModel.fireTableDataChanged();
+            }
+        }));
+        
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -130,9 +144,14 @@ public class MatchStepPanel extends StepPanel {
     }
 
     private void onDoubleClick(int modelRow, int modelColumn) {
+        MatchRow matchRow = viewModel.getMatchTable().get(modelRow);
         Optional<MatchSide> side = columns.get(modelColumn).getSide();
         if(side.isPresent()) {
-            SelectDialog dialog = new SelectDialog(this, viewModel, modelRow, MatchSide.SOURCE);
+            MatchSide sideBeingMatchedAgainst = side.get();
+            if(!matchRow.isMatched(sideBeingMatchedAgainst)) {
+                sideBeingMatchedAgainst = sideBeingMatchedAgainst.opposite();
+            }
+            SelectDialog dialog = new SelectDialog(this, viewModel, modelRow, sideBeingMatchedAgainst);
             dialog.setVisible(true);
         }
     }

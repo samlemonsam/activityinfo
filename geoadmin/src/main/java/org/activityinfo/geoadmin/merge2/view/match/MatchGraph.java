@@ -186,7 +186,7 @@ public class MatchGraph {
             // Must have a substantial score on at least ONE dimension
             // to be considered a viable candidate
             if(maxScore >= MIN_SCORE) {
-                keyFields.dumpPair(sourceIndex, j);
+            //    keyFields.dumpPair(sourceIndex, j);
                 candidates.add(new Candidate(j, scores));
             }
         }
