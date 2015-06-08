@@ -5,7 +5,6 @@ import com.google.appengine.tools.cloudstorage.GcsInputChannel;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.common.io.ByteStreams;
-import com.google.common.net.UrlEscapers;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.Domain;
 
@@ -99,8 +98,7 @@ class GcsGeneratedResource implements GeneratedResource {
 
     private URI getSignedDownloadUri() {
         GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
-        String path = bucket + "/" + metadata.getId() + "/" + UrlEscapers.urlPathSegmentEscaper().escape(metadata.getFilename());
-        return signer.signUri("GET", path);
+        return signer.signUri("GET", bucket + "/" + metadata.getUrlEscapedGcsPath());
     }
 
     public Response serveContent() throws IOException {
