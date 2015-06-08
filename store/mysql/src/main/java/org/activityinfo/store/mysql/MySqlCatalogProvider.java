@@ -3,17 +3,20 @@ package org.activityinfo.store.mysql;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class MySqlCatalogProvider {
 
+    private static final Logger LOGGER = Logger.getLogger(MySqlCatalogProvider.class.getName());
+    
     private List<CollectionProvider> mappings = Lists.newArrayList();
 
     public MySqlCatalogProvider() {
@@ -24,6 +27,7 @@ public class MySqlCatalogProvider {
         mappings.add(new SimpleTableCollectionProvider(new LocationCollectionProvider()));
         mappings.add(new SimpleTableCollectionProvider(new PartnerCollectionProvider()));
         mappings.add(new SiteCollectionProvider());
+        mappings.add(new ReportingPeriodCollectionProvider());
     }
 
     public CollectionCatalog openCatalog(final QueryExecutor executor) {
@@ -44,6 +48,7 @@ public class MySqlCatalogProvider {
 
             @Override
             public FormClass getFormClass(ResourceId formClassId) {
+                LOGGER.info("Requesting formClass " + formClassId);
                 return getCollection(formClassId).getFormClass();
             }
         };

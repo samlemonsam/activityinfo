@@ -33,7 +33,7 @@ public class MySqlCursorBuilder implements CursorBuilder {
     public MySqlCursorBuilder(TableMapping tableMapping, QueryExecutor executor) {
         this.tableMapping = tableMapping;
         this.executor = executor;
-        this.query = new SqlBuilder(tableMapping.getBaseTable());
+        this.query = new SqlBuilder(tableMapping.getBaseFromClause());
         this.query.where(tableMapping.getBaseFilter());
         this.query.orderBy(tableMapping.getPrimaryKey().getColumnName());
         this.evaluator = new PartialEvaluator<>(tableMapping.getFormClass(), readerFactory);

@@ -144,6 +144,6 @@ public class TableMappingBuilder {
         Preconditions.checkState(primaryKeyMapping != null, tableName + ": Primary key is not set");
         Preconditions.checkState(formClass != null, tableName + ": FormClass is not set");
         Preconditions.checkState(formClass.getOwnerId() != null, tableName + ": ownerId is not set");
-        return new TableMapping(tableName, baseFilter, primaryKeyMapping, mappings, formClass);
+        return new TableMapping(tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass);
     }
 }

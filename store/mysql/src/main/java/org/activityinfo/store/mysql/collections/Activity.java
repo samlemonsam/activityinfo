@@ -85,19 +85,29 @@ public class Activity {
         return name;
     }
 
-    public Iterable<ActivityField> getSiteFields() {
+    public Iterable<ActivityField> getAttributeAndIndicatorFields() {
         if(reportingFrequency == REPORT_ONCE) {
             return fields;
         } else {
             return Iterables.filter(fields, new Predicate<ActivityField>() {
                 @Override
                 public boolean apply(ActivityField input) {
-                    return !input.isAttributeGroup();
+                    return input.isAttributeGroup();
                 }
             });
         }
     }
 
+    
+    public Iterable<ActivityField> getIndicatorFields() {
+        return Iterables.filter(fields, new Predicate<ActivityField>() {
+            @Override
+            public boolean apply(ActivityField input) {
+                return !input.isAttributeGroup();
+            }
+        });
+    }
+    
     public boolean hasLocationType() {
         // hack!!
         return !isNullLocationType();

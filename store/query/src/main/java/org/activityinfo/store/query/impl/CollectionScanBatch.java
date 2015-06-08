@@ -9,13 +9,13 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
+import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.Join;
 import org.activityinfo.store.query.impl.join.JoinLink;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
-import org.activityinfo.service.store.CollectionCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -179,5 +179,9 @@ public class CollectionScanBatch {
     public Slot<ColumnView> addExpression(FormClass formClassId, ExprNode node) {
      //   return getTable(formClassId).addExpression(node);
         throw new UnsupportedOperationException();
+    }
+
+    public Slot<Integer> addRowCount(FormClass formClass) {
+        return getTable(formClass).addCount();
     }
 }

@@ -1,10 +1,8 @@
 package org.activityinfo.store.mysql.mapping;
 
 import com.google.common.collect.Maps;
-import org.activityinfo.model.expr.eval.FieldReader;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.mysql.mapping.FieldMapping;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +10,7 @@ import java.util.Map;
 
 public class TableMapping {
 
-    private String baseTable;
+    private String baseFromClause;
     private String baseFilter;
     private FormClass formClass;
     private PrimaryKeyMapping primaryKey;
@@ -20,8 +18,8 @@ public class TableMapping {
 
     private Map<ResourceId, FieldMapping> fieldMappings = Maps.newHashMap();
 
-    TableMapping(String baseTable, String baseFilter, PrimaryKeyMapping primaryKey, List<FieldMapping> mappings, FormClass formClass) {
-        this.baseTable = baseTable;
+    TableMapping(String baseFromClause, String baseFilter, PrimaryKeyMapping primaryKey, List<FieldMapping> mappings, FormClass formClass) {
+        this.baseFromClause = baseFromClause;
         this.primaryKey = primaryKey;
         this.baseFilter = baseFilter;
         this.formClass = formClass;
@@ -34,8 +32,8 @@ public class TableMapping {
         return primaryKey;
     }
 
-    public String getBaseTable() {
-        return baseTable;
+    public String getBaseFromClause() {
+        return baseFromClause;
     }
 
     public FieldMapping getMapping(ResourceId fieldId) {

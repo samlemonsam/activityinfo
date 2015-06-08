@@ -70,6 +70,15 @@ public class ColumnSetBuilder {
             columnViews.put(column.getId(), view);
         }
 
+        Slot<ColumnView> columnForRowCount = null;
+
+        if(columnViews.isEmpty()) {
+            // handle empty queries as a special case: we still need the 
+            // row count so query the id
+            columnForRowCount = batch.addResourceIdColumn(formClass);
+
+        }
+
         LOGGER.info("Request defined, execution starting...");
 
         // Now execute the batch
@@ -83,17 +92,21 @@ public class ColumnSetBuilder {
 
 
         // Package the results
+        
         int numRows = -1;
+        if(columnForRowCount != null) {
+            numRows = columnForRowCount.get().numRows();
+        } 
         Map<String, ColumnView> dataMap = Maps.newHashMap();
-        for(Map.Entry<String, Slot<ColumnView>> entry : columnViews.entrySet()) {
+        for (Map.Entry<String, Slot<ColumnView>> entry : columnViews.entrySet()) {
             ColumnView view = filter.apply(entry.getValue().get());
 
             dataMap.put(entry.getKey(), view);
 
-            if(numRows == -1) {
+            if (numRows == -1) {
                 numRows = view.numRows();
             } else {
-                if(numRows != view.numRows()) {
+                if (numRows != view.numRows()) {
                     throw new IllegalStateException("Columns are of unequal length: " + dataMap);
                 }
             }

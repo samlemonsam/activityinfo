@@ -28,7 +28,7 @@ public class ActivityTableMappingBuilder {
     private Activity activity;
     private ResourceId classId;
     
-    private String tableName;
+    private String baseFromClause;
     private String baseFilter;
     private FormClass formClass;
     private List<FieldMapping> mappings = Lists.newArrayList();
@@ -41,7 +41,7 @@ public class ActivityTableMappingBuilder {
     public static ActivityTableMappingBuilder site(Activity activity) {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
-        mapping.tableName = "site";
+        mapping.baseFromClause = "site base";
         mapping.baseFilter = "base.dateDeleted is NULL AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
@@ -60,20 +60,31 @@ public class ActivityTableMappingBuilder {
             mapping.addLocationField();
         }
 
-        for(ActivityField field : activity.getSiteFields()) {
-            mapping.addSiteField(field);
+        for(ActivityField field : activity.getAttributeAndIndicatorFields()) {
+            mapping.addIndicatorOrAttributeField(field);
         }
 
         return mapping;
     }
 
-    public static ActivityTableMappingBuilder reportingPeriod(int activityId) {
+    public static ActivityTableMappingBuilder reportingPeriod(Activity activity) {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
-        mapping.tableName = "reportingperiod base LEFT JOIN site on (site.siteId=base.siteId)";
-        mapping.baseFilter = "site.dateDeleted IS NULL AND site.activityId=" + activityId;
-        mapping.classId = CuidAdapter.reportingPeriodFormClass(activityId);
+        mapping.activity = activity;
+        mapping.baseFromClause = "reportingperiod base LEFT JOIN site on (site.siteId=base.siteId)";
+        mapping.baseFilter = "site.dateDeleted IS NULL AND site.activityId=" + activity.getId();
+        mapping.classId = CuidAdapter.reportingPeriodFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
-        mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.MONTHLY_REPORT, "base.reportingPeriodId");
+        mapping.formClass.setLabel(activity.getName() + " Monthly Reports");
+        mapping.formClass.setOwnerId(CuidAdapter.activityFormClass(activity.getId()));
+        mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.MONTHLY_REPORT, "reportingPeriodId");
+        
+        mapping.addSiteField();
+        mapping.addDateFields();
+
+        for (ActivityField indicatorField : activity.getIndicatorFields()) {
+            mapping.addIndicatorOrAttributeField(indicatorField);
+        }
+        
         return mapping;
     }
 
@@ -94,6 +105,17 @@ public class ActivityTableMappingBuilder {
                 .setRequired(true);
         formClass.addElement(date2);
         mappings.add(new FieldMapping(date2, "date2", Extractor.DATE));
+    }
+    
+    public void addSiteField() {
+        FormField siteField = new FormField(field(classId, SITE_FIELD));
+        siteField.setLabel("Site");
+        siteField.setCode("site");
+        siteField.setType(ReferenceType.single(CuidAdapter.activityFormClass(activity.getId())));
+        siteField.setRequired(true);
+        
+        formClass.addElement(siteField);
+        mappings.add(new FieldMapping(siteField, "siteId", new ForeignKeyExtractor(SITE_DOMAIN)));
     }
     
     public void addLocationField() {
@@ -130,10 +152,10 @@ public class ActivityTableMappingBuilder {
     
 
     public TableMapping build() {
-        return new TableMapping(tableName, baseFilter, primaryKeyMapping, mappings, formClass);
+        return new TableMapping(baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass);
     }
 
-    public void addSiteField(ActivityField field) {
+    public void addIndicatorOrAttributeField(ActivityField field) {
         formClass.addElement(field.getFormField());
     }
 

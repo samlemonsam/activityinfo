@@ -4,6 +4,8 @@ package org.activityinfo.store.mysql.side;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -29,8 +31,10 @@ public class SideColumnBuilder {
     private Map<Integer, ValueBuffer> fieldMap = Maps.newHashMap();
     
     private final String newLine;
-    
-    public SideColumnBuilder() {
+    private final FormClass formClass;
+
+    public SideColumnBuilder(FormClass formClass) {
+        this.formClass = formClass;
         this.newLine = "\n";
     }
     
@@ -58,24 +62,42 @@ public class SideColumnBuilder {
         }
     }
 
-
     public void sitesIndicators(int activityId, QueryExecutor executor) throws SQLException {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT site.siteId, iv.indicatorId, iv.value, iv.textValue").append(newLine);
-        sql.append("FROM site").append(newLine);
-        sql.append("LEFT JOIN reportingperiod rp ON (site.siteId = rp.siteId)").append(newLine);
-        sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId ");
-        sql.append("  AND iv.indicatorId IN (");
-        Joiner.on(", ").appendTo(sql, fieldMap.keySet());
-        sql.append("))").append(newLine);                
-        sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
-        sql.append("ORDER BY site.siteId");
+
+        if(formClass.getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+
+            sql.append("SELECT site.siteId, iv.indicatorId, iv.value, iv.textValue").append(newLine);
+            sql.append("FROM site").append(newLine);
+            sql.append("LEFT JOIN reportingperiod rp ON (site.siteId = rp.siteId)").append(newLine);
+            sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId ");
+            sql.append("  AND iv.indicatorId IN (");
+            Joiner.on(", ").appendTo(sql, fieldMap.keySet());
+            sql.append("))").append(newLine);
+            sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+            sql.append("ORDER BY site.siteId");
+        } else {
+            // Reporting periods
+            sql.append("SELECT rp.reportingPeriodId, iv.indicatorId, iv.value, iv.textValue").append(newLine);
+            sql.append("FROM reportingperiod rp").append(newLine);
+            sql.append("LEFT JOIN site site ON (site.siteId = rp.siteId)").append(newLine);
+            sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId ");
+            sql.append("  AND iv.indicatorId IN (");
+            Joiner.on(", ").appendTo(sql, fieldMap.keySet());
+            sql.append("))").append(newLine);
+            sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+            sql.append("ORDER BY rp.reportingPeriodId");
+        }
         System.out.println(sql);
         
         execute(executor, sql);
+            
     }
     
     public void attributes(int activityId, QueryExecutor executor) throws SQLException {
+        if(formClass.getId().getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS) {
+            throw new UnsupportedOperationException("Attributes are not fields of reporting periods");
+        }
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT site.siteId, a.attributeGroupId, av.attributeId, av.value").append(newLine);
         sql.append("FROM site").append(newLine);

@@ -24,6 +24,7 @@ import static org.activityinfo.model.legacy.CuidAdapter.adminLevelFormClass;
 import static org.activityinfo.model.legacy.CuidAdapter.partnerInstanceId;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 
@@ -72,6 +73,8 @@ public class MySqlCatalogTest {
 
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
     }
+    
+    
     @Test
     public void testAdmin() {
         query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code");
@@ -90,6 +93,14 @@ public class MySqlCatalogTest {
         FormTreePrettyPrinter.print(formTree);
     }
     
+    @Test
+    public void testNoColumns() {
+        QueryModel queryModel = new QueryModel(CuidAdapter.activityFormClass(1));
+        columnSet = executor.build(queryModel);
+
+        assertThat(columnSet.getNumRows(), equalTo(3));
+    }
+    
 
     @Test
     public void testSiteSimple() {
@@ -102,7 +113,20 @@ public class MySqlCatalogTest {
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
     }
-    
+
+    @Test
+    public void testReportingPeriod() {
+
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(catalogProvider);
+        FormTree formTree = treeBuilder.queryTree(CuidAdapter.reportingPeriodFormClass(3));
+
+        FormTreePrettyPrinter.print(formTree);
+        
+        query(CuidAdapter.reportingPeriodFormClass(3), "rate", "date1", "date2", "site.partner", "site.partner.label",
+                "site.location.label");
+    }
+
+
     @Test
     public void testSiteIndicator() {
         query(CuidAdapter.activityFormClass(1), "_id",
@@ -128,7 +152,7 @@ public class MySqlCatalogTest {
             System.out.println(field + ": " + column(field));
         }
     }
-
+    
     private ColumnView column(String column) {
         return columnSet.getColumnView(column);
     }

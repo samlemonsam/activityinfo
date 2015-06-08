@@ -13,6 +13,12 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnCache;
@@ -25,11 +31,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
+import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 
 public class FormResource {
     public static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
+    
+    private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
     
     private final HibernateQueryExecutor queryExecutor;
     private final ResourceId resourceId;
@@ -77,6 +87,8 @@ public class FormResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryRows(@Context UriInfo uriInfo) {
         final ColumnSet columnSet = query(uriInfo);
+        
+        LOGGER.info("Query completed with " + columnSet.getNumRows() + " rows.");
 
         final StreamingOutput output = new StreamingOutput() {
             @Override
@@ -110,17 +122,58 @@ public class FormResource {
 
 
 
-    private ColumnSet query(UriInfo uriInfo) {
-        final QueryModel queryModel = new QueryModel(resourceId);
-        for (String columnId : uriInfo.getQueryParameters().keySet()) {
-            queryModel.selectExpr(uriInfo.getQueryParameters().getFirst(columnId)).as(columnId);
-        }
+    private ColumnSet query(final UriInfo uriInfo) {
+  
         return queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<ColumnSet>() {
             @Override
             public ColumnSet execute(CollectionCatalog catalog) {
+
+                final QueryModel queryModel = new QueryModel(resourceId);
+                if(uriInfo.getQueryParameters().isEmpty()) {
+                    LOGGER.info("No query fields provided, querying all.");
+                    FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog);
+                    FormTree tree = treeBuilder.queryTree(resourceId);
+                    for (FormTree.Node leaf : tree.getLeaves()) {
+                        if(includeInDefaultQuery(leaf)) {
+                            queryModel.selectField(leaf.getPath()).as(formatId(leaf));
+                        }
+                    }
+                    LOGGER.info("Query model: " + queryModel);
+
+                } else {
+                    for (String columnId : uriInfo.getQueryParameters().keySet()) {
+                        queryModel.selectExpr(uriInfo.getQueryParameters().getFirst(columnId)).as(columnId);
+                    }
+                }
+                
                 ColumnSetBuilder builder = new ColumnSetBuilder(catalog, ColumnCache.NULL);
                 return builder.build(queryModel);
             }
         });
+    }
+
+    private boolean includeInDefaultQuery(FormTree.Node leaf) {
+        FieldType type = leaf.getType();
+        return type instanceof TextField ||
+               type instanceof BarcodeType ||
+               type instanceof QuantityType ||
+               type instanceof EnumType ||
+               type instanceof ReferenceType ||
+               type instanceof LocalDateType;
+    }
+
+    private String formatId(FormTree.Node node) {
+        StringBuilder id = new StringBuilder();
+        id.append(formatIdField(node));
+        FormTree.Node parent = node.getParent();
+        while(parent != null) {
+            id.insert(0, formatIdField(parent) + ".");
+            parent = parent.getParent();
+        }
+        return id.toString();
+    }
+
+    private String formatIdField(FormTree.Node node) {
+        return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
     }
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class SqlBuilder {
 
-    private String baseTable;
+    private String baseFromClause;
     private Map<String, Integer> columnMap = Maps.newHashMap();
     private List<String> columns = Lists.newArrayList();
     private Set<String> joins = Sets.newHashSet();
@@ -23,8 +23,8 @@ public class SqlBuilder {
     private final String newLine;
     private final String indent;
 
-    public SqlBuilder(String baseTable) {
-        this.baseTable = baseTable;
+    public SqlBuilder(String baseFromClause) {
+        this.baseFromClause = baseFromClause;
         newLine = "\n";
         indent = "   ";
     }
@@ -75,7 +75,7 @@ public class SqlBuilder {
 
     public String buildSQL() {
 
-        Preconditions.checkState(!columns.isEmpty(), baseTable + ": You must query for one or more columns.");
+        Preconditions.checkState(!columns.isEmpty(), baseFromClause + ": You must query for one or more columns.");
 
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT").append(newLine);
@@ -87,7 +87,7 @@ public class SqlBuilder {
             }
             sql.append(newLine);
         }
-        sql.append("FROM ").append(baseTable).append(" base ")
+        sql.append("FROM ").append(baseFromClause)
                 .append(joinClauses)
                 .append(newLine);
         

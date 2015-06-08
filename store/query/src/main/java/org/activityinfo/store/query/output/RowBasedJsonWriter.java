@@ -39,7 +39,7 @@ public class RowBasedJsonWriter {
         FieldWriter[] writers = createWriters(columnSet);
 
         writer.beginArray();
-        for(int rowIndex=0;rowIndex!=numRows;++rowIndex) {
+        for(int rowIndex=0;rowIndex<numRows;++rowIndex) {
 
             writer.beginObject();
             for(int colIndex=0;colIndex!=numCols;++colIndex) {

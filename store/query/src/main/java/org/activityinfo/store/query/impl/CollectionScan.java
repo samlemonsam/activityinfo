@@ -8,8 +8,12 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.service.store.*;
-import org.activityinfo.store.query.impl.builders.*;
+import org.activityinfo.service.store.ColumnQueryBuilder;
+import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.query.impl.builders.ColumnViewBuilder;
+import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
+import org.activityinfo.store.query.impl.builders.ViewBuilderFactory;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
@@ -177,6 +181,6 @@ public class CollectionScan {
             this.rowCount.get().set(cachedViews.values().iterator().next().numRows());
         }
 
-        return columnMap.isEmpty();
+        return columnMap.isEmpty() && !rowCount.isPresent();
     }
 }

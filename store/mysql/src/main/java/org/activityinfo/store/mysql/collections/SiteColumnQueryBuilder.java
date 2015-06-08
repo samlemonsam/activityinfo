@@ -29,8 +29,8 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         this.tableMapping = tableMapping;
         this.executor = executor;
         this.baseCursor = new MySqlCursorBuilder(tableMapping, executor);
-        this.indicators = new SideColumnBuilder();
-        this.attributes = new SideColumnBuilder();
+        this.indicators = new SideColumnBuilder(tableMapping.getFormClass());
+        this.attributes = new SideColumnBuilder(tableMapping.getFormClass());
         
         for(ActivityField field : activity.getFields()) {
             fieldMap.put(field.getResourceId(), field);
@@ -64,6 +64,7 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         
         try {
             // Run base table
+            int rowCount = 0;
             Cursor cursor = baseCursor.open();
             while (cursor.next()) {
             }
