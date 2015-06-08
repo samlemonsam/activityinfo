@@ -24,6 +24,8 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
 public class GxtTree {
 
+    private static final int MAX_WAIT_TIME = 30;
+
     private FluentElement container;
     private XPathProvider xPathProvider;
 
@@ -106,8 +108,8 @@ public class GxtTree {
             } catch (InterruptedException e) {
                 throw new AssertionError("Interrupted while waiting for nodes to load...");
             }
-            if(stopwatch.elapsed(TimeUnit.SECONDS) > 10) {
-                throw new AssertionError("Timed out while waiting for nodes to load...");
+            if(stopwatch.elapsed(TimeUnit.SECONDS) > MAX_WAIT_TIME) {
+                throw new AssertionError("Timed out after waiting " + MAX_WAIT_TIME + " seconds for nodes to load...");
             }
         }
         return this;
