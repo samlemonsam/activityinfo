@@ -22,8 +22,10 @@ package org.activityinfo.test.pageobject.bootstrap;
  */
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.openqa.selenium.WebDriver;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
@@ -45,7 +47,13 @@ public class BsTable {
 
     public BsModal newSubmission() {
         button(I18N.CONSTANTS.newText()).get().clickWhenReady();
-        return BsModal.find(container);
+        container.root().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().find().div(withClass("formPanel")).firstIfPresent().isPresent();
+            }
+        });
+        return BsModal.find(container.root());
     }
 
 }
