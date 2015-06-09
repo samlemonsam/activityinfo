@@ -39,6 +39,10 @@ def healthCheck() {
 
 appengineRun {
     ext.database = mysql.localDev
+    
+    // Bind to all address so that we can test ODK from the local network
+    // For example, http://192.168.1.1
+    httpAddress = "0.0.0.0"
 }
 
 task appengineStartAT(type: RunTask) {
