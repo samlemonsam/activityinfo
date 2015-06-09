@@ -145,7 +145,7 @@ public class GxtGrid {
 
     public GxtGrid waitUntilReloadedSilently() {
         try {
-            waitUntilAtLeastOneRowIsLoaded();
+            waitUntilReloaded();
         } catch (Exception e) {
             // ignore, we don't care even if loading mask didn't appear
         }

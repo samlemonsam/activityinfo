@@ -327,7 +327,10 @@ public class UiApplicationDriver extends ApplicationDriver {
         PivotTableEditor pivotTable = (PivotTableEditor) currentPage;
         DrillDownDialog drillDown = pivotTable.drillDown(cellValue);
 
-        DataTable dataTable = drillDown.table().waitUntilReloadedSilently().extractData(false);
+        DataTable dataTable = drillDown.table().
+                waitUntilReloadedSilently().
+                waitUntilAtLeastOneRowIsLoaded().
+                extractData(false);
         drillDown.close();
         return dataTable;
     }
