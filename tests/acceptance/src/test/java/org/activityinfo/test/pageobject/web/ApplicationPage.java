@@ -9,8 +9,10 @@ import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -139,6 +141,16 @@ public class ApplicationPage {
         }
 
         return new DesignTab(container());
+    }
+
+    public TablePage navigateToTable(String database, String formName) {
+        DesignTab designTab = navigateToDesignTab();
+        designTab.selectDatabase(database);
+
+        DesignPage designPage = designTab.design();
+        designPage.getDesignTree().select(formName);
+        designPage.getToolbarMenu().clickButton(I18N.CONSTANTS.openTable());
+        return new TablePage(page);
     }
     
     public ReportsTab navigateToReportsTab() {

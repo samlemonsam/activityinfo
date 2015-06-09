@@ -106,6 +106,17 @@ public class DatabaseSetupSteps {
     }
 
 
+    @And("^I have created a form \"([^\"]*)\" using the new layout$")
+    public void I_have_created_a_form_using_the_new_layout(String formName) throws Throwable {
+        driver.setup().createForm(
+                name(formName),
+                property("database", getCurrentDatabase()),
+                property("classicView", false)
+        );
+
+        this.currentForm = formName;
+    }
+
     @Given("^I have created a form named \"([^\"]*)\" with the submissions:$")
     public void I_have_created_a_form_named_with_the_submissions(String formName, DataTable dataTable) throws Throwable {
 
@@ -499,5 +510,12 @@ public class DatabaseSetupSteps {
     public void source_indicator_link_database_shows(DataTable expectedTable) throws Throwable {
         DataTable dataTable = driver.getLinkIndicatorPage().getSourceIndicator().extractData(false);
         driver.setup().getAliasTable().deAlias(dataTable).unorderedDiff(expectedTable);
+    }
+
+    @Given("^I have added (\\d+) partners$")
+    public void I_have_added_partners(int numberOfPartners) throws Throwable {
+        for (int i = 0; i < numberOfPartners; i++) {
+            driver.setup().addPartner("partner" + i, currentDatabase);
+        }
     }
 }

@@ -86,15 +86,24 @@ public class BsFormPanel extends Form {
         }
 
         @Override
+        public String getPlaceholder() {
+            return input().attribute("placeholder");
+        }
+
+        @Override
         public boolean isDropDown() {
             return element.exists(By.tagName("a"));
         }
 
         @Override
         public void fill(String value) {
-            FluentElement input = element.findElement(By.tagName("input"));
+            FluentElement input = input();
             input.element().clear();
             input.sendKeys(value);
+        }
+
+        private FluentElement input() {
+            return element.findElement(By.tagName("input"));
         }
 
         @Override

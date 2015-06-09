@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
@@ -16,6 +17,7 @@ import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
@@ -23,6 +25,7 @@ import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
@@ -31,7 +34,13 @@ import org.junit.Assert;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 @ScenarioScoped
@@ -423,6 +432,33 @@ public class UiApplicationDriver extends ApplicationDriver {
         ensureLoggedIn();
 
         return applicationPage.navigateToDesignTab().linkIndicators();
+    }
+
+    @Override
+    public void openFormDesigner(String database, String formName) {
+        ensureLoggedIn();
+
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+        designTab.selectDatabase(database);
+        designTab.design().getDesignTree().select(formName);
+        designTab.design().getToolbarMenu().clickButton(I18N.CONSTANTS.openFormDesigner());
+    }
+
+    public TablePage openFormTable(String database, String formName) {
+        ensureLoggedIn();
+
+        return applicationPage.navigateToTable(database, formName);
+    }
+
+    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
+        TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
+        BsModal modal = tablePage.table().newSubmission();
+        Form.FormItem fieldByLabel = modal.form().findFieldByLabel(fieldName);
+
+        assertNotNull(fieldByLabel);
+        if (ControlType.fromValue(controlType) == ControlType.SUGGEST_BOX) {
+            assertEquals(fieldByLabel.getPlaceholder(), I18N.CONSTANTS.suggestBoxPlaceholder());
+        }
     }
 
     @Override

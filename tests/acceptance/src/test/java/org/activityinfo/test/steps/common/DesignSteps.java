@@ -68,4 +68,19 @@ public class DesignSteps {
                 new Property("formFieldName", formFieldName),
                 new Property("items", items));
     }
+
+    @When("^I open the form designer for \"([^\"]*)\" in database \"([^\"]*)\"$")
+    public void I_open_the_form_designer_for(String formName, String database) throws Throwable {
+        driver.openFormDesigner(database, formName);
+    }
+
+    @When("^I open the table for \"([^\"]*)\" in database \"([^\"]*)\"$")
+    public void I_open_the_table_for_in_database(String formName, String database) throws Throwable {
+        driver.openFormTable(database, formName);
+    }
+
+    @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\"$")
+    public void form_in_database_has_field_represented_by(String formName, String databaseName, String fieldName, String controlType) throws Throwable {
+        driver.assertFieldVisible(formName, databaseName, fieldName, controlType);
+    }
 }

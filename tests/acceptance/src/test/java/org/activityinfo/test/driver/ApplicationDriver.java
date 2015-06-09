@@ -8,6 +8,7 @@ import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.sut.UserAccount;
 import org.json.JSONException;
 
@@ -223,6 +224,18 @@ public abstract class ApplicationDriver {
     }
 
     public void assertDataEntryTableForForm(String formName, DataTable expectedTable) {
+        throw new PendingException();
+    }
+
+    public void openFormDesigner(String database, String formName) {
+        throw new PendingException();
+    }
+
+    public TablePage openFormTable(String database, String formName) {
+        throw new PendingException();
+    }
+
+    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
         throw new PendingException();
     }
 }

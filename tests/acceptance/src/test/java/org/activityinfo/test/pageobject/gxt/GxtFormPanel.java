@@ -83,6 +83,11 @@ public class GxtFormPanel extends Form {
         }
 
         @Override
+        public String getPlaceholder() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isDropDown() {
             return element.find().img(withClass(ARROW_CLASS)).exists();
         }

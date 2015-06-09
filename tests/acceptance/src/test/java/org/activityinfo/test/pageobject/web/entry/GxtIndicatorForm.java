@@ -80,6 +80,11 @@ public class GxtIndicatorForm extends Form {
         }
 
         @Override
+        public String getPlaceholder() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isDropDown() {
             return false;
         }

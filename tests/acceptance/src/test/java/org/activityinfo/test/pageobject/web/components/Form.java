@@ -28,6 +28,7 @@ public abstract class Form {
     public interface FormItem {
         
         String getLabel();
+        String getPlaceholder();
         boolean isDropDown();
         
         void fill(String value);

@@ -79,6 +79,9 @@ public class XPathBuilder {
         return tagName("div", conditions);
     }
 
+    public XPathBuilder table(String... conditions) {
+        return tagName("table", conditions);
+    }
 
     public XPathBuilder p(String... conditions) {
         return tagName("p", conditions);

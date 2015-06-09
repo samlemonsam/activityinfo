@@ -49,6 +49,11 @@ public class GxtCommentsForm extends Form {
         }
 
         @Override
+        public String getPlaceholder() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isDropDown() {
             return false;
         }
