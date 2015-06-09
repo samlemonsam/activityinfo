@@ -237,7 +237,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         dialog.form().findFieldByLabel("Country").select("Rdc");
         dialog.form().findFieldByLabel("Options").select("Copy partners");
         dialog.form().findFieldByLabel("Options").select("Copy user permissions");
-        dialog.click("Create", "Create a new database");
+        dialog.ok("Create");
     }
 
     @Override

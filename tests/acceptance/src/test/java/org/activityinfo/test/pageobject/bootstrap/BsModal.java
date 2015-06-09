@@ -61,26 +61,35 @@ public class BsModal extends ModalDialog {
         return windowElement.find().div(withClass("modal-footer")).first();
     }
 
-    public void click(String buttonName, final String expectedTitle) {
-        buttonsContainer().find().button(XPathBuilder.withText(buttonName)).clickWhenReady();
-        windowElement.waitUntil(new Predicate<WebDriver>() {
-            @Override
-            public boolean apply(WebDriver input) {
+    public void ok(String buttonName) {
+        click(buttonName, "", false);
+    }
 
-                if (!windowElement.isDisplayed()) {  // is the box closed?
+    public void click(String buttonName, final String expectedTitle) {
+        click(buttonName, expectedTitle, true);
+    }
+
+    public void click(String buttonName, final String expectedTitle, boolean waitOnTitle) {
+        buttonsContainer().find().button(XPathBuilder.withText(buttonName)).clickWhenReady();
+        if (waitOnTitle) {
+            windowElement.waitUntil(new Predicate<WebDriver>() {
+                @Override
+                public boolean apply(WebDriver input) {
+
+                    if (!windowElement.isDisplayed()) {  // is the box closed?
+                        return false;
+                    }
+
+                    if (getTitle().contains(expectedTitle)) {
+                        return true;
+                    }
+
+                    // check for an error ?
+
                     return false;
                 }
-
-                if (getTitle().contains(expectedTitle)) {
-                    return true;
-                }
-
-                // check for an error ?
-
-                return false;
-            }
-        });
-
+            });
+        }
     }
 
     @Override
