@@ -504,12 +504,37 @@ public class UiApplicationDriver extends ApplicationDriver {
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
-        List<DetailsEntry> detailsEntries = collectDetails(dataEntryTab);
+        List<DetailsEntry> detailsEntries = collectDetailsForForm(formName, dataEntryTab, expectedTable.getGherkinRows().size() - 1, 1);
         for (DetailsEntry entry : detailsEntries) {
             aliasTable.deAlias(entry.getFieldValues());
         }
 
         assertTableEquals(expectedTable, detailsEntries);
+    }
+
+    /**
+     * Because we navigate form in tree sites may come out of order which leads to test failures. Therefore if
+     * number of details does not match number of expected details then we retry.
+     *
+     * @param dataEntryTab data entry tab
+     * @param expectedNumberOfDetails expected number of details
+     * @param retry retry count
+     * @return collected detail entries
+     */
+    private List<DetailsEntry> collectDetailsForForm(String formName, DataEntryTab dataEntryTab, int expectedNumberOfDetails, int retry) {
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        List<DetailsEntry> detailsEntries = collectDetails(dataEntryTab);
+        if (detailsEntries.size() == expectedNumberOfDetails) {
+            return detailsEntries;
+        }
+        int retryLimit = 3;
+        if (retry > retryLimit) {
+            throw new AssertionError("Failed to fetch details for form: " + formName +
+                    ", expected details: " + expectedNumberOfDetails + " but got: " + detailsEntries.size());
+        }
+        retry++;
+        return collectDetailsForForm(formName, dataEntryTab, expectedNumberOfDetails, retry);
     }
 
     public static void assertTableEquals(DataTable expectedTable, List<DetailsEntry> detailsEntries) {
