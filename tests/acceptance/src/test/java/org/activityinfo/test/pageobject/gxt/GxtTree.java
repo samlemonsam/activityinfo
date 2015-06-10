@@ -363,6 +363,7 @@ public class GxtTree {
             if (isChecked(check) != checked) {
                 check.clickWhenReady();
             }
+            check = checkbox(); // avoid stale reference
             if (isChecked(check) != checked) {
                 int retryLimit = 3;
                 if (retry > retryLimit) {
