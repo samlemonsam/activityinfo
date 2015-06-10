@@ -348,16 +348,28 @@ public class GxtTree {
             return treeItem().img(withClass("x-tree3-node-check")).first();
         }
 
-        private boolean isChecked(FluentElement checkbox) {
+        public boolean isChecked(FluentElement checkbox) {
             // Because of the image spriting that GWT does, it's difficult to know which image is being displayed
             // It's unclear how stable the value below is
             return checkbox.attribute("style").contains("-670px");
         }
 
         public void setChecked(boolean checked) {
+            setChecked(checked, 1);
+        }
+
+        public void setChecked(boolean checked, int retry) {
             FluentElement check = checkbox();
-            if(isChecked(check) != checked) {
-                check.click();
+            if (isChecked(check) != checked) {
+                check.clickWhenReady();
+            }
+            if (isChecked(check) != checked) {
+                int retryLimit = 3;
+                if (retry > retryLimit) {
+                    throw new AssertionError("Failed to check node after " + retry + " retries. |Node: " + toString());
+                }
+                retry++;
+                setChecked(checked, retry);
             }
         }
 
