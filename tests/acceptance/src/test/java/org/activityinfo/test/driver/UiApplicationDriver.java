@@ -3,6 +3,7 @@ package org.activityinfo.test.driver;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import cucumber.api.DataTable;
@@ -18,19 +19,16 @@ import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.components.Form;
-import org.activityinfo.test.pageobject.web.design.DesignPage;
-import org.activityinfo.test.pageobject.web.design.DesignTab;
-import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
-import org.activityinfo.test.pageobject.web.design.TargetsPage;
-import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
-import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
-import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
-import org.activityinfo.test.pageobject.web.entry.TablePage;
+import org.activityinfo.test.pageobject.web.design.*;
+import org.activityinfo.test.pageobject.web.entry.*;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.support.ui.FluentWait;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -38,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -462,6 +461,142 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
+    public void addLockOnDb(String lockName, String database, String startDate, String endDate, boolean lockActive) {
+        ensureLoggedIn();
+
+        LocksPage locksPage = applicationPage.navigateToDesignTab().selectDatabase(aliasTable.getAlias(database)).locks();
+        LocksDialog lockDialog = locksPage.addLock();
+        lockDialog.selectDatabase().
+                name(lockName).
+                active(lockActive).
+                startDate(LocalDate.parse(startDate)).
+                endDate(LocalDate.parse(endDate)).
+                getModal().
+                accept();
+    }
+
+    @Override
+    public void addLockOnForm(String lockName, String database, String formName, String startDate, String endDate, boolean lockActive) {
+        ensureLoggedIn();
+
+        LocksPage locksPage = applicationPage.navigateToDesignTab().selectDatabase(aliasTable.getAlias(database)).locks();
+        LocksDialog lockDialog = locksPage.addLock();
+        lockDialog.selectForm(aliasTable.getAlias(formName)).
+                name(lockName).
+                active(lockActive).
+                startDate(LocalDate.parse(startDate)).
+                endDate(LocalDate.parse(endDate)).
+                getModal().
+                accept();
+    }
+
+    public void addLockOnProject(String lockName, String database, String projectName, String startDate, String endDate, boolean lockActive) {
+        ensureLoggedIn();
+
+        LocksPage locksPage = applicationPage.navigateToDesignTab().selectDatabase(aliasTable.getAlias(database)).locks();
+        LocksDialog lockDialog = locksPage.addLock();
+        lockDialog.selectProject(aliasTable.getAlias(projectName)).
+                name(lockName).
+                active(lockActive).
+                startDate(LocalDate.parse(startDate)).
+                endDate(LocalDate.parse(endDate)).
+                getModal().
+                accept();
+    }
+
+    /**
+     * Asserts that submission is not allowed because of lock. To check it all required fields must be filled, therefore
+     * it assumes that project with name "Project1" is pre-created.
+     * @param formName new form
+     * @param endDate end date in format yyyy-MM-dd
+     */
+    public void assertSubmissionIsNotAllowedBecauseOfLock(String formName, String endDate) {
+        final DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+        GxtDataEntryDriver dataEntryDriver = dataEntryTab.newSubmission();
+
+        // we have to fill all required fields first in order to make sure that submission is not allowed because
+        // of locking (and not because of some missed required field)
+        while (dataEntryDriver.nextField()) {
+            String label = dataEntryDriver.getLabel();
+            switch (label) {
+                case "Partner":
+                    dataEntryDriver.select("Default");
+                    break;
+                case "Project":
+                    dataEntryDriver.select(aliasTable.getAlias("Project1"));
+                    break;
+                case "Start Date":
+                    dataEntryDriver.fill(LocalDate.parse(endDate));
+                    break;
+                case "End Date":
+                    dataEntryDriver.fill(LocalDate.parse(endDate));
+                    dataEntryDriver.sendKeys(Keys.TAB);
+
+                    FluentWait<GxtDataEntryDriver> wait = new FluentWait<>(dataEntryDriver).
+                            withTimeout(3, TimeUnit.SECONDS);
+                    wait.ignoring(WebDriverException.class);
+                    wait.until(new Predicate<GxtDataEntryDriver>() {
+                        @Override
+                        public boolean apply(GxtDataEntryDriver input) {
+                            // click anywhere to activate gxt validator which is run only when field lost focus
+                            GxtModal.waitForModal(dataEntryTab.getContainer()).getWindowElement().click();
+                            return !input.isValid();
+                        }
+                    });
+                    return; // success, field is marked as not valid and therefore submission is not possible
+            }
+        }
+        throw new AssertionError("New submission is still possible for form: " + formName +
+                " (however it has to be locked.)");
+    }
+
+    public void assertEntryCannotBeModifiedOrDeleted(String databaseNameOrFormName, List<FieldValue> values) {
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        List<DetailsEntry> detailsEntries = collectDetailsForForm(databaseNameOrFormName, dataEntryTab, -1, 1);
+
+        aliasTable.deAliasDetails(detailsEntries);
+
+        for (FieldValue value : values) {
+            assertEntryIsLocked(dataEntryTab, detailsEntries, value);
+        }
+    }
+
+    private void assertEntryIsLocked(DataEntryTab dataEntryTab, List<DetailsEntry> detailsEntries, FieldValue value) {
+        int row = findMatchedRow(detailsEntries, value);
+        dataEntryTab.selectSubmission(row);
+
+        // locked on edit
+        dataEntryTab.buttonClick(I18N.CONSTANTS.edit());
+        assertLockedSiteDialog(dataEntryTab);
+
+        // locked on delete
+        dataEntryTab.buttonClick(I18N.CONSTANTS.delete());
+        assertLockedSiteDialog(dataEntryTab);
+    }
+
+    private void assertLockedSiteDialog(DataEntryTab dataEntryTab) {
+        GxtModal gxtModal = GxtModal.waitForModal(dataEntryTab.getContainer());
+        String dialogTitle = gxtModal.getTitle().trim();
+        assertEquals("Entry is not locked. Dialog title: "
+                        + dialogTitle + ", expected: " + I18N.CONSTANTS.lockedSiteTitle(),
+                dialogTitle, I18N.CONSTANTS.lockedSiteTitle());
+        gxtModal.clickButton("OK");
+    }
+
+    private int findMatchedRow(List<DetailsEntry> detailsEntries, FieldValue value) {
+        int row = 0;
+        for (DetailsEntry details : detailsEntries) {
+            if (details.getFieldValues().contains(value)) {
+                return row;
+            }
+            row++;
+        }
+        throw new AssertionError("Failed to find matched row for \n Value : " + value +
+                "\n Details on UI: " + DetailsEntry.toString(detailsEntries));
+    }
+
+
+    @Override
     public void createLinkIndicators(List<IndicatorLink> linkedIndicatorRows) {
         LinkIndicatorsPage linkIndicatorsPage = getLinkIndicatorPage();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
@@ -517,7 +652,7 @@ public class UiApplicationDriver extends ApplicationDriver {
      * number of details does not match number of expected details then we retry.
      *
      * @param dataEntryTab data entry tab
-     * @param expectedNumberOfDetails expected number of details
+     * @param expectedNumberOfDetails expected number of details, -1 if we should ignore it
      * @param retry retry count
      * @return collected detail entries
      */
@@ -527,6 +662,13 @@ public class UiApplicationDriver extends ApplicationDriver {
         List<DetailsEntry> detailsEntries = collectDetails(dataEntryTab);
         if (detailsEntries.size() == expectedNumberOfDetails) {
             return detailsEntries;
+        }
+        if (expectedNumberOfDetails == -1) {
+            if (detailsEntries.size() > 0) {
+                return detailsEntries;
+            } else {
+                throw new AssertionError("Failed to fetch any details for form: " + formName);
+            }
         }
         int retryLimit = 3;
         if (retry > retryLimit) {
@@ -567,12 +709,8 @@ public class UiApplicationDriver extends ApplicationDriver {
                 notMatchedString += Joiner.on(" | ").join(row.getCells()) + "\n";
             }
 
-            String detailsEntriesString = "";
-            for (DetailsEntry entry : detailsEntries) {
-                detailsEntriesString += Joiner.on(" | ").join(entry.getFieldValues()) + "\n";
-            }
             throw new AssertionError("Data entry table does not match. Expected: \n"
-                    + expectedTable + "\n But got: \n" + detailsEntriesString + "\n Not matched rows:\n" + notMatchedString);
+                    + expectedTable + "\n But got: \n" + DetailsEntry.toString(detailsEntries) + "\n Not matched rows:\n" + notMatchedString);
         }
     }
 
@@ -608,8 +746,7 @@ public class UiApplicationDriver extends ApplicationDriver {
                     throw new AssertionError("Failed to fetch details for submissions on Data Entry tab.");
                 }
             }
-        } catch (Exception e) {
-            //e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
             // no rows anymore
         }
         return result;

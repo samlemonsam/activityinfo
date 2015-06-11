@@ -199,4 +199,19 @@ public class DataEntrySteps {
     public void submissions_for_form_are(String formName, DataTable dataTable) throws Throwable {
         driver.assertDataEntryTableForForm(formName, dataTable);
     }
+
+    @Then("^\"([^\"]*)\" database entry appears with lock in Data Entry and cannot be modified nor deleted with any of these values:$")
+    public void database_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with(String databaseName, List<FieldValue> values) throws Throwable {
+        driver.assertEntryCannotBeModifiedOrDeleted(databaseName, values);
+    }
+
+    @Then("^new entry with end date \"([^\"]*)\" cannot be submitted in \"([^\"]*)\" form$")
+    public void new_entry_with_end_date_cannot_be_submitted_in_database(String endDate, String formName) throws Throwable {
+        driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, endDate);
+    }
+
+    @Then("^\"([^\"]*)\" form entry appears with lock in Data Entry and cannot be modified nor deleted with any of these values:$")
+    public void form_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with_any_of_these_values(String formName, List<FieldValue> values) throws Throwable {
+        driver.assertEntryCannotBeModifiedOrDeleted(formName, values);
+    }
 }

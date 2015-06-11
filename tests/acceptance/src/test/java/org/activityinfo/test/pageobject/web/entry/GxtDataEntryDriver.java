@@ -60,7 +60,17 @@ public class GxtDataEntryDriver implements DataEntryDriver {
     }
 
     @Override
+    public boolean isValid() {
+        return current.isValid();
+    }
+
+    @Override
     public boolean isNextEnabled() {
         return current.isNextEnabled();
+    }
+
+    @Override
+    public void sendKeys(CharSequence keys) {
+        current.sendKeys(keys);
     }
 }

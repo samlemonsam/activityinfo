@@ -123,6 +123,11 @@ public class GxtIndicatorForm extends Form {
         public FluentElement getElement() {
             return row;
         }
+
+        @Override
+        public boolean isValid() {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

@@ -128,14 +128,30 @@ public class ColumnModelBuilder {
         columns.add(new ReadTextColumn("project", I18N.CONSTANTS.project(), 100));
     }
 
-    public ColumnModelBuilder maybeAddLockColumn(final ActivityFormDTO activity) {
-        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
+    private void addLockColumnIfHasLocks(LockedPeriodSet lockSet) {
+        if (lockSet.hasLocks()) {
             ColumnConfig columnLocked = new ColumnConfig("x", "", 28);
-            columnLocked.setRenderer(new LockedColumnRenderer(activity.getLockedPeriodSet()));
+            columnLocked.setRenderer(new LockedColumnRenderer(lockSet));
             columnLocked.setSortable(false);
             columnLocked.setMenuDisabled(true);
             columns.add(columnLocked);
         }
+    }
+
+    public ColumnModelBuilder maybeAddLockColumn(final ActivityFormDTO activity) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
+            addLockColumnIfHasLocks(activity.getLockedPeriodSet());
+        }
+        return this;
+    }
+
+    public ColumnModelBuilder maybeAddLockColumn(final SchemaDTO schemaDTO) {
+        addLockColumnIfHasLocks(new LockedPeriodSet(schemaDTO));
+        return this;
+    }
+
+    public ColumnModelBuilder maybeAddLockColumn(final UserDatabaseDTO userdatabase) {
+        addLockColumnIfHasLocks(new LockedPeriodSet(userdatabase));
         return this;
     }
 

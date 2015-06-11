@@ -238,4 +238,24 @@ public abstract class ApplicationDriver {
     public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
         throw new PendingException();
     }
+
+    public void addLockOnDb(String lockName, String database, String startDate, String endDate, boolean lockActive) {
+        throw new PendingException();
+    }
+
+    public void addLockOnForm(String lockName, String database, String formName, String startDate, String endDate, boolean lockActive) {
+        throw new PendingException();
+    }
+
+    public void addLockOnProject(String lockName, String database, String projectName, String startDate, String endDate, boolean lockActive) {
+        throw new PendingException();
+    }
+
+    public void assertEntryCannotBeModifiedOrDeleted(String databaseName, List<FieldValue> values) {
+        throw new PendingException();
+    }
+
+    public void assertSubmissionIsNotAllowedBecauseOfLock(String formName, String endDate) {
+        throw new PendingException();
+    }
 }

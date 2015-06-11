@@ -54,11 +54,11 @@ public class DataEntryTab {
 
     }
     
-    public DataEntryTab navigateToForm(String formName) {
+    public DataEntryTab navigateToForm(String formNameOrDatabaseName) {
         formTree.waitUntilLoaded();
-        Optional<GxtTree.GxtNode> formNode = formTree.search(formName);
+        Optional<GxtTree.GxtNode> formNode = formTree.search(formNameOrDatabaseName);
         if(!formNode.isPresent()) {
-            throw new AssertionError(String.format("Form '%s' is not present in data entry tree", formName));
+            throw new AssertionError(String.format("Form '%s' is not present in data entry tree", formNameOrDatabaseName));
         }
         formNode.get().select();
         
@@ -71,16 +71,20 @@ public class DataEntryTab {
     }
     
     public DataEntryDriver updateSubmission() {
-        final FluentElement button = container.find().button(withText("Edit")).first();
-        button.waitUntil(new Predicate<WebDriver>() { // wait until 'Edit' button become enabled (there may be small period before it becomes enabled)
+        buttonClick(I18N.CONSTANTS.edit());
+        return new GxtFormDataEntryDriver(new GxtModal(container));
+    }
+
+    public DataEntryTab buttonClick(String buttonLabel) {
+        final FluentElement button = container.find().button(withText(buttonLabel)).first();
+        button.waitUntil(new Predicate<WebDriver>() { // wait until button become enabled (there may be small period before it becomes enabled)
             @Override
             public boolean apply(@Nullable WebDriver input) {
                 return button.attribute("aria-disabled").equals("false");
             }
         });
         button.click();
-
-        return new GxtFormDataEntryDriver(new GxtModal(container));
+        return this;
     }
     
     public int getCurrentSiteCount() {
@@ -202,12 +206,14 @@ public class DataEntryTab {
                 FluentElements indicatorValues = detailsPanel.find().td(withClass("indicatorValue")).asList();
                 FluentElements indicatorUnits = detailsPanel.find().td(withClass("indicatorUnits")).asList();
 
-                Preconditions.checkState(indicatorNames.size() == indicatorValues.size() && indicatorValues.size() == indicatorUnits.size());
+                Preconditions.checkState(indicatorNames.size() == indicatorValues.size(),
+                        "Number of field names and values do not match on Details tab. Names: " + indicatorNames.size() +
+                                ", values: " + indicatorValues.size());
 
                 for (int i = 0; i < indicatorNames.size(); i++) {
                     String name = indicatorNames.get(i).text();
                     String value = indicatorValues.get(i).text();
-                    String unit = indicatorUnits.get(i).text();
+                    //String unit = indicatorUnits.get(i).text(); // skip units, we want to handle also text indicators here
 
                     detailsEntry.getFieldValues().add(new FieldValue(name, value));
                 }
@@ -238,5 +244,9 @@ public class DataEntryTab {
                 return detailsEntry;
             }
         });
+    }
+
+    public FluentElement getContainer() {
+        return container;
     }
 }

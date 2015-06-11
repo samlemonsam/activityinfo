@@ -64,7 +64,7 @@ public class GxtFormPanel extends Form {
         }
     }
 
-    public class GxtField implements FormItem {
+    public static class GxtField implements FormItem {
 
         private final FluentElement element;
 

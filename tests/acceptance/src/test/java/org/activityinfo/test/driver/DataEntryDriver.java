@@ -39,6 +39,8 @@ public interface DataEntryDriver {
 
     void select(String itemLabel);
 
+    boolean isValid();
+
 
     /**
      *
@@ -46,5 +48,5 @@ public interface DataEntryDriver {
      */
     boolean isNextEnabled();
 
-
+    void sendKeys(CharSequence keys);
 }

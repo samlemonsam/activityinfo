@@ -130,6 +130,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     private ColumnModel forSingleDatabase(GroupingModel grouping, UserDatabaseDTO database) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
+                                           .maybeAddLockColumn(database)
                                            .addActivityColumn(database)
                                            .addLocationColumn()
                                            .maybeAddPartnerColumn(database)
@@ -140,6 +141,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
         } else if (grouping instanceof AdminGroupingModel) {
 
             return new ColumnModelBuilder().addTreeNameColumn()
+                                           .maybeAddLockColumn(database)
                                            .addActivityColumn(database)
                                            .maybeAddPartnerColumn(database)
                                            .maybeAddProjectColumn(database)
@@ -148,6 +150,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
         } else if (grouping instanceof TimeGroupingModel) {
 
             return new ColumnModelBuilder().addTreeNameColumn()
+                                           .maybeAddLockColumn(database)
                                            .addActivityColumn(database)
                                            .maybeAddPartnerColumn(database)
                                            .maybeAddProjectColumn(database)

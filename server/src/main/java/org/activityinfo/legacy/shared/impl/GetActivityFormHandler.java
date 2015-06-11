@@ -160,7 +160,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
 
             tasks.add(loadActivity());
             tasks.add(loadIndicators());
-            tasks.add(loadLockedPeriods());
             tasks.add(loadAttributeGroups());
             tasks.add(loadAttributes());
 
@@ -238,6 +237,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 @Override
                 public Promise<Void> apply(Void input) {
                     return Promise.waitAll(
+                            loadLockedPeriods(),
                             loadAdminLevels(),
                             loadPartners(),
                             loadProjects());

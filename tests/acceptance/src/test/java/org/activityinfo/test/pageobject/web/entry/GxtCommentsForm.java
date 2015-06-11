@@ -82,5 +82,10 @@ public class GxtCommentsForm extends Form {
         public FluentElement getElement() {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean isValid() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

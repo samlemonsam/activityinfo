@@ -21,6 +21,7 @@ package org.activityinfo.test.steps.common;
  * #L%
  */
 
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
@@ -82,5 +83,20 @@ public class DesignSteps {
     @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\"$")
     public void form_in_database_has_field_represented_by(String formName, String databaseName, String fieldName, String controlType) throws Throwable {
         driver.assertFieldVisible(formName, databaseName, fieldName, controlType);
+    }
+
+    @When("^I add a lock \"([^\"]*)\" on the database \"([^\"]*)\" from \"([^\"]*)\" to \"([^\"]*)\"$")
+    public void I_add_a_lock_on_the_database_from_to(String lockName, String database, String startDate, String endDate) throws Throwable {
+        driver.addLockOnDb(lockName, database, startDate, endDate, true);
+    }
+
+    @And("^I add a lock \"([^\"]*)\" on the form \"([^\"]*)\" from \"([^\"]*)\" to \"([^\"]*)\" in database \"([^\"]*)\"$")
+    public void I_add_a_lock_on_the_form_from_to_in_database(String lockName, String formName, String startDate, String endDate, String database) throws Throwable {
+        driver.addLockOnForm(lockName, database, formName, startDate, endDate, true);
+    }
+
+    @And("^I add a lock \"([^\"]*)\" on the project \"([^\"]*)\" from \"([^\"]*)\" to \"([^\"]*)\" in database \"([^\"]*)\"$")
+    public void I_add_a_lock_on_the_project_from_to_in_database(String lockName, String projectName, String startDate, String endDate, String database) throws Throwable {
+        driver.addLockOnProject(lockName, database, projectName, startDate, endDate, true);
     }
 }

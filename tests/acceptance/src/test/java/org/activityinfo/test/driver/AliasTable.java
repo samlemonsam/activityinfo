@@ -10,6 +10,7 @@ import com.mysql.jdbc.StringUtils;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -230,6 +231,12 @@ public class AliasTable {
 
     public Map<TestHandle, Supplier<Integer>> getTestHandleToId() {
         return Maps.newHashMap(testHandleToId);
+    }
+
+    public void deAliasDetails(List<DetailsEntry> detailsEntries) {
+        for (DetailsEntry entry : detailsEntries) {
+            deAlias(entry.getFieldValues());
+        }
     }
 
     public static class TestHandle {

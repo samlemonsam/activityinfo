@@ -100,4 +100,8 @@ public class DesignTab {
         return new BsModal(dialogElement);
     }
 
+    public LocksPage locks() {
+        gallery().select("Locks");
+        return new LocksPage(container);
+    }
 }

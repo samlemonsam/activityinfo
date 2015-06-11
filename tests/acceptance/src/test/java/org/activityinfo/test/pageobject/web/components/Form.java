@@ -38,5 +38,7 @@ public abstract class Form {
         boolean isEnabled();
 
         FluentElement getElement();
+
+        boolean isValid();
     }
 }

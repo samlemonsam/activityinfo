@@ -17,6 +17,7 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.sut.Accounts;
@@ -133,7 +134,7 @@ public class DatabaseSetupSteps {
             }
         }
         
-        // Submit the forms
+        // Submit the forms (first row - header ; second row - type of the column)
         for (int row = 2; row < dataTable.getGherkinRows().size(); ++row) {
             submitRow(formName, dataTable, row, columnTypeMap);
         }
@@ -144,6 +145,8 @@ public class DatabaseSetupSteps {
             type = EnumType.TYPE_CLASS.getId();
         } else if (type.equalsIgnoreCase("text")) { // trick to not write long work free_text in *.feature file
             type = TextType.TYPE_CLASS.getId();
+        } else if (type.equalsIgnoreCase("date")) {
+            type = LocalDateType.TYPE_CLASS.getId();
         }
         return type;
     }
@@ -189,7 +192,13 @@ public class DatabaseSetupSteps {
     }
 
     private boolean isPredefinedField(String label) {
-        return label.equalsIgnoreCase("partner") || label.equalsIgnoreCase("comments");
+        return label.equalsIgnoreCase("partner") ||
+               label.equalsIgnoreCase("project") ||
+               label.equalsIgnoreCase("start date") ||
+               label.equalsIgnoreCase("end date") ||
+               label.equalsIgnoreCase("to date") ||
+               label.equalsIgnoreCase("from date") ||
+                label.equalsIgnoreCase("comments");
     }
 
     private void submitRow(String formName, DataTable dataTable, int row, Map<Integer, FieldTypeClass> columnTypeMap) throws Exception {

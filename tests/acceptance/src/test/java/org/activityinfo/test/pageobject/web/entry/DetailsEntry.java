@@ -21,6 +21,7 @@ package org.activityinfo.test.pageobject.web.entry;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.driver.FieldValue;
 import org.junit.Assert;
@@ -62,5 +63,13 @@ public class DetailsEntry {
         return "DetailsEntry{" +
                 "fieldValues=" + fieldValues +
                 '}';
+    }
+
+    public static String toString(List<DetailsEntry> detailsEntries) {
+        String detailsEntriesString = "";
+        for (DetailsEntry entry : detailsEntries) {
+            detailsEntriesString += Joiner.on(" | ").join(entry.getFieldValues()) + "\n";
+        }
+        return detailsEntriesString;
     }
 }

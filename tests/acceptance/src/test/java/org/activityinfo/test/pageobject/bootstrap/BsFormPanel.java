@@ -166,6 +166,11 @@ public class BsFormPanel extends Form {
             return element;
         }
 
+        @Override
+        public boolean isValid() {
+            throw new UnsupportedOperationException();
+        }
+
 
     }
 }
