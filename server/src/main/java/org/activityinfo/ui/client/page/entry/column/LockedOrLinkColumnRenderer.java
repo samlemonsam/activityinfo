@@ -31,10 +31,10 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-public class LockedColumnRenderer implements GridCellRenderer<ModelData> {
+public class LockedOrLinkColumnRenderer implements GridCellRenderer<ModelData> {
     private final LockedPeriodSet lockSet;
 
-    public LockedColumnRenderer(LockedPeriodSet lockSet) {
+    public LockedOrLinkColumnRenderer(LockedPeriodSet lockSet) {
         super();
         this.lockSet = lockSet;
     }

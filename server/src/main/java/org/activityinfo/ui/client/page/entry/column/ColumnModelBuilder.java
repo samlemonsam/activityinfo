@@ -128,30 +128,28 @@ public class ColumnModelBuilder {
         columns.add(new ReadTextColumn("project", I18N.CONSTANTS.project(), 100));
     }
 
-    private void addLockColumnIfHasLocks(LockedPeriodSet lockSet) {
-        if (lockSet.hasLocks()) {
-            ColumnConfig columnLocked = new ColumnConfig("x", "", 28);
-            columnLocked.setRenderer(new LockedColumnRenderer(lockSet));
-            columnLocked.setSortable(false);
-            columnLocked.setMenuDisabled(true);
-            columns.add(columnLocked);
-        }
+    private void addLockOrLinkColumn(LockedPeriodSet lockSet) {
+        ColumnConfig columnLocked = new ColumnConfig("x", "", 28);
+        columnLocked.setRenderer(new LockedOrLinkColumnRenderer(lockSet));
+        columnLocked.setSortable(false);
+        columnLocked.setMenuDisabled(true);
+        columns.add(columnLocked);
     }
 
     public ColumnModelBuilder maybeAddLockColumn(final ActivityFormDTO activity) {
         if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            addLockColumnIfHasLocks(activity.getLockedPeriodSet());
+            addLockOrLinkColumn(activity.getLockedPeriodSet());
         }
         return this;
     }
 
     public ColumnModelBuilder maybeAddLockColumn(final SchemaDTO schemaDTO) {
-        addLockColumnIfHasLocks(new LockedPeriodSet(schemaDTO));
+        addLockOrLinkColumn(new LockedPeriodSet(schemaDTO));
         return this;
     }
 
     public ColumnModelBuilder maybeAddLockColumn(final UserDatabaseDTO userdatabase) {
-        addLockColumnIfHasLocks(new LockedPeriodSet(userdatabase));
+        addLockOrLinkColumn(new LockedPeriodSet(userdatabase));
         return this;
     }
 
