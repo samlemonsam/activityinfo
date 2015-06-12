@@ -29,11 +29,16 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
+import org.activityinfo.ui.client.widget.ConfirmDialog;
+import org.activityinfo.ui.client.widget.ModalDialog;
+import org.activityinfo.ui.client.widget.Templates;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -63,7 +68,21 @@ public class FieldWidgetContainer implements WidgetContainer {
         widgetContainer.getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                formDesigner.getFormClass().remove(formField);
+                if (FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId())) {
+                    HTML dialogContent = new HTML(Templates.WARNING_MESSAGE_TEMPLATE.html(I18N.CONSTANTS.notAllowedToRemoveBuiltinField()));
+                    new ModalDialog(dialogContent, I18N.CONSTANTS.warning()).
+                            hideCancelButton().
+                            hideOnOk().
+                            show();
+                    return;
+                }
+                ConfirmDialog.confirm(new DeleteFormFieldAction(widgetContainer.getFocusPanel(), formDesigner) {
+                    @Override
+                    public void onComplete() {
+                        super.onComplete();
+                        formDesigner.getFormClass().remove(formField);
+                    }
+                });
             }
         });
         widgetContainer.getFocusPanel().addClickHandler(new ClickHandler() {

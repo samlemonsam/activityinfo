@@ -36,7 +36,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -55,10 +54,8 @@ import org.activityinfo.ui.client.widget.Button;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author yuriyz on 07/04/2014.
@@ -143,21 +140,16 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
 
     private void fillPanel(final FormClass formClass, final FormDesigner formDesigner) {
 
-        // Exclude legacy builtin fields that the user won't be able to remove or reorder
-        final Set<ResourceId> builtinFields = builtinFields(formClass.getId());
-
         formClass.traverse(formClass, new TraverseFunction() {
             @Override
             public void apply(FormElement element, FormElementContainer container) {
                 if (element instanceof FormField) {
-                    if (!builtinFields.contains(element.getId())) {
-                        FormField formField = (FormField) element;
-                        WidgetContainer widgetContainer = containerMap.get(formField.getId());
-                        if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
-                            Widget widget = widgetContainer.asWidget();
-                            formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
-                            dropPanel.add(widget);
-                        }
+                    FormField formField = (FormField) element;
+                    WidgetContainer widgetContainer = containerMap.get(formField.getId());
+                    if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
+                        Widget widget = widgetContainer.asWidget();
+                        formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
+                        dropPanel.add(widget);
                     }
                 } else if (element instanceof FormSection) {
                     FormSection section = (FormSection) element;
@@ -171,16 +163,6 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 }
             }
         });
-    }
-
-    private Set<ResourceId> builtinFields(ResourceId formClassId) {
-        Set<ResourceId> fieldIds = new HashSet<>();
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.COMMENT_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PARTNER_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PROJECT_FIELD));
-        return fieldIds;
     }
 
     private void buildWidgetContainers(final FormDesigner formDesigner, FormElementContainer container, int depth, List<Promise<Void>> promises) {

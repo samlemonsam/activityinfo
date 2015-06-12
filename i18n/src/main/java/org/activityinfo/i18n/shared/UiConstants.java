@@ -3701,5 +3701,14 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please type to search for results")
     String suggestBoxPlaceholder();
+
+    @DefaultStringValue("Information")
+    String information();
+
+    @DefaultStringValue("Field is built-in and it's not allowed to remove it.")
+    String notAllowedToRemoveBuiltinField();
+
+    @DefaultStringValue("Warning")
+    String warning();
 }
 
