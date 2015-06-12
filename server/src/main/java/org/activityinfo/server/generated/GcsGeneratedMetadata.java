@@ -1,6 +1,9 @@
 package org.activityinfo.server.generated;
 
 import com.google.appengine.api.datastore.*;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
+import com.google.common.net.UrlEscapers;
 import org.activityinfo.model.auth.AuthenticatedUser;
 
 import java.util.Date;
@@ -54,6 +57,10 @@ class GcsGeneratedMetadata {
         Entity entity = null;
         try {
             entity = datastoreService.get(tx, entityKey(id));
+            Boolean completed = (Boolean) entity.getProperty("completed");
+            if(completed) {
+                throw new IllegalStateException(id + " is already completed.");
+            }
         } catch (EntityNotFoundException e) {
             tx.rollback();
             throw new IllegalStateException("Metadata entity " + entityKey(id) + " has not been saved.");
@@ -122,6 +129,18 @@ class GcsGeneratedMetadata {
     }
     
     public String getGcsPath() {
-        return "generated/" + id;
+        return getGcsPath(Escapers.nullEscaper());
+    }
+    
+    public String getUrlEscapedGcsPath() {
+        return getGcsPath(UrlEscapers.urlPathSegmentEscaper());
+    }
+    
+    private String getGcsPath(Escaper escaper) {
+        // Include the user-friendly filename in the GCS object path, which
+        // will eliminate the need to include the filename in the Content-disposition header,
+        // support for which is extremely unpredictable in IE:
+        // http://www.jtricks.com/bits/content_disposition.html
+        return "generated/" + id + "/" + escaper.escape(filename);
     }
 }

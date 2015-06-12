@@ -98,7 +98,7 @@ class GcsGeneratedResource implements GeneratedResource {
 
     private URI getSignedDownloadUri() {
         GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
-        return signer.signUri("GET", bucket + "/" + metadata.getGcsPath());
+        return signer.signUri("GET", bucket + "/" + metadata.getUrlEscapedGcsPath());
     }
 
     public Response serveContent() throws IOException {
