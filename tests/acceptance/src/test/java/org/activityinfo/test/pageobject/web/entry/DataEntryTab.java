@@ -66,7 +66,7 @@ public class DataEntryTab {
     }
     
     public GxtDataEntryDriver newSubmission() {
-        container.find().button(withText(I18N.CONSTANTS.newSite())).clickWhenReady();
+        buttonClick(I18N.CONSTANTS.newSite());
         return new GxtDataEntryDriver(new GxtModal(container));
     }
     

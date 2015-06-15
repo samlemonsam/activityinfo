@@ -45,7 +45,19 @@ public class BsModal extends ModalDialog {
     }
 
     public static BsModal find(FluentElement parent) {
-        return new BsModal(parent.waitFor(By.className(CLASS_NAME)));
+        FluentElement fluentElement = parent.waitFor(By.className(CLASS_NAME));
+        if (fluentElement.isDisplayed()) {
+            return new BsModal(fluentElement);
+        }
+
+        // there can be multiple modal dialogs attached, we have to find the displayed one.
+        for(FluentElement element : parent.findElements(By.className(CLASS_NAME)).list()) {
+            if (element.isDisplayed()) {
+                return new BsModal(element);
+            }
+        }
+
+        throw new AssertionError("Failed to find bootstrap modal dialog.");
     }
 
     public String getTitle() {
@@ -61,7 +73,7 @@ public class BsModal extends ModalDialog {
         return windowElement.find().div(withClass("modal-footer")).first();
     }
 
-    public void ok(String buttonName) {
+    public void click(String buttonName) {
         click(buttonName, "", false);
     }
 

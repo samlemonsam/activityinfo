@@ -11,6 +11,7 @@ import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
@@ -26,6 +27,7 @@ import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 
@@ -151,6 +153,22 @@ public class ApplicationPage {
         designPage.getDesignTree().select(formName);
         designPage.getToolbarMenu().clickButton(I18N.CONSTANTS.openTable());
         return new TablePage(page);
+    }
+
+    public FormDesignerPage navigateToFormDesigner(String database, String formName) {
+        DesignTab designTab = navigateToDesignTab();
+        designTab.selectDatabase(database);
+
+        DesignPage designPage = designTab.design();
+        designPage.getDesignTree().select(formName);
+        designPage.getToolbarMenu().clickButton(I18N.CONSTANTS.openFormDesigner());
+        page.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return page.find().div(withClass(FormDesignerPage.DROP_TARGET_CLASS)).exists();
+            }
+        });
+        return new FormDesignerPage(page);
     }
     
     public ReportsTab navigateToReportsTab() {

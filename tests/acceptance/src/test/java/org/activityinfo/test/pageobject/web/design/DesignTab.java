@@ -1,20 +1,15 @@
 package org.activityinfo.test.pageobject.web.design;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.activityinfo.test.pageobject.web.design.designer.FormModal;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
 
-import java.util.List;
-
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 public class DesignTab {
@@ -84,20 +79,7 @@ public class DesignTab {
     }
 
     public BsModal formInstance() {
-        FluentElement dialogElement = container.waitFor(new Function<WebDriver, FluentElement>() {
-            @Override
-            public FluentElement apply(WebDriver driver) {
-                List<WebElement> elements = driver.findElements(By.tagName("label"));
-                for (WebElement element : elements) {
-                    if (element.getText().contains("Start Date")) {
-                        return new FluentElement(driver, element).find().ancestor().div(withClass(BsModal.CLASS_NAME)).first();
-                    }
-                }
-
-                return null;
-            }
-        });
-        return new BsModal(dialogElement);
+        return FormModal.find(container);
     }
 
     public LocksPage locks() {

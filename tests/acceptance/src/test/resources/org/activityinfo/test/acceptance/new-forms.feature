@@ -11,19 +11,27 @@ Feature: Partners in new form layout
     When I have added 21 partners
     Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "suggestbox"
 
-#  @web
-#  Scenario: Partners field is always shown
-#      When I open the table for "Patient Visits" in database "Patient Registration"
-#     When I open the form designer for "Patient Visits" in database "Patient Registration"
-#     Then the partner field should be visible
-#     When I add the user group "Southern Office" to "Patient Registration"
-#     When I open the form designer for "Patient Visits"
-#     When I open a new form submission
-#     Then the user group field should be visible
-#     When I remove the user group "Southern Office" from "Patient Registration"
-#      And I open the form designer for "Patient Visits"
-#     Then the user group field should not be visible
-    
+  @AI-1033
+  @AI-1009
+  @web
+  Scenario: Built-in fields are always shown
+    When I open the form designer for "Patient Visits" in database "Patient Registration"
+    Then following fields should be visible in form designer:
+      | Partner    |
+      | Start Date |
+      | End Date   |
+      | Comments   |
+    Then following fields are not deletable in form designer:
+      | Partner    |
+      | Start Date |
+      | End Date   |
+      | Comments   |
+    When I open a new form submission for "Patient Visits" then following fields are visible:
+      | Partner    |
+      | Start Date |
+      | End Date   |
+      | Comments   |
+
 #  @web @odk
 #  Scenario: Submitting a form with implicit user group
 #    And I have added a quantity field "Age"

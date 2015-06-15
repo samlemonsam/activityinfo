@@ -6,6 +6,7 @@ import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
@@ -227,7 +228,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void openFormDesigner(String database, String formName) {
+    public FormDesignerPage openFormDesigner(String database, String formName) {
         throw new PendingException();
     }
 
@@ -256,6 +257,18 @@ public abstract class ApplicationDriver {
     }
 
     public void assertSubmissionIsNotAllowedBecauseOfLock(String formName, String endDate) {
+        throw new PendingException();
+    }
+
+    public void assertDesignerFieldVisible(String fieldLabel) {
+        throw new PendingException();
+    }
+
+    public void assertFieldsOnNewForm(String formName, List<String> fieldLabels) {
+        throw new PendingException();
+    }
+
+    public void assertDesignerFieldIsNotDeletable(String fieldLabel) {
         throw new PendingException();
     }
 }

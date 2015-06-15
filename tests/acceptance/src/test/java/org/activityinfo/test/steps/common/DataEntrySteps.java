@@ -214,4 +214,9 @@ public class DataEntrySteps {
     public void form_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with_any_of_these_values(String formName, List<FieldValue> values) throws Throwable {
         driver.assertEntryCannotBeModifiedOrDeleted(formName, values);
     }
+
+    @When("^I open a new form submission for \"([^\"]*)\" then following fields are visible:$")
+    public void I_open_a_new_form_submission_for_then_following_fields_are_visible(String formName, List<String> fieldLabels) throws Throwable {
+        driver.assertFieldsOnNewForm(formName, fieldLabels);
+    }
 }

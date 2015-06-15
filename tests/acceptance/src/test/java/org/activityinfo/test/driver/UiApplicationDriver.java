@@ -20,6 +20,8 @@ import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
+import org.activityinfo.test.pageobject.web.design.designer.FormModal;
 import org.activityinfo.test.pageobject.web.entry.*;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
@@ -245,7 +247,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         dialog.form().findFieldByLabel("Country").select("Rdc");
         dialog.form().findFieldByLabel("Options").select("Copy partners");
         dialog.form().findFieldByLabel("Options").select("Copy user permissions");
-        dialog.ok("Create");
+        dialog.click("Create");
     }
 
     @Override
@@ -434,13 +436,11 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void openFormDesigner(String database, String formName) {
+    public FormDesignerPage openFormDesigner(String database, String formName) {
         ensureLoggedIn();
 
-        DesignTab designTab = applicationPage.navigateToDesignTab();
-        designTab.selectDatabase(database);
-        designTab.design().getDesignTree().select(formName);
-        designTab.design().getToolbarMenu().clickButton(I18N.CONSTANTS.openFormDesigner());
+        currentPage = applicationPage.navigateToFormDesigner(aliasTable.getAlias(database), aliasTable.getAlias(formName));
+        return (FormDesignerPage) currentPage;
     }
 
     public TablePage openFormTable(String database, String formName) {
@@ -751,6 +751,35 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
         return result;
     }
+
+    public void assertDesignerFieldVisible(String fieldLabel) {
+        assertNotNull("Failed to find designer field with label: " + fieldLabel,
+                formDesigner().dropTarget().fieldByLabel(fieldLabel));
+    }
+
+    private FormDesignerPage formDesigner() {
+        Preconditions.checkState(currentPage instanceof FormDesignerPage, "Form Designer must be open before with 'I open form designer ...' step.");
+
+        return (FormDesignerPage) currentPage;
+    }
+
+    public void assertDesignerFieldIsNotDeletable(String fieldLabel) {
+        Preconditions.checkState(!formDesigner().dropTarget().fieldByLabel(fieldLabel).isDeletable(),
+                "Field with label '" + fieldLabel +"' is deletable.");
+    }
+
+    public void assertFieldsOnNewForm(String formName, List<String> fieldLabels) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+        dataEntryTab.buttonClick(I18N.CONSTANTS.newSite());
+
+        BsModal bsModal = FormModal.find(dataEntryTab.getContainer());
+        for (String fieldLabel : fieldLabels) {
+            assertNotNull("Failed to find field with label: " + fieldLabel, bsModal.form().findFieldByLabel(fieldLabel));
+        }
+    }
+
 
     @Override
     public void cleanup() throws Exception {

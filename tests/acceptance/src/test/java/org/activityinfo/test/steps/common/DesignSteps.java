@@ -99,4 +99,18 @@ public class DesignSteps {
     public void I_add_a_lock_on_the_project_from_to_in_database(String lockName, String projectName, String startDate, String endDate, String database) throws Throwable {
         driver.addLockOnProject(lockName, database, projectName, startDate, endDate, true);
     }
+
+    @Then("^following fields should be visible in form designer:$")
+    public void following_fields_should_be_visible_in_form_designer(List<String> fieldLabels) throws Throwable {
+        for (String fieldLabel : fieldLabels) {
+            driver.assertDesignerFieldVisible(fieldLabel);
+        }
+    }
+
+    @Then("^following fields are not deletable in form designer:$")
+    public void following_fields_are_not_deletable_in_form_designer(List<String> fieldLabels) throws Throwable {
+        for (String fieldLabel : fieldLabels) {
+            driver.assertDesignerFieldIsNotDeletable(fieldLabel);
+        }
+    }
 }
