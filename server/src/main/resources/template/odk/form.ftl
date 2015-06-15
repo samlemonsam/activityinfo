@@ -19,10 +19,10 @@
                     <locationname/>
                     <gps/>
                     </#if>
+                
+                <#if reportingFrequency == 0> <#-- ActivityDTO.REPORT_ONCE -->
                     <date1>${.now?string("yyyy-MM-dd")}</date1>
                     <date2>${.now?string("yyyy-MM-dd")}</date2>
-
-                <#if reportingFrequency == 0> <#-- ActivityDTO.REPORT_ONCE -->
                     <#list indicators as indicator>
                         <I${indicator.id?c} />
                     </#list>

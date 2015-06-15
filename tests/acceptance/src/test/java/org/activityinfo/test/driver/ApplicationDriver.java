@@ -7,10 +7,12 @@ import cucumber.api.PendingException;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.sut.UserAccount;
+import org.joda.time.LocalDate;
 import org.json.JSONException;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ApplicationDriver {
 
@@ -67,9 +69,58 @@ public abstract class ApplicationDriver {
     }
 
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
+        fillForm(startNewSubmission(formName), FieldValue.toMap(values));
+    }
+    
+    protected final void fillForm(DataEntryDriver driver, Map<String, FieldValue> valueMap) throws InterruptedException {
+        while(driver.nextField()) {
+            System.out.println("label = " + driver.getLabel());
+            switch(driver.getLabel()) {
+                case "Partner":
+                    if(valueMap.containsKey("partner")) {
+                        driver.select(aliasTable.getAlias(valueMap.get("partner").getValue()));
+                    }
+                    break;
+                case "Start Date":
+                    if (valueMap.containsKey("Start Date")) {
+                        driver.fill(LocalDate.parse(valueMap.get("Start Date").getValue()));
+                    } else {
+                        driver.fill(new LocalDate(2014, 1, 1));
+                    }
+                    break;
+                case "End Date":
+                    if (valueMap.containsKey("End Date")) {
+                        driver.fill(LocalDate.parse(valueMap.get("End Date").getValue()));
+                    } else {
+                        driver.fill(new LocalDate(2014, 1, 1));
+                    }
+                    break;
+                case "Comments":
+                    if(valueMap.containsKey("comments")) {
+                        driver.fill(valueMap.get("comments").getValue());
+                    }
+                    break;
+                default:
+                    String testHandle = aliasTable.getTestHandleForAlias(driver.getLabel());
+                    if(valueMap.containsKey(testHandle)) {
+                        String value = valueMap.get(testHandle).getValue();
+                        if(value.matches("^\\d+$")) {
+                            driver.fill(value);
+                        } else {
+                            driver.fill(aliasTable.getAlias(value));
+                        }
+                    }
+                    break;
+            }
+        }
+
+        driver.submit();
+    }  
+
+    protected DataEntryDriver startNewSubmission(String formName) {
         throw new PendingException();
     }
-
+    
     public void submitForm(String formName, String partner, List<MonthlyFieldValue> fieldValues) throws JSONException, Exception {
         throw new PendingException();
     }
@@ -195,4 +246,5 @@ public abstract class ApplicationDriver {
         return aliasTable;
     }
 
+    
 }

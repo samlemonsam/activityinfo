@@ -1,14 +1,11 @@
 package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-
-import java.util.List;
 
 /**
  * Runs tests against a local chrome browser.
@@ -45,15 +42,6 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
         return pool;
     }
 
-    @Override
-    public List<? extends DeviceProfile> getSupportedProfiles() {
-        return Lists.newArrayList();
-    }
-
-    @Override
-    public boolean supports(DeviceProfile profile) {
-        return true;
-    }
 
     @Override
     public WebDriver start(String name, BrowserProfile profile) {

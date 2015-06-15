@@ -24,7 +24,6 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 
 @ScenarioScoped
@@ -84,66 +83,22 @@ public class UiApplicationDriver extends ApplicationDriver {
         return apiDriver;
     }
 
-
     @Override
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
-        ensureLoggedIn();
-
         currentForm = formName;
-        
-        Map<String, FieldValue> valueMap = FieldValue.toMap(values);
+        super.submitForm(formName, values);
+    }
+
+    @Override
+    protected DataEntryDriver startNewSubmission(String formName) {
+        ensureLoggedIn();
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
-        
+
         DataEntryDriver driver = dataEntryTab.newSubmission();
 
-        fillForm(valueMap, driver);
-
-        driver.submit();
-    }
-
-    private void fillForm(Map<String, FieldValue> valueMap, DataEntryDriver driver) throws InterruptedException {
-        while(driver.nextField()) {
-            System.out.println("label = " + driver.getLabel());
-            switch(driver.getLabel()) {
-                case "Partner":
-                    if(valueMap.containsKey("partner")) {
-                        driver.select(aliasTable.getAlias(valueMap.get("partner").getValue()));
-                    }
-                    break;
-                case "Start Date":
-                    if (valueMap.containsKey("Start Date")) {
-                        driver.fill(LocalDate.parse(valueMap.get("Start Date").getValue()));
-                    } else {
-                        driver.fill(new LocalDate(2014, 1, 1));
-                    }
-                    break;
-                case "End Date":
-                    if (valueMap.containsKey("End Date")) {
-                        driver.fill(LocalDate.parse(valueMap.get("End Date").getValue()));
-                    } else {
-                        driver.fill(new LocalDate(2014, 1, 1));
-                    }
-                    break;
-                case "Comments":
-                    if(valueMap.containsKey("comments")) {
-                        driver.fill(valueMap.get("comments").getValue());
-                    }
-                    break;
-                default:
-                    String testHandle = aliasTable.getTestHandleForAlias(driver.getLabel());
-                    if(valueMap.containsKey(testHandle)) {
-                        String value = valueMap.get(testHandle).getValue();
-                        if(value.matches("^\\d+$")) {
-                            driver.fill(value);
-                        } else {
-                            driver.fill(aliasTable.getAlias(value));
-                        }
-                    }
-                    break;
-            }
-        }
+        return driver;
     }
 
     @Override
@@ -224,9 +179,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         DataEntryDriver driver = dataEntryTab.updateSubmission();
         
-        fillForm(FieldValue.toMap(values), driver);
-        
-        driver.submit();
+        fillForm(driver, FieldValue.toMap(values));
     }
 
     private TargetsPage navigateToTargetSetupFor(String database) {

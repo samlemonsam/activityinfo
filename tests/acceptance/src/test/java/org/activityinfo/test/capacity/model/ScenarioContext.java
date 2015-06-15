@@ -22,7 +22,7 @@ public class ScenarioContext {
 
     public ScenarioContext(TestContext context) {
         this.testContext = context;
-        this.accounts = new DevServerAccounts();
+        this.accounts = new DevServerAccounts(testContext.getServer());
         this.aliasTable = new AliasTable();
     }
 
