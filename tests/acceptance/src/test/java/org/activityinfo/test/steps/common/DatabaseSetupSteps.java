@@ -81,7 +81,7 @@ public class DatabaseSetupSteps {
     @Given("^I have created a monthly form named \"([^\"]*)\"$")
     public void I_have_created_a_monthly_form_named(String formName) throws Throwable {
         driver.setup().createForm(name(formName),
-                property("database", currentDatabase),
+                property("database", getCurrentDatabase()),
                 property("reportingFrequency", "monthly"));
         
         currentForm = formName;
@@ -94,8 +94,20 @@ public class DatabaseSetupSteps {
                 name(name),
                 property("locationType", locationType),
                 property("database", getCurrentDatabase()));
+        
+        currentForm = name;
     }
 
+    @Given("^I have created a form named \"([^\"]*)\" with location type bound to the \"([^\"]*)\" level$")
+    public void I_have_created_a_form_named_with_location_type_bound_to_the_level(String formName, String adminLevel) throws Throwable {
+        driver.setup().createForm(
+                name(formName),
+                property("adminLevel", adminLevel),
+                property("database", getCurrentDatabase()));
+
+        currentForm = formName;
+    }
+    
     @Given("^I have created a form named \"([^\"]*)\"$")
     public void I_have_created_a_form_named(String formName) throws Throwable {
         I_have_created_a_form_named_in(formName, getCurrentDatabase());
@@ -291,8 +303,10 @@ public class DatabaseSetupSteps {
                 property("name", targetName));
     }
 
-    private String getCurrentDatabase() {
-        Preconditions.checkState(currentDatabase != null, "There has been no database mentioned yet");
+    private String getCurrentDatabase() throws Exception {
+        if(currentDatabase == null) {
+            createDatabase("Database");
+        }
         return currentDatabase;
     }
 
@@ -454,4 +468,5 @@ public class DatabaseSetupSteps {
     public void I_haven_not_defined_any_targets() throws Throwable {
         // noop!
     }
+
 }

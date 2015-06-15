@@ -77,6 +77,12 @@ public class DataEntrySteps {
     }
 
 
+    @Then("^I can submit a \"([^\"]*)\" form with:$")
+    public void I_can_submit_a_form_with(String formName, List<FieldValue> values) throws Throwable {
+        driver.submitForm(formName, values);
+    }
+
+
 
     @Then("^the submission's history should show a change from (.*) to (.*)$")
     public void the_submission_s_history_should_show_one_change_from_to(String from, String to) throws Throwable {
@@ -194,4 +200,5 @@ public class DataEntrySteps {
 
         return DataTable.create(rows);
     }
+
 }

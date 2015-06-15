@@ -6,17 +6,17 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.representation.Form;
 import org.activityinfo.test.capacity.Metrics;
-import org.activityinfo.test.config.ConfigProperty;
-import org.mindrot.bcrypt.BCrypt;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -30,11 +30,7 @@ public class DevServerAccounts implements Accounts {
     private static final Logger LOGGER = Logger.getLogger(DevServerAccounts.class.getName());
 
 
-    private static final ConfigProperty DATABASE_URL = new ConfigProperty("databaseUrl", "MySQL database url");
-    private static final ConfigProperty EMAIL = new ConfigProperty("devAccountEmail", "Dev account email");
-
     private static final String DEV_PASSWORD = "notasecret";
-    public static final String DEV_PASSWORD_HASHED = BCrypt.hashpw(DEV_PASSWORD, BCrypt.gensalt());
 
     private final Meter users = Metrics.REGISTRY.meter("registeredUsers");
 
@@ -47,15 +43,11 @@ public class DevServerAccounts implements Accounts {
     private boolean batchingEnabled = false;
     private List<String> pendingUsers = Lists.newArrayList();
     private String locale = "en";
+    private Server server;
 
-    public DevServerAccounts() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL driver is not on the classpath", e);
-        }
-        LOGGER.info("Using connection to " + connectionUrl());
-
+    @Inject
+    public DevServerAccounts(Server server) {
+        this.server = server;
         aliasMap = CacheBuilder.newBuilder().concurrencyLevel(100).build(new CacheLoader<String, UserAccount>() {
             @Override
             public UserAccount load(String key) throws Exception {
@@ -112,22 +104,6 @@ public class DevServerAccounts implements Accounts {
         return new UserAccount(email, DEV_PASSWORD);
     }
 
-    private Connection openConnection() throws SQLException {
-
-        // Add all system properties prefixed by 'mysql.' to the driver properties,
-        // stripped of the 'mysql.' prefix
-        Properties properties = new Properties();
-        for(String systemProperty : System.getProperties().stringPropertyNames()) {
-            if(systemProperty.startsWith("mysql.")) {
-                String key = systemProperty.substring("mysql.".length());
-                String value = System.getProperty(systemProperty);
-                properties.put(key, value);
-            }
-        }
-        return DriverManager.getConnection(DATABASE_URL.get(), properties);
-            
-    }
-    
     public void flush() {
         if(!pendingUsers.isEmpty()) {
             LOGGER.info(String.format("Creating %d accounts...", pendingUsers.size()));
@@ -138,29 +114,26 @@ public class DevServerAccounts implements Accounts {
 
     private void insertUsers(List<String> users) {
 
-        try(Connection connection = openConnection()) {
-            connection.setAutoCommit(false);
+        Client client = Client.create();
+        WebResource userResources = client.resource(server.getRootUrl()).path("resources").path("users");
 
-            // Create the user for testing purposes
-            try (PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO userlogin (email, name, password, locale) VALUES(?, ?, ?, ?)")) {
+        LOGGER.info("Creating new account via " + userResources);
 
-                for(String user : users) {
-                    stmt.setString(1, user);
-                    stmt.setString(2, nameForEmail(user));
-                    stmt.setString(3, DEV_PASSWORD_HASHED);
-                    stmt.setString(4, locale);
-                    stmt.addBatch();
+        for(String user : users) {
+            Form form = new Form();
+            form.putSingle("email", user);
+            form.putSingle("name", nameForEmail(user));
+            form.putSingle("password", DEV_PASSWORD);
+            form.putSingle("locale", locale);
 
-                    this.users.mark();
-                }
-                stmt.executeBatch();
+            ClientResponse response = userResources.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(ClientResponse.class);
+            
+            if(response.getStatus() == Response.Status.CREATED.getStatusCode()) {
+                LOGGER.info("User " + user + " created " + response.getStatus());
+            } else {
+                throw new RuntimeException("Could not create user " + user + ": " + response.getClientResponseStatus() + "\n"
+                        + response.getEntity(String.class));
             }
-
-            connection.commit();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -188,10 +161,6 @@ public class DevServerAccounts implements Accounts {
         alias.append("@mailinator.com");
 
         return alias.toString();
-    }
-
-    private String connectionUrl() {
-        return DATABASE_URL.getOr("jdbc:mysql://localhost/activityinfo_at?useUnicode=true&characterEncoding=UTF-8");
     }
     
     private String nameForEmail(String email) {
