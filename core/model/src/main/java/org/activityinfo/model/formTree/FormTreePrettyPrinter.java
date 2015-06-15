@@ -16,7 +16,16 @@ import java.util.Set;
  */
 public class FormTreePrettyPrinter {
 
-    private PrintWriter pw = new PrintWriter(System.out);
+    private PrintWriter pw;
+
+    public FormTreePrettyPrinter() {
+        pw = new PrintWriter(System.out);
+    }
+
+    public FormTreePrettyPrinter(PrintWriter pw) {
+        this.pw = pw;
+    }
+    
 
     public void prettyPrintNodes(int indent, List<FormTree.Node> nodes) {
 
@@ -93,5 +102,10 @@ public class FormTreePrettyPrinter {
     public static void print(FormTree formTree) {
         new FormTreePrettyPrinter()
                 .prettyPrintNodes(0, formTree.getRootFields());
+    }
+    
+    public void printTree(FormTree tree) {
+        prettyPrintNodes(0, tree.getRootFields());
+        pw.flush();
     }
 }

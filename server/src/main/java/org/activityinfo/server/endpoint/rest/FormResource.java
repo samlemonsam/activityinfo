@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -18,6 +19,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.store.CollectionCatalog;
@@ -34,6 +36,8 @@ import javax.ws.rs.core.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Logger;
 
 public class FormResource {
@@ -80,6 +84,24 @@ public class FormResource {
         JsonObject object = JsonFormTreeBuilder.toJson(tree);
         
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
+    }
+
+    @GET
+    @Path("tree/pretty")
+    public Response getTreePrettyPrinted() {
+        FormTree tree = queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<FormTree>() {
+            @Override
+            public FormTree execute(CollectionCatalog catalog) {
+                FormTreeBuilder builder = new FormTreeBuilder(catalog);
+                return builder.queryTree(resourceId);
+            }
+        });
+
+        StringWriter stringWriter = new StringWriter();
+        FormTreePrettyPrinter printer = new FormTreePrettyPrinter(new PrintWriter(stringWriter));
+        printer.printTree(tree);
+
+        return Response.ok(stringWriter.toString()).type(MediaType.TEXT_PLAIN_TYPE).build();
     }
     
     @GET
@@ -154,7 +176,7 @@ public class FormResource {
 
     private boolean includeInDefaultQuery(FormTree.Node leaf) {
         FieldType type = leaf.getType();
-        return type instanceof TextField ||
+        return type instanceof TextType ||
                type instanceof BarcodeType ||
                type instanceof QuantityType ||
                type instanceof EnumType ||
