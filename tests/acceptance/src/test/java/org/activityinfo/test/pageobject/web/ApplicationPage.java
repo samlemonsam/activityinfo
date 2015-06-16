@@ -127,6 +127,10 @@ public class ApplicationPage {
             page.find().div(containingText(I18N.CONSTANTS.dataEntry())).clickWhenReady();
         } catch(Exception ignored) {
         }
+
+        // we may got "Save" dialog before leaving the current page
+        closeSaveDialogSilently(false);
+
         return new DataEntryTab(container());
     }
 
@@ -176,14 +180,19 @@ public class ApplicationPage {
         container.find().div(withText("Reports")).clickWhenReady();
 
         // we may got "Save" dialog before leaving the current page
-        closeSaveDialogSilently();
+        closeSaveDialogSilently(true);
         
         return new ReportsTab(container);
     }
 
-    public void closeSaveDialogSilently() {
+    public void closeSaveDialogSilently(boolean discard) {
         try {
-            new GxtModal(page, 2).discardChanges();
+            GxtModal gxtModal = new GxtModal(page, 2);
+            if (discard) {
+                gxtModal.discardChanges();
+            } else {
+                gxtModal.accept();
+            }
         } catch (Exception e) {
             // ignore
         }

@@ -49,6 +49,26 @@ public class DropPanel {
         throw new AssertionError("Failed to find designer field with label: " + label);
     }
 
+    public DropPanel dragAndDrop(String fieldLabel, int positionToDrop) {
+        return dragAndDrop(fieldByLabel(fieldLabel), positionToDrop);
+    }
+
+    public DropPanel dragAndDrop(DesignerField field, int positionToDrop) {
+        DesignerField fieldAt = fields().get(positionToDrop);
+        field.draggable().dragAndDrop(fieldAt.draggable());
+        return this;
+    }
+
+    public int fieldPosition(String fieldLabel) {
+        List<DesignerField> fields = fields();
+        for (DesignerField field: Lists.newArrayList(fields)) {
+            if (field.getLabel().equals(fieldLabel)) {
+                return fields.indexOf(field);
+            }
+        }
+        throw new AssertionError("Failed to identify index of field with lable: " + fieldLabel);
+    }
+
     public List<DesignerField> fields() {
         List<FluentElement> elements = container.find().div(withClass("widget-container")).asList().list();
         List<DesignerField> fields = Lists.newArrayList();

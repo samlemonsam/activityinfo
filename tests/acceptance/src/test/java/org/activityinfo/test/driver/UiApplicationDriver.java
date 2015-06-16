@@ -40,8 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 
 @ScenarioScoped
@@ -768,6 +767,40 @@ public class UiApplicationDriver extends ApplicationDriver {
                 "Field with label '" + fieldLabel +"' is deletable.");
     }
 
+    public void assertDesignerFieldMandatory(String fieldLabel) {
+        assertTrue("Designer field with label " + fieldLabel + " is not mandatory",
+                formDesigner().dropTarget().fieldByLabel(fieldLabel).isMandatory());
+    }
+
+    public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
+        formDesigner().dropTarget().fieldByLabel(fieldLabel).element().clickWhenReady();
+        BsFormPanel form = formDesigner().properties().form();
+        for (FieldValue value : values) {
+            switch(value.getField()) {
+                case "code":
+                    form.findFieldByLabel(I18N.CONSTANTS.codeFieldLabel()).fill(value.getValue());
+                    break;
+                case "label":
+                    form.findFieldByLabel(I18N.CONSTANTS.labelFieldLabel()).fill(value.getValue());
+                    break;
+                case "description":
+                    form.findFieldByLabel(I18N.CONSTANTS.description()).fill(value.getValue());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown designer field property: " + value.getField());
+            }
+        }
+    }
+
+    public void assertDesignerFieldReorder(String fieldLabel, int positionOnPanel) {
+        int positionBeforeReorder = formDesigner().dropTarget().fieldPosition(fieldLabel);
+        formDesigner().dropTarget().dragAndDrop(fieldLabel, positionOnPanel);
+
+        int positionAfterReorder = formDesigner().dropTarget().fieldPosition(fieldLabel);
+        assertEquals(positionAfterReorder, positionOnPanel);
+        assertNotEquals(positionBeforeReorder, positionAfterReorder); // make sure field is really reordered
+    }
+
     public void assertFieldsOnNewForm(String formName, List<String> fieldLabels) {
         ensureLoggedIn();
 
@@ -777,6 +810,25 @@ public class UiApplicationDriver extends ApplicationDriver {
         BsModal bsModal = FormModal.find(dataEntryTab.getContainer());
         for (String fieldLabel : fieldLabels) {
             assertNotNull("Failed to find field with label: " + fieldLabel, bsModal.form().findFieldByLabel(fieldLabel));
+        }
+    }
+
+    public void assertFieldValuesOnNewForm(String formName, List<FieldValue> values) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+        dataEntryTab.buttonClick(I18N.CONSTANTS.newSite());
+
+        BsModal bsModal = FormModal.find(dataEntryTab.getContainer());
+        for (FieldValue field : values) {
+            BsFormPanel.BsField fieldItem = (BsFormPanel.BsField) bsModal.form().findFieldByLabel(field.getField());
+            switch (field.getControlType()) {
+                case "radio":
+                    assertTrue(fieldItem.isRadioSelected(field.getValue()));
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown control type: " + field.getControlType());
+            }
         }
     }
 

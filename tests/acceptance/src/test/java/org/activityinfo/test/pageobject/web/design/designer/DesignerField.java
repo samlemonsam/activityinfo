@@ -83,8 +83,16 @@ public class DesignerField {
         return this;
     }
 
+    public FluentElement draggable() {
+        return element.find().div(withClass("dragdrop-handle"), withText("|||")).first();
+    }
+
     private BsModal clickDelete() {
         element.find().button(withClass("btn-link"), withText("x")).first().clickWhenReady();
         return BsModal.find(element.root());
+    }
+
+    public FluentElement element() {
+        return element;
     }
 }

@@ -25,10 +25,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.ObjectType;
-import org.activityinfo.test.driver.Property;
-import org.activityinfo.test.driver.TestObject;
+import org.activityinfo.test.driver.*;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -112,5 +109,21 @@ public class DesignSteps {
         for (String fieldLabel : fieldLabels) {
             driver.assertDesignerFieldIsNotDeletable(fieldLabel);
         }
+    }
+
+    @Then("^reorder \"([^\"]*)\" designer field to position (\\d+)$")
+    public void reorder_field_to_position(String fieldLabel, int positionOnPanel) throws Throwable {
+        positionOnPanel--; // translate into machine number, position for human 2 means for machine 1
+        driver.assertDesignerFieldReorder(fieldLabel, positionOnPanel);
+    }
+
+    @Then("^\"([^\"]*)\" designer field is mandatory$")
+    public void designer_field_is_mandatory(String fieldLabel) throws Throwable {
+        driver.assertDesignerFieldMandatory(fieldLabel);
+    }
+
+    @Then("^change designer field \"([^\"]*)\" with:$")
+    public void change_designer_field_with(String fieldLabel, List<FieldValue> values) throws Throwable {
+        driver.changeDesignerField(fieldLabel, values);
     }
 }

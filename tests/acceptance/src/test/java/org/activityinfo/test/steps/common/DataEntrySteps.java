@@ -219,4 +219,9 @@ public class DataEntrySteps {
     public void I_open_a_new_form_submission_for_then_following_fields_are_visible(String formName, List<String> fieldLabels) throws Throwable {
         driver.assertFieldsOnNewForm(formName, fieldLabels);
     }
+
+    @When("^I open a new form submission for \"([^\"]*)\" then field values are:$")
+    public void I_open_a_new_form_submission_for_then_field_values_are(String formName, List<FieldValue> values) throws Throwable {
+        driver.assertFieldValuesOnNewForm(formName, values);
+    }
 }

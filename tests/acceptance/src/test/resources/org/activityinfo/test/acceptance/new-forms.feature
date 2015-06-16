@@ -32,6 +32,22 @@ Feature: Partners in new form layout
       | End Date   |
       | Comments   |
 
+  @AI-1009
+  Scenario: Partner field
+    When I open the form designer for "Patient Visits" in database "Patient Registration"
+    Then reorder "Partner" designer field to position 2
+    Then "Partner" designer field is mandatory
+    Then change designer field "Partner" with:
+      | field       | value         |
+      | label       | Partner2      |
+      | description | Partner2 desc |
+    Then following fields should be visible in form designer:
+      | Partner2  |
+#    When I open a new form submission for "Patient Visits" then field values are:
+#      | field     | value   | controlType |
+#      | Partner2  | Default | radio       |
+
+
 #  @web @odk
 #  Scenario: Submitting a form with implicit user group
 #    And I have added a quantity field "Age"

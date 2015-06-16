@@ -23,6 +23,7 @@ package org.activityinfo.test.pageobject.bootstrap;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
@@ -48,7 +49,7 @@ public class BsFormPanel extends Form {
     }
 
     @Override
-    public FormItem findFieldByLabel(String labelText) {
+    public BsField findFieldByLabel(String labelText) {
         Optional<FluentElement> element = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).firstIfPresent();
         if (element.isPresent()) {
             return new BsField(element.get());
@@ -103,7 +104,16 @@ public class BsFormPanel extends Form {
         }
 
         private FluentElement input() {
-            return element.findElement(By.tagName("input"));
+            Optional<FluentElement> input = element.find().input().firstIfPresent();
+            if (input.isPresent()) {
+                return input.get();
+            }
+            Optional<FluentElement> textArea = element.find().textArea().firstIfPresent();
+            if (textArea.isPresent()) {
+                return textArea.get();
+            }
+
+            throw new AssertionError("Failed to locate input/textarea element.");
         }
 
         @Override
@@ -171,6 +181,11 @@ public class BsFormPanel extends Form {
             throw new UnsupportedOperationException();
         }
 
+        public boolean isRadioSelected(String label) {
+            FluentElement radio = element.find().label(withText(label)).precedingSibling().input().first();
+            Preconditions.checkState(radio.element().getAttribute("type").equals("radio"), "Element is not radio element");
+            return radio.element().isSelected();
+        }
 
     }
 }

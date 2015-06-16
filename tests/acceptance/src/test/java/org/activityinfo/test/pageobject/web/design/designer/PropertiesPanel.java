@@ -22,28 +22,22 @@ package org.activityinfo.test.pageobject.web.design.designer;
  */
 
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 /**
- * @author yuriyz on 06/12/2015.
+ * @author yuriyz on 06/15/2015.
  */
-public class FormDesignerPage {
-
-    public static final String DROP_TARGET_CLASS = "dragdrop-dropTarget";
+public class PropertiesPanel {
 
     private final FluentElement container;
 
-    public FormDesignerPage(FluentElement container) {
+    public PropertiesPanel(FluentElement container) {
         this.container = container;
     }
 
-    public DropPanel dropTarget() {
-        return new DropPanel(container.find().div(withClass(FormDesignerPage.DROP_TARGET_CLASS)).first());
-    }
-
-    public PropertiesPanel properties() {
-        return new PropertiesPanel(container.find().div(withClass("panel-heading")).
-                ancestor().div(withClass("panel")).first());
+    public BsFormPanel form() {
+        return new BsFormPanel(container.find().div(withClass("panel-body")).first());
     }
 }

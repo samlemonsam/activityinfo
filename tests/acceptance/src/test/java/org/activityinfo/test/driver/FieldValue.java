@@ -3,6 +3,7 @@ package org.activityinfo.test.driver;
 import com.google.common.base.Optional;
 import org.activityinfo.model.type.FieldTypeClass;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -15,6 +16,8 @@ public class FieldValue {
     private String field;
     private String value;
     private Optional<? extends FieldTypeClass> type = Optional.absent();
+    @Nullable
+    private String controlType;
 
     public FieldValue() {
     }
@@ -23,6 +26,13 @@ public class FieldValue {
         this.field = field;
         this.value = value;
     }
+
+    public FieldValue(String field, String value, String controlType) {
+        this.field = field;
+        this.value = value;
+        this.controlType = controlType;
+    }
+
 
     public FieldValue(String field, Double value) {
         this.field = field;
@@ -80,6 +90,14 @@ public class FieldValue {
 
     public Optional<? extends FieldTypeClass> getType() {
         return type;
+    }
+
+    public String getControlType() {
+        return controlType;
+    }
+
+    public void setControlType(String controlType) {
+        this.controlType = controlType;
     }
 
     public FieldValue setType(Optional<? extends FieldTypeClass> type) {

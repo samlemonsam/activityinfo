@@ -185,9 +185,15 @@ public class FluentElement {
         }
     }
 
-    public void dragAndDropBy(int pixelsToLeft, int pixelsDown) {
+    public void dragAndDropBy(int xOffset, int yOffset) {
         Actions actions = new Actions(webDriver);
-        actions.dragAndDropBy(element, pixelsToLeft, pixelsDown);
+        actions.dragAndDropBy(element, xOffset, yOffset);
+        actions.perform();
+    }
+
+    public void dragAndDrop(FluentElement dropElement) {
+        Actions actions = new Actions(webDriver);
+        actions.dragAndDrop(element, dropElement.element());
         actions.perform();
     }
 }

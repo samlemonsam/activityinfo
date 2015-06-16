@@ -271,4 +271,20 @@ public abstract class ApplicationDriver {
     public void assertDesignerFieldIsNotDeletable(String fieldLabel) {
         throw new PendingException();
     }
+
+    public void assertDesignerFieldReorder(String fieldLabel, int positionOnPanel) {
+        throw new PendingException();
+    }
+
+    public void assertDesignerFieldMandatory(String fieldLabel) {
+        throw new PendingException();
+    }
+
+    public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
+        throw new PendingException();
+    }
+
+    public void assertFieldValuesOnNewForm(String formName, List<FieldValue> values) {
+        throw new PendingException();
+    }
 }
