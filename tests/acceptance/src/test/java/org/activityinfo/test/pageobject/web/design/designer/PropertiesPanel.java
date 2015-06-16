@@ -40,4 +40,8 @@ public class PropertiesPanel {
     public BsFormPanel form() {
         return new BsFormPanel(container.find().div(withClass("panel-body")).first());
     }
+
+    public FluentElement getContainer() {
+        return container;
+    }
 }

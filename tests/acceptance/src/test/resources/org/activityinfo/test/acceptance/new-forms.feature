@@ -26,6 +26,11 @@ Feature: Partners in new form layout
       | Start Date |
       | End Date   |
       | Comments   |
+    Then relevance functionality is disabled in form designer for:
+      | Partner    |
+      | Start Date |
+      | End Date   |
+      | Comments   |
     When I open a new form submission for "Patient Visits" then following fields are visible:
       | Partner    |
       | Start Date |

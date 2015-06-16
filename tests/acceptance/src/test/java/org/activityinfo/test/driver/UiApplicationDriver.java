@@ -11,6 +11,8 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.model.IndicatorLink;
+import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
@@ -20,6 +22,7 @@ import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
+import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
 import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.design.designer.FormModal;
 import org.activityinfo.test.pageobject.web.entry.*;
@@ -765,6 +768,17 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void assertDesignerFieldIsNotDeletable(String fieldLabel) {
         Preconditions.checkState(!formDesigner().dropTarget().fieldByLabel(fieldLabel).isDeletable(),
                 "Field with label '" + fieldLabel +"' is deletable.");
+    }
+
+    public void assertDesignerFieldHasRelevanceFunctionality(String fieldLabel, boolean enabled) {
+        DesignerField designerField = formDesigner().dropTarget().fieldByLabel(fieldLabel);
+        designerField.element().clickWhenReady();
+        FluentElement relevanceElement = formDesigner().properties().getContainer().find().
+                label(XPathBuilder.containingText(I18N.CONSTANTS.relevance())).first();
+        if (relevanceElement.isDisplayed() != enabled) {
+            throw new AssertionError("Relevance functionality state is " + relevanceElement.isDisplayed() +
+                    " while it's expected to have it " + enabled + " for label: " + fieldLabel);
+        }
     }
 
     public void assertDesignerFieldMandatory(String fieldLabel) {

@@ -287,4 +287,8 @@ public abstract class ApplicationDriver {
     public void assertFieldValuesOnNewForm(String formName, List<FieldValue> values) {
         throw new PendingException();
     }
+
+    public void assertDesignerFieldHasRelevanceFunctionality(String fieldLabel, boolean enabled) {
+        throw new PendingException();
+    }
 }

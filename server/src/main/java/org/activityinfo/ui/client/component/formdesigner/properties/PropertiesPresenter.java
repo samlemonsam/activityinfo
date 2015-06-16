@@ -147,12 +147,13 @@ public class PropertiesPresenter {
         reset();
 
         final FormField formField = fieldWidgetContainer.getFormField();
+        boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId());
 
         view.setVisible(true);
         view.getRequiredGroup().setVisible(true);
         view.getReadOnlyGroup().setVisible(true);
         view.getVisibleGroup().setVisible(true);
-        view.getRelevanceGroup().setVisible(true);
+        view.getRelevanceGroup().setVisible(!isBuiltIn);
         view.getCodeGroup().setVisible(true);
 
         view.getLabel().setValue(Strings.nullToEmpty(formField.getLabel()));
@@ -161,7 +162,7 @@ public class PropertiesPresenter {
         view.getVisible().setValue(formField.isVisible());
         view.getCode().setValue(Strings.nullToEmpty(formField.getCode()));
 
-        setRelevanceState(formField, true);
+        setRelevanceState(formField, !isBuiltIn);
         validateCode(fieldWidgetContainer);
         validateLabel();
 

@@ -126,4 +126,11 @@ public class DesignSteps {
     public void change_designer_field_with(String fieldLabel, List<FieldValue> values) throws Throwable {
         driver.changeDesignerField(fieldLabel, values);
     }
+
+    @Then("^relevance functionality is disabled in form designer for:$")
+    public void relevance_functionality_is_disabled_in_form_designer_for(List<String> fieldLabels) throws Throwable {
+        for (String fieldLabel : fieldLabels) {
+            driver.assertDesignerFieldHasRelevanceFunctionality(fieldLabel, false);
+        }
+    }
 }
