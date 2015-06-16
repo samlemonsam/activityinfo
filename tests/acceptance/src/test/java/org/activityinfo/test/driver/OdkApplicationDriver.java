@@ -90,7 +90,13 @@ public class OdkApplicationDriver extends ApplicationDriver {
         formList.select(qualifiedFormName);
         formList.getSelected();
     }
-    
+
+    @Override
+    public void submitForm(String formName, List<FieldValue> values) throws Exception {
+        // Ignored for now!!
+        
+    }
+
     public List<String> queryFormList() {
         Client client = Client.create();
         if(currentUser != null) {
