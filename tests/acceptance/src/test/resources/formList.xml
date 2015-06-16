@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views>
+  <DecorView name="" label="" value="" ref="e58c41cd-d14b-31a8-e80b-008c0cfc9131" id="" shown="true">
+    <LinearLayout name="" label="" value="" ref="2a23d3a6-2466-9fc2-cc93-b15bfa11f09c" id="" shown="true">
+      <ActionBarContainer name="" label="" value="" ref="1a5cb6fb-3c81-dda6-7217-a46c2141a95d" id="action_bar_container"
+                          shown="true">
+        <ActionBarView name="" label="" value="" ref="5bdbb9e4-e15e-2d1a-3a14-a48e342b3061" id="action_bar"
+                       shown="true">
+          <LinearLayout name="" label="" value="" ref="42b953aa-bd59-f1ee-0c2b-4e743414fa6a" id="" shown="true">
+            <ImageView name="" label="" value="" ref="84d6d992-1ea9-4783-4044-3eb8a5d4131d" id="up" shown="false"/>
+            <LinearLayout name="" label="" value="" ref="82744954-1960-007f-e237-7258f62ba916" id="" shown="true">
+              <TextView name="" label="" value="ODK Collect &gt; Get Blank Form"
+                        ref="4d22e7a7-ce40-7c5a-b2cf-4afd2014b745" id="action_bar_title" shown="true"/>
+              <TextView name="" label="" value="" ref="374de6ae-eca1-b734-1ad0-4af1c4718a44" id="action_bar_subtitle"
+                        shown="false"/>
+            </LinearLayout>
+          </LinearLayout>
+          <HomeView name="Navigate home" label="" value="" ref="7b299ae9-dba6-994c-6c41-5a6a54180423" id=""
+                    shown="true">
+            <ImageView name="" label="" value="" ref="5fa4a471-b259-171b-e04b-37eea4596425" id="up" shown="false"/>
+            <ImageView name="" label="" value="" ref="5c39e48f-c850-1b35-2365-30ab014d0752" id="home" shown="true"/>
+          </HomeView>
+          <ActionMenuView name="" label="" value="" ref="a1354423-8897-83af-2612-6f32500550af" id="" shown="true"/>
+        </ActionBarView>
+        <ActionBarContextView name="" label="" value="" ref="85b04dab-5f4a-017f-9a1c-4cb7a046b0b1"
+                              id="action_context_bar" shown="false"/>
+      </ActionBarContainer>
+      <FrameLayout name="" label="" value="" ref="c991e0d4-096f-97f7-c026-193b62d8a1bc" id="content" shown="true">
+        <RelativeLayout name="" label="" value="" ref="b7a2e92c-6b88-9a97-5594-a255d7929832" id="" shown="true">
+          <LinearLayout name="" label="" value="" ref="82de6db4-ab79-ff74-147e-33fbc78ed28a" id="buttonholder"
+                        shown="true">
+            <Button name="" label="" value="Toggle All" ref="6d096cbb-c9db-3a4d-7c7f-33f16beba589" id="toggle_button"
+                    shown="true"/>
+            <Button name="" label="" value="Refresh" ref="ae886fa7-6eb7-89c1-447c-34137ed52c8d" id="refresh_button"
+                    shown="true"/>
+            <Button name="" label="" value="Get Selected" ref="abf10914-d547-eb5c-6d10-c25204e591f7" id="add_button"
+                    shown="true"/>
+          </LinearLayout>
+          <ListView name="" label="" value="" ref="10865fd8-db9a-40cf-cde7-94d16b15582c" id="list" shown="true">
+            <TwoItemMultipleChoiceView name="" label="" value="" ref="f6b9b8c7-84e1-96c1-8ab0-d47da652a22e" id=""
+                                       shown="true">
+              <TextView name="" label="" value="Birds" ref="d970f0eb-47a4-7bc7-ac8e-9137442b8e02" id="text1"
+                        shown="true"/>
+              <TextView name="" label="" value="" ref="c39beff2-6605-b6a0-148f-912be8886101" id="text3" shown="false"/>
+              <TextView name="" label="" value="ID: Birds" ref="0c7779e9-aee4-3282-7011-9bced4b256a9" id="text2"
+                        shown="true"/>
+              <CheckBox name="" label="" value="" ref="5b6ca609-67be-1a2e-b248-13a2a986206b" id="checkbox"
+                        shown="true"/>
+            </TwoItemMultipleChoiceView>
+            <TwoItemMultipleChoiceView name="" label="" value="" ref="1ba62e61-ca5d-4af7-d2cf-31182002e791" id=""
+                                       shown="true">
+              <TextView name="" label="" value="Cascading Select Form" ref="3b112e2b-3762-94ee-8c32-dcb8a01eab06"
+                        id="text1" shown="true"/>
+              <TextView name="" label="" value="" ref="247a70a8-368c-8f66-8c83-7e49b421214c" id="text3" shown="false"/>
+              <TextView name="" label="" value="Version: 2012072302 ID: CascadingSelect"
+                        ref="685c03d0-e0b2-25df-b28d-4acc76b31257" id="text2" shown="true"/>
+              <CheckBox name="" label="" value="" ref="64f143ed-f6a9-29f9-f5a7-4387d3a6b584" id="checkbox"
+                        shown="true"/>
+            </TwoItemMultipleChoiceView>
+            <TwoItemMultipleChoiceView name="" label="" value="" ref="2afee792-ef2b-7710-e4a6-3e810b682ead" id=""
+                                       shown="true">
+              <TextView name="" label="" value="Cascading Triple Select Form" ref="f7f76f22-b451-1fed-a210-46270137d55c"
+                        id="text1" shown="true"/>
+              <TextView name="" label="" value="" ref="c2c5cb8a-430c-4656-4c18-0081cef17f1a" id="text3" shown="false"/>
+              <TextView name="" label="" value="Version: 2012072301 ID: CascadingTripleSelect"
+                        ref="9d231b64-1fb4-1265-a5b6-04298c53672d" id="text2" shown="true"/>
+              <CheckBox name="" label="" value="" ref="de3a8c64-785f-9c03-18e0-507e9c6c1292" id="checkbox"
+                        shown="true"/>
+            </TwoItemMultipleChoiceView>
+            <TwoItemMultipleChoiceView name="" label="" value="" ref="942ccadd-5941-dc38-0f44-f1e9dec4573d" id=""
+                                       shown="true">
+              <TextView name="" label="" value="Forest Plot Survey" ref="4dfc5efb-b751-04c6-a6e3-271c9709e72f"
+                        id="text1" shown="true"/>
+              <TextView name="" label="" value="" ref="bba0358f-0f4c-5a34-cfdc-325751b5c686" id="text3" shown="false"/>
+              <TextView name="" label="" value="ID: Forest_1" ref="29c97064-c4e9-4b8d-b42d-19764aa09dae" id="text2"
+                        shown="true"/>
+              <CheckBox name="" label="" value="" ref="8fd9f30f-1a97-c4ad-7ae1-b10093f83d77" id="checkbox"
+                        shown="true"/>
+            </TwoItemMultipleChoiceView>
+            <TwoItemMultipleChoiceView name="" label="" value="" ref="212b24f1-f3a7-22f8-b039-10ab33736859" id=""
+                                       shown="true">
+              <TextView name="" label="" value="Geo Tagger v2" ref="0b97ae03-80a5-082f-f43f-8ce63c1f99ee" id="text1"
+                        shown="true"/>
+              <TextView name="" label="" value="" ref="8d5ec8aa-417e-f74f-205f-2561759d5ff2" id="text3" shown="false"/>
+              <TextView name="" label="" value="ID: geo_tagger_v2" ref="a6ea63d5-2402-9108-017c-4f5bcd6d2eb2" id="text2"
+                        shown="true"/>
+              <CheckBox name="" label="" value="" ref="f7fbad16-1c9d-4b38-aa96-b70deedfcc67" id="checkbox"
+                        shown="true"/>
+            </TwoItemMultipleChoiceView>
+            <TwoItemMultipleChoiceView name="" label="" value="" ref="df186b69-1584-861a-13ef-d8c89e3c704c" id=""
+                                       shown="true">
+              <TextView name="" label="" value="Hypertension Screening" ref="250f53c3-0149-e422-8794-596bbb5fdc76"
+                        id="text1" shown="true"/>
+              <TextView name="" label="" value="" ref="747cf492-0868-6ca2-82b7-1acc96000bda" id="text3" shown="false"/>
+              <TextView name="" label="" value="ID: hypertension" ref="fc41f9c4-03e8-da63-ccf0-8f560e770f45" id="text2"
+                        shown="true"/>
+              <CheckBox name="" label="" value="" ref="14d0e748-4307-7fe0-58a1-3d123a4f7567" id="checkbox"
+                        shown="true"/>
+            </TwoItemMultipleChoiceView>
+          </ListView>
+          <TextView name="" label="" value="Nothing available to display." ref="a75b1bdc-d8a1-a86e-f581-cd58db5adb77"
+                    id="empty" shown="false"/>
+        </RelativeLayout>
+      </FrameLayout>
+      <ActionBarContainer name="" label="" value="" ref="8d4de09f-7781-3e40-8fba-ed8fe67a0692" id="split_action_bar"
+                          shown="false"/>
+    </LinearLayout>
+  </DecorView>
+</views>
