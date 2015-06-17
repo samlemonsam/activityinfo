@@ -43,6 +43,7 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.MarginData;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Element;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.reports.Theme;
@@ -158,11 +159,20 @@ public class ChartOFCView extends ContentPanel implements ChartView {
     private YAxis createYAxis(PivotChartContent content, PivotTableData table) {
         YAxis ya = new YAxis();
         double maxValue = table.getRootRow().getMaxValue();
+        ya.setLabels(yAxisLabels(content, maxValue));
         ya.setRange(content.getYMin(), maxValue);
         ya.setSteps(content.getYStep());
         ya.setGridColour("eeffee");
         ya.setColour("009900");
         return ya;
+    }
+
+    private List<String> yAxisLabels(PivotChartContent content, double maxValue) {
+        List<String> labels = Lists.newArrayList();
+        for (double i = content.getYMin(); i < maxValue; i = i + content.getYStep()) {
+            labels.add(NumberFormat.getDecimalFormat().format(i));
+        }
+        return labels;
     }
 
     private XAxis createXAxis(List<PivotTableData.Axis> categories) {
@@ -238,7 +248,7 @@ public class ChartOFCView extends ContentPanel implements ChartView {
         sb.append("<br>");
         sb.append(category.flattenLabel());
         sb.append(": ");
-        sb.append(value);
+        sb.append(NumberFormat.getDecimalFormat().format(value));
         return sb.toString();
     }
 
