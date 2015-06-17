@@ -46,6 +46,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Element;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
 import org.activityinfo.legacy.shared.reports.Theme;
 import org.activityinfo.legacy.shared.reports.content.PivotChartContent;
 import org.activityinfo.legacy.shared.reports.content.PivotTableData;
@@ -248,7 +249,7 @@ public class ChartOFCView extends ContentPanel implements ChartView {
         sb.append("<br>");
         sb.append(category.flattenLabel());
         sb.append(": ");
-        sb.append(NumberFormat.getDecimalFormat().format(value));
+        sb.append(IndicatorNumberFormat.INSTANCE.format(value));
         return sb.toString();
     }
 
