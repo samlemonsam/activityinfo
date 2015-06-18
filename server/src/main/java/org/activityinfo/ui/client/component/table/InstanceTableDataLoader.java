@@ -44,6 +44,7 @@ import java.util.logging.Logger;
 public class InstanceTableDataLoader {
 
     private static final int PAGE_SIZE = 200;
+    private static final double LOAD_THRESHOLD_FRACTION = 0.65;
 
     private static final Logger LOGGER = Logger.getLogger(InstanceTableDataLoader.class.getName());
 
@@ -53,6 +54,7 @@ public class InstanceTableDataLoader {
 
     private int lastVerticalScrollPosition;
     private int instanceTotalCount = -1;
+    private QueryResult<Projection> prefetchedResult;
 
     public InstanceTableDataLoader(InstanceTable table) {
         this.table = table;
@@ -80,20 +82,32 @@ public class InstanceTableDataLoader {
             return;
         }
 
+
         int maxScrollTop = table.getTable().getOffsetHeight()
                 - event.getScrollAncestor().getOffsetHeight();
 
+//        GWT.log("scrollPos: " + lastVerticalScrollPosition +
+//                        ", maxScrollTop:" + maxScrollTop +
+//                        ", tableHeight:" + table.getTable().getOffsetHeight() +
+//                        ", scrollHeight: " + event.getScrollAncestor().getOffsetHeight() +
+//                        ", threshold: " + maxScrollTop * LOAD_THRESHOLD_FRACTION
+//        );
+
         // if near the end then load data
-        if (lastVerticalScrollPosition >= (maxScrollTop - 20)) {
+        if (lastVerticalScrollPosition >= (maxScrollTop * LOAD_THRESHOLD_FRACTION)) {
             loadMore();
         }
     }
 
     public void loadMore() {
+        loadMore(false);
+    }
+
+    public void loadMore(boolean isPrefetchCall) {
         if (!isAllLoaded()) {
             int offset = offset();
             final int countToLoad = Math.min(PAGE_SIZE, instanceTotalCount - offset);
-            load(offset, countToLoad);
+            load(offset, countToLoad, isPrefetchCall);
         }
     }
 
@@ -114,12 +128,20 @@ public class InstanceTableDataLoader {
     /**
      * Loads data and append to table.
      *
-     * @param offset offset
-     * @param countToLoad  count
+     * @param offset      offset
+     * @param countToLoad count
      */
-    private void load(final int offset, int countToLoad) {
-        LOGGER.log(Level.FINE, "Loading instances... offset = " +
-                offset + ", count = " + countToLoad + ", totalCount = " + instanceTotalCount +", fields = " + fields);
+    private void load(final int offset, int countToLoad, final boolean isPrefetchCall) {
+
+        if (!isPrefetchCall && prefetchedResult != null) {
+            LOGGER.log(Level.FINE, "Pre-fetched instances applied. Pre-fetch again.");
+
+            applyQueryResult(prefetchedResult);
+            prefetchedResult = null;
+
+            prefetch();
+            return;
+        }
 
         if (table.getLoadingIndicator().isLoading()) {
             LOGGER.log(Level.FINE, "Loading already in progress. Skip!");
@@ -130,6 +152,9 @@ public class InstanceTableDataLoader {
             LOGGER.log(Level.FINE, "All data are already loaded.");
             return;
         }
+
+        LOGGER.log(Level.FINE, "Loading instances... offset = " +
+                offset + ", count = " + countToLoad + ", totalCount = " + instanceTotalCount + ", fields = " + fields);
 
         table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, I18N.CONSTANTS.loading());
 
@@ -143,16 +168,32 @@ public class InstanceTableDataLoader {
             @Override
             public void onSuccess(QueryResult<Projection> result) {
                 table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADED);
-                tableDataProvider.getList().addAll(result.getProjections());
 
-                InstanceTableDataLoader.this.instanceTotalCount = result.getTotalCount();
+                if (isPrefetchCall) { // just save prefetch and exit
+                    prefetchedResult = result;
+                    return;
+                }
+
+                applyQueryResult(result);
+
+                prefetch();
             }
         });
     }
 
+    private void applyQueryResult(QueryResult<Projection> result) {
+        tableDataProvider.getList().addAll(result.getProjections());
+
+        InstanceTableDataLoader.this.instanceTotalCount = result.getTotalCount();
+    }
+
+    private void prefetch() {
+        loadMore(true);
+    }
+
     public void reload() {
         tableDataProvider.getList().clear();
-        load(0, PAGE_SIZE);
+        load(0, PAGE_SIZE, false);
     }
 
     public Set<FieldPath> getFields() {
