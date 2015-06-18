@@ -39,11 +39,12 @@ public class InstanceTable implements IsWidget {
     private final ResourceLocator resourceLocator;
 
     private final CellTable<Projection> table;
-    private final TableLoadingIndicator loadingIndicator;
     private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
     private final List<TableHeaderAction> headerActions;
     private final InstanceTableView tableView;
     private final InstanceTableDataLoader dataLoader;
+    private final TableLoadingIndicator loadingIndicator = new TableLoadingIndicator()
+            .setHideOnSuccess(true);
 
     private Criteria criteria;
     private FormClass rootFormClass;
@@ -76,18 +77,15 @@ public class InstanceTable implements IsWidget {
                 table.redrawHeaders();
             }
         });
+
         dataLoader = new InstanceTableDataLoader(this);
 
-
-        // Create our loading indicator which can also show failure
-        loadingIndicator = new TableLoadingIndicator();
         loadingIndicator.getRetryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                reload();
+                dataLoader.loadMore();
             }
         });
-        table.setLoadingIndicator(loadingIndicator.asWidget());
 
         headerActions = createHeaderActions();
 
@@ -100,6 +98,7 @@ public class InstanceTable implements IsWidget {
         actions.add(new EditHeaderAction(this));
         actions.add(new ImportHeaderAction(this));
         actions.add(new ChooseColumnsHeaderAction(this));
+        actions.add(new ShowAllAction(this));
         return actions;
     }
 
@@ -123,6 +122,10 @@ public class InstanceTable implements IsWidget {
         while (table.getColumnCount() > 0) {
             table.removeColumn(0);
         }
+    }
+
+    public InstanceTableDataLoader getDataLoader() {
+        return dataLoader;
     }
 
     public void reload() {

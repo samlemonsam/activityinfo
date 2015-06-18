@@ -3,6 +3,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:table="urn:import:org.activityinfo.ui.client.component.table"
              xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+             xmlns:loading="urn:import:org.activityinfo.ui.client.widget.loading"
         >
 
   <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
@@ -22,12 +23,6 @@
 
     <table:InstanceTable ui:field="table"/>
 
-    <g:Button ui:field="loadMoreButton" styleName="btn btn-default btn-block" enabled="false"
-              text="{i18n.loadMore}"/>
-    <g:HTML ui:field="loadFailureMessageContainer">
-      <div class="text-warning">
-        <ui:text from='{i18n.failedToLoadEntries}'/>
-      </div>
-    </g:HTML>
+    <loading:TableLoadingIndicator ui:field="loadingIndicator"/>
   </g:HTMLPanel>
 </ui:UiBinder>

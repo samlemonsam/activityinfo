@@ -23,13 +23,12 @@ package org.activityinfo.ui.client.component.table;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.Projection;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.widget.CellTable;
@@ -44,52 +43,7 @@ import java.util.logging.Logger;
  */
 public class InstanceTableDataLoader {
 
-    private static final int PAGE_SIZE = 100;
-
-    public static interface DataLoadHandler extends EventHandler {
-
-        void onLoad(DataLoadEvent event);
-    }
-
-    public static class DataLoadEvent extends GwtEvent<DataLoadHandler> {
-
-        public static final Type<DataLoadHandler> TYPE = new Type<>();
-
-        private final int totalCount;
-        private final int loadedDataCount;
-        private boolean failed = false;
-
-        public DataLoadEvent(int totalCount, int loadedDataCount) {
-            this.totalCount = totalCount;
-            this.loadedDataCount = loadedDataCount;
-        }
-
-        public int getTotalCount() {
-            return totalCount;
-        }
-
-        public int getLoadedDataCount() {
-            return loadedDataCount;
-        }
-
-        public boolean isFailed() {
-            return failed;
-        }
-
-        public void setFailed(boolean failed) {
-            this.failed = failed;
-        }
-
-        @Override
-        public Type<DataLoadHandler> getAssociatedType() {
-            return TYPE;
-        }
-
-        @Override
-        protected void dispatch(DataLoadHandler handler) {
-            handler.onLoad(this);
-        }
-    }
+    private static final int PAGE_SIZE = 200;
 
     private static final Logger LOGGER = Logger.getLogger(InstanceTableDataLoader.class.getName());
 
@@ -103,15 +57,21 @@ public class InstanceTableDataLoader {
     public InstanceTableDataLoader(InstanceTable table) {
         this.table = table;
         tableDataProvider.addDataDisplay(table.getTable());
+
+        // infinite scroll loading
         table.getTable().getEventBus().addHandler(CellTable.ScrollEvent.TYPE, new CellTable.ScrollHandler() {
             @Override
             public void onScroll(CellTable.ScrollEvent event) {
-                handleScroll(event);
+                loadOnScroll(event);
             }
         });
     }
 
-    private void handleScroll(CellTable.ScrollEvent event) {
+    private void loadOnScroll(CellTable.ScrollEvent event) {
+        if (table.getLoadingIndicator().isLoading()) {
+            return; // skip if load is already in progress
+        }
+
         final int oldScrollPos = lastVerticalScrollPosition;
         lastVerticalScrollPosition = event.getVerticalScrollPosition();
 
@@ -124,54 +84,68 @@ public class InstanceTableDataLoader {
                 - event.getScrollAncestor().getOffsetHeight();
 
         // if near the end then load data
-        if (lastVerticalScrollPosition >= maxScrollTop) {
-            // AI-524: as pointed in issue for now we will put "Load more" button instead of
-            // loading data on scrolling
-            // loadMore();
+        if (lastVerticalScrollPosition >= (maxScrollTop - 20)) {
+            loadMore();
         }
     }
 
     public void loadMore() {
-        final int offset = tableDataProvider.getList().size();
-        // load data only if offset is less then total count (and totalCount is initialized)
-        if (offset < instanceTotalCount && instanceTotalCount != -1) {
-            final int count = Math.min(PAGE_SIZE, instanceTotalCount - offset);
-            load(offset, count);
+        if (!isAllLoaded()) {
+            int offset = offset();
+            final int countToLoad = Math.min(PAGE_SIZE, instanceTotalCount - offset);
+            load(offset, countToLoad);
         }
     }
 
 
-    private Promise<QueryResult<Projection>> query(int offset, int count) {
-        table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, null);
-        InstanceQuery query = new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, count);
+    private Promise<QueryResult<Projection>> query(int offset, int countToLoad) {
+        InstanceQuery query = new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, countToLoad);
         return table.getResourceLocator().queryProjection(query);
+    }
+
+    public boolean isAllLoaded() {
+        return offset() >= instanceTotalCount && instanceTotalCount != -1;
+    }
+
+    private int offset() {
+        return tableDataProvider.getList().size();
     }
 
     /**
      * Loads data and append to table.
      *
      * @param offset offset
-     * @param count  count
+     * @param countToLoad  count
      */
-    private void load(int offset, int count) {
+    private void load(final int offset, int countToLoad) {
         LOGGER.log(Level.FINE, "Loading instances... offset = " +
-                offset + ", count = " + count + ", fields = " + fields);
-        query(offset, count).then(new AsyncCallback<QueryResult<Projection>>() {
+                offset + ", count = " + countToLoad + ", totalCount = " + instanceTotalCount +", fields = " + fields);
+
+        if (table.getLoadingIndicator().isLoading()) {
+            LOGGER.log(Level.FINE, "Loading already in progress. Skip!");
+            return;
+        }
+
+        if (isAllLoaded()) {
+            LOGGER.log(Level.FINE, "All data are already loaded.");
+            return;
+        }
+
+        table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, I18N.CONSTANTS.loading());
+
+        query(offset, countToLoad).then(new AsyncCallback<QueryResult<Projection>>() {
             @Override
             public void onFailure(Throwable caught) {
                 LOGGER.log(Level.SEVERE, "Failed to load instances. fields = " + fields, caught);
                 table.getLoadingIndicator().onLoadingStateChanged(LoadingState.FAILED, caught);
-
-                final DataLoadEvent dataLoadEvent = new DataLoadEvent(instanceTotalCount, tableDataProvider.getList().size());
-                dataLoadEvent.setFailed(true);
-                table.getTable().getEventBus().fireEvent(dataLoadEvent);
             }
 
             @Override
             public void onSuccess(QueryResult<Projection> result) {
+                table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADED);
                 tableDataProvider.getList().addAll(result.getProjections());
-                instanceTotalCount = result.getTotalCount();
-                table.getTable().getEventBus().fireEvent(new DataLoadEvent(instanceTotalCount, tableDataProvider.getList().size()));
+
+                InstanceTableDataLoader.this.instanceTotalCount = result.getTotalCount();
             }
         });
     }
@@ -183,5 +157,9 @@ public class InstanceTableDataLoader {
 
     public Set<FieldPath> getFields() {
         return fields;
+    }
+
+    public void loadAll() {
+        load(offset(), Integer.MAX_VALUE);
     }
 }

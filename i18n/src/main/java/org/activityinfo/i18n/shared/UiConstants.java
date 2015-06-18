@@ -3710,5 +3710,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Warning")
     String warning();
+
+    @DefaultStringValue("Show all")
+    String showAll();
 }
 
