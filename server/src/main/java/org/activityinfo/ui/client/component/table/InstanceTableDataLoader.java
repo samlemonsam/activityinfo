@@ -159,7 +159,4 @@ public class InstanceTableDataLoader {
         return fields;
     }
 
-    public void loadAll() {
-        load(offset(), Integer.MAX_VALUE);
-    }
 }
