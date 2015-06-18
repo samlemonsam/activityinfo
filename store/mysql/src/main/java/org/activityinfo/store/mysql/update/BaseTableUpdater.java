@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.update;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -11,6 +10,7 @@ import org.activityinfo.store.mysql.mapping.FieldMapping;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +29,8 @@ public class BaseTableUpdater {
     private List<Object> parameters = new ArrayList<>();
 
     private final int siteId;
+    
+    private boolean deleted = false;
 
     public BaseTableUpdater(TableMapping mapping, ResourceId siteId) {
         this.mapping = mapping;
@@ -45,10 +47,14 @@ public class BaseTableUpdater {
             updateValue(fieldMapping, value);
         }
     }
+    
+    public void delete() {
+        deleted = true;
+    }
 
     private void updateValue(FieldMapping fieldMapping, FieldValue value) {
         for (String column : fieldMapping.getColumnNames()) {
-            updates.add(format("SET %s = ?", column));
+            updates.add(format("%s = ?", column));
         }
         updateParameters.addAll(fieldMapping.getValueExtractor().toParameters(value));
     }
@@ -58,7 +64,7 @@ public class BaseTableUpdater {
                 "Field %s ('%s') is required and cannot be set to null");
 
         for (String column : fieldMapping.getColumnNames()) {
-            updates.add(format("SET %s = NULL", column));
+            updates.add(format("%s = NULL", column));
         }
     }
 
@@ -78,20 +84,29 @@ public class BaseTableUpdater {
     }
 
     public void executeUpdates(QueryExecutor executor) {
-        StringBuilder sql = new StringBuilder("UPDATE ").append(mapping.getBaseFromClause()).append(" ");
+        StringBuilder sql = new StringBuilder("UPDATE ").append(mapping.getBaseTable()).append(" ");
         appendSetClauses(sql);
         appendWhereClause(sql);
-        
+
         System.out.println(sql.toString());
         System.out.println(parameters.toString());
 
         int rowsUpdated = executor.update(sql.toString(), parameters);
-        
+
         Preconditions.checkState(rowsUpdated == 1);
     }
 
     private void appendSetClauses(StringBuilder sql) {
-        Joiner.on(", ").appendTo(sql, updates);
+        sql.append(" SET ");
+        if(deleted) {
+            sql.append(" dateDeleted = ?");
+            parameters.add(new Date());
+        } else {
+            sql.append(" dateDeleted = NULL");
+        }
+        for (String update : updates) {
+            sql.append(", ").append(update);
+        }
         parameters.addAll(updateParameters);
     }
 

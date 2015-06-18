@@ -5,8 +5,8 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.SymbolNotFoundException;
-import org.activityinfo.model.expr.eval.SymbolBinding;
 import org.activityinfo.model.expr.eval.FormTreeSymbolTable;
+import org.activityinfo.model.expr.eval.SymbolBinding;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -49,7 +49,6 @@ public class QueryEvaluator {
             return expr.accept(columnVisitor);
 
         } catch(SymbolNotFoundException e) {
-
             throw new SymbolNotFoundException(expression);
         }
     }

@@ -41,7 +41,7 @@ public class FeatureSourceCatalog implements CollectionCatalog {
     }
     
     @Override
-    public ResourceCollection getCollection(ResourceId resourceId) {
+    public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
 
         FeatureSourceCollection accessor = sources.get(resourceId);
         if(accessor == null) {

@@ -68,6 +68,10 @@ public class SiteCollection implements ResourceCollection {
         baseTable.addValue("DateCreated", new Date());
         baseTable.addValue("DateEdited", new Date());
 
+        if(!activity.hasLocationType()) {
+            baseTable.addValue("locationId", activity.getNullaryLocationId());
+        }
+        
         IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getResourceId());
         AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getResourceId());
 
@@ -92,18 +96,22 @@ public class SiteCollection implements ResourceCollection {
 
     @Override
     public void update(ResourceUpdate update) {
-    
         BaseTableUpdater baseTable = new BaseTableUpdater(baseMapping, update.getResourceId());
         IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getResourceId());
         AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getResourceId());
 
-        for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
-            if(change.getKey().getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
-                indicatorValues.update(change.getKey(), change.getValue());
-            } else if(change.getKey().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
-                attributeValues.update(change.getKey(), change.getValue());
-            } else {
-                baseTable.update(change.getKey(), change.getValue());
+        if(update.isDeleted()) {
+            baseTable.delete();
+        } else {
+
+            for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
+                if (change.getKey().getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
+                    indicatorValues.update(change.getKey(), change.getValue());
+                } else if (change.getKey().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
+                    attributeValues.update(change.getKey(), change.getValue());
+                } else {
+                    baseTable.update(change.getKey(), change.getValue());
+                }
             }
         }
         try {

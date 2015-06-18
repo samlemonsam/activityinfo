@@ -62,7 +62,7 @@ public class MySqlCatalogIntegrationTest {
         FormTree formTree = new FormTreeBuilder(catalogProvider).queryTree(activityFormClass(33));
         FormTreePrettyPrinter.print(formTree);
 
-        FormClass formClass = catalogProvider.getCollection(activityFormClass(33)).getFormClass();
+        FormClass formClass = catalogProvider.getCollection(activityFormClass(33)).get().getFormClass();
         for(FormField field : formClass.getFields()) {
 //            System.out.println(
 //                    field.getId() + " " +

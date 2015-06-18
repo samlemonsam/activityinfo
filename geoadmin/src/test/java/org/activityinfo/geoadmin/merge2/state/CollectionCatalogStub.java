@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.state;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Resource;
@@ -17,7 +18,7 @@ public class CollectionCatalogStub implements CollectionCatalog {
     
     
     @Override
-    public ResourceCollection getCollection(ResourceId resourceId) {
+    public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
         return Preconditions.checkNotNull(map.get(resourceId));
     }
 

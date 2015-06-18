@@ -1,12 +1,12 @@
 package org.activityinfo.geoadmin.merge2.state;
 
+import com.google.common.base.Optional;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
@@ -67,7 +67,7 @@ public class ResourceStoreStub implements ResourceStore {
     private class MergedCatalog implements CollectionCatalog {
 
         @Override
-        public ResourceCollection getCollection(ResourceId resourceId) {
+        public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
             if (testCatalog.contains(resourceId)) {
                 return testCatalog.getCollection(resourceId);
             } else {
@@ -76,9 +76,10 @@ public class ResourceStoreStub implements ResourceStore {
         }
 
         @Override
-        public Resource getResource(ResourceId resourceId) {
+        public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
             throw new UnsupportedOperationException();
         }
+
 
         @Override
         public FormClass getFormClass(ResourceId resourceId) {

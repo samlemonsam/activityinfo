@@ -39,6 +39,9 @@
                 name="Health Center" reuse="1"/>
   <locationType locationTypeId="3" countryId="1" name="Territorie"
                 reuse="1" BoundAdminLevelId="2"/>
+  
+  <locationType locationTypeId="9999" countryId="1" name="Country" reuse="1"/>
+  <location locationId="9999" locationTypeId="9999" name="RDC" X="0" Y="0" timeEdited="0"/>
 
   <adminEntity adminLevelId="1" adminEntityId="1" name="Kinshasa"
                code="10" x1="0" y1="0" x2="0" y2="0"/>
@@ -480,4 +483,9 @@
         DateEdited="2009-02-01" timeEdited="660"/>
 
 
+  <activity activityId="4000" locationTypeId="9999" name="Advocacy" databaseId="1"
+      reportingFrequency="0" allowEdit="0"
+      published="0"
+      sortOrder="999"/>
+  
 </dataset>

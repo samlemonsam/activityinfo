@@ -41,6 +41,7 @@ import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.collections.CountryCollection;
+import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -169,8 +170,11 @@ public class RootResource {
             @Override
             public Response execute(CollectionCatalog catalog) {
                 Updater updater = new Updater(catalog);
-                updater.execute(jsonElement.getAsJsonObject());
-                
+                try {
+                    updater.execute(jsonElement.getAsJsonObject());
+                } catch (InvalidUpdateException e) {
+                    throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+                }
                 return Response.ok().build();
             }
         });

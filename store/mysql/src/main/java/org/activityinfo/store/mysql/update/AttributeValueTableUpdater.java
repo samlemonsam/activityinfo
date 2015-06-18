@@ -66,7 +66,7 @@ public class AttributeValueTableUpdater {
         if(idSet.size() == 1) {
             return " = " + Iterables.getOnlyElement(idSet);
         } else {
-            return " IN (" + Joiner.on(", ").join(idSet);
+            return " IN (" + Joiner.on(", ").join(idSet) + ")";
         }
     }
 }

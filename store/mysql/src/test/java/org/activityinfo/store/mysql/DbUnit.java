@@ -26,16 +26,18 @@ public class DbUnit {
     private static final String USERNAME_PROPERTY = "testDatabaseUsername";
     private static final String URL_PROPERTY = "testDatabaseUrl";
 
-    private Connection connection;
+    private static Connection connection;
 
     public void openDatabase() throws ClassNotFoundException, SQLException {
-        String url = Preconditions.checkNotNull(System.getProperty(URL_PROPERTY,
-                "jdbc:mysql://127.0.0.1:3306/aitest_1?user=root&password=root&zeroDateTimeBehavior=convertToNull&useUnicode=true"));
-        String username = Preconditions.checkNotNull(System.getProperty(USERNAME_PROPERTY, "root"), USERNAME_PROPERTY);
-        String password = Preconditions.checkNotNull(System.getProperty(PASSWORD_PROPERTY, "root"), PASSWORD_PROPERTY);
+        if(connection == null) {
+            String url = Preconditions.checkNotNull(System.getProperty(URL_PROPERTY,
+                    "jdbc:mysql://127.0.0.1:3306/aitest_1?user=root&password=root&zeroDateTimeBehavior=convertToNull&useUnicode=true"));
+            String username = Preconditions.checkNotNull(System.getProperty(USERNAME_PROPERTY, "root"), USERNAME_PROPERTY);
+            String password = Preconditions.checkNotNull(System.getProperty(PASSWORD_PROPERTY, "root"), PASSWORD_PROPERTY);
 
-        Class.forName("com.mysql.jdbc.Driver");
-        this.connection = DriverManager.getConnection(url, username, password);
+            Class.forName("com.mysql.jdbc.Driver");
+            connection = DriverManager.getConnection(url, username, password);
+        }
     }
 
     public void dropAllRows() throws SQLException {
@@ -76,6 +78,9 @@ public class DbUnit {
 
             @Override
             public int update(String sql, List<?> parameters) {
+                
+                System.out.println(sql);
+                
                 try {
                     PreparedStatement statement = connection.prepareStatement(sql);
                     for (int i = 0; i < parameters.size(); ++i) {

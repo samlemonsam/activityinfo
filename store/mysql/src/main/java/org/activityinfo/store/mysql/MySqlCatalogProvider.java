@@ -34,17 +34,17 @@ public class MySqlCatalogProvider {
     public CollectionCatalog openCatalog(final QueryExecutor executor) {
         return new CollectionCatalog() {
             @Override
-            public ResourceCollection getCollection(ResourceId resourceId) {
+            public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
                 for(CollectionProvider mapping : mappings) {
                     if(mapping.accept(resourceId)) {
                         try {
-                            return mapping.getAccessor(executor, resourceId);
+                            return Optional.of(mapping.getAccessor(executor, resourceId));
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
                         }
                     }
                 }
-                throw new IllegalArgumentException("no such collection: " + resourceId);
+                return Optional.absent();
             }
 
             @Override
@@ -53,7 +53,7 @@ public class MySqlCatalogProvider {
                     try {
                         Optional<ResourceId> collectionId = mapping.lookupCollection(executor, resourceId);
                         if(collectionId.isPresent()) {
-                            return Optional.of(getCollection(collectionId.get()));
+                            return getCollection(collectionId.get());
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -65,7 +65,7 @@ public class MySqlCatalogProvider {
             @Override
             public FormClass getFormClass(ResourceId formClassId) {
                 LOGGER.info("Requesting formClass " + formClassId);
-                return getCollection(formClassId).getFormClass();
+                return getCollection(formClassId).get().getFormClass();
             }
         };
     }

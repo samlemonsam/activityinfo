@@ -51,7 +51,7 @@ public class CollectionScanBatch {
     private CollectionScan getTable(FormClass formClass) {
         CollectionScan scan = tableMap.get(formClass.getId());
         if(scan == null) {
-            scan = new CollectionScan(store.getCollection(formClass.getId()), columnCache);
+            scan = new CollectionScan(store.getCollection(formClass.getId()).get(), columnCache);
             tableMap.put(formClass.getId(), scan);
         }
         return scan;

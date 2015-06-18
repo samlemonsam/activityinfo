@@ -117,6 +117,7 @@ public class IndicatorValueTableUpdater {
     }
 
     private int queryReportingPeriod(QueryExecutor executor) throws SQLException {
+        
         try(ResultSet rs = executor.query("SELECT ReportingPeriodId FROM reportingperiod WHERE SiteId = " + siteId)) {
             if(!rs.next()) {
                 throw new IllegalStateException("ReportingPeriod does not exist for site " + siteId);
@@ -127,5 +128,6 @@ public class IndicatorValueTableUpdater {
             }
             return reportingPeriodId;
         }
+        
     }
 }

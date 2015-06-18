@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.mapping;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -10,9 +11,7 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class TableMapping {
@@ -57,6 +56,13 @@ public class TableMapping {
         return baseFilter;
     }
     
+    public void delete(QueryExecutor executor) {
+        String sql = String.format("UPDATE %s SET dateDeleted = ?", getBaseTable());
+        int rowsUpdated = executor.update(sql, Arrays.asList(new Date()));
+
+        Preconditions.checkState(rowsUpdated == 1);
+    }
+    
     public boolean queryFields(QueryExecutor executor, Resource resource) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
@@ -78,8 +84,6 @@ public class TableMapping {
            .append(" WHERE ")
                 .append(primaryKey.getColumnName()).append("=")
                 .append(CuidAdapter.getLegacyIdFromCuid(resource.getId()));
-        
-        System.out.println(sql.toString());
 
         try(ResultSet rs = executor.query(sql.toString())) {
             if(rs.next()) {

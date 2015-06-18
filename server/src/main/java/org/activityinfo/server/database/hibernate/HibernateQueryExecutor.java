@@ -31,6 +31,7 @@ public class HibernateQueryExecutor  {
     public <T> T doWork(final StoreSession<T> session) {
         final List<T> collector = Lists.newArrayList();
         HibernateEntityManager hem = (HibernateEntityManager) entityManager.get();
+        hem.getTransaction().begin();
         hem.getSession().doWork(new Work() {
             @Override
             public void execute(Connection connection) throws SQLException {
@@ -39,6 +40,7 @@ public class HibernateQueryExecutor  {
                 collector.add(session.execute(catalog));
             }
         });
+        hem.getTransaction().commit();
         return collector.get(0);
     }
 
@@ -61,12 +63,16 @@ public class HibernateQueryExecutor  {
 
         @Override
         public int update(String sql, List<?> parameters) {
+            
+            System.out.println(sql);
+            
             try {
                 PreparedStatement statement = connection.prepareStatement(sql);
                 for (int i = 0; i < parameters.size(); i++) {
                     statement.setObject(i + 1, parameters.get(i));
                 }
-                return statement.executeUpdate(sql);
+                return statement.executeUpdate();
+                
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

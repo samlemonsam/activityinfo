@@ -11,6 +11,7 @@ import java.util.Map;
 public class ResourceUpdate {
     
     private ResourceId resourceId;
+    private boolean deleted = false;
     private Map<ResourceId, FieldValue> changedFieldValues = new HashMap<>();
 
     public void setResourceId(ResourceId resourceId) {
@@ -27,5 +28,13 @@ public class ResourceUpdate {
 
     public Map<ResourceId, FieldValue> getChangedFieldValues() {
         return changedFieldValues;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

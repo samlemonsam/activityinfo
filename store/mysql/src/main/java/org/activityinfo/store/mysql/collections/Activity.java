@@ -113,6 +113,14 @@ public class Activity {
         return !isNullLocationType();
     }
 
+    public int getNullaryLocationId() {
+        // This is nasty hack to allow for activities without location types.
+        // Each country has one "nullary" location type called "Country"
+        // Each of these location types has exactly one location instance, with the same id.
+        return locationTypeId;
+    }
+
+
     private boolean isNullLocationType() {
         return "Country".equals(locationTypeName) && locationTypeId != 20301;
     }

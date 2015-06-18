@@ -1,61 +1,47 @@
 package org.activityinfo.store.mysql;
 
-import com.google.common.io.Resources;
 import com.google.gson.JsonObject;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.collections.CountryCollection;
 import org.activityinfo.store.mysql.collections.DatabaseCollection;
-import org.activityinfo.store.query.impl.ColumnCache;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
 
 
-public class MySqlCatalogTest {
+public class MySqlCatalogTest extends AbstractMySqlTest {
 
     public static final int CATASTROPHE_NATURELLE_ID = 1;
-    private static DbUnit dbunit;
-    private static ColumnSetBuilder executor;
-    private ColumnSet columnSet;
-    private static CollectionCatalog catalogProvider;
-
+ 
     @BeforeClass
-    public static void setup() throws Throwable {
-        System.out.println("Initializing Locale...");
-        LocaleProxy.initialize();
-
-        System.out.println("Running setup...");
-        dbunit = new DbUnit();
-        dbunit.openDatabase();
-        dbunit.dropAllRows();
-        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "sites-simple1.db.xml"));
-        catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        executor = new ColumnSetBuilder(catalogProvider, ColumnCache.NULL);
+    public static void initDatabase() throws Throwable {
+        resetDatabase();
     }
-
+    
     @Test
     public void testCountry() {
         query(CountryCollection.FORM_CLASS_ID, "label", "code");
@@ -122,24 +108,6 @@ public class MySqlCatalogTest {
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
     }
 
-    @Test
-    public void testSiteCreate() {
-        
-        JsonObject changeObject = new JsonObject();
-        changeObject.addProperty("@id", CuidAdapter.generateSiteCuid().asString());
-        changeObject.addProperty("@class", CuidAdapter.activityFormClass(1).asString());
-        changeObject.addProperty("partner", partnerInstanceId(1).asString());
-        changeObject.addProperty("date1", "2015-01-01");
-        changeObject.addProperty("date2", "2015-01-01");
-        changeObject.addProperty("BENE", 45000);
-        changeObject.addProperty("location", locationInstanceId(3).asString());
-        
-        Updater updater = new Updater(catalogProvider);
-        updater.executeChange(changeObject);
-
-        query(CuidAdapter.activityFormClass(1), "_id", "partner.label", "BENE");
-        
-    }
     
     @Test
     public void testSingleSiteResource() throws IOException {
@@ -159,7 +127,19 @@ public class MySqlCatalogTest {
         assertThat(column("partner"), hasValues(partnerInstanceId(2), partnerInstanceId(1), partnerInstanceId(2)));
         assertThat(column("BENE"), hasValues(900, 3600, 10000));
         assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
+    }
+    
+    @Test
+    public void siteFormClassWithNullaryLocations() {
 
+        FormClass formClass = catalogProvider.getCollection(activityFormClass(ADVOCACY)).get().getFormClass();
+       
+        // Make a list of field codes
+        Set<String> codes = new HashSet<>();
+        for (FormField formField : formClass.getFields()) {
+            codes.add(formField.getCode());
+        }
+        assertThat(codes, not(hasItem("location")));
     }
 
     @Test
@@ -188,22 +168,5 @@ public class MySqlCatalogTest {
         query(CuidAdapter.activityFormClass(1), "_id", "q");
     }
 
-    private void query(ResourceId formClassId, String... fields) {
-        QueryModel queryModel = new QueryModel(formClassId);
-        queryModel.selectResourceId().as("_id");
-        for(String field : fields) {
-            queryModel.selectExpr(field).setId(field);
-        }
-        columnSet = executor.build(queryModel);
-
-        for(String field : fields) {
-            System.out.println(field + ": " + column(field));
-        }
-    }
-    
-    
-    private ColumnView column(String column) {
-        return columnSet.getColumnView(column);
-    }
 
 }
