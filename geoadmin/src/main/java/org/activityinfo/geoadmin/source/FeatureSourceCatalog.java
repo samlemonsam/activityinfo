@@ -1,12 +1,13 @@
 package org.activityinfo.geoadmin.source;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.ResourceCollection;
 import org.geotools.data.shapefile.ShapefileDataStore;
 
 import java.io.File;
@@ -59,6 +60,11 @@ public class FeatureSourceCatalog implements CollectionCatalog {
             }
         }
         return accessor;
+    }
+
+    @Override
+    public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

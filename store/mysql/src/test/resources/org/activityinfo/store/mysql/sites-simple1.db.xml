@@ -320,6 +320,8 @@
         DateEdited="2009-02-01" timeEdited="3" ProjectId="1" Comments="He said 'booyah'"/>
   <attributeValue siteId="1" attributeId="1" value="0"/>
   <attributeValue siteId="1" attributeId="2" value="0"/>
+  <attributeValue siteId="1" attributeId="3" value="1"/>
+
 
   <indicator indicatorId="12451" aggregation="0" name="calculated" sortOrder="5" 
              type="QUANTITY"

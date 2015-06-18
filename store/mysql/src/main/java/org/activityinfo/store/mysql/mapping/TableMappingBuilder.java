@@ -4,19 +4,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoPoint;
-import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.model.type.time.LocalDate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -58,29 +55,19 @@ public class TableMappingBuilder {
     }
     
     public void addTextField(FormField field, String columnName) {
-        add(new FieldMapping(field, columnName, TEXT_EXTRACTOR));
+        add(new FieldMapping(field, columnName, Mapping.TEXT));
     }
 
     public void addDateField(FormField field, String columnName) {
-        add(new FieldMapping(field, columnName, DATE_EXTRACTOR));
+        add(new FieldMapping(field, columnName, Mapping.DATE));
     }
 
     public void addReferenceField(FormField field, final char domain, String columnName) {
-        add(new FieldMapping(field, columnName, new FieldValueExtractor() {
-            @Override
-            public FieldValue extract(ResultSet rs, int index) throws SQLException {
-                int id = rs.getInt(index);
-                if (rs.wasNull()) {
-                    return null;
-                } else {
-                    return new ReferenceValue(CuidAdapter.cuid(domain, id));
-                }
-            }
-        }));
+        add(new FieldMapping(field, columnName, new ForeignKeyMapping(domain)));
     }
     
     public void addGeoAreaField(FormField field) {
-        add(new FieldMapping(field, Arrays.asList("y1", "y1", "x1", "x2"), new FieldValueExtractor() {
+        add(new FieldMapping(field, Arrays.asList("y1", "y1", "x1", "x2"), new FieldValueMapping() {
             @Override
             public FieldValue extract(ResultSet rs, int index) throws SQLException {
                 double minLat = rs.getDouble(index + 2);
@@ -102,11 +89,16 @@ public class TableMappingBuilder {
 
                 return new GeoArea(new Extents(minLat, maxLat, minLon, maxLon), "FIXME");
             }
+
+            @Override
+            public Collection<? extends Object> toParameters(FieldValue value) {
+                throw new UnsupportedOperationException();
+            }
         }));
     }
 
     public void addGeoPoint(FormField field) {
-        add(new FieldMapping(field, Arrays.asList("x1", "y1"), new FieldValueExtractor() {
+        add(new FieldMapping(field, Arrays.asList("x1", "y1"), new FieldValueMapping() {
             @Override
             public FieldValue extract(ResultSet rs, int index) throws SQLException {
 
@@ -122,28 +114,20 @@ public class TableMappingBuilder {
 
                 return new GeoPoint(lat, lon);
             }
+
+            @Override
+            public Collection<Double> toParameters(FieldValue value) {
+                GeoPoint pointValue = (GeoPoint) value;
+                return Arrays.asList(pointValue.getLongitude(), pointValue.getLatitude());
+            }
         }));
     }
 
-    private static final FieldValueExtractor TEXT_EXTRACTOR = new FieldValueExtractor() {
-
-        @Override
-        public FieldValue extract(ResultSet rs, int index) throws SQLException {
-            return TextValue.valueOf(rs.getString(index));
-        }
-    };
-    
-    private static final FieldValueExtractor DATE_EXTRACTOR = new FieldValueExtractor() {
-        @Override
-        public FieldValue extract(ResultSet rs, int index) throws SQLException {
-            return new LocalDate(rs.getDate(index));
-        }
-    };
 
     public TableMapping build() {
         Preconditions.checkState(primaryKeyMapping != null, tableName + ": Primary key is not set");
         Preconditions.checkState(formClass != null, tableName + ": FormClass is not set");
         Preconditions.checkState(formClass.getOwnerId() != null, tableName + ": ownerId is not set");
-        return new TableMapping(tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass);
+        return new TableMapping(tableName, tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass);
     }
 }

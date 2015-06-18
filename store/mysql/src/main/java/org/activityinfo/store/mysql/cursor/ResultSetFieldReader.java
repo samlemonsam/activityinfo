@@ -3,7 +3,7 @@ package org.activityinfo.store.mysql.cursor;
 import org.activityinfo.model.expr.eval.FieldReader;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.mysql.mapping.FieldValueExtractor;
+import org.activityinfo.store.mysql.mapping.FieldValueMapping;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,11 +12,11 @@ import java.sql.SQLException;
 class ResultSetFieldReader implements FieldReader<ResultSet> {
 
     private int columnIndex;
-    private FieldValueExtractor extractor;
+    private FieldValueMapping extractor;
     private FieldType type;
 
 
-    public ResultSetFieldReader(int columnIndex, FieldValueExtractor extractor, FieldType type) {
+    public ResultSetFieldReader(int columnIndex, FieldValueMapping extractor, FieldType type) {
         this.columnIndex = columnIndex;
         this.extractor = extractor;
         this.type = type;

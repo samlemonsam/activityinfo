@@ -22,6 +22,8 @@ package org.activityinfo.server.endpoint.rest;
  * #L%
  */
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.GetCountries;
@@ -37,12 +39,15 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.collections.CountryCollection;
+import org.activityinfo.store.query.impl.Updater;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
@@ -79,8 +84,6 @@ public class RootResource {
         QueryModel model = new QueryModel(CountryCollection.FORM_CLASS_ID);
         model.selectField(CountryCollection.CODE_FIELD_ID).as("code");
         model.selectField(CountryCollection.NAME_FIELD_ID).as("name");
-        
-        
         
         return dispatcher.execute(new GetCountries()).getData();
     }
@@ -152,5 +155,24 @@ public class RootResource {
     @Path("/query")
     public QueryResource query() {
         return new QueryResource(queryExecutor);
+    }
+    
+    @POST
+    @Path("/update") 
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response update(String json) {
+
+        Gson gson = new Gson();
+        final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
+
+        return queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<Response>() {
+            @Override
+            public Response execute(CollectionCatalog catalog) {
+                Updater updater = new Updater(catalog);
+                updater.execute(jsonElement.getAsJsonObject());
+                
+                return Response.ok().build();
+            }
+        });
     }
 }

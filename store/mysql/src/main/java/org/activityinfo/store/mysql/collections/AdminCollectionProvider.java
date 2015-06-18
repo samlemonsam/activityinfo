@@ -80,7 +80,7 @@ public class AdminCollectionProvider implements MappingProvider {
             mapping.addTextField(code, "code");
 
             if(parent != null) {
-                mapping.add(new FieldMapping(parent, "adminEntityParentId", new ForeignKeyExtractor(ADMIN_ENTITY_DOMAIN)));
+                mapping.add(new FieldMapping(parent, "adminEntityParentId", new ForeignKeyMapping(ADMIN_ENTITY_DOMAIN)));
             }
             return mapping.build();
         }

@@ -12,16 +12,22 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.ResourceUpdate;
+import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.collections.CountryCollection;
 import org.activityinfo.store.mysql.collections.DatabaseCollection;
 import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.Updater;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.activityinfo.model.legacy.CuidAdapter.adminLevelFormClass;
-import static org.activityinfo.model.legacy.CuidAdapter.partnerInstanceId;
+import java.io.IOException;
+
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.hamcrest.Matchers.equalTo;
@@ -30,6 +36,7 @@ import static org.junit.Assert.assertThat;
 
 public class MySqlCatalogTest {
 
+    public static final int CATASTROPHE_NATURELLE_ID = 1;
     private static DbUnit dbunit;
     private static ColumnSetBuilder executor;
     private ColumnSet columnSet;
@@ -104,14 +111,55 @@ public class MySqlCatalogTest {
 
     @Test
     public void testSiteSimple() {
-        query(CuidAdapter.activityFormClass(1), "date1", "date2", "partner", 
+        query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner", 
                 "partner.label", "location.label", "BENE", "cause");
-        
+
+        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
         assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
+    }
+
+    @Test
+    public void testSiteCreate() {
+        
+        JsonObject changeObject = new JsonObject();
+        changeObject.addProperty("@id", CuidAdapter.generateSiteCuid().asString());
+        changeObject.addProperty("@class", CuidAdapter.activityFormClass(1).asString());
+        changeObject.addProperty("partner", partnerInstanceId(1).asString());
+        changeObject.addProperty("date1", "2015-01-01");
+        changeObject.addProperty("date2", "2015-01-01");
+        changeObject.addProperty("BENE", 45000);
+        changeObject.addProperty("location", locationInstanceId(3).asString());
+        
+        Updater updater = new Updater(catalogProvider);
+        updater.executeChange(changeObject);
+
+        query(CuidAdapter.activityFormClass(1), "_id", "partner.label", "BENE");
+        
+    }
+    
+    @Test
+    public void testSingleSiteResource() throws IOException {
+        ResourceId formClass = CuidAdapter.activityFormClass(1);
+        ResourceUpdate update = new ResourceUpdate();
+        update.setResourceId(cuid(SITE_DOMAIN, 1));
+        update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerInstanceId(2)));
+        update.set(indicatorField(1), new Quantity(900, "units"));
+        update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
+
+        Updater updater = new Updater(catalogProvider);
+        updater.execute(update);
+
+        query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
+
+        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
+        assertThat(column("partner"), hasValues(partnerInstanceId(2), partnerInstanceId(1), partnerInstanceId(2)));
+        assertThat(column("BENE"), hasValues(900, 3600, 10000));
+        assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
+
     }
 
     @Test
@@ -152,6 +200,7 @@ public class MySqlCatalogTest {
             System.out.println(field + ": " + column(field));
         }
     }
+    
     
     private ColumnView column(String column) {
         return columnSet.getColumnView(column);

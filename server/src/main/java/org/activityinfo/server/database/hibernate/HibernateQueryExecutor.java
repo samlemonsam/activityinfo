@@ -10,10 +10,7 @@ import org.hibernate.jdbc.Work;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 
 
@@ -58,6 +55,19 @@ public class HibernateQueryExecutor  {
                 Statement statement = connection.createStatement();
                 return statement.executeQuery(sql);
             } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public int update(String sql, List<?> parameters) {
+            try {
+                PreparedStatement statement = connection.prepareStatement(sql);
+                for (int i = 0; i < parameters.size(); i++) {
+                    statement.setObject(i + 1, parameters.get(i));
+                }
+                return statement.executeUpdate(sql);
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }

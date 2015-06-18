@@ -5,12 +5,14 @@ import org.activityinfo.model.type.number.Quantity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 
-public class QuantityExtractor implements FieldValueExtractor {
+public class QuantityMapping implements FieldValueMapping {
 
     private String units;
 
-    public QuantityExtractor(String units) {
+    public QuantityMapping(String units) {
         this.units = units;
     }
 
@@ -22,5 +24,11 @@ public class QuantityExtractor implements FieldValueExtractor {
         } else {
             return new Quantity(value, units);
         }
+    }
+
+    @Override
+    public Collection<Double> toParameters(FieldValue value) {
+        Quantity quantityValue = (Quantity) value;
+        return Collections.singleton(quantityValue.getValue());
     }
 }

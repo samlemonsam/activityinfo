@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
 public class MySqlCatalogProvider {
 
     private static final Logger LOGGER = Logger.getLogger(MySqlCatalogProvider.class.getName());
-    
+
     private List<CollectionProvider> mappings = Lists.newArrayList();
 
     public MySqlCatalogProvider() {
@@ -44,6 +45,21 @@ public class MySqlCatalogProvider {
                     }
                 }
                 throw new IllegalArgumentException("no such collection: " + resourceId);
+            }
+
+            @Override
+            public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+                for (CollectionProvider mapping : mappings) {
+                    try {
+                        Optional<ResourceId> collectionId = mapping.lookupCollection(executor, resourceId);
+                        if(collectionId.isPresent()) {
+                            return Optional.of(getCollection(collectionId.get()));
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return Optional.absent();  
             }
 
             @Override

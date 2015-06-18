@@ -6,12 +6,10 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.store.mysql.Join;
-import org.activityinfo.store.mysql.mapping.FieldValueExtractor;
-import org.activityinfo.store.mysql.mapping.ForeignKeyExtractor;
-import org.activityinfo.store.mysql.mapping.QuantityExtractor;
-import org.activityinfo.store.mysql.mapping.TextExtractor;
+import org.activityinfo.store.mysql.mapping.FieldValueMapping;
+import org.activityinfo.store.mysql.mapping.ForeignKeyMapping;
+import org.activityinfo.store.mysql.mapping.Mapping;
+import org.activityinfo.store.mysql.mapping.QuantityMapping;
 
 public class ActivityField {
     
@@ -57,14 +55,14 @@ public class ActivityField {
         }
     }
 
-    public FieldValueExtractor getExtractor() {
+    public FieldValueMapping getExtractor() {
         if(isAttributeGroup()) {
-            return new ForeignKeyExtractor(CuidAdapter.ATTRIBUTE_DOMAIN);
+            return new ForeignKeyMapping(CuidAdapter.ATTRIBUTE_DOMAIN);
         } else if(formField.getType() instanceof QuantityType) {
             QuantityType type = (QuantityType) formField.getType();
-            return new QuantityExtractor(type.getUnits());
+            return new QuantityMapping(type.getUnits());
         } else {
-            return new TextExtractor();
+            return Mapping.TEXT;
         }
     }
 

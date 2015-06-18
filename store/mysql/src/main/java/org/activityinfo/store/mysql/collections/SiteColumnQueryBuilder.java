@@ -36,6 +36,13 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
             fieldMap.put(field.getResourceId(), field);
         }
     }
+    
+    @Override
+    public void only(ResourceId resourceId) {
+        baseCursor.only(resourceId);
+        indicators.only(resourceId);
+        attributes.only(resourceId);
+    }
 
     @Override
     public void addResourceId(CursorObserver<ResourceId> observer) {

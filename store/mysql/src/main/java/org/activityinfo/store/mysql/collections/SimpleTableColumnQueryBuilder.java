@@ -20,6 +20,11 @@ public class SimpleTableColumnQueryBuilder implements ColumnQueryBuilder {
     }
 
     @Override
+    public void only(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void addResourceId(CursorObserver<ResourceId> observer) {
         cursorBuilder.addResourceId(observer);
     }

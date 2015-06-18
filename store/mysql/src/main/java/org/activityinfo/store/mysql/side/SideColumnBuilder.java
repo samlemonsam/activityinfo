@@ -2,10 +2,12 @@ package org.activityinfo.store.mysql.side;
 
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -32,10 +34,16 @@ public class SideColumnBuilder {
     
     private final String newLine;
     private final FormClass formClass;
-
+    private Optional<Integer> siteId = Optional.absent();
+    
     public SideColumnBuilder(FormClass formClass) {
         this.formClass = formClass;
         this.newLine = "\n";
+    }
+
+
+    public void only(ResourceId resourceId) {
+        this.siteId = Optional.of(CuidAdapter.getLegacyIdFromCuid(resourceId));
     }
     
     public void add(ActivityField field, final CursorObserver<FieldValue> observer) {
@@ -74,7 +82,11 @@ public class SideColumnBuilder {
             sql.append("  AND iv.indicatorId IN (");
             Joiner.on(", ").appendTo(sql, fieldMap.keySet());
             sql.append("))").append(newLine);
-            sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+            if(siteId.isPresent()) {
+                sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
+            } else {
+                sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+            }
             sql.append("ORDER BY site.siteId");
         } else {
             // Reporting periods
@@ -85,7 +97,11 @@ public class SideColumnBuilder {
             sql.append("  AND iv.indicatorId IN (");
             Joiner.on(", ").appendTo(sql, fieldMap.keySet());
             sql.append("))").append(newLine);
-            sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+            if(siteId.isPresent()) {
+                sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
+            } else {
+                sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+            }
             sql.append("ORDER BY rp.reportingPeriodId");
         }
         System.out.println(sql);
@@ -124,7 +140,10 @@ public class SideColumnBuilder {
                 }
                 int fieldId = rs.getInt(ValueBuffer.FIELD_ID_COLUMN);
                 if(!rs.wasNull()) {
-                    fieldMap.get(fieldId).set(rs);
+                    ValueBuffer valueBuffer = fieldMap.get(fieldId);
+                    if(valueBuffer != null) {
+                        valueBuffer.set(rs);
+                    }
                 }
                 lastRowId = rowId;
             }

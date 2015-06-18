@@ -13,22 +13,22 @@ public class FieldMapping {
 
     private final FormField formField;
     private List<String> columnNames = Lists.newArrayList();
-    private FieldValueExtractor valueExtractor;
+    private FieldValueMapping valueExtractor;
     private Join join;
 
-    public FieldMapping(FormField formField, String columnName, FieldValueExtractor valueExtractor) {
+    public FieldMapping(FormField formField, String columnName, FieldValueMapping valueExtractor) {
         this.formField = formField;
         this.columnNames = Collections.singletonList(columnName);
         this.valueExtractor = valueExtractor;
     }
 
-    public FieldMapping(FormField formField, List<String> columnName, FieldValueExtractor valueExtractor) {
+    public FieldMapping(FormField formField, List<String> columnName, FieldValueMapping valueExtractor) {
         this.formField = formField;
         this.columnNames = columnName;
         this.valueExtractor = valueExtractor;
     }
 
-    public FieldMapping(FormField formField, String columnName, Join join, FieldValueExtractor valueExtractor) {
+    public FieldMapping(FormField formField, String columnName, Join join, FieldValueMapping valueExtractor) {
         this.formField = formField;
         this.columnNames = Collections.singletonList(columnName);
         this.valueExtractor = valueExtractor;
@@ -52,7 +52,7 @@ public class FieldMapping {
         this.columnNames = columnNames;
     }
 
-    public FieldValueExtractor getValueExtractor() {
+    public FieldValueMapping getValueExtractor() {
         return valueExtractor;
     }
 

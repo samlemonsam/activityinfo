@@ -7,6 +7,7 @@ import org.activityinfo.model.expr.eval.FieldReaderFactory;
 import org.activityinfo.model.expr.eval.PartialEvaluator;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.Cursor;
@@ -46,6 +47,10 @@ public class MySqlCursorBuilder implements CursorBuilder {
         int index = query.select(column);
 
         return new PrimaryKeyExtractor(tableMapping.getPrimaryKey().getDomain(), index);
+    }
+    
+    public void only(ResourceId resourceId) {
+        query.where(tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId));
     }
 
     @Override
@@ -127,4 +132,5 @@ public class MySqlCursorBuilder implements CursorBuilder {
         open = true;
         return cursor;
     }
+
 }

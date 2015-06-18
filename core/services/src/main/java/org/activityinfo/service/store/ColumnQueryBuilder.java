@@ -11,6 +11,8 @@ import java.io.IOException;
  */
 public interface ColumnQueryBuilder {
 
+    void only(ResourceId resourceId);
+    
     /**
      * Adds the {@code resourceId} to the list of columns to fetch.
      * 

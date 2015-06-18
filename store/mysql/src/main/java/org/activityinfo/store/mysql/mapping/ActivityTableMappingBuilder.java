@@ -30,6 +30,7 @@ public class ActivityTableMappingBuilder {
     
     private String baseFromClause;
     private String baseFilter;
+    private String baseTable;
     private FormClass formClass;
     private List<FieldMapping> mappings = Lists.newArrayList();
     private PrimaryKeyMapping primaryKeyMapping;
@@ -41,6 +42,7 @@ public class ActivityTableMappingBuilder {
     public static ActivityTableMappingBuilder site(Activity activity) {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
+        mapping.baseTable = "site";
         mapping.baseFromClause = "site base";
         mapping.baseFilter = "base.dateDeleted is NULL AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
@@ -70,6 +72,7 @@ public class ActivityTableMappingBuilder {
     public static ActivityTableMappingBuilder reportingPeriod(Activity activity) {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
+        mapping.baseTable = "reportingperiod";
         mapping.baseFromClause = "reportingperiod base LEFT JOIN site on (site.siteId=base.siteId)";
         mapping.baseFilter = "site.dateDeleted IS NULL AND site.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.reportingPeriodFormClass(activity.getId());
@@ -96,7 +99,7 @@ public class ActivityTableMappingBuilder {
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true);
         formClass.addElement(date1);
-        mappings.add(new FieldMapping(date1, "date1", Extractor.DATE));
+        mappings.add(new FieldMapping(date1, "date1", Mapping.DATE));
 
         FormField date2 = new FormField(field(classId, END_DATE_FIELD))
                 .setLabel("End Date")
@@ -104,7 +107,7 @@ public class ActivityTableMappingBuilder {
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true);
         formClass.addElement(date2);
-        mappings.add(new FieldMapping(date2, "date2", Extractor.DATE));
+        mappings.add(new FieldMapping(date2, "date2", Mapping.DATE));
     }
     
     public void addSiteField() {
@@ -115,7 +118,7 @@ public class ActivityTableMappingBuilder {
         siteField.setRequired(true);
         
         formClass.addElement(siteField);
-        mappings.add(new FieldMapping(siteField, "siteId", new ForeignKeyExtractor(SITE_DOMAIN)));
+        mappings.add(new FieldMapping(siteField, "siteId", new ForeignKeyMapping(SITE_DOMAIN)));
     }
     
     public void addLocationField() {
@@ -126,7 +129,7 @@ public class ActivityTableMappingBuilder {
         locationField.setRequired(true);
         
         formClass.addElement(locationField);
-        mappings.add(new FieldMapping(locationField, "locationId", new ForeignKeyExtractor(LOCATION_DOMAIN)));
+        mappings.add(new FieldMapping(locationField, "locationId", new ForeignKeyMapping(LOCATION_DOMAIN)));
     }
 
     public void addPartnerField() {
@@ -137,7 +140,7 @@ public class ActivityTableMappingBuilder {
                 .setType(ReferenceType.single(CuidAdapter.partnerFormClass(activity.getDatabaseId())))
                 .setRequired(true);
         formClass.addElement(partnerField);
-        mappings.add(new FieldMapping(partnerField, "partnerId", new ForeignKeyExtractor(PARTNER_DOMAIN)));
+        mappings.add(new FieldMapping(partnerField, "partnerId", new ForeignKeyMapping(PARTNER_DOMAIN)));
     }
 
     public void addProjectField() {
@@ -147,12 +150,12 @@ public class ActivityTableMappingBuilder {
                 .setType(ReferenceType.single(activity.getProjectFormClassId()))
                 .setRequired(false);
         formClass.addElement(partnerField);
-        mappings.add(new FieldMapping(partnerField, "projectId", new ForeignKeyExtractor(PROJECT_DOMAIN)));
+        mappings.add(new FieldMapping(partnerField, "projectId", new ForeignKeyMapping(PROJECT_DOMAIN)));
     }
     
 
     public TableMapping build() {
-        return new TableMapping(baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass);
+        return new TableMapping("site", baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass);
     }
 
     public void addIndicatorOrAttributeField(ActivityField field) {

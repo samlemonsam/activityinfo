@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class DbUnit {
@@ -68,6 +69,22 @@ public class DbUnit {
                 try {
                     statement = connection.createStatement();
                     return statement.executeQuery(sql);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public int update(String sql, List<?> parameters) {
+                try {
+                    PreparedStatement statement = connection.prepareStatement(sql);
+                    for (int i = 0; i < parameters.size(); ++i) {
+                        statement.setObject(i + 1, parameters.get(i));
+                    }
+                    int rowsAffected = statement.executeUpdate();
+                    
+                    return rowsAffected;
+
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }

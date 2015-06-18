@@ -2,9 +2,10 @@ package org.activityinfo.geoadmin.merge2.state;
 
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.ResourceCollection;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,6 +19,11 @@ public class CollectionCatalogStub implements CollectionCatalog {
     @Override
     public ResourceCollection getCollection(ResourceId resourceId) {
         return Preconditions.checkNotNull(map.get(resourceId));
+    }
+
+    @Override
+    public Resource getResource(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

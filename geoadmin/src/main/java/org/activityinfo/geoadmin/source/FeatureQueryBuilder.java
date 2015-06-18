@@ -1,7 +1,6 @@
 package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Function;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -32,6 +31,11 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
 
     public FeatureQueryBuilder(SimpleFeatureSource featureSource) {
         this.featureSource = featureSource;
+    }
+
+    @Override
+    public void filterOn(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

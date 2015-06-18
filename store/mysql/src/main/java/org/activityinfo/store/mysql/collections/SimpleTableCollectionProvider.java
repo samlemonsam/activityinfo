@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -25,4 +26,10 @@ public class SimpleTableCollectionProvider implements CollectionProvider {
     public ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         return new SimpleTableCollection(mappingProvider.getMapping(executor, formClassId), executor);
     }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException {
+        return Optional.absent();
+    }
+
 }

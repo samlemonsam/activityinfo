@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ResourceCollection;
@@ -22,5 +23,10 @@ public class ReportingPeriodCollectionProvider implements CollectionProvider {
         ActivityTableMappingBuilder mapping = ActivityTableMappingBuilder.reportingPeriod(activity);
 
         return new SiteCollection(activity, mapping.build(), executor);
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException {
+        return Optional.absent();
     }
 }

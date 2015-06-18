@@ -6,11 +6,12 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.ResourceStore;
 import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -72,6 +73,11 @@ public class ResourceStoreStub implements ResourceStore {
             } else {
                 return featureSourceCatalog.getCollection(resourceId);
             }
+        }
+
+        @Override
+        public Resource getResource(ResourceId resourceId) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
