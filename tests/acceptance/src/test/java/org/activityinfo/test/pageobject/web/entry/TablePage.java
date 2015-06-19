@@ -21,13 +21,8 @@ package org.activityinfo.test.pageobject.web.entry;
  * #L%
  */
 
-import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
-import org.openqa.selenium.WebDriver;
-
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 /**
  * @author yuriyz on 06/09/2015.
@@ -36,21 +31,15 @@ public class TablePage {
 
     private final FluentElement page;
 
-    public TablePage(FluentElement page) {
+    public TablePage(final FluentElement page) {
         this.page = page;
-        page.waitUntil(new Predicate<WebDriver>() {
-            @Override
-            public boolean apply(WebDriver input) {
-                return tableXPath().firstIfPresent().isPresent();
-            }
-        });
-    }
-
-    private XPathBuilder tableXPath() {
-        return page.find().table(withClass("cellTableWidget"));
     }
 
     public BsTable table() {
-        return new BsTable(tableXPath().first());
+        return BsTable.findTables(page).get(0);
+    }
+
+    public FluentElement getPage() {
+        return page;
     }
 }

@@ -23,9 +23,17 @@ package org.activityinfo.test.pageobject.bootstrap;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.internal.Locatable;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
@@ -35,6 +43,26 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
  */
 public class BsTable {
 
+    public static class Row {
+        private final FluentElement container;
+
+        public Row(FluentElement container) {
+            this.container = container;
+        }
+
+        public FluentElement getContainer() {
+            return container;
+        }
+    }
+
+    public static class Cell {
+        private final FluentElement container;
+
+        public Cell(FluentElement container) {
+            this.container = container;
+        }
+    }
+
     private final FluentElement container;
 
     public BsTable(FluentElement container) {
@@ -43,6 +71,20 @@ public class BsTable {
 
     private Optional<FluentElement> button(String buttonName) {
         return container.find().button(withClass("btn"), withText(buttonName)).firstIfPresent();
+    }
+
+    public static XPathBuilder tableXPath(FluentElement element) {
+        return element.find().table(withClass("cellTableWidget"));
+    }
+
+    public static FluentIterable<BsTable> findTables(final FluentElement container) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(@Nullable WebDriver input) {
+                return BsTable.tableXPath(container).firstIfPresent().isPresent();
+            }
+        });
+        return BsTable.tableXPath(container).asList().as(BsTable.class);
     }
 
     public BsModal newSubmission() {
@@ -56,4 +98,28 @@ public class BsTable {
         return BsModal.find(container.root());
     }
 
+    public List<Row> rows() {
+        return Lists.newArrayList(container.find().tagName("tr", false, withClass("cellTableEvenRow"), withClass("cellTableOddRow"))
+                .asList().as(Row.class));
+    }
+
+    public int rowCount() {
+        return rows().size();
+    }
+
+    public FluentElement getContainer() {
+        return container;
+    }
+
+    public void scrollToTheTop() {
+        List<Row> rows = rows();
+        WebElement lastRow = rows.get(0).getContainer().element();
+        ((Locatable) lastRow).getCoordinates().inViewPort();
+    }
+
+    public void scrollToTheBottom() {
+        List<Row> rows = rows();
+        WebElement lastRow = rows.get(rows.size() - 1).getContainer().element();
+        ((Locatable) lastRow).getCoordinates().inViewPort();
+    }
 }

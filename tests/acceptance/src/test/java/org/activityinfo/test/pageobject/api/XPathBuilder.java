@@ -164,12 +164,17 @@ public class XPathBuilder {
         this.axis = Axis.CHILD;
         return this;
     }
-    
+
     private XPathBuilder tagName(String tagName, String... conditions) {
+        return tagName(tagName, true, conditions);
+    }
+    
+    public XPathBuilder tagName(String tagName, boolean and, String... conditions) {
         StringBuilder xpath = new StringBuilder(tagName);
         if(conditions.length > 0) {
+            String condition = and ? " and " : " or ";
             xpath.append("[");
-            Joiner.on(" and ").appendTo(xpath, conditions);
+            Joiner.on(condition).appendTo(xpath, conditions);
             xpath.append("]");
         }
         this.step = xpath.toString();
