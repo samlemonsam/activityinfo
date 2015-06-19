@@ -26,6 +26,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -127,10 +128,12 @@ public class DesignSteps {
         driver.changeDesignerField(fieldLabel, values);
     }
 
-    @Then("^relevance functionality is disabled in form designer for:$")
-    public void relevance_functionality_is_disabled_in_form_designer_for(List<String> fieldLabels) throws Throwable {
+    @Then("^\"([^\"]*)\" field properties are disabled in form designer for:$")
+    public void field_properties_are_disabled_in_form_designer_for(String fieldProperties, List<String> fieldLabels) throws Throwable {
         for (String fieldLabel : fieldLabels) {
-            driver.assertDesignerFieldHasRelevanceFunctionality(fieldLabel, false);
+            for (DesignerFieldPropertyType fieldPropertyType : DesignerFieldPropertyType.fromCommaSeparateString(fieldProperties)) {
+                driver.assertDesignerFieldHasProperty(fieldLabel, fieldPropertyType, false);
+            }
         }
     }
 }

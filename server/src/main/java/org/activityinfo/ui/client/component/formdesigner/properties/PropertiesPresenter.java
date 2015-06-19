@@ -162,6 +162,9 @@ public class PropertiesPresenter {
         view.getVisible().setValue(formField.isVisible());
         view.getCode().setValue(Strings.nullToEmpty(formField.getCode()));
 
+        view.getRequired().setEnabled(!isBuiltIn);
+        view.getVisible().setEnabled(!isBuiltIn);
+
         setRelevanceState(formField, !isBuiltIn);
         validateCode(fieldWidgetContainer);
         validateLabel();

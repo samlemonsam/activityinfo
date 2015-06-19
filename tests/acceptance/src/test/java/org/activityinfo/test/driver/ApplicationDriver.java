@@ -6,6 +6,7 @@ import cucumber.api.DataTable;
 import cucumber.api.PendingException;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
+import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
 import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
@@ -288,7 +289,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertDesignerFieldHasRelevanceFunctionality(String fieldLabel, boolean enabled) {
+    public void assertDesignerFieldHasProperty(String fieldLabel, DesignerFieldPropertyType fieldPropertyType, boolean enabled) {
         throw new PendingException();
     }
 }

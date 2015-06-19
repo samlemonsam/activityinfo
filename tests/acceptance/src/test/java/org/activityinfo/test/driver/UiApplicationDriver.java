@@ -22,9 +22,7 @@ import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
-import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
-import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
-import org.activityinfo.test.pageobject.web.design.designer.FormModal;
+import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.activityinfo.test.pageobject.web.entry.*;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
@@ -770,15 +768,34 @@ public class UiApplicationDriver extends ApplicationDriver {
                 "Field with label '" + fieldLabel +"' is deletable.");
     }
 
-    public void assertDesignerFieldHasRelevanceFunctionality(String fieldLabel, boolean enabled) {
+    @Override
+    public void assertDesignerFieldHasProperty(String fieldLabel, DesignerFieldPropertyType fieldPropertyType, boolean enabled) {
         DesignerField designerField = formDesigner().dropTarget().fieldByLabel(fieldLabel);
         designerField.element().clickWhenReady();
-        FluentElement relevanceElement = formDesigner().properties().getContainer().find().
-                label(XPathBuilder.containingText(I18N.CONSTANTS.relevance())).first();
-        if (relevanceElement.isDisplayed() != enabled) {
-            throw new AssertionError("Relevance functionality state is " + relevanceElement.isDisplayed() +
+        PropertiesPanel propertiesPanel = formDesigner().properties();
+
+        final boolean actualValue;
+        switch (fieldPropertyType) {
+            case RELEVANCE:
+                FluentElement propertyElement = propertiesPanel.getContainer().find().
+                        label(XPathBuilder.containingText(I18N.CONSTANTS.relevance())).first();
+                actualValue = propertyElement.isDisplayed();
+                break;
+            case REQUIRED:
+                actualValue = propertiesPanel.form().findFieldByLabel(I18N.CONSTANTS.required()).isEnabled();
+                break;
+            case VISIBLE:
+                actualValue = propertiesPanel.form().findFieldByLabel(I18N.CONSTANTS.visible()).isEnabled();
+                break;
+            default:
+                throw new AssertionError("Unsupported field property type: " + fieldPropertyType);
+        }
+
+        if (actualValue != enabled) {
+            throw new AssertionError("'" + fieldPropertyType + "' field property state is " + actualValue +
                     " while it's expected to have it " + enabled + " for label: " + fieldLabel);
         }
+
     }
 
     public void assertDesignerFieldMandatory(String fieldLabel) {

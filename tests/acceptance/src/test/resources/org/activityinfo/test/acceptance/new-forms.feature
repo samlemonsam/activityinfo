@@ -26,7 +26,7 @@ Feature: Partners in new form layout
       | Start Date |
       | End Date   |
       | Comments   |
-    Then relevance functionality is disabled in form designer for:
+    Then "relevance, visible, required" field properties are disabled in form designer for:
       | Partner    |
       | Start Date |
       | End Date   |

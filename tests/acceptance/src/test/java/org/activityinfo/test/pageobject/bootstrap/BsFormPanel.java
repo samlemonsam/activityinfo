@@ -96,6 +96,10 @@ public class BsFormPanel extends Form {
             return element.exists(By.tagName("a"));
         }
 
+        public boolean isCheckBox() {
+            return element.exists(By.className("checkbox"));
+        }
+
         @Override
         public void fill(String value) {
             FluentElement input = input();
@@ -168,7 +172,10 @@ public class BsFormPanel extends Form {
 
         @Override
         public boolean isEnabled() {
-            return false;
+            if (isCheckBox()) {
+                return !element.exists(By.className("checkbox-disabled"));
+            }
+            throw new UnsupportedOperationException();
         }
 
         @Override

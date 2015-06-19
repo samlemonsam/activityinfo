@@ -46,6 +46,9 @@ public class InstanceTableUiTest {
     public static final int SUBMISSIONS_COUNT = 500;
     public static final int LOAD_COUNT = 200;
 
+    public InstanceTableUiTest() {
+    }
+
     @Rule
     public UiDriver driver = new UiDriver();
 
