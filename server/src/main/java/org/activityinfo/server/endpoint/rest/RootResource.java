@@ -31,8 +31,10 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.DTOViews;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
@@ -59,6 +61,7 @@ public class RootResource {
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
     private HibernateQueryExecutor queryExecutor;
+    private Provider<AuthenticatedUser> user;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
@@ -162,7 +165,11 @@ public class RootResource {
     @Path("/update") 
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
-
+        
+        if(!DeploymentEnvironment.isAppEngineDevelopment() && !user.get().getEmail().endsWith("@bedatadriven.com")) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
+        
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
