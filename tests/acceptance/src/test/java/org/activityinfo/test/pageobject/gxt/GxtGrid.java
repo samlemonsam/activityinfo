@@ -124,6 +124,9 @@ public class GxtGrid {
             }
             rows.add(cells);
         }
+        if(rows.isEmpty()) {
+            throw new IllegalStateException("No rows.");
+        }
         return DataTable.create(rows);
     }
 

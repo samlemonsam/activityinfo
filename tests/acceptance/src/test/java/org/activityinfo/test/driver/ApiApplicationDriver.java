@@ -271,7 +271,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         } else {
             String typeClassId;
-            switch (field.getString("type")) {
+            switch (field.getString("type").toLowerCase()) {
+                case "free_text":
                 case "text":
                     typeClassId = "FREE_TEXT";
                     break;

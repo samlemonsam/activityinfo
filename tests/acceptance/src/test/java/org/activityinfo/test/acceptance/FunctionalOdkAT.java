@@ -11,9 +11,9 @@ import org.activityinfo.test.webdriver.WebDriverModule;
 import org.junit.runner.RunWith;
 
 @RunWith(CucumberAndGuice.class)
-@CucumberOptions(strict = true, tags = "@api",
+@CucumberOptions(strict = true, tags = "@odk",
         plugin = {
-                "json:build/cucumber-report-api.json" },
+                "json:build/cucumber-report-odk.json" },
         glue = {
                 "org.activityinfo.test.steps.odk",
                 "org.activityinfo.test.steps.common" })
