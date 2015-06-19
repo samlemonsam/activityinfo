@@ -3372,7 +3372,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("This field is required")
     String requiredFieldMessage();
 
-    @DefaultStringValue("No data for the field")
+    @DefaultStringValue("This field has no options.")
     String noDataForField();
 
     @DefaultStringValue("Load more")
@@ -3705,7 +3705,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Information")
     String information();
 
-    @DefaultStringValue("Field is built-in and it's not allowed to remove it.")
+    @DefaultStringValue("This field is built-in and cannot be removed from the form.")
     String notAllowedToRemoveBuiltinField();
 
     @DefaultStringValue("Warning")
