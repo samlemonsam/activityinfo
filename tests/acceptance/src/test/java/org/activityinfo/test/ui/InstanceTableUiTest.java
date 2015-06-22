@@ -43,7 +43,7 @@ public class InstanceTableUiTest {
     private static final String DATABASE = "InstanceTableUiTest";
     private static final String FORM_NAME = "Form";
 
-    public static final int SUBMISSIONS_COUNT = 500;
+    public static final int SUBMISSIONS_COUNT = 500 + 1;
     public static final int LOAD_COUNT = 200;
 
     public InstanceTableUiTest() {
@@ -61,17 +61,52 @@ public class InstanceTableUiTest {
         driver.setup().createForm(name(FORM_NAME), property("database", DATABASE));
         driver.setup().createField(
                 property("form", FORM_NAME),
-                property("name", "nb. kits"),
+                property("name", "quantity"),
                 property("type", "quantity"),
                 property("code", "1")
         );
+        driver.setup().createField(
+                property("form", FORM_NAME),
+                property("name", "enum"),
+                property("type", "enum"),
+                property("items", "item1, item2, item3"),
+                property("code", "2")
+        );
+        driver.setup().createField(
+                property("form", FORM_NAME),
+                property("name", "text"),
+                property("type", "text"),
+                property("code", "3")
+        );
+        driver.setup().createField(
+                property("form", FORM_NAME),
+                property("name", "multi-line"),
+                property("type", "NARRATIVE"),
+                property("code", "4")
+        );
+        driver.setup().createField(
+                property("form", FORM_NAME),
+                property("name", "barcode"),
+                property("type", "BARCODE"),
+                property("code", "5")
+        );
+
+        // submit with null values
+        driver.setup().submitForm(FORM_NAME, Arrays.asList(
+                new FieldValue("Partner", "NRC"),
+                new FieldValue("quantity", -1)
+        ));
 
         for (int j = 0; j < 5; j++) { // chunk on 5 batch commands to avoid SQL timeout
             driver.setup().startBatch();
             for (int i = 0; i < 100; i++) {
                 driver.setup().submitForm(FORM_NAME, Arrays.asList(
                         new FieldValue("Partner", "NRC"),
-                        new FieldValue("nb. kits", i)
+                        new FieldValue("quantity", i),
+                        new FieldValue("enum", i % 2 == 0 ? "item1" : "item1, item2"),
+                        new FieldValue("text", "text"),
+                        new FieldValue("multi-line", "line1\nline2"),
+                        new FieldValue("barcode", "barcode")
                 ));
             }
             driver.setup().submitBatch();

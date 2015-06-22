@@ -16,8 +16,6 @@ import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.sut.Accounts;
@@ -140,17 +138,6 @@ public class DatabaseSetupSteps {
         }
     }
 
-    private static String resolveTypeName(String type) {
-        if (type.equalsIgnoreCase("enum")) { // trick to not write long work enumerated in *.feature file
-            type = EnumType.TYPE_CLASS.getId();
-        } else if (type.equalsIgnoreCase("text")) { // trick to not write long work free_text in *.feature file
-            type = TextType.TYPE_CLASS.getId();
-        } else if (type.equalsIgnoreCase("date")) {
-            type = LocalDateType.TYPE_CLASS.getId();
-        }
-        return type;
-    }
-
     /**
      * Creates form field from table column. Returns column type (field type).
      * @param form form name
@@ -165,7 +152,7 @@ public class DatabaseSetupSteps {
             return Optional.absent();
         }
 
-        String type = resolveTypeName(dataTable.getGherkinRows().get(1).getCells().get(columnIndex));
+        String type = driver.resolveFieldTypeName(dataTable.getGherkinRows().get(1).getCells().get(columnIndex));
 
         FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(type);
 

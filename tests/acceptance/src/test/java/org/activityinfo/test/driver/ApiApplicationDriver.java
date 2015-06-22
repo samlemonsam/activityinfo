@@ -206,7 +206,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
         createdDatabases.add(map.getName());
     }
 
-
     @Override
     public void createForm(TestObject form) throws Exception {
         JSONObject properties = new JSONObject();
@@ -231,7 +230,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
     @Override
     public void createField(TestObject field) throws Exception {
 
-        if(field.getString("type").equals("enumerated")) {
+        String type = resolveFieldTypeName(field.getString("type"));
+
+        if(type.equals("enumerated")) {
             JSONObject properties = new JSONObject();
             properties.put("name", aliases.createAliasIfNotExists(field.getName()));
             properties.put("activityId", field.getId("form"));
@@ -253,7 +254,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             JSONObject properties = new JSONObject();
             properties.put("name", field.getAlias());
             properties.put("activityId", field.getId("form"));
-            properties.put("type", field.getString("type"));
+            properties.put("type", type);
             properties.put("units", field.getString("units", "parsects"));
             properties.put("aggregation", field.getInteger("aggregation", AggregationMethod.Sum.code()));
 

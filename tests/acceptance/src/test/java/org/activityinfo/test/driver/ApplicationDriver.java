@@ -4,6 +4,9 @@ package org.activityinfo.test.driver;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
@@ -37,6 +40,17 @@ public abstract class ApplicationDriver {
      */
     public ApplicationDriver setup() {
         return this;
+    }
+
+    public String resolveFieldTypeName(String type) {
+        if (type.equalsIgnoreCase("enum")) { // trick to not write long work enumerated in *.feature file
+            type = EnumType.TYPE_CLASS.getId();
+        } else if (type.equalsIgnoreCase("text")) { // trick to not write long work free_text in *.feature file
+            type = TextType.TYPE_CLASS.getId();
+        } else if (type.equalsIgnoreCase("date")) {
+            type = LocalDateType.TYPE_CLASS.getId();
+        }
+        return type;
     }
     
     public final void createDatabase(Property... properties) throws Exception {

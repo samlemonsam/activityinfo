@@ -69,6 +69,7 @@ task acceptanceTest(type: Test) {
     // Run only functional tests
     include "**/Functional*AT*"
     include "**/*UiTest*"
+    exclude "**/*\$*"
 }
 
 task browserAcceptanceTest(type: Test) {
@@ -77,6 +78,7 @@ task browserAcceptanceTest(type: Test) {
     dependsOn ':server:configureDatabase'
 
     include "**/CrossBrowserAT*"
+    exclude "**/*\$*"
     
     outputs.upToDateWhen { false }
 }
@@ -99,6 +101,7 @@ task instrumentedAcceptanceTest(type: Test) {
 
     include "**/Functional*AT.*"
     include "**/*UiTest*"
+    exclude "**/*\$*"
 }
 
 
