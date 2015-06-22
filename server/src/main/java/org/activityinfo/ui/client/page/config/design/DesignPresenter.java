@@ -518,7 +518,13 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     public void onSelectionChanged(ModelData selectedItem) {
         view.setActionEnabled(UIActions.EDIT, this.db.isDesignAllowed() && canEditWithFormDesigner(selectedItem));
         view.setActionEnabled(UIActions.DELETE, this.db.isDesignAllowed() && selectedItem instanceof EntityDTO);
-        view.setActionEnabled(UIActions.OPEN_TABLE, getSelectedActivity(selectedItem) != null || selectedItem instanceof IsFormClass);
+
+        // in case of activity enable only if reportingFrequency==once (monthly implementation with subforms is on the way...)
+        boolean enableTable = selectedItem instanceof IsFormClass;
+        if (getSelectedActivity(selectedItem) != null) {
+            enableTable = ((IsActivityDTO) selectedItem).getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        }
+        view.setActionEnabled(UIActions.OPEN_TABLE, enableTable);
     }
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
