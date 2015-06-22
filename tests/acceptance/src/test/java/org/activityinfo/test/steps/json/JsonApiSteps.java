@@ -10,6 +10,7 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.test.TestLogger;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
@@ -43,6 +44,11 @@ public class JsonApiSteps {
     
     @Inject
     private Placeholders placeholders;
+    
+    
+    @Inject
+    private TestLogger testLogger;
+    
     private UserAccount currentAccount;
 
 
@@ -73,7 +79,7 @@ public class JsonApiSteps {
     private void execute(UserAccount account, String requestBody) {
         JsonNode request = placeholders.resolve(jsonParser.parse(requestBody));
 
-        System.out.println(request.toString());
+        testLogger.info(request.toString());
 
         recordResponse(root(Optional.of(account))
                 .path("/command")
@@ -125,7 +131,7 @@ public class JsonApiSteps {
         JsonNode expected = jsonParser.parse(expectedResponse);
         JsonNode actual = response.getJson();
         
-        System.out.println(actual.toString());
+        testLogger.info(actual.toString());
 
         new JsonChecker(placeholders).check(expected, actual);
         

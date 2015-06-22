@@ -22,6 +22,8 @@ dependencies {
     testCompile 'org.apache.commons:commons-pool2:2.0'
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
+    testCompile 'io.airlift:airline:0.7'
+    
     testCompile libraries.bcrypt
     testCompile libraries.metrics.core
     testCompile libraries.jersey.server

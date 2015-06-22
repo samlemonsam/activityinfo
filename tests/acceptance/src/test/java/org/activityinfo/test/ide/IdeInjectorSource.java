@@ -6,6 +6,7 @@ import cucumber.runtime.java.guice.ScenarioScope;
 import cucumber.runtime.java.guice.impl.ScenarioModule;
 import cucumber.runtime.java.guice.impl.SequentialScenarioScope;
 import org.activityinfo.test.driver.DriverModule;
+import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.SystemUnderTest;
 import org.activityinfo.test.webdriver.WebDriverModule;
 

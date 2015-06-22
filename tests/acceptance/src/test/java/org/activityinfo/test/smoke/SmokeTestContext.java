@@ -8,6 +8,7 @@ import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.driver.DriverModule;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
+import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.SystemUnderTest;
 import org.activityinfo.test.sut.UserAccount;
 import org.activityinfo.test.webdriver.WebDriverModule;

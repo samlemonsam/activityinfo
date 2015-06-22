@@ -6,6 +6,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.test.TestLogger;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
@@ -36,6 +37,9 @@ public class DataEntrySteps {
     @Inject
     private ApplicationDriver driver;
 
+    @Inject
+    private TestLogger testLogger;
+    
     private File exportedFile = null;
 
 
@@ -58,7 +62,7 @@ public class DataEntrySteps {
     @When("^I export the form \"([^\"]*)\"$")
     public void I_export_the_form(String formName) throws Throwable {
         exportedFile = driver.exportForm(formName);
-        System.out.println("Exported file: " + exportedFile.getAbsolutePath());
+        testLogger.info("Exported file: " + exportedFile.getAbsolutePath());
 
     }
 

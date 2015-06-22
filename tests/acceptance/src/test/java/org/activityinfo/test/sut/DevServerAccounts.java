@@ -117,7 +117,7 @@ public class DevServerAccounts implements Accounts {
         Client client = Client.create();
         WebResource userResources = client.resource(server.getRootUrl()).path("resources").path("users");
 
-        LOGGER.info("Creating new account via " + userResources);
+       // LOGGER.info("Creating new account via " + userResources);
 
         for(String user : users) {
             Form form = new Form();
@@ -129,7 +129,7 @@ public class DevServerAccounts implements Accounts {
             ClientResponse response = userResources.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(ClientResponse.class);
             
             if(response.getStatus() == Response.Status.CREATED.getStatusCode()) {
-                LOGGER.info("User " + user + " created " + response.getStatus());
+              //  LOGGER.info("User " + user + " created " + response.getStatus());
             } else {
                 throw new RuntimeException("Could not create user " + user + ": " + response.getClientResponseStatus() + "\n"
                         + response.getEntity(String.class));
