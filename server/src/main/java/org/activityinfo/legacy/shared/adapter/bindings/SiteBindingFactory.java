@@ -89,9 +89,9 @@ public class SiteBindingFactory implements Function<ActivityFormDTO, SiteBinding
 
         @Override
         public void populateChangeMap(FormInstance instance, Map<String, Object> changeMap) {
-            Set<ResourceId> references = instance.getReferences(fieldId);
-            for (ResourceId attributeResourceId : references) {
-                changeMap.put(AttributeDTO.getPropertyName(getLegacyIdFromCuid(attributeResourceId)), true);
+            for (AttributeDTO attribute : group.getAttributes()) {
+                ResourceId resourceId = CuidAdapter.attributeId(attribute.getId());
+                changeMap.put(AttributeDTO.getPropertyName(attribute.getId()), instance.getReferences(fieldId).contains(resourceId));
             }
         }
     }
