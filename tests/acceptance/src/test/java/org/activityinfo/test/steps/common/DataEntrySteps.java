@@ -8,7 +8,9 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -37,6 +39,8 @@ public class DataEntrySteps {
     private ApplicationDriver driver;
 
     private File exportedFile = null;
+    private String currentDatabase;
+    private String currentForm;
 
 
     @Given("^I submit a \"([^\"]*)\" form with:$")
@@ -223,5 +227,26 @@ public class DataEntrySteps {
     @When("^I open a new form submission for \"([^\"]*)\" then field values are:$")
     public void I_open_a_new_form_submission_for_then_field_values_are(String formName, List<FieldValue> values) throws Throwable {
         driver.assertFieldValuesOnNewForm(formName, values);
+    }
+
+    @When("^edit entry in new table with field name \"([^\"]*)\" and value \"([^\"]*)\" in the database \"([^\"]*)\" in the form \"([^\"]*)\" with:$")
+    public void edit_entry_in_new_table_with_field_name_and_value_in_the_database_in_the_form_with(String fieldName, String fieldValue,
+                                                                                                   String database, String formName,
+                                                                                                   List<FieldValue> fieldValues
+    ) throws Throwable {
+        currentDatabase = driver.getAliasTable().getAlias(database);
+        currentForm = driver.getAliasTable().getAlias(formName);
+
+        TablePage tablePage = driver.openFormTable(currentDatabase, currentForm);
+        tablePage.table().showAllColumns().findCellByText(fieldValue).get().getContainer().clickWhenReady();
+
+        BsModal bsModal = tablePage.table().editSubmission();
+        bsModal.fill(fieldValues).accept();
+    }
+
+    @Then("^table has rows:$")
+    public void table_has_rows(DataTable dataTable) throws Throwable {
+        TablePage tablePage = driver.openFormTable(currentDatabase, currentForm);
+        tablePage.table().showAllColumns().assertRowsPresent(dataTable);
     }
 }

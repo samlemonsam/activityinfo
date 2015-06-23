@@ -25,6 +25,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
@@ -43,7 +45,34 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
  */
 public class BsTable {
 
-    public static class Row {
+    public static enum Type {
+        CELL_TABLE("cellTableCell", "cellTableOddRow", "cellTableEvenRow"),
+        GRID_TABLE("data-grid-cell", "data-grid-odd-row", "data-grid-even-row");
+
+        private final String tdClass;
+        private final String trOddClass;
+        private final String trEvenClass;
+
+        Type(String tdClass, String trOddClass, String trEvenClass) {
+            this.tdClass = tdClass;
+            this.trOddClass = trOddClass;
+            this.trEvenClass = trEvenClass;
+        }
+
+        public String getTdClass() {
+            return tdClass;
+        }
+
+        public String getTrOddClass() {
+            return trOddClass;
+        }
+
+        public String getTrEvenClass() {
+            return trEvenClass;
+        }
+    }
+
+    public class Row {
         private final FluentElement container;
 
         public Row(FluentElement container) {
@@ -53,20 +82,40 @@ public class BsTable {
         public FluentElement getContainer() {
             return container;
         }
+
+        public List<Cell> getCells() {
+            return Lists.newArrayList(container.find().td(withClass(type.getTdClass())).asList().as(Cell.class));
+        }
+
     }
 
     public static class Cell {
+
         private final FluentElement container;
 
         public Cell(FluentElement container) {
             this.container = container;
         }
+
+        public String text() {
+            return container.text();
+        }
+
+        public FluentElement getContainer() {
+            return container;
+        }
     }
 
     private final FluentElement container;
+    private final Type type;
 
     public BsTable(FluentElement container) {
+        this(container, Type.CELL_TABLE);
+    }
+
+    public BsTable(FluentElement container, Type type) {
         this.container = container;
+        this.type = type;
     }
 
     private Optional<FluentElement> button(String buttonName) {
@@ -87,6 +136,17 @@ public class BsTable {
         return BsTable.tableXPath(container).asList().as(BsTable.class);
     }
 
+    public BsModal editSubmission() {
+        button(I18N.CONSTANTS.edit()).get().clickWhenReady();
+        container.root().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().find().div(withClass("formPanel")).firstIfPresent().isPresent();
+            }
+        });
+        return BsModal.find(container.root());
+    }
+
     public BsModal newSubmission() {
         button(I18N.CONSTANTS.newText()).get().clickWhenReady();
         container.root().waitUntil(new Predicate<WebDriver>() {
@@ -99,8 +159,20 @@ public class BsTable {
     }
 
     public List<Row> rows() {
-        return Lists.newArrayList(container.find().tagName("tr", false, withClass("cellTableEvenRow"), withClass("cellTableOddRow"))
-                .asList().as(Row.class));
+        // as() doesn't work because of inner class? convert manually
+        List<FluentElement> elements = container.find().tagName("tr", false, withClass(type.getTrEvenClass()), withClass(type.getTrOddClass())).asList().list();
+        List<Row> rows = Lists.newArrayList();
+        for (FluentElement element : elements) {
+            rows.add(new Row(element));
+        }
+        return rows;
+//        return Lists.newArrayList(container.find().tagName("tr", false, withClass(type.getTrEvenClass()), withClass(type.getTrOddClass()))
+//                .asList().as(Row.class));
+    }
+
+    public Optional<Cell> findCellByText(String cellText) {
+        Optional<FluentElement> cell = container.find().td(withClass(type.getTdClass()), withText(cellText)).firstIfPresent();
+        return cell.isPresent() ? Optional.of(new Cell(cell.get())) : Optional.<Cell>absent();
     }
 
     public int rowCount() {
@@ -121,5 +193,60 @@ public class BsTable {
         List<Row> rows = rows();
         WebElement lastRow = rows.get(rows.size() - 1).getContainer().element();
         ((Locatable) lastRow).getCoordinates().inViewPort();
+    }
+
+
+    public void assertRowsPresent(DataTable dataTable) {
+        List<DataTableRow> matched = Lists.newArrayList();
+        List<DataTableRow> notMatched = Lists.newArrayList();
+
+        for (Row row : rows()) {
+            for (int i = 2; i< dataTable.getGherkinRows().size(); i++) {
+                DataTableRow gherkinRow = dataTable.getGherkinRows().get(i);
+                if (matched(row.getCells(), gherkinRow)) {
+                    matched.add(gherkinRow);
+                } else {
+                    notMatched.add(gherkinRow);
+                }
+            }
+        }
+        if (matched.size() == (dataTable.getGherkinRows().size() - 2)) {
+            return; // all are matched
+        }
+
+        throw new AssertionError("Unable to find mactch for field values: " + notMatched);
+    }
+
+    public static boolean matched(List<Cell> cells, DataTableRow row) {
+        for (Cell cell : cells) {
+            for (String cellStr : row.getCells()) {
+                if (!cell.text().equals(cellStr)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public BsTable showAllColumns() {
+        ChooseColumnsDialog dialog = chooseColumns();
+        dialog.showAllColumns();
+        dialog.ok();
+        return this;
+    }
+
+    public ChooseColumnsDialog chooseColumns() {
+        button(I18N.CONSTANTS.chooseColumns()).get().clickWhenReady();
+        container.root().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().find().div(withClass(BsModal.CLASS_NAME)).firstIfPresent().isPresent();
+            }
+        });
+        return new ChooseColumnsDialog(BsModal.find(container.root()));
+    }
+
+    public Type getType() {
+        return type;
     }
 }

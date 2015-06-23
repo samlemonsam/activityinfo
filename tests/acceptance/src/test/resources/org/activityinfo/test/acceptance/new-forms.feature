@@ -3,7 +3,13 @@ Feature: Partners in new form layout
 
   Background:
     Given I have created a database "Patient Registration"
+    And I have added partner "NRC" to "Patient Registration"
     And I have created a form "Patient Visits" using the new layout
+    And I have created a form named "Medical Activities" with the submissions:
+      | Number of patients | Donor   | Diseases treated this month    | Comments         | Partner |
+      | quantity           | enum    | enum                           | text             | enum    |
+      | 230                | USAID   | cholera, malaria, tuberculosis | no comment       | NRC     |
+      | 11                 | ECHO    | cholera                        | cholera epidemic | NRC     |
 
   @AI-1108
   @web
@@ -51,6 +57,16 @@ Feature: Partners in new form layout
 #    When I open a new form submission for "Patient Visits" then field values are:
 #      | field     | value   | controlType |
 #      | Partner2  | Default | radio       |
+
+  @AI-1132
+  Scenario: Updating enum values
+    When edit entry in new table with field name "Number of patients" and value "11" in the database "Patient Registration" in the form "Medical Activities" with:
+      | field       | value      |
+      | Donor       | USAID      |
+    Then table has rows:
+      | Number of patients | Donor   | Diseases treated this month    | Comments         | Partner |
+      | quantity           | enum    | enum                           | text             | enum    |
+      | 11                 | USAID   | cholera, malaria               | no comment       | NRC     |
 
 
 #  @web @odk

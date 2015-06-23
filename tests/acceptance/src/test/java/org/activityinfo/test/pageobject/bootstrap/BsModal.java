@@ -21,13 +21,21 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+
+import java.util.List;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
@@ -69,6 +77,24 @@ public class BsModal extends ModalDialog {
         return new BsFormPanel(windowElement.find().div(withClass("modal-body")).first());
     }
 
+    public BsModal fill(List<FieldValue> fieldValues) {
+        Form form = form();
+        for (FieldValue value : fieldValues) {
+            fill(form, value);
+        }
+        return this;
+    }
+
+    private void fill(Form form, FieldValue value) {
+        Form.FormItem item = form.findFieldByLabel(value.getField());
+        Optional<? extends FieldTypeClass> type = value.getType();
+        if (!type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
+            item.fill(value.getValue());
+        } else {
+            item.fill(org.joda.time.LocalDate.parse(value.getValue()));
+        }
+    }
+
     private FluentElement buttonsContainer() {
         return windowElement.find().div(withClass("modal-footer")).first();
     }
@@ -106,11 +132,14 @@ public class BsModal extends ModalDialog {
 
     @Override
     public void accept() {
-        throw new UnsupportedOperationException();
+        click(I18N.CONSTANTS.ok());
     }
 
     public boolean isClosed() {
         return !windowElement.isDisplayed();
     }
 
+    public FluentElement getWindowElement() {
+        return windowElement;
+    }
 }

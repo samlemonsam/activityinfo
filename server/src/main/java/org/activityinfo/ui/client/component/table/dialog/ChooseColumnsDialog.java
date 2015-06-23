@@ -28,10 +28,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -53,6 +50,7 @@ import org.activityinfo.ui.client.component.table.InstanceTableView;
 import org.activityinfo.ui.client.style.table.DataGridResources;
 import org.activityinfo.ui.client.widget.ModalDialog;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -113,6 +111,15 @@ public class ChooseColumnsDialog {
         selectedTableDataProvider.addDataDisplay(selectedTable);
         selectedTableDataProvider.setList(tableView.getSelectedColumns());
         selectedTableDataProvider.refresh();
+        selectedTable.addDomHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(final DoubleClickEvent event) {
+                Set<FieldColumn> set = selectionModel.getSelectedSet();
+                if (event.getSource() != null && set.size() == 1) {
+                    onMoveLeft(null);
+                }
+            }
+        }, DoubleClickEvent.getType());
 
         final List<FieldColumn> allColumns = Lists.newArrayList(tableView.getColumns());
 
@@ -127,6 +134,15 @@ public class ChooseColumnsDialog {
                 return null;
             }
         });
+        table.addDomHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(final DoubleClickEvent event) {
+                Set<FieldColumn> set = selectionModel.getSelectedSet();
+                if (event.getSource() != null && set.size() == 1) {
+                    onMoveRight(null);
+                }
+            }
+        }, DoubleClickEvent.getType());
         tableDataProvider.addDataDisplay(table);
         tableDataProvider.setList(allColumns);
         tableDataProvider.refresh();
@@ -251,7 +267,7 @@ public class ChooseColumnsDialog {
     }
 
     @UiHandler("rightButton")
-    public void onMoveRight(ClickEvent event) {
+    public void onMoveRight(@Nullable ClickEvent event) {
         final Set<FieldColumn> set = Sets.newHashSet(selectionModel.getSelectedSet());
 
         set.removeAll(selectedTableDataProvider.getList());
@@ -277,7 +293,7 @@ public class ChooseColumnsDialog {
     }
 
     @UiHandler("leftButton")
-    public void onMoveLeft(ClickEvent event) {
+    public void onMoveLeft(@Nullable ClickEvent event) {
         final Set<FieldColumn> set = selectedSelectionModel.getSelectedSet();
 
         selectedTableDataProvider.getList().removeAll(set);
