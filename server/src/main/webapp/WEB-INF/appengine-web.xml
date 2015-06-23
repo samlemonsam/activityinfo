@@ -16,6 +16,8 @@
 
     <!--  JAXB Context Initialization was taking up to 2 seconds on AppEngine -->
     <property name="com.sun.xml.bind.v2.runtime.JAXBContextImpl.fastBoot" value="true"/>
+    
+    <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
   </system-properties>
 
   <use-google-connector-j>true</use-google-connector-j>

@@ -81,7 +81,7 @@ compileJava {
     doLast {
         ant.taskdef(name: 'hibernateInstrumentation',
                 classpath: project.sourceSets.main.compileClasspath.asPath,
-                classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask') {
+                classname: 'org.hibernate.tool.enhance.EnhancementTask') {
 
         }
         
