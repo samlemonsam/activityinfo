@@ -76,6 +76,24 @@ test {
     }
 }
 
+compileJava {
+    
+    doLast {
+        ant.taskdef(name: 'hibernateInstrumentation',
+                classpath: project.sourceSets.main.compileClasspath.asPath,
+                classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask') {
+
+        }
+        
+        ant.hibernateInstrumentation(verbose: 'true') {
+            fileset(
+                    dir: "${project.buildDir}/classes/main",
+                    includes: 'org/activityinfo/server/database/hibernate/entity/*.class'
+            )
+        }
+    }
+}
+
 processResources {
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
