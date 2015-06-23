@@ -21,8 +21,9 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
-import com.google.api.client.util.Lists;
+
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
