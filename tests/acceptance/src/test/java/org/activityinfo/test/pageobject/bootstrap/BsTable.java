@@ -223,7 +223,9 @@ public class BsTable {
     public static boolean matched(List<Cell> cells, DataTableRow row) {
         for (Cell cell : cells) {
             for (String cellStr : row.getCells()) {
-                if (!cell.text().equals(cellStr) && !cell.text().equals(cellStr)) {
+                String text = cell.text();
+                String deAlias = text.contains("_") ? text.substring(0, text.indexOf("_")) : text;
+                if (!text.equals(cellStr) && !deAlias.equals(cellStr)) {
                     return false;
                 }
             }
@@ -235,6 +237,15 @@ public class BsTable {
         ChooseColumnsDialog dialog = chooseColumns();
         dialog.showAllColumns();
         dialog.ok();
+        dialog.getModal().waitUntilClosed();
+        return this;
+    }
+
+    public BsTable hideBuiltInColumns() {
+        ChooseColumnsDialog dialog = chooseColumns();
+        dialog.hideBuiltInColumns();
+        dialog.ok();
+        dialog.getModal().waitUntilClosed();
         return this;
     }
 

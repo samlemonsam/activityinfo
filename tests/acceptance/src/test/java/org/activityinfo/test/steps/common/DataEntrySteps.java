@@ -243,7 +243,7 @@ public class DataEntrySteps {
         tablePage.table().findCellByText(fieldValue).get().getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
-        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save());
+        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();
 
         currentPage = tablePage;
     }
@@ -252,6 +252,6 @@ public class DataEntrySteps {
     public void table_has_rows(DataTable dataTable) throws Throwable {
         Preconditions.checkState(currentPage instanceof TablePage);
         TablePage tablePage = (TablePage) currentPage;
-        tablePage.table().assertRowsPresent(dataTable);
+        tablePage.table().hideBuiltInColumns().assertRowsPresent(dataTable);
     }
 }

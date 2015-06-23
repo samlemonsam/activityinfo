@@ -112,8 +112,9 @@ public class BsModal extends ModalDialog {
         return windowElement.find().div(withClass("modal-footer")).first();
     }
 
-    public void click(String buttonName) {
+    public BsModal click(String buttonName) {
         click(buttonName, "", false);
+        return this;
     }
 
     public void click(String buttonName, final String expectedTitle) {
@@ -146,6 +147,7 @@ public class BsModal extends ModalDialog {
     @Override
     public void accept() {
         click(I18N.CONSTANTS.ok());
+        waitUntilClosed();
     }
 
     public boolean isClosed() {
@@ -154,5 +156,14 @@ public class BsModal extends ModalDialog {
 
     public FluentElement getWindowElement() {
         return windowElement;
+    }
+
+    public void waitUntilClosed() {
+        windowElement.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return !windowElement.isDisplayed();
+            }
+        });
     }
 }

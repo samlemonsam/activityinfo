@@ -31,12 +31,20 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author yuriyz on 06/23/2015.
  */
 public class ChooseColumnsDialog {
+
+    public static final List<String> BUILT_IN_COLUMNS = Arrays.asList(
+         I18N.CONSTANTS.startDate(), I18N.CONSTANTS.endDate(),
+            I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.name(),
+            I18N.CONSTANTS.project() + " " + I18N.CONSTANTS.name(),
+            I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.fullName(), I18N.CONSTANTS.partner()
+    );
 
     private BsModal modal;
 
@@ -56,7 +64,7 @@ public class ChooseColumnsDialog {
         return new BsTable(tables().get(1), BsTable.Type.GRID_TABLE);
     }
 
-    private List<BsTable.Row> rows(boolean isVisible) {
+    private List<BsTable.Row> allColumnsRows(boolean isVisible) {
         BsTable allColumnsGrid = allColumnsGrid();
         List<BsTable.Row> visible = Lists.newArrayList();
         List<BsTable.Row> notVisible = Lists.newArrayList();
@@ -76,15 +84,56 @@ public class ChooseColumnsDialog {
         return this;
     }
 
+    private BsTable.Row getFirstVisibleBuiltInRow() {
+        for (BsTable.Row row : visibleColumnsGrid().rows()) {
+            if (BUILT_IN_COLUMNS.contains(row.getContainer().text())) {
+                return row;
+            }
+        }
+        return null;
+    }
+
+    public ChooseColumnsDialog hideBuiltInColumns() {
+        int counter = 0;
+
+        while (getFirstVisibleBuiltInRow() != null) {
+            // first select first visible row
+            getFirstVisibleBuiltInRow().getContainer().clickWhenReady();
+
+            // element is changed because of selection (stale element), re-select invisible rows again
+            FluentElement container = getFirstVisibleBuiltInRow().getContainer();
+            final String text = container.text();
+            container.doubleClick();
+
+            modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
+                @Override
+                public boolean apply(@Nullable WebDriver input) {
+                    // wait until appears in invisible list
+                    for (BsTable.Row invisible : allColumnsRows(false)) {
+                        if (invisible.getContainer().text().contains(text)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            });
+            counter++;
+            if (counter > 1000) { // be on safe side
+                throw new AssertionError("Failed to make all columns visible in instance table.");
+            }
+        }
+        return this;
+    }
+
     public ChooseColumnsDialog showAllColumns() {
         int counter = 0;
 
-        while(!rows(false).isEmpty()) {
+        while (!allColumnsRows(false).isEmpty()) {
             // first select first invisible row
-            rows(false).get(0).getContainer().clickWhenReady();
+            allColumnsRows(false).get(0).getContainer().clickWhenReady();
 
             // element is changed because of selection (stale element), re-select invisible rows again
-            FluentElement container = rows(false).get(0).getContainer();
+            FluentElement container = allColumnsRows(false).get(0).getContainer();
             final String text = container.text();
             container.doubleClick();
 
@@ -92,7 +141,7 @@ public class ChooseColumnsDialog {
                 @Override
                 public boolean apply(@Nullable WebDriver input) {
                     // if not in invisible row list then stop waiting
-                    for (BsTable.Row notVisible : rows(false)) {
+                    for (BsTable.Row notVisible : allColumnsRows(false)) {
                         if (notVisible.getContainer().text().contains(text)) {
                             return false;
                         }
@@ -106,5 +155,9 @@ public class ChooseColumnsDialog {
             }
         }
         return this;
+    }
+
+    public BsModal getModal() {
+        return modal;
     }
 }
