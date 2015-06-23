@@ -188,8 +188,12 @@ public class BsFormPanel extends Form {
             throw new UnsupportedOperationException();
         }
 
+        private FluentElement radioElement(String label) {
+            return element.find().label(withText(label)).precedingSibling().input().first();
+        }
+
         public boolean isRadioSelected(String label) {
-            FluentElement radio = element.find().label(withText(label)).precedingSibling().input().first();
+            FluentElement radio = radioElement(label);
             Preconditions.checkState(radio.element().getAttribute("type").equals("radio"), "Element is not radio element");
             return radio.element().isSelected();
         }

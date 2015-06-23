@@ -61,8 +61,8 @@ Feature: Partners in new form layout
   @AI-1132
   Scenario: Updating enum values
     When edit entry in new table with field name "Number of patients" and value "11" in the database "Patient Registration" in the form "Medical Activities" with:
-      | field       | value      |
-      | Donor       | USAID      |
+      | field       | value  | controlType |
+      | Donor       | USAID  | radio       |
     Then table has rows:
       | Number of patients | Donor   | Diseases treated this month    | Comments         | Partner |
       | quantity           | enum    | enum                           | text             | enum    |

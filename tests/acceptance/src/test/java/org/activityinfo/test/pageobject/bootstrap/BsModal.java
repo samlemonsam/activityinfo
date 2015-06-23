@@ -26,11 +26,12 @@ import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
-import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -73,25 +74,37 @@ public class BsModal extends ModalDialog {
     }
 
     @Override
-    public Form form() {
+    public BsFormPanel form() {
         return new BsFormPanel(windowElement.find().div(withClass("modal-body")).first());
     }
 
     public BsModal fill(List<FieldValue> fieldValues) {
-        Form form = form();
+        BsFormPanel form = form();
         for (FieldValue value : fieldValues) {
             fill(form, value);
         }
         return this;
     }
 
-    private void fill(Form form, FieldValue value) {
-        Form.FormItem item = form.findFieldByLabel(value.getField());
+    private void fill(BsFormPanel form, FieldValue value) {
+        BsFormPanel.BsField item = form.findFieldByLabel(value.getField());
+
+        // fill by control type
+        if ("radio".equalsIgnoreCase(value.getControlType())) {
+            item.select(value.getValue());
+            return;
+        }
+
+        // fill by type
         Optional<? extends FieldTypeClass> type = value.getType();
-        if (!type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
+        if (type == null || !type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
             item.fill(value.getValue());
         } else {
-            item.fill(org.joda.time.LocalDate.parse(value.getValue()));
+            if (type.get() == LocalDateType.TYPE_CLASS) {
+                item.fill(org.joda.time.LocalDate.parse(value.getValue()));
+            } else if (type.get() == EnumType.TYPE_CLASS) {
+                item.select(value.getValue());
+            }
         }
     }
 

@@ -239,6 +239,16 @@ public class AliasTable {
         }
     }
 
+    public List<FieldValue> alias(List<FieldValue> fieldValues) {
+        for (FieldValue value : fieldValues) {
+            value.setField(getAlias(value.getField()));
+            if ("radio".equalsIgnoreCase(value.getControlType())) {
+                value.setValue(getAlias(value.getValue()));
+            }
+        }
+        return fieldValues;
+    }
+
     public static class TestHandle {
 
         private String testHandle;

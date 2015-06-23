@@ -1,11 +1,13 @@
 package org.activityinfo.test.steps.common;
 
+import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
@@ -39,8 +41,7 @@ public class DataEntrySteps {
     private ApplicationDriver driver;
 
     private File exportedFile = null;
-    private String currentDatabase;
-    private String currentForm;
+    private Object currentPage;
 
 
     @Given("^I submit a \"([^\"]*)\" form with:$")
@@ -234,19 +235,23 @@ public class DataEntrySteps {
                                                                                                    String database, String formName,
                                                                                                    List<FieldValue> fieldValues
     ) throws Throwable {
-        currentDatabase = driver.getAliasTable().getAlias(database);
-        currentForm = driver.getAliasTable().getAlias(formName);
+        database = driver.getAliasTable().getAlias(database);
+        formName = driver.getAliasTable().getAlias(formName);
 
-        TablePage tablePage = driver.openFormTable(currentDatabase, currentForm);
-        tablePage.table().showAllColumns().findCellByText(fieldValue).get().getContainer().clickWhenReady();
+        TablePage tablePage = driver.openFormTable(database, formName);
+        tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().findCellByText(fieldValue).get().getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
-        bsModal.fill(fieldValues).accept();
+        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save());
+
+        currentPage = tablePage;
     }
 
     @Then("^table has rows:$")
     public void table_has_rows(DataTable dataTable) throws Throwable {
-        TablePage tablePage = driver.openFormTable(currentDatabase, currentForm);
-        tablePage.table().showAllColumns().assertRowsPresent(dataTable);
+        Preconditions.checkState(currentPage instanceof TablePage);
+        TablePage tablePage = (TablePage) currentPage;
+        tablePage.table().assertRowsPresent(dataTable);
     }
 }

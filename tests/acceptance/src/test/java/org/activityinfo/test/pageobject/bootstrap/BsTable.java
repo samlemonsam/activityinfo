@@ -171,8 +171,11 @@ public class BsTable {
     }
 
     public Optional<Cell> findCellByText(String cellText) {
-        Optional<FluentElement> cell = container.find().td(withClass(type.getTdClass()), withText(cellText)).firstIfPresent();
-        return cell.isPresent() ? Optional.of(new Cell(cell.get())) : Optional.<Cell>absent();
+        Optional<FluentElement> cell = container.find().td(withClass(type.getTdClass())).div(withText(cellText)).firstIfPresent();
+        if (cell.isPresent()) {
+            return Optional.of(new Cell(cell.get().find().ancestor().td(withClass(type.getTdClass())).first()));
+        }
+        return Optional.absent();
     }
 
     public int rowCount() {
@@ -220,7 +223,7 @@ public class BsTable {
     public static boolean matched(List<Cell> cells, DataTableRow row) {
         for (Cell cell : cells) {
             for (String cellStr : row.getCells()) {
-                if (!cell.text().equals(cellStr)) {
+                if (!cell.text().equals(cellStr) && !cell.text().equals(cellStr)) {
                     return false;
                 }
             }
@@ -248,5 +251,15 @@ public class BsTable {
 
     public Type getType() {
         return type;
+    }
+
+    public BsTable waitUntilColumnShown(final String columnName) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(@Nullable WebDriver input) {
+                return container.find().span(withText(columnName)).firstIfPresent().isPresent();
+            }
+        });
+        return this;
     }
 }

@@ -24,6 +24,7 @@ package org.activityinfo.test.pageobject.bootstrap;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.By;
@@ -76,9 +77,16 @@ public class ChooseColumnsDialog {
     }
 
     public ChooseColumnsDialog showAllColumns() {
-        for (final BsTable.Row row : rows(false)) {
-            final String text = row.getContainer().text();
-            row.getCells().get(0).getContainer().doubleClick();
+        int counter = 0;
+
+        while(!rows(false).isEmpty()) {
+            // first select first invisible row
+            rows(false).get(0).getContainer().clickWhenReady();
+
+            // element is changed because of selection (stale element), re-select invisible rows again
+            FluentElement container = rows(false).get(0).getContainer();
+            final String text = container.text();
+            container.doubleClick();
 
             modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
                 @Override
@@ -92,6 +100,10 @@ public class ChooseColumnsDialog {
                     return true;
                 }
             });
+            counter++;
+            if (counter > 1000) { // be on safe side
+                throw new AssertionError("Failed to make all columns visible in instance table.");
+            }
         }
         return this;
     }
