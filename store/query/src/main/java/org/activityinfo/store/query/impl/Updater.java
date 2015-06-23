@@ -14,9 +14,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -221,6 +219,10 @@ public class Updater {
         
         } else if(field.getType() instanceof LocalDateType) {
             return parseDate(jsonValue.getAsString());    
+            
+        } else if(field.getType() instanceof NarrativeType) {
+            return NarrativeValue.valueOf(jsonValue.getAsString());
+            
         }
         throw new InvalidUpdateException("Unsupported type: " + field.getType().getTypeClass().getId());
     }
