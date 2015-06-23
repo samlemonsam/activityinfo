@@ -11,10 +11,13 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class SiteProjector implements Function<ListResult<SiteDTO>, List<Projection>> {
 
+    private static final Logger LOGGER = Logger.getLogger(SiteProjector.class.getName());
+    
     private final List<ProjectionUpdater<LocationDTO>> locationProjectors;
     private final List<ProjectionUpdater<PartnerDTO>> partnerProjectors = Lists.newArrayList();
     private final List<IndicatorProjectionUpdater> indicatorProjectors = Lists.newArrayList();
@@ -84,10 +87,14 @@ public class SiteProjector implements Function<ListResult<SiteDTO>, List<Project
                         site.get(propertyName) == Boolean.TRUE) {
                     final AttributeDTO attributeById = activity.getAttributeById(AttributeDTO.idForPropertyName(
                             propertyName));
-                    AttributeGroupDTO attributeGroup = activity.getAttributeGroupByAttributeId(attributeById.getId());
-                    for (AttributeProjectionUpdater projector : attributeProjectors) {
-                        if (CuidAdapter.getLegacyIdFromCuid(projector.getAttributeGroupId()) == attributeGroup.getId()) {
-                            projector.update(projection, attributeById);
+                    if(attributeById == null) {
+                        LOGGER.severe("Unknown attribute " + propertyName);
+                    } else {
+                        AttributeGroupDTO attributeGroup = activity.getAttributeGroupByAttributeId(attributeById.getId());
+                        for (AttributeProjectionUpdater projector : attributeProjectors) {
+                            if (CuidAdapter.getLegacyIdFromCuid(projector.getAttributeGroupId()) == attributeGroup.getId()) {
+                                projector.update(projection, attributeById);
+                            }
                         }
                     }
                 }

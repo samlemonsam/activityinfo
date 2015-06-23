@@ -10,11 +10,16 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.ui.client.widget.Button;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Displays the loading state of a table
  */
 public class TableLoadingIndicator implements IsWidget, LoadingView {
 
+    private static final Logger LOGGER = Logger.getLogger(TableLoadingIndicator.class.getName());
+    
     private final HTMLPanel rootElement;
 
     @UiField
@@ -36,6 +41,7 @@ public class TableLoadingIndicator implements IsWidget, LoadingView {
 
     @Override
     public void onLoadingStateChanged(final LoadingState state, final Throwable caught) {
+        LOGGER.log(Level.SEVERE, "Table Load failed", caught);
         onLoadingStateChanged(state, ExceptionOracle.getHeading(caught));
     }
 
