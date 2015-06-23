@@ -81,11 +81,11 @@ compileJava {
     doLast {
         ant.taskdef(name: 'hibernateInstrumentation',
                 classpath: project.sourceSets.main.compileClasspath.asPath,
-                classname: 'org.hibernate.tool.enhance.EnhancementTask') {
+                classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask') {
 
         }
         
-        ant.hibernateInstrumentation(verbose: 'true') {
+        ant.hibernateInstrumentation() {
             fileset(
                     dir: "${project.buildDir}/classes/main",
                     includes: 'org/activityinfo/server/database/hibernate/entity/*.class'
