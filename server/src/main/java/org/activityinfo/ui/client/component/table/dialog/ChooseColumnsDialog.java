@@ -114,7 +114,7 @@ public class ChooseColumnsDialog {
         selectedTable.addDomHandler(new DoubleClickHandler() {
             @Override
             public void onDoubleClick(final DoubleClickEvent event) {
-                Set<FieldColumn> set = selectionModel.getSelectedSet();
+                Set<FieldColumn> set = selectedSelectionModel.getSelectedSet();
                 if (event.getSource() != null && set.size() == 1) {
                     onMoveLeft(null);
                 }
