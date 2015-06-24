@@ -477,6 +477,25 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
                         .getId());
     }
 
+
+    @Test
+    @OnDataSet("/dbunit/sites-simple1.db.xml")
+    public void testPercentages() {
+
+        withIndicatorAsDimension();
+        withSiteAsDimension();
+
+        filter.addRestriction(DimensionType.Indicator, 676);
+        
+        execute();
+
+        assertBucketCount(2);
+        assertEquals(60, (int) buckets.get(0).doubleValue());
+        assertEquals(40, (int) buckets.get(1).doubleValue());
+
+    }
+
+
     @Test
     @OnDataSet("/dbunit/sites-weeks.db.xml")
     public void testWeeks() {
@@ -849,6 +868,10 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         dimensions.add(indicatorDim);
     }
 
+    private void withSiteAsDimension() {
+        dimensions.add(new Dimension(DimensionType.Site));
+    }
+    
     private void withProjectAsDimension() {
         dimensions.add(projectDim);
     }

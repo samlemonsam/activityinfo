@@ -22,10 +22,10 @@ package org.activityinfo.legacy.shared.command.result;
  * #L%
  */
 
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.type.geo.AiLatLng;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -38,6 +38,7 @@ import java.util.Map;
 public class Bucket implements Serializable {
     private double sum;
     private int count;
+    private double percentage;
     private int aggregationMethod;
     private AiLatLng point;
 
@@ -90,6 +91,14 @@ public class Bucket implements Serializable {
         return point;
     }
 
+    public double getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(double percentage) {
+        this.percentage = percentage;
+    }
+
     public void setPoint(AiLatLng point) {
         this.point = point;
     }
@@ -115,6 +124,8 @@ public class Bucket implements Serializable {
                 return sum;
             case IndicatorDTO.AGGREGATE_SITE_COUNT:
                 return count;
+            case IndicatorDTO.AGGREGATE_PERCENT:
+                return percentage;
         }
         throw new UnsupportedOperationException("aggregationMethod: " + aggregationMethod);
     }

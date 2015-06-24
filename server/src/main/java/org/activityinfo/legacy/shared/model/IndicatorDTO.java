@@ -28,11 +28,9 @@ import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -50,6 +48,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     public final static int AGGREGATE_SUM = 0;
     public final static int AGGREGATE_AVG = 1;
     public final static int AGGREGATE_SITE_COUNT = 2;
+    public final static int AGGREGATE_PERCENT = 3;
 
     public static final String PROPERTY_PREFIX = "I";
 

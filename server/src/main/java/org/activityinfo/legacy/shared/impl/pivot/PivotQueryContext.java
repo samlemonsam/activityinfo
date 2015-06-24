@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.impl.ExecutionContext;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -68,5 +69,20 @@ public class PivotQueryContext {
 
     public List<Bucket> getBuckets() {
         return Lists.newArrayList(buckets.values());
+    }
+    
+    public void calculatePercentages() {
+
+        double total = 0;
+        for (Bucket bucket : buckets.values()) {
+            if(bucket.getAggregationMethod() == IndicatorDTO.AGGREGATE_PERCENT) {
+                total += bucket.getSum();
+            }
+        }
+        for (Bucket bucket : buckets.values()) {
+            if(bucket.getAggregationMethod() == IndicatorDTO.AGGREGATE_PERCENT) {
+                bucket.setPercentage(bucket.getSum() / total * 100d);
+            }
+        }
     }
 }
