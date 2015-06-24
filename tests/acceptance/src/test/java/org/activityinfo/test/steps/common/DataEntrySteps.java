@@ -240,7 +240,7 @@ public class DataEntrySteps {
 
         TablePage tablePage = driver.openFormTable(database, formName);
         tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
-        tablePage.table().findCellByText(fieldValue).get().getContainer().clickWhenReady();
+        tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
         bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();

@@ -178,6 +178,11 @@ public class BsTable {
         return Optional.absent();
     }
 
+    public Cell waitForCellByText(String cellText) {
+        FluentElement cell = container.find().td(withClass(type.getTdClass())).div(withText(cellText)).waitForFirst();
+        return new Cell(cell.find().ancestor().td(withClass(type.getTdClass())).first());
+    }
+
     public int rowCount() {
         return rows().size();
     }
