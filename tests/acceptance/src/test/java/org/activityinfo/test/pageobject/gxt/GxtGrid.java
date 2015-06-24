@@ -6,6 +6,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
+import org.activityinfo.test.driver.Tester;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.openqa.selenium.By;
@@ -186,11 +187,13 @@ public class GxtGrid {
             
             // If there is a currently focused cell, clear it first.
             Optional<FluentElement> focusedElement = element.focusedElement();
-            if(focusedElement.isPresent()) {
+            if (focusedElement.isPresent()) {
                 focusedElement.get().sendKeys(Keys.ESCAPE);
             }
 
-            element.click();
+            Tester.sleep(300);// just give some time for those sendKeys which sometimes takes some time to react
+
+            element.clickWhenReady();
 
             final FluentElement input = container.find()
                     .div(withClass("x-grid-editor"))
