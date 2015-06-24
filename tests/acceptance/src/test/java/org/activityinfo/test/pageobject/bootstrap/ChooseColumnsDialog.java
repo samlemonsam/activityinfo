@@ -41,10 +41,12 @@ import java.util.List;
 public class ChooseColumnsDialog {
 
     public static final List<String> BUILT_IN_COLUMNS = Arrays.asList(
-         I18N.CONSTANTS.startDate(), I18N.CONSTANTS.endDate(),
+            I18N.CONSTANTS.startDate(),
+            I18N.CONSTANTS.endDate(),
+            I18N.CONSTANTS.comments(),
             I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.name(),
             I18N.CONSTANTS.project() + " " + I18N.CONSTANTS.name(),
-            I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.fullName(), I18N.CONSTANTS.partner()
+            I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.fullName()
     );
 
     private BsModal modal;
@@ -108,14 +110,14 @@ public class ChooseColumnsDialog {
 
             modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
                 @Override
-                public boolean apply(@Nullable WebDriver input) {
+                public boolean apply(WebDriver input) {
                     // wait until appears in invisible list
                     for (BsTable.Row invisible : allColumnsRows(false)) {
                         if (invisible.getContainer().text().contains(text)) {
-                            return false;
+                            return true;
                         }
                     }
-                    return true;
+                    return false;
                 }
             });
             counter++;

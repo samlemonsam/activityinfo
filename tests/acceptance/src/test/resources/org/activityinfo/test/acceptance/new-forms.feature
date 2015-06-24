@@ -64,9 +64,9 @@ Feature: Partners in new form layout
       | field       | value  | controlType |
       | Donor       | USAID  | radio       |
     Then table has rows:
-      | Number of patients | Donor   | Diseases treated this month    |
-      | quantity           | enum    | enum                           |
-      | 11                 | USAID   | cholera, malaria               |
+      | Number of patients | Donor   | Diseases treated this month  |
+      | quantity           | enum    | enum                         |
+      | 11                 | USAID   | cholera                      |
 
 
 #  @web @odk

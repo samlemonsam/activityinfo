@@ -158,6 +158,11 @@ public class BsTable {
         return BsModal.find(container.root());
     }
 
+    public BsTable waitUntilAtLeastOneRowIsLoaded() {
+        container.find().tagName("tr", false, withClass(type.getTrEvenClass()), withClass(type.getTrOddClass())).waitForFirst();
+        return this;
+    }
+
     public List<Row> rows() {
         // as() doesn't work because of inner class? convert manually
         List<FluentElement> elements = container.find().tagName("tr", false, withClass(type.getTrEvenClass()), withClass(type.getTrOddClass())).asList().list();
@@ -203,8 +208,7 @@ public class BsTable {
         ((Locatable) lastRow).getCoordinates().inViewPort();
     }
 
-
-    public void assertRowsPresent(DataTable dataTable) {
+    public BsTable assertRowsPresent(DataTable dataTable) {
         List<DataTableRow> matched = Lists.newArrayList();
         List<DataTableRow> notMatched = Lists.newArrayList();
 
@@ -219,20 +223,26 @@ public class BsTable {
             }
         }
         if (matched.size() == (dataTable.getGherkinRows().size() - 2)) {
-            return; // all are matched
+            return this; // all are matched
         }
 
-        throw new AssertionError("Unable to find mactch for field values: " + notMatched);
+        throw new AssertionError("Unable to find match for field values: " + notMatched);
     }
 
     public static boolean matched(List<Cell> cells, DataTableRow row) {
         for (Cell cell : cells) {
+            String text = cell.text();
+            String deAlias = text.contains("_") ? text.substring(0, text.indexOf("_")) : text;
+
+            boolean cellMatched = false;
             for (String cellStr : row.getCells()) {
-                String text = cell.text();
-                String deAlias = text.contains("_") ? text.substring(0, text.indexOf("_")) : text;
-                if (!text.equals(cellStr) && !deAlias.equals(cellStr)) {
-                    return false;
+                if (text.equals(cellStr) || deAlias.equals(cellStr)) {
+                    cellMatched = true;
+                    break;
                 }
+            }
+            if (!cellMatched) {
+                return false;
             }
         }
         return true;

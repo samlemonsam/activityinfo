@@ -252,6 +252,6 @@ public class DataEntrySteps {
     public void table_has_rows(DataTable dataTable) throws Throwable {
         Preconditions.checkState(currentPage instanceof TablePage);
         TablePage tablePage = (TablePage) currentPage;
-        tablePage.table().hideBuiltInColumns().assertRowsPresent(dataTable);
+        tablePage.table().hideBuiltInColumns().waitUntilAtLeastOneRowIsLoaded().assertRowsPresent(dataTable);
     }
 }
