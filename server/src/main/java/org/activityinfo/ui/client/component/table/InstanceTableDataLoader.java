@@ -192,6 +192,7 @@ public class InstanceTableDataLoader {
     }
 
     public void reload() {
+        instanceTotalCount = -1;
         tableDataProvider.getList().clear();
         load(0, PAGE_SIZE, false);
     }
