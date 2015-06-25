@@ -161,6 +161,7 @@ public class PropertiesPresenter {
         view.getRequired().setValue(formField.isRequired());
         view.getVisible().setValue(formField.isVisible());
         view.getCode().setValue(Strings.nullToEmpty(formField.getCode()));
+        view.getReadOnly().setValue(formField.isReadOnly());
 
         view.getRequired().setEnabled(!isBuiltIn);
         view.getVisible().setEnabled(!isBuiltIn);
