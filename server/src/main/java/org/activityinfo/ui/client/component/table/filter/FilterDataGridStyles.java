@@ -32,4 +32,7 @@ import com.google.gwt.user.cellview.client.DataGrid;
 @Source("filterdatagrid.less")
 @Strictness(ignoreMissingClasses = true)
 public interface FilterDataGridStyles extends Stylesheet, DataGrid.Style {
+
+    @ClassName("filter-panel")
+    String filterPanel();
 }

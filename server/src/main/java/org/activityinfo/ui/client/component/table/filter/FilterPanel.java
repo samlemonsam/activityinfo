@@ -27,6 +27,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -34,6 +36,9 @@ import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.HasCriteria;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.util.GwtUtil;
+import org.activityinfo.ui.client.util.Rectangle;
+import org.activityinfo.ui.client.widget.Button;
 
 /**
  * @author yuriyz on 4/3/14.
@@ -53,6 +58,8 @@ public class FilterPanel extends Composite implements HasCriteria {
     PopupPanel popup;
     @UiField
     HTMLPanel contentContainer;
+    @UiField
+    Button okButton;
 
     public FilterPanel(InstanceTable table, FieldColumn column) {
         this.table = table;
@@ -74,8 +81,41 @@ public class FilterPanel extends Composite implements HasCriteria {
             @Override
             public void execute() {
                 popup.setPopupPositionAndShow(positionCallback);
+
+                forcePopupToBeVisible();
             }
         });
+    }
+
+    private void forcePopupToBeVisible() {
+        final Rectangle bsContainerRectangle = GwtUtil.getBsContainerRectangle(okButton.getElement());
+        final Rectangle elementRectangle = GwtUtil.getRectangle(okButton.getElement());
+
+        //GWT.log("element: " + elementRectangle + ", bs container: " + bsContainerRectangle);
+
+        boolean isInViewport = bsContainerRectangle.has(elementRectangle);
+
+        if (!isInViewport) {
+            popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                @Override
+                public void setPosition(int offsetWidth, int offsetHeight) {
+                    int bottomDifference = -(bsContainerRectangle.getBottom() - elementRectangle.getBottom());
+                    popup.setPopupPosition(popup.getAbsoluteLeft(), popup.getPopupTop() - bottomDifference);
+                }
+            });
+        }
+    }
+
+    public static Element getBsContainer(Element descendant) {
+        if (descendant != null) {
+            if (descendant.getClassName().contains("bs ")) {
+                return descendant;
+            } else if (descendant.getParentElement() != null) {
+                return getBsContainer(DOM.asOld(descendant.getParentElement()));
+            }
+            return descendant;
+        }
+        return null;
     }
 
     public PopupPanel getPopup() {

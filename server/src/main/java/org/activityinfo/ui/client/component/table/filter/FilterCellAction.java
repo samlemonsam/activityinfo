@@ -36,6 +36,8 @@ import org.activityinfo.ui.client.widget.CellTable;
  */
 public class FilterCellAction implements ActionCell.Delegate {
 
+    private static final int MINIMUM_POPUP_WIDTH_PX = 250;
+
     private final InstanceTable table;
     private final FieldColumn column;
 
@@ -59,7 +61,10 @@ public class FilterCellAction implements ActionCell.Delegate {
                 final int absoluteTop = cellElement.getAbsoluteTop();
                 final int absoluteLeft = cellElement.getAbsoluteLeft();
                 final int height = cellElement.getOffsetHeight();
-                final int width = cellElement.getOffsetWidth();
+                int width = cellElement.getOffsetWidth();
+                if (width < MINIMUM_POPUP_WIDTH_PX) {
+                    width = MINIMUM_POPUP_WIDTH_PX;
+                }
 
                 filterPanel.getPopup().setWidth(width + "px");
                 filterPanel.getPopup().setPopupPosition(absoluteLeft,

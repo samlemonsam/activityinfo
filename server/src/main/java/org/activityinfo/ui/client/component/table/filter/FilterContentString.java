@@ -156,7 +156,7 @@ public class FilterContentString extends Composite implements FilterContent {
     private List<Projection> extractItems(List<Projection> visibleItems) {
         final SortedMap<String, Projection> labelToProjectionMap = Maps.newTreeMap();
         for (Projection projection : visibleItems) {
-            final String value = column.getValue(projection);
+            final String value = column.getValue(projection).replace(String.valueOf((char) 160), " ").trim();
             if (!Strings.isNullOrEmpty(value) && !labelToProjectionMap.containsKey(value)) {
                 labelToProjectionMap.put(value, projection);
             }

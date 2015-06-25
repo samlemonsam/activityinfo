@@ -4,11 +4,12 @@
              xmlns:a="urn:import:org.activityinfo.ui.client.widget">
 
   <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
+  <ui:with field='style' type='org.activityinfo.ui.client.component.table.filter.FilterDataGridStyles'/>
 
   <g:HTMLPanel>
     <g:PopupPanel autoHideEnabled="true" modal="true" ui:field="popup" styleName="bs">
       <g:HTMLPanel>
-        <div class="modal-dialog" ui:field="dialogDiv">
+        <div class="{style.filterPanel}" ui:field="dialogDiv">
           <div class="modal-content" ui:field="contentDiv">
             <div class="modal-body">
               <g:Button addStyleNames="btn btn-default btn-block btn-xs" ui:field="clearButton" text="{i18n.clearFilter}"/>
