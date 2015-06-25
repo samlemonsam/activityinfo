@@ -119,7 +119,7 @@ public class InstanceTableUiTest {
         background();
 
         final TablePage tablePage = driver.applicationPage().navigateToTable(driver.alias(DATABASE), driver.alias(FORM_NAME));
-        final BsTable table = tablePage.table();
+        BsTable table = tablePage.table();
 
         assertRowCount(table.rowCount(), 0);
 
@@ -133,6 +133,8 @@ public class InstanceTableUiTest {
                 @Override
                 public boolean apply(WebDriver input) {
 
+                    final BsTable table = tablePage.table(); // not clear why but we may get StaleReferenceException here sometimes, refresh reference
+
                     // we don't really use scroll but just back end forth to emulate it. Need something better here
                     table.scrollToTheTop();
                     table.scrollToTheBottom();
@@ -142,6 +144,7 @@ public class InstanceTableUiTest {
                 }
             });
 
+            table = tablePage.table(); // not clear why but we may get StaleReferenceException here sometimes, refresh reference
             int rowCount = table.rowCount();
             assertRowCount(rowCount, i);
             if (rowCount == SUBMISSIONS_COUNT) {
