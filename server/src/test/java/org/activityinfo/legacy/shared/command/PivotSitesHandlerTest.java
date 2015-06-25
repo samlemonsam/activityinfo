@@ -68,6 +68,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     private DateDimension yearDim = new DateDimension(DateUnit.YEAR);
     private DateDimension monthDim = new DateDimension(DateUnit.MONTH);
     private final Dimension activityCategoryDim = new Dimension(DimensionType.ActivityCategory);
+    private Dimension siteDim = new Dimension(DimensionType.Site);
 
     @BeforeClass
     public static void setup() {
@@ -490,8 +491,8 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         execute();
 
         assertBucketCount(2);
-        assertEquals(60, (int) buckets.get(0).doubleValue());
-        assertEquals(40, (int) buckets.get(1).doubleValue());
+        assertThat().forSite(1).thereIsOneBucketWithValue(40);
+        assertThat().forSite(2).thereIsOneBucketWithValue(60);
 
     }
 
@@ -869,7 +870,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     private void withSiteAsDimension() {
-        dimensions.add(new Dimension(DimensionType.Site));
+        dimensions.add(siteDim);
     }
     
     private void withProjectAsDimension() {
