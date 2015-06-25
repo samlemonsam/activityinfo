@@ -68,6 +68,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     private DateDimension yearDim = new DateDimension(DateUnit.YEAR);
     private DateDimension monthDim = new DateDimension(DateUnit.MONTH);
     private final Dimension activityCategoryDim = new Dimension(DimensionType.ActivityCategory);
+    private Dimension siteDim = new Dimension(DimensionType.Site);
 
     @BeforeClass
     public static void setup() {
@@ -477,6 +478,25 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
                         .getId());
     }
 
+
+    @Test
+    @OnDataSet("/dbunit/sites-simple1.db.xml")
+    public void testPercentages() {
+
+        withIndicatorAsDimension();
+        withSiteAsDimension();
+
+        filter.addRestriction(DimensionType.Indicator, 676);
+        
+        execute();
+
+        assertBucketCount(2);
+        assertThat().forSite(1).thereIsOneBucketWithValue(40);
+        assertThat().forSite(2).thereIsOneBucketWithValue(60);
+
+    }
+
+
     @Test
     @OnDataSet("/dbunit/sites-weeks.db.xml")
     public void testWeeks() {
@@ -849,6 +869,10 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         dimensions.add(indicatorDim);
     }
 
+    private void withSiteAsDimension() {
+        dimensions.add(siteDim);
+    }
+    
     private void withProjectAsDimension() {
         dimensions.add(projectDim);
     }

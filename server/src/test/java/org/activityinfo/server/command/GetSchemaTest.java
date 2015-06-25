@@ -46,7 +46,6 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -169,7 +168,7 @@ public class GetSchemaTest extends CommandTestCase2 {
 
         ActivityFormDTO nfi = execute(new GetActivityForm(1));
 
-        assertThat("indicators are present", nfi.getIndicators(), hasSize(5));
+        assertThat("indicators are present", nfi.getIndicators(), hasSize(6));
 
         IndicatorDTO test = nfi.getIndicatorById(2);
         assertThat(test, hasProperty("name", equalTo("baches")));
