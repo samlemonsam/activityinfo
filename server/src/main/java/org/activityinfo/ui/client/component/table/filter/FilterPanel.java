@@ -27,8 +27,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -104,18 +102,6 @@ public class FilterPanel extends Composite implements HasCriteria {
                 }
             });
         }
-    }
-
-    public static Element getBsContainer(Element descendant) {
-        if (descendant != null) {
-            if (descendant.getClassName().contains("bs ")) {
-                return descendant;
-            } else if (descendant.getParentElement() != null) {
-                return getBsContainer(DOM.asOld(descendant.getParentElement()));
-            }
-            return descendant;
-        }
-        return null;
     }
 
     public PopupPanel getPopup() {
