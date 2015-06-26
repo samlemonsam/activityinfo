@@ -30,6 +30,7 @@ import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.internal.Locatable;
@@ -273,8 +274,18 @@ public class BsTable {
         return this;
     }
 
+    private void buttonClick(String buttonName) {
+        try {
+            button(buttonName).get().clickWhenReady();
+        } catch (TimeoutException e) {
+            // it can not be : sauce lab shows that button is visible but for some reason it times out, so here we just retry
+            button(buttonName).get().click();
+        }
+    }
+
     public ChooseColumnsDialog chooseColumns() {
-        button(I18N.CONSTANTS.chooseColumns()).get().clickWhenReady();
+        buttonClick(I18N.CONSTANTS.chooseColumns());
+
         container.root().waitUntil(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver input) {

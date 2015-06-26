@@ -273,7 +273,7 @@ public class DataEntrySteps {
 
     @When("^open table for the \"([^\"]*)\" form in the database \"([^\"]*)\"$")
     public void open_table_for_the_form_in_the_database(String formName, String databaseName) throws Throwable {
-        openFormTable(formName, databaseName);
+        openFormTable(databaseName, formName);
     }
 
     private TablePage tablePage() {
@@ -281,7 +281,7 @@ public class DataEntrySteps {
         return (TablePage) driver.getCurrentPage();
     }
 
-    private TablePage openFormTable(String formName, String databaseName) {
+    private TablePage openFormTable(String databaseName, String formName) {
         databaseName = driver.getAliasTable().getAlias(databaseName);
         formName = driver.getAliasTable().getAlias(formName);
 
