@@ -217,12 +217,15 @@ public class UiApplicationDriver extends ApplicationDriver {
         dialog.accept();
     }
 
+    public TargetsPage targetsPage() {
+        Preconditions.checkState(currentDatabase != null, "No current database");
+        return navigateToTargetSetupFor(currentDatabase);
+    }
 
     @Override
     public void setTargetValues(String targetName, List<FieldValue> values) throws Exception {
-        Preconditions.checkState(currentDatabase != null, "No current database");
-        TargetsPage targetPage = navigateToTargetSetupFor(currentDatabase);
-        targetPage.select(aliasTable.getAlias(targetName));
+        TargetsPage targetPage = targetsPage();
+        targetsPage().select(aliasTable.getAlias(targetName));
         for(FieldValue value : values) {
             targetPage.setValue(aliasTable.getAlias(value.getField()), value.getValue());   
         }
