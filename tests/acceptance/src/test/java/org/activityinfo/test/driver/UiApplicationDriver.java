@@ -446,7 +446,8 @@ public class UiApplicationDriver extends ApplicationDriver {
     public TablePage openFormTable(String database, String formName) {
         ensureLoggedIn();
 
-        return applicationPage.navigateToTable(database, formName);
+        currentPage = applicationPage.navigateToTable(database, formName);
+        return (TablePage) currentPage;
     }
 
     public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
@@ -863,6 +864,9 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    public Object getCurrentPage() {
+        return currentPage;
+    }
 
     @Override
     public void cleanup() throws Exception {

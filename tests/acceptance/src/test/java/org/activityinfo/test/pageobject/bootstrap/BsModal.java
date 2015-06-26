@@ -54,13 +54,17 @@ public class BsModal extends ModalDialog {
     }
 
     public static BsModal find(FluentElement parent) {
-        FluentElement fluentElement = parent.waitFor(By.className(CLASS_NAME));
+        return find(parent, CLASS_NAME);
+    }
+
+    public static BsModal find(FluentElement parent, String className) {
+        FluentElement fluentElement = parent.waitFor(By.className(className));
         if (fluentElement.isDisplayed()) {
             return new BsModal(fluentElement);
         }
 
         // there can be multiple modal dialogs attached, we have to find the displayed one.
-        for(FluentElement element : parent.findElements(By.className(CLASS_NAME)).list()) {
+        for (FluentElement element : parent.findElements(By.className(className)).list()) {
             if (element.isDisplayed()) {
                 return new BsModal(element);
             }

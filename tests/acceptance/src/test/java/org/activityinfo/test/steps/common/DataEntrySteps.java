@@ -2,6 +2,7 @@ package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -11,6 +12,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -41,7 +43,6 @@ public class DataEntrySteps {
     private ApplicationDriver driver;
 
     private File exportedFile = null;
-    private Object currentPage;
 
 
     @Given("^I submit a \"([^\"]*)\" form with:$")
@@ -235,23 +236,55 @@ public class DataEntrySteps {
                                                                                                    String database, String formName,
                                                                                                    List<FieldValue> fieldValues
     ) throws Throwable {
-        database = driver.getAliasTable().getAlias(database);
-        formName = driver.getAliasTable().getAlias(formName);
 
-        TablePage tablePage = driver.openFormTable(database, formName);
+        TablePage tablePage = openFormTable(database, formName);
         tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
         tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
         bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();
-
-        currentPage = tablePage;
     }
 
     @Then("^table has rows:$")
     public void table_has_rows(DataTable dataTable) throws Throwable {
-        Preconditions.checkState(currentPage instanceof TablePage);
-        TablePage tablePage = (TablePage) currentPage;
-        tablePage.table().hideBuiltInColumns().waitUntilAtLeastOneRowIsLoaded().assertRowsPresent(dataTable);
+        assertHasRows(dataTable, false);
+    }
+
+    @Then("^table has rows with hidden built-in columns:$")
+    public void table_has_rows_with_hidden_built_in_columns(DataTable dataTable) throws Throwable {
+        assertHasRows(dataTable, true);
+    }
+
+    private void assertHasRows(DataTable dataTable, boolean hideBuiltInColumns) throws Throwable {
+        BsTable table = tablePage().table();
+        if (hideBuiltInColumns) {
+            table.hideBuiltInColumns();
+        }
+        table.waitUntilAtLeastOneRowIsLoaded().assertRowsPresent(dataTable);
+    }
+
+    @And("^filter column \"([^\"]*)\" with:$")
+    public void filter_column_with(String columnName, List<String> filterValues) throws Throwable {
+        columnName = driver.getAliasTable().getAlias(columnName);
+
+        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        table.filter(columnName).select(filterValues).apply();
+    }
+
+    @When("^open table for the \"([^\"]*)\" form in the database \"([^\"]*)\"$")
+    public void open_table_for_the_form_in_the_database(String formName, String databaseName) throws Throwable {
+        openFormTable(formName, databaseName);
+    }
+
+    private TablePage tablePage() {
+        Preconditions.checkState(driver.getCurrentPage() instanceof TablePage);
+        return (TablePage) driver.getCurrentPage();
+    }
+
+    private TablePage openFormTable(String formName, String databaseName) {
+        databaseName = driver.getAliasTable().getAlias(databaseName);
+        formName = driver.getAliasTable().getAlias(formName);
+
+        return driver.openFormTable(databaseName, formName);
     }
 }

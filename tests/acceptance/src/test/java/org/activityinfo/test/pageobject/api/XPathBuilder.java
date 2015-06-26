@@ -127,6 +127,10 @@ public class XPathBuilder {
         return tagName("tr", conditions);
     }
 
+    public XPathBuilder th(String... conditions) {
+        return tagName("th", conditions);
+    }
+
     public XPathBuilder h4(String... conditions) {
         return tagName("h4", conditions);
     }

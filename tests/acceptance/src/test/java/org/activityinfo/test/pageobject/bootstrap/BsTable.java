@@ -158,6 +158,15 @@ public class BsTable {
         return BsModal.find(container.root());
     }
 
+    public TableFilterDialog filter(String columnName) {
+        clickOnHeader(columnName);
+        return new TableFilterDialog(BsModal.find(container.root(), "modal-content"));
+    }
+
+    public void clickOnHeader(String columnName) {
+        container.find().th().span(withText(columnName)).first().clickWhenReady();
+    }
+
     public BsTable waitUntilAtLeastOneRowIsLoaded() {
         container.find().tagName("tr", false, withClass(type.getTrEvenClass()), withClass(type.getTrOddClass())).waitForFirst();
         return this;

@@ -303,6 +303,10 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public Object getCurrentPage() {
+        throw new PendingException();
+    }
+
     public void assertDesignerFieldHasProperty(String fieldLabel, DesignerFieldPropertyType fieldPropertyType, boolean enabled) {
         throw new PendingException();
     }
