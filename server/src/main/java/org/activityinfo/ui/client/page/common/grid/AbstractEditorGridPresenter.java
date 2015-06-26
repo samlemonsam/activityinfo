@@ -106,7 +106,7 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
     /**
      * Responds to an explict user action to save
      */
-    protected void onSave() {
+    public void onSave() {
 
         service.execute(createSaveCommand(), view.getSavingMonitor(), new AsyncCallback() {
             @Override

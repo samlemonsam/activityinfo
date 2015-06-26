@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
@@ -72,6 +73,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     private UserDatabaseDTO db;
     private TreeStore<ModelData> treeStore;
+    private final Map<Integer, IndicatorDTO> indicators = Maps.newHashMap();
 
     @Inject
     public TargetIndicatorPresenter(EventBus eventBus,
@@ -143,6 +145,8 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
             if (indicator.getType() != FieldTypeClass.QUANTITY) {
                 continue;
             }
+
+            indicators.put(indicator.getId(), indicator);
 
             if (indicator.getCategory() != null) {
                 Link indCategoryLink = indicatorCategories.get(indicator.getCategory());
@@ -225,27 +229,6 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         return treeStore;
     }
 
-    public TreeStore<ModelData> getTreeStore() {
-        return treeStore;
-    }
-
-    protected ActivityDTO findActivityFolder(ModelData selected) {
-
-        while (!(selected instanceof ActivityDTO)) {
-            selected = treeStore.getParent(selected);
-        }
-
-        return (ActivityDTO) selected;
-    }
-
-    public void updateTargetValue() {
-        onSave();
-    }
-
-    public void rejectChanges() {
-        treeStore.rejectChanges();
-    }
-
     @Override
     protected void onDeleteConfirmed(final ModelData model) {
         service.execute(new Delete((EntityDTO) model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
@@ -269,6 +252,8 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     @Override
     protected Command createSaveCommand() {
+        lastChanges.clear();
+
         BatchCommand batch = new BatchCommand();
 
         for (ModelData model : treeStore.getRootItems()) {
@@ -277,15 +262,25 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
         return batch;
     }
 
+    final List<TargetValueDTO> lastChanges = Lists.newArrayList();
+
     protected void prepareBatch(BatchCommand batch, ModelData model) {
         if (model instanceof EntityDTO) {
             Record record = treeStore.getRecord(model);
             if (record.isDirty()) {
-                UpdateTargetValue cmd = new UpdateTargetValue((Integer) model.get("targetId"),
-                        (Integer) model.get("indicatorId"),
-                        changes(record));
+                Map<String, Double> changes = changes(record);
+
+                TargetValueDTO targetValue = new TargetValueDTO();
+                targetValue.setValue(changes.get("value"));
+                targetValue.setIndicatorId((Integer) model.get("indicatorId"));
+                targetValue.setTargetId((Integer) model.get("targetId"));
+                targetValue.setName(indicators.get(targetValue.getIndicatorId()).getName());
+
+                UpdateTargetValue cmd = new UpdateTargetValue(targetValue.getTargetId(),
+                        targetValue.getIndicatorId(), changes);
 
                 batch.add(cmd);
+                lastChanges.add(targetValue);
             }
         }
 
@@ -320,23 +315,32 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     @Override
     protected void onSaved() {
         treeStore.commitChanges();
+
+        // update target dto
+        for (TargetValueDTO targetValue : Lists.newArrayList(targetDTO.getTargetValues())) {
+            for (TargetValueDTO change : lastChanges) {
+                if (targetValue.getIndicatorId() == change.getIndicatorId() &&
+                        targetValue.getTargetId() == change.getTargetId()) {
+                    targetValue.setValue(change.getValue());
+                } else {
+                    targetDTO.getTargetValues().add(change);
+                }
+
+            }
+        }
     }
 
     @Override
     public PageId getPageId() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean navigate(PageState place) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void shutdown() {
-        // TODO Auto-generated method stub
-
     }
 }

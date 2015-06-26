@@ -185,7 +185,7 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
                 if (be.getModel() instanceof TargetValueDTO) {
 
                     if (be.getRecord().getChanges().size() > 0) {
-                        presenter.updateTargetValue();
+                        presenter.onSave();
                     }
                 }
             }
