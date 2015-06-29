@@ -207,17 +207,21 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
                         new AsyncCallback<VoidResult>() {
                             @Override
                             public void onFailure(Throwable caught) {
-
+                                Log.error("Failed to edit target. " + caught.getMessage(), caught);
                             }
 
                             @Override
                             public void onSuccess(VoidResult result) {
 
-                                PartnerDTO partner = db.getPartnerById((Integer) record.get("partnerId"));
-                                dto.setPartner(partner);
+                                if (record.get("partnerId") != null) {
+                                    PartnerDTO partner = db.getPartnerById((Integer) record.get("partnerId"));
+                                    dto.setPartner(partner);
+                                }
 
-                                ProjectDTO project = db.getProjectById((Integer) record.get("projectId"));
-                                dto.setProject(project);
+                                if (record.get("projectId") != null) {
+                                    ProjectDTO project = db.getProjectById((Integer) record.get("projectId"));
+                                    dto.setProject(project);
+                                }
 
                                 store.commitChanges();
                                 eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);

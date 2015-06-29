@@ -4,9 +4,6 @@ import com.google.inject.Singleton;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.openqa.selenium.WebDriver;
 
-import java.util.Collections;
-import java.util.List;
-
 @Singleton
 public class PhantomJsProvider implements WebDriverProvider {
 
@@ -24,26 +21,6 @@ public class PhantomJsProvider implements WebDriverProvider {
                 pool.close();
             }
         });
-    }
-
-    @Override
-    public List<BrowserProfile> getSupportedProfiles() {
-        return Collections.singletonList(BROWSER_PROFILE);
-    }
-
-    @Override
-    public boolean supports(DeviceProfile profile) {
-        if(!(profile instanceof BrowserProfile)) {
-            return false;
-        }
-        BrowserProfile browser = (BrowserProfile) profile;
-        switch(browser.getType()) {
-            case CHROME:
-            case SAFARI:
-                return true;
-            default:
-                return false;
-        }
     }
 
     @Override

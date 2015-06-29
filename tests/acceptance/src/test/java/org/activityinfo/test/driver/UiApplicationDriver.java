@@ -102,6 +102,13 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
 
+    // todo ask Alex?
+//    @Override
+//    public void submitForm(String formName, List<FieldValue> values) throws Exception {
+//        currentForm = formName;
+//        super.submitForm(formName, values);
+//    }
+    
     @Override
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         ensureLoggedIn();
@@ -118,6 +125,18 @@ public class UiApplicationDriver extends ApplicationDriver {
         fillForm(valueMap, driver);
 
         driver.submit();
+    }
+
+    @Override
+    protected DataEntryDriver startNewSubmission(String formName) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        DataEntryDriver driver = dataEntryTab.newSubmission();
+
+        return driver;
     }
 
     private void fillForm(Map<String, FieldValue> valueMap, DataEntryDriver driver) throws InterruptedException {
@@ -259,6 +278,9 @@ public class UiApplicationDriver extends ApplicationDriver {
         dataEntryTab.selectSubmission(0);
 
         DataEntryDriver driver = dataEntryTab.updateSubmission();
+        
+        // todo conflict ?
+        //fillForm(driver, FieldValue.toMap(values));
 
         fillForm(FieldValue.toMap(values), driver);
 
@@ -300,12 +322,15 @@ public class UiApplicationDriver extends ApplicationDriver {
         dialog.accept();
     }
 
+    public TargetsPage targetsPage() {
+        Preconditions.checkState(currentDatabase != null, "No current database");
+        return navigateToTargetSetupFor(currentDatabase);
+    }
 
     @Override
     public void setTargetValues(String targetName, List<FieldValue> values) throws Exception {
-        Preconditions.checkState(currentDatabase != null, "No current database");
-        TargetsPage targetPage = navigateToTargetSetupFor(currentDatabase);
-        targetPage.select(aliasTable.getAlias(targetName));
+        TargetsPage targetPage = targetsPage();
+        targetsPage().select(aliasTable.getAlias(targetName));
         for(FieldValue value : values) {
             targetPage.setValue(aliasTable.getAlias(value.getField()), value.getValue());   
         }

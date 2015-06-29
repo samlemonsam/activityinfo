@@ -54,7 +54,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     public static final Meter COMMAND_RATE = Metrics.REGISTRY.meter("COMMAND_RATE");
     public static final ApiErrorRate ERROR_RATE = new ApiErrorRate();
-    
+
 
 
     private boolean flushing = false;
@@ -75,11 +75,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
             this.handler = handler;
         }
     }
-    
+
     private interface ResponseHandler {
         void response(JSONObject response) throws JSONException;
     }
-    
+
     private class PendingId implements ResponseHandler, Supplier<Integer> {
 
         private Integer id;
@@ -91,7 +91,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         public void response(JSONObject response) throws JSONException {
             this.id = response.getInt("newId");
         }
-        
+
         public boolean isResolved() {
             return id != null;
         }
@@ -113,7 +113,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             return id;
         }
     }
-    
+
     private static class PendingChild {
         PendingId parentId;
         String name;
@@ -126,13 +126,18 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     private static final int RDC = 1;
 
+    /**
+     * Location type bound to the RDC Province level. Hardcoded in geography.sql
+     */
+    private static final int RDC_PROVINCE_LOCATION_TYPE = 99999;
+ 
     private final Server server;
     private final Accounts accounts;
-    
+
     private final AliasTable aliases;
-    
+
     private UserAccount currentUser = null;
-    
+
     private List<String> createdDatabases = Lists.newArrayList();
 
     private Cache<Integer, Integer> nullaryLocationCache = CacheBuilder.newBuilder().build();
@@ -141,8 +146,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
     private LinkedList<Command> pendingBatch = new LinkedList<>();
     private LinkedList<PendingChild> pendingChildren = new LinkedList<>();
 
-    
-    
+
+
     @Inject
     public ApiApplicationDriver(Server server, Accounts accounts, AliasTable aliases) {
         super(aliases);
@@ -202,19 +207,22 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("countryId", 1);
 
         createEntityAndBindId("UserDatabase", properties);
-        
+
         createdDatabases.add(map.getName());
     }
 
     @Override
     public void createForm(TestObject form) throws Exception {
+
+
         JSONObject properties = new JSONObject();
         properties.put("name", form.getAlias());
-        properties.put("databaseId", form.getId("database")); 
-        properties.put("locationTypeId", form.getId("locationType", queryNullaryLocationType(RDC)));
+        properties.put("databaseId", form.getId("database"));
+        properties.put("locationTypeId", resolveLocationType(form));
         properties.put("published", form.getInteger("published", 0)); // not published
         properties.put("classicView", form.getBoolean("classicView", true));
 
+        
         switch (form.getString("reportingFrequency", "once")) {
             case "monthly":
                 properties.put("reportingFrequency", 1);
@@ -223,10 +231,25 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 properties.put("reportingFrequency", 0);
                 break;
         }
-        
+
         createEntityAndBindId("Activity", properties);
     }
-    
+
+    private int resolveLocationType(TestObject form) throws ExecutionException {
+        if(form.has("locationType")) {
+            return getAliasTable().getId(form.getString("locationType"));
+        } else if(form.has("adminLevel")) {
+            String adminLevel = form.getString("adminLevel");
+            if(adminLevel.equals("Province")) {
+                return RDC_PROVINCE_LOCATION_TYPE;
+            } else {
+                throw new IllegalArgumentException("Only 'Province' admin level is implemented.");
+            }
+        } else {
+            return queryNullaryLocationType(RDC);
+        }
+    }
+
     @Override
     public void createField(TestObject field) throws Exception {
 
@@ -240,9 +263,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
             PendingId groupId = createEntityAndBindId("AttributeGroup", properties);
 
             for (String item : field.getStringList("items")) {
-                
+
                 String alias = aliases.createAliasIfNotExists(item);
-        
+
                 if(batchingEnabled) {
                     pendingChildren.add(new PendingChild(groupId, alias));
                 } else {
@@ -251,6 +274,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             }
 
         } else {
+            
             JSONObject properties = new JSONObject();
             properties.put("name", field.getAlias());
             properties.put("activityId", field.getId("form"));
@@ -338,26 +362,26 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("id", siteId);
         properties.put("locationId", queryNullaryLocationType(RDC));
         properties.put("partnerId", aliases.getId(partner));
-        
+
         executeCreateSite(properties);
-        
+
         JSONArray changes = new JSONArray();
         for (MonthlyFieldValue fieldValue : fieldValues) {
             JSONObject month = new JSONObject();
             month.put("month", fieldValue.getMonth());
             month.put("year", fieldValue.getYear());
-            
+
             JSONObject change = new JSONObject();
             change.put("month", month);
             change.put("indicatorId", aliases.getId(fieldValue.getField()));
             change.put("value", Double.parseDouble(fieldValue.getValue()));
             changes.put(changes.length(), change);
         }
-        
+
         JSONObject updateCommand = new JSONObject();
         updateCommand.put("changes", changes);
         updateCommand.put("siteId", siteId);
-        
+
         executeCommand("UpdateMonthlyReports", updateCommand);
     }
 
@@ -372,7 +396,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void delete(ObjectType objectType, String name) throws Exception {
-        
+
         switch(objectType) {
             case DATABASE:
                 executeDelete("UserDatabase", aliases.getId(name));
@@ -387,7 +411,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         int databaseId = aliases.getId(database);
         JSONObject schema = new JSONObject(root().path("resources/database/" + databaseId + "/schema").get(String.class));
-        
+
         List<String> forms = Lists.newArrayList();
         JSONArray activities = schema.getJSONArray("activities");
         for(int i=0;i!=activities.length();++i) {
@@ -396,7 +420,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         return forms;
     }
-    
+
     private void executeDelete(String objectType, int objectId) throws Exception {
         JSONObject command = new JSONObject();
         command.put("entityName", objectType);
@@ -407,25 +431,25 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void addPartner(String partnerName, String databaseName) throws Exception {
-        
+
         // AddPartner will be called multiple times by different members of the scenario
         // and concurrency introduces a tricky problem with concurrency here, so we 
         // have to flush the queue here and block on the call to get the id
-        
+
         flush();
-        
+
         int databaseId = aliases.getId(databaseName);
         String partnerAlias = aliases.createAliasIfNotExists(partnerName);
 
         JSONObject partner = new JSONObject();
         partner.put("name", partnerAlias);
-        
+
         JSONObject command = new JSONObject();
         command.put("databaseId", databaseId);
         command.put("partner", partner);
 
         JSONObject response = new JSONObject(doCommand("AddPartner", command).getEntity(String.class));
-        
+
         aliases.bindTestHandleToIdIfAbsent(partnerName, Suppliers.ofInstance(response.getInt("newId")));
     }
 
@@ -440,22 +464,22 @@ public class ApiApplicationDriver extends ApplicationDriver {
         command.put("project", properties);
 
         PendingId pendingId = new PendingId();
-        
+
         executeCommand("AddProject", command, pendingId);
-        
+
         aliases.bindTestHandleToId(project.getName(), pendingId);
     }
 
     @Override
     public void grantPermission(TestObject properties) throws Exception {
-        
+
         UserAccount email = accounts.ensureAccountExists(properties.getString("user"));
-        
+
         JSONObject model = new JSONObject();
         model.put("name", "A User");
         model.put("email", email.getEmail());
         model.put("partnerId", aliases.getId(properties.getString("partner")));
-        
+
         for(String permission : properties.getStringList("permissions")) {
             switch (permission) {
                 case "View":
@@ -481,7 +505,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     break;
             }
         }
-        
+
         JSONObject command = new JSONObject();
         command.put("databaseId", aliases.getId(properties.getString("database")));
         command.put("model", model);
@@ -490,7 +514,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 properties.getString("database"), command.getInt("databaseId"),
                 properties.getString("user"), email.getEmail(),
                 properties.getString("partner"), model.getInt("partnerId")));
-        
+
         executeCommand("UpdateUserPermissions", command);
     }
 
@@ -500,7 +524,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void createLocationType(TestObject locationType) throws Exception {
-        
+
         JSONObject properties = new JSONObject();
         properties.put("name", locationType.getAlias());
         properties.put("databaseId", locationType.getId("database"));
@@ -510,16 +534,16 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void createLocation(TestObject map) throws Exception {
-        
+
         JSONObject properties = new JSONObject();
         properties.put("id", aliases.generateIdFor(map.getName()));
         properties.put("name", map.getAlias());
         properties.put("axe", map.getString("code"));
         properties.put("locationTypeId", map.getId("locationType"));
-        
+
         JSONObject command = new JSONObject();
         command.put("properties", properties);
-        
+
         executeCommand("CreateLocation", command);
     }
 
@@ -536,25 +560,25 @@ public class ApiApplicationDriver extends ApplicationDriver {
         addTarget.put("target", target);
 
         PendingId pendingId = new PendingId();
-        
+
         executeCommand("AddTarget", addTarget, pendingId);
-        
+
         aliases.bindAliasToId(properties.getAlias(), pendingId);
     }
 
     @Override
     public void setTargetValues(String targetName, List<FieldValue> values) throws Exception {
-  
+
         for(FieldValue value : values) {
 
             JSONObject changes = new JSONObject();
             changes.put("value", value.asDouble());
-            
+
             JSONObject command = new JSONObject();
             command.put("targetId", aliases.getId(targetName));
             command.put("indicatorId", aliases.getId(value.getField()));
             command.put("changes", changes);
-            
+
             executeCommand("UpdateTargetValue", command);
         }
     }
@@ -586,7 +610,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             if(stopwatch.elapsed(TimeUnit.MINUTES) > 5) {
                 throw new AssertionError("Download timed out.");
             }
-            
+
             Thread.sleep(1000);
         }
 
@@ -603,7 +627,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         PendingId pendingId = createEntity(entityType, properties);
 
         aliases.bindAliasToId(properties.getString("name"), pendingId);
-        
+
         return pendingId;
     }
 
@@ -615,7 +639,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         if(properties.has("name")) {
             aliases.getTestHandleForAlias(properties.getString("name"));
         }
-        
+
         PendingId pendingId = new PendingId();
 
         executeCommand("CreateEntity", object, pendingId);
@@ -623,7 +647,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
 
     private int queryNullaryLocationType(final int countryId) throws ExecutionException {
-    
+
         return nullaryLocationCache.get(countryId, new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
@@ -674,7 +698,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             executeImmediately(pendingCommand, retryCount);
         }
     }
-    
+
     private void executeImmediately(Command command, int retriesRemaining) throws JSONException {
 
         ClientResponse response = doCommand(command.request, retriesRemaining);
@@ -682,16 +706,16 @@ public class ApiApplicationDriver extends ApplicationDriver {
             command.handler.response(new JSONObject(response.getEntity(String.class)));
         }
     }
-    
+
     private ClientResponse doCommand(String type, JSONObject command) throws Exception {
         JSONObject request = new JSONObject();
         request.put("type", type);
         request.put("command", command);
-        
+
         return doCommand(request, getRetryCount());
 
     }
-    
+
     private ClientResponse doCommand(JSONObject json, int retriesRemaining) throws JSONException {
         COMMAND_RATE.mark();
         ERROR_RATE.markSubmitted();
@@ -709,10 +733,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 backoff();
                 return doCommand(json, retriesRemaining-1);
             }
-            
+
             throw new RuntimeException(format("Command %s failed: %s", json.getString("type"), e.getMessage()));
         }
-        
+
         ClientResponse.Status status = response.getClientResponseStatus();
 
         if (status.getFamily() == Response.Status.Family.SUCCESSFUL) {
@@ -723,19 +747,19 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
             LOGGER.fine(format("Command %s failed: %d %s",
                     json.getString("type"), status.getStatusCode(), status.getReasonPhrase()));
-            
+
             if (retriesRemaining > 0 &&
                     status == ClientResponse.Status.INTERNAL_SERVER_ERROR ||
                     status == ClientResponse.Status.SERVICE_UNAVAILABLE) {
                 return doCommand(json, retriesRemaining-1);
             }
-            
-        
+
+
             String message = status.getStatusCode() + " " + status.getReasonPhrase();
             if(MediaType.TEXT_PLAIN_TYPE.equals(response.getType())) {
                 message += ": " + response.getEntity(String.class);
             }
-            
+
             throw new RuntimeException(message);
         }
     }
@@ -751,17 +775,17 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     public List<SyncRegion> getSyncRegions() throws Exception {
         Preconditions.checkState(currentUser != null, "Authentication required");
-        
+
         flush();
 
         JSONObject request = new JSONObject();
         request.put("type", "GetSyncRegions");
         request.put("command", new JSONObject());
-        
+
         String responseJson = doCommand(request, getRetryCount()).getEntity(String.class);
 
         JSONObject response = new JSONObject(responseJson);
-        
+
         JSONArray array = response.getJSONArray("list");
         List<SyncRegion> regions = Lists.newArrayList();
         for(int i=0;i<array.length();++i) {
@@ -769,38 +793,38 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     array.getJSONObject(i).getString("id"),
                     array.getJSONObject(i).getString("currentVersion")));
         }
-        
+
         return regions;
     }
-    
+
     public SyncUpdate fetchSyncRegion(String id, String version) throws Exception {
         Preconditions.checkState(currentUser != null, "Authentication required");
 
         JSONObject command = new JSONObject();
         command.put("regionPath", id);
-        
+
         if(version != null) {
             command.put("localVersion", version);
         }
-        
+
         JSONObject request = new JSONObject();
         request.put("type", "GetSyncRegionUpdates");
         request.put("command", command);
 
         ClientResponse response = doCommand(request, getRetryCount());
-        
+
         // Read response to exercise server.. not sure if necessary
         String json = response.getEntity(String.class);
         JSONObject update = new JSONObject(json);
-        
+
         SyncUpdate syncUpdate = new SyncUpdate();
         syncUpdate.setByteCount(json.length());
         syncUpdate.setComplete(update.getBoolean("complete"));
         syncUpdate.setVersion(update.getString("version"));
-        
+
         return syncUpdate;
     }
-    
+
     public void flush() throws JSONException {
 
         Preconditions.checkState(!flushing, "Re-entrant flushing");
@@ -852,8 +876,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
             flushing = false;
         }
     }
-    
-    
+
+
     private void createAttribute(PendingId parentId, String name) throws JSONException {
         JSONObject itemProperties = new JSONObject();
         itemProperties.put("name", name);

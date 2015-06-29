@@ -27,6 +27,8 @@ dependencies {
     testCompile libraries.jersey.server
     testCompile libraries.jersey.simpleServer
 
+    testCompile 'io.appium:java-client:2.2.0'
+    
     testCompile libraries.c3p0
 
     testCompile project(':core:model')

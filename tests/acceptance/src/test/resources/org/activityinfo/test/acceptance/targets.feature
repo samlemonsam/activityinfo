@@ -30,8 +30,16 @@ Feature: Indicator Targets
       |                     | Value |
       | Realized            | 1,800 |
       | Targeted            | 3,000 |
-    
-  
+
+  @AI-1126
+  Scenario: Defining database-level target for two activities
+    And I have created a form named "Helmet form" in "RRMP"
+    And I have created a quantity field "helmet" in "Helmet form"
+    And I create a target with values:
+      | field     | value |
+      | nb. kits  | 3000  |
+      | helmet    | 3     |
+
   Scenario: Defining targets by partner
     When I create a target for partner NRC with values:
       | field       | value |

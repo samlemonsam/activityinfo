@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author yuriyz on 05/18/2015.
@@ -51,6 +52,12 @@ public class TargetsUiTest {
             driver.setup().addPartner(partner, DATABASE);
         }
 
+        for (String project : new String[] {"FY2014", "FY2015"}) {
+            driver.setup().createProject(
+                    property("name", project),
+                    property("database", DATABASE));
+        }
+
         driver.setup().createForm(name(FORM_NAME), property("database", DATABASE));
         driver.setup().createField(
                 property("form", FORM_NAME),
@@ -64,12 +71,18 @@ public class TargetsUiTest {
                 property("type", "quantity"),
                 property("code", "1")
         );
+
+
         driver.ui().createTarget(
                 property("database", DATABASE),
-                property("name", "Target1"));
+                property("name", "Target1"),
+                property("project", "FY2014")
+        );
         driver.ui().createTarget(
                 property("database", DATABASE),
-                property("name", "Target2"));
+                property("name", "Target2"),
+                property("project", "FY2015")
+        );
 
         driver.ui().setTargetValues("Target1", Lists.newArrayList(
                 new FieldValue("nb. kits", "1000")
@@ -77,6 +90,21 @@ public class TargetsUiTest {
         driver.ui().setTargetValues("Target2", Lists.newArrayList(
                 new FieldValue("nb. kits", "2000")
         ));
+    }
+
+    @Test
+    public void treeEditorStateOnSelectionChange() throws Exception {
+        background();
+
+        driver.ui().setTargetValues("Target1", Lists.newArrayList(
+                new FieldValue("nb. kits", "1000")
+        ));
+
+        TargetsPage targetPage = driver.ui().targetsPage();
+        targetPage.select(driver.getAlias("Target2"));
+        targetPage.select(driver.getAlias("Target1")); // switch back and check whether value is in tree
+
+        assertNotNull(targetPage.valueGrid().findCell("1000")); // value must be present in tree
     }
 
     @Test

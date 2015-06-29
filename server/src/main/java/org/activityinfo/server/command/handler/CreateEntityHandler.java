@@ -106,15 +106,10 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
         updateAttributeProperties(properties, attribute);
 
-        Activity activity = ag.getActivities().iterator().next(); // Assume
-        // group has
-        // only one
-        // activity
+        Activity activity = ag.getActivities().iterator().next(); // Assume group has only one activity
 
         entityManager().persist(attribute);
         activity.getDatabase().setLastSchemaUpdate(new Date());
-
-        attribute.setSortOrder(ag.getAttributes().size());
 
         return new CreateResult(attribute.getId());
     }

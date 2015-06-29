@@ -12,10 +12,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -71,7 +69,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
         }
     }
 
-    private URL getWebDriverServer() {
+    public URL getWebDriverServer() {
 
         String host = JENKINS_SELENIUM_HOST.getOr("ondemand.saucelabs.com");
         String port = JENKINS_SELENIUM_PORT.getOr("80");
@@ -84,21 +82,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
             throw new ConfigurationError(format("Sauce labs remote address [%s] is malformed.", url), e);
         }
     }
-
-    @Override
-    public List<BrowserProfile> getSupportedProfiles() {
-        try {
-            return SaucePlatforms.fetchBrowsers();
-        } catch (IOException e) {
-            throw new RuntimeException("Could not fetch supported browser", e);
-        }
-    }
-
-    @Override
-    public boolean supports(DeviceProfile profile) {
-        return profile instanceof BrowserProfile;
-    }
-
+    
     private String osName(BrowserProfile browser) {
         switch(browser.getOS().getType()) {
             case WINDOWS:

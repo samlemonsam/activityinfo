@@ -56,4 +56,5 @@ public class OfflineSteps {
     public void the_application_should_be_in_offline_mode() throws Throwable {
         assertThat(driver.getCurrentOfflineMode(), equalTo(OfflineMode.OFFLINE));
     }
+
 }
