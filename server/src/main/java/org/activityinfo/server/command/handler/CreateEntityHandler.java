@@ -104,10 +104,6 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         entityManager().persist(attribute);
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
-        if (attribute.getSortOrder() == 0) { // todo : why do we need to set sortOrder to size of attribute list?
-            attribute.setSortOrder(ag.getAttributes().size());
-        }
-
         return new CreateResult(attribute.getId());
     }
 
