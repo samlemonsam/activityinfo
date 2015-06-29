@@ -262,8 +262,8 @@ public class ActivityTest extends CommandTestCase2 {
         AttributeGroupDTO group = findGroup(activity, "New Group");
         assertThat(group.isMultipleAllowed(), equalTo(false));
         assertThat(group.getAttributes(), hasSize(2));
-        assertThat(group.getAttributes().get(0), hasProperty("name", Matchers.equalTo("Yes")));
-        assertThat(group.getAttributes().get(1), hasProperty("name", Matchers.equalTo("No")));
+        assertThat(group.getAttributes().get(0), hasProperty("name", anyOf(equalTo("Yes"), equalTo("No"))));
+        assertThat(group.getAttributes().get(1), hasProperty("name", anyOf(equalTo("Yes"), equalTo("No"))));
 
         // Now update the same attribute group and a value
         newField.setLabel("Do you like ice cream?");
