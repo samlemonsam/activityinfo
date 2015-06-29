@@ -11,7 +11,10 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
@@ -253,7 +256,7 @@ public class FormPersister {
             }
 
             if(attr == null) {
-                commands.add(createAttribute(group.getId(), enumValue));
+                commands.add(createAttribute(group.getId(), enumValue, sortOrder));
 
             } else {
                 if(!attr.getName().equals(enumValue.getLabel()) ||
@@ -275,11 +278,12 @@ public class FormPersister {
 
     }
 
-    private CreateEntity createAttribute(int groupId, EnumValue enumValue) {
+    private CreateEntity createAttribute(int groupId, EnumValue enumValue, int sortOrder) {
         AttributeDTO attr;
         attr = new AttributeDTO();
         attr.setName(enumValue.getLabel());
         attr.set("attributeGroupId", groupId);
+        attr.set("sortOrder", sortOrder);
         CreateEntity create = new CreateEntity(attr);
         oldIds.put(create, enumValue.getId());
         return create;
@@ -301,8 +305,10 @@ public class FormPersister {
         for(FormField field : newAttributes) {
             int groupId = newIds.get(field.getId());
             EnumType enumType = (EnumType) field.getType();
-            for(EnumValue enumValue : enumType.getValues()) {
-                commands.add(createAttribute(groupId, enumValue));
+            int sortOrder = 0;
+            for (EnumValue enumValue : enumType.getValues()) {
+                commands.add(createAttribute(groupId, enumValue, sortOrder));
+                sortOrder++;
             }
         }
         return executeAndCollectNewIds();
