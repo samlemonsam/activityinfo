@@ -45,7 +45,7 @@ public class WebDriverPool {
 
     private static void configureDriver(WebDriver driver) {
         // increase timeout before NoSuchElementException
-        driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(4, TimeUnit.SECONDS);
     }
 
     public WebDriver get(BrowserProfile profile) {

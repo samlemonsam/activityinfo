@@ -601,6 +601,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void createLinkIndicators(List<IndicatorLink> linkedIndicatorRows) {
         LinkIndicatorsPage linkIndicatorsPage = getLinkIndicatorPage();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
+        linkIndicatorsPage.getTargetDb().waitUntilAtLeastOneRowIsLoaded();
 
         for (IndicatorLink row : linkedIndicatorRows) {
 
