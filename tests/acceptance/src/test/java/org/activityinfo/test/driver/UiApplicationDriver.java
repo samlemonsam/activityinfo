@@ -608,6 +608,8 @@ public class UiApplicationDriver extends ApplicationDriver {
             linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).click();
             linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).click();
 
+            Tester.sleepSeconds(1); // sometimes it's too fast and we have to give time show "Loading" and only then wait for rows
+
             GxtGrid sourceIndicator = linkIndicatorsPage.getSourceIndicator().waitUntilAtLeastOneRowIsLoaded();
             GxtGrid targetIndicator = linkIndicatorsPage.getTargetIndicator().waitUntilAtLeastOneRowIsLoaded();
 
