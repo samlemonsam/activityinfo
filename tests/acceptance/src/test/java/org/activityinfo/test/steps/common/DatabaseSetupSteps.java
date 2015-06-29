@@ -344,17 +344,27 @@ public class DatabaseSetupSteps {
                 property("project", project));
     }
 
+    @When("^I create a target named \"([^\"]*)\" for project \"([^\"]*)\"$")
+    public void I_create_a_target_for_project_with_values(String targetName, String project) throws Throwable {
+        driver.createTarget(
+                property("name", targetName),
+                property("database", getCurrentDatabase()),
+                property("project", project));
 
-    @When("^I create a target for project \"([^\"]*)\" with values:$")
-    public void I_create_a_target_for_project_with_values(String project, List<FieldValue> values) throws Throwable {
-        String targetName = nextTargetName();
+    }
 
+    @When("^I create a target named \"([^\"]*)\" for project \"([^\"]*)\" with values:$")
+    public void I_create_a_target_for_project_with_values(String targetName, String project, List<FieldValue> values) throws Throwable {
         driver.createTarget(
                 property("name", targetName),
                 property("database", getCurrentDatabase()),
                 property("project", project));
         driver.setTargetValues(targetName, values);
+    }
 
+    @When("^I create a target for project \"([^\"]*)\" with values:$")
+    public void I_create_a_target_for_project_with_values(String project, List<FieldValue> values) throws Throwable {
+        I_create_a_target_for_project_with_values(nextTargetName(), project, values);
     }
 
     @When("^I set the targets of \"(.*)\" to:$")
