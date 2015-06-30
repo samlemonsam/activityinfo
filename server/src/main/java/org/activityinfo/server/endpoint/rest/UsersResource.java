@@ -8,6 +8,7 @@ import org.activityinfo.service.DeploymentConfiguration;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,7 +41,7 @@ public class UsersResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createUser(
-            @FormParam("email") String email, 
+            @FormParam("email") String email,
             @FormParam("name") String name, 
             @FormParam("password") String password,
             @FormParam("locale") String locale) {

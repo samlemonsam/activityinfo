@@ -155,16 +155,6 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         tree.getColumnModel().getColumn(column).setEditor(new CellEditor(field));
     }
 
-    private IndicatorDTO getIndicatorById(int indicatorId) {
-        for (ActivityDTO activity : getActivitiesFromStore()) {
-            IndicatorDTO indicatorById = activity.getIndicatorById(indicatorId);
-            if (indicatorById != null) {
-                return indicatorById;
-            }
-        }
-        throw new RuntimeException("Failed to find IndicatorDTO by id: " + indicatorId);
-    }
-
     private List<ActivityDTO> getActivitiesFromStore() {
         List<ActivityDTO> activities = Lists.newArrayList();
         for (int i = 0; i < tree.getStore().getCount(); i++) {
