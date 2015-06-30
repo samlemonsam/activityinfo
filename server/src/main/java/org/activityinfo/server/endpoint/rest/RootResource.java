@@ -133,4 +133,9 @@ public class RootResource {
     public FormResource getForm(@PathParam("id") String id) {
         return new FormResource(id);
     }
+
+    @Path("/users")
+    public UsersResource getUsers() {
+        return new UsersResource(config, entityManager);
+    }
 }
