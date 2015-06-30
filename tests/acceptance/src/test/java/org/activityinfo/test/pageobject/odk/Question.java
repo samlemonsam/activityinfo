@@ -78,7 +78,17 @@ public class Question implements DataEntryDriver {
     }
 
     @Override
+    public boolean isValid() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isNextEnabled() {
         return false;
+    }
+
+    @Override
+    public void sendKeys(CharSequence keys) {
+        throw new UnsupportedOperationException();
     }
 }
