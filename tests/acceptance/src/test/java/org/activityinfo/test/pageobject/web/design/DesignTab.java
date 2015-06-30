@@ -1,6 +1,7 @@
 package org.activityinfo.test.pageobject.web.design;
 
 import com.google.common.base.Optional;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -23,11 +24,16 @@ public class DesignTab {
             try {
                 Optional<GxtTree.GxtNode> selected = databaseTree.findSelected();
                 if (!selected.isPresent() || !selected.get().getLabel().equals(databaseName)) {
-                    databaseTree.select("Databases", databaseName);
+                    databaseTree.select(I18N.CONSTANTS.databases(), databaseName);
                 }
                 return this;
             } catch (WebDriverException ignored) {}
         }
+    }
+
+    public DatabasesPage showDatabasesGrid() {
+        databaseTree.select(I18N.CONSTANTS.databases());
+        return new DatabasesPage(container);
     }
     
     private GalleryView gallery() {
@@ -48,5 +54,9 @@ public class DesignTab {
     public DesignPage design() {
         gallery().select("Design");
         return new DesignPage(container);
+    }
+
+    public FluentElement getContainer() {
+        return container;
     }
 }

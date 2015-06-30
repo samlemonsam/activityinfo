@@ -8,6 +8,7 @@ import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
+import org.activityinfo.test.pageobject.web.design.DatabasesPage;
 import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
@@ -310,6 +311,19 @@ public class UiApplicationDriver extends ApplicationDriver {
         DesignPage designPage = designTab.design();
         designPage.getDesignTree().select(testObject.getAlias("name"));
         designPage.getToolbarMenu().clickButton("Delete");
+    }
+
+    public void renameDatabase(String oldName, String newName, String newDescription) {
+        ensureLoggedIn();
+
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+
+        DatabasesPage databasesPage = designTab.showDatabasesGrid();
+        databasesPage.rename(aliasTable.getAlias(oldName), newName, newDescription);
+
+        // validate values are changed in table
+        Assert.assertNotNull(databasesPage.grid().findCell(newName));
+        Assert.assertNotNull(databasesPage.grid().findCell(newDescription));
     }
 
     @Override
