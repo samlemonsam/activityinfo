@@ -34,6 +34,6 @@ public class GxtPanel {
     }
 
     public ToolbarMenu toolbarMenu() {
-        return new ToolbarMenu(panel.findElement(By.className("x-toolbar-ct")));
+        return ToolbarMenu.find(panel);
     }
 }

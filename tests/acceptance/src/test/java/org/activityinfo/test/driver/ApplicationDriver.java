@@ -246,5 +246,8 @@ public abstract class ApplicationDriver {
         return aliasTable;
     }
 
-    
+
+    public void renameDatabase(String oldName, String newName, String newDescription) {
+        throw new PendingException();
+    }
 }
