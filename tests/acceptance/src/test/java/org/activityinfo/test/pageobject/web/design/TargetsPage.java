@@ -85,7 +85,7 @@ public class TargetsPage {
                     return !loaded;
                 }
             });
-            tree.search(indicatorName).get().select();
+            tree.search(indicatorName).get().ensureExpanded();
         } catch (WebDriverException e) { // revisit it later
             // unknown error: cannot focus element on key down
         }
