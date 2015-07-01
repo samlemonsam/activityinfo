@@ -45,8 +45,11 @@ public class Activity {
     private String locationTypeName;
     private int adminLevelId;
     private String name;
-
+    private int ownerUserId;
+    private boolean published;
+    
     private List<ActivityField> fields = Lists.newArrayList();
+            ;
 
 
     public int getId() {
@@ -155,7 +158,9 @@ public class Activity {
                         "L.Name locationTypeName, " +
                         "L.BoundAdminLevelId, " +
                         "A.formClass, " + 
-                        "A.gzFormClass " + 
+                        "A.gzFormClass, " + 
+                        "d.ownerUserId, " +
+                        "A.published " +
                         "FROM activity A " +
                         "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                         "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -172,6 +177,8 @@ public class Activity {
             activity.locationTypeId = rs.getInt("locationTypeId");
             activity.locationTypeName = rs.getString("locationTypeName");
             activity.adminLevelId = rs.getInt("boundAdminLevelId");
+            activity.ownerUserId = rs.getInt("ownerUserId");
+            activity.published = rs.getInt("published") == 1;
 
             serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
             
@@ -383,4 +390,11 @@ public class Activity {
     }
 
 
+    public int getOwnerUserId() {
+        return ownerUserId;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
 }

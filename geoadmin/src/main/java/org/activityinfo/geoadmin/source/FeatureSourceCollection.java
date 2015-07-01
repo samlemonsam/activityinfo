@@ -6,6 +6,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
@@ -23,6 +24,11 @@ public class FeatureSourceCollection implements ResourceCollection {
         this.featureSource = featureSource;
     }
 
+
+    @Override
+    public CollectionPermissions getPermissions(int userId) {
+        return CollectionPermissions.full();
+    }
 
     @Override
     public Optional<Resource> get(ResourceId resourceId) {

@@ -6,6 +6,7 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 
@@ -36,6 +37,11 @@ public class MockCollectionCatalog implements CollectionCatalog {
     }
     
     private class MockResourceCollection implements ResourceCollection {
+
+        @Override
+        public CollectionPermissions getPermissions(int userId) {
+            return CollectionPermissions.full();
+        }
 
         @Override
         public Optional<Resource> get(ResourceId resourceId) {

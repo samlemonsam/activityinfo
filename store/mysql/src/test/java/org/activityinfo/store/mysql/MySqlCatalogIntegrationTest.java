@@ -78,7 +78,7 @@ public class MySqlCatalogIntegrationTest {
         ColumnSet columnSet = columnSetBuilder.build(model);
         System.out.println("Query executed in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
         
-        assertThat(columnSet.getNumRows(), equalTo(759));
+        assertThat(columnSet.getNumRows(), equalTo(652));
 
         StringWriter stringWriter = new StringWriter();
         RowBasedJsonWriter writer = new RowBasedJsonWriter(stringWriter);

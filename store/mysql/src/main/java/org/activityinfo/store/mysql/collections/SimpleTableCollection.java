@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
@@ -21,6 +22,11 @@ public class SimpleTableCollection implements ResourceCollection {
     public SimpleTableCollection(TableMapping mapping, QueryExecutor executor) {
         this.mapping = mapping;
         this.executor = executor;
+    }
+
+    @Override
+    public CollectionPermissions getPermissions(int userId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

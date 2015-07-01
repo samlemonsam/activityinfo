@@ -8,6 +8,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -17,9 +18,13 @@ import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
 import org.activityinfo.store.mysql.update.IndicatorValueTableUpdater;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+
+import static java.lang.String.copyValueOf;
+import static java.lang.String.format;
 
 /**
  * Collection of Sites
@@ -34,6 +39,58 @@ public class SiteCollection implements ResourceCollection {
         this.activity = activity;
         this.baseMapping = baseMapping;
         this.queryExecutor = queryExecutor;
+    }
+
+    @Override
+    public CollectionPermissions getPermissions(int userId) {
+        if(activity.getOwnerUserId() == userId) {
+           return CollectionPermissions.full(); 
+        } else {
+            CollectionPermissions permissions = new CollectionPermissions();
+            
+            try(ResultSet rs = queryExecutor.query(format("select * from userpermission where databaseId=%d and UserId = %d",
+                    userId,
+                    activity.getDatabaseId()))) {
+                
+                if(rs.next()) {
+                    int partnerId = rs.getInt("partnerId");
+                    String partnerFilter = format("%s=%s",
+                            CuidAdapter.partnerField(activity.getId()),
+                            CuidAdapter.partnerInstanceId(partnerId));
+                    permissions.setVisibilityFilter(partnerFilter);
+                    
+                    if(rs.getBoolean("AllowViewAll")) {
+                        permissions.setVisible(true);
+                        
+                    } else if(rs.getBoolean("AllowView")) {
+                        permissions.setVisible(true);
+                        permissions.setVisibilityFilter(partnerFilter);
+
+                    }
+                    if(rs.getBoolean("AllowEditAll")) {
+                        permissions.setEditAllowed(true);
+                    } else if(rs.getBoolean("AllowEdit")) {
+                        permissions.setEditAllowed(true);
+                        permissions.setVisibilityFilter(partnerFilter);
+                    }
+                }
+
+                
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+
+            // published property of activity overrides user permissions
+            if(activity.isPublished()) {
+                permissions.setVisible(true);
+                permissions.setVisibilityFilter(null);
+            }
+
+
+            return permissions;
+
+        }
     }
 
     @Override

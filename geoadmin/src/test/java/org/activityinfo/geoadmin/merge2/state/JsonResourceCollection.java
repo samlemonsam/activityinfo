@@ -18,6 +18,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.service.store.ResourceCollection;
@@ -72,7 +73,12 @@ public class JsonResourceCollection implements ResourceCollection {
         throw new IllegalArgumentException(id.toString());
     }
 
-    
+
+    @Override
+    public CollectionPermissions getPermissions(int userId) {
+        return CollectionPermissions.full();
+    }
+
     @Override
     public Optional<Resource> get(ResourceId resourceId) {
         throw new UnsupportedOperationException();
