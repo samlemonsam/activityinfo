@@ -22,7 +22,7 @@ Feature: Indicator Targets
         | partner            | NRC    |
         | nb. kits           | 800    |
       
-  Scenario: Defining database-level target
+  Scenario: Target by database
     When I create a target with values:
       | field       | value |
       | nb. kits    | 3000  |

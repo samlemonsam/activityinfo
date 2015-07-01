@@ -73,6 +73,14 @@ public class GxtGrid {
         
         return new GxtCell(cell.get());
     }
+
+    public Optional<GxtCell> findCellOptional(String text) {
+        try {
+            return Optional.of(findCell(text));
+        } catch (AssertionError e) {
+            return Optional.absent();
+        }
+    }
     
     public void sortBy(String columnId) {
         columnHeader(columnId).click();
