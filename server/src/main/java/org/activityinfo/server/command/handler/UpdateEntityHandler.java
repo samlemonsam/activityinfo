@@ -123,11 +123,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
         updateAttributeProperties(changes, attribute);
         AttributeGroup ag = entityManager().find(AttributeGroup.class, attribute.getGroup().getId());
-        Activity activity = ag.getActivities().iterator().next(); // Assume only
-        // one
-        // activity
-        // for the
-        // attr group
+        Activity activity = ag.getActivities().iterator().next(); // Assume only one activity for the attr group
         activity.getDatabase().setLastSchemaUpdate(new Date());
     }
 
@@ -136,12 +132,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
         updateAttributeGroupProperties(group, changes);
 
-        Activity activity = group.getActivities().iterator().next(); // Assume
-        // only one
-        // activity
-        // for the
-        // attr
-        // group
+        Activity activity = group.getActivities().iterator().next(); // Assume only one activity for the attr group
         activity.getDatabase().setLastSchemaUpdate(new Date());
     }
 

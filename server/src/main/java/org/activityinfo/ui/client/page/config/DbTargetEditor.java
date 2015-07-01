@@ -36,6 +36,7 @@ import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.AddTarget;
@@ -122,12 +123,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
 
     private void fillStore() {
 
-        service.execute(new GetTargets(db.getId()), view.getLoadingMonitor(), new AsyncCallback<TargetResult>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
+        service.execute(new GetTargets(db.getId()), view.getLoadingMonitor(), new SuccessCallback<TargetResult>() {
 
             @Override
             public void onSuccess(TargetResult result) {
@@ -216,11 +212,15 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
                                 if (record.get("partnerId") != null) {
                                     PartnerDTO partner = db.getPartnerById((Integer) record.get("partnerId"));
                                     dto.setPartner(partner);
+                                } else {
+                                    dto.setPartner(null);
                                 }
 
                                 if (record.get("projectId") != null) {
                                     ProjectDTO project = db.getProjectById((Integer) record.get("projectId"));
                                     dto.setProject(project);
+                                } else {
+                                    dto.setProject(null);
                                 }
 
                                 store.commitChanges();
