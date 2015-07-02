@@ -131,7 +131,16 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
-        element().sendKeys(keys);
+        try {
+            element().sendKeys(keys);
+        } catch (WebDriverException e) {
+            // sometimes got unknown error: cannot focus element
+            Actions actions = new Actions(webDriver);
+            actions.moveToElement(element());
+            actions.click();
+            actions.sendKeys(keys);
+            actions.build().perform();
+        }
     }
 
     public boolean exists(By by) {
@@ -174,6 +183,10 @@ public class FluentElement {
     public FluentElement clear() {
         element.clear();
         return this;
+    }
+
+    public void focus() {
+        new Actions(webDriver).moveToElement(element()).perform();
     }
 
     public Optional<FluentElement> focusedElement() {

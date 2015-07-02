@@ -279,8 +279,20 @@ public class GxtTree {
         }
 
         public boolean isExpanded() {
-            Optional<FluentElement> container = childContainer().firstIfPresent();
-            return container.isPresent() && container.get().isDisplayed();
+            String style = joint().first().attribute("style");
+
+            // gxt has strange approach of changing images. It has big image and shows only part of it
+            int backgroundIndex = style.indexOf("background:");
+            if (backgroundIndex != -1) {
+                String backgroundValue = style.substring(backgroundIndex + "background:".length());
+                if (backgroundValue.contains("-66px")) { // not expanded
+                    return false;
+                }
+                if (backgroundValue.contains("-34px")) { // expanded
+                    return true;
+                }
+            }
+            return false; // fall back to not expanded
         }
 
         public String getLabel() {

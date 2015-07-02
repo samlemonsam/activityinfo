@@ -8,12 +8,11 @@ import org.activityinfo.test.driver.TestObject;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
-import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
@@ -87,19 +86,17 @@ public class TargetsPage {
 
     public void expandTree(String indicatorName) {
         GxtTree tree = GxtTree.treeGrid(container);
-        try {
-            tree.waitUntil(new Predicate<GxtTree>() {
-                @Override
-                public boolean apply(GxtTree tree) {
-                    Optional<GxtTree.GxtNode> root = tree.firstRootNode();
-                    boolean loaded = root.isPresent() && root.get().joint().firstIfPresent().isPresent();
-                    return !loaded;
-                }
-            });
-            tree.search(indicatorName).get().ensureExpanded();
-        } catch (WebDriverException e) { // revisit it later
-            // unknown error: cannot focus element on key down
-        }
+
+        tree.waitUntil(new Predicate<GxtTree>() {
+            @Override
+            public boolean apply(GxtTree tree) {
+                Optional<GxtTree.GxtNode> root = tree.firstRootNode();
+                boolean loaded = root.isPresent() && root.get().joint().firstIfPresent().isPresent();
+                return !loaded;
+            }
+        });
+        tree.search(indicatorName).get().ensureExpanded();
+
         Preconditions.checkState(tree.firstRootNode().get().joint().firstIfPresent().isPresent());
     }
 
