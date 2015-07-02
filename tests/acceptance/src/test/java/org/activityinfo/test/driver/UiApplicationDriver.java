@@ -24,6 +24,13 @@ import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
 import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.activityinfo.test.pageobject.web.entry.*;
+import org.activityinfo.test.pageobject.web.design.DatabasesPage;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.design.TargetsPage;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
+import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
@@ -894,6 +901,19 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     public Object getCurrentPage() {
         return currentPage;
+    }
+
+    public void renameDatabase(String oldName, String newName, String newDescription) {
+        ensureLoggedIn();
+
+        DesignTab designTab = applicationPage.navigateToDesignTab();
+
+        DatabasesPage databasesPage = designTab.showDatabasesGrid();
+        databasesPage.rename(aliasTable.getAlias(oldName), newName, newDescription);
+
+        // validate values are changed in table
+        Assert.assertNotNull(databasesPage.grid().findCell(newName));
+        Assert.assertNotNull(databasesPage.grid().findCell(newDescription));
     }
 
     @Override

@@ -362,4 +362,8 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
     
+
+    public void renameDatabase(String oldName, String newName, String newDescription) {
+        throw new PendingException();
+    }
 }

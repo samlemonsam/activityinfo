@@ -1,4 +1,4 @@
-package org.activityinfo.test.pageobject.gxt;
+package org.activityinfo.test.ui;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,25 +21,27 @@ package org.activityinfo.test.pageobject.gxt;
  * #L%
  */
 
-import org.activityinfo.test.pageobject.api.FluentElement;
-import org.openqa.selenium.By;
+import org.junit.Rule;
+import org.junit.Test;
+
+import static org.activityinfo.test.driver.Property.property;
 
 /**
- * @author yuriyz on 04/02/2015.
+ * @author yuriyz on 06/30/2015.
  */
-public class ToolbarMenu {
+public class DesignUiTest {
 
-    private FluentElement menu;
+    private static final String DATABASE = "DesignUiDb";
 
-    public ToolbarMenu(FluentElement menu) {
-        this.menu = menu;
-    }
+    @Rule
+    public UiDriver driver = new UiDriver();
 
-    public static ToolbarMenu find(FluentElement container) {
-        return new ToolbarMenu(container.findElement(By.className("x-toolbar-ct")));
-    }
+    @Test
+    public void renameDatabase() throws Exception {
+        driver.loginAsAny();
+        driver.setup().createDatabase(property("name", DATABASE));
 
-    public void clickButton(String buttonName) {
-        menu.findElement(Gxt.button(buttonName)).clickWhenReady();
+        driver.ui().renameDatabase(DATABASE, "NewDesignUiDb", "New Desc");
+
     }
 }
