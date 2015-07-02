@@ -131,16 +131,16 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
-        try {
-            element().sendKeys(keys);
-        } catch (WebDriverException e) {
-            // sometimes got unknown error: cannot focus element
-            Actions actions = new Actions(webDriver);
-            actions.moveToElement(element());
-            actions.click();
-            actions.sendKeys(keys);
-            actions.build().perform();
-        }
+//        try {
+        element().sendKeys(keys);
+//        } catch (WebDriverException e) {
+//            // sometimes got unknown error: cannot focus element
+//            Actions actions = new Actions(webDriver);
+//            actions.moveToElement(element());
+//            actions.click();
+//            actions.sendKeys(keys);
+//            actions.build().perform();
+//        }
     }
 
     public boolean exists(By by) {

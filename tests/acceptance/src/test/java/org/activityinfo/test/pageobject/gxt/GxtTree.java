@@ -164,7 +164,7 @@ public class GxtTree {
     }
 
 
-    private FluentIterable<GxtNode> findRootNodes() {
+    public FluentIterable<GxtNode> findRootNodes() {
         return container.findElements(By.xpath(xPathProvider.root())).as(GxtNode.class);
     }
 

@@ -3,6 +3,7 @@ package org.activityinfo.test.pageobject.web.design;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.TestObject;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -13,6 +14,7 @@ import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
@@ -87,15 +89,26 @@ public class TargetsPage {
     public void expandTree(String indicatorName) {
         GxtTree tree = GxtTree.treeGrid(container);
 
-        tree.waitUntil(new Predicate<GxtTree>() {
-            @Override
-            public boolean apply(GxtTree tree) {
-                Optional<GxtTree.GxtNode> root = tree.firstRootNode();
-                boolean loaded = root.isPresent() && root.get().joint().firstIfPresent().isPresent();
-                return !loaded;
+        try {
+
+            // expand roots -> must be removed once we find out real problem for KeyDown on TreeGrid (throws cannot focus element on key down)
+            for (GxtTree.GxtNode root : Lists.newArrayList(tree.findRootNodes())) {
+                root.ensureExpanded();
             }
-        });
-        tree.search(indicatorName).get().ensureExpanded();
+
+            tree.waitUntil(new Predicate<GxtTree>() {
+                @Override
+                public boolean apply(GxtTree tree) {
+                    Optional<GxtTree.GxtNode> root = tree.firstRootNode();
+                    boolean loaded = root.isPresent() && root.get().joint().firstIfPresent().isPresent();
+                    return !loaded;
+                }
+            });
+
+            tree.search(indicatorName).get().ensureExpanded();
+        } catch (WebDriverException e) { // revisit it later
+            // unknown error: cannot focus element on key down
+        }
 
         Preconditions.checkState(tree.firstRootNode().get().joint().firstIfPresent().isPresent());
     }
