@@ -68,6 +68,7 @@ public class TargetForm extends FormPanel {
         MappingComboBox<Integer> projectCombo = new MappingComboBox<Integer>();
         projectCombo.setFieldLabel(constants.project());
         projectCombo.setAllowBlank(true);
+        projectCombo.addNone();
         for (ProjectDTO projectDTO : database.getProjects()) {
             projectCombo.add(projectDTO.getId(), projectDTO.getName());
         }
@@ -75,6 +76,7 @@ public class TargetForm extends FormPanel {
         this.add(projectCombo);
 
         MappingComboBox<Integer> partnerCombo = new MappingComboBox<Integer>();
+        partnerCombo.addNone();
         for (PartnerDTO partner : database.getPartners()) {
             partnerCombo.add(partner.getId(), partner.getName());
         }
