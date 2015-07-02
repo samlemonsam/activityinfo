@@ -202,11 +202,21 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("projectId")) {
-            target.setProject(entityManager().getReference(Project.class, changes.get("projectId")));
+            Object projectId = changes.get("projectId");
+            if (projectId != null) {
+                target.setProject(entityManager().getReference(Project.class, projectId));
+            } else {
+                target.setProject(null);
+            }
         }
 
         if (changes.containsKey("partnerId")) {
-            target.setPartner(entityManager().getReference(Partner.class, changes.get("partnerId")));
+            Object partnerId = changes.get("partnerId");
+            if (partnerId != null) {
+                target.setPartner(entityManager().getReference(Partner.class, partnerId));
+            } else {
+                target.setPartner(null);
+            }
         }
 
         if (changes.containsKey("AdminEntityId")) {

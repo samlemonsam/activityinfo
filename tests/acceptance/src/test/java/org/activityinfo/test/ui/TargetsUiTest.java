@@ -22,6 +22,7 @@ package org.activityinfo.test.ui;
  */
 
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.junit.Rule;
@@ -30,6 +31,7 @@ import org.junit.Test;
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author yuriyz on 05/18/2015.
@@ -96,5 +98,21 @@ public class TargetsUiTest {
         targetPage.select(driver.getAlias("Target1")); // switch back and check whether value is in tree
 
         assertNotNull(targetPage.valueGrid().findCell("1000")); // value must be present in tree
+    }
+
+    @Test
+    public void targetEdit() throws Exception {
+        background();
+
+        TargetsPage targets = driver.applicationPage().navigateToDesignTab().
+                selectDatabase(driver.alias(DATABASE)).targets();
+        targets.editTarget("Target1", driver.alias("ARC"), driver.alias("FY2014"));
+
+        targets.targetGrid().findCell(driver.alias("ARC"));
+        targets.targetGrid().findCell(driver.alias("FY2014"));
+
+        targets.editTarget("Target1", I18N.CONSTANTS.none(), I18N.CONSTANTS.none());
+        assertFalse(targets.targetGrid().findCellOptional(driver.alias("ARC")).isPresent());
+
     }
 }

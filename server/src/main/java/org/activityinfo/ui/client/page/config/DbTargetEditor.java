@@ -216,11 +216,15 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
                                 if (record.get("partnerId") != null) {
                                     PartnerDTO partner = db.getPartnerById((Integer) record.get("partnerId"));
                                     dto.setPartner(partner);
+                                } else {
+                                    dto.setPartner(null);
                                 }
 
                                 if (record.get("projectId") != null) {
                                     ProjectDTO project = db.getProjectById((Integer) record.get("projectId"));
                                     dto.setProject(project);
+                                } else {
+                                    dto.setProject(null);
                                 }
 
                                 store.commitChanges();

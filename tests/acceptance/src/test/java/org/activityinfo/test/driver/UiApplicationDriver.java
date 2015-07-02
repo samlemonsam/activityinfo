@@ -202,7 +202,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void createTarget(TestObject target) throws Exception {
         TargetsPage targetPage = navigateToTargetSetupFor(target.getAlias("database"));
 
-        GxtModal dialog = targetPage.add();
+        GxtModal dialog = targetPage.addButton();
         
         dialog.form().fillTextField("Name", target.getAlias());
         dialog.form().fillDateField("from", new LocalDate(2014, 1, 1));
