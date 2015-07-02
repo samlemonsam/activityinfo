@@ -211,7 +211,6 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("partnerId")) {
-            target.setPartner(entityManager().getReference(Partner.class, changes.get("partnerId")));
             Object partnerId = changes.get("partnerId");
             if (partnerId != null) {
                 target.setPartner(entityManager().getReference(Partner.class, partnerId));
