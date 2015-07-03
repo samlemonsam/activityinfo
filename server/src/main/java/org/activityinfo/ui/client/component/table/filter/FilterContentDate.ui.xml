@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget">
+
+  <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+  <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
+
+  <g:HTMLPanel addStyleNames="radio" ui:field="rootPanel">
+    <form class="form-inline">
+      <div class="form-group">
+        <label>
+          <ui:text from="{i18n.startDate}"/>:
+        </label>
+        <span class="form-control" ui:field="startDate"/>
+      </div>
+      <div class="form-group">
+        <label>
+          <ui:text from="{i18n.endDate}"/>:
+        </label>
+        <span class="form-control" ui:field="endDate"/>
+      </div>
+    </form>
+    <br/>
+    <g:HTMLPanel addStyleNames="radio" ui:field="radioContainer" width="100%"/>
+    <hr/>
+    <a:ButtonWithSize ui:field="customDateRange" text="{i18n.customDateRange}" style="DEFAULT" size="EXTRA_SMALL"/>
+  </g:HTMLPanel>
+</ui:UiBinder>

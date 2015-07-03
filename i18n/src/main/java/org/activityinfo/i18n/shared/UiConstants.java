@@ -3713,5 +3713,12 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Show all")
     String showAll();
+
+    @DefaultStringValue("Please specify 'from' date")
+    String pleaseSpecifyFromDate();
+
+    @DefaultStringValue("Please specify 'to' date")
+    String pleaseSpecifyToDate();
+
 }
 

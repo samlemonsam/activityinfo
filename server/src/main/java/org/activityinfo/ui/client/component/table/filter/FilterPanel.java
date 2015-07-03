@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.component.table.filter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,7 +51,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     private final InstanceTable table;
     private final FieldColumn column;
-    private final FilterContent filterContent;
+    private final FilterContentExistingItems filterContent;
 
     @UiField
     PopupPanel popup;
@@ -58,15 +59,17 @@ public class FilterPanel extends Composite implements HasCriteria {
     HTMLPanel contentContainer;
     @UiField
     Button okButton;
+    @UiField
+    HeadingElement title;
 
     public FilterPanel(InstanceTable table, FieldColumn column) {
         this.table = table;
         this.column = column;
         initWidget(uiBinder.createAndBindUi(this));
-        filterContent = FilterContentFactory.create(table, column);
-        if (filterContent != null) { // we may have null for unsupported types
-            contentContainer.add(filterContent);
-        }
+        title.setInnerHTML(column.getHeader());
+
+        filterContent = new FilterContentExistingItems(table, column);
+        contentContainer.add(filterContent);
     }
 
     @Override

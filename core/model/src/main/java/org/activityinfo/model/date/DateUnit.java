@@ -1,4 +1,4 @@
-package org.activityinfo.legacy.shared.reports.model;
+package org.activityinfo.model.date;
 
 /*
  * #%L
@@ -28,6 +28,6 @@ public enum DateUnit {
     QUARTER,
     MONTH,
     WEEK_MON,
-    DAY;
+    DAY
 
 }

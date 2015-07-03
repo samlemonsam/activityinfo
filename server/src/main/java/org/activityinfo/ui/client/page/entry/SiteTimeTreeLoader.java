@@ -41,8 +41,8 @@ import org.activityinfo.legacy.shared.reports.content.MonthCategory;
 import org.activityinfo.legacy.shared.reports.content.YearCategory;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
-import org.activityinfo.legacy.shared.reports.model.DateUnit;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.date.DateUnit;
 
 import java.util.List;
 

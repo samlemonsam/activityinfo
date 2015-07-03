@@ -55,7 +55,7 @@ import java.util.*;
 /**
  * @author yuriyz on 4/3/14.
  */
-public class FilterContentString extends Composite implements FilterContent {
+public class FilterContentExistingItems extends Composite implements FilterContent {
 
     public static final String FILTER_GRID_HEIGHT = "250px";
     public static final int CHECKBOX_COLUMN_WIDTH = 20;
@@ -66,7 +66,7 @@ public class FilterContentString extends Composite implements FilterContent {
      */
     private static final int SEARCH_BOX_PRESENCE_ITEM_COUNT = 7;
 
-    interface FilterContentStringUiBinder extends UiBinder<HTMLPanel, FilterContentString> {
+    interface FilterContentStringUiBinder extends UiBinder<HTMLPanel, FilterContentExistingItems> {
     }
 
     private static FilterContentStringUiBinder uiBinder = GWT.create(FilterContentStringUiBinder.class);
@@ -86,7 +86,7 @@ public class FilterContentString extends Composite implements FilterContent {
     @UiField
     HTMLPanel textBoxContainer;
 
-    public FilterContentString(InstanceTable table, FieldColumn column) {
+    public FilterContentExistingItems(InstanceTable table, FieldColumn column) {
         FilterDataGridResources.INSTANCE.dataGridStyle().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 

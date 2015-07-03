@@ -37,6 +37,7 @@ import org.activityinfo.legacy.shared.reports.model.layers.BubbleMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.IconMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.date.DateUnit;
 import org.activityinfo.server.generated.StorageProviderStub;
 import org.activityinfo.server.geo.TestGeometry;
 import org.activityinfo.server.report.DummyPivotTableData;

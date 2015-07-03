@@ -24,7 +24,11 @@ package org.activityinfo.server.report;
 
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.*;
-import org.activityinfo.legacy.shared.reports.model.*;
+import org.activityinfo.legacy.shared.reports.model.AdminDimension;
+import org.activityinfo.legacy.shared.reports.model.DateDimension;
+import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
+import org.activityinfo.model.date.DateUnit;
 
 import java.util.ArrayList;
 import java.util.List;

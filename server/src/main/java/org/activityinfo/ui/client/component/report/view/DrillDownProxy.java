@@ -11,8 +11,8 @@ import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.reports.content.DayCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
-import org.activityinfo.legacy.shared.reports.model.DateUnit;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.date.DateUnit;
 
 import java.util.ArrayList;
 import java.util.HashSet;

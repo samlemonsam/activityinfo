@@ -4,8 +4,8 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
-import org.activityinfo.legacy.shared.reports.model.DateUnit;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.date.DateUnit;
 
 public class DateAccessor implements DimAccessor {
 

@@ -31,8 +31,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.reports.model.DateUnit;
 import org.activityinfo.legacy.shared.reports.model.PivotChartReportElement;
+import org.activityinfo.model.date.DateUnit;
 import org.activityinfo.ui.client.component.report.editor.pivotTable.DimensionModel;
 
 import java.util.List;
