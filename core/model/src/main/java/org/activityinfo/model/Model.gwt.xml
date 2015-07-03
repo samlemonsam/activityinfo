@@ -42,5 +42,6 @@
   <source path="calc"/>
   <source path="system"/>
   <source path="legacy"/>
+  <source path="util"/>
 
 </module>
