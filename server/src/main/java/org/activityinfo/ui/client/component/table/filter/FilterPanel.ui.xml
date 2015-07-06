@@ -11,7 +11,7 @@
       <g:HTMLPanel>
         <div class="{style.filterPanel}" ui:field="dialogDiv">
           <div class="modal-content" ui:field="contentDiv">
-            <h5 ui:field="title"/>
+            <h4 ui:field="title"/>
             <div class="modal-body">
               <g:Button addStyleNames="btn btn-default btn-block btn-xs" ui:field="clearButton" text="{i18n.clearFilter}"/>
               <br/>

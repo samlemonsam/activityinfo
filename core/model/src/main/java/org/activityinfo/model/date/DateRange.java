@@ -25,6 +25,8 @@ package org.activityinfo.model.date;
  * @author yuriyz on 07/03/2015.
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -62,6 +64,10 @@ public class DateRange implements Serializable {
     public Date midDate() {
         long midDate = (start.getTime() + end.getTime()) / 2;
         return new Date(midDate);
+    }
+
+    public LocalDateRange asLocalDateRange() {
+        return new LocalDateRange(new LocalDate(start), new LocalDate(end));
     }
 
     @Override

@@ -66,6 +66,7 @@ public class FilterCellAction implements ActionCell.Delegate {
                     width = MINIMUM_POPUP_WIDTH_PX;
                 }
 
+                filterPanel.getPopup().setAutoHideEnabled(false);
                 filterPanel.getPopup().setWidth(width + "px");
                 filterPanel.getPopup().setPopupPosition(absoluteLeft,
                         absoluteTop + height);

@@ -28,4 +28,6 @@ import org.activityinfo.core.shared.criteria.HasCriteria;
  * @author yuriyz on 4/3/14.
  */
 public interface FilterContent extends HasCriteria, IsWidget {
+
+    public void clear();
 }

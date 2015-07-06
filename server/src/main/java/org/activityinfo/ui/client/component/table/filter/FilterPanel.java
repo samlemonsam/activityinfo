@@ -51,7 +51,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     private final InstanceTable table;
     private final FieldColumn column;
-    private final FilterContentExistingItems filterContent;
+    private final FilterContent filterContent;
 
     @UiField
     PopupPanel popup;
@@ -65,11 +65,16 @@ public class FilterPanel extends Composite implements HasCriteria {
     public FilterPanel(InstanceTable table, FieldColumn column) {
         this.table = table;
         this.column = column;
+
+        FilterDataGridResources.INSTANCE.dataGridStyle().ensureInjected();
+
         initWidget(uiBinder.createAndBindUi(this));
         title.setInnerHTML(column.getHeader());
 
-        filterContent = new FilterContentExistingItems(table, column);
-        contentContainer.add(filterContent);
+        filterContent = FilterContentFactory.create(table, column);
+        if (filterContent != null) { // we may have null for unsupported types
+            contentContainer.add(filterContent);
+        }
     }
 
     @Override
@@ -113,6 +118,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     @UiHandler("clearButton")
     public void onClear(ClickEvent event) {
+        filterContent.clear();
         column.setCriteria(null);
         table.getTable().redrawHeaders();
         table.reload();

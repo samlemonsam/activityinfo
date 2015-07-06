@@ -87,7 +87,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     HTMLPanel textBoxContainer;
 
     public FilterContentExistingItems(InstanceTable table, FieldColumn column) {
-        FilterDataGridResources.INSTANCE.dataGridStyle().ensureInjected();
+
         initWidget(uiBinder.createAndBindUi(this));
 
         this.table = table;
@@ -199,6 +199,11 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
     @UiHandler("deselectAllButton")
     public void onDeselectAll(ClickEvent event) {
+        selectAll(false);
+    }
+
+    @Override
+    public void clear() {
         selectAll(false);
     }
 }

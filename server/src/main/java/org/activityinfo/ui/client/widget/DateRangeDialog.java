@@ -46,6 +46,7 @@ public class DateRangeDialog {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     private final ModalDialog dialog = new ModalDialog();
+    private ClickHandler successCallback;
 
     @UiField
     DateBox fromDate;
@@ -71,6 +72,9 @@ public class DateRangeDialog {
     private void onOk() {
         if (validate()) {
             dialog.hide();
+            if (successCallback != null) {
+                successCallback.onClick(null);
+            }
         }
     }
 
@@ -97,7 +101,7 @@ public class DateRangeDialog {
 
     private void showError(String message) {
         messageSpanContainer.setVisible(true);
-        messageSpan.setInnerHTML(SafeHtmlUtils.fromString(message).toString());
+        messageSpan.setInnerHTML(SafeHtmlUtils.fromString(message).asString());
     }
 
     public DateRangeDialog show() {
@@ -107,5 +111,13 @@ public class DateRangeDialog {
 
     public DateRange getDateRange() {
         return new DateRange(fromDate.getValue(), toDate.getValue());
+    }
+
+    public ClickHandler getSuccessCallback() {
+        return successCallback;
+    }
+
+    public void setSuccessCallback(ClickHandler successCallback) {
+        this.successCallback = successCallback;
     }
 }
