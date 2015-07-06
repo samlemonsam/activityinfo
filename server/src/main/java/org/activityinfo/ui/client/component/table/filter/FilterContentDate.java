@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.component.table.filter;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
@@ -50,8 +49,6 @@ import org.activityinfo.ui.client.widget.ButtonWithSize;
 import org.activityinfo.ui.client.widget.DateRangeDialog;
 import org.activityinfo.ui.client.widget.RadioButton;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,7 +81,7 @@ public class FilterContentDate extends Composite implements FilterContent {
         this.column = column;
         initWidget(uiBinder.createAndBindUi(this));
 
-        addLastForQuarters();
+        addLastFourQuarters();
         radioContainer.add(new HTML("<hr/>"));
         addYearRange(0);
         addYearRange(1);
@@ -133,12 +130,9 @@ public class FilterContentDate extends Composite implements FilterContent {
         }
     }
 
-    private void addLastForQuarters() {
+    private void addLastFourQuarters() {
 
-        List<Map.Entry<Pair<Integer, Integer>, LocalDateRange>> entries = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap().entrySet());
-        Collections.reverse(entries);
-
-        for (Map.Entry<Pair<Integer, Integer>, LocalDateRange> entry : entries) {
+        for (Map.Entry<Pair<Integer, Integer>, LocalDateRange> entry : CalendarUtils.getLastFourQuarterMap().entrySet()) {
             Integer year = entry.getKey().getFirst();
             Integer quarter = entry.getKey().getSecond();
             String key = year + "_" + quarter;
@@ -180,8 +174,8 @@ public class FilterContentDate extends Composite implements FilterContent {
 
     private void addYearRange(int yearsAgo) {
         int year = new LocalDate().getYear() - yearsAgo;
-        LocalDate from = new LocalDate(year, 0, 1);
-        LocalDate to = new LocalDate(year, 11, 31);
+        LocalDate from = new LocalDate(year, 1, 1);
+        LocalDate to = new LocalDate(year, 12, 31);
 
         radioContainer.add(createRadioButton(year + "", year + ""));
         radioKeyToRange.put(year + "", new LocalDateRange(from, to));

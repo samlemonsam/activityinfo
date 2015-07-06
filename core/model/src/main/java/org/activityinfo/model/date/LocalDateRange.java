@@ -78,6 +78,30 @@ public class LocalDateRange implements Serializable {
         return minDate;
     }
 
+    public boolean isIn(LocalDate date) {
+        if (!isEmpty()) {
+            boolean afterMinDate = true;
+            boolean beforeMaxDate = true;
+
+            if (minDate != null) {
+                afterMinDate = date.after(minDate);
+            }
+            if (maxDate != null) {
+                beforeMaxDate = date.before(maxDate);
+            }
+            return afterMinDate && beforeMaxDate;
+        }
+        return false;
+    }
+
+    public boolean isIn(org.activityinfo.model.type.time.LocalDate date) { // some date we have to consolidate and leave only one LocalDate
+        return isIn(CalendarUtils.convert(date));
+    }
+
+    public boolean isEmpty() { // both not null
+        return minDate == null && maxDate == null;
+    }
+
     /**
      * Sets the minimum date in this range (inclusive).
      *

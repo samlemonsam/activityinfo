@@ -26,6 +26,8 @@ import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.time.LocalDate;
 
 import javax.annotation.Nonnull;
 
@@ -59,6 +61,13 @@ public class FieldDateCriteria implements Criteria {
 
     @Override
     public boolean apply(@Nonnull Projection input) {
+        return match(input.getValue(fieldPath));
+    }
+
+    private boolean match(FieldValue value) {
+        if (range != null) {
+            return value instanceof LocalDate && range.isIn((LocalDate) value);
+        }
         return true;
     }
 

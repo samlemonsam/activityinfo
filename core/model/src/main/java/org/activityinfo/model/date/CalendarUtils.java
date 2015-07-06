@@ -207,7 +207,7 @@ public class CalendarUtils {
         int year = today.getYear();
         int quarter = today.getMonthOfYear() / 3;
 
-        Map<Pair<Integer, Integer>, LocalDateRange> result = Maps.newHashMap();
+        Map<Pair<Integer, Integer>, LocalDateRange> result = Maps.newLinkedHashMap();
 
         for (int i = 0; i < 4; ++i) {
             quarter = quarter - 1;
@@ -228,6 +228,10 @@ public class CalendarUtils {
         CalendarUtil.addMonthsToDate(to, 3);
 
         return new LocalDateRange(from, to);
+    }
+
+    public static LocalDate convert(org.activityinfo.model.type.time.LocalDate date) {
+        return new LocalDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
     }
 
 }
