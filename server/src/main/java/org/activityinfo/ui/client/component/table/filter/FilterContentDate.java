@@ -22,13 +22,9 @@ package org.activityinfo.ui.client.component.table.filter;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -45,9 +41,9 @@ import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.util.Pair;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.ButtonWithSize;
-import org.activityinfo.ui.client.widget.DateRangeDialog;
-import org.activityinfo.ui.client.widget.RadioButton;
+import org.activityinfo.ui.client.widget.DateRangePanel;
 
 import java.util.Map;
 
@@ -62,17 +58,12 @@ public class FilterContentDate extends Composite implements FilterContent {
     private static DateUiBinder uiBinder = GWT.create(DateUiBinder.class);
 
     @UiField
-    SpanElement startDate;
+    HTMLPanel buttonsContainer;
     @UiField
-    SpanElement endDate;
-    @UiField
-    HTMLPanel radioContainer;
-    @UiField
-    ButtonWithSize customDateRange;
+    DateRangePanel rangePanel;
 
     private final InstanceTable table;
     private final FieldColumn column;
-    private final Map<String, LocalDateRange> radioKeyToRange = Maps.newHashMap();
 
     private LocalDateRange currentRange = null;
 
@@ -82,29 +73,11 @@ public class FilterContentDate extends Composite implements FilterContent {
         initWidget(uiBinder.createAndBindUi(this));
 
         addLastFourQuarters();
-        radioContainer.add(new HTML("<hr/>"));
+        buttonsContainer.add(new HTML("<hr/>"));
         addYearRange(0);
         addYearRange(1);
 
         initByCriteriaVisit();
-        initCustomDateRange();
-    }
-
-    private void initCustomDateRange() {
-        customDateRange.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final DateRangeDialog dialog = new DateRangeDialog();
-                dialog.setSuccessCallback(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        currentRange = dialog.getDateRange().asLocalDateRange();
-                        onRangeChange(currentRange);
-                    }
-                });
-                dialog.show();
-            }
-        });
     }
 
     private void initByCriteriaVisit() {
@@ -114,8 +87,8 @@ public class FilterContentDate extends Composite implements FilterContent {
                 @Override
                 public void visitFieldCriteria(FieldDateCriteria fieldCriteria) {
                     if (fieldCriteria.getFieldPath().equals(column.getNode().getPath())) {
-                        currentRange = fieldCriteria.getRange();
-                        onRangeChange(currentRange);
+                        setCurrentRange(fieldCriteria.getRange());
+                        rangePanel.setDateRange(currentRange.asDateRange());
                     }
                 }
 
@@ -131,45 +104,26 @@ public class FilterContentDate extends Composite implements FilterContent {
     }
 
     private void addLastFourQuarters() {
-
         for (Map.Entry<Pair<Integer, Integer>, LocalDateRange> entry : CalendarUtils.getLastFourQuarterMap().entrySet()) {
             Integer year = entry.getKey().getFirst();
             Integer quarter = entry.getKey().getSecond();
-            String key = year + "_" + quarter;
 
-            radioContainer.add(createRadioButton(key, I18N.MESSAGES.quarter(year, (quarter + 1))));
-            radioKeyToRange.put(key, entry.getValue());
+            buttonsContainer.add(createButton(I18N.MESSAGES.quarter(year, (quarter + 1)), entry.getValue()));
         }
     }
 
-    private RadioButton createRadioButton(String key, String label) {
-        final RadioButton button = new RadioButton("range_name", label);
-        button.setFormValue(key);
-        button.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+    private ButtonWithSize createButton(final String label, final LocalDateRange range) {
+        final ButtonWithSize button = new ButtonWithSize(ElementStyle.DEFAULT, ButtonWithSize.Size.EXTRA_SMALL);
+        button.setText(label);
+        button.addClickHandler(new ClickHandler() {
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (button.getValue()) {
-                    onRangeChange(radioKeyToRange.get(button.getFormValue()));
-                }
+            public void onClick(ClickEvent event) {
+                setCurrentRange(range);
+                rangePanel.setDateRange(range.asDateRange());
             }
         });
+
         return button;
-    }
-
-    private void onRangeChange(LocalDateRange range) {
-        if (range == null) {
-            startDate.setInnerHTML("");
-            endDate.setInnerHTML("");
-            return;
-        }
-
-        startDate.setInnerText(format(range.getMinLocalDate()));
-        endDate.setInnerText(format(range.getMaxLocalDate()));
-
-    }
-
-    private static String format(LocalDate localDate) {
-        return localDate != null ? localDate.toString() : "";
     }
 
     private void addYearRange(int yearsAgo) {
@@ -177,8 +131,7 @@ public class FilterContentDate extends Composite implements FilterContent {
         LocalDate from = new LocalDate(year, 1, 1);
         LocalDate to = new LocalDate(year, 12, 31);
 
-        radioContainer.add(createRadioButton(year + "", year + ""));
-        radioKeyToRange.put(year + "", new LocalDateRange(from, to));
+        buttonsContainer.add(createButton(year + "", new LocalDateRange(from, to)));
     }
 
     @Override
@@ -191,8 +144,13 @@ public class FilterContentDate extends Composite implements FilterContent {
 
     @Override
     public void clear() {
-        currentRange = null;
-        onRangeChange(null);
+        setCurrentRange(null);
+        rangePanel.clear();
+    }
+
+    public void setCurrentRange(LocalDateRange currentRange) {
+        this.currentRange = currentRange;
+        rangePanel.setDateRange(currentRange != null ? currentRange.asDateRange() : null);
     }
 
     @Override

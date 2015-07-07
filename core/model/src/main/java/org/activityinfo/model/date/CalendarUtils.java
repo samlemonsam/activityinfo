@@ -203,9 +203,12 @@ public class CalendarUtils {
     }
 
     public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap() {
-        LocalDate today = new LocalDate();
-        int year = today.getYear();
-        int quarter = today.getMonthOfYear() / 3;
+        return getLastFourQuarterMap(new LocalDate());
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(LocalDate date) {
+        int year = date.getYear();
+        int quarter = date.getMonthOfYear() / 3;
 
         Map<Pair<Integer, Integer>, LocalDateRange> result = Maps.newLinkedHashMap();
 
@@ -224,8 +227,9 @@ public class CalendarUtils {
     public static LocalDateRange createQuarterRange(int year, int quarter) {
         Date from = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
         Date to = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
+        CalendarUtil.addMonthsToDate(from, 1);
+        CalendarUtil.addMonthsToDate(to, 4);
         CalendarUtil.addDaysToDate(to, -1);
-        CalendarUtil.addMonthsToDate(to, 3);
 
         return new LocalDateRange(from, to);
     }

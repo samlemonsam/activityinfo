@@ -36,6 +36,11 @@ public class DateBox extends com.google.gwt.user.datepicker.client.DateBox {
         init();
     }
 
+    public DateBox(Format format) {
+        super(new DatePicker(), null, format);
+        init();
+    }
+
     public DateBox(DatePicker picker, Date date, Format format) {
         super(picker, date, format);
         init();

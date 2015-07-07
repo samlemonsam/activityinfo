@@ -7,18 +7,8 @@
   <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
 
   <g:HTMLPanel addStyleNames="radio" ui:field="rootPanel">
-    <label>
-      <ui:text from="{i18n.startDate}"/>:
-    </label>
-    <span ui:field="startDate"/>
+    <a:DateRangePanel ui:field="rangePanel"/>
     <br/>
-    <label>
-      <ui:text from="{i18n.endDate}"/>:
-    </label>
-    <span ui:field="endDate"/>
-    <br/>
-    <g:HTMLPanel addStyleNames="radio" ui:field="radioContainer" width="100%"/>
-    <hr/>
-    <a:ButtonWithSize ui:field="customDateRange" text="{i18n.customDateRange}" style="DEFAULT" size="EXTRA_SMALL"/>
+    <g:HTMLPanel ui:field="buttonsContainer" width="100%"/>
   </g:HTMLPanel>
 </ui:UiBinder>

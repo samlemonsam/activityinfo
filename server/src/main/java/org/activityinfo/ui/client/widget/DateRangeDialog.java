@@ -21,45 +21,23 @@ package org.activityinfo.ui.client.widget;
  * #L%
  */
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.date.CalendarUtils;
-import org.activityinfo.model.date.DateRange;
-
-import java.util.Date;
 
 /**
- * @author yuriyz on 07/03/2015.
+ * @author yuriyz on 07/06/2015.
  */
 public class DateRangeDialog {
 
-    interface MyUiBinder extends UiBinder<HTMLPanel, DateRangeDialog> {
-    }
-
-    private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-
     private final ModalDialog dialog = new ModalDialog();
-    private ClickHandler successCallback;
+    private final DateRangePanel panel = new DateRangePanel();
 
-    @UiField
-    DateBox fromDate;
-    @UiField
-    DateBox toDate;
-    @UiField
-    SpanElement messageSpan;
-    @UiField
-    HTMLPanel messageSpanContainer;
+    private ClickHandler successCallback;
 
     public DateRangeDialog() {
         dialog.setDialogTitle(I18N.CONSTANTS.customDateRange());
-        dialog.getModalBody().add(uiBinder.createAndBindUi(this));
+        dialog.getModalBody().add(panel);
 
         dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
@@ -70,7 +48,7 @@ public class DateRangeDialog {
     }
 
     private void onOk() {
-        if (validate()) {
+        if (panel.validate()) {
             dialog.hide();
             if (successCallback != null) {
                 successCallback.onClick(null);
@@ -78,40 +56,6 @@ public class DateRangeDialog {
         }
     }
 
-    private boolean validate() {
-        messageSpanContainer.setVisible(false);
-
-        Date fromDateValue = fromDate.getValue();
-        Date toDateValue = toDate.getValue();
-
-        if (fromDateValue == null) {
-            showError(I18N.CONSTANTS.pleaseSpecifyFromDate());
-            return false;
-        }
-        if (toDateValue == null) {
-            showError(I18N.CONSTANTS.pleaseSpecifyToDate());
-            return false;
-        }
-        if (CalendarUtils.before(fromDateValue, toDateValue)) {
-            showError(I18N.CONSTANTS.inconsistentDateRangeWarning());
-            return false;
-        }
-        return true;
-    }
-
-    private void showError(String message) {
-        messageSpanContainer.setVisible(true);
-        messageSpan.setInnerHTML(SafeHtmlUtils.fromString(message).asString());
-    }
-
-    public DateRangeDialog show() {
-        dialog.show();
-        return this;
-    }
-
-    public DateRange getDateRange() {
-        return new DateRange(fromDate.getValue(), toDate.getValue());
-    }
 
     public ClickHandler getSuccessCallback() {
         return successCallback;

@@ -102,6 +102,12 @@ public class LocalDateRange implements Serializable {
         return minDate == null && maxDate == null;
     }
 
+    public DateRange asDateRange() {
+        return new DateRange(
+                minDate != null ? minDate.atMidnightInMyTimezone() : null,
+                maxDate != null ? maxDate.atMidnightInMyTimezone() : null);
+    }
+
     /**
      * Sets the minimum date in this range (inclusive).
      *
@@ -183,4 +189,11 @@ public class LocalDateRange implements Serializable {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "LocalDateRange{" +
+                "minDate=" + minDate +
+                ", maxDate=" + maxDate +
+                '}';
+    }
 }
