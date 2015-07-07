@@ -25,11 +25,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.mysql.jdbc.StringUtils;
 import cucumber.api.DataTable;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -160,7 +163,18 @@ public class BsTable {
     }
 
     public TableFilterDialog filter(String columnName) {
-        clickOnHeader(columnName);
+        try {
+            clickOnHeader(columnName);
+        } catch (NoSuchElementException e) {
+
+            // handle built-in column names (without alias)
+            int index = columnName.indexOf("_");
+            if (index != -1) {
+                clickOnHeader(columnName.substring(0, index));
+            } else {
+                throw e;
+            }
+        }
         return new TableFilterDialog(BsModal.find(container.root(), "modal-content"));
     }
 
@@ -222,8 +236,14 @@ public class BsTable {
         List<DataTableRow> matched = Lists.newArrayList();
         List<DataTableRow> notMatched = Lists.newArrayList();
 
-        for (Row row : rows()) {
-            for (int i = 2; i< dataTable.getGherkinRows().size(); i++) {
+        List<Row> rows = rows();
+        int expectedRows = dataTable.getGherkinRows().size() - 2;
+        if (rows.size() != expectedRows) {
+            throw new AssertionError("Number of rows do not match, found on UI: " + rows.size() + ", expected: " + expectedRows);
+        }
+
+        for (Row row : rows) {
+            for (int i = 2; i < dataTable.getGherkinRows().size(); i++) {
                 DataTableRow gherkinRow = dataTable.getGherkinRows().get(i);
                 if (matched(row.getCells(), gherkinRow)) {
                     matched.add(gherkinRow);
@@ -232,7 +252,7 @@ public class BsTable {
                 }
             }
         }
-        if (matched.size() == (dataTable.getGherkinRows().size() - 2)) {
+        if (matched.size() == expectedRows) {
             return this; // all are matched
         }
 
@@ -241,14 +261,28 @@ public class BsTable {
 
     public static boolean matched(List<Cell> cells, DataTableRow row) {
         for (Cell cell : cells) {
-            String text = cell.text();
-            String deAlias = text.contains("_") ? text.substring(0, text.indexOf("_")) : text;
+            String text = cell.text().trim();
+            String deAlias = AliasTable.deAlias(text);
 
             boolean cellMatched = false;
-            for (String cellStr : row.getCells()) {
-                if (text.equals(cellStr) || deAlias.equals(cellStr)) {
+            for (int i = 0; i < row.getCells().size(); i++) {
+                String cellStr = row.getCells().get(i);
+
+                System.out.println("uiText: " + text + ", cellStr: " + cellStr);
+                if (text.equals(cellStr) || deAlias.equals(cellStr) || text.isEmpty()) {
                     cellMatched = true;
                     break;
+                }
+
+                if (text.contains(",") && cellStr.contains(",")) { // check enum values
+                    List<String> deAliasedEnumValues = AliasTable.deAliasEnumValueSplittedByComma(text);
+                    if (!deAliasedEnumValues.isEmpty()) {
+                        deAliasedEnumValues.removeAll(StringUtils.split(cellStr, ",", true));
+                        if (deAliasedEnumValues.isEmpty()) { // all enum values are matched
+                            cellMatched = true;
+                            break;
+                        }
+                    }
                 }
             }
             if (!cellMatched) {

@@ -6,9 +6,11 @@
   <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
   <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
 
-  <g:HTMLPanel addStyleNames="radio" ui:field="rootPanel">
-    <a:DateRangePanel ui:field="rangePanel"/>
-    <br/>
-    <g:HTMLPanel ui:field="buttonsContainer" width="100%"/>
+  <g:HTMLPanel ui:field="rootPanel">
+    <div style="padding: 4px;">
+      <a:DateRangePanel ui:field="rangePanel"/>
+      <br/>
+      <g:HTMLPanel ui:field="buttonsContainer" width="100%"/>
+    </div>
   </g:HTMLPanel>
 </ui:UiBinder>

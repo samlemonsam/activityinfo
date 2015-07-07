@@ -5,7 +5,7 @@
 
   <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
 
-  <g:HTMLPanel addStyleNames="form-inline">
+  <g:HTMLPanel>
     <div class="form-group">
       <label>
         <ui:text from="{i18n.fromDate}"/>:

@@ -186,6 +186,18 @@ public class AliasTable {
         return DataTable.create(rows);
     }
 
+    public static String deAlias(String text) {
+        return text.contains("_") ? text.substring(0, text.indexOf("_")).trim() : text;
+    }
+
+    public static List<String> deAliasEnumValueSplittedByComma(String text) {
+        List<String> split = Lists.newArrayList(StringUtils.split(text, ",", true));
+        for (int i = 0; i < split.size(); i++) {
+            split.set(i, AliasTable.deAlias(split.get(i)));
+        }
+        return split;
+    }
+
     public List<FieldValue> deAlias(List<FieldValue> values) {
         for (FieldValue value : values) {
             deAlias(value);

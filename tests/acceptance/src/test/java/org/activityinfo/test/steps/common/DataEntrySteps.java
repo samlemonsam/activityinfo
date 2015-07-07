@@ -294,4 +294,11 @@ public class DataEntrySteps {
         return driver.openFormTable(databaseName, formName);
     }
 
+    @And("^filter date column \"([^\"]*)\" with start date \"([^\"]*)\" and end date \"([^\"]*)\":$")
+    public void filter_date_column_with_start_date_and_end_date_(String columnName, String startDate, String endDate) throws Throwable {
+        columnName = driver.getAliasTable().getAlias(columnName);
+
+        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        table.filter(columnName).fillRange(LocalDate.parse(startDate), LocalDate.parse(endDate)).apply();
+    }
 }

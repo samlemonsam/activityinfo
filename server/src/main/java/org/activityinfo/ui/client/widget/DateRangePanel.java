@@ -66,6 +66,17 @@ public class DateRangePanel implements IsWidget {
         rootPanel = uiBinder.createAndBindUi(this);
     }
 
+
+    public DateRangePanel inlineForm(boolean inlineForm) {
+        if (inlineForm) {
+            rootPanel.addStyleName("form-inline");
+        } else {
+            rootPanel.removeStyleName("form-inline");
+        }
+        return this;
+    }
+
+
     public void addValueChangeHandler(ValueChangeHandler<Date> rangeChangedHandler) {
         fromDate.addValueChangeHandler(rangeChangedHandler);
         toDate.addValueChangeHandler(rangeChangedHandler);

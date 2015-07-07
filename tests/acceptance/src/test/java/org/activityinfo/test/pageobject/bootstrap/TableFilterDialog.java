@@ -21,7 +21,9 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
+import org.activityinfo.core.shared.type.formatter.DateFormatterFactory;
 import org.activityinfo.i18n.shared.I18N;
+import org.joda.time.LocalDate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +41,14 @@ public class TableFilterDialog {
 
     public BsTable table() {
         return new BsTable(modal.getWindowElement().find().table().first(), BsTable.Type.GRID_TABLE);
+    }
+
+    public TableFilterDialog fillRange(LocalDate startDate, LocalDate endDate) {
+        BsFormPanel form = modal.form();
+
+        form.fillTextField("from:", startDate.toString(DateFormatterFactory.FORMAT));
+        form.fillTextField("to:", endDate.toString(DateFormatterFactory.FORMAT));
+        return this;
     }
 
     public TableFilterDialog select(String... filterValues) {

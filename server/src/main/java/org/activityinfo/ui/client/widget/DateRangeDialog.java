@@ -38,6 +38,7 @@ public class DateRangeDialog {
     public DateRangeDialog() {
         dialog.setDialogTitle(I18N.CONSTANTS.customDateRange());
         dialog.getModalBody().add(panel);
+        panel.inlineForm(true);
 
         dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
