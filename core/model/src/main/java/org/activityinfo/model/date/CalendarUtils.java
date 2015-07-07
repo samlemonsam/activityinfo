@@ -211,7 +211,11 @@ public class CalendarUtils {
     }
 
     public static List<LocalDateRange> getLastFourQuarters() {
-        return Lists.newArrayList(getLastFourQuarterMap(GWT_DATE_SHIFTER).values());
+        return Lists.newArrayList(getLastFourQuarterMap().values());
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap() {
+        return getLastFourQuarterMap(GWT_DATE_SHIFTER);
     }
 
     public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(DateShifter dateShifter) {
