@@ -63,6 +63,18 @@ public class CalendarUtils {
         }
     };
 
+    public static final DateShifter GWT_DATE_SHIFTER = new DateShifter() {
+        @Override
+        public void addMonthsToDate(Date date, int add) {
+            CalendarUtil.addMonthsToDate(date, add);
+        }
+
+        @Override
+        public void addDaysToDate(Date date, int add) {
+            CalendarUtil.addDaysToDate(date, add);
+        }
+    };
+
     private CalendarUtils() {
     }
 
@@ -199,14 +211,14 @@ public class CalendarUtils {
     }
 
     public static List<LocalDateRange> getLastFourQuarters() {
-        return Lists.newArrayList(getLastFourQuarterMap().values());
+        return Lists.newArrayList(getLastFourQuarterMap(GWT_DATE_SHIFTER).values());
     }
 
-    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap() {
-        return getLastFourQuarterMap(new LocalDate());
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(DateShifter dateShifter) {
+        return getLastFourQuarterMap(new LocalDate(), dateShifter);
     }
 
-    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(LocalDate date) {
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(LocalDate date, DateShifter dateShifter) {
         int year = date.getYear();
         int quarter = date.getMonthOfYear() / 3;
 
@@ -218,18 +230,21 @@ public class CalendarUtils {
                 year = year - 1;
                 quarter = 3;
             }
-            result.put(Pair.newPair(year, quarter), createQuarterRange(year, quarter));
+            result.put(Pair.newPair(year, quarter), createQuarterRange(year, quarter, dateShifter));
         }
         return result;
     }
 
-
     public static LocalDateRange createQuarterRange(int year, int quarter) {
+        return createQuarterRange(year, quarter, GWT_DATE_SHIFTER);
+    }
+
+    public static LocalDateRange createQuarterRange(int year, int quarter, DateShifter dateShifter) {
         Date from = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
         Date to = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
-        CalendarUtil.addMonthsToDate(from, 1);
-        CalendarUtil.addMonthsToDate(to, 4);
-        CalendarUtil.addDaysToDate(to, -1);
+        dateShifter.addMonthsToDate(from, 1);
+        dateShifter.addMonthsToDate(to, 4);
+        dateShifter.addDaysToDate(to, -1);
 
         return new LocalDateRange(from, to);
     }

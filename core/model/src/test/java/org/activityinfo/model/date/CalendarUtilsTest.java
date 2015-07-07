@@ -26,6 +26,8 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -38,11 +40,31 @@ public class CalendarUtilsTest {
     public void lastFourQuarters() {
 
         LocalDate date = new LocalDate(2015, 6, 7);
-        ArrayList<LocalDateRange> ranges = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap(date).values());
+        ArrayList<LocalDateRange> ranges = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap(date, jvmDateShifter()).values());
 
         assertEquals(ranges.get(0), new LocalDateRange(new LocalDate(2015, 4, 1), new LocalDate(2015, 6, 30)));
         assertEquals(ranges.get(1), new LocalDateRange(new LocalDate(2015, 1, 1), new LocalDate(2015, 3, 31)));
         assertEquals(ranges.get(2), new LocalDateRange(new LocalDate(2014, 10, 1), new LocalDate(2014, 12, 31)));
         assertEquals(ranges.get(3), new LocalDateRange(new LocalDate(2014, 7, 1), new LocalDate(2014, 9, 30)));
+    }
+
+    public static DateShifter jvmDateShifter() {
+        return new DateShifter() {
+            @Override
+            public void addMonthsToDate(Date date, int add) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(date);
+                c.add(Calendar.MONTH, add);
+                date.setTime(c.getTime().getTime());
+            }
+
+            @Override
+            public void addDaysToDate(Date date, int add) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(date);
+                c.add(Calendar.DAY_OF_MONTH, add);
+                date.setTime(c.getTime().getTime());
+            }
+        };
     }
 }
