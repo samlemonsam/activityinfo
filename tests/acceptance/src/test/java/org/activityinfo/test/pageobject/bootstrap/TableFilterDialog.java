@@ -21,7 +21,6 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
-import org.activityinfo.core.shared.type.formatter.DateFormatterFactory;
 import org.activityinfo.i18n.shared.I18N;
 import org.joda.time.LocalDate;
 
@@ -46,8 +45,8 @@ public class TableFilterDialog {
     public TableFilterDialog fillRange(LocalDate startDate, LocalDate endDate) {
         BsFormPanel form = modal.form();
 
-        form.fillTextField("from:", startDate.toString(DateFormatterFactory.FORMAT));
-        form.fillTextField("to:", endDate.toString(DateFormatterFactory.FORMAT));
+        form.fillTextField("from:", startDate.toString("dd-MM-yyyy"));
+        form.fillTextField("to:", endDate.toString("dd-MM-yyyy"));
         return this;
     }
 
