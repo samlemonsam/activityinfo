@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.widget;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -63,6 +64,11 @@ public class DateRangePanel implements IsWidget {
         toDate = new DateBox(createFormat());
 
         rootPanel = uiBinder.createAndBindUi(this);
+    }
+
+    public void addValueChangeHandler(ValueChangeHandler<Date> rangeChangedHandler) {
+        fromDate.addValueChangeHandler(rangeChangedHandler);
+        toDate.addValueChangeHandler(rangeChangedHandler);
     }
 
     public boolean validate() {

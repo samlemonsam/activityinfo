@@ -67,7 +67,9 @@ public class DateRange implements Serializable {
     }
 
     public LocalDateRange asLocalDateRange() {
-        return new LocalDateRange(new LocalDate(start), new LocalDate(end));
+        return new LocalDateRange(
+                start != null ? new LocalDate(start) : null,
+                end != null ? new LocalDate(end) : null);
     }
 
     @Override

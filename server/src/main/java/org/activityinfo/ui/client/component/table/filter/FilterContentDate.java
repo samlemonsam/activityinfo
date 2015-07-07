@@ -25,6 +25,8 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -45,6 +47,7 @@ import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.ButtonWithSize;
 import org.activityinfo.ui.client.widget.DateRangePanel;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -78,6 +81,12 @@ public class FilterContentDate extends Composite implements FilterContent {
         addYearRange(1);
 
         initByCriteriaVisit();
+        rangePanel.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                setCurrentRange(rangePanel.getDateRange().asLocalDateRange());
+            }
+        });
     }
 
     private void initByCriteriaVisit() {
