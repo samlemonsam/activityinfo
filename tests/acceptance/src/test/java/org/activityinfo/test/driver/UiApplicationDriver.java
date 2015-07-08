@@ -396,7 +396,12 @@ public class UiApplicationDriver extends ApplicationDriver {
             }
         } else if (objectType == ObjectType.PARTNER) {
             GxtGrid grid = designTab.partners().grid();
-            grid.findCell(testObject.getAlias("name"));
+
+            String partnerName = testObject.getString("name");
+            if (!"Default".equals(partnerName)) {
+                partnerName = testObject.getAlias("name");
+            }
+            grid.findCell(partnerName);
 
         } else if (objectType == ObjectType.FORM_FIELD) {
             DesignPage designPage = designTab.design();

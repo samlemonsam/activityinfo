@@ -24,9 +24,11 @@ package org.activityinfo.server.command.handler;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.api.client.util.Strings;
+import com.google.common.base.Preconditions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.UpdateFormClass;
@@ -36,6 +38,7 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
 import org.activityinfo.legacy.shared.impl.ExecutionContext;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -94,6 +97,8 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
         this.targetDb = createDatabase(command, user);
         this.sourceDb = em.find(UserDatabase.class, command.getSourceDatabaseId());
 
+        createDefaultPartner(user);
+
         if (!permissionOracle.isViewAllowed(sourceDb, user)) {
             throw new IllegalAccessCommandException();
         }
@@ -127,6 +132,16 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
         });
     }
 
+    private void createDefaultPartner(User user) {
+        Preconditions.checkNotNull(targetDb);
+        Preconditions.checkState(targetDb.getId() > 0);
+
+        PartnerDTO partner = new PartnerDTO();
+        partner.setName("Default");
+
+        new AddPartnerHandler(em).execute(new AddPartner(targetDb.getId(), partner), user);
+    }
+
     private void copyUserPermissions() {
 
         for (UserPermission sourcePermission : sourceDb.getUserPermissions()) {
@@ -147,6 +162,11 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
 
     private void copyPartners() {
         for (Partner partner : sourceDb.getPartners()) {
+
+            if (partner.getName().equals("Default")) { // skip source "Default" partner
+                continue;
+            }
+
             Partner newPartner = new Partner();
             newPartner.setName(partner.getName());
             newPartner.setFullName(partner.getFullName());

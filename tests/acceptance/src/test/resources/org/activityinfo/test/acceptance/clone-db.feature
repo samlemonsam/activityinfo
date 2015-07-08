@@ -11,6 +11,7 @@ Feature: Clone database
   Scenario: Clone database
     Given I have cloned a database "RRMP" with name "RRMP_Clone"
     Given I have added partner "PP1" to "RRMP"
+    Then "RRMP_Clone" database has "Default" partner
     Then "RRMP_Clone" database has "NRC" partner
     Then "RRMP_Clone" database has "PP" partner
     Then "RRMP_Clone" database has "NFI Distribution" form
