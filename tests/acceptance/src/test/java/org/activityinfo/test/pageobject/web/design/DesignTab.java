@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.gxt.GalleryView;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
@@ -71,8 +72,8 @@ public class DesignTab {
         return new DesignPage(container);
     }
 
-    public FormInstanceTable formInstanceTable() {
-        return new FormInstanceTable(container.waitFor(By.className("cellTableWidget")));
+    public BsTable formInstanceTable() {
+        return new BsTable(container.waitFor(By.className("cellTableWidget")));
     }
 
     public BsModal newDatabase() {

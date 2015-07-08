@@ -403,7 +403,7 @@ public class UiApplicationDriver extends ApplicationDriver {
             designPage.getDesignTree().search(name).get().select();
             designPage.getToolbarMenu().clickButton("Open Table");
 
-            designTab.formInstanceTable().getToolbarMenu().clickButton("New");
+            designTab.formInstanceTable().buttonClick("New");
 
             BsModal dialog = designTab.formInstance();
             BsFormPanel.BsField bsField = (BsFormPanel.BsField) dialog.form().findFieldByLabel(testObject.getString("formFieldName"));

@@ -308,7 +308,7 @@ public class BsTable {
         return this;
     }
 
-    private void buttonClick(String buttonName) {
+    public void buttonClick(String buttonName) {
         try {
             button(buttonName).get().clickWhenReady();
         } catch (TimeoutException e) {
