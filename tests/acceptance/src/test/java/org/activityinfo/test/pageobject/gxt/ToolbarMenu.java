@@ -21,13 +21,8 @@ package org.activityinfo.test.pageobject.gxt;
  * #L%
  */
 
-import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-
-import javax.annotation.Nullable;
 
 /**
  * @author yuriyz on 04/02/2015.
@@ -45,16 +40,6 @@ public class ToolbarMenu {
     }
 
     public void clickButton(final String buttonName) {
-        menu.waitUntil(new Predicate<WebDriver>() {
-            @Override
-            public boolean apply(@Nullable WebDriver input) {
-                try {
-                    return menu.findElement(Gxt.button(buttonName)) != null;
-                } catch(NoSuchElementException e) {
-                    return false;
-                }
-            }
-        });
-        menu.findElement(Gxt.button(buttonName)).clickWhenReady();
+        menu.waitFor(Gxt.button(buttonName)).clickWhenReady();
     }
 }

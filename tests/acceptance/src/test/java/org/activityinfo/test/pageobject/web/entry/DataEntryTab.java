@@ -143,7 +143,11 @@ public class DataEntryTab {
     public void selectSubmission(int rowIndex) {
         GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
         grid.waitUntilAtLeastOneRowIsLoaded();
-        grid.rows().get(rowIndex).select();
+        try {
+            grid.rows().get(rowIndex).select();
+        } catch (StaleElementReferenceException e) {
+            GxtGrid.waitForGrids(container).first().get().rows().get(rowIndex).select();
+        }
     }
     
     public void selectTab(String tabName) {

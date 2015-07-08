@@ -20,9 +20,13 @@ Feature: New table (based on new form)
       | field       | value  | controlType |
       | Donor       | USAID  | radio       |
     Then table has rows with hidden built-in columns:
-      | Number of patients | Donor   | Diseases treated this month  |
-      | quantity           | enum    | enum                         |
-      | 11                 | USAID   | cholera                      |
+      | Number of patients | Donor   | Diseases treated this month    |
+      | quantity           | enum    | enum                           |
+      | 230                | USAID   | cholera, malaria, tuberculosis |
+      | 51                 | ECHO    | cholera                        |
+      | 1                  | ECHO    | cholera                        |
+      | 13                 | USAID   | cholera, malaria               |
+      | 11                 | USAID   | cholera                        |
 
   @AI-835
   Scenario: Column filtering by items
