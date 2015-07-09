@@ -121,8 +121,6 @@ public class InstanceTableUiTest {
         final TablePage tablePage = driver.applicationPage().navigateToTable(driver.alias(DATABASE), driver.alias(FORM_NAME));
         BsTable table = tablePage.table();
 
-        assertRowCount(table.rowCount(), 0);
-
         // start scrolling down and check that rows are loaded during scrolling
         for (int i = 1; i < 11; i++) {
             final int index = i;
@@ -160,7 +158,7 @@ public class InstanceTableUiTest {
     private static void assertRowCount(int rowCount, int iteration) {
         assertTrue("rowCount: " + rowCount + ", expected to be more then: " + LOAD_COUNT * iteration +
                         ", end less/equals then: " + (LOAD_COUNT * (iteration + 1)),
-                rowCount > LOAD_COUNT * iteration /*&& rowCount <= (LOAD_COUNT * (iteration + 1))*/);
+                rowCount >= LOAD_COUNT * iteration /*&& rowCount <= (LOAD_COUNT * (iteration + 1))*/);
     }
 
 }
