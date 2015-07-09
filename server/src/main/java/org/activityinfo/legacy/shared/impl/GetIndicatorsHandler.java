@@ -5,7 +5,6 @@ import com.bedatadriven.rebar.sql.client.SqlResultSet;
 import com.bedatadriven.rebar.sql.client.SqlResultSetRow;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
-import com.bedatadriven.rebar.sql.client.util.RowHandler;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.GetIndicators;
@@ -36,12 +35,12 @@ public class GetIndicatorsHandler implements CommandHandlerAsync<GetIndicators, 
                 "i.mandatory",
                 "a.databaseId")
                 .appendColumn("db.name", "databaseName")
-                .from(Tables.INDICATOR)
+                .from(Tables.INDICATOR, "i")
                 .leftJoin(Tables.ACTIVITY, "a").on("a.activityId=i.activityId")
                 .leftJoin(Tables.USER_DATABASE, "db").on("a.databaseId=db.databaseId")
-                .where("indicatorId").in(command.getIndicatorIds())
-                .whereTrue("dateDeleted is null")
-                .orderBy("SortOrder")
+                .where("i.indicatorId").in(command.getIndicatorIds())
+                .whereTrue("a.dateDeleted is null")
+                .orderBy("i.SortOrder")
                 .execute(context.getTransaction(), new SqlResultCallback() {
 
             @Override

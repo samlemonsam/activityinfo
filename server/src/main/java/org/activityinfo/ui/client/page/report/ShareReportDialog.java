@@ -32,23 +32,25 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.IndicatorResult;
 import org.activityinfo.legacy.shared.command.result.ReportVisibilityResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.legacy.shared.model.ReportDTO;
+import org.activityinfo.legacy.shared.model.ReportMetadataDTO;
+import org.activityinfo.legacy.shared.model.ReportVisibilityDTO;
 import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ShareReportDialog extends Dialog {
 
@@ -134,13 +136,7 @@ public class ShareReportDialog extends Dialog {
 
         dispatcher.execute(batch,
                 new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
-                new AsyncCallback<BatchResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
-                    }
+                new SuccessCallback<BatchResult>() {
 
                     @Override
                     public void onSuccess(BatchResult batch) {
@@ -165,14 +161,7 @@ public class ShareReportDialog extends Dialog {
 
         dispatcher.execute(batch,
                 new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
-                new AsyncCallback<BatchResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
-                    }
-
+                new SuccessCallback<BatchResult>() {
                     @Override
                     public void onSuccess(BatchResult batch) {
                         populateGrid((IndicatorResult) batch.getResult(0), (ReportVisibilityResult) batch.getResult(1));
@@ -235,13 +224,7 @@ public class ShareReportDialog extends Dialog {
         } else {
             dispatcher.execute(new UpdateReportVisibility(currentReport.getId(), toSave),
                     new MaskingAsyncMonitor(grid, I18N.CONSTANTS.saving()),
-                    new AsyncCallback<VoidResult>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // handled by monitor
-                        }
-
+                    new SuccessCallback<VoidResult>() {
                         @Override
                         public void onSuccess(VoidResult result) {
                             hide();
