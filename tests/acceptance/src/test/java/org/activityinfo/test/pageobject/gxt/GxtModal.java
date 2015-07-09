@@ -67,7 +67,11 @@ public class GxtModal extends ModalDialog {
 
     @Override
     public void accept() {
-        windowElement.find().button(XPathBuilder.withText("Save")).clickWhenReady();
+        accept("Save");
+    }
+
+    public void accept(String buttonName) {
+        windowElement.find().button(XPathBuilder.withText(buttonName)).clickWhenReady();
         windowElement.waitUntil(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver input) {

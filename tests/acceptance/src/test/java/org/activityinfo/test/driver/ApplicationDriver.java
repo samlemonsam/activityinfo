@@ -366,4 +366,8 @@ public abstract class ApplicationDriver {
     public void renameDatabase(String oldName, String newName, String newDescription) {
         throw new PendingException();
     }
+
+    public void shareReportIsEmpty(boolean isEmpty) {
+        throw new PendingException();
+    }
 }

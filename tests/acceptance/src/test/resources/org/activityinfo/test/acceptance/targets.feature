@@ -30,6 +30,7 @@ Feature: Indicator Targets
       |                     | Value |
       | Realized            | 1,800 |
       | Targeted            | 3,000 |
+    Then share report dialog should not be empty
 
   @AI-1126
   Scenario: Defining database-level target for two activities

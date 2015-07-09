@@ -1,6 +1,7 @@
 package org.activityinfo.test.pageobject.gxt;
 
 
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
 
 public class Gxt {
@@ -20,6 +21,10 @@ public class Gxt {
     
     public static By button(String label) {
         return By.xpath(String.format("//button[text() = '%s']", label));
+    }
+
+    public static void buttonClick(FluentElement element, String buttonName) {
+        element.waitFor(button(buttonName)).clickWhenReady();
     }
 
 }

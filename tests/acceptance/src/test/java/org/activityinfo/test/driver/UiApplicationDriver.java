@@ -24,19 +24,13 @@ import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
 import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.activityinfo.test.pageobject.web.entry.*;
-import org.activityinfo.test.pageobject.web.design.DatabasesPage;
-import org.activityinfo.test.pageobject.web.design.DesignPage;
-import org.activityinfo.test.pageobject.web.design.DesignTab;
-import org.activityinfo.test.pageobject.web.design.TargetsPage;
-import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
-import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
-import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.FluentWait;
 
@@ -362,6 +356,25 @@ public class UiApplicationDriver extends ApplicationDriver {
         return pivotTable.extractData();
     }
 
+    public void shareReportIsEmpty(boolean expectedEmpty) {
+        Preconditions.checkState(currentPage instanceof PivotTableEditor);
+
+        PivotTableEditor pivotTable = (PivotTableEditor) currentPage;
+        GxtModal modal = pivotTable.clickButton("Share");
+
+        GxtGrid grid = GxtGrid.findGrids(modal.getWindowElement()).first().get().waitUntilReloadedSilently();
+        try {
+            grid.waitUntilAtLeastOneRowIsLoaded();
+            if (expectedEmpty) {
+                throw new AssertionError("Share report grid is not empty");
+            }
+        } catch (TimeoutException e) {
+            if (!expectedEmpty) {
+                throw new AssertionError("Share report grid is empty or selenium is timeout.");
+            }
+        }
+    }
+
     @Override
     public DataTable drillDown(String cellValue) {
         Preconditions.checkState(currentPage instanceof PivotTableEditor, "No pivot results. Please pivot data first before using drill down.");
@@ -390,9 +403,9 @@ public class UiApplicationDriver extends ApplicationDriver {
             Optional<GxtTree.GxtNode> node = designTab.design().getDesignTree().search(name);
 
             if (exists) {
-                Assert.assertTrue(objectType.name() + " with name '" + name + "' is not present.", node.isPresent());
+                assertTrue(objectType.name() + " with name '" + name + "' is not present.", node.isPresent());
             } else {
-                Assert.assertTrue(objectType.name() + " with name '" + name + "' is present.", !node.isPresent());
+                assertTrue(objectType.name() + " with name '" + name + "' is present.", !node.isPresent());
             }
         } else if (objectType == ObjectType.PARTNER) {
             GxtGrid grid = designTab.partners().grid();
