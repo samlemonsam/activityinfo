@@ -28,6 +28,7 @@ import com.bedatadriven.rebar.sql.client.SqlResultSetRow;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
+import com.google.api.client.util.Sets;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
@@ -39,12 +40,12 @@ import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityForm, ActivityFormDTO> {
+
+    private static final Logger LOGGER = Logger.getLogger(GetActivityFormHandler.class.getName());
 
     private ActivityFormCache cache;
 
@@ -160,8 +161,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
 
             tasks.add(loadActivity());
             tasks.add(loadIndicators());
-            tasks.add(loadAttributeGroups());
-            tasks.add(loadAttributes());
+            tasks.add(loadAttributeGroupsWithAttributes());
 
             return Promise.waitAll(tasks).then(Functions.constant(activity));
         }
@@ -461,7 +461,38 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             });
         }
 
-        public Promise<Void> loadAttributeGroups() {
+        public Promise<Void> loadAttributeGroupsWithAttributes() {
+
+            SqlQuery query = SqlQuery.select("AttributeGroupId")
+                    .from("attributegroupinactivity")
+                    .where("ActivityId").equalTo(activity.getId());
+
+            final Set<Integer> attributeGroupIds = Sets.newHashSet();
+            return execute(query, new SqlResultCallback() {
+                @Override
+                public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+
+                    for (SqlResultSetRow row : results.getRows()) {
+                        attributeGroupIds.add(row.getInt("AttributeGroupId"));
+                    }
+                }
+            }).join(new Function<Void, Promise<Void>>() {
+                @Override
+                public Promise<Void> apply(Void input) {
+                    LOGGER.fine("loading attribute groups. Size: " + attributeGroupIds.size());
+
+                    return Promise.waitAll(
+                            loadAttributeGroups(attributeGroupIds),
+                            loadAttributes(attributeGroupIds)
+                    );
+                }
+            });
+        }
+
+        public Promise<Void> loadAttributeGroups(Set<Integer> attributeGroupIds) {
+            if (attributeGroupIds.isEmpty()) {
+                return Promise.done();
+            }
 
             SqlQuery query = SqlQuery.select()
                     .appendColumn("AttributeGroupId", "id")
@@ -472,8 +503,8 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     .appendColumn("workflow")
                     .appendColumn("sortOrder")
                     .from("attributegroup")
-                    .where("attributeGroupId").in(attributeGroups())
                     .whereTrue("dateDeleted is NULL")
+                    .where("attributeGroupId").in(attributeGroupIds)
                     .orderBy("SortOrder");
 
             return execute(query, new RowHandler() {
@@ -498,13 +529,16 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             });
         }
 
+        public Promise<Void> loadAttributes(Set<Integer> attributeGroupIds) {
+            if (attributeGroupIds.isEmpty()) {
+                return Promise.done();
+            }
 
-        public Promise<Void> loadAttributes() {
             SqlQuery query = SqlQuery.select("attributeId", "name", "attributeGroupId")
                     .from("attribute")
-                    .orderBy("SortOrder")
-                    .where("attributeGroupId").in(attributeGroups())
-                    .whereTrue("dateDeleted is null");
+                    .whereTrue("dateDeleted is null")
+                    .where("attributeGroupId").in(attributeGroupIds)
+                    .orderBy("SortOrder");
 
             return execute(query, new RowHandler() {
 
@@ -523,13 +557,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 }
             });
         }
-
-        private SqlQuery attributeGroups() {
-            return SqlQuery.select("AttributeGroupId")
-                    .from("attributegroupinactivity")
-                    .where("ActivityId").equalTo(activity.getId());
-        }
-
 
         private Promise<Void> execute(SqlQuery query, final SqlResultCallback rowHandler) {
             final Promise<Void> promise = new Promise<>();
