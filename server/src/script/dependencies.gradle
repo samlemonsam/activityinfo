@@ -6,6 +6,7 @@ dependencies {
     compile project(':core:services')
     compile project(':i18n')
     compile project(':io:xform')
+    gwt project(':ui:icons')
 
 
     testCompile project(':core:model').sourceSets.test.output

@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.widget.loading;
 
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.style.Icons;
+import org.activityinfo.ui.icons.Icons;
 
 /**
  * Provides user-intelligible information about exceptions

@@ -3,7 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:a="urn:import:org.activityinfo.ui.client.widget">
 
-  <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+  <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
   <ui:with field='i18n' type='org.activityinfo.i18n.shared.UiConstants'/>
 
   <g:HTMLPanel styleName="f">
