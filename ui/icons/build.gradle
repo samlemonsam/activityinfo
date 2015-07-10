@@ -12,6 +12,13 @@ dependencies {
     gwt     libraries.gwt.user
 }
 
+node {
+    // Version of node to use.
+    version = '0.10.25'
+
+    // Enabled the automatic download. False is the default (for now).
+    download = true
+}
 
 grunt {
     // Set the directory where Gruntfile.js should be found
