@@ -4,7 +4,7 @@
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
-  <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+  <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
 
   <g:HTMLPanel ui:field="skipGroup">
     <div class="row form-group" style="margin-left: 0px; margin-right: 0px">

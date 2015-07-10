@@ -9,8 +9,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.ui.client.style.Icons;
 import org.activityinfo.ui.client.widget.Button;
+import org.activityinfo.ui.icons.Icons;
 
 /**
  * Loading Panel view for top level views

@@ -7,5 +7,6 @@ include 'core:promises'
 include 'geoadmin'
 include 'server'
 include 'io:xform'
+include 'ui:icons'
 include 'tests:acceptance'
 
