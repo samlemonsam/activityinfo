@@ -1,0 +1,21 @@
+package org.activityinfo.ui.icons;
+
+/**
+ * Application-wide icons
+ */
+public class Icons  {
+
+    public static final Icons INSTANCE = new Icons();
+    
+    public void ensureInjected() {
+        IconClientBundle.INSTANCE.iconStyle().ensureInjected();
+    }
+
+<% for (var glyphIdx = 0; glyphIdx < glyphs.length; glyphIdx++) { %>
+    
+    public String <%= glyphs[glyphIdx] %>() {
+        return "icon icon_<%= glyphs[glyphIdx] %>";
+    }
+<% } %>
+
+}
