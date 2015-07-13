@@ -227,6 +227,8 @@ public class BsTable {
     }
 
     public void scrollToTheBottom() {
+        waitUntilAtLeastOneRowIsLoaded();
+
         List<Row> rows = rows();
         WebElement lastRow = rows.get(rows.size() - 1).getContainer().element();
         ((Locatable) lastRow).getCoordinates().inViewPort();
