@@ -175,6 +175,12 @@ public class GxtGrid {
     }
 
     public GxtGrid waitUntilAtLeastOneRowIsLoaded() {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(@Nullable WebDriver input) {
+                return !container.find().div(withClass("x-grid-empty")).firstIfPresent().isPresent();
+            }
+        });
         container.waitFor(By.className("x-grid3-row"));
         return this;
     }
