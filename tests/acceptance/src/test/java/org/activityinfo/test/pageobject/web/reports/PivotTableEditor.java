@@ -25,7 +25,7 @@ public class PivotTableEditor {
     }
 
     private GxtGrid dataTable() {
-        return GxtGrid.findGrids(container).first().get();
+        return GxtGrid.waitForGrids(container).first().get();
     }
 
 
@@ -46,6 +46,7 @@ public class PivotTableEditor {
             throw new RuntimeException(e);
         }
 
+        Gxt.waitUntilMaskDisappear(container);
         GxtGrid grid = dataTable();
         return grid.extractData();
     }

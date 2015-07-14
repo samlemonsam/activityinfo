@@ -1,8 +1,12 @@
 package org.activityinfo.test.pageobject.gxt;
 
 
+import com.google.common.base.Predicate;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 public class Gxt {
 
@@ -25,6 +29,15 @@ public class Gxt {
 
     public static void buttonClick(FluentElement element, String buttonName) {
         element.waitFor(button(buttonName)).clickWhenReady();
+    }
+
+    public static void waitUntilMaskDisappear(final FluentElement element) {
+        element.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver webDriver) {
+                return !element.find().div(withClass("x-masked")).firstIfPresent().isPresent();
+            }
+        });
     }
 
 }
