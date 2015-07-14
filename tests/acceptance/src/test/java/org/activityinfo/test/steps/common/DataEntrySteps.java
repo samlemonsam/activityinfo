@@ -1,7 +1,6 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -12,25 +11,18 @@ import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.TableDataParser;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,12 +128,12 @@ public class DataEntrySteps {
 
     @Then("^the exported spreadsheet contains:$")
     public void the_exported_spreadsheet_should_contain(DataTable dataTable) throws Throwable {
-        assertTableUnorderedDiff(dataTable, exportedDataTable(exportedFile));
+        assertTableUnorderedDiff(dataTable, TableDataParser.exportedDataTable(exportedFile));
     }
 
     @Then("^the exported csv contains:$")
     public void the_exported_csv_contains(DataTable dataTable) throws Throwable {
-        assertTableUnorderedDiff(dataTable, exportedDataTableFromCsvFile(exportedFile));
+        assertTableUnorderedDiff(dataTable, TableDataParser.exportedDataTableFromCsvFile(exportedFile));
     }
 
     public void assertTableUnorderedDiff(DataTable dataTable, DataTable fileTable) {
@@ -151,28 +143,6 @@ public class DataEntrySteps {
         DataTable subsettedExcelTable = subsetColumns(excelTable, expectedColumns);
 
         subsettedExcelTable.unorderedDiff(dataTable);
-    }
-
-    private static DataTable exportedDataTableFromCsvFile(File file) throws IOException {
-
-        List<List<String>> rows = new ArrayList<>();
-        CSVParser parser = null;
-
-        try (Reader reader = new FileReader(file)) {
-            parser = CSVFormat.EXCEL.parse(reader);
-            for (CSVRecord record : parser.getRecords()) {
-                List<String> row = Lists.newArrayList();
-                for (int i = 0; i < record.size(); i++) {
-                    row.add(record.get(i));
-                }
-                rows.add(row);
-            }
-        } finally {
-            if (parser != null) {
-                parser.close();
-            }
-        }
-        return DataTable.create(rows);
     }
 
     @When("^I export the schema of \"([^\"]*)\" database$")
@@ -207,41 +177,6 @@ public class DataEntrySteps {
             rows.add(row);
         }
         
-        return DataTable.create(rows);
-    }
-
-    private static DataTable exportedDataTable(File file) throws IOException, InvalidFormatException {
-
-        HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
-        Sheet sheet = workbook.getSheetAt(0);
-        DataFormatter formatter = new DataFormatter();
-        
-        List<List<String>> rows = new ArrayList<>();
-
-        // First row contains a title
-        int numRowsToSkip = 1; 
-        
-        // Find the number of columns 
-        int numColumns = 0;
-        for(int rowIndex=numRowsToSkip;rowIndex<=sheet.getLastRowNum();++rowIndex) {
-            numColumns = Math.max(numColumns, sheet.getRow(rowIndex).getLastCellNum());
-        }
-
-        // Create the table
-        for(int rowIndex=numRowsToSkip;rowIndex<=sheet.getLastRowNum();++rowIndex) {
-            List<String> row = new ArrayList<>();
-            Row excelRow = sheet.getRow(rowIndex);
-
-            for(int colIndex=0;colIndex<numColumns;++colIndex) {
-                row.add(formatter.formatCellValue(excelRow.getCell( colIndex)));
-            }
-            rows.add(row);
-        }
-        
-        if(rows.isEmpty()) {
-            throw new AssertionError("Export contained no data");
-        }
-
         return DataTable.create(rows);
     }
 

@@ -3,12 +3,14 @@ package org.activityinfo.test.capacity.scenario.coordination;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import cucumber.api.DataTable;
 import org.activityinfo.test.capacity.action.CompositeAction;
 import org.activityinfo.test.capacity.action.SynchronizeAction;
 import org.activityinfo.test.capacity.action.UserAction;
 import org.activityinfo.test.capacity.model.DatabaseBuilder;
 import org.activityinfo.test.capacity.model.UserRole;
 import org.activityinfo.test.driver.ApiApplicationDriver;
+import org.activityinfo.test.driver.TableDataParser;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.File;
@@ -59,11 +61,13 @@ public class SectorLead implements UserRole {
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateForms(formsToCreate.get(1)),
                         new ExportDatabase(),
+                        new ExportDatabaseSchema(),
                         synchronizeAction));
             case 2:
                 return Optional.<UserAction>of(new CompositeAction(
                         new CreateForms(formsToCreate.get(2)),
                         new ExportDatabase(),
+                        new ExportDatabaseSchema(),
                         synchronizeAction));
 
             default:
@@ -167,16 +171,42 @@ public class SectorLead implements UserRole {
                         totalRows));
                 
             } finally {
-                boolean deleted = file.delete();
-                if(!deleted) {
-                    LOGGER.fine("Failed to delete temporary file " + file);
-                }
+                deleteTempFile(file);
             }
         }
 
         @Override
         public String toString() {
             return "ExportDatabase";
+        }
+    }
+
+    private class ExportDatabaseSchema implements UserAction {
+        @Override
+        public void execute(ApiApplicationDriver driver) throws Exception {
+            File file = driver.exportDatabaseSchema(sector.getDatabaseName());
+            try {
+                DataTable dataTable = TableDataParser.exportedDataTableFromCsvFile(file);
+
+                LOGGER.info(String.format("%s exported results to CSV [ %d rows]",
+                        getNickName(),
+                        dataTable.getGherkinRows().size()));
+
+            } finally {
+                deleteTempFile(file);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ExportDatabaseSchema";
+        }
+    }
+
+    private static void deleteTempFile(File file) {
+        boolean deleted = file.delete();
+        if(!deleted) {
+            LOGGER.fine("Failed to delete temporary file " + file);
         }
     }
 
