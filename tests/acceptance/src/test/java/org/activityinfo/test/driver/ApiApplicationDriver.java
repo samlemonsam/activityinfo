@@ -24,6 +24,7 @@ import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -593,6 +594,18 @@ public class ApiApplicationDriver extends ApplicationDriver {
         return export("filter=Database+" + aliases.getId(databaseName));
     }
 
+    @Override
+    public File exportDatabaseSchema(String databaseName) throws Exception {
+        InputStream inputStream = root().path("resources").path("database").path(Integer.toString(aliases.getId(databaseName))).path("schema.csv").get(InputStream.class);
+        File file = File.createTempFile("exportSchema", ".csv");
+        try {
+            ByteStreams.copy(inputStream, Files.asByteSink(file));
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return file;
+    }
+
     private File export(String exportModel) throws Exception {
         WebResource root = root();
         String id = root.path("ActivityInfo").path("export")
@@ -614,11 +627,14 @@ public class ApiApplicationDriver extends ApplicationDriver {
             Thread.sleep(1000);
         }
 
-        File file = File.createTempFile("export", ".xls");
+        return downloadFile(downloadUri, "export");
+    }
+
+    private File downloadFile(String downloadUri, String fileName) throws Exception {
+        File file = File.createTempFile(fileName, ".xls");
         try(InputStream inputStream = new URI(downloadUri).toURL().openStream()) {
             ByteStreams.copy(inputStream, Files.asByteSink(file));
         }
-
         return file;
     }
 

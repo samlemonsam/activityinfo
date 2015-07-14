@@ -370,4 +370,8 @@ public abstract class ApplicationDriver {
     public void shareReportIsEmpty(boolean isEmpty) {
         throw new PendingException();
     }
+
+    public File exportDatabaseSchema(String databaseName) throws Exception {
+        throw new PendingException();
+    }
 }

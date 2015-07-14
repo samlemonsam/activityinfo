@@ -1,6 +1,7 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -15,6 +16,9 @@ import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -26,9 +30,7 @@ import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,12 +136,48 @@ public class DataEntrySteps {
 
     @Then("^the exported spreadsheet contains:$")
     public void the_exported_spreadsheet_should_contain(DataTable dataTable) throws Throwable {
+        assertTableUnorderedDiff(dataTable, exportedDataTable(exportedFile));
+    }
+
+    @Then("^the exported csv contains:$")
+    public void the_exported_csv_contains(DataTable dataTable) throws Throwable {
+        assertTableUnorderedDiff(dataTable, exportedDataTableFromCsvFile(exportedFile));
+    }
+
+    public void assertTableUnorderedDiff(DataTable dataTable, DataTable fileTable) {
         List<String> expectedColumns = dataTable.getGherkinRows().get(0).getCells();
 
-        DataTable excelTable = driver.getAliasTable().deAlias(exportedDataTable(exportedFile));
+        DataTable excelTable = driver.getAliasTable().deAlias(fileTable);
         DataTable subsettedExcelTable = subsetColumns(excelTable, expectedColumns);
-        
+
         subsettedExcelTable.unorderedDiff(dataTable);
+    }
+
+    private static DataTable exportedDataTableFromCsvFile(File file) throws IOException {
+
+        List<List<String>> rows = new ArrayList<>();
+        CSVParser parser = null;
+
+        try (Reader reader = new FileReader(file)) {
+            parser = CSVFormat.EXCEL.parse(reader);
+            for (CSVRecord record : parser.getRecords()) {
+                List<String> row = Lists.newArrayList();
+                for (int i = 0; i < record.size(); i++) {
+                    row.add(record.get(i));
+                }
+                rows.add(row);
+            }
+        } finally {
+            if (parser != null) {
+                parser.close();
+            }
+        }
+        return DataTable.create(rows);
+    }
+
+    @When("^I export the schema of \"([^\"]*)\" database$")
+    public void I_export_the_schema_of_database(String databaseName) throws Throwable {
+        exportedFile = driver.setup().exportDatabaseSchema(databaseName);
     }
 
     private static DataTable subsetColumns(DataTable table, List<String> expectedColumns) {
