@@ -90,6 +90,14 @@ class PsuedoJsonParser {
 
     private JsonNode toScalarNode(ScalarNode node) {
         String value = node.getValue();
+
+        if (!value.contains(".")) { // avoid type mistmatch
+            try {
+                return json.numberNode(Integer.parseInt(value));
+            } catch (NumberFormatException ignore) {
+            }
+        }
+
         try {
             Double doubleValue = Double.parseDouble(value);
             return json.numberNode(doubleValue);
