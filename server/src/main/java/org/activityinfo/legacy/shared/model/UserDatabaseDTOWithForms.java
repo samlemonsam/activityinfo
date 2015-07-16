@@ -1,5 +1,4 @@
 package org.activityinfo.legacy.shared.model;
-
 /*
  * #%L
  * ActivityInfo Server
@@ -23,46 +22,59 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO.HasLockedPeriod;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import java.util.*;
 
 /**
- * One-to-one DTO of the
- * {@link org.activityinfo.server.database.hibernate.entity.UserDatabase} domain
- * object.
- *
- * @author Alex Bertram
+ * @author yuriyz on 07/16/2015.
  */
-@JsonAutoDetect(JsonMethod.NONE)
-public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, HasLockedPeriod, ProvidesKey {
+public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO, LockedPeriodDTO.HasLockedPeriod, ProvidesKey {
 
-    public static final int MAX_NAME_LENGTH = 255;
     private CountryDTO country;
     private List<PartnerDTO> partners = new ArrayList<PartnerDTO>(0);
-    private List<ActivityDTO> activities = new ArrayList<>(0);
+    private List<ActivityFormDTO> activities = new ArrayList<>(0);
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
     private List<ProjectDTO> projects = new ArrayList<>(0);
 
     public final static String ENTITY_NAME = "UserDatabase";
 
-    public UserDatabaseDTO() {
+    public UserDatabaseDTOWithForms() {
     }
 
-    public UserDatabaseDTO(int id, String name) {
+    public UserDatabaseDTOWithForms(int id, String name) {
         setId(id);
         setName(name);
+    }
+
+    public UserDatabaseDTOWithForms(UserDatabaseDTO userDatabaseDTO) {
+        setId(userDatabaseDTO.getId());
+        setName(userDatabaseDTO.getName());
+        setAmOwner(userDatabaseDTO.getAmOwner());
+        setCountry(userDatabaseDTO.getCountry());
+        setDesignAllowed(userDatabaseDTO.isDesignAllowed());
+        setEditAllAllowed(userDatabaseDTO.isEditAllAllowed());
+        setEditAllowed(userDatabaseDTO.isEditAllowed());
+        setFullName(userDatabaseDTO.getFullName());
+        setLockedPeriods(userDatabaseDTO.getLockedPeriods());
+        setManageAllUsersAllowed(userDatabaseDTO.isManageAllUsersAllowed());
+        setManageUsersAllowed(userDatabaseDTO.isManageUsersAllowed());
+        setMyPartnerId(userDatabaseDTO.getMyPartnerId());
+        setOwnerEmail(userDatabaseDTO.getOwnerEmail());
+        setOwnerName(userDatabaseDTO.getOwnerName());
+        setPartners(userDatabaseDTO.getPartners());
+        setProjects(userDatabaseDTO.getProjects());
+        setViewAllAllowed(userDatabaseDTO.isViewAllAllowed());
+        setAllowNestedValues(userDatabaseDTO.isAllowNestedValues());
     }
 
     /**
      * @return this UserDatabase's id
      */
-    @Override @JsonProperty @JsonView(DTOViews.List.class)
+    @Override @JsonProperty
+    @JsonView(DTOViews.List.class)
     public int getId() {
         return (Integer) get("id");
     }
@@ -77,8 +89,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return the name of this UserDatabase
      */
-    @Override 
-    @JsonProperty 
+    @Override
+    @JsonProperty
     @JsonView({DTOViews.Schema.class, DTOViews.List.class})
     public String getName() {
         return get("name");
@@ -131,7 +143,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * Gets the full, descriptive name of this UserDatabase
      */
-    @JsonProperty("description") 
+    @JsonProperty("description")
     @JsonView(DTOViews.Schema.class)
     public String getFullName() {
         return get("fullName");
@@ -140,23 +152,23 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return this list of ActivityDTOs that belong to this UserDatabase
      */
-    @JsonProperty 
+    @JsonProperty
     @JsonView(DTOViews.Schema.class)
-    public List<ActivityDTO> getActivities() {
+    public List<ActivityFormDTO> getActivities() {
         return activities;
     }
 
     /**
      * @param activities sets the list of Activities in this UserDatabase
      */
-    public void setActivities(List<ActivityDTO> activities) {
+    public void setActivities(List<ActivityFormDTO> activities) {
         this.activities = activities;
     }
 
     /**
      * @return the Country in which this UserDatabase is set
      */
-    @JsonProperty 
+    @JsonProperty
     @JsonView(DTOViews.Schema.class)
     public CountryDTO getCountry() {
         return country;
@@ -310,7 +322,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * @return the id of the Partner to which the client belongs
      */
     public int getMyPartnerId() {
-        return hasPartnerId() ? (Integer) get("myPartnerId") : 0;
+        return (Integer) get("myPartnerId");
     }
 
     /**
@@ -356,8 +368,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return null;
     }
 
-    public ActivityDTO getActivityById(int id) {
-        for (ActivityDTO activity : getActivities()) {
+    public ActivityFormDTO getActivityById(int id) {
+        for (ActivityFormDTO activity : getActivities()) {
             if (activity.getId() == id) {
                 return activity;
             }
@@ -405,15 +417,9 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     public boolean isAllowedToEdit(SiteDTO site) {
         if (isEditAllAllowed()) {
             return true;
-        } else if (isEditAllowed()) {
-            return getMyPartnerId() == site.getPartnerId();
         } else {
-            return false;
+            return isEditAllowed() && getMyPartnerId() == site.getPartnerId();
         }
-    }
-
-    public void addActivity(ActivityFormDTO dist) {
-        activities.add(new ActivityDTO(this, dist));
     }
 
     @JsonIgnore

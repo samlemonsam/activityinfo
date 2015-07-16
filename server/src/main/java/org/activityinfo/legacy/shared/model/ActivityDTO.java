@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -118,6 +119,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     /**
      * @return the database to which this Activity belongs
      */
+    @JsonIgnore
     public UserDatabaseDTO getDatabase() {
         return database;
     }
