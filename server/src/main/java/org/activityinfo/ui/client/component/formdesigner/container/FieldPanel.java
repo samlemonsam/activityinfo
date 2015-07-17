@@ -27,13 +27,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabs;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.widget.ConfirmDialog;
-import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 /**
  * @author yuriyz on 7/8/14.
@@ -79,15 +77,32 @@ public class FieldPanel {
                 FieldPanel.this.onClick();
             }
         });
-   }
+    }
 
     /**
      * Actual removing must be done only via remove confirmation callback.
-     * @see this.setOnRemoveConfirmationCallback
+     *
      * @return remove button
+     * @see this.setOnRemoveConfirmationCallback
      */
-    private Button getRemoveButton() {
+    public Button getRemoveButton() {
         return removeButton;
+    }
+
+    public void setOnRemoveConfirmationCallback(final ClickHandler onRemoveConfirmationCallback) {
+        removeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(final ClickEvent event) {
+                ConfirmDialog.confirm(new DeleteWidgetContainerAction(getFocusPanel(), formDesigner) {
+                    @Override
+                    public void onComplete() {
+                        super.onComplete();
+                        onRemoveConfirmationCallback.onClick(event);
+                    }
+                });
+
+            }
+        });
     }
 
     private void onClick() {
@@ -127,6 +142,10 @@ public class FieldPanel {
         } else {
             focusPanel.removeStyleName(getSelectedClassName());
         }
+    }
+
+    public FocusPanel getFocusPanel() {
+        return focusPanel;
     }
 
     public ClickHandler getClickHandler() {

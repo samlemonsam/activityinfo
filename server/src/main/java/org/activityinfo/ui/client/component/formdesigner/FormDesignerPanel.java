@@ -40,7 +40,6 @@ import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
-import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -315,6 +314,10 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
 
     public FieldPalette getFieldPalette() {
         return fieldPalette;
+    }
+
+    public WidgetContainer getSelectedWidgetContainer() {
+        return selectedWidgetContainer;
     }
 
     public Button getSaveButton() {

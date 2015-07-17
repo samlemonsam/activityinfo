@@ -26,8 +26,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormElement;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -40,7 +38,6 @@ import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPr
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

@@ -32,7 +32,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -72,7 +71,7 @@ public class FieldWidgetContainer implements WidgetContainer {
         fieldPanel.getWidgetContainer().add(formFieldWidget);
         fieldPanel.getRemoveButton().addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                if (FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId())) {
+                if (FormDesigner.isBuiltin(parentId, formField.getId())) {
                     HTML dialogContent = new HTML(Templates.WARNING_MESSAGE_TEMPLATE.html(I18N.CONSTANTS.notAllowedToRemoveBuiltinField()));
                     new ModalDialog(dialogContent, I18N.CONSTANTS.warning()).
                             hideCancelButton().
@@ -80,7 +79,7 @@ public class FieldWidgetContainer implements WidgetContainer {
                             show();
                     return;
                 }
-                ConfirmDialog.confirm(new DeleteFormFieldAction(widgetContainer.getFocusPanel(), formDesigner) {
+                ConfirmDialog.confirm(new DeleteWidgetContainerAction(fieldPanel.getFocusPanel(), formDesigner) {
                     @Override
                     public void onComplete() {
                         super.onComplete();

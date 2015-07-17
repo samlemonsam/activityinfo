@@ -28,7 +28,6 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
@@ -90,9 +89,9 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
     public static FieldsHolderWidgetContainer section(final FormDesigner formDesigner, final FormSection formSection, final ResourceId parentId) {
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formSection, parentId);
-        container.getPanel().getPanel().setOnRemoveConfirmationCallback(new SuccessCallback<Object>() {
+        container.getPanel().getPanel().setOnRemoveConfirmationCallback(new ClickHandler() {
             @Override
-            public void onSuccess(Object result) {
+            public void onClick(final ClickEvent event) {
                 formDesigner.getModel().getFormClass(parentId).remove(formSection);
                 formDesigner.getDropControllerRegistry().unregister(formSection.getId());
             }
@@ -105,9 +104,9 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formClass, parentId);
         container.isSubform = true;
         container.getPanel().getPanel().getSubformTabs().setVisible(true);
-        container.getPanel().getPanel().setOnRemoveConfirmationCallback(new SuccessCallback<Object>() {
+        container.getPanel().getPanel().setOnRemoveConfirmationCallback(new ClickHandler() {
             @Override
-            public void onSuccess(Object result) {
+            public void onClick(final ClickEvent event) {
                 formDesigner.getModel().removeSubform(formClass);
                 formDesigner.getDropControllerRegistry().unregister(formClass.getId());
             }
