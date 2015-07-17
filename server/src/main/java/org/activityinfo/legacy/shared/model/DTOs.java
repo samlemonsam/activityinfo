@@ -99,7 +99,7 @@ public class DTOs {
 
         public static final SchemaDTO SCHEMA;
         public static final UserDatabaseDTO DATABASE;
-        public static final ActivityDTO NFI_DISTRIBUTION;
+        public static final ActivityFormDTO NFI_DISTRIBUTION;
         public static final ActivityDTO SCHOOL_REHAB;
         public static final AttributeDTO MINOR;
         public static final AttributeDTO MAJOR;
@@ -123,20 +123,22 @@ public class DTOs {
 
             DATABASE.getPartners().add(NRC);
 
-            NFI_DISTRIBUTION = new ActivityDTO(91, "NFI Distributions");
+            NFI_DISTRIBUTION = new ActivityFormDTO(91, "NFI Distributions");
             NFI_DISTRIBUTION.setDatabase(DATABASE);
             NFI_DISTRIBUTION.setLocationType(LOCALITE);
-            DATABASE.getActivities().add(NFI_DISTRIBUTION);
+            NFI_DISTRIBUTION.setClassicView(true);
+            DATABASE.getActivities().add(new ActivityDTO(DATABASE, NFI_DISTRIBUTION));
 
             SCHOOL_REHAB = new ActivityDTO(92, "School Rehab");
             SCHOOL_REHAB.setDatabase(DATABASE);
             SCHOOL_REHAB.setLocationType(ECOLE);
+            SCHOOL_REHAB.setClassicView(true);
             DATABASE.getActivities().add(SCHOOL_REHAB);
 
             REHAB_TYPE = new AttributeGroupDTO(71);
             REHAB_TYPE.setName("Rehab type");
             REHAB_TYPE.setMultipleAllowed(false);
-            SCHOOL_REHAB.getAttributeGroups().add(REHAB_TYPE);
+          //  SCHOOL_REHAB.getAttributeGroups().add(REHAB_TYPE);
 
             MINOR = new AttributeDTO(711, "Minor");
             REHAB_TYPE.getAttributes().add(MINOR);
@@ -276,7 +278,7 @@ public class DTOs {
         ActivityDTO activity = new ActivityDTO(11, "Reunificiation des Enfants");
         activity.setDatabase(pearPlus);
         activity.setLocationType(aireSante);
-        activity.setReportingFrequency(ActivityDTO.REPORT_MONTHLY);
+        activity.setReportingFrequency(ActivityFormDTO.REPORT_MONTHLY);
         pearPlus.getActivities().add(activity);
 
         return schema;

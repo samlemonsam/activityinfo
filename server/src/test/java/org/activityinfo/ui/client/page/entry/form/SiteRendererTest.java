@@ -1,15 +1,12 @@
 package org.activityinfo.ui.client.page.entry.form;
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.server.endpoint.kml.JreIndicatorValueFormatter;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Locale;
 
 import static org.junit.Assert.assertTrue;
 
@@ -19,10 +16,7 @@ public class SiteRendererTest {
 
     @Before
     public void setup() {
-        LocaleProxy.setLocale(Locale.ENGLISH);
-
         siteRenderer = new SiteRenderer(new JreIndicatorValueFormatter());
-
     }
 
     @Test
@@ -50,7 +44,7 @@ public class SiteRendererTest {
         indicator3.setCategory("Second group");
 
 
-        ActivityDTO activity = new ActivityDTO();
+        ActivityFormDTO activity = new ActivityFormDTO();
         activity.setId(1);
         activity.getIndicators().add(indicator1);
         activity.getIndicators().add(indicator2);

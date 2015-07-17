@@ -44,10 +44,7 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.TargetValueDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.page.common.grid.AbstractEditorTreeGridView;
 import org.activityinfo.ui.client.page.common.grid.ImprovedCellTreeGridSelectionModel;
@@ -99,12 +96,13 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         tree.setClicksToEdit(EditorGrid.ClicksToEdit.ONE);
         tree.setLoadMask(true);
         tree.setStateId("TargetValueGrid" + db.getId());
+        tree.setStateful(true);
 
         tree.setIconProvider(new ModelIconProvider<ModelData>() {
             @Override
             public AbstractImagePrototype getIcon(ModelData model) {
 
-                if (model instanceof ActivityDTO) {
+                if (model instanceof IsActivityDTO) {
                     return IconImageBundle.ICONS.activity();
                 } else if (model instanceof TargetValueDTO) {
                     return IconImageBundle.ICONS.indicator();
@@ -146,7 +144,8 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         TextField field = new TextField<String>();
         field.setAllowBlank(true);
 
-        FieldTypeClass type = getIndicatorById(targetValueDTO.getIndicatorId()).getType();
+        IndicatorDTO indicatorById = presenter.getIndicatorById(targetValueDTO.getIndicatorId());
+        FieldTypeClass type = indicatorById.getType();
         if (type == FieldTypeClass.QUANTITY) {
             field = new NumberField();
             ((NumberField) field).setFormat(IndicatorNumberFormat.INSTANCE);
@@ -154,16 +153,6 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
         }
 
         tree.getColumnModel().getColumn(column).setEditor(new CellEditor(field));
-    }
-
-    private IndicatorDTO getIndicatorById(int indicatorId) {
-        for (ActivityDTO activity : getActivitiesFromStore()) {
-            IndicatorDTO indicatorById = activity.getIndicatorById(indicatorId);
-            if (indicatorById != null) {
-                return indicatorById;
-            }
-        }
-        throw new RuntimeException("Failed to find IndicatorDTO by id: " + indicatorId);
     }
 
     private List<ActivityDTO> getActivitiesFromStore() {

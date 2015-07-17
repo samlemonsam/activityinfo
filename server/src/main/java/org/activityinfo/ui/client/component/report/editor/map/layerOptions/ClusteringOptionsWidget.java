@@ -38,14 +38,19 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasValue;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.command.GetAdminLevels;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.result.AdminLevelResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.model.clustering.AdministrativeLevelClustering;
 import org.activityinfo.legacy.shared.reports.model.clustering.AutomaticClustering;
 import org.activityinfo.legacy.shared.reports.model.clustering.Clustering;
 import org.activityinfo.legacy.shared.reports.model.clustering.NoClustering;
 import org.activityinfo.legacy.shared.reports.model.layers.MapLayer;
+import org.activityinfo.server.database.hibernate.entity.AdminLevel;
+import org.activityinfo.server.endpoint.rest.AdminLevelResource;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -91,7 +96,10 @@ public class ClusteringOptionsWidget extends LayoutContainer implements HasValue
         // mask();
         destroyForm();
 
-        service.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+        GetAdminLevels query = new GetAdminLevels();
+        query.setIndicatorIds(Sets.newHashSet(layer.getIndicatorIds()));
+
+        service.execute(query, new AsyncCallback<AdminLevelResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -100,27 +108,24 @@ public class ClusteringOptionsWidget extends LayoutContainer implements HasValue
             }
 
             @Override
-            public void onSuccess(SchemaDTO schema) {
-                buildForm(countriesForLayer(schema, layer));
+            public void onSuccess(AdminLevelResult result) {
+                buildForm(result.getData());
             }
         });
     }
 
-    private void buildForm(Set<CountryDTO> countries) {
+    private void buildForm(Collection<AdminLevelDTO> adminLevels) {
 
         radios = Lists.newArrayList();
         radios.add(new ClusteringRadio(I18N.CONSTANTS.none(), new NoClustering()));
         radios.add(new ClusteringRadio(I18N.CONSTANTS.automatic(), new AutomaticClustering()));
 
-        if (countries.size() == 1) {
-            CountryDTO country = countries.iterator().next();
-            for (AdminLevelDTO level : country.getAdminLevels()) {
+        for (AdminLevelDTO level : adminLevels) {
 
-                AdministrativeLevelClustering clustering = new AdministrativeLevelClustering();
-                clustering.getAdminLevels().add(level.getId());
+            AdministrativeLevelClustering clustering = new AdministrativeLevelClustering();
+            clustering.getAdminLevels().add(level.getId());
 
-                radios.add(new ClusteringRadio(level.getName(), clustering));
-            }
+            radios.add(new ClusteringRadio(level.getName(), clustering));
         }
         radioGroup = new RadioGroup();
         radioGroup.setOrientation(Orientation.VERTICAL);
@@ -142,29 +147,6 @@ public class ClusteringOptionsWidget extends LayoutContainer implements HasValue
         });
         layout();
         // unmask();
-    }
-
-    private Set<CountryDTO> countriesForLayer(SchemaDTO schema, MapLayer layer) {
-        Set<Integer> indicatorIds = Sets.newHashSet(layer.getIndicatorIds());
-        Set<CountryDTO> countries = Sets.newHashSet();
-        for (UserDatabaseDTO database : schema.getDatabases()) {
-            if (databaseContainsIndicatorId(database, indicatorIds)) {
-                countries.add(database.getCountry());
-            }
-        }
-        return countries;
-    }
-
-    private boolean databaseContainsIndicatorId(UserDatabaseDTO database, Set<Integer> indicatorIds) {
-
-        for (ActivityDTO activity : database.getActivities()) {
-            for (IndicatorDTO indicator : activity.getIndicators()) {
-                if (indicatorIds.contains(indicator.getId())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override

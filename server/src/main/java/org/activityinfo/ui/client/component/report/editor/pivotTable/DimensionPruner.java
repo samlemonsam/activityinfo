@@ -22,17 +22,15 @@ package org.activityinfo.ui.client.component.report.editor.pivotTable;
  * #L%
  */
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.command.GetActivityForms;
+import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
@@ -41,6 +39,9 @@ import org.activityinfo.ui.client.page.report.HasReportElement;
 import org.activityinfo.ui.client.page.report.ReportChangeHandler;
 import org.activityinfo.ui.client.page.report.ReportEventBus;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -60,6 +61,8 @@ public class DimensionPruner implements HasReportElement<PivotTableReportElement
     private PivotTableReportElement model;
     private Dispatcher dispatcher;
 
+    private Map<Integer, String> groupNames = Maps.newHashMap();
+
     @Inject
     public DimensionPruner(EventBus eventBus, Dispatcher dispatcher) {
         super();
@@ -75,7 +78,7 @@ public class DimensionPruner implements HasReportElement<PivotTableReportElement
     }
 
     protected void onChanged() {
-        dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+        dispatcher.execute(new GetActivityForms(model.getFilter()), new AsyncCallback<ActivityFormResults>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -83,42 +86,49 @@ public class DimensionPruner implements HasReportElement<PivotTableReportElement
             }
 
             @Override
-            public void onSuccess(SchemaDTO result) {
+            public void onSuccess(ActivityFormResults result) {
                 pruneModel(result);
             }
         });
     }
 
-    private void pruneModel(SchemaDTO schema) {
-        Set<ActivityDTO> activityIds = getSelectedActivities(schema);
-        Set<AttributeGroupDimension> dimensions = getSelectedAttributes(schema);
+    private void pruneModel(ActivityFormResults schema) {
+
+        Map<Integer, String> valid = validDimensions(schema);
+        Set<String> validLabels = new HashSet<>(valid.values());
+
         boolean dirty = false;
-        for (AttributeGroupDimension dim : dimensions) {
-            if (!isApplicable(schema, activityIds, dim)) {
-                LOGGER.fine("Removing attribute group " + dim.getAttributeGroupId());
-                model.getRowDimensions().remove(dim);
-                model.getColumnDimensions().remove(dim);
+        for (AttributeGroupDimension selectedDim : getSelectedAttributes()) {
+            String label = groupNames.get(selectedDim.getAttributeGroupId());
+            if (!validLabels.contains(label)) {
+
+                LOGGER.fine("Removing attribute group " + selectedDim.getAttributeGroupId());
+                model.getRowDimensions().remove(selectedDim);
+                model.getColumnDimensions().remove(selectedDim);
                 dirty = true;
             }
         }
         if (dirty) {
             reportEventBus.fireChange();
         }
+
+        // Store group labels so that we can match by name of those
+        // dimensions which might no longer be returned by GetActivityForms(filter)
+        groupNames.putAll(valid);
     }
 
-    private boolean isApplicable(SchemaDTO schema, Set<ActivityDTO> activities, AttributeGroupDimension dim) {
+    private Map<Integer, String> validDimensions(ActivityFormResults schema) {
+        Map<Integer, String> valid = new HashMap<>();
 
-        String attributeName = schema.getAttributeGroupNameSafe(dim.getAttributeGroupId());
-
-        for (ActivityDTO activity : activities) {
-            if (activity.getAttributeGroupByName(attributeName) != null) {
-                return true;
+        for(ActivityFormDTO form : schema.getData()) {
+            for(AttributeGroupDTO group : form.getAttributeGroups()) {
+                valid.put(group.getId(), group.getName());
             }
         }
-        return false;
+        return valid;
     }
 
-    private Set<AttributeGroupDimension> getSelectedAttributes(SchemaDTO schema) {
+    private Set<AttributeGroupDimension> getSelectedAttributes() {
         Set<AttributeGroupDimension> dimensions = Sets.newHashSet();
         for (Dimension dim : model.allDimensions()) {
             if (dim instanceof AttributeGroupDimension) {
@@ -128,20 +138,6 @@ public class DimensionPruner implements HasReportElement<PivotTableReportElement
         return dimensions;
     }
 
-    private Set<ActivityDTO> getSelectedActivities(SchemaDTO schema) {
-        Set<ActivityDTO> activities = Sets.newHashSet();
-        Set<Integer> indicatorIds = Sets.newHashSet(model.getFilter().getRestrictions(DimensionType.Indicator));
-        for (UserDatabaseDTO db : schema.getDatabases()) {
-            for (ActivityDTO activity : db.getActivities()) {
-                for (IndicatorDTO indicator : activity.getIndicators()) {
-                    if (indicatorIds.contains(indicator.getId())) {
-                        activities.add(activity);
-                    }
-                }
-            }
-        }
-        return activities;
-    }
 
     @Override
     public void bind(PivotTableReportElement model) {

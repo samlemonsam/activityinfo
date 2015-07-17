@@ -25,6 +25,7 @@ package org.activityinfo.legacy.shared.reports.model.typeadapter;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.*;
+import org.activityinfo.model.date.DateUnit;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

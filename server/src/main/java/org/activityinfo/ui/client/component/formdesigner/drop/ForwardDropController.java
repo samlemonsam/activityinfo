@@ -34,9 +34,9 @@ import java.util.List;
  *
  * @author yuriyz on 7/8/14.
  */
-public class ForwardDropController implements DropController {
+public class ForwardDropController implements DropControllerExtended {
 
-    private final List<DropController> controllers = Lists.newArrayList();
+    private final List<DropControllerExtended> controllers = Lists.newArrayList();
 
     private final Widget dropTarget;
 
@@ -49,7 +49,7 @@ public class ForwardDropController implements DropController {
         return dropTarget;
     }
 
-    public void add(DropController controller) {
+    public void add(DropControllerExtended controller) {
         controllers.add(controller);
     }
 
@@ -85,6 +85,13 @@ public class ForwardDropController implements DropController {
     public void onPreviewDrop(DragContext context) throws VetoDragException {
         for (DropController dropController : controllers) {
             dropController.onPreviewDrop(context);
+        }
+    }
+
+    @Override
+    public void setPositionerToEnd() {
+        for (DropControllerExtended dropController : controllers) {
+            dropController.setPositionerToEnd();
         }
     }
 }

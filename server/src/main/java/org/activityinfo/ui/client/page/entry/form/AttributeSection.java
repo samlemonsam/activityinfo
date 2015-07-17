@@ -23,7 +23,7 @@ package org.activityinfo.ui.client.page.entry.form;
  */
 
 import com.google.common.collect.Lists;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.ui.client.page.entry.form.field.AttributeCheckBoxGroup;
@@ -36,7 +36,7 @@ public class AttributeSection extends FormSectionWithFormLayout<SiteDTO> {
 
     private List<AttributeField> fields = Lists.newArrayList();
 
-    public AttributeSection(ActivityDTO activity) {
+    public AttributeSection(ActivityFormDTO activity) {
 
         for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
 
@@ -56,7 +56,7 @@ public class AttributeSection extends FormSectionWithFormLayout<SiteDTO> {
                 field = combo;
             }
 
-            field.setReadOnly(attributeGroup.isWorkflow() && !activity.getDatabase().isDesignAllowed());
+            field.setReadOnly(attributeGroup.isWorkflow() && !activity.isDesignAllowed());
 
             fields.add(field);
         }

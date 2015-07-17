@@ -30,7 +30,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -47,6 +46,7 @@ import org.activityinfo.ui.client.local.capability.LocalCapabilityProfile;
 import org.activityinfo.ui.client.local.capability.PermissionRefusedException;
 import org.activityinfo.ui.client.local.sync.*;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;

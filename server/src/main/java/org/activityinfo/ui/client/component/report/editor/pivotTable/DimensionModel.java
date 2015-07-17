@@ -27,8 +27,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.legacy.shared.reports.model.*;
+import org.activityinfo.legacy.shared.model.AdminLevelDTO;
+import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
+import org.activityinfo.legacy.shared.reports.model.AdminDimension;
+import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
+import org.activityinfo.legacy.shared.reports.model.DateDimension;
+import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.date.DateUnit;
 
 import java.util.List;
 import java.util.Set;
@@ -100,7 +105,7 @@ public class DimensionModel extends BaseModelData {
     }
 
 
-    public static List<DimensionModel> attributeGroupModels(SchemaDTO schema, Set<Integer> indicators) {
+    public static List<DimensionModel> attributeGroupModels(List<AttributeGroupDTO> groups) {
         /*
          * Attribute Groups retain their own identity and ids 
          * by Activity, but once we get to this stage, we treat
@@ -109,22 +114,24 @@ public class DimensionModel extends BaseModelData {
          * This allows user to define attributes across databases
          * and activities through "offline" coordination.
          */
-        Set<String> groupsAdded = Sets.newHashSet();
         List<DimensionModel> models = Lists.newArrayList();
-        for (UserDatabaseDTO db : schema.getDatabases()) {
-            for (ActivityDTO activity : db.getActivities()) {
-                if (activity.containsAny(indicators)) {
-                    for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
-                        if (!groupsAdded.contains(attributeGroup.getName())) {
-                            DimensionModel dimModel = new DimensionModel(attributeGroup);
-                            models.add(dimModel);
-                            groupsAdded.add(attributeGroup.getName());
-                        }
-                    }
-                }
+        Set<String> groupsAdded = Sets.newHashSet();
+        for (AttributeGroupDTO attributeGroup : groups) {
+
+            if (!groupsAdded.contains(attributeGroup.getName())) {
+                DimensionModel dimModel = new DimensionModel(attributeGroup);
+                models.add(dimModel);
+                groupsAdded.add(attributeGroup.getName());
             }
         }
         return models;
     }
 
+    public static List<DimensionModel> adminLevelModels(List<AdminLevelDTO> data) {
+        List<DimensionModel> models = Lists.newArrayList();
+        for(AdminLevelDTO level : data) {
+            models.add(new DimensionModel(level));
+        }
+        return models;
+    }
 }

@@ -52,7 +52,7 @@ public class MonitoringCallback<T> implements AsyncCallback<T> {
             }
         } else {
             try {
-                monitor.onServerError();
+                monitor.onServerError(caught);
             } catch (Exception e) {
                 Log.error("Exception calling monitor.onServerError()", e);
             }

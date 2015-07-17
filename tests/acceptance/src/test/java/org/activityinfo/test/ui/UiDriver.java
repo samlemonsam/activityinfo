@@ -3,9 +3,9 @@ package org.activityinfo.test.ui;
 import com.google.common.io.Files;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
 import cucumber.runtime.java.guice.impl.ScenarioModule;
 import cucumber.runtime.java.guice.impl.SequentialScenarioScope;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.DriverModule;
@@ -142,7 +142,7 @@ public class UiDriver extends TestWatcher {
     }
 
     public void setLocale(String locale) {
-        LocaleProxy.setLocale(Locale.forLanguageTag(locale));
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(locale));
         injector.getInstance(DevServerAccounts.class).setLocale(locale);
     }
 

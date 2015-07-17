@@ -8,6 +8,7 @@ import org.activityinfo.test.pageobject.web.entry.GxtDataEntryDriver;
 import org.activityinfo.test.pageobject.web.entry.LocationDialog;
 import org.junit.Rule;
 import org.junit.Test;
+import org.openqa.selenium.TimeoutException;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -54,9 +55,16 @@ public class LocationDialogUiTest {
         LocationDialog locationDialog = dataEntry.getLocationDialog();
 
         locationDialog.locationInput().sendKeys("Mwenu Ditu");
-        
-        locationDialog.addNew();
-        locationDialog.dragMarker(5, 5);
+
+        try {
+            locationDialog.addNew();
+            locationDialog.dragMarker(5, 5);
+        } catch (TimeoutException e) {
+            // sometimes test fails because it can't find marker, however tried it manually and it always appears
+            // retry one time
+            locationDialog.addNew();
+            locationDialog.dragMarker(5, 5);
+        }
 
         GxtFormPanel.GxtField latitude = locationDialog.getFormPanel().findFieldByLabel(I18N.CONSTANTS.latitude());
         latitude.assertValid();

@@ -38,7 +38,6 @@ import org.activityinfo.legacy.shared.command.SearchLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,23 +64,20 @@ public class SearchLocationsHandler implements CommandHandlerAsync<SearchLocatio
             @Override
             public void onSuccess(SqlTransaction tx, SqlResultSet results) {
                 int count = results.getRow(0).getInt("count");
-                if (count > MAX_LOCATIONS) {
-                    LocationResult result = new LocationResult(new ArrayList<LocationDTO>());
-                    result.setOffset(0);
-                    result.setTotalLength(count);
-                    callback.onSuccess(result);
-                } else {
-                    retrieveLocations(command, context, callback);
-                }
+                int limit = command.getLimit() != -1 ? command.getLimit() : MAX_LOCATIONS;
+
+                retrieveLocations(command, context, callback, limit, count);
             }
         });
     }
 
     private void retrieveLocations(final SearchLocations command,
                                    final ExecutionContext context,
-                                   final AsyncCallback<LocationResult> callback) {
+                                   final AsyncCallback<LocationResult> callback,
+                                   final int limit,
+                                   final int totalCount) {
         SqlQuery query = baseQuery(command).appendColumns("LocationId", "Name", "Axe", "X", "Y", "LocationTypeId")
-                                           .setLimitClause(dialect.limitClause(0, 26));
+                .setLimitClause(dialect.limitClause(0, limit));
 
         query.execute(context.getTransaction(), new SqlResultCallback() {
             @Override
@@ -97,7 +93,7 @@ public class SearchLocationsHandler implements CommandHandlerAsync<SearchLocatio
 
                 LocationResult result = new LocationResult(locations);
                 result.setOffset(0);
-                result.setTotalLength(results.getRows().size());
+                result.setTotalLength(totalCount > results.getRows().size() ? totalCount : results.getRows().size());
 
                 callback.onSuccess(result);
             }
@@ -112,10 +108,10 @@ public class SearchLocationsHandler implements CommandHandlerAsync<SearchLocatio
         if (command.getAdminEntityIds() != null) {
             for (Integer adminEntityId : command.getAdminEntityIds()) {
                 query.where("LocationId")
-                     .in(SqlQuery.select("LocationId")
-                                 .from("locationadminlink")
-                                 .where("adminentityid")
-                                 .equalTo(adminEntityId));
+                        .in(SqlQuery.select("LocationId")
+                                .from("locationadminlink")
+                                .where("adminentityid")
+                                .equalTo(adminEntityId));
             }
         }
         query.orderBy("location.name");
@@ -125,6 +121,15 @@ public class SearchLocationsHandler implements CommandHandlerAsync<SearchLocatio
         }
         if (!Strings.isNullOrEmpty(command.getName())) {
             query.where("Name").startsWith(command.getName());
+        }
+
+        if (command.getIndicatorIds() != null && !command.getIndicatorIds().isEmpty()) {
+            query.where("LocationID")
+                    .in(SqlQuery.selectDistinct().appendColumns("LocationId").from("site", "site")
+                                    .leftJoin("reportingperiod", "period").on("site.SiteID=period.SiteId")
+                                    .leftJoin("indicatorvalue", "iv").on("iv.ReportingPeriodId=period.ReportingPeriodId")
+                                    .where("iv.IndicatorId").in(command.getIndicatorIds())
+                    );
         }
         return query;
     }

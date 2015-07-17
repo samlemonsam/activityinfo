@@ -1,9 +1,10 @@
 package org.activityinfo.model.type;
 
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 
 /**
@@ -22,7 +23,6 @@ public interface FieldTypeClass {
 
     public static final String TYPE_FIELD_NAME = "type";
 
-
     /**
      *
      * @return a string uniquely identifying this {@code FieldTypeClass}. This
@@ -32,42 +32,29 @@ public interface FieldTypeClass {
 
 
     /**
-     * @return a human readable label describing this type class
-     */
-    String getLabel();
-
-    /**
-     * Creates an instance of this {@code FieldTypeClass} using the parameters
-     * specified by given the record.
-     */
-    FieldType createType(Record typeParameters);
-
-    /**
      *
      * @return an instance of this {@code FieldTypeClass} using default parameters
      */
     FieldType createType();
 
-    /**
-     *
-     * @return a FormClass that describes the FieldType's parameters
-     */
-    FormClass getParameterFormClass();
-
 
     // intermediate step to support refactoring
 
 
-    public static final QuantityType.TypeClass QUANTITY = QuantityType.TypeClass.INSTANCE;
+    public static final ParametrizedFieldTypeClass QUANTITY = QuantityType.TYPE_CLASS;
 
-    public static final NarrativeType NARRATIVE = NarrativeType.INSTANCE;
+    public static final FieldTypeClass NARRATIVE = NarrativeType.TYPE_CLASS;
 
-    public static final TextType FREE_TEXT = TextType.INSTANCE;
+    public static final FieldTypeClass FREE_TEXT = TextType.TYPE_CLASS;
 
-    public static final LocalDateType LOCAL_DATE = LocalDateType.INSTANCE;
+    public static final FieldTypeClass LOCAL_DATE = LocalDateType.TYPE_CLASS;
 
-    public static final GeoPointType GEOGRAPHIC_POINT = GeoPointType.INSTANCE;
+    public static final FieldTypeClass GEOGRAPHIC_POINT = GeoPointType.TYPE_CLASS;
 
-    public static final ReferenceType.TypeClass REFERENCE = ReferenceType.TypeClass.INSTANCE;
+    public static final FieldTypeClass BOOLEAN = BooleanType.TYPE_CLASS;
+
+    public static final FieldTypeClass BARCODE = BarcodeType.TYPE_CLASS;
+
+    public static final ParametrizedFieldTypeClass REFERENCE = ReferenceType.TYPE_CLASS;
 
 }

@@ -24,14 +24,15 @@ package org.activityinfo.test.ui;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author yuriyz on 05/18/2015.
@@ -73,6 +74,7 @@ public class TargetsUiTest {
                 property("code", "1")
         );
 
+
         driver.ui().createTarget(
                 property("database", DATABASE),
                 property("name", "Target1"),
@@ -83,6 +85,13 @@ public class TargetsUiTest {
                 property("name", "Target2"),
                 property("project", "FY2015")
         );
+
+        driver.ui().setTargetValues("Target1", Lists.newArrayList(
+                new FieldValue("nb. kits", "1000")
+        ));
+        driver.ui().setTargetValues("Target2", Lists.newArrayList(
+                new FieldValue("nb. kits", "2000")
+        ));
     }
 
     @Test
@@ -101,6 +110,26 @@ public class TargetsUiTest {
     }
 
     @Test
+    public void statefulTree() throws Exception {
+
+        background();
+
+
+        ApplicationPage app = driver.applicationPage();
+
+        TargetsPage targets = app.navigateToDesignTab().selectDatabase(driver.alias(DATABASE)).targets();
+        targets.select("Target1");
+        targets.expandTree("nb. kits"); // expand tree only one time for Target1, then it should be stateful and keep it expanded
+        targets.valueGrid().findCell("1000");
+        targets.select("Target2");
+        targets.valueGrid().findCell("2000");
+
+        // back to Target1 without expand, tree must be already expanded
+        targets.select("Target1");
+        targets.valueGrid().findCell("1000");
+    }
+
+    @Test
     public void targetEdit() throws Exception {
         background();
 
@@ -115,4 +144,5 @@ public class TargetsUiTest {
         assertFalse(targets.targetGrid().findCellOptional(driver.alias("ARC")).isPresent());
 
     }
+
 }

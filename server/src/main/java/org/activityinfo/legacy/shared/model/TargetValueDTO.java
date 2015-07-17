@@ -81,4 +81,13 @@ public class TargetValueDTO extends BaseModelData implements EntityDTO {
     public String getEntityName() {
         return ENTITY_NAME;
     }
+
+    @Override
+    public String toString() {
+        return "TargetValueDTO{" +
+                "targetId=" + getTargetId() +
+                ", indicatorId=" + getIndicatorId() +
+                ", value=" + getValue() +
+                '}';
+    }
 }

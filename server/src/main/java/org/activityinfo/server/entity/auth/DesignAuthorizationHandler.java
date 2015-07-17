@@ -2,7 +2,7 @@ package org.activityinfo.server.entity.auth;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.SchemaElement;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;

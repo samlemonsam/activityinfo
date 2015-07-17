@@ -1,7 +1,11 @@
 package org.activityinfo.model.resource;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.primitive.BooleanFieldValue;
+import org.activityinfo.model.type.primitive.TextValue;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -11,9 +15,15 @@ import java.util.Map;
 /**
  * Base class for Resource and Record
  */
-class PropertyBag<T extends PropertyBag> {
+public class PropertyBag<T extends PropertyBag> {
 
     private final Map<String, Object> properties = Maps.newHashMap();
+
+    public PropertyBag<T> copy() {
+        final PropertyBag<T> copy = new PropertyBag<>();
+        copy.properties.putAll(this.properties);
+        return copy;
+    }
 
     /**
      *
@@ -31,13 +41,35 @@ class PropertyBag<T extends PropertyBag> {
         return properties.containsKey(propertyName);
     }
 
+    /**
+     * @return the value of the given boolean property
+     * @throws java.lang.NullPointerException
+     */
+    public boolean getBoolean(String propertyName) {
+        return (Boolean) getNonNullPropertyValue(propertyName);
+    }
+
+
+    public Boolean isBoolean(String propertyName) {
+        Object value = properties.get(propertyName);
+
+        if(value == Boolean.TRUE) {
+            return true;
+        } else if(value == Boolean.FALSE) {
+            return false;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * @return the value of the given boolean property, or the {@code defaultValue}
-     * if there is no value for this property or the value is not of Boolean type.
+     * @throws java.lang.ClassCastException if the value of the property is not a boolean
+     * @throws java.lang.NullPointerException if there is no value for the property
      */
     public boolean getBoolean(String propertyName, boolean defaultValue) {
         Object value = properties.get(propertyName);
+
         if(value == Boolean.TRUE) {
             return true;
         } else if(value == Boolean.FALSE) {
@@ -78,11 +110,7 @@ class PropertyBag<T extends PropertyBag> {
      */
     @Nonnull
     public String getString(String propertyName) {
-        String value = (String) properties.get(propertyName);
-        if(value == null) {
-            throw new NullPointerException(propertyName + " is not present in " + this);
-        }
-        return value;
+        return (String) getNonNullPropertyValue(propertyName);
     }
 
     public String isString(String propertyName) {
@@ -99,11 +127,7 @@ class PropertyBag<T extends PropertyBag> {
      */
     @Nonnull
     public Record getRecord(String propertyName) {
-        Record value = (Record) properties.get(propertyName);
-        if(value == null) {
-            throw new NullPointerException(propertyName);
-        }
-        return value;
+        return (Record) getNonNullPropertyValue(propertyName);
     }
 
     public Record isRecord(String propertyName) {
@@ -115,16 +139,53 @@ class PropertyBag<T extends PropertyBag> {
     }
 
     /**
+     * @return this field's value as a {@code Resource}
+     *
+     */
+    @Nonnull
+    public Resource getResource(String propertyName) {
+        Resource value = (Resource) properties.get(propertyName);
+        if(value == null) {
+            throw new NullPointerException(propertyName);
+        }
+        return value;
+    }
+
+    @Nonnull
+    public ResourceId getResourceId(String propertyName) {
+        String value = (String) properties.get(propertyName);
+        if(value == null) {
+            throw new NullPointerException(propertyName);
+        }
+        return ResourceId.valueOf(value);
+    }
+
+    public ResourceId isResourceId(String propertyName) {
+        Object value = properties.get(propertyName);
+        if(value instanceof ResourceId) {
+            return (ResourceId) value;
+        }
+        return null;
+    }
+
+    /**
      * @return the value of this field as a {@code double}
      * @throws java.lang.ClassCastException if the value of the property is not a Number
      * @throws java.lang.NullPointerException if there is no value for the property
      */
     public double getDouble(String propertyName) {
-        Number value = (Number)properties.get(propertyName);
-        if(value == null) {
-            throw new NullPointerException(propertyName);
-        }
+        Number value = (Number) getNonNullPropertyValue(propertyName);
         return value.doubleValue();
+    }
+
+    /**
+     * @return the value of this field as a {@code integer}
+     * @throws java.lang.ClassCastException if the value of the property is not a Number
+     * @throws java.lang.NullPointerException if there is no value for the property
+     */
+    public int getInt(String propertyName) {
+        Number value = (Number) getNonNullPropertyValue(propertyName);
+        return value.intValue();
     }
 
     /**
@@ -138,6 +199,33 @@ class PropertyBag<T extends PropertyBag> {
             properties.put(propertyName, record);
         }
         return (T)this;
+    }
+
+
+    public PropertyBag<T> set(@Nonnull ResourceId fieldId, FieldValue fieldValue) {
+        Preconditions.checkNotNull(fieldId);
+        if (fieldValue == null) {
+            remove(fieldId.asString());
+
+        } else if (fieldValue instanceof TextValue) {
+            set(fieldId.asString(), ((TextValue) fieldValue).toString());
+
+        } else if (fieldValue instanceof BooleanFieldValue) {
+            set(fieldId.asString(), fieldValue == BooleanFieldValue.TRUE);
+
+        } else if(fieldValue instanceof IsRecord) {
+            set(fieldId.asString(), ((IsRecord) fieldValue).asRecord());
+
+        } else {
+            throw new UnsupportedOperationException(fieldId + " = " + fieldValue);
+        }
+        return this;
+    }
+
+
+
+    public void remove(String fieldName) {
+        properties.remove(fieldName);
     }
 
     /**
@@ -195,6 +283,18 @@ class PropertyBag<T extends PropertyBag> {
         return (T)this;
     }
 
+    public void clear() {
+        properties.clear();
+    }
+
+    private Object getNonNullPropertyValue(String propertyName) {
+        Object value = properties.get(propertyName);
+        if(value == null) {
+            throw new NullPointerException(propertyName);
+        }
+        return value;
+    }
+
     /**
      * Sets the named property to the given value,
      * or removes the property if the {@code value} is null.
@@ -212,18 +312,34 @@ class PropertyBag<T extends PropertyBag> {
         if(value == null) {
             properties.remove(propertyName);
 
-        } else if(value instanceof String ||
-                  value instanceof Number ||
-                  value instanceof Record ||
-                  value instanceof Boolean ||
-                  value instanceof List) {
-
-           properties.put(propertyName, value);
+        } else if(value instanceof ResourceId) {
+            properties.put(propertyName, ((ResourceId) value).asString());
 
         } else {
-            throw new IllegalArgumentException("Invalid field type: " + value.getClass().getName());
+            assert validPropertyValue(value) : "Invalid " + propertyName + " = " + value +
+                                               " (" + value.getClass().getName() + ")";
+
+            properties.put(propertyName, value);
+
         }
         return (T)this;
+    }
+
+    private boolean validPropertyValue(Object value) {
+        if(value instanceof List) {
+            for(Object element : (List)value) {
+                if(!validPropertyValue(element)) {
+                    return false;
+                }
+            }
+            return true;
+
+        } else {
+            return value instanceof String ||
+                   value instanceof Number ||
+                   value instanceof Record ||
+                   value instanceof Boolean;
+        }
     }
 
     /**
@@ -233,6 +349,10 @@ class PropertyBag<T extends PropertyBag> {
     public T set(String propertyName, boolean booleanValue) {
         properties.put(propertyName, booleanValue);
         return (T)this;
+    }
+
+    public void setAll(PropertyBag propertyBag) {
+        properties.putAll(propertyBag.properties);
     }
 
     public Map<String, Object> getProperties() {
@@ -258,4 +378,8 @@ class PropertyBag<T extends PropertyBag> {
         return properties.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return properties.toString();
+    }
 }

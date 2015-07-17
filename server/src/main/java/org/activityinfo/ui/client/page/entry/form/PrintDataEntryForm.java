@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.Frame;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
-import org.activityinfo.legacy.shared.command.GetFormViewModel;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 
@@ -81,9 +81,9 @@ public class PrintDataEntryForm extends Window {
 
     public void print(final int activityId) {
         setVisible(true);
-        dispatcher.execute(new GetFormViewModel(activityId),
+        dispatcher.execute(new GetActivityForm(activityId),
                 new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading()),
-                new AsyncCallback<ActivityDTO>() {
+                new AsyncCallback<ActivityFormDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -91,14 +91,14 @@ public class PrintDataEntryForm extends Window {
                     }
 
                     @Override
-                    public void onSuccess(ActivityDTO result) {
+                    public void onSuccess(ActivityFormDTO result) {
                         renderForm(result);
                     }
 
                 });
     }
 
-    private void renderForm(ActivityDTO activity) {
+    private void renderForm(ActivityFormDTO activity) {
         try {
             String html = render(activity);
 
@@ -137,7 +137,7 @@ public class PrintDataEntryForm extends Window {
                 });
     }
 
-    private String render(ActivityDTO activity) {
+    private String render(ActivityFormDTO activity) {
 
         String contents = getFormContents();
 
@@ -153,7 +153,7 @@ public class PrintDataEntryForm extends Window {
         return html.toString();
     }
 
-    private String addProjects(ActivityDTO activity) {
+    private String addProjects(ActivityFormDTO activity) {
         String result = "";
         for (ProjectDTO projectDTO : activity.getProjects()) {
             result += projectDTO.getName() + ",";
@@ -184,7 +184,7 @@ public class PrintDataEntryForm extends Window {
     }-*/;
 
 
-    private String addIndicators(ActivityDTO activity) {
+    private String addIndicators(ActivityFormDTO activity) {
         StringBuilder builder = new StringBuilder();
 
         builder.append("<table border=\"1px\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\" " +
@@ -220,7 +220,7 @@ public class PrintDataEntryForm extends Window {
         builder.append("</tr>");
     }
 
-    private String addAttributes(ActivityDTO activity) {
+    private String addAttributes(ActivityFormDTO activity) {
 
         StringBuilder builder = new StringBuilder();
         for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {

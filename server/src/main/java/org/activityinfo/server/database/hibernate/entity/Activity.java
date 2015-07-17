@@ -75,6 +75,11 @@ public class Activity implements Serializable, Deleteable, Orderable {
     private long version;
     private long siteVersion;
     
+    private boolean classicView;
+
+    private String formClass;
+    private byte[] gzFormClass;
+
     public Activity() {
 
     }
@@ -82,12 +87,28 @@ public class Activity implements Serializable, Deleteable, Orderable {
     public Activity(int id, String name) {
         this.id = id;
         this.name = name;
-
     }
 
-    @Id 
-    @GeneratedValue(strategy = GenerationType.AUTO) 
+    public Activity(Activity sourceActivity) {
+        this.locationType = sourceActivity.getLocationType();
+
+        this.database = sourceActivity.getDatabase();
+        this.name = sourceActivity.getName();
+        this.category = sourceActivity.getCategory();
+
+        this.reportingFrequency = sourceActivity.reportingFrequency;
+        this.allowEdit = sourceActivity.allowEdit;
+        this.sortOrder = sourceActivity.sortOrder;
+        this.dateDeleted = sourceActivity.dateDeleted;
+
+        this.mapIcon = sourceActivity.mapIcon;
+        this.published = sourceActivity.published;
+        this.classicView = sourceActivity.classicView;
+    }
+
+    @Id
     @Offline
+    @GeneratedValue(strategy = GenerationType.AUTO) 
     @Column(name = "ActivityId", unique = true, nullable = false)
     public int getId() {
         return this.id;
@@ -108,8 +129,8 @@ public class Activity implements Serializable, Deleteable, Orderable {
         this.locationType = locationType;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY) 
     @Offline
+    @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "DatabaseId", nullable = false)
     public UserDatabase getDatabase() {
         return this.database;
@@ -119,8 +140,8 @@ public class Activity implements Serializable, Deleteable, Orderable {
         this.database = database;
     }
 
-    @Column(name = "Name", nullable = false, length = 45)
     @Offline
+    @Column(name = "Name", nullable = false, length = 45)
     public String getName() {
         return this.name;
     }
@@ -129,8 +150,17 @@ public class Activity implements Serializable, Deleteable, Orderable {
         this.name = name;
     }
 
-    @Column(name = "ReportingFrequency", nullable = false)
+    @Column(name = "classicView", nullable = false)
+    public boolean isClassicView() {
+        return classicView;
+    }
+
+    public void setClassicView(boolean classicView) {
+        this.classicView = classicView;
+    }
+
     @Offline
+    @Column(name = "ReportingFrequency", nullable = false)
     public int getReportingFrequency() {
         return this.reportingFrequency;
     }
@@ -148,9 +178,9 @@ public class Activity implements Serializable, Deleteable, Orderable {
         this.allowEdit = allowEdit;
     }
 
+    @Offline
     @Override 
     @Column(name = "SortOrder", nullable = false)
-    @Offline
     public int getSortOrder() {
         return this.sortOrder;
     }
@@ -192,6 +222,29 @@ public class Activity implements Serializable, Deleteable, Orderable {
         this.sites = sites;
     }
 
+    /**
+     *
+     * @return the FormClass resource encoded as JSON
+     */
+    @Lob
+    @Offline(sync = false)
+    public String getFormClass() {
+        return formClass;
+    }
+
+    public void setFormClass(String formClass) {
+        this.formClass = formClass;
+    }
+
+    @Offline(sync = false)
+    public byte[] getGzFormClass() {
+        return gzFormClass;
+    }
+
+    public void setGzFormClass(byte[] gzFormClass) {
+        this.gzFormClass = gzFormClass;
+    }
+
     @Column 
     @Temporal(value = TemporalType.TIMESTAMP)
     public Date getDateDeleted() {
@@ -203,6 +256,7 @@ public class Activity implements Serializable, Deleteable, Orderable {
     }
 
     @Override
+    @Offline(sync = false)
     public void delete() {
         setDateDeleted(new Date());
         getDatabase().setLastSchemaUpdate(new Date());

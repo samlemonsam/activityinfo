@@ -157,10 +157,6 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
         this.parentId = id;
     }
 
-    public String getParentName() {
-        return (String) get("parentName");
-    }
-
     public int getParentId() {
         return parentId;
     }

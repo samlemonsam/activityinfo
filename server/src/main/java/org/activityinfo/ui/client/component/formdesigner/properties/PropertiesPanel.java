@@ -22,14 +22,14 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import org.activityinfo.ui.client.widget.CheckBox;
 import org.activityinfo.ui.client.widget.TextArea;
 import org.activityinfo.ui.client.widget.TextBox;
+import org.activityinfo.ui.client.widget.form.FormGroup;
 
 /**
  * @author yuriyz on 7/9/14.
@@ -56,6 +56,26 @@ public class PropertiesPanel extends Composite {
     HTMLPanel readOnlyGroup;
     @UiField
     CheckBox readOnly;
+    @UiField
+    Button relevanceButton;
+    @UiField
+    HTMLPanel relevanceGroup;
+    @UiField
+    SpanElement relevanceExpression;
+    @UiField
+    CheckBox visible;
+    @UiField
+    FormGroup visibleGroup;
+    @UiField
+    RadioButton relevanceEnabled;
+    @UiField
+    RadioButton relevanceEnabledIf;
+    @UiField
+    TextBox code;
+    @UiField
+    FormGroup codeGroup;
+    @UiField
+    FormGroup labelGroup;
 
     public PropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -87,5 +107,45 @@ public class PropertiesPanel extends Composite {
 
     public CheckBox getReadOnly() {
         return readOnly;
+    }
+
+    public Button getRelevanceButton() {
+        return relevanceButton;
+    }
+
+    public HTMLPanel getRelevanceGroup() {
+        return relevanceGroup;
+    }
+
+    public SpanElement getRelevanceExpression() {
+        return relevanceExpression;
+    }
+
+    public CheckBox getVisible() {
+        return visible;
+    }
+
+    public FormGroup getVisibleGroup() {
+        return visibleGroup;
+    }
+
+    public RadioButton getRelevanceEnabled() {
+        return relevanceEnabled;
+    }
+
+    public RadioButton getRelevanceEnabledIf() {
+        return relevanceEnabledIf;
+    }
+
+    public TextBox getCode() {
+        return code;
+    }
+
+    public FormGroup getCodeGroup() {
+        return codeGroup;
+    }
+
+    public FormGroup getLabelGroup() {
+        return labelGroup;
     }
 }

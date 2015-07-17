@@ -27,6 +27,16 @@ public class GxtModal extends ModalDialog {
         this.windowElement = parent.root().waitFor(By.className(CLASS_NAME), timeout);
     }
 
+    public static GxtModal waitForModal(final FluentElement container) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().exists(By.className(GxtModal.CLASS_NAME));
+            }
+        });
+        return new GxtModal(container);
+    }
+
     public FluentElement getWindowElement() {
         return windowElement;
     }
@@ -57,7 +67,11 @@ public class GxtModal extends ModalDialog {
 
     @Override
     public void accept() {
-        windowElement.find().button(XPathBuilder.withText("Save")).clickWhenReady();
+        accept("Save");
+    }
+
+    public void accept(String buttonName) {
+        windowElement.find().button(XPathBuilder.withText(buttonName)).clickWhenReady();
         windowElement.waitUntil(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver input) {

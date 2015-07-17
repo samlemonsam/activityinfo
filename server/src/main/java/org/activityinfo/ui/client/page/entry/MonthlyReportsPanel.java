@@ -44,10 +44,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
-import org.activityinfo.legacy.shared.command.GetMonthlyReports;
-import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.Month;
-import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
@@ -69,7 +66,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     private MappingComboBox<Month> monthCombo;
 
     private int currentSiteId;
-    private ActivityDTO currentActivity;
+    private ActivityFormDTO currentActivity;
 
     private ActionToolBar toolBar;
     private boolean readOnly;
@@ -136,9 +133,9 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         this.currentSiteId = site.getId();
         this.grid.getStore().removeAll();
 
-        service.execute(new GetSchema(),
+        service.execute(new GetActivityForm(site.getActivityId()),
                 new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading()),
-                new AsyncCallback<SchemaDTO>() {
+                new AsyncCallback<ActivityFormDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -146,14 +143,14 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                     }
 
                     @Override
-                    public void onSuccess(SchemaDTO schema) {
-                        currentActivity = schema.getActivityById(site.getActivityId());
+                    public void onSuccess(ActivityFormDTO result) {
+                        currentActivity = result;
                         populateGrid(site, currentActivity);
                     }
                 });
     }
 
-    private void populateGrid(SiteDTO site, ActivityDTO activity) {
+    private void populateGrid(SiteDTO site, ActivityFormDTO activity) {
         Month startMonth = getInitialStartMonth(site);
         monthCombo.setMappedValue(startMonth);
         grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(activity)));

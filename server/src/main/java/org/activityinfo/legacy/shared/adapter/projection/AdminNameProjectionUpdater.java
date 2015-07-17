@@ -23,9 +23,10 @@ package org.activityinfo.legacy.shared.adapter.projection;
 
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.type.primitive.TextValue;
 
 /**
  * @author yuriyz on 4/15/14.
@@ -48,7 +49,7 @@ class AdminNameProjectionUpdater implements ProjectionUpdater<LocationDTO> {
         if (entity != null) {
             switch (fieldIndex) {
                 case CuidAdapter.NAME_FIELD:
-                    projection.setValue(path, entity.getName());
+                    projection.setValue(path, TextValue.valueOf(entity.getName()));
                     break;
                 case CuidAdapter.CODE_FIELD:
                     // TODO: projection.setValue(path, "");

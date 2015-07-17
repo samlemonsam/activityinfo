@@ -28,6 +28,7 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.ui.client.component.report.editor.map.LeafletMap;
 import org.activityinfo.ui.client.component.report.editor.map.symbols.LeafletReportOverlays;
@@ -49,7 +50,20 @@ public class MapReportView extends ContentPanel implements ReportView<MapReportE
     }
 
     @Override
+    public void loading() {
+        el().mask();
+    }
+
+    @Override
+    public void onFailure(Throwable caught, ClickHandler retryCallback) {
+        ReportViewRetrier.onFailure(this, caught, retryCallback);
+        map = null;
+    }
+
+
+    @Override
     public void show(MapReportElement element) {
+        el().unmask();
         this.element = element;
         addContent();
     }

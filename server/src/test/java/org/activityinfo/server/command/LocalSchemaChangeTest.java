@@ -64,12 +64,12 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
     @Test
     public void update() throws Exception {
-        assertChangeIsSynchronized(new UpdateEntity("Indicator", 5, newName()));
-        assertChangeIsSynchronized(new UpdateEntity("Activity", 2, newName()));
-        assertChangeIsSynchronized(new UpdateEntity("AttributeGroup", 1, newName()));
-        assertChangeIsSynchronized(new UpdateEntity("Attribute", 1, newName()));
-        assertChangeIsSynchronized(new UpdateEntity("LockedPeriod", 1, newName()));
-        assertChangeIsSynchronized(new UpdateEntity(UserDatabaseDTO.ENTITY_NAME, 1, newName()));
+        assertChangeIsSynchronized(3, new UpdateEntity("Indicator", 5, newName()));
+        assertChangeIsSynchronized(   new UpdateEntity("Activity", 2, newName()));
+        assertChangeIsSynchronized(1, new UpdateEntity("AttributeGroup", 1, newName()));
+        assertChangeIsSynchronized(1, new UpdateEntity("Attribute", 1, newName()));
+        assertChangeIsSynchronized(   new UpdateEntity("LockedPeriod", 1, newName()));
+        assertChangeIsSynchronized(   new UpdateEntity(UserDatabaseDTO.ENTITY_NAME, 1, newName()));
     }
     
     @Test
@@ -83,13 +83,13 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
     @Test
     public void delete() throws Exception {
-        assertChangeIsSynchronized(new Delete("Indicator", 5));
-        assertChangeIsSynchronized(new Delete("Activity", 2));
-        assertChangeIsSynchronized(new Delete("Attribute", 1));
-        assertChangeIsSynchronized(new Delete("AttributeGroup", 1));
-        assertChangeIsSynchronized(new Delete("LockedPeriod", 1));
-        assertChangeIsSynchronized(new Delete("Project", 1));
-        assertChangeIsSynchronized(new Delete(UserDatabaseDTO.ENTITY_NAME, 1));
+        assertChangeIsSynchronized(3, new Delete("Indicator", 5));
+        assertChangeIsSynchronized(   new Delete("Activity", 2));
+        assertChangeIsSynchronized(1, new Delete("Attribute", 1));
+        assertChangeIsSynchronized(1, new Delete("AttributeGroup", 1));
+        assertChangeIsSynchronized(   new Delete("LockedPeriod", 1));
+        assertChangeIsSynchronized(   new Delete("Project", 1));
+        assertChangeIsSynchronized(   new Delete(UserDatabaseDTO.ENTITY_NAME, 1));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
         SchemaDTO schema = executeRemotely(new GetSchema());
 
-        ActivityDTO activity = new ActivityDTO();
+        ActivityFormDTO activity = new ActivityFormDTO();
         activity.setName("New Activity");
         activity.setReportingFrequency(0);
         activity.setLocationType(schema.getLocationTypeById(1));
@@ -121,8 +121,10 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         indicator.put("units", "bricks");
         indicator.put("activityId", 2);
 
-        assertChangeIsSynchronized(new CreateEntity("Indicator", indicator));
+        assertChangeIsSynchronized(2, new CreateEntity("Indicator", indicator));
     }
+
+
 
     @Test
     public void createAttributes() throws Exception {
@@ -132,14 +134,14 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         attributeGroup.put("multipleAllowed", true);
         attributeGroup.put("mandatory", true);
 
-        CreateResult createResult = assertChangeIsSynchronized(new CreateEntity("AttributeGroup", attributeGroup));
+        CreateResult createResult = assertChangeIsSynchronized(2, new CreateEntity("AttributeGroup", attributeGroup));
 
 
         Map<String, Object> attribute = Maps.newHashMap();
         attribute.put("name", "New Attribute");
         attribute.put("attributeGroupId", createResult.getNewId());
 
-        assertChangeIsSynchronized(new CreateEntity("Attribute", attribute));
+        assertChangeIsSynchronized(2, new CreateEntity("Attribute", attribute));
     }
     
     @Test
@@ -243,7 +245,39 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
     }
 
-    
+    private <R extends CommandResult> R assertChangeIsSynchronized(int activityId, Command<R> command) throws Exception {
+        ActivityFormDTO originalRemote = executeRemotely(new GetActivityForm(activityId));
+        
+        synchronize();
+
+        R result = executeRemotely(command);
+
+        ActivityFormDTO newRemote = executeRemotely(new GetActivityForm(activityId));
+
+        // Verify that the command actually had some effect:
+        // otherwise we're not testing anything...
+        assertThat(dump(newRemote), not(equalTo(dump(originalRemote))));
+
+        synchronize();
+
+        ActivityFormDTO newLocal = executeLocally(new GetActivityForm(activityId));
+
+        assertThat(dump(newLocal), equalTo(dump(newRemote)));
+
+        System.out.println(dump(newLocal));
+
+        return result;
+        
+
+    }
+
+
+    private String dump(ActivityFormDTO object) throws Exception {
+        Set<Object> visited = Sets.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        StringBuilder sb = new StringBuilder();
+        dump(sb, visited, "form[" + object.getId() + "]", object);
+        return sb.toString();
+    }
     
     private String dump(SchemaDTO object) throws Exception {
         Set<Object> visited = Sets.newSetFromMap(new IdentityHashMap<Object, Boolean>());

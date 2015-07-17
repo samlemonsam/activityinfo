@@ -9,3 +9,9 @@ dependencies {
   compile libraries.jersey.server
   compile libraries.guice
 }
+
+
+jar {
+  from project.sourceSets.main.allSource
+  from project.sourceSets.main.output
+}

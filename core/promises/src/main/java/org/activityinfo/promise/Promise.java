@@ -231,6 +231,12 @@ public final class Promise<T> implements AsyncCallback<T> {
         return value;
     }
 
+    public Throwable getException() {
+        if(state != State.REJECTED) {
+            throw new IllegalStateException();
+        }
+        return exception;
+    }
 
     @Override
     public void onFailure(Throwable caught) {

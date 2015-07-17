@@ -64,7 +64,7 @@ public class GxtFormPanel extends Form {
         }
     }
 
-    public class GxtField implements FormItem {
+    public static class GxtField implements FormItem {
 
         private final FluentElement element;
 
@@ -80,6 +80,11 @@ public class GxtFormPanel extends Form {
             } else {
                 return label;
             }
+        }
+
+        @Override
+        public String getPlaceholder() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -140,6 +145,10 @@ public class GxtFormPanel extends Form {
             if(!isValid()) {
                 throw new AssertionError(format("Expected field '%s' to be valid", getLabel()));
             }
+        }
+
+        public FluentElement getElement() {
+            return element;
         }
     }
 }

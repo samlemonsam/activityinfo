@@ -40,6 +40,7 @@ import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel.CheckCascade;
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.user.client.Event;
@@ -49,10 +50,13 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -74,7 +78,7 @@ public class IndicatorTreePanel extends ContentPanel {
     private boolean multipleSelection;
 
     /**
-     * Keep our own copy of our selection state that is indepedent of the
+     * Keep our own copy of our selection state that is independent of the
      * loading process
      */
     private Set<Integer> selection = Sets.newHashSet();
@@ -174,24 +178,6 @@ public class IndicatorTreePanel extends ContentPanel {
         });
     }
 
-    public void loadSingleDatabase(UserDatabaseDTO database) {
-        store.removeAll();
-        for (ActivityDTO activity : database.getActivities()) {
-            store.add(activity, true);
-            List<ModelData> models = createActivityChildren(activity);
-            for (ModelData model : models) {
-                if (model instanceof IndicatorGroup) {
-                    store.add(activity, model, true);
-                    store.add(model, createIndicatorList((IndicatorGroup) model), true);
-                } else {
-                    store.add(activity, model, true);
-                }
-            }
-
-        }
-        tree.expandAll();
-    }
-
     @Override
     public void setHeadingText(String heading) {
         super.setHeadingText(heading);
@@ -259,7 +245,7 @@ public class IndicatorTreePanel extends ContentPanel {
 
             } else if (parent instanceof ActivityDTO) {
 
-                callback.onSuccess(createActivityChildren((ActivityDTO) parent));
+                loadActivityChildren((ActivityDTO) parent).then(callback);
 
             } else if (parent instanceof IndicatorGroup) {
 
@@ -276,8 +262,7 @@ public class IndicatorTreePanel extends ContentPanel {
 
         for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
             if (activityDTO.hasCategory()) {
-                ActivityCategory activityCategory =
-                        new ActivityCategory(databaseDTO.getId(), activityDTO.getCategory());
+                ActivityCategory activityCategory = new ActivityCategory(databaseDTO.getId(), activityDTO.getCategory());
                 categories.add(activityCategory);
                 if (!children.contains(activityCategory)) {
                     children.add(activityCategory);
@@ -290,8 +275,7 @@ public class IndicatorTreePanel extends ContentPanel {
         // fill category with activities
         for (ActivityCategory category : categories) {
             for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
-                if (activityDTO.hasCategory() &&
-                        category.equals(new ActivityCategory(databaseDTO.getId(), activityDTO.getCategory()))) {
+                if (category.getName().equals(activityDTO.getCategory())) {
                     category.addActivity(activityDTO);
                 }
             }
@@ -300,20 +284,25 @@ public class IndicatorTreePanel extends ContentPanel {
         return children;
     }
 
-    private List<ModelData> createActivityChildren(ActivityDTO activity) {
-        List<IndicatorGroup> groupIndicators = activity.groupIndicators();
-        List<ModelData> children = new ArrayList<ModelData>();
-        for (IndicatorGroup group : groupIndicators) {
-            if (group.getName() == null) {
-                for (IndicatorDTO indicator : group.getIndicators()) {
-                    children.add(indicator);
+    private Promise<List<ModelData>> loadActivityChildren(ActivityDTO activity) {
+        return dispatcher.execute(new GetActivityForm(activity.getId())).then(new Function<ActivityFormDTO, List<ModelData>>() {
+            @Nullable
+            @Override
+            public List<ModelData> apply(@Nullable ActivityFormDTO form) {
+                List<IndicatorGroup> groupIndicators = form.groupIndicators();
+                List<ModelData> children = new ArrayList<ModelData>();
+                for (IndicatorGroup group : groupIndicators) {
+                    if (group.getName() == null) {
+                        for (IndicatorDTO indicator : group.getIndicators()) {
+                            children.add(indicator);
+                        }
+                    } else {
+                        children.add(group);
+                    }
                 }
-            } else {
-                children.add(group);
+                return children;
             }
-        }
-
-        return children;
+        });
     }
 
     private List<ModelData> createIndicatorList(IndicatorGroup group) {

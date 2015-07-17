@@ -24,7 +24,7 @@ package org.activityinfo.server.report.renderer.itext;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.reports.content.FilterDescription;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.server.util.date.DateFormatter;

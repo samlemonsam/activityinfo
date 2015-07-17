@@ -29,12 +29,12 @@ import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.sql.shared.adapter.SyncTransactionAdapter;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Injector;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
 import org.activityinfo.legacy.shared.impl.ExecutionContext;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.command.handler.CommandHandler;
 import org.activityinfo.server.command.handler.HandlerUtil;
 import org.activityinfo.server.database.hibernate.HibernateExecutor;
@@ -50,7 +50,7 @@ public class RemoteExecutionContext implements ExecutionContext {
 
     private static final Logger LOGGER = Logger.getLogger(RemoteExecutionContext.class.getName());
 
-    private static final ThreadLocal<RemoteExecutionContext> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<RemoteExecutionContext> CURRENT = new ThreadLocal<RemoteExecutionContext>();
 
     private AuthenticatedUser user;
     private Injector injector;

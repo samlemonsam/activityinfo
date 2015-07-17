@@ -9,5 +9,5 @@ import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
  */
 public interface FieldContainerFactory {
 
-    public FieldContainer createContainer(FormField field, FormFieldWidget widget);
+    public FieldContainer createContainer(FormField field, FormFieldWidget widget, int columnWidth);
 }

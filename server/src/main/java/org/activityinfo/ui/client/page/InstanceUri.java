@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.page;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 
 public class InstanceUri {
 

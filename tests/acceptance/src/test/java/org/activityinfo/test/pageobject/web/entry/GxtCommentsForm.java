@@ -49,6 +49,11 @@ public class GxtCommentsForm extends Form {
         }
 
         @Override
+        public String getPlaceholder() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isDropDown() {
             return false;
         }
@@ -71,6 +76,16 @@ public class GxtCommentsForm extends Form {
         @Override
         public boolean isEnabled() {
             return true;
+        }
+
+        @Override
+        public FluentElement getElement() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isValid() {
+            throw new UnsupportedOperationException();
         }
     }
 }

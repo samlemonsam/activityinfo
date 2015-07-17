@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.component.form;
 
 
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 
 public interface FormDialogCallback {
 

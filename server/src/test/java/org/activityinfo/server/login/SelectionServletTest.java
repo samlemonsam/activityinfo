@@ -23,7 +23,7 @@ package org.activityinfo.server.login;
  */
 
 import com.google.inject.Provider;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.easymock.EasyMock;
 import org.junit.Test;

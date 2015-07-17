@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!--
+  #%L
+  ActivityInfo Server
+  %%
+  Copyright (C) 2009 - 2013 UNICEF
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+
+
+<dataset>
+
+
+  <!-- Country setup -->
+
+  <country countryId="1" name="Rdc" x1="0" y1="0" x2="0" y2="0"/>
+
+  <adminLevel countryId="1" adminLevelId="1" name="Province" deleted="0"/>
+  <locationType locationTypeId="1" countryId="1" name="localite" reuse="1"/>
+
+
+  <!-- User setup -->
+  <userLogin userId="1" name="Alex"
+             email="akbertram@gmail.com" password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
+             locale="fr" organization="" jobtitle="" emailnotification="1"/>
+
+  <!-- Attributes -->
+
+  <!-- NFI Attribute 1: Cause -->
+
+  <attributeGroup attributeGroupId="102" name="Funding Source" multipleAllowed="0" sortOrder="2" mandatory="0"/>
+  <attributeGroup attributeGroupId="103" name="Funding Source" multipleAllowed="0" sortOrder="2" mandatory="0"/>
+
+
+  <!-- Database: PEAR -->
+
+  <userDatabase databaseId="1" name="PEAR" countryId="1"
+                ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+
+
+  <!-- PEAR Activity 1 : NFI Distribution -->
+
+  <activity activityId="1" databaseId="1" name="Distribution"
+            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"
+            published="0"/>
+
+
+  <indicator indicatorId="101" activityId="1" name="Nb menages"
+             calculatedAutomatically="0"
+             units="menages" aggregation="0" category="inputs"
+             sortOrder="2" mandatory="0"/>
+
+  <attributeGroupInActivity activityId="1" attributeGroupId="102"/>
+
+
+  <!-- PEAR Activity 2 : Vouchers -->
+
+  <activity activityId="2" databaseId="1"
+            name="Faire" reportingFrequency="0"
+            allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+
+  <attributeGroupInActivity activityId="2" attributeGroupId="103"/>
+
+  <indicator indicatorId="102" activityId="2" name="Voucher Value"
+             calculatedAutomatically="0"
+             units="menages" aggregation="0"
+             sortOrder="2" mandatory="0"/>
+
+</dataset>

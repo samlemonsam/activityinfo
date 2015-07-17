@@ -26,4 +26,8 @@ public abstract class CriteriaVisitor {
     public void visitParentCriteria(ParentCriteria criteria) {
 
     }
+
+    public void visitFieldCriteria(FieldDateCriteria fieldDateCriteria) {
+
+    }
 }

@@ -1,6 +1,7 @@
 package org.activityinfo.test.pageobject.web.components;
 
 
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.joda.time.LocalDate;
 
 public abstract class Form {
@@ -27,6 +28,7 @@ public abstract class Form {
     public interface FormItem {
         
         String getLabel();
+        String getPlaceholder();
         boolean isDropDown();
         
         void fill(String value);
@@ -34,5 +36,9 @@ public abstract class Form {
         void select(String itemLabel);
         
         boolean isEnabled();
+
+        FluentElement getElement();
+
+        boolean isValid();
     }
 }

@@ -1,104 +1,58 @@
 package org.activityinfo.model.type.time;
 
-import com.bedatadriven.rebar.time.calendar.LocalDate;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resource;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.component.ComponentReader;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordFieldTypeClass;
 
-import java.util.Date;
-
-public enum LocalDateType implements FieldType, FieldTypeClass {
-
-    INSTANCE;
+/**
+ * Value type that represents a date in the ISO-8601 calendar.
+ * There is no representation of time-of-day or time-zone.
+ *
+ * <blockquote>
+ * The “local” terminology is familiar from Joda-Time and comes originally from the ISO-8601 date and time standard.
+ * It relates specifically to the absence of a time-zone. In effect, a local date is a description of a date,
+ * such as the “5th April 2014”. That particular local date will start at different points on the time-line
+ * depending on where on the Earth you are. Thus the local date will start in Australia 10 hours before it
+ * starts in London and 18 hours before it starts in San Francisco. -- Stephen Colebourn in
+ * <a href="http://www.infoq.com/articles/java.time">InfoQ</a>
+ * </blockquote>
+ *
+ */
+public class LocalDateType implements FieldType {
 
     public static final String TYPE_ID = "LOCAL_DATE";
 
-    @Override
-    public String getId() {
-        return TYPE_ID;
-    }
+    public static final FieldTypeClass TYPE_CLASS = new RecordFieldTypeClass() {
+        @Override
+        public String getId() {
+            return TYPE_ID;
+        }
 
-    @Override
-    public String getLabel() {
-        return "Date";
-    }
+        @Override
+        public FieldType createType() {
+            return INSTANCE;
+        }
 
-    @Override
-    public FieldType createType(Record typeParameters) {
-        // no parameters
-        return this;
-    }
+        @Override
+        public FieldValue deserialize(Record record) {
+            return org.activityinfo.model.type.time.LocalDate.fromRecord(record);
+        }
+    };
 
-    @Override
-    public FieldType createType() {
-        return this;
-    }
+    public static final LocalDateType INSTANCE = new LocalDateType();
 
-    @Override
-    public FormClass getParameterFormClass() {
-        return new FormClass(ResourceId.create("_localDate"));
-    }
+
+    private LocalDateType() { }
 
     @Override
     public FieldTypeClass getTypeClass() {
-        return this;
-    }
-
-
-
-    @Override
-    public Record getParameters() {
-        return new Record();
+        return TYPE_CLASS;
     }
 
     @Override
-    public ComponentReader<String> getStringReader(final String fieldName, String componentId) {
-        return new ComponentReader<String>() {
-            @Override
-            public String read(Resource resource) {
-                Record record = resource.isRecord(fieldName);
-                if(record == null) {
-                    return null;
-                } else {
-                    return record.getString("date");
-                }
-            }
-        };
+    public String toString() {
+        return "LocalDateType";
     }
-
-    @Override
-    public ComponentReader<LocalDate> getDateReader(final String name, String componentId) {
-        return new ComponentReader<LocalDate>() {
-            @Override
-            public LocalDate read(Resource resource) {
-                Record record = resource.isRecord(name);
-                if(record == null) {
-                    return null;
-                }
-                return LocalDate.parse(record.getString("date"));
-            }
-        };
-    }
-
-
-    public static LocalDate asLocalDate(Record record) {
-        return LocalDate.parse(record.getString("date"));
-    }
-
-    public static Record fromDate(Date date) {
-        return fromLocalDate(new LocalDate(date));
-    }
-
-    public static Record fromLocalDate(LocalDate value) {
-        Record record = new Record();
-        record.set(TYPE_FIELD_NAME, INSTANCE.getId());
-        record.set("date", value.toString());
-        return record;
-    }
-
-
 }

@@ -1,9 +1,12 @@
 rootProject.name = 'activityinfo'
 
+include 'i18n'
 include 'core:model'
 include 'core:services'
 include 'core:promises'
 include 'geoadmin'
 include 'server'
+include 'io:xform'
+include 'ui:icons'
 include 'tests:acceptance'
 

@@ -25,7 +25,8 @@ package org.activityinfo.server.command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -98,24 +99,31 @@ public class CommandTestCase2 {
             user.setLocale("en");
         }
 
-        LocaleProxy.setLocale(user.getLocaleObject());
+        ThreadLocalLocaleProvider.pushLocale(user.getLocaleObject());
 
-        RemoteExecutionContext context = new RemoteExecutionContext(injector);
-        T result = context.startExecute(command);
+        try {
 
-        // normally each request and so each handleCommand() gets its own
-        // EntityManager, but here successive requests in the same test
-        // will share an EntityManager, which can be bad if there are
-        // collections
-        // still living in the first-level cache
-        //
-        // I think these command tests should ultimately become real end-to-end
-        // tests and so would go through the actual servlet process, but for the
-        // moment,
-        // we'll just add this work aroudn that clears the cache after each
-        // command.
-        injector.getInstance(EntityManager.class).clear();
-        return result;
+
+            RemoteExecutionContext context = new RemoteExecutionContext(injector);
+            T result = context.startExecute(command);
+
+            // normally each request and so each handleCommand() gets its own
+            // EntityManager, but here successive requests in the same test
+            // will share an EntityManager, which can be bad if there are
+            // collections
+            // still living in the first-level cache
+            //
+            // I think these command tests should ultimately become real end-to-end
+            // tests and so would go through the actual servlet process, but for the
+            // moment,
+            // we'll just add this work aroudn that clears the cache after each
+            // command.
+            injector.getInstance(EntityManager.class).clear();
+            return result;
+
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
+        }
     }
 
     public DispatcherSync getDispatcherSync() {

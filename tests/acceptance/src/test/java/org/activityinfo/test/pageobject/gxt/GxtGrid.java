@@ -18,15 +18,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 
 public class GxtGrid {
     
-    private static final Logger LOGGER = Logger.getLogger(GxtGrid.class.getName());
-    
+
     private FluentElement container;
 
     
@@ -46,6 +44,12 @@ public class GxtGrid {
         
         return elements.topToBottom().as(GxtGrid.class);
     }
+
+    public static FluentIterable<GxtGrid> waitForGrids(FluentElement container) {
+        container.waitFor(By.className("x-grid3"));
+        return findGrids(container);
+    }
+
     
     public GxtGrid(FluentElement container) {
         this.container = container;
@@ -58,7 +62,13 @@ public class GxtGrid {
                 .firstIfPresent();
         
         if(!cell.isPresent()) {
-            throw makeAssertion(text);
+            cell = container.find()
+                    .div(withClass("x-grid3-cell-inner")).div(containingText(text))
+                    .ancestor().td(withClass("x-grid3-cell"))
+                    .firstIfPresent();
+            if (!cell.isPresent()) {
+                throw makeAssertion(text);
+            }
         }
         
         return new GxtCell(cell.get());
@@ -140,16 +150,14 @@ public class GxtGrid {
     }
 
     public GxtCell findCell(String rowText, String columnId) {
-        return new GxtCell(container.find()
-                .anyElement(withText(rowText))
-                .ancestor().div(withClass("x-grid3-row"))
-                .descendants().td(withClass("x-grid3-td-" + columnId))
-                .first());
+        FluentElement nodeWithText = container.find().anyElement(withText(rowText)).first();
+        FluentElement ancestor = nodeWithText.find().ancestor().div(withClass("x-grid3-row")).first();
+        return new GxtCell(ancestor.find().descendants().td(withClass("x-grid3-td-" + columnId)).first());
     }
 
     public GxtGrid waitUntilReloadedSilently() {
         try {
-            waitUntilAtLeastOneRowIsLoaded();
+            waitUntilReloaded();
         } catch (Exception e) {
             // ignore, we don't care even if loading mask didn't appear
         }
@@ -167,6 +175,12 @@ public class GxtGrid {
     }
 
     public GxtGrid waitUntilAtLeastOneRowIsLoaded() {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(@Nullable WebDriver input) {
+                return !container.find().div(withClass("x-grid-empty")).firstIfPresent().isPresent();
+            }
+        });
         container.waitFor(By.className("x-grid3-row"));
         return this;
     }
@@ -190,8 +204,16 @@ public class GxtGrid {
         public GxtCell(FluentElement element) {
             this.element = element;
         }
-        
+
         public void edit(String value) {
+            edit(value, "x-grid-editor") ;
+        }
+
+        public void editTreeGrid(String value) {
+            edit(value, "x-grid3-col-value");
+        }
+        
+        public void edit(String value, String editCellClassName) {
             
             // If there is a currently focused cell, clear it first.
             Optional<FluentElement> focusedElement = element.focusedElement();
@@ -204,7 +226,7 @@ public class GxtGrid {
             element.clickWhenReady();
 
             final FluentElement input = container.find()
-                    .div(withClass("x-grid-editor"))
+                    .div(withClass(editCellClassName))
                     .input(withClass("x-form-focus"))
                     .waitForFirst();
             
@@ -223,6 +245,12 @@ public class GxtGrid {
                     }
                 }
             });
+        }
+
+        public boolean hasIcon() {
+            return element.find().precedingSibling().
+                    td(withClass("x-grid3-td-icon")).div(withClass("x-grid3-col-icon")).
+                    img().firstIfPresent().isPresent();
         }
 
         public void click() {

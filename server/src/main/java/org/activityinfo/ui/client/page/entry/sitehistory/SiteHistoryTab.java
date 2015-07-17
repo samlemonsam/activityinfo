@@ -28,15 +28,13 @@ import com.extjs.gxt.ui.client.widget.TabItem;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.GetSiteHistory;
 import org.activityinfo.legacy.shared.command.GetSiteHistory.GetSiteHistoryResult;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
-import org.activityinfo.legacy.shared.model.LocationDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.legacy.shared.model.SiteHistoryDTO;
+import org.activityinfo.legacy.shared.model.*;
 
 import java.util.List;
 
@@ -79,14 +77,14 @@ public class SiteHistoryTab extends TabItem {
 
                                 @Override
                                 public void onSuccess(final LocationResult locationsResult) {
-                                    dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+                                    dispatcher.execute(new GetActivityForm(site.getActivityId()), new AsyncCallback<ActivityFormDTO>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
                                             renderNotAvailable(site);
                                         }
 
                                         @Override
-                                        public void onSuccess(SchemaDTO schema) {
+                                        public void onSuccess(ActivityFormDTO schema) {
                                             render(schema,
                                                     locationsResult.getData(),
                                                     site,
@@ -102,7 +100,7 @@ public class SiteHistoryTab extends TabItem {
         });
     }
 
-    private void render(final SchemaDTO schema,
+    private void render(final ActivityFormDTO schema,
                         final List<LocationDTO> locations,
                         final SiteDTO site,
                         final List<SiteHistoryDTO> histories) {

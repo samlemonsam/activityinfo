@@ -69,6 +69,11 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         return activity.getId();
     }
 
+    public Activity persist(Activity activity) {
+        activityDAO.persist(activity);
+        return activity;
+    }
+
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Activity activity = em.find(Activity.class, entityId);
@@ -123,6 +128,10 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
         if (changes.containsKey("published")) {
             activity.setPublished((Integer) changes.get("published"));
+        }
+
+        if (changes.containsKey("classicView")) {
+            activity.setClassicView((Boolean) changes.get("classicView"));
         }
 
         if (changes.containsKey("sortOrder")) {

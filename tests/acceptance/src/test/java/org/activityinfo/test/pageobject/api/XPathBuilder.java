@@ -11,13 +11,14 @@ import org.openqa.selenium.WebDriverException;
 
 public class XPathBuilder {
 
-
     public enum Axis {
         CHILD,
         DESCENDANT,
         ANCESTORS,
         PARENT,
-        FOLLOWING_SIBLING
+        FOLLOWING_SIBLING,
+        PRECEDING_SIBLING,
+        PRECEDING
     }
     
     private FluentElement context;
@@ -53,6 +54,16 @@ public class XPathBuilder {
         return this;
     }
 
+    public XPathBuilder preceding() {
+        this.axis = Axis.PRECEDING;
+        return this;
+    }
+
+    public XPathBuilder precedingSibling() {
+        this.axis = Axis.PRECEDING_SIBLING;
+        return this;
+    }
+
 
     public XPathBuilder parent() {
         this.axis = Axis.PARENT;
@@ -67,6 +78,9 @@ public class XPathBuilder {
         return tagName("div", conditions);
     }
 
+    public XPathBuilder table(String... conditions) {
+        return tagName("table", conditions);
+    }
 
     public XPathBuilder p(String... conditions) {
         return tagName("p", conditions);
@@ -93,6 +107,14 @@ public class XPathBuilder {
         return tagName("input", conditions);
     }
 
+    public XPathBuilder textArea(String... conditions) {
+        return tagName("textArea", conditions);
+    }
+
+    public XPathBuilder b(String... conditions) {
+        return tagName("b", conditions);
+    }
+
     public XPathBuilder anyElement(String... conditions) {
         return tagName("*", conditions);
     }
@@ -103,6 +125,10 @@ public class XPathBuilder {
 
     public XPathBuilder tr(String... conditions) {
         return tagName("tr", conditions);
+    }
+
+    public XPathBuilder th(String... conditions) {
+        return tagName("th", conditions);
     }
 
     public XPathBuilder h4(String... conditions) {
@@ -142,12 +168,17 @@ public class XPathBuilder {
         this.axis = Axis.CHILD;
         return this;
     }
+
+    private XPathBuilder tagName(String tagName, String... conditions) {
+        return tagName(tagName, true, conditions);
+    }
     
-    private XPathBuilder tagName(String div, String... conditions) {
-        StringBuilder xpath = new StringBuilder(div);
+    public XPathBuilder tagName(String tagName, boolean and, String... conditions) {
+        StringBuilder xpath = new StringBuilder(tagName);
         if(conditions.length > 0) {
+            String condition = and ? " and " : " or ";
             xpath.append("[");
-            Joiner.on(" and ").appendTo(xpath, conditions);
+            Joiner.on(condition).appendTo(xpath, conditions);
             xpath.append("]");
         }
         this.step = xpath.toString();
@@ -176,6 +207,10 @@ public class XPathBuilder {
                 xpath.append("parent::");
             } else if(axis == Axis.FOLLOWING_SIBLING) {
                 xpath.append("following-sibling::");
+            } else if (axis == Axis.PRECEDING) {
+                xpath.append("preceding::");
+            } else if (axis == Axis.PRECEDING_SIBLING) {
+                xpath.append("preceding-sibling::");
             }
             xpath.append(step);
         }

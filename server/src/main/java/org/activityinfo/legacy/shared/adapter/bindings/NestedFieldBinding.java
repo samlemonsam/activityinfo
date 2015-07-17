@@ -1,14 +1,14 @@
 package org.activityinfo.legacy.shared.adapter.bindings;
 
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
-import org.activityinfo.legacy.shared.model.DTO;
 import org.activityinfo.legacy.shared.model.EntityDTO;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Map;
 
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.getLegacyIdFromCuid;
+import static org.activityinfo.model.legacy.CuidAdapter.getLegacyIdFromCuid;
 
 /**
  * Created by alex on 2/22/14.
@@ -26,9 +26,13 @@ public class NestedFieldBinding implements FieldBinding<EntityDTO> {
 
     @Override
     public void updateInstanceFromModel(FormInstance instance, EntityDTO model) {
-        DTO value = model.get(propertyName);
+        Object value = model.get(propertyName);
         if (value instanceof EntityDTO) {
             instance.set(fieldId, CuidAdapter.cuid(domain, ((EntityDTO) value).getId()));
+        } else if (value instanceof PartnerDTO) { // todo: why PartnerDTO doesn't implement EntityDTO interface?
+            instance.set(fieldId, CuidAdapter.cuid(domain, ((PartnerDTO) value).getId()));
+        } else if (value instanceof Integer) { // todo: ready to go id
+            instance.set(fieldId, CuidAdapter.cuid(domain, (Integer) value));
         }
     }
 

@@ -1,24 +1,26 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.google.common.collect.*;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.IdCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.projection.LocationProjector;
 import org.activityinfo.legacy.shared.adapter.projection.SiteProjector;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.promise.Promise;
 
@@ -156,14 +158,22 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
     }
 
     private Promise<List<Projection>> projectSites(GetSites query, final List<FieldPath> fieldPaths) {
-        final Promise<SchemaDTO> schemaPromise = dispatcher.execute(new GetSchema());
-        final Promise<SiteResult> sitePromise = dispatcher.execute(query);
-        return Promise.waitAll(schemaPromise, sitePromise).then(new Supplier<List<Projection>>() {
+        return dispatcher.execute(query).join(new Function<SiteResult, Promise<List<Projection>>>() {
+            @Nullable
             @Override
-            public List<Projection> get() {
-                final SchemaDTO schemaDTO = schemaPromise.get();
-                final SiteProjector siteProjector = new SiteProjector(schemaDTO, criteria, fieldPaths);
-                return siteProjector.apply(sitePromise.get());
+            public Promise<List<Projection>> apply(final SiteResult input) {
+                if (input.getData().isEmpty()) {
+                    List<Projection> value = Lists.newArrayList();
+                    return Promise.resolved(value);
+                }
+                return dispatcher.execute(new GetActivityForm(input.getData().get(0).getActivityId())).then(new Function<ActivityFormDTO, List<Projection>>() {
+                    @Nullable
+                    @Override
+                    public List<Projection> apply(ActivityFormDTO schemaDTO) {
+                        final SiteProjector siteProjector = new SiteProjector(schemaDTO, criteria, fieldPaths);
+                        return siteProjector.apply(input);
+                    }
+                });
             }
         });
     }
@@ -228,10 +238,10 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
                 Projection projection = new Projection(instance.getId(), instance.getClassId());
 
                 for (FieldPath classPath : map.get(ApplicationProperties.CLASS_PROPERTY)) {
-                    projection.setValue(classPath, instance.getClassId());
+                    projection.setValue(classPath, new ReferenceValue(instance.getClassId()));
                 }
 
-                for (Map.Entry<ResourceId, Object> entry : instance.getValueMap().entrySet()) {
+                for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
                     for (FieldPath targetPath : map.get(entry.getKey())) {
                         projection.setValue(targetPath, entry.getValue());
                     }
@@ -323,7 +333,7 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
         }
 
         private void populateReferencedFields(Projection projection, FormInstance referencedInstance) {
-            for (Map.Entry<ResourceId, Object> entry : referencedInstance.getValueMap().entrySet()) {
+            for (Map.Entry<ResourceId, FieldValue> entry : referencedInstance.getFieldValueMap().entrySet()) {
                 FieldPath path = new FieldPath(referenceField, entry.getKey());
                 if (fields.contains(path)) {
                     projection.setValue(path, entry.getValue());

@@ -11,6 +11,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+import com.mysql.jdbc.StringUtils;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
@@ -18,10 +19,12 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.calc.AggregationMethod;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -209,7 +212,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
         createdDatabases.add(map.getName());
     }
 
-
     @Override
     public void createForm(TestObject form) throws Exception {
 
@@ -219,6 +221,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("databaseId", form.getId("database"));
         properties.put("locationTypeId", resolveLocationType(form));
         properties.put("published", form.getInteger("published", 0)); // not published
+        properties.put("classicView", form.getBoolean("classicView", true));
 
         
         switch (form.getString("reportingFrequency", "once")) {
@@ -251,7 +254,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
     @Override
     public void createField(TestObject field) throws Exception {
 
-        if(field.getString("type").equals("enumerated")) {
+        String type = resolveFieldTypeName(field.getString("type"));
+
+        if(type.equals("enumerated")) {
             JSONObject properties = new JSONObject();
             properties.put("name", aliases.createAliasIfNotExists(field.getName()));
             properties.put("activityId", field.getId("form"));
@@ -270,24 +275,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
             }
 
         } else {
-            String typeClassId;
-            switch (field.getString("type").toLowerCase()) {
-                case "free_text":
-                case "text":
-                    typeClassId = "FREE_TEXT";
-                    break;
-                case "quantity":
-                    typeClassId = "QUANTITY";
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown/unsupported field type: " + field.getString("type"));
-            }
-
             
             JSONObject properties = new JSONObject();
             properties.put("name", field.getAlias());
             properties.put("activityId", field.getId("form"));
-            properties.put("type", typeClassId);
+            properties.put("type", type);
             properties.put("units", field.getString("units", "parsects"));
             properties.put("aggregation", field.getInteger("aggregation", AggregationMethod.Sum.code()));
 
@@ -305,6 +297,11 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
     @Override
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
+        submitForm(formName, values, Lists.<String>newArrayList());
+    }
+
+    @Override
+    public void submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
         int activityId = aliases.getId(formName);
 
         JSONObject properties = new JSONObject();
@@ -313,9 +310,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
         properties.put("id", aliases.generateId());
         properties.put("reportingPeriodId", aliases.generateId());
         properties.put("date1", "2014-01-01");
-        properties.put("date2", "2014-02-01");
-
-        for(FieldValue value : values) {
+        properties.put("date2", "2014-02-01");  
+        
+        for(int i = 0; i < values.size(); i++) {
+            FieldValue value = values.get(i);
             switch (value.getField().toLowerCase()) {
                 case "partner":
                     properties.put("partnerId", aliases.getId(value.getValue()));
@@ -326,15 +324,28 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 case "location":
                     properties.put("locationId", aliases.getId(value.getValue()));
                     break;
+                case "start date":
                 case "fromdate":
                     properties.put("date1", value.getValue());
                     break;
+                case "end date":
                 case "todate":
                     properties.put("date2", value.getValue());
                     break;
+                case "comments":
+                    properties.put("comments", value.getValue());
+                    break;
                 default:
-                    int indicatorId = aliases.getId(value.getField());
-                    properties.put("I" + indicatorId, value.maybeNumberValue());
+
+                    if (value.getType() != null && value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                        for (String item : StringUtils.split(value.getValue(), ",", true)) {
+                            int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
+                            properties.put("ATTRIB" + attributeId, true);
+                        }
+                    } else {
+                        int indicatorId = aliases.getId(value.getField());
+                        properties.put("I" + indicatorId, value.maybeNumberValue());
+                    }
                     break;
             }
         }
@@ -583,6 +594,18 @@ public class ApiApplicationDriver extends ApplicationDriver {
         return export("filter=Database+" + aliases.getId(databaseName));
     }
 
+    @Override
+    public File exportDatabaseSchema(String databaseName) throws Exception {
+        InputStream inputStream = root().path("resources").path("database").path(Integer.toString(aliases.getId(databaseName))).path("schema.csv").get(InputStream.class);
+        File file = File.createTempFile("exportSchema", ".csv");
+        try {
+            ByteStreams.copy(inputStream, Files.asByteSink(file));
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return file;
+    }
+
     private File export(String exportModel) throws Exception {
         WebResource root = root();
         String id = root.path("ActivityInfo").path("export")
@@ -604,11 +627,14 @@ public class ApiApplicationDriver extends ApplicationDriver {
             Thread.sleep(1000);
         }
 
-        File file = File.createTempFile("export", ".xls");
+        return downloadFile(downloadUri, "export");
+    }
+
+    private File downloadFile(String downloadUri, String fileName) throws Exception {
+        File file = File.createTempFile(fileName, ".xls");
         try(InputStream inputStream = new URI(downloadUri).toURL().openStream()) {
             ByteStreams.copy(inputStream, Files.asByteSink(file));
         }
-
         return file;
     }
 
@@ -873,7 +899,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
         itemProperties.put("name", name);
         itemProperties.put("attributeGroupId", parentId.get());
 
-        createEntity("Attribute", itemProperties);
+        PendingId pendingId = createEntity("Attribute", itemProperties);
+        String testHandle = aliases.getTestHandleForAlias(name);
+
+        aliases.bindTestHandleToId(new AliasTable.TestHandle(testHandle, parentId.get()), pendingId);
     }
 
 

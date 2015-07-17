@@ -27,13 +27,13 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import org.activityinfo.legacy.shared.auth.AnonymousUser;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandService;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
+import org.activityinfo.model.auth.AnonymousUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
 import javax.servlet.http.HttpServletRequest;
@@ -123,6 +123,8 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
                         (CommandException)result);
             }
             return result;
+        } catch (CommandException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Exception executing " + command.getClass().getSimpleName(), e);
             throw new CommandException(command, context, e);

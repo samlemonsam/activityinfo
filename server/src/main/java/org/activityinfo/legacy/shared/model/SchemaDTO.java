@@ -73,18 +73,6 @@ public final class SchemaDTO extends BaseModelData implements DTO {
         return databases;
     }
 
-    public Set<CountryDTO> getCountriesForIndicators(Set<Integer> indicatorIds) {
-        Set<CountryDTO> countries = Sets.newHashSet();
-        for (UserDatabaseDTO db : getDatabases()) {
-            for (ActivityDTO activity : db.getActivities()) {
-                if (activity.containsAny(indicatorIds)) {
-                    countries.add(db.getCountry());
-                }
-            }
-        }
-        return countries;
-    }
-
     public void setDatabases(List<UserDatabaseDTO> databases) {
         this.databases = databases;
     }
@@ -183,99 +171,6 @@ public final class SchemaDTO extends BaseModelData implements DTO {
             return getCountryById(adminLevel.getCountryId());
         }
 
-        return null;
-    }
-
-    public ActivityDTO getActivityByIndicatorId(int id) {
-        for (UserDatabaseDTO db : databases) {
-            for (ActivityDTO act : db.getActivities()) {
-                for (IndicatorDTO ind : act.getIndicators()) {
-                    if (ind.getId() == id) {
-                        return act;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    public IndicatorDTO getIndicatorById(int id) {
-        for (UserDatabaseDTO db : databases) {
-
-            for (ActivityDTO act : db.getActivities()) {
-                for (IndicatorDTO ind : act.getIndicators()) {
-                    if (ind.getId() == id) {
-                        return ind;
-                    }
-                }
-            }
-
-        }
-        return null;
-    }
-
-    public Set<PartnerDTO> getVisiblePartners() {
-
-        Set<PartnerDTO> partners = new HashSet<PartnerDTO>();
-
-        for (UserDatabaseDTO database : getDatabases()) {
-            partners.addAll(database.getPartners());
-        }
-
-        return partners;
-    }
-
-    public List<PartnerDTO> getVisiblePartnersList() {
-        List<PartnerDTO> list = new ArrayList<PartnerDTO>();
-        list.addAll(getVisiblePartners());
-        return list;
-    }
-
-    public ActivityDTO getFirstActivity() {
-        for (UserDatabaseDTO database : getDatabases()) {
-
-            for (ActivityDTO activity : database.getActivities()) {
-                return activity;
-            }
-        }
-        return null;
-    }
-
-    public AttributeGroupDTO getAttributeGroupById(int attributeGroupId) {
-        for (UserDatabaseDTO db : getDatabases()) {
-            for (ActivityDTO activity : db.getActivities()) {
-                AttributeGroupDTO group = activity.getAttributeGroupById(attributeGroupId);
-                if (group != null) {
-                    return group;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the name of the AttributeGroup from the Schema graph,
-     * or returns "" if the attribute group cannot be found in the
-     * loaded schema.
-     */
-    public String getAttributeGroupNameSafe(int attributeGroupId) {
-        AttributeGroupDTO group = getAttributeGroupById(attributeGroupId);
-        if (group == null) {
-            return "";
-        } else {
-            return group.getName();
-        }
-    }
-
-    public AttributeDTO getAttributeById(int attributeId) {
-        for (UserDatabaseDTO db : getDatabases()) {
-            for (ActivityDTO activity : db.getActivities()) {
-                AttributeDTO attr = activity.getAttributeById(attributeId);
-                if (attr != null) {
-                    return attr;
-                }
-            }
-        }
         return null;
     }
 

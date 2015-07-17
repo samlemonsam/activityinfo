@@ -26,10 +26,9 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import org.activityinfo.legacy.shared.command.GetAdminEntities;
 import org.activityinfo.legacy.shared.command.result.AdminEntityResult;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
-import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.DTOs.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.ui.client.dispatch.DispatcherStub;
@@ -303,7 +302,7 @@ public class AdminFieldSetPresenterTest {
                 + " combo", store.getModels(), equalTo(expectedEntities.getData()));
     }
 
-    private void presenterForActivity(ActivityDTO activity) {
+    private void presenterForActivity(ActivityFormDTO activity) {
         presenter = new AdminFieldSetPresenter(dispatcher,
                 activity.getLocationType().getCountryBounds(),
                 activity.getAdminLevels());

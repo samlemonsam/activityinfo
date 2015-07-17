@@ -42,9 +42,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.monitor.NullAsyncMonitor;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.page.common.columns.EditCheckColumnConfig;
 import org.activityinfo.ui.client.page.common.columns.EditableLocalDateColumn;
 import org.activityinfo.ui.client.page.common.columns.ReadLockedPeriodTypeColumn;
@@ -74,13 +72,12 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     private ListStore<LockedPeriodDTO> lockedPeriodStore;
     private EditorGrid<LockedPeriodDTO> lockedPeriodGrid;
     private AsyncMonitor deletingMonitor = new NullAsyncMonitor();
-    private AsyncMonitor creatingMonitor = new NullAsyncMonitor();
     private AsyncMonitor loadingMonitor = new NullAsyncMonitor();
     private AsyncMonitor updatingMonitor = new NullAsyncMonitor();
 
     // Data
     private LockedPeriodDTO lockedPeriod;
-    private ActivityDTO activityFilter = null;
+    private ActivityFormDTO activityFilter = null;
 
     // Nested views
     private AddLockedPeriodDialog addLockedPeriod;
@@ -246,7 +243,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public void askConfirmDelete(LockedPeriodDTO item) {
-        // TODO: i18n
         if (mustConfirmDelete) {
             MessageBox.confirm(I18N.CONSTANTS.deleteLockedPeriodTitle(),
                     I18N.CONSTANTS.deleteLockedPeriodQuestion(),
@@ -283,7 +279,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
             // activiftyFilter
             List<LockedPeriodDTO> lockedPeriodsFilteredByActivity = new ArrayList<LockedPeriodDTO>();
             for (LockedPeriodDTO lockedPeriod : items) {
-                if (lockedPeriod.getParent() != null && lockedPeriod.getParent() instanceof ActivityDTO) {
+                if (lockedPeriod.getParent() != null && lockedPeriod.getParent() instanceof IsActivityDTO) {
                     // Activity as parent, only add when activity equals filter
                     if (lockedPeriod.getParent().getId() == activityFilter.getId()) {
                         lockedPeriodsFilteredByActivity.add(lockedPeriod);
@@ -390,8 +386,10 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
             @Override
             public void onValidated(FormDialogTether dlg) {
-                LockedPeriodGrid.this.lockedPeriod = addLockedPeriod.getValue();
-                eventBus.fireEvent(new CreateEvent());
+                if (addLockedPeriod.isValid()) {
+                    LockedPeriodGrid.this.lockedPeriod = addLockedPeriod.getValue();
+                    eventBus.fireEvent(new CreateEvent());
+                }
             }
 
             @Override
@@ -431,22 +429,18 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public void setMustConfirmDelete(boolean mustConfirmDelete) {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void setRefreshEnabled(boolean canRefresh) {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void startUpdate() {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void cancelDelete() {
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -456,26 +450,22 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public HandlerRegistration addFilterHandler(FilterHandler filter) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void initialize() {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void setValue(LockedPeriodDTO value) {
-        // lockedPeriodGrid.getSelectionModel().select(vgetActivityalue,
-        // false);
     }
 
-    public void setActivityFilter(ActivityDTO activityFilter) {
+    public void setActivityFilter(ActivityFormDTO activityFilter) {
         this.activityFilter = activityFilter;
     }
 
-    public ActivityDTO getActivityFilter() {
+    public ActivityFormDTO getActivityFilter() {
         return activityFilter;
     }
 

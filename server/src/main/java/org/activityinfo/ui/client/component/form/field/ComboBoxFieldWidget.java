@@ -27,10 +27,11 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.form.FormInstanceLabeler;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
@@ -42,10 +43,12 @@ import java.util.Set;
 public class ComboBoxFieldWidget implements ReferenceFieldWidget {
 
     private final ListBox dropBox;
+    private final List<FormInstance> range;
 
-    public ComboBoxFieldWidget(final List<FormInstance> range, final ValueUpdater valueUpdater) {
+    public ComboBoxFieldWidget(final List<FormInstance> range, final ValueUpdater<ReferenceValue> valueUpdater) {
         dropBox = new ListBox(false);
         dropBox.addStyleName("form-control");
+        this.range = range;
 
         for (FormInstance instance : range) {
             dropBox.addItem(
@@ -65,25 +68,30 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
         dropBox.setEnabled(!readOnly);
     }
 
-    private Set<ResourceId> updatedValue() {
+    private ReferenceValue updatedValue() {
         Set<ResourceId> value = Sets.newHashSet();
         int selectedIndex = dropBox.getSelectedIndex();
         if(selectedIndex != -1) {
-            value.add(ResourceId.create(dropBox.getValue(selectedIndex)));
+            value.add(ResourceId.valueOf(dropBox.getValue(selectedIndex)));
         }
-        return value;
+        return new ReferenceValue(value);
     }
 
     @Override
-    public Promise<Void> setValue(Set<ResourceId> value) {
+    public Promise<Void> setValue(ReferenceValue value) {
         for(int i=0;i!=dropBox.getSelectedIndex();++i) {
-            ResourceId id = ResourceId.create(dropBox.getValue(i));
-            if(value.contains(id)) {
+            ResourceId id = ResourceId.valueOf(dropBox.getValue(i));
+            if(value.getResourceIds().contains(id)) {
                 dropBox.setSelectedIndex(i);
                 break;
             }
         }
         return Promise.done();
+    }
+
+    @Override
+    public void clearValue() {
+        setValue(ReferenceValue.EMPTY);
     }
 
     @Override

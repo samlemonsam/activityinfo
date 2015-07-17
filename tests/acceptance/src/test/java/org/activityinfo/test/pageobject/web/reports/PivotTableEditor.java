@@ -2,10 +2,9 @@ package org.activityinfo.test.pageobject.web.reports;
 
 import com.google.common.collect.Iterables;
 import cucumber.api.DataTable;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.pageobject.gxt.GxtGrid;
-import org.activityinfo.test.pageobject.gxt.GxtPanel;
-import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.activityinfo.test.pageobject.gxt.*;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class PivotTableEditor {
     }
 
     private GxtGrid dataTable() {
-        return GxtGrid.findGrids(container).first().get();
+        return GxtGrid.waitForGrids(container).first().get();
     }
 
 
@@ -47,6 +46,7 @@ public class PivotTableEditor {
             throw new RuntimeException(e);
         }
 
+        Gxt.waitUntilMaskDisappear(container);
         GxtGrid grid = dataTable();
         return grid.extractData();
     }
@@ -54,5 +54,21 @@ public class PivotTableEditor {
     public DrillDownDialog drillDown(String cellText) {
         dataTable().findCell(cellText).doubleClick();
         return new DrillDownDialog(container);
+    }
+
+    public GxtModal clickButton(String buttonName) {
+        Gxt.buttonClick(container, buttonName);
+
+        GxtModal modal = GxtModal.waitForModal(container);
+        if (modal.getTitle().equals("Save")) {
+            GxtFormPanel.GxtField field = new GxtFormPanel.GxtField(modal.getWindowElement());
+            field.fill("Report");
+            modal.accept(I18N.CONSTANTS.ok());
+
+            Gxt.buttonClick(container, buttonName);
+            modal = GxtModal.waitForModal(container); // renew
+        }
+
+        return modal;
     }
 }

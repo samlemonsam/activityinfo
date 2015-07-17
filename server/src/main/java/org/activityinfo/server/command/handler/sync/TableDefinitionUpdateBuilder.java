@@ -78,7 +78,7 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
                     "create table if not exists AttributeValue (SiteId integer, AttributeId integer, Value integer)");
             builder.executeStatement(
                     "create table if not exists IndicatorValue (ReportingPeriodId integer, IndicatorId integer, " +
-                    "Value real, TextValue text, DateValue text)");
+                    "Value real, TextValue text, DateValue text, BooleanValue bit)");
 
             builder.executeStatement(
                     "create table if not exists sitehistory (id integer, siteid integer, userid integer, " +

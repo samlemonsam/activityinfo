@@ -31,11 +31,14 @@ public class LockedPeriodTest {
     @Test
     public void rangeTest() {
         UserDatabaseDTO db = new UserDatabaseDTO();
+        db.setId(991);
 
         LockedPeriodDTO lockedPeriod = new LockedPeriodDTO();
         lockedPeriod.setFromDate(new LocalDate(2000, 1, 1));
         lockedPeriod.setToDate(new LocalDate(2000, 1, 2));
         lockedPeriod.setEnabled(true);
+        lockedPeriod.setParentType(ActivityDTO.ENTITY_NAME);
+        lockedPeriod.setParentId(1);
 
         SiteDTO site = new SiteDTO(1);
         site.setDate1(new LocalDate(2000, 1, 1));
@@ -54,6 +57,8 @@ public class LockedPeriodTest {
         LockedPeriodDTO lockedPeriod1 = new LockedPeriodDTO();
         lockedPeriod1.setFromDate(new LocalDate(2000, 1, 1));
         lockedPeriod1.setToDate(new LocalDate(2000, 1, 2));
+        lockedPeriod1.setParentType(ActivityDTO.ENTITY_NAME);
+        lockedPeriod1.setParentId(2);
         lockedPeriod1.setEnabled(true);
 
         SiteDTO site1 = new SiteDTO(2);
@@ -61,7 +66,7 @@ public class LockedPeriodTest {
         site1.setDate1(new LocalDate(2000, 1, 1));
         site1.setDate2(new LocalDate(2000, 1, 3));
 
-        ActivityDTO activity1 = new ActivityDTO(2, "woei");
+        ActivityFormDTO activity1 = new ActivityFormDTO(2, "woei");
         activity1.setDatabase(db);
         activity1.getLockedPeriods().add(lockedPeriod1);
 

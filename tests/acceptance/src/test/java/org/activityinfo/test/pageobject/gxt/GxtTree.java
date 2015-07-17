@@ -1,15 +1,16 @@
 package org.activityinfo.test.pageobject.gxt;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.gxt.tree.CheckingVisitor;
+import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.NavigatingVisitor;
 import org.activityinfo.test.pageobject.gxt.tree.SearchingVisitor;
-import org.activityinfo.test.pageobject.gxt.tree.GxtTreeVisitor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -22,6 +23,8 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
 public class GxtTree {
+
+    private static final int MAX_WAIT_TIME = 120;
 
     private FluentElement container;
     private XPathProvider xPathProvider;
@@ -88,15 +91,25 @@ public class GxtTree {
     }
 
     public GxtTree waitUntilLoaded() {
+        waitUntil(new Predicate<GxtTree>() {
+            @Override
+            public boolean apply(GxtTree tree) {
+                return isEmpty();
+            }
+        });
+        return this;
+    }
+
+    public GxtTree waitUntil(Predicate<GxtTree> predicate) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        while(isEmpty()) {
+        while(predicate.apply(this)) {
             try {
                 Thread.sleep(150);
             } catch (InterruptedException e) {
                 throw new AssertionError("Interrupted while waiting for nodes to load...");
             }
-            if(stopwatch.elapsed(TimeUnit.SECONDS) > 10) {
-                throw new AssertionError("Timed out while waiting for nodes to load...");
+            if(stopwatch.elapsed(TimeUnit.SECONDS) > MAX_WAIT_TIME) {
+                throw new AssertionError("Timed out after waiting " + MAX_WAIT_TIME + " seconds for nodes to load...");
             }
         }
         return this;
@@ -151,7 +164,7 @@ public class GxtTree {
     }
 
 
-    private FluentIterable<GxtNode> findRootNodes() {
+    public FluentIterable<GxtNode> findRootNodes() {
         return container.findElements(By.xpath(xPathProvider.root())).as(GxtNode.class);
     }
 
@@ -222,7 +235,7 @@ public class GxtTree {
             throw new RuntimeException("Failed to find treeItem");
         }
 
-        private XPathBuilder joint() {
+        public XPathBuilder joint() {
             return treeItem().descendants().img(withClass("x-tree3-node-joint"));
         }
 
@@ -266,8 +279,34 @@ public class GxtTree {
         }
 
         public boolean isExpanded() {
-            Optional<FluentElement> container = childContainer().firstIfPresent();
-            return container.isPresent() && container.get().isDisplayed();
+            return isExpanded(true);
+        }
+
+        public boolean isExpanded(boolean retry) {
+            try {
+                String style = joint().first().attribute("style");
+
+                // gxt has strange approach of changing images. It has big image and shows only part of it
+                int backgroundIndex = style.indexOf("background:");
+                if (backgroundIndex != -1) {
+                    String backgroundValue = style.substring(backgroundIndex + "background:".length());
+                    if (backgroundValue.contains("-66px")) { // not expanded
+                        return false;
+                    }
+                    if (backgroundValue.contains("-34px")) { // expanded
+                        return true;
+                    }
+                }
+            } catch (StaleElementReferenceException e) {
+                if (retry) {
+                    return isExpanded(false);
+                }
+
+                // try old way
+                Optional<FluentElement> container = childContainer().firstIfPresent();
+                return container.isPresent() && container.get().isDisplayed();
+            }
+            return false; // fall back to not expanded
         }
 
         public String getLabel() {
@@ -335,16 +374,29 @@ public class GxtTree {
             return treeItem().img(withClass("x-tree3-node-check")).first();
         }
 
-        private boolean isChecked(FluentElement checkbox) {
+        public boolean isChecked(FluentElement checkbox) {
             // Because of the image spriting that GWT does, it's difficult to know which image is being displayed
             // It's unclear how stable the value below is
             return checkbox.attribute("style").contains("-670px");
         }
 
         public void setChecked(boolean checked) {
+            setChecked(checked, 1);
+        }
+
+        public void setChecked(boolean checked, int retry) {
             FluentElement check = checkbox();
-            if(isChecked(check) != checked) {
-                check.click();
+            if (isChecked(check) != checked) {
+                check.clickWhenReady();
+            }
+            check = checkbox(); // avoid stale reference
+            if (isChecked(check) != checked) {
+                int retryLimit = 3;
+                if (retry > retryLimit) {
+                    throw new AssertionError("Failed to check node after " + retry + " retries. |Node: " + toString());
+                }
+                retry++;
+                setChecked(checked, retry);
             }
         }
 

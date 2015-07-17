@@ -24,8 +24,8 @@ package org.activityinfo.server.util.locale;
 
 import com.google.gwt.i18n.client.LocalizableResource;
 import com.google.inject.Provider;
-import com.teklabs.gwt.i18n.client.LocaleFactory;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.client.LocaleFactory;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 
 
 public class LocalizableResourceProvider<T extends LocalizableResource> implements Provider<T> {

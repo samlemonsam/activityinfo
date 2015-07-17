@@ -24,7 +24,7 @@ package org.activityinfo.server.command;
 
 import com.extjs.gxt.ui.client.data.PagingLoadResult;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.client.KeyGenerator;
+import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.CreateSite;
 import org.activityinfo.legacy.shared.command.GetSites;
@@ -33,6 +33,13 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -40,9 +47,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.GregorianCalendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
@@ -53,9 +60,6 @@ public class CreateSiteTest extends CommandTestCase2 {
 
     @Test
     public void test() throws CommandException {
-
-        Logger.getLogger("org.hibernate").setLevel(Level.FINE);
-        
         LocationDTO location = LocationDTOs.newLocation();
         execute(new CreateLocation(location));
 
@@ -71,6 +75,31 @@ public class CreateSiteTest extends CommandTestCase2 {
 
         SiteDTO secondRead = readSite(newSite.getId());
         SiteDTOs.validateNewSite(secondRead);
+    }
+
+    @Test
+    public void persistSite() {
+
+        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
+
+        ResourceId locationClassId = CuidAdapter.locationFormClass(1);
+        FormInstance location = new FormInstance(CuidAdapter.generateLocationCuid(), locationClassId);
+        location.set(field(locationClassId, CuidAdapter.NAME_FIELD), "Virunga");
+        location.set(field(locationClassId, CuidAdapter.AXE_FIELD), "Goma - Rutshuru");
+        location.set(field(locationClassId, CuidAdapter.GEOMETRY_FIELD), new GeoPoint(27.432, 1.23));
+        assertResolves(locator.persist(location));
+
+        ResourceId formClassId = CuidAdapter.activityFormClass(1);
+        FormInstance instance = new FormInstance(CuidAdapter.generateSiteCuid(), formClassId);
+        instance.set(field(formClassId, LOCATION_FIELD), location.getId());
+        instance.set(field(formClassId, PARTNER_FIELD), CuidAdapter.partnerInstanceId(1));
+        instance.set(field(formClassId, START_DATE_FIELD), new LocalDate(2008, 12, 1));
+        instance.set(field(formClassId, END_DATE_FIELD), new LocalDate(2009, 1, 3));
+        instance.set(indicatorField(1), 996.0);
+        instance.set(attributeField(1), new EnumValue(CuidAdapter.attributeId(1), CuidAdapter.attributeField(2)));
+        instance.set(commentsField(1), "objection!");
+        instance.set(field(formClassId, PROJECT_FIELD), CuidAdapter.cuid(PROJECT_DOMAIN, 1));
+        assertResolves(locator.persist(instance));
     }
 
     @Test(expected = IllegalAccessCommandException.class)

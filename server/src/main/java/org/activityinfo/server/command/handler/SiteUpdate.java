@@ -3,10 +3,8 @@ package org.activityinfo.server.command.handler;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.AttributeDTO;
-import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.legacy.shared.impl.ActivityFormCache;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.util.JsonUtil;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
@@ -73,7 +71,7 @@ public class SiteUpdate {
         entityManager.persist(site);
         updateAttributeValues(site, propertyMap);
 
-        if(site.getActivity().getReportingFrequency() == ActivityDTO.REPORT_ONCE &&
+        if(site.getActivity().getReportingFrequency() == ActivityFormDTO.REPORT_ONCE &&
             propertyMap.containsKey(REPORTING_PERIOD_ID)) {
 
             newReportingPeriod(site, propertyMap);
@@ -100,7 +98,7 @@ public class SiteUpdate {
         applyProperties(site, changes);
         updateAttributeValues(site, changes);
 
-        if(site.getActivity().getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if(site.getActivity().getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             updateUniqueReportingPeriod(site, changes);
         }
 

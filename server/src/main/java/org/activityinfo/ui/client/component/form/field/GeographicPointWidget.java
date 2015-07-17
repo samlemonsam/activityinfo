@@ -29,15 +29,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.model.AiLatLng;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.widget.coord.CoordinateBox;
 
 /**
  * @author yuriyz on 1/31/14.
  */
-public class GeographicPointWidget implements FormFieldWidget<AiLatLng> {
+public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
 
     interface GeographicPointWidgetUiBinder extends UiBinder<HTMLPanel, GeographicPointWidget> {
     }
@@ -52,7 +52,7 @@ public class GeographicPointWidget implements FormFieldWidget<AiLatLng> {
     @UiField
     CoordinateBox longitudeBox;
 
-    public GeographicPointWidget(final ValueUpdater valueUpdater) {
+    public GeographicPointWidget(final ValueUpdater<GeoPoint> valueUpdater) {
         panel = ourUiBinder.createAndBindUi(this);
 
         ValueChangeHandler<Double> handler = new ValueChangeHandler<Double>() {
@@ -65,13 +65,13 @@ public class GeographicPointWidget implements FormFieldWidget<AiLatLng> {
         longitudeBox.addValueChangeHandler(handler);
     }
 
-    private AiLatLng getValue() {
+    private GeoPoint getValue() {
         Double latitude = latitudeBox.getValue();
         Double longitude = longitudeBox.getValue();
         if(latitude == null || longitude == null) {
             return null;
         } else {
-            return new AiLatLng(latitude, longitude);
+            return new GeoPoint(latitude, longitude);
         }
     }
 
@@ -82,15 +82,16 @@ public class GeographicPointWidget implements FormFieldWidget<AiLatLng> {
     }
 
     @Override
-    public Promise<Void> setValue(AiLatLng value) {
-        if (value != null) {
-            latitudeBox.setValue(value.getLat());
-            longitudeBox.setValue(value.getLng());
-        } else {
-            latitudeBox.setValue(null);
-            longitudeBox.setValue(null);
-        }
+    public Promise<Void> setValue(GeoPoint value) {
+        latitudeBox.setValue(value.getLatitude());
+        longitudeBox.setValue(value.getLongitude());
         return Promise.done();
+    }
+
+    @Override
+    public void clearValue() {
+        latitudeBox.setValue(null);
+        longitudeBox.setValue(null);
     }
 
     @Override

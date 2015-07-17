@@ -21,10 +21,11 @@ package org.activityinfo.core.shared.util;
  * #L%
  */
 
+import org.activityinfo.model.expr.StringUtil;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.activityinfo.core.shared.util.StringUtil.getLevenshteinDistance;
+import static org.activityinfo.model.expr.StringUtil.getLevenshteinDistance;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 

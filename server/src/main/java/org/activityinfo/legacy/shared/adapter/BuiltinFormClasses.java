@@ -1,14 +1,11 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.base.Function;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.model.type.TextType;
-
-import javax.annotation.Nullable;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.primitive.TextType;
 
 /**
  * In the old legacy, many "FormClasses" were builtins, defined as part
@@ -38,19 +35,4 @@ public class BuiltinFormClasses {
         return formClass;
     }
 
-
-    static class ActivityAdapter implements Function<ActivityDTO, FormClass> {
-
-        private int activityId;
-
-        public ActivityAdapter(int activityId) {
-            this.activityId = activityId;
-        }
-
-        @Nullable @Override
-        public FormClass apply(@Nullable ActivityDTO activity) {
-            ActivityUserFormBuilder builder = new ActivityUserFormBuilder(activity);
-            return builder.build();
-        }
-    }
 }

@@ -131,7 +131,16 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
+//        try {
         element().sendKeys(keys);
+//        } catch (WebDriverException e) {
+//            // sometimes got unknown error: cannot focus element
+//            Actions actions = new Actions(webDriver);
+//            actions.moveToElement(element());
+//            actions.click();
+//            actions.sendKeys(keys);
+//            actions.build().perform();
+//        }
     }
 
     public boolean exists(By by) {
@@ -176,6 +185,10 @@ public class FluentElement {
         return this;
     }
 
+    public void focus() {
+        new Actions(webDriver).moveToElement(element()).perform();
+    }
+
     public Optional<FluentElement> focusedElement() {
         WebElement focusedElement = webDriver.switchTo().activeElement();
         if(focusedElement.getTagName().equalsIgnoreCase("body")) {
@@ -185,9 +198,15 @@ public class FluentElement {
         }
     }
 
-    public void dragAndDropBy(int pixelsToLeft, int pixelsDown) {
+    public void dragAndDropBy(int xOffset, int yOffset) {
         Actions actions = new Actions(webDriver);
-        actions.dragAndDropBy(element, pixelsToLeft, pixelsDown);
+        actions.dragAndDropBy(element, xOffset, yOffset);
+        actions.perform();
+    }
+
+    public void dragAndDrop(FluentElement dropElement) {
+        Actions actions = new Actions(webDriver);
+        actions.dragAndDrop(element, dropElement.element());
         actions.perform();
     }
 }

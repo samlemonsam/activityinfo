@@ -121,7 +121,7 @@
 
                     <div class="textwidget">
                         <p><a href="http://www.unocha.org" target="_blank">
-                            <img src="//about.activityinfo.org/wp-content/uploads/2011/10/OCHA-Logo.png"></a>
+                            <img src="/img/OCHA-Logo.png"></a>
                         </p>
                     </div>
                 </div>

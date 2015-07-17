@@ -57,10 +57,10 @@ public class SchemaImporter {
 
     private AsyncCallback<Void> callback;
 
-    private Map<String, ActivityDTO> activityMap = Maps.newHashMap();
+    private Map<String, ActivityFormDTO> activityMap = Maps.newHashMap();
     private Map<String, Integer> locationTypeMap = Maps.newHashMap();
 
-    private List<ActivityDTO> newActivities = Lists.newArrayList();
+    private List<ActivityFormDTO> newActivities = Lists.newArrayList();
     private List<DtoWrapper> newIndicators = Lists.newArrayList();
     private List<DtoWrapper> newAttributeGroups = Lists.newArrayList();
     private List<DtoWrapper> newAttributes = Lists.newArrayList();
@@ -142,9 +142,9 @@ public class SchemaImporter {
         this.db = db;
         this.templates = templates;
 
-        for (ActivityDTO activity : db.getActivities()) {
-            activityMap.put(activity.getName() + activity.getCategory(), activity);
-        }
+//        for (ActivityFormDTO activity : db.getActivities()) {
+//            activityMap.put(activity.getName() + activity.getCategory(), activity);
+//        }
         for (LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
             locationTypeMap.put(locationType.getName().toLowerCase(), locationType.getId());
         }
@@ -178,7 +178,7 @@ public class SchemaImporter {
 
     private void processRows(SourceTable source) {
         for (SourceRow row : source.getRows()) {
-            ActivityDTO activity = getActivity(row);
+            ActivityFormDTO activity = getActivity(row);
             String fieldType = formFieldType.get(row);
             if ("Indicator".equals(fieldType)) {
                 DtoWrapper indicatorWrapper = new DtoWrapper(new IndicatorKey(activity.getName(), fieldName.get(row), fieldCategory.get(row)));
@@ -256,13 +256,13 @@ public class SchemaImporter {
 
     }
 
-    private ActivityDTO getActivity(SourceRow row) {
+    private ActivityFormDTO getActivity(SourceRow row) {
         String name = activityName.get(row);
         String category = activityCategory.get(row);
 
-        ActivityDTO activity = activityMap.get(name + category);
+        ActivityFormDTO activity = activityMap.get(name + category);
         if (activity == null) {
-            activity = new ActivityDTO();
+            activity = new ActivityFormDTO();
             activity.set("databaseId", db.getId());
             activity.setName(name);
             activity.setCategory(category);
@@ -270,7 +270,7 @@ public class SchemaImporter {
 
             String frequency = Strings.nullToEmpty(reportingFrequency.get(row));
             if (frequency.toLowerCase().contains("month")) {
-                activity.setReportingFrequency(ActivityDTO.REPORT_MONTHLY);
+                activity.setReportingFrequency(ActivityFormDTO.REPORT_MONTHLY);
             }
 
             activityMap.put(name + category, activity);
@@ -280,7 +280,7 @@ public class SchemaImporter {
         return activity;
     }
 
-    private int findLocationType(ActivityDTO activity, SourceRow row) {
+    private int findLocationType(ActivityFormDTO activity, SourceRow row) {
         String name = locationType.get(row);
         if (Strings.isNullOrEmpty(name)) {
             warnings.add(templates.defaultLocationType(defaultLocationType.getName(), activity.getName()));
@@ -407,7 +407,7 @@ public class SchemaImporter {
         fatalError = false;
     }
 
-    public List<ActivityDTO> getNewActivities() {
+    public List<ActivityFormDTO> getNewActivities() {
         return newActivities;
     }
 

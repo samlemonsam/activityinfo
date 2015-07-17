@@ -24,6 +24,9 @@ package org.activityinfo.server.database.hibernate.entity;
 
 // Generated Apr 9, 2009 7:58:20 AM by Hibernate Tools 3.2.2.GA
 
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -44,7 +47,15 @@ public class Attribute implements Serializable, Deleteable, Orderable {
 
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "AttributeId", unique = true, nullable = false)
+    public Attribute(Attribute attribute) {
+        this.group = attribute.group;
+        this.name = attribute.name;
+        this.sortOrder = attribute.sortOrder;
+        this.dateDeleted = attribute.dateDeleted;
+    }
+
+    @Id
+    @Column(name = "AttributeId", unique = true, nullable = false)
     public int getId() {
         return this.id;
     }
@@ -99,5 +110,10 @@ public class Attribute implements Serializable, Deleteable, Orderable {
     @Override @Transient
     public boolean isDeleted() {
         return getDateDeleted() != null;
+    }
+
+    @Transient
+    public ResourceId getResourceId() {
+        return CuidAdapter.attributeId(getId());
     }
 }

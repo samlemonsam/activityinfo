@@ -2,8 +2,10 @@ package org.activityinfo.core.shared.criteria;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,16 +18,20 @@ import java.util.Objects;
 public class FieldCriteria implements Criteria {
 
     private FieldPath fieldPath;
-    private Object value;
+    private FieldValue value;
 
-    public FieldCriteria(@Nonnull ResourceId fieldId, @Nonnull Object value) {
+    public FieldCriteria(@Nonnull ResourceId fieldId, @Nonnull FieldValue value) {
         this.fieldPath = new FieldPath(fieldId);
         this.value = value;
     }
 
-    public FieldCriteria(FieldPath fieldPath, Object value) {
+    public FieldCriteria(FieldPath fieldPath, FieldValue value) {
         this.fieldPath = fieldPath;
         this.value = value;
+    }
+
+    public FieldCriteria(FieldPath fieldPath, ResourceId referenceValueId) {
+        this(fieldPath, new ReferenceValue(referenceValueId));
     }
 
     @Override

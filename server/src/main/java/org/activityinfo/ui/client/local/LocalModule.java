@@ -34,7 +34,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;
 import org.activityinfo.ui.client.local.sync.Synchronizer;
 import org.activityinfo.ui.client.local.sync.SynchronizerImpl;

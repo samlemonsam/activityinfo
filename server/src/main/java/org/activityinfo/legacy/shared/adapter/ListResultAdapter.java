@@ -4,7 +4,7 @@ package org.activityinfo.legacy.shared.adapter;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.shared.command.result.ListResult;
 
 import java.util.List;

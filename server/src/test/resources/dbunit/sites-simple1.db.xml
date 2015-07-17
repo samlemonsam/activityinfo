@@ -38,6 +38,8 @@
                 name="Health Center" reuse="1"/>
   <locationType locationTypeId="3" countryId="1" name="Territorie" version="1" locationVersion="1"
                 reuse="1" BoundAdminLevelId="2"/>
+  <locationType locationTypeId="20301" countryId="1" name="Country" version="1" locationVersion="1"
+                reuse="1" BoundAdminLevelId="2"/>
 
   <adminEntity adminLevelId="1" adminEntityId="1" name="Kinshasa"
                code="10" x1="0" y1="0" x2="0" y2="0"/>
@@ -166,6 +168,11 @@
              units="distributions" aggregation="2" category="outputs" listHeader="distribs"
              description="Kivu description" sortOrder="3" mandatory="0"/>
 
+  <indicator indicatorId="676" activityId="1" name="Weight"
+             calculatedAutomatically="0"
+             units="distributions" aggregation="3" category="outputs" listHeader="distribs"
+             description="Kivu description" sortOrder="4" mandatory="0"/>
+  
   <!-- PEAR Activity 2 : Kits Scolaire -->
 
   <activity activityId="2" databaseId="1"
@@ -303,7 +310,7 @@
   <attributeValue siteId="1" attributeId="1" value="0"/>
   <attributeValue siteId="1" attributeId="2" value="0"/>
 
-  <indicator indicatorId="12451" aggregation="0" name="calculated" sortOrder="5" units="calculated" activityId="1"
+  <indicator indicatorId="12451" aggregation="0" name="calculated" sortOrder="5" activityId="1"
              calculatedAutomatically="1" mandatory="false" expression="{BENE}+{BACHE}"/>
 
   <reportingPeriod reportingPeriodId="1" siteId="1"
@@ -313,7 +320,9 @@
                   value="1500"/>
   <indicatorValue reportingPeriodId="1" indicatorId="2"
                   value="500"/>
-
+  <indicatorValue reportingPeriodId="1" indicatorId="676"
+                  value="200"/>
+  
   <sitehistory id="1" siteid="1" userid="1" timecreated="1355342502769"
                initial="true"
                json="{'id':{'type':'Integer','value':1},'I4925':{'type':'Double','value':54.0},'comments':{'type':'String','value':'site 1 my first comment'}}"/>
@@ -342,7 +351,9 @@
                   value="3600"/>
   <indicatorValue reportingPeriodId="2" indicatorId="2"
                   value="1200"/>
-
+  <indicatorValue reportingPeriodId="2" indicatorId="676"
+                  value="300"/>
+  
   <sitehistory id="3" siteid="2" userid="1" timecreated="1355342502769"
                initial="false"
                json="{'id':{'type':'Integer','value':1},'I4925':{'type':'Double','value':54.0},'comments':{'type':'String','value':'site 2 my first comment'}}"/>

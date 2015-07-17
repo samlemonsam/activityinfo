@@ -25,6 +25,7 @@ package org.activityinfo.ui.client.page.entry.place;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.app.Section;
@@ -53,6 +54,11 @@ public class DataEntryPlace extends AbstractPagingGridPageState {
         super();
         this.filter = filter;
         this.grouping = grouping;
+    }
+
+    public DataEntryPlace(ActivityFormDTO activity) {
+        filter = new Filter();
+        filter.addRestriction(DimensionType.Activity, activity.getId());
     }
 
     public DataEntryPlace(ActivityDTO activity) {

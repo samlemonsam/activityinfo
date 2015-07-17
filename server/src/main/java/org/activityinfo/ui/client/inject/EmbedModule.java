@@ -30,12 +30,19 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.RemoteDispatcher;
 import org.activityinfo.legacy.client.state.GxtStateProvider;
 import org.activityinfo.legacy.client.state.StateProvider;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
+import org.activityinfo.model.auth.AnonymousUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.LoggingEventBus;
 
 public class EmbedModule extends AbstractGinModule {
+
+    public static AuthenticatedUser getAnonymous(String localeName) {
+        return new AuthenticatedUser(AnonymousUser.AUTHTOKEN,
+                AuthenticatedUser.ANONYMOUS_ID,
+                AnonymousUser.USER_EMAIL, localeName);
+    }
 
     @Override
     protected void configure() {
@@ -47,6 +54,6 @@ public class EmbedModule extends AbstractGinModule {
 
     @Provides
     public AuthenticatedUser provideAuth() {
-        return AuthenticatedUser.getAnonymous(LocaleInfo.getCurrentLocale());
+        return getAnonymous(LocaleInfo.getCurrentLocale().getLocaleName());
     }
 }

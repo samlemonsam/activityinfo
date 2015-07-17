@@ -76,6 +76,24 @@ test {
     }
 }
 
+compileJava {
+    
+    doLast {
+        ant.taskdef(name: 'hibernateInstrumentation',
+                classpath: project.sourceSets.main.compileClasspath.asPath,
+                classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask') {
+
+        }
+        
+        ant.hibernateInstrumentation() {
+            fileset(
+                    dir: "${project.buildDir}/classes/main",
+                    includes: 'org/activityinfo/server/database/hibernate/entity/*.class'
+            )
+        }
+    }
+}
+
 processResources {
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
@@ -143,6 +161,7 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
         }
     }
 }
+
 
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"

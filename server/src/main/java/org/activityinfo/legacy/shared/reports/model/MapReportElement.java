@@ -23,7 +23,7 @@ package org.activityinfo.legacy.shared.reports.model;
  */
 
 import com.google.common.collect.Sets;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.reports.content.MapContent;
 import org.activityinfo.legacy.shared.reports.model.layers.*;
 

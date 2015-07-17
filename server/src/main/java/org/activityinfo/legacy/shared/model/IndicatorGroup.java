@@ -31,7 +31,7 @@ import java.util.List;
  * Convenience class for groups of Indicators, which are currently not modeled
  * as entities by as properties of Indicator.
  * <p/>
- * See {@link ActivityDTO#groupIndicators()}
+ * See {@link ActivityFormDTO#groupIndicators()}
  *
  * @author Alex Bertram (akbertram@gmail.com)
  */

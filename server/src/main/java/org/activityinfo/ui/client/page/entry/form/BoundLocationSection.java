@@ -24,7 +24,7 @@ package org.activityinfo.ui.client.page.entry.form;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.client.KeyGenerator;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
@@ -46,12 +46,12 @@ public class BoundLocationSection extends FormSectionWithFormLayout<SiteDTO> imp
 
     private LocationDTO location;
 
-    public BoundLocationSection(Dispatcher dispatcher, ActivityDTO activity) {
+    public BoundLocationSection(Dispatcher dispatcher, ActivityFormDTO activity) {
 
         this.dispatcher = dispatcher;
 
         adminFieldSet = new AdminFieldSetPresenter(dispatcher,
-                activity.getCountry().getBounds(),
+                activity.getBounds(),
                 activity.getAdminLevels());
 
         comboBoxes = new AdminComboBoxSet(adminFieldSet, new BoundAdminComboBox.Factory());

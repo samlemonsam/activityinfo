@@ -69,7 +69,7 @@ public class ConverterFactory {
             return StringToDateConverter.INSTANCE;
         } else if (fieldType == FieldTypeClass.FREE_TEXT || fieldType == FieldTypeClass.NARRATIVE) {
             return NullConverter.INSTANCE;
-        } else if (fieldType == EnumType.TypeClass.INSTANCE) {
+        } else if (fieldType == EnumType.TYPE_CLASS) {
             return NullConverter.INSTANCE;
         }
         throw new UnsupportedOperationException(fieldType.getId());

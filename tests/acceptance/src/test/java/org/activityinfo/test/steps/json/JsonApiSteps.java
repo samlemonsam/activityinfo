@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 @ScenarioScoped
 public class JsonApiSteps {
@@ -122,13 +123,22 @@ public class JsonApiSteps {
 
     @Then("^the response should be:$")
     public void the_response_should_be(String expectedResponse) throws Throwable {
+        responseShouldBe(expectedResponse, false);
+        
+    }
+
+    private void responseShouldBe(String expectedResponse, boolean ignorePositionInArray) throws IOException {
         JsonNode expected = jsonParser.parse(expectedResponse);
         JsonNode actual = response.getJson();
-        
+
         System.out.println(actual.toString());
 
-        new JsonChecker(placeholders).check(expected, actual);
-        
+        new JsonChecker(placeholders, ignorePositionInArray).check(expected, actual);
+    }
+
+    @Then("^the response should be \\(ignoring position in array\\):$")
+    public void the_response_should_be_ignoring_position_in_array_(String expectedResponse) throws Throwable {
+        responseShouldBe(expectedResponse, true);
     }
 
     @Then("^the response should fail with (\\d+) ([A-Za-z ]+) and mention \"([^\"]*)\"$")

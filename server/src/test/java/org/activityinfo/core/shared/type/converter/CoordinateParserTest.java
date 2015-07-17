@@ -22,8 +22,11 @@ package org.activityinfo.core.shared.type.converter;
  * #L%
  */
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.core.server.type.converter.JreNumberFormats;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,21 +40,24 @@ public class CoordinateParserTest {
     @Before
     public void before() {
         LocaleProxy.initialize();
-        LocaleProxy.setLocale(Locale.ENGLISH);
+        ThreadLocalLocaleProvider.pushLocale(Locale.ENGLISH);
+    }
+
+    @After
+    public void after() {
+        ThreadLocalLocaleProvider.popLocale();
     }
 
     @Test
     public void DDdEnglish() throws CoordinateFormatException {
-        
-        LocaleProxy.setLocale(Locale.ENGLISH);
-        
+
         CoordinateParser latitude = new CoordinateParser(CoordinateAxis.LATITUDE, new JreNumberFormats());
         CoordinateParser longitude = new CoordinateParser(CoordinateAxis.LONGITUDE, new JreNumberFormats());
-        
+
         assertThat(latitude.parse("+6.325"), closeTo(6.325, 0d));
         assertThat(latitude.parse("+6.3"), closeTo(6.3, 0d));
         assertThat(latitude.parse("+6"), closeTo(6, 0d));
-        
+
         // notation should be updated
         assertThat(latitude.getNotation(), equalTo(CoordinateParser.Notation.DDd));
 
@@ -64,7 +70,7 @@ public class CoordinateParserTest {
         assertThat(latitude.parse("S 2.45"), closeTo(-2.45, 0d));
         assertThat(latitude.parse("2N"), closeTo(2, 0d));
     }
-    
+
     @Test(expected = CoordinateFormatException.class)
     public void DDdMissingHemisphere() {
         assertThat(parseLatitude("6.325"), closeTo(6.325, 0d));
@@ -87,7 +93,7 @@ public class CoordinateParserTest {
 
         assertThat(parser.parse("6.325"), closeTo(6.325, 0d));
         assertThat(parser.parse("6.3"), closeTo(6.3, 0d));
-        assertThat(parser.parse("6"), closeTo(6, 0d));    
+        assertThat(parser.parse("6"), closeTo(6, 0d));
     }
 
     @Test
@@ -97,7 +103,7 @@ public class CoordinateParserTest {
         parser.setMinValue(-20);
         parser.setMaxValue(-21);
         assertThat(parser.parse("20.5"), closeTo(-20.5, 0d));
-        
+
         parser.setMinValue(10);
         parser.setMaxValue(35);
         assertThat(parser.parse("20.5"), closeTo(20.5, 0d));
@@ -118,11 +124,14 @@ public class CoordinateParserTest {
 
     @Test
     public void parseDMdInFrenchLocale() throws CoordinateFormatException {
-        
-        LocaleProxy.setLocale(Locale.FRANCE);
-        
-        assertThat(parseLatitude("30 15,00\"  N"), equalTo(30.25));
-        assertThat(parseLatitude("S   25 15 "), equalTo(-25.25));
+        try {
+            ThreadLocalLocaleProvider.pushLocale(Locale.FRANCE);
+
+            assertThat(parseLatitude("30 15,00\"  N"), equalTo(30.25));
+            assertThat(parseLatitude("S   25 15 "), equalTo(-25.25));
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
+        }
     }
 
 
@@ -134,10 +143,14 @@ public class CoordinateParserTest {
 
     @Test
     public void parseDMSInFrenchLocale() throws CoordinateFormatException {
-        LocaleProxy.setLocale(Locale.FRANCE);
-        
-        assertThat(parseLatitude("25 10 54,23\"  N"), closeTo(25.18173056, 0.000001));
-        assertThat(parseLatitude("176 50' 23\" S"), closeTo(-176.8397222, 0.000001));
+        try {
+            ThreadLocalLocaleProvider.pushLocale(Locale.FRANCE);
+
+            assertThat(parseLatitude("25 10 54,23\"  N"), closeTo(25.18173056, 0.000001));
+            assertThat(parseLatitude("176 50' 23\" S"), closeTo(-176.8397222, 0.000001));
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
+        }
     }
 
     @Test
@@ -159,7 +172,7 @@ public class CoordinateParserTest {
     @Test
     public void nullValues() {
         CoordinateParser parser = new CoordinateParser(CoordinateAxis.LATITUDE, new JreNumberFormats());
-        
+
         assertThat(parser.parse(null), nullValue());
         assertThat(parser.parse(""), nullValue());
 
@@ -167,14 +180,17 @@ public class CoordinateParserTest {
 
     @Test
     public void formatDMdFrench() {
-        
-        LocaleProxy.setLocale(Locale.FRANCE);
-        
-        CoordinateParser parser = new CoordinateParser(CoordinateAxis.LONGITUDE, new JreNumberFormats());
-        parser.setNotation(CoordinateParser.Notation.DMd);
+        try {
+            ThreadLocalLocaleProvider.pushLocale(Locale.FRANCE);
 
-        assertThat(parser.format(2.405), equalTo("2° 0,40' E"));
-        assertThat(parser.format(-2.465), equalTo("2° 0,46' O"));
+            CoordinateParser parser = new CoordinateParser(CoordinateAxis.LONGITUDE, new JreNumberFormats());
+            parser.setNotation(CoordinateParser.Notation.DMd);
+
+            assertThat(parser.format(2.405), equalTo("2° 0,40' E"));
+            assertThat(parser.format(-2.465), equalTo("2° 0,46' O"));
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
+        }
     }
 
 
@@ -195,6 +211,6 @@ public class CoordinateParserTest {
         CoordinateParser parser = new CoordinateParser(CoordinateAxis.LONGITUDE, new JreNumberFormats());
         return parser.parse(text);
     }
-    
+
 
 }

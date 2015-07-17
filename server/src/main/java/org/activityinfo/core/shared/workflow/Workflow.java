@@ -13,4 +13,8 @@ public class Workflow {
     public static final String VALIDATED = "validated";
 
     public static final String REJECTED = "rejected";
+
+    public static boolean isValidId(String workflowId) {
+        return OPEN_WORKFLOW_ID.equals(workflowId) || CLOSED_WORKFLOW_ID.equals(workflowId);
+    }
 }

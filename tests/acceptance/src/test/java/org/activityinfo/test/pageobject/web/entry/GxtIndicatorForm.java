@@ -80,6 +80,11 @@ public class GxtIndicatorForm extends Form {
         }
 
         @Override
+        public String getPlaceholder() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isDropDown() {
             return false;
         }
@@ -112,6 +117,16 @@ public class GxtIndicatorForm extends Form {
         @Override
         public boolean isEnabled() {
             return true;
+        }
+
+        @Override
+        public FluentElement getElement() {
+            return row;
+        }
+
+        @Override
+        public boolean isValid() {
+            throw new UnsupportedOperationException();
         }
     }
 

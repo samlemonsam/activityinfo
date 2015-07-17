@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <userLogin userId="9944" name="Owner" email="owner@gmail.com" locale="fr" organization="" jobtitle="" emailnotification="1"/>
+  <country CountryId="291" x1="13.4734754562378" y1="7.44106817245483" x2="24.0026607513428" y2="23.4503688812256" ISO2="TD" Name="Chad"/>
+  <locationtype locationtypeid="50573" Name="Country" Reuse="false" CountryId="291" workflowId="closed"/>
+  <location LocationID="50573" Name="Chad" X="18.738068103790297" Y="15.445718526840215" LocationTypeID="50573" timeEdited="1397595403000" workflowStatusId="validated"/>
+  <userdatabase DatabaseId="1470" FullName="Cost per service level for UNHCR Chad" Name="UNHCR LCCA Chad 2014" CountryId="291" OwnerUserId="9944" version="1415310640622"/>
+  <partnerindatabase PartnerId="1734" DatabaseId="1470"/>
+  <partner PartnerId="1734" FullName="The Survey Staff :-)" name="Survey Staff"/>
+  <activity ActivityId="11218" AllowEdit="false" Name="Chad Waterpoint data collection" ReportingFrequency="0" SortOrder="1" DatabaseId="1470" LocationTypeId="50573" published="0"/>
+  <indicator IndicatorId="90811" Aggregation="0" dateDeleted="2014-11-06 15:42:57.0" name="I1. Scannez le code barre" SortOrder="7" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Barecode" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90836" Aggregation="0" name="D1. Num&#233;ro du point d&apos;eau" SortOrder="6" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Waterpoint number" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90837" Aggregation="0" name="D2. Num&#233;ro de l&apos;&#233;quipe d&apos;enqu&#234;teur" SortOrder="7" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Surveyor team number" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90838" Aggregation="0" name="I5. De combien de personnes est compos&#233; votre m&#233;nage?" SortOrder="11" units="personnes" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Household size" calculatedAutomatically="false" skipExpression="{Q0000031842}=={t0000166402}"/>
+  <indicator IndicatorId="90839" Aggregation="0" name="L2. Dans quel bloc vivez-vous?" SortOrder="13" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Bloc number" calculatedAutomatically="false" skipExpression="{Q0000031845}=={t0000166408}"/>
+  <indicator IndicatorId="90840" Aggregation="0" name="L3. Combien de temps vous faut-il pour venir au point d&apos;eau (en minutes)?" SortOrder="14" units="Minutes" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Distance to waterpoint" calculatedAutomatically="false" skipExpression="{Q0000031842}=={t0000166402}"/>
+  <indicator IndicatorId="90841" Aggregation="0" name="Q1. Combien de r&#233;cipients la personne remplie-t-elle?" SortOrder="15" units="r&#233;cipients" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Number of recipients" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90842" Aggregation="0" name="Q2. Nombre de r&#233;cipients de 5 litres" SortOrder="16" units="r&#233;cipients" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Number 5 liters" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90843" Aggregation="0" name="Q3. Nombre de r&#233;cipients de 10 litres" SortOrder="17" units="r&#233;cipients" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Number - 10 liters" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90844" Aggregation="0" name="Q4. Nombre de r&#233;cipients de 15 litres" SortOrder="18" units="r&#233;cipients" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="number - 15 litres" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90845" Aggregation="0" name="Q5. Nombre de r&#233;cipients de 20 litres" SortOrder="19" units="r&#233;cipients" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Number - 20 litres" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90846" Aggregation="0" name="Q6. Nombre de r&#233;cipients d&apos;un autre volume" SortOrder="20" units="r&#233;cipients" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Number - other volume" calculatedAutomatically="false"/>
+  <indicator IndicatorId="90847" Aggregation="0" name="Q7. Entrez le volume du r&#233;cipient" SortOrder="21" units="litres" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="Volume - others recipients" calculatedAutomatically="false"/>
+  <indicator IndicatorId="91913" Aggregation="0" dateDeleted="2014-11-06 14:56:39.0" name="POUF" SortOrder="14" units="POUF" ActivityId="11218" mandatory="false" Type="QUANTITY" nameInExpression="POUF POUF" calculatedAutomatically="false"/>
+  <attributegroupinactivity AttributeGroupId="31842" ActivityId="11218"/>
+  <attributegroupinactivity AttributeGroupId="31843" ActivityId="11218"/>
+  <attributegroupinactivity AttributeGroupId="31844" ActivityId="11218"/>
+  <attributegroupinactivity AttributeGroupId="31845" ActivityId="11218"/>
+  <attributegroup AttributeGroupId="31842" multipleAllowed="false" name="I2. Nouveau code barre fourni?" sortOrder="8" mandatory="false" workflow="false"/>
+  <attributegroup AttributeGroupId="31843" multipleAllowed="false" name="I3. Famille enregistr&#233;e avec UNHCR?" sortOrder="9" mandatory="false" workflow="false"/>
+  <attributegroup AttributeGroupId="31844" multipleAllowed="false" name="I4. Si non, pourquoi?" sortOrder="10" mandatory="false" workflow="false"/>
+  <attributegroup AttributeGroupId="31845" multipleAllowed="false" name="L1. Vivez-vous dans le camp?" sortOrder="12" mandatory="true" workflow="false"/>
+  <attribute AttributeId="166402" Name="Oui" SortOrder="1" AttributeGroupId="31842"/>
+  <attribute AttributeId="166403" Name="Non" SortOrder="0" AttributeGroupId="31842"/>
+  <attribute AttributeId="166404" Name="Oui" SortOrder="1" AttributeGroupId="31843"/>
+  <attribute AttributeId="166405" Name="Non" SortOrder="2" AttributeGroupId="31843"/>
+  <attribute AttributeId="166406" Name="Je suis r&#233;fugi&#233; mais pas encore enregistr&#233;" SortOrder="1" AttributeGroupId="31844"/>
+  <attribute AttributeId="166407" dateDeleted="2014-11-06 19:28:38.0" Name="Je ne suis pas un r&#233;fugi&#233;" SortOrder="2" AttributeGroupId="31844"/>
+  <attribute AttributeId="166408" Name="Oui" SortOrder="1" AttributeGroupId="31845"/>
+  <attribute AttributeId="166409" dateDeleted="2014-11-06 19:28:38.0" Name="Non" SortOrder="2" AttributeGroupId="31845"/>
+  <attribute AttributeId="166616" Name="Je ne suis pas un r&#233;fugee" SortOrder="3" AttributeGroupId="31844"/>
+  <attribute AttributeId="166617" Name="Non" SortOrder="2" AttributeGroupId="31845"/>
+</dataset>

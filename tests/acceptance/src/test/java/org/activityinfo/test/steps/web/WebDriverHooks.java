@@ -1,11 +1,11 @@
 package org.activityinfo.test.steps.web;
 
-import com.teklabs.gwt.i18n.server.LocaleProxy;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.test.webdriver.*;
 
 import javax.inject.Inject;
@@ -33,7 +33,7 @@ public class WebDriverHooks {
         this.session.beforeTest(scenario.getName());
         reporter.start(scenario);
 
-        LocaleProxy.setLocale(Locale.ENGLISH);
+        ThreadLocalLocaleProvider.pushLocale(Locale.ENGLISH);
     }
 
     @After
@@ -45,6 +45,7 @@ public class WebDriverHooks {
                 session.stop();
             }
         }
+        ThreadLocalLocaleProvider.popLocale();
     }
 
     @Given("^my browser supports offline mode$")

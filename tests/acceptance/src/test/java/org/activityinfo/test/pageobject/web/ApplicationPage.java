@@ -3,14 +3,17 @@ package org.activityinfo.test.pageobject.web;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.teklabs.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.OfflineMode;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -24,6 +27,7 @@ import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 
@@ -123,6 +127,10 @@ public class ApplicationPage {
             page.find().div(containingText(I18N.CONSTANTS.dataEntry())).clickWhenReady();
         } catch(Exception ignored) {
         }
+
+        // we may got "Save" dialog before leaving the current page
+        closeSaveDialogSilently(false);
+
         return new DataEntryTab(container());
     }
 
@@ -140,20 +148,51 @@ public class ApplicationPage {
 
         return new DesignTab(container());
     }
+
+    public TablePage navigateToTable(String database, String formName) {
+        DesignTab designTab = navigateToDesignTab();
+        designTab.selectDatabase(database);
+
+        DesignPage designPage = designTab.design();
+        designPage.getDesignTree().select(formName);
+        designPage.getToolbarMenu().clickButton(I18N.CONSTANTS.openTable());
+        return new TablePage(page);
+    }
+
+    public FormDesignerPage navigateToFormDesigner(String database, String formName) {
+        DesignTab designTab = navigateToDesignTab();
+        designTab.selectDatabase(database);
+
+        DesignPage designPage = designTab.design();
+        designPage.getDesignTree().select(formName);
+        designPage.getToolbarMenu().clickButton(I18N.CONSTANTS.openFormDesigner());
+        page.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return page.find().div(withClass(FormDesignerPage.DROP_TARGET_CLASS)).exists();
+            }
+        });
+        return new FormDesignerPage(page);
+    }
     
     public ReportsTab navigateToReportsTab() {
         FluentElement container = container();
         container.find().div(withText("Reports")).clickWhenReady();
 
         // we may got "Save" dialog before leaving the current page
-        closeSaveDialogSilently();
+        closeSaveDialogSilently(true);
         
         return new ReportsTab(container);
     }
 
-    public void closeSaveDialogSilently() {
+    public void closeSaveDialogSilently(boolean discard) {
         try {
-            new GxtModal(page, 2).discardChanges();
+            GxtModal gxtModal = new GxtModal(page, 2);
+            if (discard) {
+                gxtModal.discardChanges();
+            } else {
+                gxtModal.accept();
+            }
         } catch (Exception e) {
             // ignore
         }

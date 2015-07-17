@@ -146,6 +146,8 @@ public class SitesResources {
                         json.writeStringField(Integer.toString(indicatorId), (String) indicatorValue);
                     } else if (indicatorValue instanceof LocalDate) {
                         json.writeStringField(Integer.toString(indicatorId), ((LocalDate) indicatorValue).toString());
+                    } else if (indicatorValue instanceof Boolean) {
+                        json.writeStringField(Integer.toString(indicatorId), ((Boolean) indicatorValue).toString());
                     }
                 }
                 json.writeEndObject();
@@ -181,14 +183,21 @@ public class SitesResources {
             return;
         }
 
-        final ActivityDTO activity = dispatcher.execute(new GetFormViewModel(sites.get(0).getActivityId()));
 
+        Map<Integer, ActivityFormDTO> forms = Maps.newHashMap();
+        
         for (SiteDTO site : sites) {
             if (site.hasLatLong()) {
                 json.writeStartObject();
                 json.writeStringField("type", "Feature");
                 json.writeNumberField("id", site.getId());
                 //                json.writeNumberField("timestamp", site.getTimeEdited());
+
+                ActivityFormDTO form = forms.get(site.getActivityId());
+                if(form == null) {
+                    form = dispatcher.execute(new GetActivityForm(site.getActivityId()));
+                    forms.put(form.getId(), form);
+                }
 
                 // write out the properties object
                 json.writeObjectFieldStart("properties");
@@ -199,10 +208,10 @@ public class SitesResources {
                 }
 
                 json.writeNumberField("activity", site.getActivityId());
-                if (!Strings.isNullOrEmpty(activity.getCategory())) {
-                    json.writeStringField("activityCategory", activity.getCategory());
+                if (!Strings.isNullOrEmpty(form.getCategory())) {
+                    json.writeStringField("activityCategory", form.getCategory());
                 }
-                json.writeStringField("activityName", activity.getName());
+                json.writeStringField("activityName", form.getName());
 
                 // write start / end date if applicable
                 if (site.getDate1() != null && site.getDate2() != null) {
@@ -218,17 +227,19 @@ public class SitesResources {
                     if (propertyName.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
                         Object value = site.get(propertyName);
                         final int indicatorId = IndicatorDTO.indicatorIdForPropertyName(propertyName);
-                        final IndicatorDTO dto = activity.getIndicatorById(indicatorId);
+                        final IndicatorDTO dto = form.getIndicatorById(indicatorId);
                         if (value instanceof Number) {
                             final double doubleValue = ((Number) value).doubleValue();
                             indicatorsMap.put(dto.getName(), doubleValue);
                         } else if (value instanceof String || value instanceof LocalDate) {
                             indicatorsMap.put(dto.getName(), value);
+                        } else if (value instanceof Boolean) {
+                            indicatorsMap.put(dto.getName(), value);
                         }
                     } else if (propertyName.startsWith(AttributeDTO.PROPERTY_PREFIX)) {
                         Object value = site.get(propertyName);
                         final int attributeId = AttributeDTO.idForPropertyName(propertyName);
-                        for (AttributeGroupDTO attributeGroupDTO : activity.getAttributeGroups()) {
+                        for (AttributeGroupDTO attributeGroupDTO : form.getAttributeGroups()) {
                             final AttributeDTO attributeDTO = attributeGroupDTO.getAttributeById(attributeId);
                             if (attributeDTO != null) {
                                 if (attributesGroupMap.containsKey(attributeGroupDTO)) {

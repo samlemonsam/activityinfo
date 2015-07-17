@@ -24,11 +24,14 @@ package org.activityinfo.server.servlet;
 
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.DTOs;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -59,15 +62,14 @@ public class ExportIntegrationTest extends CommandTestCase2 {
         SiteExporter export = new SiteExporter(context);
         for (UserDatabaseDTO db : schema.getDatabases()) {
             for (ActivityDTO activity : db.getActivities()) {
-                export.export(activity, new Filter());
+                export.export(execute(new GetActivityForm(activity)), new Filter());
             }
         }
 
         File outputDir = new File("target/report-test/");
         outputDir.mkdirs();
 
-        FileOutputStream fos = new FileOutputStream(
-                "target/report-test/ExportTest.xls");
+        FileOutputStream fos = new FileOutputStream("target/report-test/ExportTest.xls");
         export.getBook().write(fos);
         fos.close();
     }

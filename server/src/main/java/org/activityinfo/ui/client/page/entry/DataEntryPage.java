@@ -36,24 +36,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
-import org.activityinfo.legacy.shared.command.DeleteSite;
-import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.FeatureSwitch;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
@@ -65,8 +57,9 @@ import org.activityinfo.ui.client.page.entry.form.SiteDialogCallback;
 import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
-import org.activityinfo.ui.client.page.entry.place.UserFormPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
+import org.activityinfo.ui.client.page.instance.InstancePage;
+import org.activityinfo.ui.client.page.instance.InstancePlace;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
@@ -193,6 +186,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.addDeleteButton(I18N.CONSTANTS.deleteSite());
 
         toolBar.add(new SeparatorToolItem());
+        toolBar.addButton(UIActions.OPEN_TABLE, I18N.CONSTANTS.openTable(), IconImageBundle.ICONS.table());
+        toolBar.add(new SeparatorToolItem());
 
         if (IMPORT_FUNCTION_ENABLED) {
             toolBar.addImportButton();
@@ -210,7 +205,10 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         if (se.getSelection().isEmpty()) {
             onNoSelection();
         } else {
-            dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+            final SiteDTO site = se.getSelectedItem();
+            int activityId = site.getActivityId();
+
+            dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -219,24 +217,23 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                 }
 
                 @Override
-                public void onSuccess(SchemaDTO schema) {
-                    SiteDTO site = se.getSelectedItem();
-                    ActivityDTO activity = schema.getActivityById(site.getActivityId());
+                public void onSuccess(ActivityFormDTO activity) {
                     updateSelection(activity, site);
                 }
             });
         }
     }
 
-    private void updateSelection(ActivityDTO activity, SiteDTO site) {
+    private void updateSelection(ActivityFormDTO activity, SiteDTO site) {
 
         boolean permissionToEdit = activity.isAllowedToEdit(site);
         toolBar.setActionEnabled(UIActions.EDIT, permissionToEdit && !site.isLinked());
         toolBar.setActionEnabled(UIActions.DELETE, permissionToEdit && !site.isLinked());
+        toolBar.setActionEnabled(UIActions.OPEN_TABLE, site != null);
 
         detailTab.setSite(site);
         attachmentsTab.setSite(site);
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_MONTHLY) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY) {
             monthlyPanel.load(site);
             monthlyPanel.setReadOnly(!permissionToEdit);
             monthlyTab.setEnabled(true);
@@ -252,6 +249,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void onNoSelection() {
         toolBar.setActionEnabled(UIActions.EDIT, false);
         toolBar.setActionEnabled(UIActions.DELETE, false);
+        toolBar.setActionEnabled(UIActions.OPEN_TABLE, false);
         monthlyPanel.onNoSelection();
     }
 
@@ -362,48 +360,33 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     @Override
     public void onUIAction(String actionId) {
         if (UIActions.ADD.equals(actionId)) {
-            if (FeatureSwitch.isNewFormEnabled()) {
-                int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
-                final ResourceId siteResourceId = CuidAdapter.siteField(new KeyGenerator().generateInt());
-                final ResourceId activityResourceId = CuidAdapter.activityFormClass(activityId);
-                eventBus.fireEvent(new NavigationEvent(NavigationHandler.NAVIGATION_REQUESTED,
-                        new UserFormPlace(activityResourceId, siteResourceId)));
-            } else {
-                SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher);
-                formHelper.addSite(currentPlace.getFilter(), new SiteDialogCallback() {
 
-                    @Override
-                    public void onSaved(SiteDTO site) {
-                        gridPanel.refresh();
-                    }
-                });
-            }
+            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus);
+            formHelper.addSite(currentPlace.getFilter(), new SiteDialogCallback() {
+
+                @Override
+                public void onSaved() {
+                    gridPanel.refresh();
+                }
+            });
+
         } else if (UIActions.EDIT.equals(actionId)) {
             final SiteDTO selection = gridPanel.getSelection();
-            if (FeatureSwitch.isNewFormEnabled()) {
-                eventBus.fireEvent(new NavigationEvent(NavigationHandler.NAVIGATION_REQUESTED,
-                        new UserFormPlace(selection.getFormClassId(), selection.getInstanceId())));
-            } else {
-                SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher);
-                launcher.editSite(selection, new SiteDialogCallback() {
+            SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus);
+            launcher.editSite(selection, new SiteDialogCallback() {
 
-                    @Override
-                    public void onSaved(SiteDTO site) {
-                        gridPanel.refresh();
-                    }
-                });
-            }
+                @Override
+                public void onSaved() {
+                    gridPanel.refresh();
+                }
+            });
+        }else if (UIActions.OPEN_TABLE.equals(actionId)) {
+            final SiteDTO selection = gridPanel.getSelection();
+            eventBus.fireEvent(new NavigationEvent(
+                    NavigationHandler.NAVIGATION_REQUESTED,
+                    new InstancePlace(selection.getFormClassId(), InstancePage.TABLE_PAGE_ID)));
         } else if (UIActions.DELETE.equals(actionId)) {
-            MessageBox.confirm(ClientContext.getAppTitle(),
-                    I18N.MESSAGES.confirmDeleteSite(),
-                    new Listener<MessageBoxEvent>() {
-                        @Override
-                        public void handleEvent(MessageBoxEvent be) {
-                            if (be.getButtonClicked().getItemId().equals(Dialog.YES)) {
-                                delete();
-                            }
-                        }
-                    });
+            onDelete();
 
         } else if (UIActions.PRINT.equals(actionId)) {
             int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
@@ -423,6 +406,41 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         }
 
+    }
+
+    private void onDelete() {
+        dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                showError(caught);
+            }
+
+            @Override
+            public void onSuccess(SchemaDTO schema) {
+                LockedPeriodSet locks = new LockedPeriodSet(schema);
+                if (locks.isLocked(gridPanel.getSelection())) {
+                    MessageBox.alert(I18N.CONSTANTS.lockedSiteTitle(), I18N.CONSTANTS.siteIsLocked(), null);
+                    return;
+                }
+
+                MessageBox.confirm(ClientContext.getAppTitle(),
+                        I18N.MESSAGES.confirmDeleteSite(),
+                        new Listener<MessageBoxEvent>() {
+                            @Override
+                            public void handleEvent(MessageBoxEvent be) {
+                                if (be.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                                    delete();
+                                }
+                            }
+                        });
+            }
+        });
+    }
+
+    private void showError(Throwable caught) {
+        MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorUnexpectedOccured(), null);
+        Log.error("Error launching site dialog", caught);
     }
 
     protected void doImport() {

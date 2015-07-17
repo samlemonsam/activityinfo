@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.util;
  */
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -90,6 +91,47 @@ public class GwtUtil {
             } else {
                 return getScrollAncestor(parent);
             }
+        }
+        return null;
+    }
+
+    public static boolean isInt(String integer) {
+        try {
+            Integer.parseInt(integer);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static int getIntSilently(String integer) {
+        try {
+            return Integer.parseInt(integer);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    public static boolean isInViewport(com.google.gwt.user.client.Element element) {
+        return GwtUtil.getBsContainerRectangle(element).has(GwtUtil.getRectangle(element));
+    }
+
+    public static Rectangle getRectangle(Element element) {
+        return new Rectangle(element.getAbsoluteLeft(), element.getAbsoluteRight(), element.getAbsoluteTop(), element.getAbsoluteBottom());
+    }
+
+    public static Rectangle getBsContainerRectangle(com.google.gwt.user.client.Element descendant) {
+        return getRectangle(getBsContainer(descendant));
+    }
+
+    public static com.google.gwt.user.client.Element getBsContainer(com.google.gwt.user.client.Element descendant) {
+        if (descendant != null) {
+            if (descendant.getClassName().contains("bs ")) {
+                return descendant;
+            } else if (descendant.getParentElement() != null)  {
+                return getBsContainer(DOM.asOld(descendant.getParentElement()));
+            }
+            return descendant;
         }
         return null;
     }

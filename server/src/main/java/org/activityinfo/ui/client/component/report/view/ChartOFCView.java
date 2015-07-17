@@ -43,6 +43,7 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.MarginData;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Element;
 import org.activityinfo.i18n.shared.I18N;
@@ -115,6 +116,18 @@ public class ChartOFCView extends ContentPanel implements ChartView {
         }
     }
 
+    @Override
+    public void loading() {
+        el().mask();
+    }
+
+    @Override
+    public void onFailure(Throwable caught, ClickHandler retryCallback) {
+        ReportViewRetrier.onFailure(this, caught, retryCallback);
+        chart = null;
+    }
+
+
     /**
      * Updates the view to the given PivotChartContent
      *
@@ -122,6 +135,7 @@ public class ChartOFCView extends ContentPanel implements ChartView {
      */
     @Override
     public void show(PivotChartReportElement element) {
+        el().unmask();
 
         PivotChartContent content = element.getContent();
         PivotTableData table = element.getContent().getData();

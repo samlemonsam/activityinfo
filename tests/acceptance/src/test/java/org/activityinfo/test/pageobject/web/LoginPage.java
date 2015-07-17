@@ -38,7 +38,7 @@ public class LoginPage {
     public LoginPage loginAs(UserAccount account) {
         page.waitFor(EMAIL_INPUT).sendKeys(account.getEmail());
         page.findElement(PASSWORD_INPUT).sendKeys(account.getPassword());
-        page.findElement(LOGIN_BUTTON).click();
+        page.findElement(LOGIN_BUTTON).clickWhenReady();
         return this;
     }
 

@@ -3,23 +3,26 @@ package org.activityinfo.legacy.shared.adapter;
 import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.model.AiLatLng;
-import org.activityinfo.promise.Promise;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.GetAdminEntities;
 import org.activityinfo.legacy.shared.command.result.AdminEntityResult;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.promise.Promise;
 
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.*;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 
 /**
  * Updates/creates a location object.
@@ -48,13 +51,13 @@ public class LocationPersister {
         properties = Maps.newHashMap();
         properties.put("id", CuidAdapter.getLegacyIdFromCuid(instance.getId()));
         properties.put("locationTypeId", getLegacyIdFromCuid(classId));
-        properties.put("name", instance.get(field(classId, NAME_FIELD)));
-        properties.put("axe", instance.get(field(classId, AXE_FIELD)));
+        properties.put("name", unwrapText(instance.get(field(classId, NAME_FIELD))));
+        properties.put("axe", unwrapText(instance.get(field(classId, AXE_FIELD))));
 
-        AiLatLng point = (AiLatLng) instance.get(field(classId, GEOMETRY_FIELD));
+        GeoPoint point = (GeoPoint) instance.get(field(classId, GEOMETRY_FIELD));
         if (point != null) {
-            properties.put("latitude", point.getLat());
-            properties.put("longitude", point.getLng());
+            properties.put("latitude", point.getLatitude());
+            properties.put("longitude", point.getLongitude());
         }
 
         Set<ResourceId> adminEntities = instance.getReferences(field(classId, ADMIN_FIELD));
@@ -66,6 +69,14 @@ public class LocationPersister {
 
         resolveNextParent();
         return callback;
+    }
+
+    private Object unwrapText(FieldValue fieldValue) {
+        if(fieldValue instanceof TextValue) {
+            return fieldValue.toString();
+        } else {
+            return null;
+        }
     }
 
     private void resolveNextParent() {

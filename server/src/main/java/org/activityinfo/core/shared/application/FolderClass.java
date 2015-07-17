@@ -9,11 +9,11 @@ import org.activityinfo.model.form.FormField;
  */
 public class FolderClass {
 
-    public static final ResourceId CLASS_ID = ResourceId.create("_folder");
+    public static final ResourceId CLASS_ID = ResourceId.valueOf("_folder");
 
-    public static final ResourceId LABEL_FIELD_ID = ResourceId.create("_folder_label");
+    public static final ResourceId LABEL_FIELD_ID = ResourceId.valueOf("_folder_label");
 
-    public static final ResourceId DESCRIPTION_FIELD_ID = ResourceId.create("_folder_description");
+    public static final ResourceId DESCRIPTION_FIELD_ID = ResourceId.valueOf("_folder_description");
 
     public static final FormClass get() {
 

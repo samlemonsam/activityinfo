@@ -10,7 +10,7 @@ import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.instance.InstancePage;
 import org.activityinfo.ui.client.page.instance.InstancePlace;
@@ -21,6 +21,7 @@ import java.util.List;
 
 public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
 
+    private final NavigationHandler pageManager;
     private ResourceLocator resourceLocator;
 
     @Inject
@@ -29,14 +30,17 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
                       ResourceLocator resourceLocator) {
 
         this.resourceLocator = resourceLocator;
+        this.pageManager = pageManager;
 
 
         pageManager.registerPageLoader(HomePage.PAGE_ID, this);
         placeSerializer.registerParser(HomePage.PAGE_ID, new HomePlace.Parser());
 
-        pageManager.registerPageLoader(InstancePage.PAGE_ID, this);
-        placeSerializer.registerParser(InstancePage.PAGE_ID, new InstancePlace.Parser());
+        pageManager.registerPageLoader(InstancePage.DESIGN_PAGE_ID, this);
+        placeSerializer.registerParser(InstancePage.DESIGN_PAGE_ID, new InstancePlace.Parser(InstancePage.DESIGN_PAGE_ID));
 
+        pageManager.registerPageLoader(InstancePage.TABLE_PAGE_ID, this);
+        placeSerializer.registerParser(InstancePage.TABLE_PAGE_ID, new InstancePlace.Parser(InstancePage.TABLE_PAGE_ID));
     }
 
     @Override
@@ -51,7 +55,8 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
                     loadHomePage(callback);
 
                 } else if (pageState instanceof InstancePlace) {
-                    InstancePage page = new InstancePage(resourceLocator);
+                    InstancePlace instancePlace = (InstancePlace) pageState;
+                    InstancePage page = new InstancePage(resourceLocator, instancePlace.getPageId(), pageManager.getEventBus());
                     page.navigate(pageState);
                     callback.onSuccess(page);
                 }

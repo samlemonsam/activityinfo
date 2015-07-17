@@ -22,10 +22,11 @@ package org.activityinfo.legacy.shared.adapter.projection;
  */
 
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.core.shared.model.AiLatLng;
-import org.activityinfo.legacy.shared.adapter.CuidAdapter;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.primitive.TextValue;
 
 /**
  * @author yuriyz on 4/15/14.
@@ -44,14 +45,14 @@ class LocationFieldProjectionUpdater implements ProjectionUpdater<LocationDTO> {
     public void update(Projection projection, LocationDTO locationDTO) {
         switch (fieldIndex) {
             case CuidAdapter.NAME_FIELD:
-                projection.setValue(path, locationDTO.getName());
+                projection.setValue(path, TextValue.valueOf(locationDTO.getName()));
                 break;
             case CuidAdapter.AXE_FIELD:
-                projection.setValue(path, locationDTO.getAxe());
+                projection.setValue(path, TextValue.valueOf(locationDTO.getAxe()));
                 break;
             case CuidAdapter.GEOMETRY_FIELD:
                 if (locationDTO.hasCoordinates()) {
-                    projection.setValue(path, new AiLatLng(locationDTO.getLatitude(), locationDTO.getLongitude()));
+                    projection.setValue(path, new GeoPoint(locationDTO.getLatitude(), locationDTO.getLongitude()));
                 }
                 break;
         }

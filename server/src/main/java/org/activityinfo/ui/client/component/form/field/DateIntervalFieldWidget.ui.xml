@@ -1,0 +1,17 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:date="urn:import:org.activityinfo.ui.client.widget">
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+
+  <g:HTMLPanel>
+    <div class="field-element">
+      <label class="control-label"><ui:text from="{i18n.startDate}"/></label>
+      <date:DateBox ui:field="startDateBox" styleName="form-control"/>
+    </div>
+    <div class="field-element">
+      <label class="control-label"><ui:text from="{i18n.endDate}"/></label>
+      <date:DateBox ui:field="endDateBox" styleName="form-control"/>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

@@ -52,7 +52,7 @@ public final class AdminBoundsHelper {
      * @param site
      * @return the normative lat/lng bounds
      */
-    public static Extents calculate(ActivityDTO activity, final SiteDTO site) {
+    public static Extents calculate(ActivityFormDTO activity, final SiteDTO site) {
         return calculate(activity, new HasAdminEntityValues() {
             @Override
             public AdminEntityDTO getAdminEntity(int levelId) {
@@ -76,7 +76,7 @@ public final class AdminBoundsHelper {
      *                       representation of a site.
      * @return the normative lat/lng bounds
      */
-    public static Extents calculate(ActivityDTO activity, HasAdminEntityValues entityAccessor) {
+    public static Extents calculate(ActivityFormDTO activity, HasAdminEntityValues entityAccessor) {
         return calculate(activity.getBounds(), activity.getAdminLevels(), entityAccessor);
     }
 
@@ -125,7 +125,7 @@ public final class AdminBoundsHelper {
      * @param site
      * @return
      */
-    public static String name(ActivityDTO activity, Extents bounds, final SiteDTO site) {
+    public static String name(ActivityFormDTO activity, Extents bounds, final SiteDTO site) {
         return name(bounds, activity.getAdminLevels(), new HasAdminEntityValues() {
             @Override
             public AdminEntityDTO getAdminEntity(int levelId) {

@@ -27,14 +27,12 @@ import org.activityinfo.legacy.shared.command.result.LocationResult;
 import java.util.Collection;
 
 public class SearchLocations implements Command<LocationResult> {
-    private Collection<Integer> adminEntityIds;
-    private String name;
-    private int threshold = 300;
-    private int locationTypeId = 0;
 
-    public int getThreshold() {
-        return threshold;
-    }
+    private Collection<Integer> adminEntityIds;
+    private Collection<Integer> indicatorIds;
+    private String name;
+    private int limit = -1;
+    private int locationTypeId = 0;
 
     public Collection<Integer> getAdminEntityIds() {
         return adminEntityIds;
@@ -60,6 +58,24 @@ public class SearchLocations implements Command<LocationResult> {
 
     public SearchLocations setLocationTypeId(int locationTypeId) {
         this.locationTypeId = locationTypeId;
+        return this;
+    }
+
+    public Collection<Integer> getIndicatorIds() {
+        return indicatorIds;
+    }
+
+    public SearchLocations setIndicatorIds(Collection<Integer> indicatorIds) {
+        this.indicatorIds = indicatorIds;
+        return this;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public SearchLocations setLimit(int limit) {
+        this.limit = limit;
         return this;
     }
 }

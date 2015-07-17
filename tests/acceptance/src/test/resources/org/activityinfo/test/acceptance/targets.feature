@@ -22,7 +22,7 @@ Feature: Indicator Targets
         | partner            | NRC    |
         | nb. kits           | 800    |
       
-  Scenario: Defining database-level target
+  Scenario: Target by database
     When I create a target with values:
       | field       | value |
       | nb. kits    | 3000  |
@@ -30,6 +30,7 @@ Feature: Indicator Targets
       |                     | Value |
       | Realized            | 1,800 |
       | Targeted            | 3,000 |
+    Then share report dialog should not be empty
 
   @AI-1126
   Scenario: Defining database-level target for two activities
@@ -109,6 +110,27 @@ Feature: Indicator Targets
       |                       | Value       |
       | Realized              | 1,800       |
       | Targeted              | 6,000       |
+
+  @AI-1007
+  Scenario: Test various UI scenarios based on database-level target
+    When I create a target named "Target1"
+    And I set the targets of "Target1" to:
+      | field                 | value       |
+      | nb. kits              | 4000  kits  |
+      | Satisfaction score    | 7.5         |
+    And I create a target named "Target2"
+    And I set the targets of "Target2" to:
+      | field                 | value       |
+      | nb. kits              | 5000  kits  |
+      | Satisfaction score    | 8.3         |
+    Then selecting target "Target1" shows:
+      | field                 | value       |
+      | nb. kits              | 4000        |
+      | Satisfaction score    | 7.5         |
+    And selecting target "Target2" shows:
+      | field                 | value       |
+      | nb. kits              | 5000        |
+      | Satisfaction score    | 8.3         |
 
   @AI-1096
   Scenario: Pivoting on deleted target

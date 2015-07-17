@@ -25,7 +25,6 @@ package org.activityinfo.legacy.shared.model;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.activityinfo.legacy.shared.model.*;
 
 import java.util.Collection;
 import java.util.Date;
@@ -41,9 +40,26 @@ public class LockedPeriodSet {
         }
     }
 
+    public LockedPeriodSet(UserDatabaseDTO userDatabaseDTO) {
+        indexLocks(userDatabaseDTO);
+    }
+
+    public LockedPeriodSet(ActivityFormDTO activity) {
+        for (LockedPeriodDTO lock : activity.getLockedPeriods()) {
+            if (lock.isEnabled()) {
+                if (lock.getParentType().equals(ProjectDTO.ENTITY_NAME)) {
+                    projectLocks.put(lock.getParentId(), lock);
+                } else {
+                    activityLocks.put(activity.getId(), lock);
+                }
+            }
+        }
+    }
+
     public LockedPeriodSet(ActivityDTO activity) {
         indexLocks(activity.getDatabase());
     }
+
 
     private void indexLocks(UserDatabaseDTO db) {
         for (ActivityDTO activity : db.getActivities()) {
@@ -99,5 +115,9 @@ public class LockedPeriodSet {
             }
         }
         return false;
+    }
+
+    public boolean hasLocks() {
+        return !activityLocks.isEmpty() || !projectLocks.isEmpty();
     }
 }

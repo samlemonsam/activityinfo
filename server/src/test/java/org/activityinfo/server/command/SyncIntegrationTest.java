@@ -34,7 +34,6 @@ import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.client.KeyGenerator;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
@@ -42,6 +41,7 @@ import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.Collector;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.TestSqliteDatabase;
@@ -249,26 +249,26 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         assertThat(men.getIndicatorId(), equalTo(7001));
 
         assertThat(men.getValue(2009, 1), CoreMatchers.equalTo(200d));
-        assertThat(women.getValue(2009, 1), CoreMatchers.equalTo(300d));
+        assertThat(women.getValue(2009, 1), equalTo(300d));
 
-        assertThat(men.getValue(2009, 2), CoreMatchers.equalTo(150d));
-        assertThat(women.getValue(2009, 2), CoreMatchers.equalTo(330d));
+        assertThat(men.getValue(2009, 2), equalTo(150d));
+        assertThat(women.getValue(2009, 2), equalTo(330d));
 
         // Update locally
 
         executeLocally(new UpdateMonthlyReports(siteId, Lists.newArrayList(
-                new Change(men.getIndicatorId(), new Month(2009, 1), 221d),
-                new Change(men.getIndicatorId(), new Month(2009, 3), 444d),
-                new Change(women.getIndicatorId(), new Month(2009, 5), 200d),
-                new Change(men.getIndicatorId(), new Month(2009, 5), 522d))));
+            new Change(men.getIndicatorId(), new Month(2009, 1), 221d),
+            new Change(men.getIndicatorId(), new Month(2009, 3), 444d),
+            new Change(women.getIndicatorId(), new Month(2009, 5), 200d),
+            new Change(men.getIndicatorId(), new Month(2009, 5), 522d))));
 
         result = executeLocally(new GetMonthlyReports(siteId, new Month(2009, 1), 12));
 
         women = result.getData().get(0);
         men = result.getData().get(1);
 
-        assertThat(men.getValue(2009, 1), CoreMatchers.equalTo(221d));
-        assertThat(women.getValue(2009, 1), CoreMatchers.equalTo(300d));
+        assertThat(men.getValue(2009, 1), equalTo(221d));
+        assertThat(women.getValue(2009, 1), equalTo(300d));
 
         // same - no change
         assertThat(men.getValue(2009, 2), equalTo(150d));
@@ -288,8 +288,8 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         women = remoteResult.getData().get(0);
         men = remoteResult.getData().get(1);
 
-        assertThat(men.getValue(2009, 1), CoreMatchers.equalTo(221d));
-        assertThat(women.getValue(2009, 1), CoreMatchers.equalTo(300d));
+        assertThat(men.getValue(2009, 1), equalTo(221d));
+        assertThat(women.getValue(2009, 1), equalTo(300d));
 
         // same - no change
         assertThat(men.getValue(2009, 2), equalTo(150d));
@@ -319,6 +319,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
         assertThat(women.getValue(2009, 1), CoreMatchers.equalTo(300d));  // unchanged
 
         assertThat(women.getValue(2009, 3), equalTo(6000d));
+
 
 
     }

@@ -27,19 +27,19 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.form.FormInstance;
-import org.activityinfo.core.shared.form.FormInstanceLabeler;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestOracle;
 import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestion;
 import org.activityinfo.ui.client.widget.SuggestBox;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @author yuriyz on 2/10/14.
@@ -51,15 +51,16 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     private ResourceId value;
     private List<FormInstance> range;
 
-    public SuggestBoxWidget(List<FormInstance> range, final ValueUpdater valueUpdater) {
-        this.range = range;
-        this.suggestBox = new SuggestBox(new InstanceSuggestOracle(range));
+    public SuggestBoxWidget(List<FormInstance> instances, final ValueUpdater<ReferenceValue> valueUpdater) {
+        this.range = instances;
+        this.suggestBox = new SuggestBox(new InstanceSuggestOracle(instances));
+        this.suggestBox.setPlaceholder(I18N.CONSTANTS.suggestBoxPlaceholder());
         this.suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
                 InstanceSuggestion suggestion = (InstanceSuggestion) event.getSelectedItem();
                 if(!Objects.equals(suggestion.getInstanceId(), value)) {
-                    valueUpdater.update(Collections.singleton(suggestion.getInstanceId()));
+                    valueUpdater.update(new ReferenceValue(suggestion.getInstanceId()));
                 }
             }
         });
@@ -71,8 +72,8 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     }
 
     @Override
-    public Promise<Void> setValue(Set<ResourceId> value) {
-        ResourceId newValue = Iterables.getFirst(value, null);
+    public Promise<Void> setValue(ReferenceValue value) {
+        ResourceId newValue = Iterables.getFirst(value.getResourceIds(), null);
         if(!Objects.equals(newValue, this.value)) {
             this.value = newValue;
             if(newValue == null) {
@@ -82,6 +83,11 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
             }
         }
         return Promise.done();
+    }
+
+    @Override
+    public void clearValue() {
+        suggestBox.setValue(null);
     }
 
     @Override

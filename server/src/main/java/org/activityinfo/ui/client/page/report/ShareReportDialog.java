@@ -32,22 +32,25 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
+import org.activityinfo.legacy.shared.command.result.IndicatorResult;
 import org.activityinfo.legacy.shared.command.result.ReportVisibilityResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.legacy.shared.model.ReportDTO;
+import org.activityinfo.legacy.shared.model.ReportMetadataDTO;
+import org.activityinfo.legacy.shared.model.ReportVisibilityDTO;
 import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ShareReportDialog extends Dialog {
 
@@ -128,25 +131,19 @@ public class ShareReportDialog extends Dialog {
 
         BatchCommand batch = new BatchCommand();
         batch.add(new GetReportModel(metadata.getId()));
-        batch.add(new GetSchema());
+        batch.add(new GetIndicators(currentReport.getIndicators()));
         batch.add(new GetReportVisibility(metadata.getId()));
 
         dispatcher.execute(batch,
                 new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
-                new AsyncCallback<BatchResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
-                    }
+                new SuccessCallback<BatchResult>() {
 
                     @Override
                     public void onSuccess(BatchResult batch) {
 
                         currentReport = ((ReportDTO) batch.getResult(0)).getReport();
 
-                        populateGrid((SchemaDTO) batch.getResult(1), (ReportVisibilityResult) batch.getResult(2));
+                        populateGrid((IndicatorResult) batch.getResult(1), (ReportVisibilityResult) batch.getResult(2));
                     }
                 });
     }
@@ -157,48 +154,38 @@ public class ShareReportDialog extends Dialog {
         this.currentReport = report;
 
         // we need to combine the databases which already have visiblity with
-        // those
-        // that could potentially be added
+        // those that could potentially be added
         BatchCommand batch = new BatchCommand();
-        batch.add(new GetSchema());
+        batch.add(new GetIndicators(currentReport.getIndicators()));
         batch.add(new GetReportVisibility(currentReport.getId()));
 
         dispatcher.execute(batch,
                 new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
-                new AsyncCallback<BatchResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
-                    }
-
+                new SuccessCallback<BatchResult>() {
                     @Override
                     public void onSuccess(BatchResult batch) {
-                        populateGrid((SchemaDTO) batch.getResult(0), (ReportVisibilityResult) batch.getResult(1));
+                        populateGrid((IndicatorResult) batch.getResult(0), (ReportVisibilityResult) batch.getResult(1));
                     }
                 });
     }
 
-    private void populateGrid(SchemaDTO schema, ReportVisibilityResult visibility) {
+
+    private void populateGrid(IndicatorResult indicators, ReportVisibilityResult visibility) {
         gridStore.removeAll();
-        Set<Integer> indicators = currentReport.getIndicators();
         Map<Integer, ReportVisibilityDTO> databases = Maps.newHashMap();
 
         for (ReportVisibilityDTO model : visibility.getList()) {
             databases.put(model.getDatabaseId(), model);
         }
 
-        for (UserDatabaseDTO db : schema.getDatabases()) {
-            if (hasAny(db, indicators)) {
-                if (databases.containsKey(db.getId())) {
-                    gridStore.add(databases.get(db.getId()));
-                } else {
-                    ReportVisibilityDTO model = new ReportVisibilityDTO();
-                    model.setDatabaseId(db.getId());
-                    model.setDatabaseName(db.getName());
-                    gridStore.add(model);
-                }
+        for (IndicatorDTO indicator : indicators.getIndicators()) {
+            if (databases.containsKey(indicator.getDatabaseId())) {
+                gridStore.add(databases.get(indicator.getDatabaseId()));
+            } else {
+                ReportVisibilityDTO model = new ReportVisibilityDTO();
+                model.setDatabaseId(indicator.getDatabaseId());
+                model.setDatabaseName(indicator.getDatabaseName());
+                gridStore.add(model);
             }
         }
 
@@ -213,17 +200,6 @@ public class ShareReportDialog extends Dialog {
                         }
                     });
         }
-    }
-
-    protected boolean hasAny(UserDatabaseDTO db, Set<Integer> indicators) {
-        for (ActivityDTO activity : db.getActivities()) {
-            for (IndicatorDTO indicator : activity.getIndicators()) {
-                if (indicators.contains(indicator.getId())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
@@ -248,13 +224,7 @@ public class ShareReportDialog extends Dialog {
         } else {
             dispatcher.execute(new UpdateReportVisibility(currentReport.getId(), toSave),
                     new MaskingAsyncMonitor(grid, I18N.CONSTANTS.saving()),
-                    new AsyncCallback<VoidResult>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // handled by monitor
-                        }
-
+                    new SuccessCallback<VoidResult>() {
                         @Override
                         public void onSuccess(VoidResult result) {
                             hide();

@@ -1,11 +1,11 @@
 package org.activityinfo.server.endpoint.odk;
 
 import com.google.inject.Inject;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class OdkAuthProvider implements Provider<AuthenticatedUser> {
 
     private static final Logger LOGGER = Logger.getLogger(OdkAuthProvider.class.getName());
-    
+
     public static final String DEBUG_USER_ID = "odk.debug.authorization.userid";
 
 

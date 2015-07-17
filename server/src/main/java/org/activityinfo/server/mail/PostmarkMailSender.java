@@ -4,8 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import freemarker.template.Configuration;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
-import org.activityinfo.server.util.monitoring.Timed;
+import org.activityinfo.service.DeploymentConfiguration;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.inject.Inject;
@@ -60,7 +59,6 @@ public class PostmarkMailSender extends MailSender {
     }
 
     @Override
-    @Timed(name = "mail.send.postmark")
     public void send(Message message) throws MessagingException {
         try {
             JsonObject json = toJson(message);

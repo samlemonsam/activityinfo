@@ -27,7 +27,7 @@ import com.extjs.gxt.ui.client.widget.form.Field;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.extjs.gxt.ui.client.widget.form.Validator;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.ui.client.page.entry.form.field.PartnerComboBox;
@@ -35,7 +35,7 @@ import org.activityinfo.ui.client.page.entry.form.field.ProjectComboBox;
 
 public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
 
-    private final ActivityDTO activity;
+    private final ActivityFormDTO activity;
     private final LockedPeriodSet locks;
 
     private DateField dateField1;
@@ -43,7 +43,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
     private PartnerComboBox partnerCombo;
     private ProjectComboBox projectCombo;
 
-    public ActivitySection(final ActivityDTO activity) {
+    public ActivitySection(final ActivityFormDTO activity) {
         super();
 
         this.activity = activity;
@@ -72,7 +72,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
             add(projectCombo);
         }
 
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
 
             dateField1 = new DateField();
             dateField1.setName("date1");
@@ -112,7 +112,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
     @Override
     public boolean validate() {
         boolean valid = true;
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             valid &= dateField1.validate();
             valid &= dateField2.validate();
         }
@@ -123,7 +123,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
 
     @Override
     public void updateModel(SiteDTO m) {
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             m.setDate1(dateField1.getValue());
             m.setDate2(dateField2.getValue());
         }
@@ -133,7 +133,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
 
     @Override
     public void updateForm(SiteDTO m, boolean isNew) {
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             dateField1.setValue(m.getDate1() == null ? null : m.getDate1().atMidnightInMyTimezone());
             dateField2.setValue(m.getDate2() == null ? null : m.getDate2().atMidnightInMyTimezone());
         }

@@ -22,12 +22,13 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
  */
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
-import com.allen_sauer.gwt.dnd.client.drop.DropController;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.ui.client.component.formdesigner.Metrics;
+import org.activityinfo.ui.client.component.formdesigner.drop.ForwardDropController;
 
 import java.util.List;
 
@@ -39,18 +40,34 @@ import java.util.List;
  */
 public class FieldPalette implements IsWidget {
 
-    public static final int NUM_COLUMNS = 2;
+    public static final int NUM_COLUMNS = 1;
 
     private final AbsolutePanel panel;
     private final PickupDragController dragController;
 
+    // Used to check whether widget was dropped after Drag gesture. If it was not dropped then
+    // simulate "click" and drop widget at the end of the form.
+    private DragMonitor dragMonitor;
+
     public FieldPalette() {
         this.panel = new AbsolutePanel();
-        dragController = new PickupDragController(RootPanel.get(), false);
+        dragController = new PickupDragController(RootPanel.get(), false) {
+            @Override
+            public void dragStart() {
+                super.dragStart();
+                dragMonitor.start(context);
+            }
+
+            @Override
+            public void dragEnd() {
+                dragMonitor.dragEnd(); // monitor must finished drag end first while context is still valid
+                super.dragEnd();
+            }
+        };
         dragController.setBehaviorMultipleSelection(false);
 
         List<FieldTemplate> templates = FieldTemplates.list();
-        for (int i=0;i!=templates.size();++i) {
+        for (int i = 0; i != templates.size(); ++i) {
             int row = (i / NUM_COLUMNS);
             int column = (i % NUM_COLUMNS);
 
@@ -64,6 +81,11 @@ public class FieldPalette implements IsWidget {
         panel.setHeight(calculateTop(rowCount) + "px");
     }
 
+    public void bind(EventBus eventBus, ForwardDropController dropController) {
+        this.dragController.registerDropController(dropController);
+        this.dragMonitor = new DragMonitor(eventBus, dropController);
+    }
+
     @Override
     public Widget asWidget() {
         return panel;
@@ -75,21 +97,17 @@ public class FieldPalette implements IsWidget {
 
     private int calculateTop(int row) {
         return Metrics.SOURCE_CONTROL_INITIAL_TOP +
-               (Metrics.SOURCE_CONTROL_HEIGHT_PX * row);
+                (Metrics.SOURCE_CONTROL_HEIGHT_PX * row);
     }
 
     private int calculateLeft(int column) {
         return Metrics.SOURCE_CONTROL_INITIAL_LEFT +
-               (Metrics.SOURCE_CONTROL_WIDTH_PX * column) +
-               (Metrics.SOURCE_CONTROL_MARGIN_RIGHT * column);
-    }
-
-
-    public void registerDropController(DropController dropController) {
-        dragController.registerDropController(dropController);
+                (Metrics.SOURCE_CONTROL_WIDTH_PX * column) +
+                (Metrics.SOURCE_CONTROL_MARGIN_RIGHT * column);
     }
 
     public PickupDragController getDragController() {
         return dragController;
     }
+
 }

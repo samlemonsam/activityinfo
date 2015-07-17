@@ -34,6 +34,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.event.PanelUpdatedEvent;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldLabel;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldTemplate;
 
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * @author yuriyz on 07/07/2014.
  */
-public class DropPanelDropController extends FlowPanelDropController {
+public class DropPanelDropController extends FlowPanelDropController implements DropControllerExtended {
 
     private final Positioner positioner = new Positioner();
     private FormDesigner formDesigner;
@@ -62,10 +63,13 @@ public class DropPanelDropController extends FlowPanelDropController {
         if (context.draggable instanceof FieldLabel) {
             previewDropNewWidget(context);
         } else {
+            drop(context.draggable, context);
+
             Scheduler.get().scheduleDeferred(new Command() {
                 @Override
                 public void execute() {
                     formDesigner.updateFieldOrder();
+                    removePositioner();
                 }
             });
         }
@@ -75,19 +79,16 @@ public class DropPanelDropController extends FlowPanelDropController {
         final FieldTemplate fieldTemplate = ((FieldLabel) context.draggable).getFieldTemplate();
         final FormField formField = fieldTemplate.createField();
 
-        formDesigner.getFormFieldWidgetFactory().createWidget(formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+        formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
             @Nullable
             @Override
             public Void apply(@Nullable FormFieldWidget formFieldWidget) {
                 final FieldWidgetContainer fieldWidgetContainer = new FieldWidgetContainer(formDesigner, formFieldWidget, formField);
                 final Widget containerWidget = fieldWidgetContainer.asWidget();
 
-                // hack ! - replace original selected widget with our container, drop it and then restore selection
-                final List<Widget> originalSelectedWidgets = context.selectedWidgets;
-                context.selectedWidgets = Lists.newArrayList(containerWidget);
-                DropPanelDropController.super.onDrop(context); // drop container
-                context.selectedWidgets = originalSelectedWidgets; // restore state;
+                drop(containerWidget, context);
 
+                formDesigner.getEventBus().fireEvent(new PanelUpdatedEvent(fieldWidgetContainer, PanelUpdatedEvent.EventType.ADDED));
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     @Override
                     public void execute() {
@@ -96,6 +97,8 @@ public class DropPanelDropController extends FlowPanelDropController {
                         // update model
                         formDesigner.getFormClass().insertElement(widgetIndex, formField);
                         formDesigner.getDragController().makeDraggable(containerWidget, fieldWidgetContainer.getDragHandle());
+
+                        removePositioner();
                     }
                 });
                 return null;
@@ -106,8 +109,31 @@ public class DropPanelDropController extends FlowPanelDropController {
         throw new VetoDragException();
     }
 
+    private void drop(Widget containerWidget, DragContext context) {
+        // hack ! - replace original selected widget with our container, drop it and then restore selection
+        final List<Widget> originalSelectedWidgets = context.selectedWidgets;
+        context.selectedWidgets = Lists.newArrayList(containerWidget);
+        DropPanelDropController.super.onDrop(context); // drop container
+        context.selectedWidgets = originalSelectedWidgets; // restore state;
+
+        formDesigner.getSavedGuard().setSaved(false);
+    }
+
     @Override
     protected Widget newPositioner(DragContext context) {
         return positioner.asWidget();
+    }
+
+    @Override
+    public void setPositionerToEnd() {
+        removePositioner();
+        dropTarget.insert(positioner, (dropTarget.getWidgetCount()));
+    }
+
+    private void removePositioner() {
+        int currentIndex = dropTarget.getWidgetIndex(positioner);
+        if (currentIndex != -1) {
+            dropTarget.remove(currentIndex);
+        }
     }
 }

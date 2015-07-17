@@ -32,4 +32,5 @@ import javax.ws.rs.core.Response;
 public class VoidResult implements CommandResult {
 
     public static final VoidResult EMPTY = null;
+    public static VoidResult INSTANCE = new VoidResult();
 }

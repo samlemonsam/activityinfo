@@ -21,8 +21,8 @@ package org.activityinfo.legacy.shared.adapter;
  * #L%
  */
 
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.Cuids;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,7 +36,7 @@ public class ResourceIdAdapterTest {
 
     @Test
     public void blockSize() {
-        assertThat(CuidAdapter.BLOCK_SIZE, equalTo(Integer.toString(Integer.MAX_VALUE, Cuids.RADIX).length()));
+        assertThat(CuidAdapter.BLOCK_SIZE, equalTo(Integer.toString(Integer.MAX_VALUE, ResourceId.RADIX).length()));
     }
 
     @Test

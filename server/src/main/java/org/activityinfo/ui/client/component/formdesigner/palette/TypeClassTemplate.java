@@ -10,22 +10,24 @@ import org.activityinfo.model.type.FieldTypeClass;
  */
 public class TypeClassTemplate implements FieldTemplate {
 
-    public FieldTypeClass typeClass;
+    private FieldTypeClass typeClass;
+    private String label;
 
-    public TypeClassTemplate(FieldTypeClass typeClass) {
+    public TypeClassTemplate(FieldTypeClass typeClass, String label) {
         this.typeClass = typeClass;
+        this.label = label;
     }
 
     @Override
     public String getLabel() {
-        return typeClass.getLabel();
+        return label;
     }
 
     @Override
     public FormField createField() {
-        FormField formField = new FormField(ResourceId.generateId());
+        FormField formField = new FormField(ResourceId.generateFieldId(typeClass));
         formField.setType(typeClass.createType());
-        formField.setLabel(typeClass.getLabel());
+        formField.setLabel(label);
         return formField;
     }
 }

@@ -3,7 +3,7 @@ package org.activityinfo.core.shared.criteria;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 
 import javax.annotation.Nonnull;
 import java.util.List;

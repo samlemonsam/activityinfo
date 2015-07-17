@@ -5,44 +5,24 @@ import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.DigestModel;
+import org.activityinfo.server.digest.UserDigest;
 import org.activityinfo.server.util.date.DateCalc;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 public class ActivityDigestModel implements DigestModel {
-    private final User user;
-    private final Date date;
-    private final int days;
-    private final long from;
+
+    private final UserDigest userDigest;
     private final Set<DatabaseModel> databases;
 
-    public ActivityDigestModel(User user, Date date, int days) {
-        this.user = user;
-        this.date = date;
-        this.days = days;
-        this.from = DateCalc.daysAgo(date, days).getTime();
+    public ActivityDigestModel(UserDigest userDigest) {
+        this.userDigest = userDigest;
         this.databases = new TreeSet<DatabaseModel>();
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public int getDays() {
-        return days;
-    }
-
-    public long getFrom() {
-        return from;
-    }
-
-    public Date getFromDate() {
-        return new Date(from);
+    public UserDigest getUserDigest() {
+        return userDigest;
     }
 
     @Override
@@ -181,7 +161,7 @@ public class ActivityDigestModel implements DigestModel {
         public Map<Integer, Integer> getTotalActivityMap() {
             Map<Integer, Integer> totals = new HashMap<Integer, Integer>();
 
-            int size = databaseModel.getModel().getDays();
+            int size = databaseModel.getModel().userDigest.getDays();
             if (activityMaps != null && !activityMaps.isEmpty()) {
                 size = activityMaps.iterator().next().getMap().keySet().size();
             }
@@ -223,13 +203,13 @@ public class ActivityDigestModel implements DigestModel {
             this.databaseModel = databaseModel;
             this.user = user;
 
-            for (int i = 0; i < databaseModel.getModel().getDays(); i++) {
+            for (int i = 0; i < databaseModel.getModel().userDigest.getDays(); i++) {
                 map.put(i, 0);
             }
 
             if (histories != null && !histories.isEmpty()) {
                 for (SiteHistory history : histories) {
-                    int daysBetween = DateCalc.absoluteDaysBetween(databaseModel.getModel().getDate(),
+                    int daysBetween = DateCalc.absoluteDaysBetween(databaseModel.getModel().userDigest.getDate(),
                             history.getTimeCreated());
                     Integer old = map.get(daysBetween);
                     map.put(daysBetween, old + 1);

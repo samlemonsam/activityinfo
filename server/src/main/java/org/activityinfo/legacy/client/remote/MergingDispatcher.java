@@ -74,7 +74,6 @@ public class MergingDispatcher extends AbstractDispatcher {
                 .build());
     }
 
-    @Inject
     public MergingDispatcher(Dispatcher dispatcher, Scheduler scheduler, BackOff backOff) {
         this.dispatcher = dispatcher;
         this.scheduler = scheduler;

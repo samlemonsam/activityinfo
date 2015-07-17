@@ -24,7 +24,7 @@ package org.activityinfo.server.report.generator.map;
 
 import com.google.common.collect.Maps;
 import junit.framework.Assert;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.reports.content.MapContent;

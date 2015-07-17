@@ -117,7 +117,7 @@ public class ColumnModelBuilder {
         return new ColumnModel(columns);
     }
 
-    protected ColumnModelBuilder maybeAddProjectColumn(ActivityDTO activity) {
+    protected ColumnModelBuilder maybeAddProjectColumn(ActivityFormDTO activity) {
         if (!activity.getProjects().isEmpty()) {
             addProjectColumn();
         }
@@ -128,14 +128,28 @@ public class ColumnModelBuilder {
         columns.add(new ReadTextColumn("project", I18N.CONSTANTS.project(), 100));
     }
 
-    public ColumnModelBuilder maybeAddLockColumn(final ActivityDTO activity) {
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
-            ColumnConfig columnLocked = new ColumnConfig("x", "", 28);
-            columnLocked.setRenderer(new LockedColumnRenderer(activity.getLockedPeriodSet()));
-            columnLocked.setSortable(false);
-            columnLocked.setMenuDisabled(true);
-            columns.add(columnLocked);
+    private void addLockOrLinkColumn(LockedPeriodSet lockSet) {
+        ColumnConfig columnLocked = new ColumnConfig("x", "", 28);
+        columnLocked.setRenderer(new LockedOrLinkColumnRenderer(lockSet));
+        columnLocked.setSortable(false);
+        columnLocked.setMenuDisabled(true);
+        columns.add(columnLocked);
+    }
+
+    public ColumnModelBuilder maybeAddLockColumn(final ActivityFormDTO activity) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
+            addLockOrLinkColumn(activity.getLockedPeriodSet());
         }
+        return this;
+    }
+
+    public ColumnModelBuilder maybeAddLockColumn(final SchemaDTO schemaDTO) {
+        addLockOrLinkColumn(new LockedPeriodSet(schemaDTO));
+        return this;
+    }
+
+    public ColumnModelBuilder maybeAddLockColumn(final UserDatabaseDTO userdatabase) {
+        addLockOrLinkColumn(new LockedPeriodSet(userdatabase));
         return this;
     }
 
@@ -214,7 +228,7 @@ public class ColumnModelBuilder {
         return this;
     }
 
-    public ColumnModelBuilder maybeAddTwoLineLocationColumn(ActivityDTO activity) {
+    public ColumnModelBuilder maybeAddTwoLineLocationColumn(ActivityFormDTO activity) {
         if (activity.getLocationType().getBoundAdminLevelId() == null) {
             ReadTextColumn column = new ReadTextColumn("locationName", activity.getLocationType().getName(), 100);
             column.setRenderer(new LocationColumnRenderer());
@@ -223,7 +237,7 @@ public class ColumnModelBuilder {
         return this;
     }
 
-    public ColumnModelBuilder maybeAddSingleLineLocationColumn(ActivityDTO activity) {
+    public ColumnModelBuilder maybeAddSingleLineLocationColumn(ActivityFormDTO activity) {
         if (activity.getLocationType().getBoundAdminLevelId() == null) {
             ReadTextColumn column = new ReadTextColumn("locationName", activity.getLocationType().getName(), 100);
             columns.add(column);
@@ -237,11 +251,11 @@ public class ColumnModelBuilder {
         return this;
     }
 
-    public ColumnModelBuilder addAdminLevelColumns(ActivityDTO activity) {
+    public ColumnModelBuilder addAdminLevelColumns(ActivityFormDTO activity) {
         return addAdminLevelColumns(activity.getAdminLevels());
     }
 
-    public ColumnModelBuilder addSingleAdminColumn(ActivityDTO activity) {
+    public ColumnModelBuilder addSingleAdminColumn(ActivityFormDTO activity) {
         ColumnConfig admin = new ColumnConfig("admin", I18N.CONSTANTS.location(), 100);
         admin.setToolTip(I18N.CONSTANTS.location());
         admin.setRenderer(new AdminColumnRenderer(activity.getAdminLevels()));
@@ -265,7 +279,7 @@ public class ColumnModelBuilder {
 
     }
 
-    public ColumnModelBuilder maybeAddPartnerColumn(ActivityDTO activity) {
+    public ColumnModelBuilder maybeAddPartnerColumn(ActivityFormDTO activity) {
         addPartnerColumn();
         return this;
     }
@@ -283,8 +297,8 @@ public class ColumnModelBuilder {
         return this;
     }
 
-    public ColumnModelBuilder maybeAddDateColumn(ActivityDTO activity) {
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+    public ColumnModelBuilder maybeAddDateColumn(ActivityFormDTO activity) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             columns.add(new EditableLocalDateColumn("date2", I18N.CONSTANTS.date(), 100));
         }
         return this;
@@ -316,9 +330,9 @@ public class ColumnModelBuilder {
         return this;
     }
 
-    public ColumnModelBuilder maybeAddKeyIndicatorColumns(ActivityDTO activity) {
+    public ColumnModelBuilder maybeAddKeyIndicatorColumns(ActivityFormDTO activity) {
         // Only add indicators that have a queries heading
-        if (activity.getReportingFrequency() == ActivityDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             for (IndicatorDTO indicator : activity.getIndicators()) {
                 if (indicator.getListHeader() != null && !indicator.getListHeader().isEmpty()) {
                     columns.add(createIndicatorColumn(indicator, indicator.getListHeader()));

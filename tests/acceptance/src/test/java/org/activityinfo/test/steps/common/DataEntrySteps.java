@@ -1,19 +1,21 @@
 package org.activityinfo.test.steps.common;
 
+import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.TableDataParser;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -21,8 +23,6 @@ import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,12 +128,26 @@ public class DataEntrySteps {
 
     @Then("^the exported spreadsheet contains:$")
     public void the_exported_spreadsheet_should_contain(DataTable dataTable) throws Throwable {
+        assertTableUnorderedDiff(dataTable, TableDataParser.exportedDataTable(exportedFile));
+    }
+
+    @Then("^the exported csv contains:$")
+    public void the_exported_csv_contains(DataTable dataTable) throws Throwable {
+        assertTableUnorderedDiff(dataTable, TableDataParser.exportedDataTableFromCsvFile(exportedFile));
+    }
+
+    public void assertTableUnorderedDiff(DataTable dataTable, DataTable fileTable) {
         List<String> expectedColumns = dataTable.getGherkinRows().get(0).getCells();
 
-        DataTable excelTable = driver.getAliasTable().deAlias(exportedDataTable(exportedFile));
+        DataTable excelTable = driver.getAliasTable().deAlias(fileTable);
         DataTable subsettedExcelTable = subsetColumns(excelTable, expectedColumns);
-        
+
         subsettedExcelTable.unorderedDiff(dataTable);
+    }
+
+    @When("^I export the schema of \"([^\"]*)\" database$")
+    public void I_export_the_schema_of_database(String databaseName) throws Throwable {
+        exportedFile = driver.setup().exportDatabaseSchema(databaseName);
     }
 
     private static DataTable subsetColumns(DataTable table, List<String> expectedColumns) {
@@ -166,39 +180,98 @@ public class DataEntrySteps {
         return DataTable.create(rows);
     }
 
-    private static DataTable exportedDataTable(File file) throws IOException, InvalidFormatException {
-
-        HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
-        Sheet sheet = workbook.getSheetAt(0);
-        DataFormatter formatter = new DataFormatter();
-        
-        List<List<String>> rows = new ArrayList<>();
-
-        // First row contains a title
-        int numRowsToSkip = 1; 
-        
-        // Find the number of columns 
-        int numColumns = 0;
-        for(int rowIndex=numRowsToSkip;rowIndex<=sheet.getLastRowNum();++rowIndex) {
-            numColumns = Math.max(numColumns, sheet.getRow(rowIndex).getLastCellNum());
-        }
-
-        // Create the table
-        for(int rowIndex=numRowsToSkip;rowIndex<=sheet.getLastRowNum();++rowIndex) {
-            List<String> row = new ArrayList<>();
-            Row excelRow = sheet.getRow(rowIndex);
-
-            for(int colIndex=0;colIndex<numColumns;++colIndex) {
-                row.add(formatter.formatCellValue(excelRow.getCell( colIndex)));
-            }
-            rows.add(row);
-        }
-        
-        if(rows.isEmpty()) {
-            throw new AssertionError("Export contained no data");
-        }
-
-        return DataTable.create(rows);
+    @Then("^submissions for \"([^\"]*)\" form are:$")
+    public void submissions_for_form_are(String formName, DataTable dataTable) throws Throwable {
+        driver.assertDataEntryTableForForm(formName, dataTable);
     }
 
+    @Then("^\"([^\"]*)\" database entry appears with lock in Data Entry and cannot be modified nor deleted with any of these values:$")
+    public void database_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with(String databaseName, List<FieldValue> values) throws Throwable {
+        driver.assertEntryCannotBeModifiedOrDeleted(databaseName, values);
+    }
+
+    @Then("^new entry with end date \"([^\"]*)\" cannot be submitted in \"([^\"]*)\" form$")
+    public void new_entry_with_end_date_cannot_be_submitted_in_database(String endDate, String formName) throws Throwable {
+        driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, endDate);
+    }
+
+    @Then("^\"([^\"]*)\" form entry appears with lock in Data Entry and cannot be modified nor deleted with any of these values:$")
+    public void form_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with_any_of_these_values(String formName, List<FieldValue> values) throws Throwable {
+        driver.assertEntryCannotBeModifiedOrDeleted(formName, values);
+    }
+
+    @When("^I open a new form submission for \"([^\"]*)\" then following fields are visible:$")
+    public void I_open_a_new_form_submission_for_then_following_fields_are_visible(String formName, List<String> fieldLabels) throws Throwable {
+        driver.assertFieldsOnNewForm(formName, fieldLabels);
+    }
+
+    @When("^I open a new form submission for \"([^\"]*)\" then field values are:$")
+    public void I_open_a_new_form_submission_for_then_field_values_are(String formName, List<FieldValue> values) throws Throwable {
+        driver.assertFieldValuesOnNewForm(formName, values);
+    }
+
+    @When("^edit entry in new table with field name \"([^\"]*)\" and value \"([^\"]*)\" in the database \"([^\"]*)\" in the form \"([^\"]*)\" with:$")
+    public void edit_entry_in_new_table_with_field_name_and_value_in_the_database_in_the_form_with(String fieldName, String fieldValue,
+                                                                                                   String database, String formName,
+                                                                                                   List<FieldValue> fieldValues
+    ) throws Throwable {
+
+        TablePage tablePage = openFormTable(database, formName);
+        tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
+
+        BsModal bsModal = tablePage.table().editSubmission();
+        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();
+    }
+
+    @Then("^table has rows:$")
+    public void table_has_rows(DataTable dataTable) throws Throwable {
+        assertHasRows(dataTable, false);
+    }
+
+    @Then("^table has rows with hidden built-in columns:$")
+    public void table_has_rows_with_hidden_built_in_columns(DataTable dataTable) throws Throwable {
+        assertHasRows(dataTable, true);
+    }
+
+    private void assertHasRows(DataTable dataTable, boolean hideBuiltInColumns) throws Throwable {
+        BsTable table = tablePage().table();
+        if (hideBuiltInColumns) {
+            table.hideBuiltInColumns();
+        }
+        table.waitUntilAtLeastOneRowIsLoaded().assertRowsPresent(dataTable);
+    }
+
+    @And("^filter column \"([^\"]*)\" with:$")
+    public void filter_column_with(String columnName, List<String> filterValues) throws Throwable {
+        columnName = driver.getAliasTable().getAlias(columnName);
+
+        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        table.filter(columnName).select(filterValues).apply();
+    }
+
+    @When("^open table for the \"([^\"]*)\" form in the database \"([^\"]*)\"$")
+    public void open_table_for_the_form_in_the_database(String formName, String databaseName) throws Throwable {
+        openFormTable(databaseName, formName);
+    }
+
+    private TablePage tablePage() {
+        Preconditions.checkState(driver.getCurrentPage() instanceof TablePage);
+        return (TablePage) driver.getCurrentPage();
+    }
+
+    private TablePage openFormTable(String databaseName, String formName) {
+        databaseName = driver.getAliasTable().getAlias(databaseName);
+        formName = driver.getAliasTable().getAlias(formName);
+
+        return driver.openFormTable(databaseName, formName);
+    }
+
+    @And("^filter date column \"([^\"]*)\" with start date \"([^\"]*)\" and end date \"([^\"]*)\":$")
+    public void filter_date_column_with_start_date_and_end_date_(String columnName, String startDate, String endDate) throws Throwable {
+        columnName = driver.getAliasTable().getAlias(columnName);
+
+        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        table.filter(columnName).fillRange(LocalDate.parse(startDate), LocalDate.parse(endDate)).apply();
+    }
 }

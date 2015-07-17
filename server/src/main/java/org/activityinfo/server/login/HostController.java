@@ -28,8 +28,8 @@ import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.activityinfo.server.login.model.RootPageModel;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
 import org.activityinfo.server.util.monitoring.Count;
+import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;

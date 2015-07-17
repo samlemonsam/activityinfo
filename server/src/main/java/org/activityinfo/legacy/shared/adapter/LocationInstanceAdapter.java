@@ -2,10 +2,12 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceValue;
 
 import java.util.List;
 import java.util.Set;
@@ -32,7 +34,7 @@ public class LocationInstanceAdapter implements Function<LocationDTO, FormInstan
     }
 
 
-    private Set<ResourceId> toInstanceIdSet(List<AdminEntityDTO> adminEntities) {
+    private ReferenceValue toInstanceIdSet(List<AdminEntityDTO> adminEntities) {
         // in the legacy database, all admin entities are stored to simplify
         // querying the sql database. here we need to eliminate the redundancy
 
@@ -49,6 +51,6 @@ public class LocationInstanceAdapter implements Function<LocationDTO, FormInstan
                 instanceIds.add(CuidAdapter.entity(entity.getId()));
             }
         }
-        return instanceIds;
+        return new ReferenceValue(instanceIds);
     }
 }

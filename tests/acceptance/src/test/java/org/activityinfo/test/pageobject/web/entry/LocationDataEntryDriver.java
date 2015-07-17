@@ -46,7 +46,17 @@ public class LocationDataEntryDriver implements DataEntryDriver {
     }
 
     @Override
+    public boolean isValid() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isNextEnabled() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void sendKeys(CharSequence keys) {
         throw new UnsupportedOperationException();
     }
 }

@@ -40,6 +40,7 @@ import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.reports.model.*;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.component.report.editor.chart.Dimensions;
 import org.activityinfo.ui.client.page.report.HasReportElement;
 import org.activityinfo.ui.client.page.report.ReportChangeHandler;
 import org.activityinfo.ui.client.page.report.ReportEventBus;
@@ -74,10 +75,11 @@ public class DimensionSelectionListView implements HasReportElement<PivotTableRe
         this.dispatcher = dispatcher;
         this.axis = axis;
 
-        store = new ListStore<DimensionModel>();
+        store = new ListStore<>();
 
-        list = new ListView<DimensionModel>(store);
+        list = new ListView<>(store);
         list.setDisplayProperty("name");
+
         new ListViewDragSource(list);
         ListViewDropTarget target = new ListViewDropTarget(list);
         target.setFeedback(DND.Feedback.INSERT);
@@ -125,7 +127,7 @@ public class DimensionSelectionListView implements HasReportElement<PivotTableRe
     }
 
     private void onModelChanged() {
-        dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
+        Dimensions.loadDimensions(dispatcher, model).then(new AsyncCallback<Dimensions>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -133,7 +135,7 @@ public class DimensionSelectionListView implements HasReportElement<PivotTableRe
             }
 
             @Override
-            public void onSuccess(SchemaDTO result) {
+            public void onSuccess(Dimensions result) {
                 updateStoreAfterModelChanged(result);
             }
         });
@@ -149,7 +151,7 @@ public class DimensionSelectionListView implements HasReportElement<PivotTableRe
         throw new IllegalStateException("" + axis);
     }
 
-    private void updateStoreAfterModelChanged(SchemaDTO schema) {
+    private void updateStoreAfterModelChanged(Dimensions schema) {
         store.setFiresEvents(false);
         store.removeAll();
         for (Dimension dim : getSelection()) {
@@ -162,7 +164,7 @@ public class DimensionSelectionListView implements HasReportElement<PivotTableRe
         list.refresh();
     }
 
-    private DimensionModel toModel(Dimension dim, SchemaDTO schema) {
+    private DimensionModel toModel(Dimension dim, Dimensions schema) {
         if (dim instanceof DateDimension) {
             return new DimensionModel(((DateDimension) dim).getUnit());
         } else if (dim instanceof AdminDimension) {

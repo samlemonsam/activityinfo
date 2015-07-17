@@ -28,17 +28,14 @@ import com.extjs.gxt.ui.client.util.Format;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Text;
-import com.extjs.gxt.ui.client.widget.form.Field;
-import com.extjs.gxt.ui.client.widget.form.NumberField;
-import com.extjs.gxt.ui.client.widget.form.TextArea;
-import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.extjs.gxt.ui.client.widget.form.*;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.extjs.gxt.ui.client.widget.layout.TableLayout;
 import com.extjs.gxt.ui.client.widget.tips.ToolTipConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.IndicatorGroup;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -55,7 +52,7 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
     private List<Field> indicatorFields = Lists.newArrayList();
     private Set<IndicatorDTO> calculatedIndicators = Sets.newHashSet();
 
-    public IndicatorSection(ActivityDTO activity) {
+    public IndicatorSection(ActivityFormDTO activity) {
 
         TableLayout layout = new TableLayout(3);
         layout.setCellPadding(5);
@@ -165,6 +162,12 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
             add(textField);
             add(new Text()); // avoid layout shift
             return textField;
+        } else if (type == FieldTypeClass.BOOLEAN) {
+            CheckBox checkBox = new CheckBox();
+
+            add(checkBox);
+            add(new Text()); // avoid layout shift
+            return checkBox;
         }
         return new NumberField();
     }

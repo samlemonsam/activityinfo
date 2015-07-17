@@ -23,7 +23,7 @@ package org.activityinfo.server.report.generator.map.cluster;
  */
 
 import com.google.common.collect.Lists;
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.reports.content.Point;

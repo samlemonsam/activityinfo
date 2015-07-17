@@ -27,12 +27,13 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.client.AsyncMonitor;
+import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.inject.Root;
 
 import java.util.HashMap;
@@ -72,6 +73,19 @@ public class NavigationHandler {
                     }
                 });
         Log.debug("PageManager: connected to EventBus and listening.");
+
+        Window.addWindowClosingHandler(new Window.ClosingHandler() {
+            @Override
+            public void onWindowClosing(Window.ClosingEvent event) {
+                if (activeNavigation != null && activeNavigation.currentPage != null) {
+                    event.setMessage(activeNavigation.currentPage.beforeWindowCloses());
+                }
+            }
+        });
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     private void onNavigationRequested(NavigationEvent be) {

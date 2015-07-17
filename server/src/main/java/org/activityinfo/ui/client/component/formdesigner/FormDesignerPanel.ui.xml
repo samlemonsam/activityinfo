@@ -11,23 +11,11 @@
   <ui:with field="style" type="org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles"/>
 
   <g:HTMLPanel ui:field="containerPanel">
+    <br/>
     <div class="row">
       <div class="col-xs-4">
         <g:HTMLPanel height="100%">
           <g:HTML ui:field="spacer" width="100%" height="0px"/>
-          <a:Button style="PRIMARY" ui:field="saveButton" text="{i18n.save}"/>
-          <g:HTML ui:field="statusMessage"/>
-          <br/>
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <b>
-                <ui:text from='{i18n.widgets}'/>
-              </b>
-            </div>
-            <div class="panel-body">
-              <palette:FieldPalette ui:field="fieldPalette" width="350px"/>
-            </div>
-          </div>
           <div class="panel panel-default">
             <div class="panel-heading">
               <b>
@@ -41,10 +29,36 @@
         </g:HTMLPanel>
       </div>
 
-      <div class="col-xs-8">
+      <div class="col-xs-6">
         <g:HTMLPanel>
           <header:HeaderPanel ui:field="headerPanel"/>
           <g:FlowPanel addStyleNames="{style.mainPanel}" ui:field="dropPanel"/>
+        </g:HTMLPanel>
+      </div>
+
+      <div class="col-xs-2">
+        <g:HTMLPanel>
+          <g:HTML ui:field="paletteSpacer" width="100%" height="0px"/>
+
+          <div class="row">
+            <!--<div class="col-xs-2">-->
+            <a:Button style="PRIMARY" ui:field="saveButton" text="{i18n.save}"/>
+            <!--</div>-->
+            <!--<div class="col-xs-10">-->
+            <g:HTML ui:field="statusMessage"/>
+            <!--</div>-->
+          </div>
+          <br/>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <b>
+                <ui:text from='{i18n.widgets}'/>
+              </b>
+            </div>
+            <div class="panel-body">
+              <palette:FieldPalette ui:field="fieldPalette" width="350px"/>
+            </div>
+          </div>
         </g:HTMLPanel>
       </div>
     </div>

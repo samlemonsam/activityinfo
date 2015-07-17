@@ -1,0 +1,7 @@
+--6ZDcLifdiXTh-KnKcc-5svSPYlcKTNtMS
+Content-Disposition: form-data; name="xml_submission_file"; filename="UNHCR LCCA Chad 2014 Chad Waterpoint data collection_2014-11-07_15-18-37.xml"
+Content-Type: text/xml
+Content-Transfer-Encoding: binary
+
+<?xml version='1.0' ?><data id="a0000011218"><meta><instanceID>uuid:c054c9a7-160a-4a16-954c-3cfe2d8b1cf7</instanceID><userID>token:c55536ea93b0c7da</userID></meta><field_a00000112180000000007 /><field_a00000112180000000013>2014-11-07T15:19:03.904+01</field_a00000112180000000013><field_a00000112180000000012>2014-11-07T15:18:37.666+01</field_a00000112180000000012><field_i0000090836>5880.0</field_i0000090836><field_i0000090837>668.0</field_i0000090837><field_Q0000031842>t0000166403</field_Q0000031842><field_Q0000031843>t0000166404</field_Q0000031843><field_Q0000031844>t0000166616</field_Q0000031844><field_Q0000031845>t0000166408</field_Q0000031845><field_i0000090839>5580.0</field_i0000090839><field_i0000090841>589.0</field_i0000090841><field_i0000090842>989.0</field_i0000090842><field_i0000090843>888.0</field_i0000090843><field_i0000090844>888.0</field_i0000090844><field_i0000090845>889.0</field_i0000090845><field_i0000090846>999.0</field_i0000090846><field_i0000090847>688.0</field_i0000090847><field_a00000112180000000014 /></data>
+--6ZDcLifdiXTh-KnKcc-5svSPYlcKTNtMS--

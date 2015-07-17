@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
+import org.activityinfo.ui.client.widget.ConfirmDialog;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -44,14 +45,19 @@ public class SectionWidgetContainer implements WidgetContainer {
     public SectionWidgetContainer(final FormDesigner formDesigner, final FormSection formSection) {
         this.formDesigner = formDesigner;
         this.formSection = formSection;
+
         widgetContainer = new WidgetContainerPanel(formDesigner);
-
-
         widgetContainer.getWidgetContainer().add(html);
         widgetContainer.getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                formDesigner.getFormClass().remove(formSection);
+                ConfirmDialog.confirm(new DeleteFormFieldAction(widgetContainer.getFocusPanel(), formDesigner) {
+                    @Override
+                    public void onComplete() {
+                        super.onComplete();
+                        formDesigner.getFormClass().remove(formSection);
+                    }
+                });
             }
         });
         widgetContainer.getFocusPanel().addClickHandler(new ClickHandler() {
@@ -75,5 +81,9 @@ public class SectionWidgetContainer implements WidgetContainer {
     @Override
     public Widget getDragHandle() {
         return widgetContainer.getDragHandle();
+    }
+
+    public FormDesigner getFormDesigner() {
+        return formDesigner;
     }
 }

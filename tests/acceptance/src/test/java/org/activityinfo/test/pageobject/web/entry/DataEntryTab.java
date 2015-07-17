@@ -3,11 +3,13 @@ package org.activityinfo.test.pageobject.web.entry;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -52,11 +54,11 @@ public class DataEntryTab {
 
     }
     
-    public DataEntryTab navigateToForm(String formName) {
+    public DataEntryTab navigateToForm(String formNameOrDatabaseName) {
         formTree.waitUntilLoaded();
-        Optional<GxtTree.GxtNode> formNode = formTree.search(formName);
+        Optional<GxtTree.GxtNode> formNode = formTree.search(formNameOrDatabaseName);
         if(!formNode.isPresent()) {
-            throw new AssertionError(String.format("Form '%s' is not present in data entry tree", formName));
+            throw new AssertionError(String.format("Form '%s' is not present in data entry tree", formNameOrDatabaseName));
         }
         formNode.get().select();
         
@@ -64,18 +66,25 @@ public class DataEntryTab {
     }
     
     public GxtDataEntryDriver newSubmission() {
-        container.find().button(withText(I18N.CONSTANTS.newSite())).clickWhenReady();
+        buttonClick(I18N.CONSTANTS.newSite());
         return new GxtDataEntryDriver(new GxtModal(container));
     }
     
     public DataEntryDriver updateSubmission() {
-        FluentElement button = container.find().button(withText("Edit")).first();
-        if("true".equals(button.attribute("aria-disabled"))) {
-            throw new AssertionError("Edit button is disabled");
-        }
-        button.click();
-
+        buttonClick(I18N.CONSTANTS.edit());
         return new GxtFormDataEntryDriver(new GxtModal(container));
+    }
+
+    public DataEntryTab buttonClick(String buttonLabel) {
+        final FluentElement button = container.find().button(withText(buttonLabel)).first();
+        button.waitUntil(new Predicate<WebDriver>() { // wait until button become enabled (there may be small period before it becomes enabled)
+            @Override
+            public boolean apply(@Nullable WebDriver input) {
+                return button.attribute("aria-disabled").equals("false");
+            }
+        });
+        button.click();
+        return this;
     }
     
     public int getCurrentSiteCount() {
@@ -132,9 +141,13 @@ public class DataEntryTab {
     }
 
     public void selectSubmission(int rowIndex) {
-        GxtGrid grid = GxtGrid.findGrids(container).first().get();
+        GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
         grid.waitUntilAtLeastOneRowIsLoaded();
-        grid.rows().get(rowIndex).select();
+        try {
+            grid.rows().get(rowIndex).select();
+        } catch (StaleElementReferenceException e) {
+            GxtGrid.waitForGrids(container).first().get().rows().get(rowIndex).select();
+        }
     }
     
     public void selectTab(String tabName) {
@@ -180,7 +193,12 @@ public class DataEntryTab {
 
     public DetailsEntry details() {
         selectTab("Details");
-
+        try {
+            Thread.sleep(300); // sometimes it's too fast and we read details of previous row, give it time to switch
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        container.waitFor(By.className("indicatorHeading"));
         return container.waitFor(new Function<WebDriver, DetailsEntry>() {
             @Override
             public DetailsEntry apply(WebDriver input) {
@@ -188,21 +206,51 @@ public class DataEntryTab {
 
                 FluentElement detailsPanel = container.find().div(withClass("details")).first();
 
-                FluentElements names = detailsPanel.find().td(withClass("indicatorHeading")).asList();
-                FluentElements values = detailsPanel.find().td(withClass("indicatorValue")).asList();
-                FluentElements units = detailsPanel.find().td(withClass("indicatorUnits")).asList();
+                FluentElements indicatorNames = detailsPanel.find().td(withClass("indicatorHeading")).asList();
+                FluentElements indicatorValues = detailsPanel.find().td(withClass("indicatorValue")).asList();
+                FluentElements indicatorUnits = detailsPanel.find().td(withClass("indicatorUnits")).asList();
 
-                Preconditions.checkState(names.size() == values.size() && values.size() == units.size());
+                Preconditions.checkState(indicatorNames.size() == indicatorValues.size(),
+                        "Number of field names and values do not match on Details tab. Names: " + indicatorNames.size() +
+                                ", values: " + indicatorValues.size());
 
-                for (int i = 0; i < names.size(); i++) {
-                    String name = names.get(i).text();
-                    String value = values.get(i).text();
-                    String unit = units.get(i).text();
+                for (int i = 0; i < indicatorNames.size(); i++) {
+                    String name = indicatorNames.get(i).text();
+                    String value = indicatorValues.get(i).text();
+                    //String unit = indicatorUnits.get(i).text(); // skip units, we want to handle also text indicators here
 
                     detailsEntry.getFieldValues().add(new FieldValue(name, value));
                 }
+
+                FluentElements attributeGroupNames = detailsPanel.find().p(withClass("attribute")).span(withClass("groupName")).asList();
+                FluentElements attributeValues = detailsPanel.find().p(withClass("attribute")).span(withClass("attValues")).asList();
+
+                Preconditions.checkState(attributeGroupNames.size() == attributeValues.size());
+
+                for (int i = 0; i < attributeGroupNames.size(); i++) {
+                    String name = attributeGroupNames.get(i).text();
+                    String value = attributeValues.get(i).text();
+
+                    if (name.endsWith(":")) {
+                        name = name.substring(0, name.length() - 1);
+                    }
+
+                    FieldValue fieldValue = new FieldValue(name, value).
+                            setType(Optional.of(EnumType.TYPE_CLASS));
+                    detailsEntry.getFieldValues().add(fieldValue);
+                }
+
+                Optional<FluentElement> commentValue = detailsPanel.find().p(withClass("comments")).span(withClass("attValues")).firstIfPresent();
+                if (commentValue.isPresent()) {
+                    detailsEntry.getFieldValues().add(new FieldValue("Comments", commentValue.get().text()));
+                }
+
                 return detailsEntry;
             }
         });
+    }
+
+    public FluentElement getContainer() {
+        return container;
     }
 }

@@ -2,23 +2,24 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.ApplicationProperties;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.TextType;
 import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.model.type.primitive.TextType;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
-import static org.activityinfo.legacy.shared.adapter.CuidAdapter.adminLevelFormClass;
+import static org.activityinfo.model.legacy.CuidAdapter.adminLevelFormClass;
 
 /**
  * Creates a {@code FormClass} for a LocationType given a legacy SchemaDTO.

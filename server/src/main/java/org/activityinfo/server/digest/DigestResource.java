@@ -30,8 +30,9 @@ public abstract class DigestResource {
         Queue queue = QueueFactory.getQueue(USERDIGEST_QUEUE);
 
         for (Integer userId : userIds) {
-            TaskOptions taskoptions = withUrl(getUserDigestEndpoint()).param(UserDigestResource.PARAM_USER,
-                    String.valueOf(userId)).method(Method.GET);
+            TaskOptions taskoptions = withUrl(getUserDigestEndpoint())
+                    .param(UserDigestResource.PARAM_USER, String.valueOf(userId))
+                    .method(Method.GET);
             queue.add(taskoptions);
         }
         return msg;

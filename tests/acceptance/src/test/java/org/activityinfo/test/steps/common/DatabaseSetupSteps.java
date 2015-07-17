@@ -1,6 +1,10 @@
 package org.activityinfo.test.steps.common;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mysql.jdbc.StringUtils;
 import cucumber.api.DataTable;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
@@ -9,17 +13,16 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.calc.AggregationMethod;
-import org.activityinfo.model.type.TextType;
-import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.activityinfo.test.driver.Property.name;
@@ -114,6 +117,17 @@ public class DatabaseSetupSteps {
     }
 
 
+    @And("^I have created a form \"([^\"]*)\" using the new layout$")
+    public void I_have_created_a_form_using_the_new_layout(String formName) throws Throwable {
+        driver.setup().createForm(
+                name(formName),
+                property("database", getCurrentDatabase()),
+                property("classicView", false)
+        );
+
+        this.currentForm = formName;
+    }
+
     @Given("^I have created a form named \"([^\"]*)\" with the submissions:$")
     public void I_have_created_a_form_named_with_the_submissions(String formName, DataTable dataTable) throws Throwable {
 
@@ -122,68 +136,81 @@ public class DatabaseSetupSteps {
 
         // Create each of the fields as a column
         List<String> columns = dataTable.getGherkinRows().get(0).getCells();
-        for(int i=0;i!=columns.size();++i) {
-            createFieldForColumn(formName, dataTable, i);
+        Map<Integer, FieldTypeClass> columnTypeMap = Maps.newHashMap();
+        for (int i = 0; i != columns.size(); ++i) {
+            Optional<FieldTypeClass> columnType = createFieldForColumn(formName, dataTable, i);
+            if (columnType.isPresent()) {
+                columnTypeMap.put(i, columnType.get());
+            }
         }
         
-        // Submit the forms
-        for(int row=1;row<dataTable.getGherkinRows().size();++row) {
-            submitRow(formName, dataTable, row);
+        // Submit the forms (first row - header ; second row - type of the column)
+        for (int row = 2; row < dataTable.getGherkinRows().size(); ++row) {
+            submitRow(formName, dataTable, row, columnTypeMap);
         }
     }
 
-
-    private void createFieldForColumn(String form, DataTable dataTable, int columnIndex) throws Exception {
+    /**
+     * Creates form field from table column. Returns column type (field type).
+     * @param form form name
+     * @param dataTable table
+     * @param columnIndex column index
+     * @return column type (field type)
+     * @throws Exception
+     */
+    private Optional<FieldTypeClass> createFieldForColumn(String form, DataTable dataTable, int columnIndex) throws Exception {
         String label = dataTable.getGherkinRows().get(0).getCells().get(columnIndex);
+        if (isPredefinedField(label)) {
+            return Optional.absent();
+        }
+
+        String type = driver.resolveFieldTypeName(dataTable.getGherkinRows().get(1).getCells().get(columnIndex));
+
+        FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(type);
+
         // Find set of distinct values
         Set<String> values = new HashSet<>();
-        for (int row = 1; row < dataTable.getGherkinRows().size(); ++row) {
-            values.add(dataTable.getGherkinRows().get(row).getCells().get(columnIndex));
+        for (int row = 2; row < dataTable.getGherkinRows().size(); ++row) {
+            String cellValue = dataTable.getGherkinRows().get(row).getCells().get(columnIndex);
+            if (typeClass == EnumType.TYPE_CLASS) {
+                values.addAll(StringUtils.split(cellValue, ",", true));
+            } else {
+                values.add(cellValue);
+            }
         }
 
-        if(!isPredefinedField(label)) {
-            driver.setup().createField(
-                    property("form", form),
-                    property("name", label),
-                    property("type", detectType(values)));
-        }
+            if (typeClass == EnumType.TYPE_CLASS) {
+                I_have_created_a_enumerated_field_with_options(label, Lists.newArrayList(values));
+            } else {
+                driver.setup().createField(
+                        property("form", form),
+                        property("name", label),
+                        property("type", typeClass.getId()));
+            }
+        return Optional.of(typeClass);
     }
 
     private boolean isPredefinedField(String label) {
-        return label.equalsIgnoreCase("partner");
+        return label.equalsIgnoreCase("partner") ||
+               label.equalsIgnoreCase("project") ||
+               label.equalsIgnoreCase("start date") ||
+               label.equalsIgnoreCase("end date") ||
+               label.equalsIgnoreCase("to date") ||
+               label.equalsIgnoreCase("from date") ||
+                label.equalsIgnoreCase("comments");
     }
 
-    private String detectType(Set<String> values) {
-        if(isQuantity(values)) {
-            return QuantityType.TypeClass.INSTANCE.getId();
-        } else {
-            return TextType.INSTANCE.getId();
-        }
-    }
-
-    private boolean isQuantity(Set<String> values) {
-        try {
-            for (String value : values) {
-                //noinspection ResultOfMethodCallIgnored
-                Double.parseDouble(value);
-            }
-            return true;
-            
-        } catch (NumberFormatException ignored) {
-            return false;
-        }
-    }
-
-    private void submitRow(String formName, DataTable dataTable, int row) throws Exception {
+    private void submitRow(String formName, DataTable dataTable, int row, Map<Integer, FieldTypeClass> columnTypeMap) throws Exception {
         List<String> headers = dataTable.getGherkinRows().get(0).getCells();
         List<String> columns = dataTable.getGherkinRows().get(row).getCells();
         List<FieldValue> fieldValues = new ArrayList<>();
         
         for(int column=0; column<columns.size();++column) {
-            fieldValues.add(new FieldValue(headers.get(column),  columns.get(column)));
+            fieldValues.add(new FieldValue(headers.get(column), columns.get(column))
+                    .setType(Optional.fromNullable(columnTypeMap.get(column))));
         }
         
-        driver.setup().submitForm(formName, fieldValues);
+        driver.setup().submitForm(formName, fieldValues, headers);
         
     }
     
@@ -232,7 +259,7 @@ public class DatabaseSetupSteps {
     }
 
     @Given("^I have created a enumerated field \"([^\"]*)\" with items:$")
-    public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Throwable {
+    public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Exception {
         Preconditions.checkState(currentForm != null, "No current form");
 
         driver.setup().createField(
@@ -350,7 +377,6 @@ public class DatabaseSetupSteps {
                 property("name", targetName),
                 property("database", getCurrentDatabase()),
                 property("project", project));
-
     }
 
     @When("^I create a target named \"([^\"]*)\" for project \"([^\"]*)\" with values:$")
@@ -477,6 +503,39 @@ public class DatabaseSetupSteps {
     @Given("^I haven not defined any targets$")
     public void I_haven_not_defined_any_targets() throws Throwable {
         // noop!
+    }
+
+    @Then("^selecting target \"([^\"]*)\" shows:$")
+    public void selecting_target_shows(String targetName, List<FieldValue> targetValues) throws Throwable {
+        driver.assertTargetValues(targetName, targetValues);
+    }
+
+    @When("^I link indicators:$")
+    public void I_link_indicators(List<IndicatorLink> linkedIndicatorRows) throws Throwable {
+        driver.createLinkIndicators(linkedIndicatorRows);
+    }
+
+    @Then("^Linked indicators marked by icon:$")
+    public void Linked_indicators_marked_by_icon(List<IndicatorLink> linkedIndicatorRows) throws Throwable {
+        driver.assertLinkedIndicatorsMarked(linkedIndicatorRows, true);
+    }
+
+    @When("^selecting \"([^\"]*)\" as the source link database$")
+    public void selecting_as_the_source_link_database(String databaseName) throws Throwable {
+        driver.getLinkIndicatorPage().getSourceDb().findCell(driver.getAliasTable().getAlias(databaseName)).click();
+    }
+
+    @Then("^source indicator link database shows:$")
+    public void source_indicator_link_database_shows(DataTable expectedTable) throws Throwable {
+        DataTable dataTable = driver.getLinkIndicatorPage().getSourceIndicator().extractData(false);
+        driver.setup().getAliasTable().deAlias(dataTable).unorderedDiff(expectedTable);
+    }
+
+    @Given("^I have added (\\d+) partners$")
+    public void I_have_added_partners(int numberOfPartners) throws Throwable {
+        for (int i = 0; i < numberOfPartners; i++) {
+            driver.setup().addPartner("partner" + i, currentDatabase);
+        }
     }
 
 }

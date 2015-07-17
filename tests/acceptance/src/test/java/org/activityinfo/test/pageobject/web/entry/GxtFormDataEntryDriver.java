@@ -109,8 +109,18 @@ public class GxtFormDataEntryDriver implements DataEntryDriver {
     }
 
     @Override
+    public boolean isValid() {
+        return currentField.isValid();
+    }
+
+    @Override
     public boolean isNextEnabled() {
         return false;
+    }
+
+    @Override
+    public void sendKeys(CharSequence keys) {
+        currentField.getElement().sendKeys(keys);
     }
 
     @Override

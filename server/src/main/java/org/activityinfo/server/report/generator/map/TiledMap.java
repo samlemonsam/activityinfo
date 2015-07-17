@@ -22,7 +22,7 @@ package org.activityinfo.server.report.generator.map;
  * #L%
  */
 
-import org.activityinfo.core.shared.model.AiLatLng;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.reports.content.Point;
 import org.activityinfo.legacy.shared.reports.util.mapping.Tile;
 import org.activityinfo.legacy.shared.reports.util.mapping.TileMath;

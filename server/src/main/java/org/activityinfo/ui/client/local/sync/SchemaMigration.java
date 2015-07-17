@@ -61,6 +61,7 @@ public class SchemaMigration {
             "ALTER TABLE LocationType ADD COLUMN databaseId",
             "ALTER TABLE IndicatorValue ADD COLUMN TextValue",
             "ALTER TABLE IndicatorValue ADD COLUMN DateValue",
+            "ALTER TABLE IndicatorValue ADD COLUMN BooleanValue",
             "ALTER TABLE Indicator ADD COLUMN type",
             "ALTER TABLE Indicator ADD COLUMN expression",
             "ALTER TABLE Indicator ADD COLUMN calculatedAutomatically",

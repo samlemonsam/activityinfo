@@ -24,9 +24,9 @@ package org.activityinfo.legacy.shared.impl;
 
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.legacy.shared.auth.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.model.auth.AuthenticatedUser;
 
 public interface ExecutionContext {
 

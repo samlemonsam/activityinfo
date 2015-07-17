@@ -28,10 +28,7 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
-import org.activityinfo.legacy.shared.model.ProjectDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 /*
@@ -53,7 +50,7 @@ public class ReadLockedPeriodTypeColumn extends ColumnConfig {
                                  ListStore<LockedPeriodDTO> store,
                                  Grid<LockedPeriodDTO> grid) {
 
-                if (model.getParent() instanceof ActivityDTO) {
+                if (model.getParent() instanceof IsActivityDTO) {
                     return IconImageBundle.ICONS.activity().getHTML();
                 }
 

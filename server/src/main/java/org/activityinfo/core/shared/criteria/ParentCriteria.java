@@ -2,7 +2,7 @@ package org.activityinfo.core.shared.criteria;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.form.FormInstance;
+import org.activityinfo.model.form.FormInstance;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -33,7 +33,7 @@ public class ParentCriteria implements Criteria {
 
     @Override
     public boolean apply(@Nonnull FormInstance instance) {
-        return Objects.equals(parentId, instance.getParentId());
+        return Objects.equals(parentId, instance.getOwnerId());
     }
 
     @Override

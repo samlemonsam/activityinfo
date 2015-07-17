@@ -43,7 +43,7 @@ import java.util.Map.Entry;
 public class LocationSection extends FormSectionWithFormLayout<SiteDTO> implements LocationFormSection {
 
     private boolean isNew;
-    private ActivityDTO activity;
+    private ActivityFormDTO activity;
     private LocationDTO location;
     private Dispatcher dispatcher;
     private LabelField nameField;
@@ -51,7 +51,7 @@ public class LocationSection extends FormSectionWithFormLayout<SiteDTO> implemen
     private CoordinateFields coordinateFields;
     private Map<Integer, LabelField> levelFields;
 
-    public LocationSection(Dispatcher dispatcher, ActivityDTO activity) {
+    public LocationSection(Dispatcher dispatcher, ActivityFormDTO activity) {
         this.dispatcher = dispatcher;
         this.activity = activity;
 

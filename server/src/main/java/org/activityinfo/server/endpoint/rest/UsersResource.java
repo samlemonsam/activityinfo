@@ -3,7 +3,7 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -41,7 +41,7 @@ public class UsersResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createUser(
-            @FormParam("email") String email, 
+            @FormParam("email") String email,
             @FormParam("name") String name, 
             @FormParam("password") String password,
             @FormParam("locale") String locale) {

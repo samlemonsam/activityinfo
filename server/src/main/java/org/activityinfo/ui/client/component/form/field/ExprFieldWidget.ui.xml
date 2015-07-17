@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+        >
+  <g:HTMLPanel ui:field="boxWrapper">
+    <a:TextBox ui:field="box"/>
+    <span class="hide help-block" ui:field="errorMessages"/>
+  </g:HTMLPanel>
+</ui:UiBinder>

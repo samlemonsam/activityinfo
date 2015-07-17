@@ -26,7 +26,7 @@ import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.core.shared.importing.strategy.ImportTarget;
-import org.activityinfo.core.shared.util.StringUtil;
+import org.activityinfo.model.expr.StringUtil;
 
 import java.util.List;
 import java.util.Map;
