@@ -395,11 +395,11 @@ public interface UiConstants extends Constants {
     String axe();
 
     /**
-     * Translated "&laquo; Back".
+     * Translated "« Back".
      *
-     * @return translated "&laquo; Back"
+     * @return translated "« Back"
      */
-    @DefaultStringValue("&laquo; Back")
+    @DefaultStringValue("« Back")
     @Key("backButton")
     String backButton();
 
