@@ -3517,7 +3517,7 @@ public interface UiConstants extends Constants {
     String relevanceWelcomeText();
 
     @DefaultStringValue("Invalid code. Valid code must starting with a letter and " +
-            "containing only letters, numbers, and the underscore symbol")
+            "contain only letters, numbers, and the underscore symbol.")
     String invalidCodeMessage();
 
     @DefaultStringValue("Please enter label.")
