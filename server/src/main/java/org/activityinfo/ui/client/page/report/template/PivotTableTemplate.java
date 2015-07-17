@@ -26,7 +26,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.reports.model.*;
+import org.activityinfo.legacy.shared.reports.model.DateDimension;
+import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
+import org.activityinfo.legacy.shared.reports.model.ReportElement;
+import org.activityinfo.model.date.DateUnit;
 
 public class PivotTableTemplate extends ReportElementTemplate {
 

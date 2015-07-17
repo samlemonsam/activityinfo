@@ -25,7 +25,10 @@ package org.activityinfo.server.login.model;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 public class ChangePasswordPageModel extends PageModel {
+
     private User user;
+    private boolean passwordLengthInvalid = false; // if less than 6 chars
+    private boolean passwordsNotMatched = false;
 
     public ChangePasswordPageModel(User user) {
         super();
@@ -34,5 +37,23 @@ public class ChangePasswordPageModel extends PageModel {
 
     public User getUser() {
         return user;
+    }
+
+    public boolean isPasswordLengthInvalid() {
+        return passwordLengthInvalid;
+    }
+
+    public ChangePasswordPageModel setPasswordLengthInvalid(boolean passwordLengthInvalid) {
+        this.passwordLengthInvalid = passwordLengthInvalid;
+        return this;
+    }
+
+    public boolean isPasswordsNotMatched() {
+        return passwordsNotMatched;
+    }
+
+    public ChangePasswordPageModel setPasswordsNotMatched(boolean passwordsNotMatched) {
+        this.passwordsNotMatched = passwordsNotMatched;
+        return this;
     }
 }

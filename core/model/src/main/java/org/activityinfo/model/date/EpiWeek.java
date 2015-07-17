@@ -74,7 +74,6 @@ public class EpiWeek implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         EpiWeek epiWeek = (EpiWeek) o;
-
         if (weekInYear != epiWeek.weekInYear) return false;
         if (year != epiWeek.year) return false;
 
@@ -95,4 +94,5 @@ public class EpiWeek implements Serializable {
                 ", year=" + year +
                 '}';
     }
+}
 }

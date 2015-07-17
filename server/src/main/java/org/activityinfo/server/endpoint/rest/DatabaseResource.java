@@ -1,18 +1,16 @@
 package org.activityinfo.server.endpoint.rest;
 
 import org.activityinfo.io.xform.XFormReader;
+import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.legacy.shared.command.CreateEntity;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.DTOViews;
-import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.io.xform.form.XForm;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.ws.rs.*;
@@ -31,19 +29,24 @@ public class DatabaseResource {
         this.databaseId = databaseId;
     }
 
-    private UserDatabaseDTO getSchema() {
+    private UserDatabaseDTOWithForms getSchema() {
         UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
         if (db == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
-        return db;
+
+        UserDatabaseDTOWithForms dbWithForms = new UserDatabaseDTOWithForms(db);
+        for (ActivityDTO activity : db.getActivities()) {
+            dbWithForms.getActivities().add(dispatcher.execute(new GetActivityForm(activity.getId())));
+        }
+        return dbWithForms;
     }
 
     @GET
     @Path("schema")
     @JsonView(DTOViews.Schema.class)
     @Produces(MediaType.APPLICATION_JSON)
-    public UserDatabaseDTO getDatabaseSchema() {
+    public UserDatabaseDTOWithForms getDatabaseSchema() {
         return getSchema();
     }
 
@@ -67,7 +70,7 @@ public class DatabaseResource {
     @Consumes("application/xml")
     public Response createFormFromXForm(@Context UriInfo uri, XForm xForm) {
 
-        UserDatabaseDTO schema = getSchema();
+        UserDatabaseDTOWithForms schema = getSchema();
         LocationTypeDTO locationType = schema.getCountry().getNullLocationType();
 
         ActivityFormDTO activityDTO = new ActivityFormDTO();

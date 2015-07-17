@@ -22,6 +22,7 @@ package org.activityinfo.i18n.shared;
  * #L%
  */
 
+import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
 import java.util.Date;
@@ -47,14 +48,14 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     /**
      * Translated "Are you sure you want to delete the database <b>{0}</b>? <br>
      * <br>
-     * You will loose all activities and indicator results.".
+     * You will lose all activities and indicator results.".
      *
      * @return translated "Are you sure you want to delete the database
      * <b>{0}</b>? <br>
      * <br>
-     * You will loose all activities and indicator results."
+     * You will lose all activities and indicator results."
      */
-    @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will loose all activities and indicator results.")
+    @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will lose all activities and indicator results.")
     String confirmDeleteDb(String arg0);
 
     /**
@@ -362,4 +363,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Please enter a number. For example: {0} or {1} or {2}")
     String quantityFieldInvalidValue(int integer, double doubleWithoutPoint, double doubleWithPoint);
+
+    @Messages.DefaultMessage("Failed to find nationwide location type, db: {0}, country: {1}")
+    String noNationWideLocationType(String dbName, String countryName);
 }

@@ -7,7 +7,7 @@
         .editable:hover .icon {display: inherit;}
     </ui:style>
 
-    <ui:with field="icons" type="org.activityinfo.ui.client.style.Icons"/>
+    <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
     <g:HTMLPanel>
         <h1 ui:field="headerElement" class="{style.editable}">
             <g:InlineLabel ui:field="headerLabel"/>

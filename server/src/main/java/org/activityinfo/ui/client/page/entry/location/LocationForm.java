@@ -234,7 +234,7 @@ public class LocationForm extends LayoutContainer {
     }
 
     private void saveNewLocation() {
-        if (coordinateFields.validate() && nameField.validate()) {
+        if (coordinateFields.validate() && nameField.validate() && axeField.validate()) {
             LocationDTO newLocation = new LocationDTO();
             newLocation.setId(new KeyGenerator().generateInt());
             newLocation.setLocationTypeId(locationType.getId());

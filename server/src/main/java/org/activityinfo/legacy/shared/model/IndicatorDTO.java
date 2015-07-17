@@ -51,6 +51,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     public final static int AGGREGATE_SUM = 0;
     public final static int AGGREGATE_AVG = 1;
     public final static int AGGREGATE_SITE_COUNT = 2;
+    public final static int AGGREGATE_PERCENT = 3;
 
     public static final String PROPERTY_PREFIX = "I";
 
@@ -196,7 +197,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("expression", expression);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty("relevanceCondition") @JsonView(DTOViews.Schema.class)
     public String getSkipExpression() {
         return get("skipExpression");
     }
@@ -205,7 +206,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("skipExpression", skipExpression);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty("code") @JsonView(DTOViews.Schema.class)
     public String getNameInExpression() {
         return get("nameInExpression");
     }

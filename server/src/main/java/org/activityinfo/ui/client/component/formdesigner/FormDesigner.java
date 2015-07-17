@@ -26,6 +26,9 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElement;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -36,7 +39,10 @@ import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPro
 import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPresenter;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 07/07/2014.
@@ -78,7 +84,7 @@ public class FormDesigner {
 
         savedGuard = new FormSavedGuard(this);
 
-        formDesignerActions = new FormDesignerActions(this);
+        formDesignerActions = FormDesignerActions.create(this);
     }
 
     public DropControllerRegistry getDropControllerRegistry() {
@@ -139,5 +145,19 @@ public class FormDesigner {
             return map.get(resourceId);
         }
         return dropControllerRegistry.getDropController(resourceId).getContainerMap().get(resourceId);
+    }
+
+    public static Set<ResourceId> builtinFields(ResourceId formClassId) {
+        Set<ResourceId> fieldIds = new HashSet<>();
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.COMMENT_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PARTNER_FIELD));
+        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PROJECT_FIELD));
+        return fieldIds;
+    }
+
+    public static boolean isBuiltin(ResourceId formClassId, ResourceId fieldId) {
+        return builtinFields(formClassId).contains(fieldId);
     }
 }

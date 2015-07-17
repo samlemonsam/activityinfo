@@ -28,7 +28,7 @@
 
             <h3>${label.chooseNewPassword}</h3>
 
-            <form class="form" method="post" action="changePassword" method="post">
+            <form class="form" method="post" id="changePasswordForm" action="changePassword" method="post">
                 <input type="hidden" name="key" value="${user.changePasswordKey}"></input>
 
                 <div class="control-group">
@@ -42,7 +42,18 @@
                     <label class="control-label" for="newPasswordInput">${label.confirmNewPassword}</label>
 
                     <div class="controls">
-                        <input type="password" id="newPasswordInput2">
+                        <input type="password" name="password2" id="newPasswordInput2">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="alert alert-error <#if !passwordLengthInvalid> hide </#if>" id="alertLength">
+                        ${label.passwordHelp}
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="alert alert-error <#if !passwordsNotMatched> hide </#if>" id="alertNotMatch">
+                        ${label.passwordDoNotMatch}
                     </div>
                 </div>
 
@@ -58,5 +69,29 @@
     </@content>
 
     <@footer/>
-    <@scripts/>
+    <@scripts>
+    <script type="text/javascript">
+        $("#changePasswordForm").submit(function( event ) {
+
+            $("#alertLength").addClass( "hide" );
+            $("#alertNotMatch").addClass( "hide" );
+
+            var val1 = $("#newPasswordInput").val();
+            var val2 = $("#newPasswordInput2").val();
+
+            if (val1.length < 6) { // minimal length of password is 6
+                $("#alertLength").removeClass("hide");
+                event.preventDefault();
+                return;
+            }
+
+            if (val1 != val2) { // check whether passwords equals
+                $("#alertNotMatch").removeClass("hide");
+                event.preventDefault();
+                return;
+            }
+
+        });
+    </script>
+    </@scripts>
 </@scaffolding>

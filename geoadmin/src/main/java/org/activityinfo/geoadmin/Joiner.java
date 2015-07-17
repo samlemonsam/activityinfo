@@ -63,7 +63,7 @@ public class Joiner {
         // in the first pass, match strictly by name
         for (AdminEntity unit : entities) {
             ImportFeature match = matchExactlyByName(unit);
-            if (match != null && unmatchedEntities.contains(match)) {
+            if (match != null && unmatchedFeatures.contains(match)) {
                 joins.add(new Join(unit, match));
                 unmatchedEntities.remove(unit);
                 unmatchedFeatures.remove(match);

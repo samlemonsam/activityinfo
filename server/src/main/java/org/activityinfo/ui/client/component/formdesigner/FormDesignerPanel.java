@@ -38,7 +38,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.model.type.subform.SubformConstants;
@@ -60,10 +59,8 @@ import org.activityinfo.ui.client.widget.Button;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Main Form designer panel. Must be created via FormDesigner class
@@ -199,28 +196,23 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
 
     private void fillPanel(final FormClass formClass, final FormDesigner formDesigner) {
 
-        // Exclude legacy builtin fields that the user won't be able to remove or reorder
-        final Set<ResourceId> builtinFields = builtinFields(formClass.getId());
-
         formClass.traverse(formClass, new TraverseFunction() {
             @Override
             public void apply(FormElement element, FormElementContainer container) {
                 if (element instanceof FormField) {
-                    if (!builtinFields.contains(element.getId())) {
-                        FormField formField = (FormField) element;
-                        WidgetContainer widgetContainer = containerMap.get(formField.getId());
-                        if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
-                            Widget widget = widgetContainer.asWidget();
-                            formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
+                    FormField formField = (FormField) element;
+                    WidgetContainer widgetContainer = containerMap.get(formField.getId());
+                    if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
+                        Widget widget = widgetContainer.asWidget();
+                        formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
 
-                            FlowPanel parentDropPanel = (FlowPanel) formDesigner.getDropControllerRegistry().getDropController(widgetContainer.getParentId()).getDropTarget();
-                            parentDropPanel.add(widget);
-                        }
-                        if (formField.getType() instanceof SubFormType) {
-                            ResourceId subFormId = ((SubFormType) formField.getType()).getClassId();
-                            FormClass subForm = (FormClass) formDesigner.getModel().getElementContainer(subFormId);
-                            fillPanel(subForm, formDesigner);
-                        }
+                        FlowPanel parentDropPanel = (FlowPanel) formDesigner.getDropControllerRegistry().getDropController(widgetContainer.getParentId()).getDropTarget();
+                        parentDropPanel.add(widget);
+                    }
+                    if (formField.getType() instanceof SubFormType) {
+                        ResourceId subFormId = ((SubFormType) formField.getType()).getClassId();
+                        FormClass subForm = (FormClass) formDesigner.getModel().getElementContainer(subFormId);
+                        fillPanel(subForm, formDesigner);
                     }
                 } else if (element instanceof FormSection) {
                     FormSection section = (FormSection) element;
@@ -234,18 +226,6 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 }
             }
         });
-    }
-
-    private Set<ResourceId> builtinFields(ResourceId formClassId) {
-        Set<ResourceId> fieldIds = new HashSet<>();
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.COMMENT_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PARTNER_FIELD));
-        fieldIds.add(CuidAdapter.field(formClassId, CuidAdapter.PROJECT_FIELD));
-        fieldIds.add(SubformConstants.TYPE_FIELD_ID);
-        fieldIds.add(SubformConstants.TAB_COUNT_FIELD_ID);
-        return fieldIds;
     }
 
     private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, final FormClass owner, final int depth, final List<Promise<Void>> promises) {

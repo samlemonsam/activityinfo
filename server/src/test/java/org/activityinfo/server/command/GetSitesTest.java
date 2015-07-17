@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.server.database.OnDataSet;
@@ -104,6 +105,63 @@ public class GetSitesTest extends CommandTestCase2 {
 
         Assert.assertNotNull("activityId", result.getData().get(0).getActivityId());
     }
+
+    @Test
+    @OnDataSet("/dbunit/sites-public.db.xml")
+    public void testAdminEntitySort() throws CommandException {
+
+        setUser(DATABASE_OWNER);
+
+        // level 1 - DESC
+        GetSites cmd = new GetSites();
+        cmd.filter().onActivity(1);
+        cmd.setSortInfo(new SortInfo("E1", SortDir.DESC));
+
+        PagingLoadResult<SiteDTO> result = execute(cmd);
+
+        assertThat("sorted", adminName(result, 0, "E1"), equalTo("Sud Kivu"));
+        assertThat("sorted", adminName(result, 1, "E1"), equalTo("Sud Kivu"));
+        assertThat("sorted", adminName(result, 2, "E1"), equalTo("Ituri"));
+
+        // level 1 - ASC
+        cmd = new GetSites();
+        cmd.filter().onActivity(1);
+        cmd.setSortInfo(new SortInfo("E1", SortDir.ASC));
+
+        result = execute(cmd);
+
+        assertThat("sorted", adminName(result, 0, "E1"), equalTo("Ituri"));
+        assertThat("sorted", adminName(result, 1, "E1"), equalTo("Sud Kivu"));
+        assertThat("sorted", adminName(result, 2, "E1"), equalTo("Sud Kivu"));
+
+        // level 2 - DESC
+        cmd = new GetSites();
+        cmd.filter().onActivity(1);
+        cmd.setSortInfo(new SortInfo("E2", SortDir.DESC));
+
+        result = execute(cmd);
+
+        assertThat("sorted", adminName(result, 0, "E2"), equalTo("Walungu"));
+        assertThat("sorted", adminName(result, 1, "E2"), equalTo("Shabunda"));
+        assertThat("sorted", adminName(result, 2, "E2"), equalTo("Irumu"));
+
+        // level 2 - ASC
+        cmd = new GetSites();
+        cmd.filter().onActivity(1);
+        cmd.setSortInfo(new SortInfo("E2", SortDir.ASC));
+
+        result = execute(cmd);
+
+        assertThat("sorted", adminName(result, 0, "E2"), equalTo("Irumu"));
+        assertThat("sorted", adminName(result, 1, "E2"), equalTo("Shabunda"));
+        assertThat("sorted", adminName(result, 2, "E2"), equalTo("Walungu"));
+    }
+
+    private String adminName(PagingLoadResult<SiteDTO> result, int index, String key) {
+        SiteDTO site = result.getData().get(index);
+        return ((AdminEntityDTO) site.get(key)).getName();
+    }
+
 
     @Test
     public void testActivityQueryPaged() throws CommandException {

@@ -100,8 +100,9 @@ public class DatabaseForm extends FormPanel {
     public FormBinding getBinding() {
         return binding;
     }
-
-    public void disableCountry() {
-        countryField.setEnabled(false);
+    
+    public void hideCountryField() {
+        countryField.setVisible(false);
+        countryField.setEnabled(false); // AI-1038 : disable also control to let gxt return valid=true for form (we don't need to validate invisible field)
     }
 }

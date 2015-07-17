@@ -32,7 +32,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.FormDialog;
 import org.activityinfo.ui.client.component.form.FormDialogCallback;
 import org.activityinfo.ui.client.component.table.InstanceTable;
-import org.activityinfo.ui.client.style.Icons;
+import org.activityinfo.ui.icons.Icons;
 
 import java.util.List;
 

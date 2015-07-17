@@ -98,7 +98,7 @@ public class UserProfilePage extends FormPanel implements Page {
 
     private void saveProfile() {
         AuthenticatedUser user = new ClientSideAuthProvider().get();
-        if (user != null && user.getUserId() == userProfile.getUserId()) {
+        if (user != null && user.getUserId() == userProfile.getUserId() && isValid()) {
             dispatcher.execute(new UpdateUserProfile(userProfile), new AsyncCallback<VoidResult>() {
                 @Override
                 public void onSuccess(final VoidResult result) {

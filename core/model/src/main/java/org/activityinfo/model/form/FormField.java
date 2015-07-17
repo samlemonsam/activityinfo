@@ -68,6 +68,7 @@ public class FormField extends FormElement {
         return code != null && code.matches("^[A-Za-z][A-Za-z0-9_]*");
     }
 
+    @Override
     @Nonnull
     public String getLabel() {
         return label;

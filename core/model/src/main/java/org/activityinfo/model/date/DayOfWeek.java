@@ -26,6 +26,7 @@ import com.google.gwt.i18n.shared.DateTimeFormat;
 import java.util.Date;
 
 /**
+ * @author yuriyz on 07/03/2015.
  * @author yuriyz on 02/26/2015.
  */
 public enum DayOfWeek {

@@ -29,7 +29,9 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -38,6 +40,9 @@ import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
+import org.activityinfo.ui.client.widget.ConfirmDialog;
+import org.activityinfo.ui.client.widget.ModalDialog;
+import org.activityinfo.ui.client.widget.Templates;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -65,11 +70,24 @@ public class FieldWidgetContainer implements WidgetContainer {
 
         fieldPanel = new FieldPanel(formDesigner);
         fieldPanel.getWidgetContainer().add(formFieldWidget);
-        fieldPanel.setOnRemoveConfirmationCallback(new SuccessCallback<Object>() {
-            @Override
-            public void onSuccess(Object result) {
-                FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
-                formClass.remove(formField);
+        fieldPanel.getRemoveButton().addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                if (FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId())) {
+                    HTML dialogContent = new HTML(Templates.WARNING_MESSAGE_TEMPLATE.html(I18N.CONSTANTS.notAllowedToRemoveBuiltinField()));
+                    new ModalDialog(dialogContent, I18N.CONSTANTS.warning()).
+                            hideCancelButton().
+                            hideOnOk().
+                            show();
+                    return;
+                }
+                ConfirmDialog.confirm(new DeleteFormFieldAction(widgetContainer.getFocusPanel(), formDesigner) {
+                    @Override
+                    public void onComplete() {
+                        super.onComplete();
+                        FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
+                        formClass.remove(formField);
+                    }
+                });
             }
         });
 
@@ -124,10 +142,12 @@ public class FieldWidgetContainer implements WidgetContainer {
         syncWithModel();
     }
 
+    @Override
     public Widget asWidget() {
         return fieldPanel.asWidget();
     }
 
+    @Override
     public Widget getDragHandle() {
         return fieldPanel.getDragHandle();
     }

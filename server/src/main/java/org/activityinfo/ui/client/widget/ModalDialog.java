@@ -94,18 +94,19 @@ public class ModalDialog  {
         getModalBody().add(content);
     }
 
-    public ModalDialog(IsWidget content, String dialogTitle) {
+    public ModalDialog(IsWidget content, String dialogTitleHtml) {
         this(content);
-        setDialogTitle(dialogTitle);
+        setDialogTitle(dialogTitleHtml);
     }
 
     public IsWidget getContent() {
         return content;
     }
 
-    public void show() {
+    public ModalDialog show() {
         showBackdrop();
         showDialog();
+        return this;
     }
 
     private void showDialog() {
@@ -142,8 +143,8 @@ public class ModalDialog  {
         this.hideHandler = hideHandler;
     }
 
-    public void setDialogTitle(String dialogTitle) {
-        this.title.setInnerHTML(dialogTitle);
+    public void setDialogTitle(String dialogTitleHtml) {
+        this.title.setInnerHTML(dialogTitleHtml);
     }
 
     public Button getPrimaryButton() {
@@ -167,12 +168,24 @@ public class ModalDialog  {
         cancelButton.setEnabled(false);
     }
 
-    public void hideCancelButton() {
-        cancelButton.setVisible(false);
+    public ModalDialog hideOnOk() {
+        getPrimaryButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
+        return this;
     }
 
-    public void hideBackButton() {
+    public ModalDialog hideCancelButton() {
+        cancelButton.setVisible(false);
+        return this;
+    }
+
+    public ModalDialog hideBackButton() {
         backButton.setVisible(false);
+        return this;
     }
 
 

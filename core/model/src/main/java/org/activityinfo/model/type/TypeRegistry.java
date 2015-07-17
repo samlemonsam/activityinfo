@@ -54,11 +54,11 @@ public class TypeRegistry {
         if (typeMap.containsKey(typeClass.getId())) {
             throw new RuntimeException("Type already registered: " + typeClass);
         }
-        typeMap.put(typeClass.getId(), typeClass);
+        typeMap.put(typeClass.getId().toUpperCase(), typeClass);
     }
 
     public FieldTypeClass getTypeClass(String typeId) {
-        FieldTypeClass typeClass = typeMap.get(typeId);
+        FieldTypeClass typeClass = typeMap.get(typeId.toUpperCase());
         if (typeClass == null) {
             throw new RuntimeException("Unknown type: " + typeId);
         }

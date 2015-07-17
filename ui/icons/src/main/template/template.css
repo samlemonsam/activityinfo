@@ -1,0 +1,60 @@
+
+
+@url trueTypeUrl trueTypeFont;
+@url woffUrl openWebFont;
+@url eotUrl embeddedOpenTypeFont;
+
+/*
+ * The safari permutation serves not only chrome,
+ * but all webkit-based browsers, which include Android, iOS and Safari. 
+ * TTF seems to be the common denominator between all thse browsers
+ */
+@if user.agent safari {
+
+	@font-face {
+		font-family:"<%= fontBaseName %>";
+		src: trueTypeUrl format('truetype');
+		font-weight:normal;
+		font-style:normal;
+	}
+} 
+
+/* Otherwise WOFF is preferable */
+@if user.agent gecko1_8 ie9 ie10 ie11 {
+	@font-face {
+		font-family: "icons";
+		src: woffUrl format("woff");
+		font-weight:normal;
+		font-style:normal;
+	}
+}
+/* Of course, IE8 has it's own format... IE6-7 are no longer supported */
+@if user.agent ie8 {
+	@font-face {
+		font-family: "icons";
+		src: eotUrl;
+		font-weight:normal;
+		font-style:normal;
+	}
+}
+
+.icon {
+	font-family:"<%= fontBaseName %>";
+	display:inline-block;
+	vertical-align:middle;
+	line-height:1;
+	font-weight:normal;
+	font-style:normal;
+	speak:none;
+	text-decoration:inherit;
+	text-transform:none;
+	text-rendering:auto;
+	-webkit-font-smoothing:antialiased;
+	-moz-osx-font-smoothing:grayscale;
+}
+
+<% for (var glyphIdx = 0; glyphIdx < glyphs.length; glyphIdx++) { %>
+.icon_<%= glyphs[glyphIdx] %>:before {
+	content:"\<%= codepoints[glyphIdx] %>";
+}
+<% } %>

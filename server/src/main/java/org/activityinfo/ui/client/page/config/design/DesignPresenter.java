@@ -29,7 +29,7 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.common.base.Function;
@@ -42,9 +42,9 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
-import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
@@ -98,6 +98,8 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         public MenuItem getNewIndicator();
 
         public void showForm(ModelData model);
+
+        AsyncMonitor getLoadingMonitor();
     }
 
     private final EventBus eventBus;
@@ -160,7 +162,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     }
 
     public void refresh() {
-        service.execute(new GetSchema(), new MaskingAsyncMonitor((ContentPanel)view, I18N.CONSTANTS.loading()),
+        service.execute(new GetSchema(), view.getLoadingMonitor(),
                 new AsyncCallback<SchemaDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -225,8 +227,8 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
         }
 
-        for(LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
-            if(Objects.equals(locationType.getDatabaseId(), db.getId())) {
+        for (LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
+            if (Objects.equals(locationType.getDatabaseId(), db.getId()) && !locationType.isDeleted()) {
                 treeStore.add(locationType, false);
             }
         }
@@ -267,16 +269,23 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                 }
             });
         } else if(UIActions.EDIT.equals(actionId)) {
-            ResourceId formClassId = getSelectedActivity(view.getSelection()).getFormClassId();
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(formClassId, InstancePage.DESIGN_PAGE_ID)));
+                    new InstancePlace(getSelectedFormClassId(), InstancePage.DESIGN_PAGE_ID)));
 
         } else if(UIActions.OPEN_TABLE.equals(actionId)) {
-            IsFormClass formClass = (IsFormClass) view.getSelection();
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(formClass.getResourceId(), InstancePage.TABLE_PAGE_ID)));
+                    new InstancePlace(getSelectedFormClassId(), InstancePage.TABLE_PAGE_ID)));
+        }
+    }
+
+    public ResourceId getSelectedFormClassId() {
+        if (view.getSelection() instanceof IsFormClass) {
+            IsFormClass formClass = (IsFormClass) view.getSelection();
+            return formClass.getResourceId();
+        } else {
+            return getSelectedActivity(view.getSelection()).getFormClassId();
         }
     }
 
@@ -397,9 +406,9 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                 return dto;
             }
         }
-//        throw new RuntimeException("Failed to find nationwide location type, db:" + db + ", country:" + db.getCountry());
-        // return first location, test db doesn't have nationwide location type for country
-        return db.getCountry().getLocationTypes().get(0);
+
+        MessageBox.info(I18N.CONSTANTS.alert(), I18N.MESSAGES.noNationWideLocationType(db.getName(), db.getCountry().getName()), null);
+        throw new RuntimeException("Failed to find nationwide location type, db:" + db.getName() + ", country:" + db.getCountry().getName());
     }
 
     private void createEntity(final ModelData parent, final EntityDTO newEntity) {
@@ -509,12 +518,22 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     public void onSelectionChanged(ModelData selectedItem) {
         view.setActionEnabled(UIActions.EDIT, this.db.isDesignAllowed() && canEditWithFormDesigner(selectedItem));
         view.setActionEnabled(UIActions.DELETE, this.db.isDesignAllowed() && selectedItem instanceof EntityDTO);
-        view.setActionEnabled(UIActions.OPEN_TABLE, getSelectedActivity(selectedItem) != null);
+
+        // in case of activity enable only if reportingFrequency==once (monthly implementation with subforms is on the way...)
+        boolean enableTable = selectedItem instanceof IsFormClass;
+        if (getSelectedActivity(selectedItem) != null) {
+            enableTable = ((IsActivityDTO) selectedItem).getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        }
+        view.setActionEnabled(UIActions.OPEN_TABLE, enableTable);
     }
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
         IsActivityDTO activity = getSelectedActivity(selectedItem);
-        return activity != null && activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        if (activity != null) {
+            return  activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        } else {
+            return selectedItem instanceof IsFormClass;
+        }
     }
 
     private IsActivityDTO getSelectedActivity(ModelData selectedItem) {

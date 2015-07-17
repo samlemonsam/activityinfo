@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -25,6 +26,7 @@ public class CriteriaAnalysis extends CriteriaVisitor {
 
     private boolean rootOnly = false;
     private boolean classUnion = true;
+    private boolean querySiteById = false;
 
     /**
      * Must be one of these ids
@@ -54,16 +56,26 @@ public class CriteriaAnalysis extends CriteriaVisitor {
         // this is implicitly a union criteria
         // separate the instances out into domains
         for (ResourceId id : criteria.getInstanceIds()) {
-            assert id != null : "ids cannot be null";
+            Preconditions.checkNotNull(id, "ids cannot be null");
+  
             if (criteria.isMappedToLegacyModel()) {
                 if (id.getDomain() != CuidAdapter.ACTIVITY_CATEGORY_DOMAIN) {
                     ids.put(id.getDomain(), CuidAdapter.getLegacyIdFromCuid(id));
+                } else {
+                    if (id.getDomain() == CuidAdapter.SITE_DOMAIN) {
+                        querySiteById = true;
+                    } else if (querySiteById) {
+                        throw new RuntimeException("Id domain is not SITE_DOMAIN while querySiteById flag is set to true." +
+                                "All ids must be site ids. It's not allowed to mix ids");
+                    }
                 }
             } else {
                 if (id.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
                     idsWithoutLegacyModel.add(id.asString());
                 }
             }
+
+            
         }
     }
 
@@ -131,8 +143,12 @@ public class CriteriaAnalysis extends CriteriaVisitor {
         return isRestrictedToSingleClass() && getClassRestriction().getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN;
     }
 
-    public boolean isSiteQuery() {
+    public boolean isSiteQueryByClass() {
         return isRestrictedToSingleClass() && getClassRestriction().getDomain() == CuidAdapter.ACTIVITY_DOMAIN;
+    }
+
+    public boolean isQuerySiteById() {
+        return querySiteById;
     }
 
     public boolean isAncestorQuery() {

@@ -40,6 +40,10 @@ public class LockedPeriodSet {
         }
     }
 
+    public LockedPeriodSet(UserDatabaseDTO userDatabaseDTO) {
+        indexLocks(userDatabaseDTO);
+    }
+
     public LockedPeriodSet(ActivityFormDTO activity) {
         for (LockedPeriodDTO lock : activity.getLockedPeriods()) {
             if (lock.isEnabled()) {
@@ -111,5 +115,9 @@ public class LockedPeriodSet {
             }
         }
         return false;
+    }
+
+    public boolean hasLocks() {
+        return !activityLocks.isEmpty() || !projectLocks.isEmpty();
     }
 }

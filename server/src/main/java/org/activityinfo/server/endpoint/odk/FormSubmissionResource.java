@@ -28,7 +28,6 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.ResourceLocatorSync;
-import org.activityinfo.server.database.hibernate.EntityManagerProvider;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.odk.xform.LegacyXFormInstance;
@@ -38,13 +37,11 @@ import org.activityinfo.service.blob.BlobFieldStorageService;
 import org.activityinfo.service.blob.BlobId;
 import org.w3c.dom.Element;
 
+import javax.inject.Provider;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.persistence.EntityManager;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -53,6 +50,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.appengine.api.images.ImagesServiceFactory.makeImage;
+import static javax.ws.rs.core.Response.Status.*;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -76,7 +75,7 @@ public class FormSubmissionResource {
     final private ResourceLocatorSync locator;
     final private AuthenticationTokenService authenticationTokenService;
     final private ServerSideAuthProvider authProvider;                  // Necessary for 2.8 XForms, remove afterwards
-    final private EntityManagerProvider entityManager;                  // Necessary for 2.8 XForms, remove afterwards
+    final private Provider<EntityManager> entityManager;                  // Necessary for 2.8 XForms, remove afterwards
     final private BlobFieldStorageService blobFieldStorageService;
     final private InstanceIdService instanceIdService;
     final private SubmissionArchiver submissionArchiver;
@@ -86,7 +85,7 @@ public class FormSubmissionResource {
                                   ResourceLocatorSync locator,
                                   AuthenticationTokenService authenticationTokenService,
                                   ServerSideAuthProvider authProvider,  // Necessary for 2.8 XForms, remove afterwards
-                                  EntityManagerProvider entityManager,  // Necessary for 2.8 XForms, remove afterwards
+                                  Provider<EntityManager> entityManager,  // Necessary for 2.8 XForms, remove afterwards
                                   BlobFieldStorageService blobFieldStorageService,
                                   InstanceIdService instanceIdService,
                                   SubmissionArchiver submissionArchiver) {

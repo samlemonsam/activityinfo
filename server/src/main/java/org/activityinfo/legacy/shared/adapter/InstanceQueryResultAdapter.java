@@ -43,7 +43,8 @@ public class InstanceQueryResultAdapter<T> implements Function<List<T>, QueryRes
         final int size = list.size();
         final int startIndex = query.getOffset() >= 0 && query.getOffset() < size ? query.getOffset() : 0;
         final int count = query.getMaxCount();
-        final int endIndex = (startIndex + count) < size ? (startIndex + count) : size;
+        final int endIndex = (startIndex + count) < size && (startIndex + count) >= 0 /* overflow check*/ ?
+                (startIndex + count) : size;
         return new QueryResult<>(list.subList(startIndex, endIndex), size);
     }
 }

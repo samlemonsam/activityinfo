@@ -110,7 +110,13 @@ public class MergeTreeBuilder {
 
         AdminLevel childLevel = nextParent(adminLevel);
 
-        List<AdminEntity> parents = levelMap.get(adminLevel.getId());
+
+        List<AdminEntity> parents;
+        if(parentNode.getEntity() == null) {
+           parents = levelMap.get(adminLevel.getId());
+        } else {
+           parents = getChildEntities(adminLevel, parentNode.getEntity());
+        }
 
         Joiner joiner = new Joiner(parents, features);
         if(nameMap.containsKey(adminLevel.getId())) {

@@ -23,12 +23,16 @@ package org.activityinfo.ui.client.component.report.view;
  */
 
 import com.extjs.gxt.ui.client.widget.Component;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
 
 public interface ReportView<T extends ReportElement> {
+
+    void loading();
 
     void show(T element);
 
     Component asComponent();
 
+    void onFailure(Throwable caught, ClickHandler retryCallback);
 }

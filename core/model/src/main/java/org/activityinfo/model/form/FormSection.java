@@ -27,6 +27,7 @@ public class FormSection extends FormElement implements FormElementContainer {
         return id;
     }
 
+    @Override
     @Nonnull
     public String getLabel() {
         return label;
@@ -37,6 +38,7 @@ public class FormSection extends FormElement implements FormElementContainer {
         return this;
     }
 
+    @Override
     public List<FormElement> getElements() {
         return elements;
     }

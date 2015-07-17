@@ -27,7 +27,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.component.table.InstanceTable;
 import org.activityinfo.ui.client.component.table.dialog.ChooseColumnsDialog;
-import org.activityinfo.ui.client.style.Icons;
+import org.activityinfo.ui.icons.Icons;
 
 /**
  * @author yuriyz on 4/8/14.

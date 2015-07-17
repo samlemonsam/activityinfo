@@ -33,6 +33,7 @@ public class FormClass implements IsResource, FormElementContainer {
      */
     public static final String LABEL_FIELD_ID = "_class_label";
 
+
     @Nonnull
     private ResourceId id;
     private ResourceId ownerId;
@@ -126,6 +127,7 @@ public class FormClass implements IsResource, FormElementContainer {
         });
     }
 
+    @Override
     public ResourceId getId() {
         return id;
     }
@@ -151,6 +153,7 @@ public class FormClass implements IsResource, FormElementContainer {
         this.description = description;
     }
 
+    @Override
     public List<FormElement> getElements() {
         return elements;
     }
@@ -223,6 +226,7 @@ public class FormClass implements IsResource, FormElementContainer {
         throw new IllegalArgumentException("No such field: " + fieldId);
     }
 
+    @Override
     public FormClass addElement(FormElement element) {
         elements.add(element);
         return this;
@@ -272,6 +276,7 @@ public class FormClass implements IsResource, FormElementContainer {
         return elements;
     }
 
+    @Override
     public Resource asResource() {
         Resource resource = Resources.createResource();
         resource.setId(id);

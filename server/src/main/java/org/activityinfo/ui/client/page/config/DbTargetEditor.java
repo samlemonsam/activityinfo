@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.ImplementedBy;
@@ -35,7 +36,9 @@ import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.state.StateProvider;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.AddTarget;
 import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.GetTargets;
@@ -120,12 +123,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
 
     private void fillStore() {
 
-        service.execute(new GetTargets(db.getId()), view.getLoadingMonitor(), new AsyncCallback<TargetResult>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
+        service.execute(new GetTargets(db.getId()), view.getLoadingMonitor(), new SuccessCallback<TargetResult>() {
 
             @Override
             public void onSuccess(TargetResult result) {
@@ -140,7 +138,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
         service.execute(new Delete(model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
-
+                Log.error("Failed to remove target. ", caught);
             }
 
             @Override
@@ -155,6 +153,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
     @Override
     protected void onAdd() {
         final TargetDTO newTarget = new TargetDTO();
+
         this.view.showAddDialog(newTarget, db, new FormDialogCallback() {
 
             @Override
@@ -170,11 +169,15 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
                     public void onSuccess(CreateResult result) {
                         newTarget.setId(result.getNewId());
 
-                        PartnerDTO partner = db.getPartnerById((Integer) newTarget.get("partnerId"));
-                        newTarget.setPartner(partner);
+                        if (newTarget.get("partnerId") != null) {
+                            PartnerDTO partner = db.getPartnerById((Integer) newTarget.get("partnerId"));
+                            newTarget.setPartner(partner);
+                        }
 
-                        ProjectDTO project = db.getProjectById((Integer) newTarget.get("projectId"));
-                        newTarget.setProject(project);
+                        if (newTarget.get("projectId") != null) {
+                            ProjectDTO project = db.getProjectById((Integer) newTarget.get("projectId"));
+                            newTarget.setProject(project);
+                        }
 
                         store.add(newTarget);
                         store.commitChanges();
@@ -200,17 +203,25 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
                         new AsyncCallback<VoidResult>() {
                             @Override
                             public void onFailure(Throwable caught) {
-
+                                Log.error("Failed to edit target. " + caught.getMessage(), caught);
                             }
 
                             @Override
                             public void onSuccess(VoidResult result) {
 
-                                PartnerDTO partner = db.getPartnerById((Integer) record.get("partnerId"));
-                                dto.setPartner(partner);
+                                if (record.get("partnerId") != null) {
+                                    PartnerDTO partner = db.getPartnerById((Integer) record.get("partnerId"));
+                                    dto.setPartner(partner);
+                                } else {
+                                    dto.setPartner(null);
+                                }
 
-                                ProjectDTO project = db.getProjectById((Integer) record.get("projectId"));
-                                dto.setProject(project);
+                                if (record.get("projectId") != null) {
+                                    ProjectDTO project = db.getProjectById((Integer) record.get("projectId"));
+                                    dto.setProject(project);
+                                } else {
+                                    dto.setProject(null);
+                                }
 
                                 store.commitChanges();
                                 eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
@@ -257,8 +268,8 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
 
     @Override
     public void onSelectionChanged(ModelData selectedItem) {
-        view.setActionEnabled(UIActions.DELETE, true);
-        view.setActionEnabled(UIActions.EDIT, true);
-        targetIndicatorPresenter.load(view.getSelection());
+        view.setActionEnabled(UIActions.DELETE, selectedItem != null);
+        view.setActionEnabled(UIActions.EDIT, selectedItem != null);
+        targetIndicatorPresenter.load(Optional.fromNullable(view.getSelection()));
     }
 }

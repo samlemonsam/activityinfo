@@ -1,5 +1,6 @@
 package org.activityinfo.model.date;
 /*
+<<<<<<< HEAD
  * #%L
  * ActivityInfo Server
  * %%
@@ -21,11 +22,16 @@ package org.activityinfo.model.date;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
-import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.util.Pair;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The first epi week of the year ends, by definition, on the first Saturday of January,
@@ -55,6 +61,18 @@ public class CalendarUtils {
         @Override
         public DayOfWeek dayOfWeek(Date date) {
             return DayOfWeek.dayOfWeek(date);
+        }
+    };
+
+    public static final DateShifter GWT_DATE_SHIFTER = new DateShifter() {
+        @Override
+        public void addMonthsToDate(Date date, int add) {
+            CalendarUtil.addMonthsToDate(date, add);
+        }
+
+        @Override
+        public void addDaysToDate(Date date, int add) {
+            CalendarUtil.addDaysToDate(date, add);
         }
     };
 
@@ -92,13 +110,12 @@ public class CalendarUtils {
             epiWeek.setYear(year - 1);
             return epiWeek;
         }
+
         // Calculate week number: number of weeks between target date and january 4th
         int weekInYear = (int) (1 + Math.ceil(daysBetween / 7));
         Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
-
         if (firstDayOfEpicWeekInYear.getYear() < year && date.getMonth() == 0 &&
                 (weekInYear == 1 || weekInYear == 52 || weekInYear == 53)) {
-
             if (dayOfWeek == DayOfWeek.THURSDAY || dayOfWeek == DayOfWeek.FRIDAY || dayOfWeek == DayOfWeek.SATURDAY) {
                 year = firstDayOfEpicWeekInYear.getYear() + 1900;
             }
@@ -106,7 +123,7 @@ public class CalendarUtils {
 
         // case when date falls into next year week
         if (weekInYear == 52 || weekInYear == 53) {
-            if (date.getMonth() == 11 &&  // if december
+            if (date.getMonth() == 11 && // if december
                     (dayInMonth == 28 || dayInMonth == 29 || dayInMonth == 30 || dayInMonth == 31) &&
                     (dayOfWeek == DayOfWeek.SUNDAY || dayOfWeek == DayOfWeek.MONDAY || dayOfWeek == DayOfWeek.TUESDAY)) {
                 return new EpiWeek()
@@ -139,7 +156,6 @@ public class CalendarUtils {
                 return january4;
 
         }
-
         throw new RuntimeException("Failed to identify first day of epic week in year: " + year);
 
     }
@@ -161,10 +177,92 @@ public class CalendarUtils {
 
         Date startDate = CalendarUtil.copyDate(date);
         CalendarUtil.addDaysToDate(startDate, -dateOfWeek.getValue());
-
         Date endDate = CalendarUtil.copyDate(date);
         CalendarUtil.addDaysToDate(endDate, 6 - dateOfWeek.getValue());
-
         return new DateRange(startDate, endDate);
     }
-}
+
+    /**
+     * Compares two date with a precision of one second.
+     *
+     * @param baseDate  The base date
+     * @param afterDate The date supposed to be after.
+     * @return True if the afterDate is indeed after the baseDate.
+     */
+    public static boolean after(final Date baseDate, final Date afterDate) {
+        if ((baseDate == null) || (afterDate == null)) {
+            throw new IllegalArgumentException(
+                    "Can't compare the dates, at least one of them is null");
+        }
+
+        final long baseTime = baseDate.getTime() / 1000;
+        final long afterTime = afterDate.getTime() / 1000;
+        return baseTime < afterTime;
+    }
+
+    /**
+     * Compares two date with a precision of one second.
+     *
+     * @param baseDate   The base date
+     * @param beforeDate The date supposed to be before.
+     * @return True if the beforeDate is indeed before the baseDate.
+     */
+    public static boolean before(final Date baseDate, final Date beforeDate) {
+        if ((baseDate == null) || (beforeDate == null)) {
+            throw new IllegalArgumentException(
+                    "Can't compare the dates, at least one of them is null");
+        }
+
+        final long baseTime = baseDate.getTime() / 1000;
+        final long beforeTime = beforeDate.getTime() / 1000;
+        return beforeTime < baseTime;
+    }
+
+    public static List<LocalDateRange> getLastFourQuarters() {
+        return Lists.newArrayList(getLastFourQuarterMap().values());
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap() {
+        return getLastFourQuarterMap(GWT_DATE_SHIFTER);
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(DateShifter dateShifter) {
+        return getLastFourQuarterMap(new LocalDate(), dateShifter);
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(LocalDate date, DateShifter dateShifter) {
+        int year = date.getYear();
+        int quarter = date.getMonthOfYear() / 3;
+
+        Map<Pair<Integer, Integer>, LocalDateRange> result = Maps.newLinkedHashMap();
+
+        for (int i = 0; i < 4; ++i) {
+            quarter = quarter - 1;
+            if (quarter < 0) {
+                year = year - 1;
+                quarter = 3;
+            }
+            result.put(Pair.newPair(year, quarter), createQuarterRange(year, quarter, dateShifter));
+        }
+        return result;
+    }
+
+    public static LocalDateRange createQuarterRange(int year, int quarter) {
+        return createQuarterRange(year, quarter, GWT_DATE_SHIFTER);
+    }
+
+    public static LocalDateRange createQuarterRange(int year, int quarter, DateShifter dateShifter) {
+        Date from = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
+        Date to = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
+        dateShifter.addMonthsToDate(from, 1);
+        dateShifter.addMonthsToDate(to, 4);
+        dateShifter.addDaysToDate(to, -1);
+
+        return new LocalDateRange(from, to);
+    }
+
+    public static LocalDate convert(org.activityinfo.model.type.time.LocalDate date) {
+        return new LocalDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
+    }
+
+}}

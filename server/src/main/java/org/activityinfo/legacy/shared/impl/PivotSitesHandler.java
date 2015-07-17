@@ -83,7 +83,7 @@ public class PivotSitesHandler implements CommandHandlerAsync<PivotSites, PivotS
             }
         }
 
-        if(command.isPivotedBy(DimensionType.Indicator)) {
+        if (command.getValueType() == PivotSites.ValueType.INDICATOR) {
             workList.add(new ErrorLoggingWorkItem(new CalculatedIndicatorsQuery(queryContext)));
         }
 
@@ -103,6 +103,7 @@ public class PivotSitesHandler implements CommandHandlerAsync<PivotSites, PivotS
                         remaining.remove(workItem);
                         if (remaining.isEmpty()) {
                             try {
+                                queryContext.calculatePercentages();
                                 callback.onSuccess(new PivotResult(queryContext.getBuckets()));
                             } catch (Throwable e) {
                                 callback.onFailure(e);
