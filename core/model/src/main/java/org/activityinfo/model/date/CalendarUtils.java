@@ -1,6 +1,5 @@
 package org.activityinfo.model.date;
 /*
-<<<<<<< HEAD
  * #%L
  * ActivityInfo Server
  * %%
@@ -265,4 +264,4 @@ public class CalendarUtils {
         return new LocalDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
     }
 
-}}
+}

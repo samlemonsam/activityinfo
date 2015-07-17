@@ -21,15 +21,6 @@ package org.activityinfo.model.date;
  * #L%
  */
 
-import org.activityinfo.model.type.time.LocalDate;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.Calendar;
-import java.util.Date;
-
-/**
- * @author yuriyz on 02/26/2015.
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.Lists;
 import org.junit.Test;
@@ -38,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author yuriyz on 07/06/2015.
@@ -56,7 +47,7 @@ public class CalendarUtilsTest {
         calendar.set(Calendar.MILLISECOND, 0);
 
         Date date = calendar.getTime();
-        Assert.assertEquals(date, CalendarUtils.getFirstDateOfYear(date));
+        assertEquals(date, CalendarUtils.getFirstDateOfYear(date));
     }
 
     @Test
@@ -110,14 +101,14 @@ public class CalendarUtilsTest {
 
     private static void assertRangeByDate(int year, int weekInYear, LocalDate startDate, LocalDate endDate) {
         DateRange range = CalendarUtils.rangeByEpiWeek(jvmDayOfWeekProvider(), new EpiWeek(weekInYear, year));
-        Assert.assertEquals(range, new DateRange(startDate.atMidnightInMyTimezone(), endDate.atMidnightInMyTimezone()));
+        assertEquals(range, new DateRange(startDate.atMidnightInMyTimezone(), endDate.atMidnightInMyTimezone()));
     }
 
     private static void assertWeekOfYear(int year, int month, int dayOfMonth, int expectedWeek, int expectedYear) {
         Date date = new LocalDate(year, month, dayOfMonth).atMidnightInMyTimezone();
         EpiWeek epiWeek = CalendarUtils.epiWeek(date, jvmDayOfWeekProvider());
-        Assert.assertEquals(epiWeek.getWeekInYear(), expectedWeek);
-        Assert.assertEquals(epiWeek.getYear(), expectedYear);
+        assertEquals(epiWeek.getWeekInYear(), expectedWeek);
+        assertEquals(epiWeek.getYear(), expectedYear);
     }
 
     private Date firstDayOfEpicWeekInYear(int year) {
@@ -126,7 +117,7 @@ public class CalendarUtilsTest {
 
     private void assertFirstDayOfEpicWeekInYear(int year, int expectedYear, int expectedMonth, int expectedDayOfMonth) {
         LocalDate localDate = new LocalDate(expectedYear, expectedMonth, expectedDayOfMonth);
-        Assert.assertEquals(firstDayOfEpicWeekInYear(year), localDate.atMidnightInMyTimezone());
+        assertEquals(firstDayOfEpicWeekInYear(year), localDate.atMidnightInMyTimezone());
     }
 
     public static CalendarUtils.DayOfWeekProvider jvmDayOfWeekProvider() {
@@ -136,15 +127,8 @@ public class CalendarUtilsTest {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 return DayOfWeek.fromValue(calendar.get(Calendar.DAY_OF_WEEK) - 1);
-    public void lastFourQuarters() {
-
-        LocalDate date = new LocalDate(2015, 6, 7);
-        ArrayList<LocalDateRange> ranges = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap(date, jvmDateShifter()).values());
-
-        assertEquals(ranges.get(0), new LocalDateRange(new LocalDate(2015, 4, 1), new LocalDate(2015, 6, 30)));
-        assertEquals(ranges.get(1), new LocalDateRange(new LocalDate(2015, 1, 1), new LocalDate(2015, 3, 31)));
-        assertEquals(ranges.get(2), new LocalDateRange(new LocalDate(2014, 10, 1), new LocalDate(2014, 12, 31)));
-        assertEquals(ranges.get(3), new LocalDateRange(new LocalDate(2014, 7, 1), new LocalDate(2014, 9, 30)));
+            }
+        };
     }
 
     public static DateShifter jvmDateShifter() {
@@ -165,5 +149,17 @@ public class CalendarUtilsTest {
                 date.setTime(c.getTime().getTime());
             }
         };
+    }
+
+    @Test
+    public void lastFourQuarters() {
+
+        LocalDate date = new LocalDate(2015, 6, 7);
+        ArrayList<LocalDateRange> ranges = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap(date, jvmDateShifter()).values());
+
+        assertEquals(ranges.get(0), new LocalDateRange(new LocalDate(2015, 4, 1), new LocalDate(2015, 6, 30)));
+        assertEquals(ranges.get(1), new LocalDateRange(new LocalDate(2015, 1, 1), new LocalDate(2015, 3, 31)));
+        assertEquals(ranges.get(2), new LocalDateRange(new LocalDate(2014, 10, 1), new LocalDate(2014, 12, 31)));
+        assertEquals(ranges.get(3), new LocalDateRange(new LocalDate(2014, 7, 1), new LocalDate(2014, 9, 30)));
     }
 }
