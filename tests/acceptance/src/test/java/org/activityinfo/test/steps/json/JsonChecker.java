@@ -1,10 +1,7 @@
 package org.activityinfo.test.steps.json;
 
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.NullNode;
-import org.codehaus.jackson.node.ObjectNode;
-import org.codehaus.jackson.node.TextNode;
+import org.codehaus.jackson.node.*;
 
 import java.util.Iterator;
 
@@ -49,10 +46,16 @@ class JsonChecker {
             if ("null".equals(expected.asText()) && actual instanceof NullNode) {
                 return;
             }
-            if(!actual.isTextual()) {
+            if (!actual.isTextual()) {
                 throw new AssertionError(String.format("Expected an text at %s; found: %s", path, actual));
             }
             checkString(path, expected.asText(), actual.asText());
+
+        } else if (expected.isNumber()) {
+            if(!actual.isNumber()) {
+                throw new AssertionError(String.format("Expected a number at %s; found: %s", path, actual));
+            }
+            checkNumber(path, expected.asDouble(), actual.asDouble());
             
         } else if (expected instanceof ObjectNode) {
             if(!actual.isObject()) {
@@ -70,6 +73,14 @@ class JsonChecker {
             if(!expected.equals(actual)) {
                 throw mismatchException(path, expected, actual);
             }
+        }
+    }
+
+    private void checkNumber(String path, double expected, double actual) {
+        double diff = Math.abs(expected - actual);
+        if(diff > 0.0001) {
+            throw new AssertionError(String.format("At %s, expected:\n%f\nFound:\n%f",
+                    path, expected, actual));
         }
     }
 
