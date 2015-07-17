@@ -3671,7 +3671,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Attributes and indicators appear separately")
     String newFormAsClassicHelpBlock();
 
-    @DefaultStringValue("There are no partners defined for this database, so it is not possible to" +
+    @DefaultStringValue("There are no partners defined for this database, so it is not possible to " +
             "make new submissions at this time.")
     String noPartners();
 
