@@ -100,3 +100,79 @@ Feature: Site API
            -  21.746970920000003
            -  -4.034950903
     """
+
+  @AI-917
+  Scenario: Querying database schema
+    When I request /resources/database/$RRMP/schema
+    Then the response should be:
+    """
+    name: RRMP
+    editAllowed: true
+    designAllowed: true
+    editAllAllowed: true
+    description: null
+    owned: true
+    country:
+      id: 1
+      name: RDC
+      code: null
+    partners: 
+      - id: $Default
+        name: Default
+        fullName: null
+      - id: $NRC
+        name: NRC
+        fullName: null
+    lockedPeriods: [ ]
+    projects: [ ]
+    activities:
+      - id: $Distributions
+        name: Distributions
+        reportingFrequency: 0
+        category: null
+        published: 1
+        locationType:
+          id: 100000
+          name: Country
+          adminLevelId: null
+        lockedPeriods: [ ]
+        indicators: 
+          - id: $kits
+            name: kits
+            code: kits
+            units: parsects
+            type: QUANTITY
+            description: null
+            aggregation: 0
+            listHeader: null
+            calculatedAutomatically: false
+            expression: null
+            category: null
+            mandatory: false
+            
+          - id: $score
+            code: score        
+            name: score
+            units: parsects
+            type: QUANTITY
+            description: null
+            aggregation: 0
+            listHeader: null
+            calculatedAutomatically: false
+            expression: null
+            category: null
+            mandatory: false
+        attributeGroups: 
+          - id: $donor
+            name: donor
+            multipleAllowed: false
+            workflow: false
+            mandatory: false
+            attributes: 
+              - id: $USAID
+                name: USAID
+              - id: $ECHO
+                name: ECHO
+              - id: $NRC
+                name: NRC
+    """
