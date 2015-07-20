@@ -185,7 +185,6 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("expression", expression);
     }
 
-    @JsonProperty("relevanceCondition") @JsonView(DTOViews.Schema.class)
     public String getSkipExpression() {
         return get("skipExpression");
     }
@@ -217,7 +216,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         return !Strings.isNullOrEmpty(getExpression());
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+
     public FieldTypeClass getType() {
         return TypeRegistry.get().getTypeClass(getTypeId());
     }
@@ -228,6 +227,8 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     public void setTypeId(String typeId) { set("type", typeId); }
 
+    @JsonProperty("type")
+    @JsonView(DTOViews.Schema.class)
     private String getTypeId() {
         return get("type", QuantityType.TYPE_CLASS.getId());
     }
