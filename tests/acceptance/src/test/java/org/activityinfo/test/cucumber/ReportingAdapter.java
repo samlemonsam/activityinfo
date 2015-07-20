@@ -5,90 +5,80 @@ import gherkin.formatter.Formatter;
 import gherkin.formatter.PrettyFormatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.*;
+import org.activityinfo.test.TestReporter;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static cucumber.runtime.Runtime.isPending;
 
 public class ReportingAdapter implements Formatter, Reporter {
 
+    private final TestReporter reporter;
     private StringBuilder output;
     private boolean passed = true;
     private PrettyFormatter formatter;
-    
-    private List<Throwable> errors = new ArrayList<>();
 
-    public ReportingAdapter() {
+    public ReportingAdapter(TestReporter reporter) {
+        this.reporter = reporter;
         output = new StringBuilder();
-        formatter = new PrettyFormatter(output, true, true);
     }
 
     @Override
     public void feature(Feature feature) {
-        formatter.feature(feature);
+        printlnf("Feature: %s", feature.getName());
     }
 
     @Override
     public void uri(String uri) {
-        formatter.uri(uri);
     }
     
     @Override
     public void syntaxError(String state, String event, List<String> legalEvents, String uri, Integer line) {
-        formatter.syntaxError(state, event, legalEvents, uri, line);
     }
 
 
     @Override
     public void background(Background background) {
-        formatter.background(background);
-        output.append("Background:\n");
+        output.append("Running Background:\n");
     }
     
     @Override
     public void scenarioOutline(ScenarioOutline scenarioOutline) {
-        formatter.scenarioOutline(scenarioOutline);
+        printlnf("Starting Scenario Outline: %s", scenarioOutline.getName());
     }
 
     @Override
     public void examples(Examples examples) {
-        formatter.examples(examples);
     }
 
     @Override
     public void startOfScenarioLifeCycle(Scenario scenario) {
-        formatter.startOfScenarioLifeCycle(scenario);
     }
 
     @Override
     public void scenario(Scenario scenario) {
-        formatter.scenario(scenario);
+        printlnf("Starting Scenario: %s", scenario.getName());
     }
 
+    /**
+     * Called at the beginning of an execution block, long before the steps are actually executed.
+     */
     @Override
     public void step(Step step) {
-        formatter.step(step);
     }
 
     @Override
     public void endOfScenarioLifeCycle(Scenario scenario) {
-        formatter.endOfScenarioLifeCycle(scenario);
     }
 
     @Override
     public void done() {
-        formatter.done();
     }
 
     @Override
     public void close() {
-        formatter.close();
     }
 
     @Override
     public void eof() {
-        formatter.eof();
     }
 
     /**
@@ -96,7 +86,7 @@ public class ReportingAdapter implements Formatter, Reporter {
      */
     @Override
     public void before(Match match, Result result) {
-        formatter.before(match, result);
+        printlnf("Running @Before hook %s [%s]", match.getLocation(), result.getStatus());
         maybeRecordFailure(result);
     }
 
@@ -105,47 +95,42 @@ public class ReportingAdapter implements Formatter, Reporter {
      */
     @Override
     public void after(Match match, Result result) {
-        formatter.result(result);
+        printlnf("Running @After hook %s [%s]", match.getLocation(), result.getStatus());
         maybeRecordFailure(result);
+    }
+
+    @Override
+    public void match(Match match) {
+        printlnf("Running %s", match.getLocation());
     }
 
 
     @Override
     public void result(Result result) {
-        formatter.result(result);
-
+        printlnf("Result: %s", result.getStatus());
         maybeRecordFailure(result);
     }
 
     private void maybeRecordFailure(Result result) {
         Throwable error = result.getError();
-        if (isPendingOrUndefined(result)) {
-            passed = false;
-
-        } else if(error != null) {
+        if(error != null) {
             output.append(Throwables.getStackTraceAsString(error));
             passed = false;
         }
     }
-
-    private boolean isPendingOrUndefined(Result result) {
-        Throwable error = result.getError();
-        return Result.UNDEFINED == result || isPending(error);
-    }
-
-    @Override
-    public void match(Match match) {
-        formatter.match(match);
-    }
-
+    
     @Override
     public void embedding(String mimeType, byte[] data) {
-        formatter.embedding(mimeType, data);
+        reporter.attach(mimeType, data);
     }
 
     @Override
     public void write(String text) {
-        formatter.write(text);
+        output.append(text);
+    }
+    
+    private void printlnf(String format, Object... args) {
+        output.append(String.format(format, args)).append("\n");
     }
     
     public Appendable asAppendable() {

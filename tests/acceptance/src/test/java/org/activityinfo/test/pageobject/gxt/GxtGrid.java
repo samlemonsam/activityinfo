@@ -24,10 +24,7 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 public class GxtGrid {
     
-
     private FluentElement container;
-
-    
 
     public static FluentIterable<GxtGrid> findGrids(final FluentElement container) {
         FluentElements elements = container.waitFor(new Function<WebDriver, FluentElements>() {

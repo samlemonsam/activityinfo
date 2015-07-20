@@ -1,14 +1,12 @@
 package org.activityinfo.test;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
 import com.google.inject.Module;
-import cucumber.runtime.ClassFinder;
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
-import cucumber.runtime.io.ResourceLoaderClassFinder;
 import cucumber.runtime.model.CucumberFeature;
 import io.airlift.airline.Command;
 import io.airlift.airline.HelpOption;
@@ -18,7 +16,7 @@ import org.activityinfo.test.cucumber.FeatureTestSuite;
 import org.activityinfo.test.driver.ApiModule;
 import org.activityinfo.test.driver.mail.EmailModule;
 import org.activityinfo.test.sut.SystemUnderTest;
-import org.activityinfo.test.webdriver.ChromeDriverModule;
+import org.activityinfo.test.webdriver.WebDriverModule;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -45,8 +43,16 @@ public class TestMain implements Runnable {
     @Option(name = "--api", description = "Run functional tests against the API")
     public boolean api;
     
-    @Option(name = "--chrome", description = "Run tests using a local chrome browser")
-    public boolean chrome;
+    @Option(name = "--ui", description = "Run functional tests against the UI")
+    public boolean ui;
+    
+    
+    @Option(name = "--webdriver", 
+            title = "chrome | phantomjs | sauce",
+            description = "Select the WebDriver to use for executing tests against the UI: chrome, phantomjs or sauce.", 
+            allowedValues = { "chrome", "phantomjs", "sauce" }
+    )
+    public String webDriverType;
     
     @Option(name = "--smoke", description = "Run smoke tests against the live production instance")
     public boolean smokeTests;
@@ -56,6 +62,7 @@ public class TestMain implements Runnable {
     
     @Option(name = "--filter", description = "Filters tests to run using a regular expression")
     public String filterRegex;
+    
 
     private TestStats stats = new TestStats();
     private ExecutorService executor;
@@ -93,8 +100,8 @@ public class TestMain implements Runnable {
             queueApiTests();
         }
         
-        if(chrome) {
-            queueWebTests(new ChromeDriverModule());
+        if(ui) {
+            queueUiTests();
         }
 
         executor.shutdown();
@@ -106,7 +113,7 @@ public class TestMain implements Runnable {
         }
         
         executor.shutdownNow();
-        
+        stats.finished();
         stats.printSummary();
         
         if(stats.hasFailures()) {
@@ -118,29 +125,28 @@ public class TestMain implements Runnable {
 
     private void queueApiTests() {
         ResourceLoader loader = new MultiLoader(getClass().getClassLoader());
-        ClassFinder classFinder = new ResourceLoaderClassFinder(loader, getClass().getClassLoader());
         RuntimeOptions options = new RuntimeOptions(Arrays.asList(
                 "--tags", "@api", "classpath:org/activityinfo/test",
                 "--glue", "org.activityinfo.test.steps.common", 
                 "--glue", "org.activityinfo.test.steps.json"));
 
 
-        queueFeatures(loader, options, new ApiModule());
+        queueFeatures("api", loader, options, new ApiModule());
     }
 
-    private void queueWebTests(Module driverModule) {
+    private void queueUiTests() {
         ResourceLoader loader = new MultiLoader(getClass().getClassLoader());
-        ClassFinder classFinder = new ResourceLoaderClassFinder(loader, getClass().getClassLoader());
         RuntimeOptions options = new RuntimeOptions(Arrays.asList(
                 "--tags", "@web", "classpath:org/activityinfo/test",
                 "--glue", "org.activityinfo.test.steps.common",
                 "--glue", "org.activityinfo.test.steps.web"));
 
 
-        queueFeatures(loader, options, driverModule);
+        queueFeatures("ui", loader, options, new WebDriverModule(webDriverType));
     }
 
-    private void queueFeatures(ResourceLoader loader, RuntimeOptions options, Module... driverModules) {
+    private void queueFeatures(String environment, ResourceLoader loader, RuntimeOptions options,
+                               Module... driverModules) {
         
         List<Module> modules = new ArrayList<>();
         modules.add(new SystemUnderTest(url));
@@ -149,7 +155,7 @@ public class TestMain implements Runnable {
         
         List<CucumberFeature> features = options.cucumberFeatures(loader);
         for (CucumberFeature feature : features) {
-            CiTestReporter reporter = new CiTestReporter(outputDir, stats);
+            CiTestReporter reporter = new CiTestReporter(environment, outputDir, stats);
             
             executor.submit(new FeatureTestSuite(options, feature, reporter, filterPredicate(), modules));
         }

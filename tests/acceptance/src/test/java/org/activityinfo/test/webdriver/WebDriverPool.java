@@ -115,7 +115,9 @@ public class WebDriverPool {
 
         @Override
         public void setConnected(boolean connected) {
-            ((WebDriverConnection) getWrappedDriver()).setConnected(connected);
+            if(getWrappedDriver() instanceof WebDriverConnection) {
+                ((WebDriverConnection) getWrappedDriver()).setConnected(connected);
+            }
         }
     }
 }

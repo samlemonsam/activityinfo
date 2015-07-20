@@ -48,45 +48,28 @@ test {
     
 }
 
-task commitTest(type: Test) {
-    group = "Verification"
-    description = "Runs API tests against Local Development Server upon commit"
-    
-    dependsOn ':server:configureDatabase'
-    dependsOn ':server:appengineStartAT'
-    finalizedBy ':server:appengineStop'
-    
-    include "**/FunctionalApiAT*"
-}
 
-task acceptanceTest(type: Test) {
+task acceptanceTest(type: JavaExec) {
     group = "Verification"
     description = 'Runs acceptance test suite'
-    
+
+    dependsOn 'testClasses'
     dependsOn ':server:configureDatabase'
+
+    args '--url', project.environment.url
+    args '--api'
+    
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
     
     // Determine the server against which to test
     if(project.environment.local) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
     } 
-
-    // Run only functional tests
-    include "**/Functional*AT*"
-    include "**/*UiTest*"
-    exclude "**/*\$*"
 }
 
-task browserAcceptanceTest(type: Test) {
-    group = "Verification"
-    description = 'Runs functional tests against a specific browser'
-    dependsOn ':server:configureDatabase'
-
-    include "**/CrossBrowserAT*"
-    exclude "**/*\$*"
-    
-    outputs.upToDateWhen { false }
-}
 
 task instrumentedAcceptanceTest(type: Test) {
     group = "Verification"
@@ -165,18 +148,11 @@ task smokeTest(type: Test) {
 }
 
 tasks.each { task ->
-    if(task.name =~ /commitTest|[aA]cceptanceTest$/) {
+    if(task.name =~ /[aA]cceptanceTest$/) {
         task.configure {
-            scanForTestClasses = false
 
             doFirst {
                 systemProperties.putAll(project.environment.systemProperties)
-
-                // Keep console output to a minimum
-                testLogging {
-                    showStandardStreams = false
-                    events = ['failed', 'passed']
-                }
             }
             systemProperty 'webdriver', project.property('webdriver')
             systemProperty 'webdriver.chrome.silentOutput', 'true'

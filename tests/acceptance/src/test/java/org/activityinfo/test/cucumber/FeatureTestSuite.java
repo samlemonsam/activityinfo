@@ -1,7 +1,7 @@
 package org.activityinfo.test.cucumber;
 
-import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -109,7 +109,7 @@ public class FeatureTestSuite implements Runnable {
         }
         
         String testName = element.getGherkinModel().getName();
-        adapter = new ReportingAdapter();
+        adapter = new ReportingAdapter(reporter);
         reporter.testStarted(testName);
         
         try {

@@ -19,6 +19,7 @@ import org.openqa.selenium.WebDriverException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
@@ -318,7 +319,10 @@ public class GxtTree {
         public void ensureExpanded() {
 
             Stopwatch stopwatch = Stopwatch.createStarted();
-            while(stopwatch.elapsed(TimeUnit.SECONDS) < 90) {
+            while(true) {
+                if(stopwatch.elapsed(TimeUnit.SECONDS) > 20) {
+                    throw new RuntimeException(format("Failed to expand node %s after 20 seconds", getLabel()));
+                }
                 if(isExpanded()) {
                     break;
                 }

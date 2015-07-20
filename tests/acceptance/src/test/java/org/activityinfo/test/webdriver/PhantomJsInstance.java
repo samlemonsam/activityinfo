@@ -8,7 +8,6 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
@@ -60,11 +59,11 @@ public class PhantomJsInstance {
                 environment.put("HOME", homeDir.getAbsolutePath());
             }
             
-            proxyController = new ProxyController();
-            proxyController.start();
+//            proxyController = new ProxyController();
+//            proxyController.start();
 
             PhantomJSDriverService service = new PhantomJSDriverService.Builder()
-                    .usingPhantomJSExecutable(PHANTOM_JS_PATH.getFile())
+                    .usingPhantomJSExecutable(resolvePhantomJsPath())
                     .usingAnyFreePort()
                     .withLogFile(logFile)
                     .withEnvironment(environment)
@@ -72,7 +71,7 @@ public class PhantomJsInstance {
                     .build();
 
             DesiredCapabilities capabilities = new DesiredCapabilities();
-            capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
+//            capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
 
             webDriver = new PhantomJSDriver(service, capabilities);
             webDriver.manage().window().setSize(new Dimension(1400, 1000));
@@ -80,6 +79,23 @@ public class PhantomJsInstance {
         } finally {
             System.setErr(errorStream);
         }
+    }
+
+    private File resolvePhantomJsPath() {
+        if(PHANTOM_JS_PATH.isPresent()) {
+            return PHANTOM_JS_PATH.getFile();
+        }
+        // check path
+        String[] paths = System.getenv("PATH").split(File.pathSeparator);
+        for (String path : paths) {
+            File bin = new File(path + File.separator + "phantomjs");
+            if(bin.exists()) {
+                return bin;
+            }
+        }
+        
+        // Will throw ConfigurationError
+        return PHANTOM_JS_PATH.getFile();
     }
 
     public WebDriver getWebDriver() {

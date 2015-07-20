@@ -4,6 +4,8 @@ import com.google.common.base.Function;
 import com.google.inject.Singleton;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 /**
  * Runs tests against a local chrome browser.
@@ -30,12 +32,16 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
                 // the connection's properties
 //                ProxyController proxyController = new ProxyController();
 //                proxyController.start();
+
+                ChromeOptions options = new ChromeOptions();
+                options.addArguments("--verbose");
 //                
-             //   DesiredCapabilities capabilities = new DesiredCapabilities();
+                DesiredCapabilities capabilities = new DesiredCapabilities();
             //    capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
-                
-               // return new ProxiedWebDriver(new ChromeDriver(capabilities), proxyController);
-                return new ChromeDriver();
+                capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+
+                // return new ProxiedWebDriver(new ChromeDriver(capabilities), proxyController);
+                return new ChromeDriver(capabilities);
             }
         });
         return pool;

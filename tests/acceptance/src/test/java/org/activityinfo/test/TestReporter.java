@@ -10,4 +10,6 @@ public interface TestReporter {
     void testFinished(String name, boolean passed, String output);
     
     void testSuiteFinished();
+
+    void attach(String mimeType, byte[] data);
 }

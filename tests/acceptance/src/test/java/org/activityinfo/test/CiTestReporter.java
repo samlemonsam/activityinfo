@@ -1,5 +1,6 @@
 package org.activityinfo.test;
 
+import com.google.common.io.Files;
 import org.activityinfo.test.config.ConfigurationError;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -11,6 +12,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 
 import static java.lang.String.format;
@@ -18,14 +20,25 @@ import static java.lang.String.format;
 public class CiTestReporter implements TestReporter {
     
     private String testSuite;
+    private String environment;
     private File outputDir;
     private Document resultDoc;
     
     private long startTime;
     private TestStats stats;
     private PrintStream out;
+    
+    private int attachmentIndex = 1;
 
-    public CiTestReporter(File outputDir, TestStats stats) {
+    /**
+     * 
+     * @param environment a string describing the environment in which the test is run (e.g. chrome, phantomjs,
+     *                    sauce-chrome-winxp, etc)
+     * @param outputDir the directory to which test results should be written
+     * @param stats global test stat collector
+     */
+    public CiTestReporter(String environment, File outputDir, TestStats stats) {
+        this.environment = environment;
         this.outputDir = outputDir;
         this.stats = stats;
         this.out = TestOutputStream.getStandardOutput();
@@ -45,7 +58,7 @@ public class CiTestReporter implements TestReporter {
 
     @Override
     public void testSuiteStarted(String suiteName) {
-        this.testSuite = suiteName;
+        this.testSuite = suiteName + "." + environment;
         Thread.currentThread().setName("Test Suite: " + suiteName);
     }
 
@@ -59,7 +72,7 @@ public class CiTestReporter implements TestReporter {
         
         long testTime = System.currentTimeMillis() - startTime;
         
-        stats.recordResult(testSuite, name, passed);
+        stats.recordResult(testSuite, name, testTime, passed);
         writeConsoleUpdate(name, passed, testTime);
         addTestResult(name, passed, testTime, output);    
         
@@ -92,6 +105,35 @@ public class CiTestReporter implements TestReporter {
     @Override
     public void testSuiteFinished() {
         writeXml();        
+    }
+
+    @Override
+    public void attach(String mimeType, byte[] data) {
+        File attachmentFile = new File(attachmentDir(), nextFilename(mimeType));
+        try {
+            Files.write(data, attachmentFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Exception write test attachment");
+        }
+    }
+
+    private File attachmentDir() {
+        File dir = new File(outputDir, testSuite);
+        if(!dir.exists()) {
+            boolean created = dir.mkdirs();
+            if(!created) {
+                throw new IllegalStateException("Could not create attachment dir " + dir.getAbsolutePath());
+            }
+        }
+        return dir;
+    }
+
+    private String nextFilename(String mimeType) {
+        if(mimeType.equals("image/png")) {
+            return "image" + (attachmentIndex++) + ".png";
+        } else {
+            return "attachment" + (attachmentIndex++);
+        }
     }
 
     private void writeXml()  {
