@@ -1,6 +1,6 @@
 package org.activityinfo.test.webdriver;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import cucumber.runtime.java.guice.ScenarioScoped;
