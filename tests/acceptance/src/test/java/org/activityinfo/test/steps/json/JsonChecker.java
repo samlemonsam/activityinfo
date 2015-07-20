@@ -1,7 +1,10 @@
 package org.activityinfo.test.steps.json;
 
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.*;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.NullNode;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.node.TextNode;
 
 import java.util.Iterator;
 
@@ -158,8 +161,8 @@ class JsonChecker {
     private void checkArray(String path, ArrayNode expectedArray, ArrayNode actualArray) {
         int expectedArraySize = expectedArray.size();
         if (expectedArraySize != actualArray.size()) {
-            throw new AssertionError(String.format("Expected an array with %d elements, found %d.",
-                    expectedArraySize, actualArray.size()));
+            throw new AssertionError(String.format("At %s, Expected an array with %d elements, found %d.",
+                    path, expectedArraySize, actualArray.size()));
         }
 
         if (ignorePositionInArray) {

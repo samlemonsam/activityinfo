@@ -102,7 +102,7 @@ public class JsonApiSteps {
                 .path(placeholders.resolvePath(url))
                 .queryParams(placeholders.resolveQueryParams(url));
 
-        scenario.write(String.format("<code><pre>GET %s</pre></code>", resource.getURI().toString()));
+        scenario.write(String.format("GET %s", resource.getURI().toString()));
 
         recordResponse(resource
                 .accept(MediaType.APPLICATION_JSON_TYPE)
