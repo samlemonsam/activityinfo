@@ -1,5 +1,8 @@
 package org.activityinfo.test;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.inject.Module;
 import cucumber.runtime.ClassFinder;
 import cucumber.runtime.RuntimeOptions;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * Command line tool for running the acceptance test suite
@@ -49,6 +53,9 @@ public class TestMain implements Runnable {
 
     @Option(name = "--outputDir", description = "Directory into which test result XML files are written")
     public File outputDir;
+    
+    @Option(name = "--filter", description = "Filters tests to run using a regular expression")
+    public String filterRegex;
 
     private TestStats stats = new TestStats();
     private ExecutorService executor;
@@ -69,12 +76,16 @@ public class TestMain implements Runnable {
 
     public void run() {
         
-        if(outputDir != null) {
+        if(outputDir == null) {
+            outputDir = new File("build/test-reports");
+        }
+        if(!outputDir.exists()) {
             boolean created = outputDir.mkdirs();
-            if(!created) {
+            if (!created) {
                 throw new RuntimeException("Failed to create " + outputDir.getAbsolutePath());
             }
         }
+    
         
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
      
@@ -97,6 +108,12 @@ public class TestMain implements Runnable {
         executor.shutdownNow();
         
         stats.printSummary();
+        
+        if(stats.hasFailures()) {
+            System.exit(-1);
+        } else {
+            System.exit(0);
+        }
     }
 
     private void queueApiTests() {
@@ -134,7 +151,21 @@ public class TestMain implements Runnable {
         for (CucumberFeature feature : features) {
             CiTestReporter reporter = new CiTestReporter(outputDir, stats);
             
-            executor.submit(new FeatureTestSuite(options, feature, reporter, modules));
+            executor.submit(new FeatureTestSuite(options, feature, reporter, filterPredicate(), modules));
+        }
+    }
+
+    private Predicate<String> filterPredicate() {
+        if(Strings.isNullOrEmpty(filterRegex)) {
+            return Predicates.alwaysTrue();
+        } else {
+            final Pattern pattern = Pattern.compile(filterRegex);
+            return new Predicate<String>() {
+                @Override
+                public boolean apply(String input) {
+                    return pattern.matcher(input).find();
+                }
+            };
         }
     }
 

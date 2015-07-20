@@ -23,4 +23,8 @@ public class TestStats {
         System.out.println();
         System.out.println(format("TEST RESULTS: %d Tests, %d Failed.", count, failedTests.size()));
     }
+    
+    public boolean hasFailures() {
+        return !failedTests.isEmpty();
+    }
 }

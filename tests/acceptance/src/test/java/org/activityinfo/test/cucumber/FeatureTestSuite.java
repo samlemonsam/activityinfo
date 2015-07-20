@@ -1,6 +1,7 @@
 package org.activityinfo.test.cucumber;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Predicate;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -34,13 +35,16 @@ public class FeatureTestSuite implements Runnable {
     private final CucumberFeature feature;
     private final RuntimeOptions options;
     private final TestReporter reporter;
+    private Predicate<String> scenarioFilter;
     private final cucumber.runtime.Runtime runtime;
     private ReportingAdapter adapter;
 
-    public FeatureTestSuite(RuntimeOptions options, CucumberFeature feature, TestReporter reporter, List<Module> modules) {
+    public FeatureTestSuite(RuntimeOptions options, CucumberFeature feature, TestReporter reporter,
+                            Predicate<String> scenarioFilter, List<Module> modules) {
         this.feature = feature;
         this.options = options;
         this.reporter = reporter;
+        this.scenarioFilter = scenarioFilter;
 
         List<Module> moduleList = new ArrayList<>();
         moduleList.add(new ScenarioModule(new SequentialScenarioScope()));
@@ -75,10 +79,12 @@ public class FeatureTestSuite implements Runnable {
         reporter.testSuiteStarted(suiteNameFromPath());
 
         for (CucumberTagStatement element : feature.getFeatureElements()) {
-            try {
-                runScenario(element);
-            } catch (InterruptedException e) {
-                break;
+            if(scenarioFilter.apply(suiteNameFromPath()) || scenarioFilter.apply(element.getVisualName())) {
+                try {
+                    runScenario(element);
+                } catch (InterruptedException e) {
+                    break;
+                }
             }
         }
 

@@ -22,6 +22,7 @@ public class WebDriverPool {
 
     public WebDriverPool() {
         pool = new GenericKeyedObjectPool<>(new Factory());
+        pool.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(5));
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
