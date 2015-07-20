@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Provides a locally-running double of Postmark's API to
+ * Provides a locally-running double of Postmark's API to allow testing of use cases that involve sending
+ * and receiving email
  */
 public class PostmarkStubServer  {
 

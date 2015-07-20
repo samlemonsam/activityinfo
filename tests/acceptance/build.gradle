@@ -23,6 +23,8 @@ dependencies {
     testCompile 'joda-time:joda-time:2.5'
     testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
     testCompile 'org.apache.commons:commons-csv:1.1'
+    testCompile 'io.airlift:airline:0.7'
+    
     testCompile libraries.bcrypt
     testCompile libraries.metrics.core
     testCompile libraries.jersey.server

@@ -4,8 +4,6 @@ import com.google.common.base.Function;
 import com.google.inject.Singleton;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 /**
  * Runs tests against a local chrome browser.
@@ -23,20 +21,21 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
 
     private static WebDriverPool initPool() {
         WebDriverPool pool = new WebDriverPool();
-        pool.setMaxTotalSize(3);
+        //pool.setMaxTotalSize(3);
         pool.setCreator(new Function<BrowserProfile, WebDriver>() {
             @Override
             public WebDriver apply(BrowserProfile input) {
                 
                 // Start a local http proxy that we can use to control the 
                 // the connection's properties
-                ProxyController proxyController = new ProxyController();
-                proxyController.start();
+//                ProxyController proxyController = new ProxyController();
+//                proxyController.start();
+//                
+             //   DesiredCapabilities capabilities = new DesiredCapabilities();
+            //    capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
                 
-                DesiredCapabilities capabilities = new DesiredCapabilities();
-                capabilities.setCapability(CapabilityType.PROXY, proxyController.getWebDriverProxy());
-                
-                return new ProxiedWebDriver(new ChromeDriver(capabilities), proxyController);
+               // return new ProxiedWebDriver(new ChromeDriver(capabilities), proxyController);
+                return new ChromeDriver();
             }
         });
         return pool;

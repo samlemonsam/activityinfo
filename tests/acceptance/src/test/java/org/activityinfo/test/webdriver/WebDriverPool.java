@@ -5,6 +5,8 @@ import org.apache.commons.pool2.KeyedPooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -86,7 +88,13 @@ public class WebDriverPool {
     
         @Override
         public void passivateObject(BrowserProfile browserProfile, PooledObject<WebDriver> pooledObject) throws Exception {
-    
+            pooledObject.getObject().navigate().to("about:blank");
+            try {
+                Alert alert = pooledObject.getObject().switchTo().alert();
+                alert.accept();
+            } catch (NoAlertPresentException ignored) {
+                // continue
+            }
         }
     }
 
