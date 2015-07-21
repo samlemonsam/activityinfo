@@ -63,6 +63,9 @@ public class TestMain implements Runnable {
     @Option(name = "--filter", description = "Filters tests to run using a regular expression")
     public String filterRegex;
     
+    @Option(name = "-T", description = "Number of threads to use")
+    public int threadCount = Runtime.getRuntime().availableProcessors();
+    
 
     private TestStats stats = new TestStats();
     private ExecutorService executor;
@@ -94,7 +97,7 @@ public class TestMain implements Runnable {
         }
     
         
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        executor = Executors.newFixedThreadPool(threadCount);
      
         if(api) {
             queueApiTests();
