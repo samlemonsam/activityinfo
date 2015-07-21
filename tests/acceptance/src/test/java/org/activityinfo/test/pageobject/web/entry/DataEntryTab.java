@@ -156,37 +156,38 @@ public class DataEntryTab {
             tab.click();
         }
     }
-    
+
     public List<HistoryEntry> changes() {
-        
+
         selectTab("History");
-        
+
         return container.waitFor(new Function<WebDriver, List<HistoryEntry>>() {
             @Override
             public List<HistoryEntry> apply(WebDriver input) {
-                List<HistoryEntry> entries = Lists.newArrayList();
-                FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
-                for (FluentElement p : paragraphs) {
-                    String text;
-                    try {
+                try {
+                    List<HistoryEntry> entries = Lists.newArrayList();
+                    FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
+                    for (FluentElement p : paragraphs) {
+                        String text;
                         text = p.text();
-                    } catch (StaleElementReferenceException ignored) {
-                        return null;
-                    }
-                    if(text.contains("Loading")) {
-                        return null;
-                    }
-                    if(!text.trim().isEmpty()) {
-                        HistoryEntry entry = new HistoryEntry(text);
-                        FluentElements changes = p.find().parent().p().followingSibling().ul().li().asList();
-                        for (FluentElement change : changes) {
-                            entry.addChange(change.text());
+
+                        if(text.contains("Loading")) {
+                            return null;
                         }
-                       
-                        entries.add(entry);
+                        if(!text.trim().isEmpty()) {
+                            HistoryEntry entry = new HistoryEntry(text);
+                            FluentElements changes = p.find().parent().p().followingSibling().ul().li().asList();
+                            for (FluentElement change : changes) {
+                                entry.addChange(change.text());
+                            }
+
+                            entries.add(entry);
+                        }
                     }
+                    return entries;
+                } catch (StaleElementReferenceException ignored) {
+                    return null;
                 }
-                return entries;
             }
         });
     }
