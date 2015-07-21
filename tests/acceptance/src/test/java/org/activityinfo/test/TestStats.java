@@ -1,6 +1,7 @@
 package org.activityinfo.test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
@@ -11,7 +12,8 @@ import static java.lang.String.format;
 public class TestStats {
 
     private int count;
-    private ArrayList<String> failedTests = new ArrayList<>();
+    private int failureCount = 0;
+    private List<TestResult> results = new ArrayList<>();
     
     private long totalRunningTime = 0;
     
@@ -19,14 +21,22 @@ public class TestStats {
     
     private long startTime = System.currentTimeMillis();
     
-    public synchronized void recordResult(String testSuite, String name, long millis, boolean passed) {
-        if(!passed) {
-            failedTests.add(testSuite + " / " + name);
-        }
-        count++;
-        totalRunningTime += millis;
+    public void recordTime(TestResult result) {
+        totalRunningTime += result.getDuration(TimeUnit.MILLISECONDS);
     }
     
+    public synchronized void recordResult(TestResult result) {
+        count++;
+        if(!result.isPassed()) {
+            failureCount++;
+        }
+        results.add(result);
+    }
+
+    public List<TestResult> getResults() {
+        return results;
+    }
+
     public void finished() {
         wallTime = System.currentTimeMillis() - startTime;
     }
@@ -38,11 +48,12 @@ public class TestStats {
                 TimeUnit.MILLISECONDS.toMinutes(totalRunningTime),
                 (double)totalRunningTime / (double)wallTime));
 
-        System.out.println(format("TEST RESULTS: %d Tests, %d Failed.", count, failedTests.size()));
+        System.out.println(format("TEST RESULTS: %d Tests, %d Failed.", count, failureCount));
 
     }
     
     public boolean hasFailures() {
-        return !failedTests.isEmpty();
+        return failureCount > 0;
     }
+
 }

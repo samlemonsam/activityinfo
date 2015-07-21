@@ -2,23 +2,20 @@ package org.activityinfo.test.cucumber;
 
 import com.google.common.base.Throwables;
 import gherkin.formatter.Formatter;
-import gherkin.formatter.PrettyFormatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.*;
-import org.activityinfo.test.TestReporter;
+import org.activityinfo.test.TestResult;
 
 import java.util.List;
 
 public class ReportingAdapter implements Formatter, Reporter {
 
-    private final TestReporter reporter;
-    private StringBuilder output;
-    private boolean passed = true;
-    private PrettyFormatter formatter;
+    private TestResult.Builder resultBuilder;
+    
+    private int attachmentIndex = 1;
 
-    public ReportingAdapter(TestReporter reporter) {
-        this.reporter = reporter;
-        output = new StringBuilder();
+    public ReportingAdapter(TestResult.Builder result) {
+        resultBuilder = result;
     }
 
     @Override
@@ -37,7 +34,7 @@ public class ReportingAdapter implements Formatter, Reporter {
 
     @Override
     public void background(Background background) {
-        output.append("Running Background:\n");
+        printlnf("Running Background:");
     }
     
     @Override
@@ -114,34 +111,33 @@ public class ReportingAdapter implements Formatter, Reporter {
     private void maybeRecordFailure(Result result) {
         Throwable error = result.getError();
         if(error != null) {
-            output.append(Throwables.getStackTraceAsString(error));
-            passed = false;
+            resultBuilder.output().append(Throwables.getStackTraceAsString(error));
+            resultBuilder.failed();
         }
     }
     
     @Override
     public void embedding(String mimeType, byte[] data) {
-        reporter.attach(mimeType, data);
+        String filename = nextFilename(mimeType);
+    }
+
+    private String nextFilename(String mimeType) {
+        if(mimeType.equals("image/png")) {
+            return "image" + (attachmentIndex++) + ".png";
+        } else if(mimeType.equals("application/vnd.ms-excel")) {
+            return "excel" + (attachmentIndex++) + ".xls";
+        } else {
+            return "attachment" + (attachmentIndex++);
+        }
     }
 
     @Override
     public void write(String text) {
-        output.append(text);
+        resultBuilder.output().append(text);
     }
     
     private void printlnf(String format, Object... args) {
-        output.append(String.format(format, args)).append("\n");
-    }
-    
-    public Appendable asAppendable() {
-        return output;
+        resultBuilder.output().append(String.format(format, args)).append("\n");
     }
 
-    public String getOutput() {
-        return output.toString();
-    }
-
-    public boolean isPassed() {
-        return passed;
-    }
 }

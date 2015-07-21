@@ -62,7 +62,8 @@ task acceptanceTest(type: JavaExec) {
     args '--api'
     args '--ui'
     args '-T', '6'
-    
+    args '--outputDir', "$buildDir/test-results"
+
     main = 'org.activityinfo.test.TestMain'
     classpath = sourceSets.test.runtimeClasspath
     workingDir = "$buildDir"
@@ -97,6 +98,8 @@ task instrumentedAcceptanceTest(type: JavaExec) {
 
     args '--url', project.environment.url
     args '--api', '--ui', '--odk'
+    args '--retries', '3'
+    args '--outputDir', "$buildDir/test-results"
 }
 
 

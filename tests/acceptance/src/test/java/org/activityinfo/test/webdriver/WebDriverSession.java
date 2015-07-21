@@ -7,9 +7,7 @@ import com.google.common.base.Strings;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.sut.Server;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
@@ -92,6 +90,14 @@ public class WebDriverSession {
 
             // Trigger the 'onLoad' event which should write the statistics to local storage
             driver.navigate().to(server.path("coverage.html"));
+
+            // Clear alert dialog if prompted about navigating away from page
+            try {
+                Alert alert = driver.switchTo().alert();
+                alert.accept();
+            } catch (NoAlertPresentException ignored) {
+                // continue
+            }
 
             // Retrieve the results from local storage
             JavascriptExecutor js = (JavascriptExecutor) driver;

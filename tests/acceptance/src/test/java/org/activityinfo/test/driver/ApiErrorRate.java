@@ -1,10 +1,9 @@
 package org.activityinfo.test.driver;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
 
-/**
- * Created by alex on 20-3-15.
- */
+
 public class ApiErrorRate implements Metric {
     
     
