@@ -5,7 +5,6 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import io.appium.java_client.AppiumDriver;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.OdkApplicationDriver;
-import org.activityinfo.test.odk.AndroidDevice;
 import org.activityinfo.test.pageobject.odk.OdkVersion;
 
 

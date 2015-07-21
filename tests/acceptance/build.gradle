@@ -75,7 +75,7 @@ task acceptanceTest(type: JavaExec) {
 }
 
 
-task instrumentedAcceptanceTest(type: Test) {
+task instrumentedAcceptanceTest(type: JavaExec) {
     group = "Verification"
     description = 'Runs acceptance tests against an instrumented server to gather test coverage metrics'
 
@@ -84,16 +84,19 @@ task instrumentedAcceptanceTest(type: Test) {
     }
 
     // Determine the server against which to test
+    dependsOn 'testClasses'
     dependsOn { ':server:appengineStartInstrumentedAT' }
     finalizedBy { ':server:appengineStop' }
 
     // some tests may fail due to the instrumentation process
-    ignoreFailures = true
     systemProperty "gwt.coverage.report.dir", coverageReportDir
 
-    include "**/Functional*AT.*"
-    include "**/*UiTest*"
-    exclude "**/*\$*"
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
+
+    args '--url', project.environment.url
+    args '--api', '--ui', '--odk'
 }
 
 
