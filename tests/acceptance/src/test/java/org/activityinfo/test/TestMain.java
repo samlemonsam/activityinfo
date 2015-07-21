@@ -16,6 +16,7 @@ import org.activityinfo.test.cucumber.FeatureTestSuite;
 import org.activityinfo.test.driver.ApiModule;
 import org.activityinfo.test.driver.mail.EmailModule;
 import org.activityinfo.test.sut.SystemUnderTest;
+import org.activityinfo.test.webdriver.OdkModule;
 import org.activityinfo.test.webdriver.WebDriverModule;
 
 import javax.inject.Inject;
@@ -46,6 +47,8 @@ public class TestMain implements Runnable {
     @Option(name = "--ui", description = "Run functional tests against the UI")
     public boolean ui;
     
+    @Option(name = "--odk", description = "Run ODK integration tests")
+    public boolean odk;
     
     @Option(name = "--webdriver", 
             title = "chrome | phantomjs | sauce",
@@ -107,6 +110,10 @@ public class TestMain implements Runnable {
             queueUiTests();
         }
 
+        if(odk) {
+            queueOdkTests();
+        }
+        
         executor.shutdown();
         
         try {
@@ -147,6 +154,18 @@ public class TestMain implements Runnable {
 
         queueFeatures("ui", loader, options, new WebDriverModule(webDriverType));
     }
+    
+    private void queueOdkTests() {
+        ResourceLoader loader = new MultiLoader(getClass().getClassLoader());
+        RuntimeOptions options = new RuntimeOptions(Arrays.asList(
+                "--tags", "@odk", "classpath:org/activityinfo/test",
+                "--glue", "org.activityinfo.test.steps.common",
+                "--glue", "org.activityinfo.test.steps.odk"));
+
+
+        queueFeatures("odk", loader, options, new OdkModule());
+    }
+
 
     private void queueFeatures(String environment, ResourceLoader loader, RuntimeOptions options,
                                Module... driverModules) {
