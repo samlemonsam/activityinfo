@@ -58,6 +58,7 @@ task acceptanceTest(type: JavaExec) {
 
     args '--url', project.environment.url
     args '--api'
+    args '--ui'
     
     main = 'org.activityinfo.test.TestMain'
     classpath = sourceSets.test.runtimeClasspath
