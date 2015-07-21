@@ -1,4 +1,4 @@
-package org.activityinfo.test.odk;
+package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
