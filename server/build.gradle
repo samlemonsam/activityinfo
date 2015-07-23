@@ -36,6 +36,12 @@ gwt {
     }
 }
 
+idea {
+    module {
+        scopes.COMPILE.plus += [ configurations.gwt ]
+    }
+}
+
 appengine {
     downloadSdk = true
     

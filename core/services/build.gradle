@@ -5,9 +5,16 @@ apply plugin: 'gwt-base'
 
 dependencies {
   compile project(':core:model')
+  gwt     libraries.gwt.user
   compile libraries.jersey.core
   compile libraries.jersey.server
   compile libraries.guice
+}
+
+idea {
+  module {
+    scopes.COMPILE.plus += [ configurations.gwt ]
+  }
 }
 
 
