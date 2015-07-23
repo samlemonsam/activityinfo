@@ -13,7 +13,7 @@ apply from: "./gradle/environment.gradle"
 
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.3'
+  gradleVersion = '2.5'
 }
 
 allprojects  {
