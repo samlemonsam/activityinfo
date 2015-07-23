@@ -148,6 +148,11 @@ subprojects {
         exclude group:'xml-apis', module: 'xml-apis'
         exclude module: 'guava-jdk5'
         
+        //  javax.servlet:servlet-api:2.5 is not generically typed
+        // use the implementation provided by gwt-servlet
+        exclude group: 'javax.servlet', module: 'servlet-api'
+
+
         // Exclude CGLIB which is actually repackaged by guice
         exclude group: 'org.sonatype.sisu.inject', module:'cglib'
         
