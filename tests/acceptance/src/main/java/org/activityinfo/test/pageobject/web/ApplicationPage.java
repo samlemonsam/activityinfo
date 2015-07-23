@@ -93,7 +93,7 @@ public class ApplicationPage {
 
     public void assertOfflineModeLoads(int timeout, TimeUnit timeoutUnits) {
         page.wait(timeout, timeoutUnits).until(new Predicate<WebDriver>() {
-            
+
             private String lastStatus = "";
 
             @Override
@@ -109,7 +109,7 @@ public class ApplicationPage {
 
                     } else if (element.getText().contains("%")) {
                         String status = element.getText();
-                        if(!lastStatus.equals(status)) {
+                        if (!lastStatus.equals(status)) {
                             LOGGER.info("Offline Status: " + status);
                             lastStatus = status;
                         }
@@ -118,6 +118,16 @@ public class ApplicationPage {
                 return false;
             }
         });
+    }
+
+
+    public Dashboard navigateToDashboard() {
+        try {
+            page.find().div(containingText(I18N.CONSTANTS.dashboard())).clickWhenReady();
+        } catch(Exception ignored) {
+        }
+
+        return new Dashboard(container());
     }
     
     public DataEntryTab navigateToDataEntryTab() {
@@ -172,6 +182,8 @@ public class ApplicationPage {
         });
         return new FormDesignerPage(page);
     }
+
+
     
     public ReportsTab navigateToReportsTab() {
         FluentElement container = container();

@@ -200,7 +200,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         return applicationPage.getOfflineMode();
     }
-
+    
     @Override
     public void synchronize() {
         ensureLoggedIn();
@@ -921,6 +921,12 @@ public class UiApplicationDriver extends ApplicationDriver {
         return currentPage;
     }
 
+    public ApplicationPage getApplicationPage() {
+        ensureLoggedIn();
+        
+        return applicationPage;
+    }
+    
     public void renameDatabase(String oldName, String newName, String newDescription) {
         ensureLoggedIn();
 

@@ -3720,5 +3720,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please specify 'to' date")
     String pleaseSpecifyToDate();
 
+    @DefaultStringValue("Pin to dashboard")
+    String pinToDashboard();
+    
+    @DefaultStringValue("Switch to page view")
+    String switchToPageView();
 }
 

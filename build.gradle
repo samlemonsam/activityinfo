@@ -20,6 +20,14 @@ allprojects  {
   apply plugin: 'maven'
   apply plugin: 'idea'
   group = 'org.activityinfo'
+  
+}
+
+idea {
+  project {
+    jdkName = '1.7'
+    languageLevel = '1.7'
+  }
 }
 
 

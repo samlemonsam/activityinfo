@@ -48,7 +48,7 @@ task acceptanceTest(type: JavaExec) {
     group = "Verification"
     description = 'Runs acceptance test suite'
 
-    dependsOn 'testClasses'
+    dependsOn 'classes'
     dependsOn ':server:configureDatabase'
 
     args '--url', project.environment.url

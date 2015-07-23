@@ -130,6 +130,8 @@ public class TestMain implements Runnable {
             queueOdkTests();
         }
         
+        System.out.println(format("Queued %d test(s)", pending.size()));
+        
         while(!pending.isEmpty()) {
             Iterator<Future<TestResult>> it = pending.iterator();
             List<TestResult> completed = Lists.newArrayList();

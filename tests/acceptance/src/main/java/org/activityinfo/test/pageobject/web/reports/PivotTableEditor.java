@@ -71,4 +71,8 @@ public class PivotTableEditor {
 
         return modal;
     }
+
+    public ReportEditorBar reportBar() {
+        return new ReportEditorBar(container);
+    }
 }
