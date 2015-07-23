@@ -40,7 +40,6 @@ dependencies {
     
     compile project(':core:model')
     compile project(':i18n')
-    compile project(path: ':server', configuration: 'i18n')
     compile libraries.gwt.i18nServer
 }
 
