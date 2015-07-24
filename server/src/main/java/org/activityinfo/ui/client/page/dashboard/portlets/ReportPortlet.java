@@ -39,12 +39,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.command.GenerateElement;
+import org.activityinfo.legacy.shared.command.GenerateDashboardElement;
 import org.activityinfo.legacy.shared.command.UpdateReportSubscription;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.ReportDTO;
 import org.activityinfo.legacy.shared.model.ReportMetadataDTO;
-import org.activityinfo.legacy.shared.reports.content.Content;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.legacy.shared.reports.model.PivotChartReportElement;
 import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
@@ -65,14 +63,12 @@ public class ReportPortlet extends Portlet {
     private final Dispatcher dispatcher;
     private final EventBus eventBus;
 
-    private final ReportDTO report;
     private final ReportMetadataDTO metadata;
 
-    public ReportPortlet(Dispatcher dispatcher, EventBus eventBus, ReportDTO report) {
+    public ReportPortlet(Dispatcher dispatcher, EventBus eventBus, ReportMetadataDTO report) {
         this.dispatcher = dispatcher;
         this.eventBus = eventBus;
-        this.report = report;
-        this.metadata = report.getReportMetadataDTO();
+        this.metadata = report;
 
         setHeadingText(metadata.getTitle());
         setHeight(275);
@@ -137,23 +133,7 @@ public class ReportPortlet extends Portlet {
     }
 
     private void addContent() {
-        Report report = this.report.getReport();
-        if (report.getElements().isEmpty()) {
-            removeAll();
-            add(new Label("The report is empty"));
-            return;
-        }
-        final ReportElement element = report.getElement(0);
-        final ReportView view = createView(element);
-
-        if (view == null) {
-            removeAll();
-            add(new Label("Unsupported report type"));
-            layout();
-            return;
-        }
-
-        dispatcher.execute(new GenerateElement<Content>(element), new AsyncCallback<Content>() {
+        dispatcher.execute(new GenerateDashboardElement(metadata.getId()), new AsyncCallback<ReportElement>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -161,9 +141,9 @@ public class ReportPortlet extends Portlet {
             }
 
             @Override
-            public void onSuccess(Content content) {
+            public void onSuccess(ReportElement element) {
                 removeAll();
-                element.setContent(content);
+                final ReportView view = createView(element);
                 view.show(element);
                 add(view.asComponent());
                 layout();
