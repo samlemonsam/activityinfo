@@ -38,6 +38,7 @@ import org.activityinfo.legacy.shared.model.ReportMetadataDTO;
 import org.activityinfo.legacy.shared.reports.model.EmailDelivery;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Alex Bertram
@@ -45,10 +46,13 @@ import java.util.List;
  */
 public class GetReportsHandler implements CommandHandlerAsync<GetReports, ReportsResult> {
 
+    private static final Logger LOGGER = Logger.getLogger(GetReportsHandler.class.getName());
+    
     @Override
     public void execute(final GetReports command,
                         final ExecutionContext context,
                         final AsyncCallback<ReportsResult> callback) {
+        
         // note that we are excluding reports with a null title-- these
         // reports have not yet been explicitly saved by the user
 
@@ -102,6 +106,8 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
             query.appendParameter(param);
         }
 
+        LOGGER.info("Reports query: " + query.sql());
+        
         query.execute(context.getTransaction(), new SqlResultCallback() {
 
             @Override

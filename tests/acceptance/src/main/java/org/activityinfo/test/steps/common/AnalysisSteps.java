@@ -13,9 +13,16 @@ import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.web.Dashboard;
 import org.activityinfo.test.pageobject.web.reports.DashboardPortlet;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
+import org.activityinfo.test.pageobject.web.reports.ReportsTab;
+import org.activityinfo.test.sut.Accounts;
+import org.hamcrest.Matchers;
 
 import javax.inject.Inject;
 import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.not;
 
 @ScenarioScoped
 public class AnalysisSteps {
@@ -25,6 +32,11 @@ public class AnalysisSteps {
     
     @Inject
     private AliasTable aliasTable;
+    
+    @Inject
+    private Accounts accounts;
+    
+    private String currentReport;
 
     @Then("^aggregating the indicators (.*) by (.*) should yield:$")
     public void aggregating_the_indicators_by_should_yield(String indicators, String dimensions, DataTable expected) throws Throwable {
@@ -54,8 +66,10 @@ public class AnalysisSteps {
     public void I_save_the_report_as(String reportName) throws Throwable {
         UiApplicationDriver ui = (UiApplicationDriver) driver;
         PivotTableEditor editor = (PivotTableEditor) ui.getCurrentPage();
-        editor.reportBar().rename(reportName);
+        editor.reportBar().rename(aliasTable.createAlias(reportName));
         editor.reportBar().save();
+        
+        currentReport = reportName;
     }
 
     @When("^I pin the report to my dashboard$")
@@ -72,7 +86,13 @@ public class AnalysisSteps {
         UiApplicationDriver ui = (UiApplicationDriver) driver;
         Dashboard dashboard = ui.getApplicationPage().navigateToDashboard();
 
-        DashboardPortlet portlet = dashboard.findPortlet(reportName);
+        dashboard.findPortlet(aliasTable.getAlias(reportName));
+    }
+
+
+    @Then("^the report should be shown on my dashboard with:$")
+    public void the_report_should_be_shown_on_my_dashboard_with(DataTable expected) throws Throwable {
+        the_pivot_table_should_be_shown_on_my_dashboard_with(currentReport, expected);
     }
 
     @Then("^the pivot table \"([^\"]*)\" should be shown on my dashboard with:$")
@@ -81,11 +101,33 @@ public class AnalysisSteps {
         UiApplicationDriver ui = (UiApplicationDriver) driver;
         Dashboard dashboard = ui.getApplicationPage().navigateToDashboard();
 
-        DashboardPortlet portlet = dashboard.findPortlet(reportName);
+        DashboardPortlet portlet = dashboard.findPortlet(aliasTable.getAlias(reportName));
         DataTable actual = portlet.extractPivotTableData();
         expectedData.diff(aliasTable.deAlias(actual));
     }
 
+
+
+    @Then("^the report should not be shown on the dashboard of \"([^\"]*)\"$")
+    public void the_report_should_not_be_shown_on_the_dashboard_of(String userName) throws Throwable {
+        driver.login(accounts.ensureAccountExists(userName));
+
+        UiApplicationDriver ui = (UiApplicationDriver) driver;
+
+        Dashboard dashboard = ui.getApplicationPage().navigateToDashboard();
+        List<String> portlets = dashboard.getPortletTitles();
+        
+        assertThat(portlets, not(contains(aliasTable.getAlias(currentReport))));
+    }
+    
+    @Then("^\"([^\"]*)\" should appear in my list of saved reports$")
+    public void should_appear_in_my_list_of_saved_reports(String reportName) throws Throwable {
+        UiApplicationDriver ui = (UiApplicationDriver) driver;
+        ReportsTab reports = ui.getApplicationPage().navigateToReportsTab();
+
+        assertThat(reports.reportsList().getTitles(), contains(aliasTable.getAlias(reportName)));
+    }
+    
     private List<String> parseStringList(String stringList) {
         String[] parts = stringList.split("and");
         List<String> strings = Lists.newArrayList();
@@ -100,5 +142,5 @@ public class AnalysisSteps {
         }
         return strings;
     }
-
+    
 }
