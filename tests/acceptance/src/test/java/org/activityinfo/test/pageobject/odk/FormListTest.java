@@ -10,6 +10,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings("unchecked")
 public class FormListTest {
 
     @Test
