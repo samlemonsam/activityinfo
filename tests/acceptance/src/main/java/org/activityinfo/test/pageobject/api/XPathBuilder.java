@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.api;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -8,8 +9,11 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 
+import javax.annotation.Nullable;
+
 
 public class XPathBuilder {
+
 
     public enum Axis {
         CHILD,
@@ -246,6 +250,22 @@ public class XPathBuilder {
     public FluentElement waitForFirst() {
         return context.waitFor(firstLocator());
     }
+    
+    public FluentElements waitForList() {
+        return context.waitFor(new Function<WebDriver, FluentElements>() {
+            @Nullable
+            @Override
+            public FluentElements apply(WebDriver input) {
+                FluentElements elements = asList();
+                if(elements.size() > 0) {
+                    return elements;
+                } else {
+                    return null;
+                }
+            }
+        });
+    }
+    
 
     public <T> T find(Class<T> clazz) {
         return all().as(clazz).first().get();

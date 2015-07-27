@@ -1,5 +1,6 @@
 package org.activityinfo.test.steps.common;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
@@ -59,7 +60,7 @@ public class AnalysisSteps {
 
     @When("^I create a pivot table report aggregating the indicators (.*) by (.*)$")
     public void I_create_a_new_pivot_table_report(String indicatorName, String dimensions) throws Throwable {
-        driver.pivotTable(indicatorName, parseStringList(dimensions));
+        driver.pivotTable(parseStringList(indicatorName), parseStringList(dimensions));
     }
 
     @When("^I save the report as \"([^\"]*)\"$")
@@ -79,20 +80,31 @@ public class AnalysisSteps {
         editor.reportBar().pinToDashboard();
     }
 
+    @When("^I share the report with users of the \"([^\"]*)\" database$")
+    public void I_share_the_report_with_users_of_the_database(String databaseName) throws Throwable {
+        UiApplicationDriver ui = (UiApplicationDriver) driver;
+        PivotTableEditor editor = (PivotTableEditor) ui.getCurrentPage();
+        
+        editor.reportBar().share().shareWith(aliasTable.getAlias(databaseName), true).ok();
+    }
 
+    @When("^I share the report with users of the \"([^\"]*)\" database as a default dashboard report$")
+    public void I_share_the_report_with_users_of_the_database_as_a_default_dashboard_report(String databaseName) throws Throwable {
+        UiApplicationDriver ui = (UiApplicationDriver) driver;
+        PivotTableEditor editor = (PivotTableEditor) ui.getCurrentPage();
+
+        editor.reportBar().share().putOnDashboard(aliasTable.getAlias(databaseName)).ok();
+    }
+    
     @Then("^the report \"([^\"]*)\" should be shown on my dashboard$")
     public void the_report_should_be_shown_on_my_dashboard(String reportName) throws Throwable {
-
-        UiApplicationDriver ui = (UiApplicationDriver) driver;
-        Dashboard dashboard = ui.getApplicationPage().navigateToDashboard();
-
-        dashboard.findPortlet(aliasTable.getAlias(reportName));
+        assertThat(driver.getDashboardPortlets(), contains(reportName));
     }
 
 
     @Then("^the report should be shown on my dashboard with:$")
     public void the_report_should_be_shown_on_my_dashboard_with(DataTable expected) throws Throwable {
-        the_pivot_table_should_be_shown_on_my_dashboard_with(currentReport, expected);
+        the_pivot_table_should_be_shown_on_my_dashboard_with(getCurrentReport(), expected);
     }
 
     @Then("^the pivot table \"([^\"]*)\" should be shown on my dashboard with:$")
@@ -107,26 +119,47 @@ public class AnalysisSteps {
     }
 
 
-
     @Then("^the report should not be shown on the dashboard of \"([^\"]*)\"$")
     public void the_report_should_not_be_shown_on_the_dashboard_of(String userName) throws Throwable {
         driver.login(accounts.ensureAccountExists(userName));
-
-        UiApplicationDriver ui = (UiApplicationDriver) driver;
-
-        Dashboard dashboard = ui.getApplicationPage().navigateToDashboard();
-        List<String> portlets = dashboard.getPortletTitles();
         
-        assertThat(portlets, not(contains(aliasTable.getAlias(currentReport))));
+        assertThat(driver.getDashboardPortlets(), not(contains(getCurrentReport())));
     }
-    
+
+    @Then("^the report should be shown on (.+)'s dashboard$")
+    public void the_report_should_not_be_shown_on_users_dashboard(String userName) throws Throwable {
+        driver.login(accounts.ensureAccountExists(userName));
+        assertThat(driver.getDashboardPortlets(), contains(getCurrentReport()));
+    }
+
+    private String getCurrentReport() {
+        Preconditions.checkState(currentReport != null, "No current report");
+
+        return currentReport;
+    }
+
     @Then("^\"([^\"]*)\" should appear in my list of saved reports$")
     public void should_appear_in_my_list_of_saved_reports(String reportName) throws Throwable {
-        UiApplicationDriver ui = (UiApplicationDriver) driver;
-        ReportsTab reports = ui.getApplicationPage().navigateToReportsTab();
-
-        assertThat(reports.reportsList().getTitles(), contains(aliasTable.getAlias(reportName)));
+        assertThat(driver.getSavedReports(), contains(reportName));
     }
+    
+    
+    @Then("^the report should not appear in (.+)'s list of saved reports$")
+    public void the_report_should_not_appear_in_users_list_of_saved_reports(String userName) throws Throwable {
+
+        driver.login(accounts.ensureAccountExists(userName));
+
+        assertThat(driver.getSavedReports(), not(contains(getCurrentReport())));
+    }
+
+    @Then("^the report should appear in (.+)'s list of saved reports$")
+    public void the_report_should_appear_in_users_list_of_saved_reports(String userName) throws Throwable {
+
+        driver.login(accounts.ensureAccountExists(userName));
+
+        assertThat(driver.getSavedReports(), contains(getCurrentReport()));
+    }
+    
     
     private List<String> parseStringList(String stringList) {
         String[] parts = stringList.split("and");
@@ -142,5 +175,7 @@ public class AnalysisSteps {
         }
         return strings;
     }
-    
+
+
+
 }

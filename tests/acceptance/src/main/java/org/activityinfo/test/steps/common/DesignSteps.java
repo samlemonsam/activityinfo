@@ -136,9 +136,4 @@ public class DesignSteps {
             }
         }
     }
-
-    @Then("^share report dialog should not be empty$")
-    public void share_report_dialog_should_not_be_empty() throws Throwable {
-        driver.shareReportIsEmpty(false);
-    }
 }

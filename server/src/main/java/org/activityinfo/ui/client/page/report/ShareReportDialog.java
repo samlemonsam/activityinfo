@@ -111,7 +111,7 @@ public class ShareReportDialog extends Dialog {
                                  ListStore<ReportVisibilityDTO> store,
                                  Grid<ReportVisibilityDTO> grid) {
 
-                return model.getDatabaseName() + " Users";
+                return I18N.MESSAGES.databaseUserGroup(model.getDatabaseName());
 
             }
         });
@@ -122,8 +122,7 @@ public class ShareReportDialog extends Dialog {
         dashboardColumn = new CheckColumnConfig("defaultDashboard", I18N.CONSTANTS.defaultDashboard(), 75);
         dashboardColumn.setDataIndex("defaultDashboard");
 
-        ColumnModel columnModel = new ColumnModel(Arrays.asList(icon, name, visibleColumn, dashboardColumn));
-        return columnModel;
+        return new ColumnModel(Arrays.asList(icon, name, visibleColumn, dashboardColumn));
     }
 
     public void show(ReportMetadataDTO metadata) {
@@ -179,26 +178,27 @@ public class ShareReportDialog extends Dialog {
         }
 
         for (IndicatorDTO indicator : indicators.getIndicators()) {
-            if (databases.containsKey(indicator.getDatabaseId())) {
-                gridStore.add(databases.get(indicator.getDatabaseId()));
-            } else {
+            if (!databases.containsKey(indicator.getDatabaseId())) {
                 ReportVisibilityDTO model = new ReportVisibilityDTO();
                 model.setDatabaseId(indicator.getDatabaseId());
                 model.setDatabaseName(indicator.getDatabaseName());
-                gridStore.add(model);
+                databases.put(indicator.getDatabaseId(), model);
             }
         }
 
-        if (gridStore.getCount() == 0) {
-            MessageBox.alert(I18N.CONSTANTS.share(),
-                    "This report is still empty, so it can't yet be shared.",
-                    new Listener<MessageBoxEvent>() {
+        for (ReportVisibilityDTO model : databases.values()) {
+            gridStore.add(model);
+        }
 
-                        @Override
-                        public void handleEvent(MessageBoxEvent be) {
-                            hide();
-                        }
-                    });
+        if (gridStore.getCount() == 0) {
+            MessageBox.alert(I18N.CONSTANTS.share(), I18N.CONSTANTS.emptyReportsCannotBeShared(),
+                new Listener<MessageBoxEvent>() {
+
+                    @Override
+                    public void handleEvent(MessageBoxEvent be) {
+                        hide();
+                    }
+                });
         }
     }
 

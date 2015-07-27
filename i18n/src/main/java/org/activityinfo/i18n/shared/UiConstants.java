@@ -2519,6 +2519,9 @@ public interface UiConstants extends Constants {
     @Key("shareReport")
     String shareReport();
 
+    @DefaultStringValue("This report is still empty, so it can't yet be shared.")
+    String emptyReportsCannotBeShared();
+    
     /**
      * Translated "Shared".
      *

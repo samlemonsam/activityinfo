@@ -19,6 +19,7 @@ import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
+import org.activityinfo.test.pageobject.web.Dashboard;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
@@ -26,6 +27,7 @@ import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.activityinfo.test.pageobject.web.entry.*;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
+import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
@@ -354,25 +356,6 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
         return pivotTable.extractData();
-    }
-
-    public void shareReportIsEmpty(boolean expectedEmpty) {
-        Preconditions.checkState(currentPage instanceof PivotTableEditor);
-
-        PivotTableEditor pivotTable = (PivotTableEditor) currentPage;
-        GxtModal modal = pivotTable.clickButton("Share");
-
-        GxtGrid grid = GxtGrid.findGrids(modal.getWindowElement()).first().get().waitUntilReloadedSilently();
-        try {
-            grid.waitUntilAtLeastOneRowIsLoaded();
-            if (expectedEmpty) {
-                throw new AssertionError("Share report grid is not empty");
-            }
-        } catch (TimeoutException e) {
-            if (!expectedEmpty) {
-                throw new AssertionError("Share report grid is empty or selenium is timeout.");
-            }
-        }
     }
 
     @Override
@@ -938,6 +921,18 @@ public class UiApplicationDriver extends ApplicationDriver {
         // validate values are changed in table
         Assert.assertNotNull(databasesPage.grid().findCell(newName));
         Assert.assertNotNull(databasesPage.grid().findCell(newDescription));
+    }
+
+    @Override
+    public List<String> getSavedReports() {
+        ReportsTab reports = getApplicationPage().navigateToReportsTab();
+        return aliasTable.deAlias(reports.reportsList().getTitles());
+    }
+
+    @Override
+    public List<String> getDashboardPortlets() {
+        Dashboard dashboard = getApplicationPage().navigateToDashboard();
+        return aliasTable.deAlias(dashboard.getPortletTitles());
     }
 
     @Override

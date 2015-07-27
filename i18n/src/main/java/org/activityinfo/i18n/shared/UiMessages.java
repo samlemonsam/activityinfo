@@ -363,4 +363,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @Messages.DefaultMessage("Failed to find nationwide location type, db: {0}, country: {1}")
     String noNationWideLocationType(String dbName, String countryName);
+
+    @Messages.DefaultMessage("{0} Users")
+    String databaseUserGroup(String databaseName);
+
 }

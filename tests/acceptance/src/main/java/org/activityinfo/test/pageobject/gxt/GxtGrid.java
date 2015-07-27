@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Uninterruptibles;
 import cucumber.api.DataTable;
 import org.activityinfo.test.driver.Tester;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -19,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 
@@ -111,7 +113,7 @@ public class GxtGrid {
         } catch (Exception e) {
             dataTable = "<Error: >";
         }
-        return new AssertionError(String.format("Could not find cell with text '%s'.", text) + dataTable);
+        return new AssertionError(format("Could not find cell with text '%s'.", text) + dataTable);
     }
     
     public FluentIterable<GxtRow> rows() {
@@ -149,7 +151,14 @@ public class GxtGrid {
     public GxtCell findCell(String rowText, String columnId) {
         FluentElement nodeWithText = container.find().anyElement(withText(rowText)).first();
         FluentElement ancestor = nodeWithText.find().ancestor().div(withClass("x-grid3-row")).first();
-        return new GxtCell(ancestor.find().descendants().td(withClass("x-grid3-td-" + columnId)).first());
+
+        FluentElements cells = ancestor.find().descendants().td(withClass("x-grid3-td-" + columnId)).waitForList();
+        if(cells.size() != 1) {
+            throw new AssertionError(
+                format("Expected unique row containing text '%s', found %d rows", rowText, cells.size()));
+        }
+        
+        return new GxtCell(cells.first().get());
     }
 
     public GxtGrid waitUntilReloadedSilently() {
@@ -218,6 +227,7 @@ public class GxtGrid {
                 focusedElement.get().sendKeys(Keys.ESCAPE);
             }
 
+
             Tester.sleep(300);// just give some time for those sendKeys which sometimes takes some time to react
 
             element.clickWhenReady();
@@ -242,6 +252,17 @@ public class GxtGrid {
                     }
                 }
             });
+        }
+        
+        public boolean isChecked() {
+            String classNames = element.findElement(By.className("x-grid3-check-col")).attribute("class");
+            if(classNames.contains("x-grid3-check-col-on")) {
+                return true;
+            } else if(classNames.contains("x-grid3-check-col")) {
+                return false;
+            } else {
+                throw new AssertionError("The cell is not a check column");
+            }
         }
 
         public boolean hasIcon() {

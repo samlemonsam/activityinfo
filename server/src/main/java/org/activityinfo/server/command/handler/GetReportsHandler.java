@@ -63,7 +63,7 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
 
         SqlQuery myDatabases = SqlQuery.selectSingle("d.databaseid")
                                        .from(Tables.USER_DATABASE, "d")
-                                       .leftJoin(SqlQuery.selectAll()
+                                       .leftJoin(SqlQuery.selectAll()   
                                                          .from(Tables.USER_PERMISSION)
                                                          .where("userpermission.UserId")
                                                          .equalTo(context.getUser().getId()), "p")

@@ -2,7 +2,9 @@ package org.activityinfo.test.driver;
 
 
 import com.google.common.collect.Lists;
+import com.sun.glass.ui.Pen;
 import cucumber.api.DataTable;
+import cucumber.api.Pending;
 import cucumber.api.PendingException;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -362,12 +364,22 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
     
-
     public void renameDatabase(String oldName, String newName, String newDescription) {
         throw new PendingException();
     }
 
-    public void shareReportIsEmpty(boolean isEmpty) {
+    /**
+     * 
+     * @return a list of the names of saved reports
+     */
+    public List<String> getSavedReports() {
+        throw new PendingException();
+    }
+
+    /**
+     * @return a list of the names of reports that appear on the user's dashboard
+     */
+    public List<String> getDashboardPortlets() {
         throw new PendingException();
     }
 

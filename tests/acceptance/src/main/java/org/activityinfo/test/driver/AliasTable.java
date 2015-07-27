@@ -206,6 +206,18 @@ public class AliasTable {
         return values;
     }
 
+    public List<String> deAlias(Iterable<String> values) {
+        List<String> testHandles = Lists.newArrayList();
+        for (String value : values) {
+            if(isAlias(value)) {
+                testHandles.add(getTestHandleForAlias(value));
+            } else {
+                testHandles.add(value);
+            }
+        }
+        return testHandles;
+    }
+    
     public FieldValue deAlias(FieldValue value) {
         value.setField(getTestHandleForAlias(value.getField()));
 
