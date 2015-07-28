@@ -620,7 +620,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 break;
             }
             if(stopwatch.elapsed(TimeUnit.MINUTES) > 5) {
-                throw new AssertionError("Download timed out.");
+                throw new RuntimeException("Download timed out.");
             }
 
             Thread.sleep(1000);
