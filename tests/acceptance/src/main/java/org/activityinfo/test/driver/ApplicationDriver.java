@@ -2,9 +2,7 @@ package org.activityinfo.test.driver;
 
 
 import com.google.common.collect.Lists;
-import com.sun.glass.ui.Pen;
 import cucumber.api.DataTable;
-import cucumber.api.Pending;
 import cucumber.api.PendingException;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
