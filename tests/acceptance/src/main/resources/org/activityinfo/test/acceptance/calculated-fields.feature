@@ -30,7 +30,7 @@ Feature: Calculated fields
     Then the submission's detail shows:
       | field              | value           |
       | a                  | 1               |
-      | c                  | ∞              |
+      | c                  | ∞               |
     When I update the submission with:
       | field              | value           |
       | a                  | 0               |

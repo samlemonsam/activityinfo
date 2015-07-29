@@ -16,9 +16,11 @@ dependencies {
 
 idea {
     module {
-        scopes.COMPILE.plus += [ configurations.gwt ]
+        scopes.PROVIDED.plus += [ configurations.gwt ]
+        scopes.PROVIDED.plus += [ configurations.gwtSdk ]
     }
 }
+
 
 jar {
     from project.sourceSets.main.allSource

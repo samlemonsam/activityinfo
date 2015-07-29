@@ -36,9 +36,13 @@ gwt {
     }
 }
 
+configurations {
+    compile.exclude module: 'gwt-servlet'
+}
+
 idea {
     module {
-        scopes.COMPILE.plus += [ configurations.gwt ]
+        scopes.PROVIDED.plus += [ configurations.gwt ]
     }
 }
 

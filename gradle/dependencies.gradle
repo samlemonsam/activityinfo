@@ -4,7 +4,7 @@ ext {
 
     guavaVersion = '15.0'
     rebarVersion = '2.4.4'
-    gwtVersion = '2.6.0-rc3'
+    gwtVersion = '2.6.1'
     jerseyVersion = '1.17'
     gaeVersion = '1.9.6'
     jacksonVersion = '1.9.2'
