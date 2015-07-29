@@ -1,7 +1,6 @@
 /**
- * Measures test coverage of server-side cost by our acceptance test suite.
- * 
- * To get these statistics 
+ * Measures test coverage of server-side code by our acceptance test suite.
+ *
  */
 
 ext {

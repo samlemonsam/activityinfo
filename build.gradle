@@ -27,6 +27,7 @@ idea {
   project {
     jdkName = '1.7'
     languageLevel = '1.7'
+    vcs = 'Git'
   }
 }
 
@@ -60,18 +61,6 @@ subprojects {
     testCompile libraries.junit
     testCompile libraries.hamcrest
     testCompile libraries.easymock
-  }
-
-  project.afterEvaluate { project -> 
-    if(project.configurations.hasProperty('gwt')) {
-      project.tasks.getByName('ideaModule').doFirst { task ->
-        // Update the configuration *just* before the ideaModules task is executed,
-        // because once we resolve the gwt configuration, it can't be further modified
-        task.module.scopes.PROVIDED.plus += [ 
-                project.configurations.gwt,
-                project.configurations.gwtSdk]
-      }
-    }
   }
 }
 

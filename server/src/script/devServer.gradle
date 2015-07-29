@@ -37,6 +37,56 @@ def healthCheck() {
     }
 }
 
+task appengineExplodeDevMode(type: Copy) {
+    group = "Google App Engine"
+    description = "Creates a partial, exploded web app layout for GWT Dev Mode"
+    
+    // In order to run (super)dev mode, we need ONLY the part of the
+    // web app required for the server side, which includes
+    // compiled Java classes, resources, and server-side libraries
+    
+    dependsOn compileJava
+    from("$projectDir/src/main/webapp")
+    from(configurations.runtime) {
+        into "WEB-INF/lib"
+    }
+    from(sourceSets.main.output) {
+        into "WEB-INF/classes"
+    }
+    into "$buildDir/explodedDevMode"
+}
+
+
+task appengineDevMode(type: JavaExec) {
+    dependsOn appengineDownloadSdk
+    dependsOn appengineExplodeDevMode
+
+    main = 'com.google.gwt.dev.DevMode'
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+
+    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
+    args '-war', "${buildDir}/explodedDevMode"
+    args '-startupUrl', 'login'
+    args '-port', devServerPort
+    args 'org.activityinfo.ui.ActivityInfoFFTest'
+
+    doFirst {
+        // The SDK root is only available after appengineDownloadSdk runs
+        def sdkRoot = System.getProperty('appengine.sdk.root')
+        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
+        
+        // Write the application configuration pointing to the development database
+        writeConfiguration mysql.localDev
+        jvmArgs "-Dactivityinfo.config=${configFile}"
+    }
+}
+
 appengineRun {
     ext.database = mysql.localDev
     

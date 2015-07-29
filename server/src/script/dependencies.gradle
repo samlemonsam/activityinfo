@@ -54,7 +54,6 @@ dependencies {
 
     // GWT User Interface Dependencies
     compile libraries.gxt
-    compile libraries.gwt.user
     gwt libraries.gwt.dnd
     gwt libraries.gwt.guice
     gwt libraries.gwt.gson
@@ -79,7 +78,6 @@ dependencies {
 
     gwt libraries.rebar.style
     
-
 
     // Report Rendering
     compile libraries.appengine.export.itext

@@ -16,7 +16,7 @@ dependencies {
 
 idea {
     module {
-        scopes.COMPILE.plus += [ configurations.gwt ]
+        scopes.PROVIDED.plus += [ configurations.gwt ]
     }
 }
 
