@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
 @ScenarioScoped
@@ -123,13 +124,15 @@ public class AnalysisSteps {
     public void the_report_should_not_be_shown_on_the_dashboard_of(String userName) throws Throwable {
         driver.login(accounts.ensureAccountExists(userName));
         
-        assertThat(driver.getDashboardPortlets(), not(contains(getCurrentReport())));
+        assertThat(driver.getDashboardPortlets(), not(hasItem(getCurrentReport())));
     }
 
     @Then("^the report should be shown on (.+)'s dashboard$")
-    public void the_report_should_not_be_shown_on_users_dashboard(String userName) throws Throwable {
+    public void the_report_should_be_shown_on_users_dashboard(String userName) throws Throwable {
+        
         driver.login(accounts.ensureAccountExists(userName));
-        assertThat(driver.getDashboardPortlets(), contains(getCurrentReport()));
+        List<String> portlets = driver.getDashboardPortlets();
+        assertThat(portlets, hasItem(getCurrentReport()));
     }
 
     private String getCurrentReport() {
@@ -140,7 +143,7 @@ public class AnalysisSteps {
 
     @Then("^\"([^\"]*)\" should appear in my list of saved reports$")
     public void should_appear_in_my_list_of_saved_reports(String reportName) throws Throwable {
-        assertThat(driver.getSavedReports(), contains(reportName));
+        assertThat(driver.getSavedReports(), hasItem(reportName));
     }
     
     
@@ -149,7 +152,7 @@ public class AnalysisSteps {
 
         driver.login(accounts.ensureAccountExists(userName));
 
-        assertThat(driver.getSavedReports(), not(contains(getCurrentReport())));
+        assertThat(driver.getSavedReports(), not(hasItem(getCurrentReport())));
     }
 
     @Then("^the report should appear in (.+)'s list of saved reports$")
@@ -157,7 +160,7 @@ public class AnalysisSteps {
 
         driver.login(accounts.ensureAccountExists(userName));
 
-        assertThat(driver.getSavedReports(), contains(getCurrentReport()));
+        assertThat(driver.getSavedReports(), hasItem(getCurrentReport()));
     }
     
     
