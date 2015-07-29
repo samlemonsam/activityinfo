@@ -22,9 +22,12 @@ package org.activityinfo.ui.client.page.report;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.data.ModelData;
+import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.button.Button;
@@ -119,7 +122,20 @@ public class ShareReportDialog extends Dialog {
         visibleColumn = new CheckColumnConfig("visible", I18N.CONSTANTS.shared(), 75);
         visibleColumn.setDataIndex("visible");
 
-        dashboardColumn = new CheckColumnConfig("defaultDashboard", I18N.CONSTANTS.defaultDashboard(), 75);
+        dashboardColumn = new CheckColumnConfig("defaultDashboard", I18N.CONSTANTS.defaultDashboard(), 75) {
+            @Override
+            protected void onMouseDown(GridEvent<ModelData> ge) {
+                super.onMouseDown(ge);
+                Record record = grid.getStore().getRecord(ge.getModel());
+    
+                // Putting on the dashboard implies sharing
+                if(record.get("defaultDashboard") == Boolean.TRUE &&
+                   record.get("visible") != Boolean.TRUE) {
+                    
+                    record.set("visible", true);
+                }
+            }
+        };
         dashboardColumn.setDataIndex("defaultDashboard");
 
         return new ColumnModel(Arrays.asList(icon, name, visibleColumn, dashboardColumn));
