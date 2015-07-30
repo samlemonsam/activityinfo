@@ -57,6 +57,7 @@ import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.ui.client.Beta;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
@@ -105,7 +106,7 @@ public class SiteDialog extends Window {
         setLayout(new BorderLayout());
 
         // show alert only for report frequency ONCE
-        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
+        if (Beta.ENABLED && activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             BorderLayoutData alertLayout = new BorderLayoutData(LayoutRegion.NORTH);
             alertLayout.setSize(30);
             add(modernViewAlert(), alertLayout);

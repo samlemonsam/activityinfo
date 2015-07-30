@@ -62,12 +62,20 @@ task appengineDevMode(type: JavaExec) {
     dependsOn appengineExplodeDevMode
 
     main = 'com.google.gwt.dev.DevMode'
+    
+    // Java sources first, so that changes get picked up on refresh
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath project(":i18n").sourceSets.main.java.srcDirs
+    classpath project(":i18n").sourceSets.main.resources.srcDirs
+
+
+    // Compiled java classes and libraries second
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.gwt
     classpath configurations.gwtSdk
 
-    classpath sourceSets.main.java.srcDirs
-    classpath sourceSets.main.resources.srcDirs
+
 
     args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
     args '-war', "${buildDir}/explodedDevMode"

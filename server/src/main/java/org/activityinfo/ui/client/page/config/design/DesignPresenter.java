@@ -310,15 +310,18 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         ModelData selected = view.getSelection();
 
         if ("Activity".equals(entityName)) {
-            final NewFormDialog newFormDialog = new NewFormDialog();
-            newFormDialog.show();
-            newFormDialog.setSuccessHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    createNewActivity(newFormDialog);
-                }
-            });
-            return;
+            newEntity = new ActivityDTO();
+            newEntity.set("databaseId", db.getId());
+            newEntity.set("classicView", true);
+            newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
+
+        } else if("Form".equals(entityName)) {
+            newEntity = new ActivityDTO();
+            newEntity.set("databaseId", db.getId());
+            newEntity.set("classicView", false);
+            newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
 
         } else if ("LocationType".equals(entityName)) {
             newEntity = new LocationTypeDTO();
@@ -529,11 +532,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
         IsActivityDTO activity = getSelectedActivity(selectedItem);
-        if (activity != null) {
-            return  activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
-        } else {
-            return selectedItem instanceof IsFormClass;
-        }
+        return activity != null;
     }
 
     private IsActivityDTO getSelectedActivity(ModelData selectedItem) {

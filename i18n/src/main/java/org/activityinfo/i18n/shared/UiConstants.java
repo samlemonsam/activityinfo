@@ -1701,7 +1701,7 @@ public interface UiConstants extends Constants {
      *
      * @return translated "New Form"
      */
-    @DefaultStringValue("New Form")
+    @DefaultStringValue("New Activity")
     @Key("newActivity")
     String newActivity();
 
@@ -3547,6 +3547,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Classic view")
     String classicView();
+    
+    @DefaultStringValue("Try the new (BETA) form layout")
+    String tryNewFormLayout();
 
     @DefaultStringValue("Modern view")
     String modernView();
@@ -3575,8 +3578,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Style is not selected")
     String styleIsNotSelected();
 
-    @DefaultStringValue("Show me the difference")
-    String showMeTheDifference();
+    @DefaultStringValue("What's this?")
+    String whatsThis();
 
     @DefaultStringValue("More about view types")
     String moreAboutView();

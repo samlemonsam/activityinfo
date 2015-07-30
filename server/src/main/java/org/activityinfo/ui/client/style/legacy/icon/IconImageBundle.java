@@ -58,7 +58,6 @@ public interface IconImageBundle extends ImageBundle {
 
     AbstractImagePrototype excel();
 
-    @Resource("application_form.png")
     AbstractImagePrototype activity();
 
     AbstractImagePrototype addActivity();
