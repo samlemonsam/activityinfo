@@ -15,7 +15,7 @@ of the document.
 
 ## Setting up your Development Environment
 
-To contribute to ActivityInfo, the first step is to set up an environment on your own machine where you 
+The next step is to set up an environment on your own machine where you 
 can make changes to the source code, test those changes quickly, and run automated tests to confirm that you haven't
 broken anything.
 
@@ -26,10 +26,10 @@ this from [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-
 
 ### Installing MySQL
 
-ActivityInfo uses MySql 5.5 for storage, and you will need a locally running database to run the application locally and
-to run tests.
+ActivityInfo uses MySql 5.5 for storage, and you will need a locally running database to run 
+and test the application locally.
 
-Read the MySql documentation o [setting up MySql](https://dev.mysql.com/doc/refman/5.5/en/installing.html) on your
+Read the MySql documentation on [setting up MySql](https://dev.mysql.com/doc/refman/5.5/en/installing.html) on your
 local machine.
 
 ### Defining Gradle Properties
@@ -73,17 +73,18 @@ that allows you to interactively make changes to the source code, and then refre
 the browser to see the result.
 
 *Note:* we are still using the "classic" GWT Dev Mode which requires a browser plugin to function. This browser
-no longer works on the most recent versions of most browsers; we recommend installing a local copy of
+plugin no longer works on the most recent versions of most browsers; we recommend installing a local copy of
 [FireFox 24.2.0esr](https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/24.2.0esr/) and following this 
 [tutorial](https://openbpm.wordpress.com/2014/05/31/getting-gwt-plugin-to-work-on-firefox-on-ubuntu-14-04/) to setup
 a seperate FireFox profile for testing ActivityInfo. We expect to transition to GWT 2.7 and the new "Super" Dev Mode 
 before the end of 2015.
 
-First, create an `activityinfo_dev` database by running:
+The very first time you run AI locally, you'll need to create an `activityinfo_dev` database by running:
 
     $ ./gradlew setupDevDatabase
     
-This 
+This will create the required MySQL tables and populate the database with a bare minimum of geographic reference
+data to run AI.
 
 You can start development mode from Gradle by running:
 
@@ -92,7 +93,7 @@ You can start development mode from Gradle by running:
 And then navigating to [http://127.0.0.1:8080/login?gwt.codesvr=127.0.0.1:9997](http://127.0.0.1:8080/login?gwt.codesvr=127.0.0.1:9997)
 with Firefox 24. 
 
-
+You can log in with the account `test@test.org` and any password.
 
 
 
