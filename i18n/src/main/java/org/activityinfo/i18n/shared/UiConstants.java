@@ -3378,12 +3378,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("This field has no options.")
     String noDataForField();
 
-    @DefaultStringValue("Load more")
-    String loadMore();
-
-    @DefaultStringValue("Retry loading")
-    String retryLoading();
-
     @DefaultStringValue("Import")
     String importText();
 
@@ -3465,9 +3459,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Create")
     String create();
-
-    @DefaultStringValue("Design form")
-    String designForm();
 
     @DefaultStringValue("Widgets")
     String widgets();
@@ -3571,9 +3562,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please enter a name for the new form")
     String enterNameForNewForm();
-
-    @DefaultStringValue("Style is not selected")
-    String styleIsNotSelected();
 
     @DefaultStringValue("What's this?")
     String whatsThis();
@@ -3713,9 +3701,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Warning")
     String warning();
-
-    @DefaultStringValue("Show all")
-    String showAll();
 
     @DefaultStringValue("Please specify 'from' date")
     String pleaseSpecifyFromDate();
