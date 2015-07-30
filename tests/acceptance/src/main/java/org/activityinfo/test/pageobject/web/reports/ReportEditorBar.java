@@ -2,13 +2,12 @@ package org.activityinfo.test.pageobject.web.reports;
 
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.pageobject.api.XPathBuilder;
-import org.activityinfo.test.pageobject.gxt.GxtGrid;
+import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
-import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.Keys;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 /**
  * Page object for the common report editor bar
@@ -30,12 +29,12 @@ public class ReportEditorBar {
     
     public void save() {
         container.find().button(containingText(I18N.CONSTANTS.save())).first().click();
-        waitForSavedNotification();
+        Gxt.waitForSavedNotification(container);
     }
     
     public void pinToDashboard() {
         container.find().button(containingText(I18N.CONSTANTS.pinToDashboard())).first().click();
-        waitForSavedNotification();
+        Gxt.waitForSavedNotification(container);
     }
     
     public ShareReportsDialog share() {
@@ -44,8 +43,5 @@ public class ReportEditorBar {
         return new ShareReportsDialog(modal);
     }
     
-    public void waitForSavedNotification() {
-        container.find().span(withClass("x-info-header-text"), withText(I18N.CONSTANTS.saved())).waitForFirst();
-    }
     
 }

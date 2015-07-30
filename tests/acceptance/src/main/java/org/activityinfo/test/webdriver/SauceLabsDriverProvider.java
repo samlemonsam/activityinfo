@@ -100,6 +100,9 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     public WebDriver start(String name, BrowserProfile profile) {
 
         DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setCapability("name", name);
+        capabilities.setCapability("build", System.getenv("BUILD_NUMBER"));
+            
         if(!Strings.isNullOrEmpty(System.getenv("SELENIUM_BROWSER"))) {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, System.getenv("SELENIUM_BROWSER"));
             capabilities.setCapability(CapabilityType.VERSION, System.getenv("SELENIUM_VERSION"));
@@ -113,7 +116,6 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
         } else {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
-            capabilities.setCapability("name", name);
         }
 
         if(SAUCE_FAST.isPresent()) {

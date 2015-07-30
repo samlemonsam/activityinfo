@@ -5,9 +5,6 @@ import com.google.common.base.Strings;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
-import org.openqa.selenium.Keys;
-
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 
 public class GxtIndicatorForm extends Form {
@@ -34,12 +31,10 @@ public class GxtIndicatorForm extends Form {
         } else {
             // otherwise use tab key to advance
 
-            current.tab();
-
-            Optional<FluentElement> focused = container.find()
-                    .input(withClass("x-form-focus")).ancestor().tr().firstIfPresent();
-            if (focused.isPresent()) {
-                current = new IndicatorField(focused.get());
+            Optional<FluentElement> next = current.getElement().find().followingSibling().tr().firstIfPresent();
+            if (next.isPresent()) {
+                current = new IndicatorField(next.get());
+                current.focus();
                 return true;
             } else {
                 return false;
@@ -96,10 +91,6 @@ public class GxtIndicatorForm extends Form {
             input.sendKeys(value);
         }
 
-        public void tab() {
-            row.find().input().first().sendKeys(Keys.TAB);
-        }
-        
         public String getName() {
             return row.find().input().first().attribute("name");
         }

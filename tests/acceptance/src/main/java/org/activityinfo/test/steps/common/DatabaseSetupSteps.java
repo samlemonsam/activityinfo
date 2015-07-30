@@ -522,7 +522,7 @@ public class DatabaseSetupSteps {
 
     @When("^selecting \"([^\"]*)\" as the source link database$")
     public void selecting_as_the_source_link_database(String databaseName) throws Throwable {
-        driver.getLinkIndicatorPage().getSourceDb().findCell(driver.getAliasTable().getAlias(databaseName)).click();
+        driver.getLinkIndicatorPage().getSourceDb().clickCell(driver.getAliasTable().getAlias(databaseName));
     }
 
     @Then("^source indicator link database shows:$")

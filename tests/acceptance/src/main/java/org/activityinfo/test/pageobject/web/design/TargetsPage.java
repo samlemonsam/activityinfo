@@ -64,7 +64,7 @@ public class TargetsPage {
         // Select the target from the upper grid
         GxtGrid grid = targetGrid();
         grid.waitUntilAtLeastOneRowIsLoaded();
-        grid.findCell(targetName).click();
+        grid.clickCell(targetName);
     }
     
     public void setValue(String indicatorName, String value) {

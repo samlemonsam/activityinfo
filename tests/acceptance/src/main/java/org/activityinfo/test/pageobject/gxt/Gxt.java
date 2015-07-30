@@ -2,11 +2,13 @@ package org.activityinfo.test.pageobject.gxt;
 
 
 import com.google.common.base.Predicate;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 public class Gxt {
 
@@ -38,6 +40,11 @@ public class Gxt {
                 return !element.find().div(withClass("x-masked")).firstIfPresent().isPresent();
             }
         });
+    }
+
+
+    public static void waitForSavedNotification(FluentElement container) {
+        container.find().span(withClass("x-info-header-text"), withText(I18N.CONSTANTS.saved())).waitForFirst();
     }
 
 }

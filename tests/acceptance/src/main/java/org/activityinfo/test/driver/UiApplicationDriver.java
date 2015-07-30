@@ -32,16 +32,12 @@ import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -143,17 +139,24 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     private void fillForm(Map<String, FieldValue> valueMap, DataEntryDriver driver) throws InterruptedException {
+        
+        Set<String> unsubmittedValues = new HashSet<>(valueMap.keySet());
+        Set<String> presentFields = new HashSet<>();
+        
         while (driver.nextField()) {
+            presentFields.add(driver.getLabel());
             System.out.println("label = " + driver.getLabel());
             switch (driver.getLabel()) {
                 case "Partner":
                     if (valueMap.containsKey("partner")) {
                         driver.select(aliasTable.getAlias(valueMap.get("partner").getValue()));
+                        unsubmittedValues.remove("partner");
                     }
                     break;
                 case "Start Date":
                     if (valueMap.containsKey("Start Date")) {
                         driver.fill(LocalDate.parse(valueMap.get("Start Date").getValue()));
+                        unsubmittedValues.remove("Start Date");
                     } else {
                         driver.fill(new LocalDate(2014, 1, 1));
                     }
@@ -161,18 +164,21 @@ public class UiApplicationDriver extends ApplicationDriver {
                 case "End Date":
                     if (valueMap.containsKey("End Date")) {
                         driver.fill(LocalDate.parse(valueMap.get("End Date").getValue()));
+                        unsubmittedValues.remove("End Date");
                     } else {
                         driver.fill(new LocalDate(2014, 1, 1));
                     }
                     break;
                 case "Comments":
                     if (valueMap.containsKey("comments")) {
+                        unsubmittedValues.add("comments");
                         driver.fill(valueMap.get("comments").getValue());
                     }
                     break;
                 default:
                     String testHandle = aliasTable.getTestHandleForAlias(driver.getLabel());
                     if (valueMap.containsKey(testHandle)) {
+                        unsubmittedValues.remove(testHandle);
                         String value = valueMap.get(testHandle).getValue();
                         if (value.matches("^\\d+$")) {
                             driver.fill(value);
@@ -183,8 +189,16 @@ public class UiApplicationDriver extends ApplicationDriver {
                     break;
             }
         }
+        
+        if(!unsubmittedValues.isEmpty()) {
+            throw new AssertionError(String.format("Could not complete fields %s, they were not present or enabled" +
+                    " on the form. The following fields were present: %s", 
+                    unsubmittedValues.toString(), 
+                    presentFields.toString()));
+        }
+        
     }
-
+    
     @Override
     public void enableOfflineMode() {
         ensureLoggedIn();
@@ -638,18 +652,18 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         for (IndicatorLink row : linkedIndicatorRows) {
 
-            linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).click();
-            linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).click();
+            linkIndicatorsPage.getSourceDb().clickCell(aliasTable.getAlias(row.getSourceDb()));
+            linkIndicatorsPage.getTargetDb().clickCell(aliasTable.getAlias(row.getDestDb()));
 
             Tester.sleepSeconds(1); // sometimes it's too fast and we have to give time show "Loading" and only then wait for rows
 
             GxtGrid sourceIndicator = linkIndicatorsPage.getSourceIndicator().waitUntilAtLeastOneRowIsLoaded();
             GxtGrid targetIndicator = linkIndicatorsPage.getTargetIndicator().waitUntilAtLeastOneRowIsLoaded();
 
-            sourceIndicator.findCell(aliasTable.getAlias(row.getSourceIndicator())).click();
-            targetIndicator.findCell(aliasTable.getAlias(row.getDestIndicator())).click();
+            sourceIndicator.clickCell(aliasTable.getAlias(row.getSourceIndicator()));
+            targetIndicator.clickCell(aliasTable.getAlias(row.getDestIndicator()));
 
-            linkIndicatorsPage.clickLinkButton();
+            linkIndicatorsPage.linkSelection();
         }
     }
 

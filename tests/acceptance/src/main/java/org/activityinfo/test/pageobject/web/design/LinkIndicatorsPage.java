@@ -24,6 +24,7 @@ package org.activityinfo.test.pageobject.web.design;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 
 /**
@@ -43,8 +44,9 @@ public class LinkIndicatorsPage {
                 grids.size() + " expected: " + EXPECTED_GRIDS_COUNT );
     }
 
-    public void clickLinkButton() {
+    public void linkSelection() {
         container.find().button().clickWhenReady();
+        Gxt.waitForSavedNotification(container);
     }
 
     public GxtGrid getSourceDb() {

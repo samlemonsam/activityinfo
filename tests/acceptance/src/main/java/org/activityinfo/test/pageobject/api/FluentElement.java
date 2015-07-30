@@ -83,11 +83,13 @@ public class FluentElement {
 
     public void waitUntil(Predicate<WebDriver> predicate) {
         WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+        wait.ignoring(StaleElementReferenceException.class);
         wait.until(predicate);
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {
         WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+        wait.ignoring(StaleElementReferenceException.class);
         wait.until(condition);
     }
 
@@ -97,12 +99,14 @@ public class FluentElement {
 
     public FluentElement waitFor(By by, int timeout) {
         WebDriverWait wait = new WebDriverWait(webDriver, timeout);
+        wait.ignoring(StaleElementReferenceException.class);
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
         return new FluentElement(webDriver, element);
     }
     
     public <T> T waitFor(Function<WebDriver, T> function) {
         WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+        wait.ignoring(StaleElementReferenceException.class);
         return wait.until(function);
     }
     
@@ -131,16 +135,7 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
-//        try {
         element().sendKeys(keys);
-//        } catch (WebDriverException e) {
-//            // sometimes got unknown error: cannot focus element
-//            Actions actions = new Actions(webDriver);
-//            actions.moveToElement(element());
-//            actions.click();
-//            actions.sendKeys(keys);
-//            actions.build().perform();
-//        }
     }
 
     public boolean exists(By by) {
@@ -208,5 +203,9 @@ public class FluentElement {
         Actions actions = new Actions(webDriver);
         actions.dragAndDrop(element, dropElement.element());
         actions.perform();
+    }
+
+    public FluentElement activeElement() {
+        return new FluentElement(webDriver, webDriver.switchTo().activeElement());
     }
 }
