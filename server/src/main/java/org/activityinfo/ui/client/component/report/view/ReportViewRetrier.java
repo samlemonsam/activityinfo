@@ -37,12 +37,20 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.widget.loading.ExceptionOracle;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * @author yuriyz on 07/14/2015.
  */
 public class ReportViewRetrier {
 
+    private static final Logger LOGGER = Logger.getLogger(ReportViewRetrier.class.getName());
+    
     public static void onFailure(LayoutContainer container, Throwable caught, ClickHandler retryCallback) {
+        
+        LOGGER.log(Level.SEVERE, "Exception while loading reports contents", caught);
+        
         container.el().unmask();
         container.removeAll();
         container.add(createRetryPanel(caught, retryCallback));
