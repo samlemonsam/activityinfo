@@ -101,7 +101,7 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability("name", name);
-        capabilities.setCapability("build", System.getenv("BUILD_NUMBER"));
+        capabilities.setCapability("build", System.getenv("BUILD_TAG"));
             
         if(!Strings.isNullOrEmpty(System.getenv("SELENIUM_BROWSER"))) {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, System.getenv("SELENIUM_BROWSER"));

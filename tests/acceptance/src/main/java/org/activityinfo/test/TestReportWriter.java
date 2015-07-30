@@ -2,6 +2,7 @@ package org.activityinfo.test;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.io.Files;
 import org.activityinfo.test.config.ConfigurationError;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,6 +15,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,30 @@ public class TestReportWriter {
         }
         for (String suite : suiteMap.keySet()) {
             writeSuite(suite, suiteMap.get(suite));
+            writeAttachments(suite, suiteMap.get(suite));
         }
+    }
+
+    private void writeAttachments(String suite, Collection<TestResult> testResults) {
+        File attachmentDir = new File(outputDir, suite);
+        if(!attachmentDir.exists()) {
+            boolean created = attachmentDir.mkdirs();
+            if(!created) {
+                throw new IllegalStateException("Cannot create attachment directory for " + suite);
+            }
+        }
+
+        for (TestResult testResult : testResults) {
+            for (TestResult.Attachment attachment : testResult.getAttachments()) {
+                File attachmentFile = new File(attachmentDir, testName(testResult) + "-" + attachment.getFilename());
+                try {
+                    Files.copy(attachment.getByteSource(), attachmentFile);
+                } catch (IOException e) {
+                    throw new ConfigurationError("Could not write attachment file " + attachmentFile.getAbsolutePath());
+                }
+            }
+        }
+        
     }
 
     private String suiteName(TestResult result) {

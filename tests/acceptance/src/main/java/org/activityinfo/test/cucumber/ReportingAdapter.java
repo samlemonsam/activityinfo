@@ -1,6 +1,7 @@
 package org.activityinfo.test.cucumber;
 
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteSource;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
 import gherkin.formatter.model.*;
@@ -118,7 +119,7 @@ public class ReportingAdapter implements Formatter, Reporter {
     
     @Override
     public void embedding(String mimeType, byte[] data) {
-        String filename = nextFilename(mimeType);
+        resultBuilder.attach(nextFilename(mimeType), ByteSource.wrap(data));
     }
 
     private String nextFilename(String mimeType) {

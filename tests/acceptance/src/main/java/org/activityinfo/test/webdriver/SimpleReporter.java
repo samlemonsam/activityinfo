@@ -26,9 +26,7 @@ public class SimpleReporter implements SessionReporter {
 
     @Override
     public void finished(Scenario scenario) {
-        if(scenario.isFailed()) {
-            screenshot();
-        }
+        screenshot();
     }
 
     @Override

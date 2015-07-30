@@ -13,7 +13,9 @@ import java.util.concurrent.TimeUnit;
 public class TestResult {
 
 
-
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
 
     public static class Attachment {
         private String filename;
@@ -37,6 +39,7 @@ public class TestResult {
     private boolean passed;
     private String output;
     private long duration;
+    private List<Attachment> attachments;
     
     private TestResult() {
     }
@@ -96,9 +99,13 @@ public class TestResult {
             testResult.duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
             testResult.passed = passed;
             testResult.output = output.toString();
+            testResult.attachments = attachments;
             return testResult;
         }
 
 
+        public void attach(String filename, ByteSource contents) {
+            attachments.add(new Attachment(filename, contents));
+        }
     }
 }
