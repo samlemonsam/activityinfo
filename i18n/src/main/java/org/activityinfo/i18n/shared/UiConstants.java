@@ -3381,9 +3381,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Load more")
     String loadMore();
 
-    @DefaultStringValue("Failed to load entries")
-    String failedToLoadEntries();
-
     @DefaultStringValue("Retry loading")
     String retryLoading();
 

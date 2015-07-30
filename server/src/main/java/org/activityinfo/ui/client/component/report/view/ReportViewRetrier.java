@@ -29,10 +29,13 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Text;
 import com.extjs.gxt.ui.client.widget.button.Button;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.extjs.gxt.ui.client.widget.layout.RowData;
 import com.extjs.gxt.ui.client.widget.layout.RowLayout;
+import com.extjs.gxt.ui.client.widget.layout.VBoxLayout;
 import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.widget.loading.ExceptionOracle;
 
 /**
  * @author yuriyz on 07/14/2015.
@@ -56,12 +59,14 @@ public class ReportViewRetrier {
                 }
             }
         });
+        Text label = new Text(ExceptionOracle.getExplanation(caught));
+        label.setWidth("50%");
 
-        Text label = new Text(I18N.CONSTANTS.failedToLoadEntries() + ". Reason : " + caught.getMessage());
+        VBoxLayout layout = new VBoxLayout(VBoxLayout.VBoxLayoutAlign.CENTER);
 
         ContentPanel panel = new ContentPanel();
         panel.setHeaderVisible(false);
-        panel.setLayout(new RowLayout(Style.Orientation.VERTICAL));
+        panel.setLayout(layout);
         panel.add(label, new RowData(1, -1, new Margins(4)));
         panel.add(retryButton, new RowData(-1, -1, new Margins(4)));
 
