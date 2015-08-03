@@ -34,8 +34,6 @@ import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
@@ -320,6 +318,8 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
             newEntity = new ActivityDTO();
             newEntity.set("databaseId", db.getId());
             newEntity.set("classicView", false);
+            newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
+            newEntity.set("locationTypeId", db.getCountry().getNullLocationType().getId());
             newEntity.set("published", Published.NOT_PUBLISHED);
             parent = null;
 
