@@ -1679,15 +1679,6 @@ public interface UiConstants extends Constants {
     String monthlyReports();
 
     /**
-     * Translated "Multiple choices".
-     *
-     * @return translated "Multiple choices"
-     */
-    @DefaultStringValue("Multiple choices")
-    @Key("multipleChoice")
-    String multipleChoice();
-
-    /**
      * Translated "Name".
      *
      * @return translated "Name"
@@ -2548,15 +2539,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Showing results for:")
     @Key("showingSearchResultFor")
     String showingSearchResultFor();
-
-    /**
-     * Translated "Single selection".
-     *
-     * @return translated "Single selection"
-     */
-    @DefaultStringValue("Single selection")
-    @Key("singleChoice")
-    String singleChoice();
 
     /**
      * Translated "Count".
@@ -3650,8 +3632,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Calculated")
     String fieldTypeCalculated();
 
-    @DefaultStringValue("Checkboxes")
-    String checkboxes();
+    @DefaultStringValue("Multiple selection")
+    String multipleSelection();
 
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
@@ -3713,5 +3695,8 @@ public interface UiConstants extends Constants {
     
     @DefaultStringValue("Switch to page view")
     String switchToPageView();
+
+    @DefaultStringValue("Single selection")
+    String singleSelection();
 }
 

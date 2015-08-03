@@ -65,8 +65,8 @@ class AttributeGroupForm extends AbstractDesignForm {
         add(nameField);
 
         MappingComboBox typeField = new MappingComboBox();
-        typeField.add(true, I18N.CONSTANTS.multipleChoice());
-        typeField.add(false, I18N.CONSTANTS.singleChoice());
+        typeField.add(true, I18N.CONSTANTS.multipleSelection());
+        typeField.add(false, I18N.CONSTANTS.singleSelection());
         typeField.setFieldLabel(I18N.CONSTANTS.choiceType());
         binding.addFieldBinding(new MappingComboBoxBinding(typeField, "multipleAllowed"));
         add(typeField);
