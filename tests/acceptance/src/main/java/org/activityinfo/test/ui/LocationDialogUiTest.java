@@ -1,14 +1,19 @@
 package org.activityinfo.test.ui;
 
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.gxt.GxtFormPanel;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.GxtDataEntryDriver;
 import org.activityinfo.test.pageobject.web.entry.LocationDialog;
-import org.junit.Rule;
+import org.activityinfo.test.sut.DevServerAccounts;
 import org.junit.Test;
 import org.openqa.selenium.TimeoutException;
+
+import javax.inject.Inject;
+import java.util.Locale;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -20,19 +25,24 @@ public class LocationDialogUiTest {
     public static final String DISTRIBUTION_FORM = "NFI Distribution";
     public static final String VILLAGE = "Village";
 
-    @Rule
-    public UiDriver driver = new UiDriver();
+    @Inject
+    private UiApplicationDriver driver;
+    
+    @Inject
+    private DevServerAccounts accounts;
 
 
     @Test
     public void frenchCoordinates() throws Exception {
 
-        driver.setLocale("fr");
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag("fr"));
+        accounts.setLocale("fr");
+
         
         System.out.println(I18N.CONSTANTS.newSite());
         
         
-        driver.loginAsAny();
+        driver.login();
         driver.setup().createDatabase(
                 name(CLUSTER_DATABASE));
         
@@ -45,11 +55,11 @@ public class LocationDialogUiTest {
                 property("database", CLUSTER_DATABASE),
                 property("locationType", VILLAGE));
 
-        ApplicationPage applicationPage = driver.applicationPage();
+        ApplicationPage applicationPage = driver.getApplicationPage();
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
 
         GxtDataEntryDriver dataEntry = dataEntryTab
-                .navigateToForm(this.driver.alias(DISTRIBUTION_FORM))
+                .navigateToForm(this.driver.getAliasTable().getAlias(DISTRIBUTION_FORM))
                 .newSubmission();
 
         LocationDialog locationDialog = dataEntry.getLocationDialog();

@@ -28,6 +28,7 @@ import org.activityinfo.test.pageobject.web.entry.*;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
 import org.activityinfo.test.pageobject.web.reports.ReportsTab;
+import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
@@ -51,6 +52,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     private AliasTable aliasTable;
 
+    private Accounts accounts;
+    
     private UserAccount currentUser = null;
 
     private ApplicationPage applicationPage;
@@ -62,16 +65,18 @@ public class UiApplicationDriver extends ApplicationDriver {
     @Inject
     public UiApplicationDriver(ApiApplicationDriver apiDriver,
                                LoginPage loginPage,
-                               AliasTable aliasTable) {
+                               AliasTable aliasTable,
+                               Accounts accounts) {
         super(aliasTable);
         this.apiDriver = apiDriver;
         this.loginPage = loginPage;
         this.aliasTable = aliasTable;
+        this.accounts = accounts;
     }
 
     @Override
     public void login() {
-        throw new UnsupportedOperationException();
+        login(accounts.any());
     }
 
     @Override

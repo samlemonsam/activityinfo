@@ -384,4 +384,8 @@ public abstract class ApplicationDriver {
     public File exportDatabaseSchema(String databaseName) throws Exception {
         throw new PendingException();
     }
+
+    public String alias(String testHandle) {
+        return getAliasTable().getAlias(testHandle);
+    }
 }

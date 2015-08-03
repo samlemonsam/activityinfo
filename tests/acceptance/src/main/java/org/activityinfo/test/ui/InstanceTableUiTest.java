@@ -22,13 +22,15 @@ package org.activityinfo.test.ui;
  */
 
 import com.google.common.base.Predicate;
+import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
-import org.junit.Rule;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 
 import static org.activityinfo.test.driver.Property.name;
@@ -49,42 +51,43 @@ public class InstanceTableUiTest {
     public InstanceTableUiTest() {
     }
 
-    @Rule
-    public UiDriver driver = new UiDriver();
+    @Inject
+    public UiApplicationDriver driver;
 
     private void background() throws Exception {
-        driver.loginAsAny();
-        driver.setup().createDatabase(property("name", DATABASE));
+        driver.login();
+        ApiApplicationDriver api = (ApiApplicationDriver) driver.setup();
+        api.createDatabase(property("name", DATABASE));
 
-        driver.setup().addPartner("NRC", DATABASE);
+        api.addPartner("NRC", DATABASE);
 
-        driver.setup().createForm(name(FORM_NAME), property("database", DATABASE));
-        driver.setup().createField(
+        api.createForm(name(FORM_NAME), property("database", DATABASE));
+        api.createField(
                 property("form", FORM_NAME),
                 property("name", "quantity"),
                 property("type", "quantity"),
                 property("code", "1")
         );
-        driver.setup().createField(
+        api.createField(
                 property("form", FORM_NAME),
                 property("name", "enum"),
                 property("type", "enum"),
                 property("items", "item1, item2, item3"),
                 property("code", "2")
         );
-        driver.setup().createField(
+        api.createField(
                 property("form", FORM_NAME),
                 property("name", "text"),
                 property("type", "text"),
                 property("code", "3")
         );
-        driver.setup().createField(
+        api.createField(
                 property("form", FORM_NAME),
                 property("name", "multi-line"),
                 property("type", "NARRATIVE"),
                 property("code", "4")
         );
-        driver.setup().createField(
+        api.createField(
                 property("form", FORM_NAME),
                 property("name", "barcode"),
                 property("type", "BARCODE"),
@@ -92,15 +95,15 @@ public class InstanceTableUiTest {
         );
 
         // submit with null values
-        driver.setup().submitForm(FORM_NAME, Arrays.asList(
+        api.submitForm(FORM_NAME, Arrays.asList(
                 new FieldValue("Partner", "NRC"),
                 new FieldValue("quantity", -1)
         ));
 
         for (int j = 0; j < 5; j++) { // chunk on 5 batch commands to avoid SQL timeout
-            driver.setup().startBatch();
+            api.startBatch();
             for (int i = 0; i < 100; i++) {
-                driver.setup().submitForm(FORM_NAME, Arrays.asList(
+                api.submitForm(FORM_NAME, Arrays.asList(
                         new FieldValue("Partner", "NRC"),
                         new FieldValue("quantity", i),
                         new FieldValue("enum", i % 2 == 0 ? "item1" : "item1, item2"),
@@ -109,7 +112,7 @@ public class InstanceTableUiTest {
                         new FieldValue("barcode", "barcode")
                 ));
             }
-            driver.setup().submitBatch();
+            api.submitBatch();
         }
     }
 
@@ -118,7 +121,10 @@ public class InstanceTableUiTest {
 
         background();
 
-        final TablePage tablePage = driver.applicationPage().navigateToTable(driver.alias(DATABASE), driver.alias(FORM_NAME));
+        final TablePage tablePage = driver.getApplicationPage().navigateToTable(
+                driver.getAliasTable().getAlias(DATABASE), 
+                driver.getAliasTable().getAlias(FORM_NAME));
+        
         BsTable table = tablePage.table();
 
         // start scrolling down and check that rows are loaded during scrolling

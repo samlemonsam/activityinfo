@@ -8,9 +8,11 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.util.concurrent.Futures;
 import com.google.inject.Module;
+import cucumber.runtime.ClassFinder;
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
+import cucumber.runtime.io.ResourceLoaderClassFinder;
 import cucumber.runtime.model.CucumberFeature;
 import cucumber.runtime.model.CucumberTagStatement;
 import io.airlift.airline.Command;
@@ -27,10 +29,8 @@ import org.activityinfo.test.webdriver.WebDriverModule;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -90,6 +90,7 @@ public class TestMain implements Runnable {
     private ExecutorService executor;
     private List<Future<TestResult>> pending = Lists.newArrayList();
  
+    
     public static void main(String[] args) {
 
         TestOutputStream.initialize();
@@ -240,6 +241,7 @@ public class TestMain implements Runnable {
 
 
         queueFeatures("ui", loader, options, new WebDriverModule(webDriverType));
+        queueTestMethods("ui", new WebDriverModule(webDriverType));
     }
 
     private void queueOdkTests() {
@@ -273,6 +275,30 @@ public class TestMain implements Runnable {
                 if(filter.apply(feature.getPath()) || filter.apply(element.getVisualName())) {
                     ScenarioTestCase testCase = new ScenarioTestCase(options, feature, element, conditions);
                     queueTestCase(testCase);
+                }
+            }
+        }
+    }
+    
+    private void queueTestMethods(String environment, Module... driverModules) {
+
+        List<Module> modules = new ArrayList<>();
+        modules.add(new SystemUnderTest(url));
+        modules.add(new EmailModule());
+        modules.addAll(Arrays.asList(driverModules));
+        
+        TestConditions conditions = new TestConditions(environment, modules);
+
+        Predicate<String> filter = filterPredicate();
+
+        ClassLoader classLoader = getClass().getClassLoader();
+        ClassFinder classFinder = new ResourceLoaderClassFinder(new MultiLoader(classLoader), classLoader);
+        Collection<Class<?>> testClasses = classFinder.getDescendants(Object.class, "org.activityinfo.test.ui");
+
+        for (Class<?> testClass : testClasses) {
+            for (Method method : JUnitUiTestCase.findTestMethods(testClass)) {
+                if (filter.apply(method.getName()) || filter.apply(method.getDeclaringClass().getName())) {
+                    queueTestCase(new JUnitUiTestCase(method, conditions));
                 }
             }
         }

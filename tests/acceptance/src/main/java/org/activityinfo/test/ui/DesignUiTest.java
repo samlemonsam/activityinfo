@@ -21,8 +21,10 @@ package org.activityinfo.test.ui;
  * #L%
  */
 
-import org.junit.Rule;
+import org.activityinfo.test.driver.UiApplicationDriver;
 import org.junit.Test;
+
+import javax.inject.Inject;
 
 import static org.activityinfo.test.driver.Property.property;
 
@@ -33,15 +35,15 @@ public class DesignUiTest {
 
     private static final String DATABASE = "DesignUiDb";
 
-    @Rule
-    public UiDriver driver = new UiDriver();
+    @Inject
+    public UiApplicationDriver driver;
 
     @Test
     public void renameDatabase() throws Exception {
-        driver.loginAsAny();
+        driver.login();
         driver.setup().createDatabase(property("name", DATABASE));
 
-        driver.ui().renameDatabase(DATABASE, "NewDesignUiDb", "New Desc");
+        driver.renameDatabase(DATABASE, "NewDesignUiDb", "New Desc");
 
     }
 }
