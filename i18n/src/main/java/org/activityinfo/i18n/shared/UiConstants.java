@@ -3460,8 +3460,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Create")
     String create();
 
-    @DefaultStringValue("Widgets")
-    String widgets();
+    @DefaultStringValue("Fields")
+    String fields();
 
     @DefaultStringValue("Properties")
     String properties();

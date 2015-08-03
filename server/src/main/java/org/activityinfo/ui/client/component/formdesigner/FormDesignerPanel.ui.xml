@@ -52,7 +52,7 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <b>
-                <ui:text from='{i18n.widgets}'/>
+                <ui:text from='{i18n.fields}'/>
               </b>
             </div>
             <div class="panel-body">
