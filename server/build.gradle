@@ -115,6 +115,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     appCacheDownloadSizeLimit "2000kb"
 }
 
+tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {

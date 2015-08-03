@@ -21,9 +21,13 @@ package org.activityinfo.test.pageobject.web.design.designer;
  * #L%
  */
 
+import com.google.common.base.Predicate;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.openqa.selenium.WebDriver;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 /**
  * @author yuriyz on 06/12/2015.
@@ -45,5 +49,28 @@ public class FormDesignerPage {
     public PropertiesPanel properties() {
         return new PropertiesPanel(container.find().div(withClass("panel-heading")).
                 ancestor().div(withClass("panel")).first());
+    }
+    
+    public FieldPalette fields() {
+        return new FieldPalette(container.find()
+                .h4(withText(I18N.CONSTANTS.fields()))
+                .ancestor().div(withClass("panel"))
+                .waitForFirst());
+    }
+
+    public void save() {
+        container.find().button(withText(I18N.CONSTANTS.save())).clickWhenReady();
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                if (container.find().div(withText(I18N.CONSTANTS.saved())).exists()) {
+                    return true;
+                }
+                if (container.find().div(withText(I18N.CONSTANTS.failedToSaveClass())).exists()) {
+                    throw new AssertionError("Save failed");
+                }
+                return false;
+            }
+        });
     }
 }

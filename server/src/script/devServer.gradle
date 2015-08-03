@@ -117,7 +117,7 @@ task appengineRunAT(type: RunTask) {
     group = "Google App Engine"
     description = "Runs a local AppEngine Development Server for Acceptance Testing"
 
-    dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
+    dependsOn 'appengineExplodeApp', 'setupDatabaseAT', 'classes', 'compileGwt'
     ext.database = mysql.localAT
 }
 
@@ -125,6 +125,7 @@ task appengineStartInstrumentedAT(type: RunTask) {
     group = "Google App Engine"
     description = "Starts a local AppEngine Dev Server instrumented for measuring test coverage"
 
+    dependsOn 'classes', 'compileGwt'
     dependsOn 'setupDatabaseAT'
     dependsOn 'appengineExplodeInstrumentedApp'
 
