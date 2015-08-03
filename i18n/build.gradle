@@ -3,24 +3,59 @@ description = 'ActivityInfo Internationalization Resources'
 
 apply plugin: 'gwt-base'
 
+
 gwt {
     gwtVersion = project.gwtVersion
 }
+
+
+sourceSets {
+    tool {
+        java {
+            srcDir 'src/tool/java'
+        }
+        resources {
+            srcDir 'src/tool/resources'
+        }
+    }
+}
+
 
 dependencies {
     compile libraries.guava
     compile libraries.gwt.i18nServer
     gwt     libraries.gwt.user
     gwt     libraries.gwt.guava
+    
+    toolCompile   libraries.jersey.client
+    toolCompile   libraries.jersey.json
+    toolCompile   libraries.guava
+    toolCompile   'com.github.javaparser:javaparser-core:2.0.0'
+    toolCompile   'joda-time:joda-time:2.5'
 }
 
 idea {
     module {
+        testSourceDirs += file('src/tool/java')
+
         scopes.PROVIDED.plus += [ configurations.gwt ]
+        scopes.TEST.plus += [ configurations.toolCompile ]
     }
 }
 
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
+}
+
+task checkResources(type: JavaExec) {
+    group = "Verification"
+    description = 'Checks localization resources'
+
+    dependsOn 'toolClasses'
+    dependsOn ':server:configureDatabase'
+
+    main = 'org.activityinfo.i18n.tools.Check'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
 }
