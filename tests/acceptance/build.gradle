@@ -93,7 +93,6 @@ task instrumentedAcceptanceTest(type: JavaExec) {
     args '--url', project.environment.url
     args '--api', '--ui', '--odk'   
     args '--retries', '3'
-    args '-T', '2'
     args '--webdriver', 'chrome'
     args '--outputDir', "$buildDir/test-results"
 }
