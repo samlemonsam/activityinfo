@@ -1,5 +1,6 @@
 package org.activityinfo.test.ui;
 
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.UiApplicationDriver;
@@ -34,7 +35,7 @@ public class LocationDialogUiTest {
 
     @Test
     public void frenchCoordinates() throws Exception {
-
+        LocaleProxy.initialize();
         ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag("fr"));
         accounts.setLocale("fr");
 

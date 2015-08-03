@@ -1,8 +1,4 @@
 
-apply plugin: 'application'
-
-mainClassName = "org.activityinfo.test.TestMain"
-
 
 dependencies {
 
@@ -151,16 +147,6 @@ task smokeTest(type: Test) {
         systemProperty "test.url", project.property("testUrl")
     }
 }
-
-distZip.baseName = "activityinfo-tests"
-
-task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
-    group = "Delivery Pipeline"
-    description = "Archives the binary test runner that is used by subsequent stages"
-    dependsOn 'distZip'
-    archivePath = distZip.archivePath
-}
-
 
 
 tasks.each { task ->
