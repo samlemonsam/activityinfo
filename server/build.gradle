@@ -101,6 +101,7 @@ compileJava {
 }
 
 processResources {
+    inputs.property "project.version", project.version.toString()
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
             .replace('$[git.commit.id]', commitId)
