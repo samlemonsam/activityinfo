@@ -44,6 +44,7 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.ui.client.Beta;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
@@ -186,7 +187,9 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.addDeleteButton(I18N.CONSTANTS.deleteSite());
 
         toolBar.add(new SeparatorToolItem());
-        toolBar.addButton(UIActions.OPEN_TABLE, I18N.CONSTANTS.openTable(), IconImageBundle.ICONS.table());
+        if(Beta.ENABLED) {
+            toolBar.addButton(UIActions.OPEN_TABLE, I18N.CONSTANTS.openTable(), IconImageBundle.ICONS.table());
+        }
         toolBar.add(new SeparatorToolItem());
 
         if (IMPORT_FUNCTION_ENABLED) {
