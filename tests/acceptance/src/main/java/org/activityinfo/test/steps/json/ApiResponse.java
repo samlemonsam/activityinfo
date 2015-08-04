@@ -30,7 +30,7 @@ class ApiResponse {
     
     public JsonNode getJson() throws IOException {
         if(!isSuccess()) {
-            throw new AssertionError(String.format("Request failed with status code %d:\n%s", response.getStatus(),
+            throw new AssertionError(String.format("Request failed with status code %d:%n%s", response.getStatus(),
                     getResponseEntity()));
         }
         return objectMapper.readTree(getResponseEntity());
@@ -46,7 +46,7 @@ class ApiResponse {
     public void assertStatusCodeIs(int statusCode) {
         if(response.getStatus() != statusCode) {
             throw new AssertionError(String.format(
-                    "Expected response with status code %d, actual status code was %d.\n%s",
+                    "Expected response with status code %d, actual status code was %d.%n%s",
                     statusCode,
                     response.getStatus(),
                     response.getEntity(String.class)));
@@ -70,7 +70,7 @@ class ApiResponse {
     public void assertErrorMessageContains(String errorMessage) {
         String message = getResponseEntity();
         if(!message.toLowerCase().contains(errorMessage.toLowerCase())) {
-            throw new AssertionError(String.format("Expected an error message containing the phrase '%s' but received:\n%s",
+            throw new AssertionError(String.format("Expected an error message containing the phrase '%s' but received:%n%s",
                     errorMessage, message));
         }
     }
