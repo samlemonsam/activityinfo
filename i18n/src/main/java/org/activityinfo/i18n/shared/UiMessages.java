@@ -2,6 +2,7 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
+
 import java.util.Date;
 
 /**
@@ -9,18 +10,6 @@ import java.util.Date;
  */
 public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
-    /*
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-     * ================================================================================================
-     *
-     * IMPORTANT
-     *
-     * (1) Do not use this class for text that takes no parameters: place those in UiConstants
-     * (2) The message format requires apostrophes to be doubled: ''
-     *
-     * ================================================================================================
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     */
     @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will loose all activities and indicator results.")
     String confirmDeleteDb(String arg0);
 
