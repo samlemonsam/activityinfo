@@ -35,6 +35,7 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
@@ -144,21 +145,12 @@ public class ShareReportDialog extends Dialog {
     public void show(ReportMetadataDTO metadata) {
         super.show();
 
-        BatchCommand batch = new BatchCommand();
-        batch.add(new GetReportModel(metadata.getId()));
-        batch.add(new GetIndicators(currentReport.getIndicators()));
-        batch.add(new GetReportVisibility(metadata.getId()));
-
-        dispatcher.execute(batch,
-                new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
-                new SuccessCallback<BatchResult>() {
+        dispatcher.execute(new GetReportModel(metadata.getId()), new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
+                new SuccessCallback<ReportDTO>() {
 
                     @Override
-                    public void onSuccess(BatchResult batch) {
-
-                        currentReport = ((ReportDTO) batch.getResult(0)).getReport();
-
-                        populateGrid((IndicatorResult) batch.getResult(1), (ReportVisibilityResult) batch.getResult(2));
+                    public void onSuccess(ReportDTO reportDTO) {
+                        show(reportDTO.getReport());
                     }
                 });
     }
