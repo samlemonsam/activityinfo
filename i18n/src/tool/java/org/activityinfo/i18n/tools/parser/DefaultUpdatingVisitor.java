@@ -62,36 +62,11 @@ public class DefaultUpdatingVisitor extends VoidVisitorAdapter<TranslationSet> {
 
     private void updateJavadoc(MethodDeclaration decl, String translated) {
 
-        String expectedComment = formatJavadoc(decl, translated);
-
-        Comment methodComment = decl.getComment();
-        if(methodComment instanceof JavadocComment) {
-            if(!methodComment.getContent().equals(expectedComment)) {
-                methodComment.setContent(expectedComment);
-                dirty = true;
-            }
-        } else if(methodComment == null) {
-            decl.setComment(new JavadocComment(expectedComment));
+        // Clear Javadoc comment; way too much noise
+        if(decl.getComment() != null) {
+            decl.setComment(null);
             dirty = true;
         }
-    }
-
-    private String formatJavadoc(MethodDeclaration decl, String translated) {
-
-        // Remove newlines which screw up formatting
-        translated = translated.replace("\n", " ");
-
-        int indentWidth = decl.getBeginColumn();
-        String indent = Strings.padStart("*", indentWidth + 1, ' ');
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        sb.append(indent).append(" Translated \"").append(translated).append("\"\n");
-        sb.append(indent).append("\n");
-        sb.append(indent).append(" @return translated \"").append(translated).append("\"\n");
-        sb.append(Strings.repeat(" ", indentWidth));
-
-        return sb.toString();
     }
 
     private void updateDefaultStringAnnotation(MethodDeclaration decl, String translated) {
