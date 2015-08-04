@@ -74,5 +74,7 @@ task pullTranslations(type: JavaExec) {
     classpath = sourceSets.tool.runtimeClasspath
     workingDir = projectDir
  
-    systemProperty 'poApiKey', project.property('poApiKey')
+    doFirst {
+        systemProperty 'poApiKey', project.property('poApiKey')
+    }
 }
