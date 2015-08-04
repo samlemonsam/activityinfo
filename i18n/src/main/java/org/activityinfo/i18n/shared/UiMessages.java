@@ -100,12 +100,14 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
      * @return translated "{0,number,integer}Q{1,number,integer}"
      */
     @DefaultMessage("{0,number,#}Q{1}")
+    @Key("quarterName")
     String quarter(int year, int quarter);
 
     @DefaultMessage("{0,number,#}W{1}")
     String week(int year, int week);
 
     @DefaultMessage("{0,date,MMM}")
+    @Key("monthName")
     String month(Date month);
 
     /**
@@ -164,6 +166,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     String matchingLocations(int count);
 
     @DefaultMessage("Use site ''{0}''")
+    @Key("useLocationWithName")
     String useLocation(String name);
 
     @DefaultMessage("Targets for database {0}")
@@ -317,16 +320,11 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     String newVersion(String appTitle);
 
     @DefaultMessage("Do you want to retry deleting {0} row(s) from {1}?")
+    @Key("retryDeletionAtRow")
     String retryDeletion(int size, String formClassLabel);
 
     @DefaultMessage("Deleting {0} row(s) from {1}...")
     String deletingRows(int size, String formClassLabel);
-
-    @DefaultMessage("Add {0}")
-    String addLocation(String locationTypeName);
-
-    @DefaultMessage("Edit {0}")
-    String editLocation(String locationTypeName);
 
     @DefaultMessage("<b>Showing {0} of {1} columns.</b> You can choose visible columns with ''{2}'' button")
     SafeHtml  notAllColumnsAreShown(int visibleColumns, int allColumns, String chooseColumnButtonName);
@@ -350,6 +348,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     String doesNotExist(String placeholder);
 
     @DefaultMessage("Please provide valid comma separated text. Column count does not match in row number {0}.")
+    @Key("provideCsvAtRow")
     String pleaseProvideCommaSeparatedText(int rowNumber);
 
     @DefaultMessage("Exceeds maximum length of {0} characters.")

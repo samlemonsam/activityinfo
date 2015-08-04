@@ -12,7 +12,8 @@ import java.util.List;
 public class Project {
 
     public static final Project INSTANCE = new Project();
-    
+    public static final int ACTIVITYINFO_PROJECT_ID = 26801;
+
     private List<String> resourceClasses = Lists.newArrayList();
 
     private File sourceDirectory;
@@ -24,7 +25,7 @@ public class Project {
         sourceDirectory = new File("src/main/java");
         defaultLanguage = "en";
         languages = Lists.newArrayList("en", "fr");
-        translationSource = new PoEditorSource();
+        translationSource = new PoEditorSource(ACTIVITYINFO_PROJECT_ID, System.getProperty("poApiKey"));
         resourceClasses.add("org.activityinfo.i18n.shared.UiConstants");
         resourceClasses.add("org.activityinfo.i18n.shared.UiMessages");
     }

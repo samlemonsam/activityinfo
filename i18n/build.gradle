@@ -8,6 +8,9 @@ gwt {
     gwtVersion = project.gwtVersion
 }
 
+// Define an addition 'tool' source set that includes
+// the java code to verify i18n resources and merge
+// translations from PoEditor at build time
 
 sourceSets {
     tool {
@@ -48,14 +51,28 @@ jar {
     from project.sourceSets.main.output
 }
 
-task checkResources(type: JavaExec) {
+task checkMessages(type: JavaExec) {
     group = "Verification"
     description = 'Checks localization resources'
 
     dependsOn 'toolClasses'
-    dependsOn ':server:configureDatabase'
-
+    
     main = 'org.activityinfo.i18n.tools.Check'
     classpath = sourceSets.tool.runtimeClasspath
     workingDir = projectDir
+}
+
+check.dependsOn checkMessages
+
+task pullTranslations(type: JavaExec) {
+    group = "I18N"
+    description = 'Fetches translations from PoEditor.com'
+
+    dependsOn 'toolClasses'
+
+    main = 'org.activityinfo.i18n.tools.Pull'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
+ 
+    systemProperty 'poApiKey', project.property('poApiKey')
 }

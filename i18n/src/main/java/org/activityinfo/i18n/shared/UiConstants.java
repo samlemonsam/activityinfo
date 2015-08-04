@@ -3660,9 +3660,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Permissions")
     String permissions();
 
-    @DefaultStringValue("Quantity field contains invalid value. Please enter valid double value (e.g. 1, 1.3)")
-    String quantityFieldInvalidValue();
-
     @DefaultStringValue("Load")
     String load();
 

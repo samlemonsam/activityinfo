@@ -20,6 +20,11 @@ public class PoEditorSource implements TranslationSource {
     private int projectId;
     private String apiToken;
 
+    public PoEditorSource(int projectId, String apiToken) {
+        this.projectId = projectId;
+        this.apiToken = apiToken;
+    }
+
     public int getProjectId() {
         return projectId;
     }
