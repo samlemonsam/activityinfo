@@ -1,6 +1,5 @@
 package org.activityinfo.test;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -52,9 +51,10 @@ public class JUnitUiTestCase implements TestCase {
         try {
             testMethod.invoke(testClassInstance);
         } catch (Throwable caught) {
-            result.output().append(Throwables.getStackTraceAsString(caught));
+            caught.printStackTrace();
             result.failed();
         } finally {
+            result.output().append(TestOutputStream.drainThreadOutput());
             if(session.isRunning()) {
                 session.stop();
             }

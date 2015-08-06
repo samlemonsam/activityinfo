@@ -11,7 +11,6 @@ import java.util.Set;
 
 public class BrowserProfile implements DeviceProfile, Serializable {
     
-    
     @Nonnull
     private final OperatingSystem os;
 

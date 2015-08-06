@@ -105,13 +105,6 @@ public class UiApplicationDriver extends ApplicationDriver {
         return apiDriver;
     }
 
-
-    // todo ask Alex?
-//    @Override
-//    public void submitForm(String formName, List<FieldValue> values) throws Exception {
-//        currentForm = formName;
-//        super.submitForm(formName, values);
-//    }
     
     @Override
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
@@ -132,7 +125,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    protected DataEntryDriver startNewSubmission(String formName) {
+    public DataEntryDriver startNewSubmission(String formName) {
         ensureLoggedIn();
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
@@ -565,7 +558,7 @@ public class UiApplicationDriver extends ApplicationDriver {
      */
     public void assertSubmissionIsNotAllowedBecauseOfLock(String formName, String endDate) {
         final DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
-        GxtDataEntryDriver dataEntryDriver = dataEntryTab.newSubmission();
+        GxtDataEntryDriver dataEntryDriver = (GxtDataEntryDriver) dataEntryTab.newSubmission();
 
         // we have to fill all required fields first in order to make sure that submission is not allowed because
         // of locking (and not because of some missed required field)

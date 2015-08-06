@@ -244,6 +244,13 @@ public class TestMain implements Runnable {
         queueTestMethods("ui", new WebDriverModule(webDriverType));
     }
 
+    /**
+     * Some extra checks with the browser set to different timezones
+     */
+    private void queueTimezoneTests() {
+        
+    }
+    
     private void queueOdkTests() {
         ResourceLoader loader = new MultiLoader(getClass().getClassLoader());
         RuntimeOptions options = new RuntimeOptions(Arrays.asList(

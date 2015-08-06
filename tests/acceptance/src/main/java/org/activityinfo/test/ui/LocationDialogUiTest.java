@@ -59,7 +59,7 @@ public class LocationDialogUiTest {
         ApplicationPage applicationPage = driver.getApplicationPage();
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
 
-        GxtDataEntryDriver dataEntry = dataEntryTab
+        GxtDataEntryDriver dataEntry = (GxtDataEntryDriver) dataEntryTab
                 .navigateToForm(this.driver.getAliasTable().getAlias(DISTRIBUTION_FORM))
                 .newSubmission();
 
