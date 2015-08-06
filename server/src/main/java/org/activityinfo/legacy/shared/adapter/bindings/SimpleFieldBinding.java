@@ -1,21 +1,17 @@
 package org.activityinfo.legacy.shared.adapter.bindings;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.legacy.shared.model.EntityDTO;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.NarrativeValue;
-import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextValue;
 
 import java.util.Map;
 
-/**
- * Created by alex on 2/22/14.
- */
+
 public class SimpleFieldBinding implements FieldBinding<EntityDTO> {
     private final ResourceId fieldId;
     private final String propertyName;
@@ -38,7 +34,9 @@ public class SimpleFieldBinding implements FieldBinding<EntityDTO> {
         Object value = instance.get(fieldId);
         if(value != null) {
             if (value instanceof org.activityinfo.model.type.time.LocalDate) {
-                value = ((org.activityinfo.model.type.time.LocalDate) value).atMidnightInMyTimezone();
+                // I want to phase out Rebar time, but it's still needed due to it's use in rebar sql
+                org.activityinfo.model.type.time.LocalDate localDate = (org.activityinfo.model.type.time.LocalDate) value;
+                value = new LocalDate(localDate.getYear(), localDate.getMonthOfYear(), localDate.getDayOfMonth());
             } else if (value instanceof NarrativeValue) {
                 value = ((NarrativeValue) value).getText();
             } else if (value instanceof TextValue) {

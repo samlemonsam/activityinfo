@@ -40,8 +40,8 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
 //                proxyController.start();
 
                 Map<String, String> environment = Maps.newHashMap();
-                if(Strings.isNullOrEmpty(System.getProperty("browserTimezone"))) {
-                    environment.put("TZ", "America/New_York");
+                if(!Strings.isNullOrEmpty(System.getProperty("browserTimezone"))) {
+                    environment.put("TZ", System.getProperty("browserTimezone"));
                 }
 
                 ChromeDriverService service = new ChromeDriverService.Builder()
