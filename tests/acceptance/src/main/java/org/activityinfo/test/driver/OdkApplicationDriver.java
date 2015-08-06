@@ -72,7 +72,7 @@ public class OdkApplicationDriver extends ApplicationDriver {
 
     
     @Override
-    protected DataEntryDriver startNewSubmission(String formName) {
+    public DataEntryDriver startNewSubmission(String formName) {
         downloadForm(formName);
 
         Question question = pageObject()

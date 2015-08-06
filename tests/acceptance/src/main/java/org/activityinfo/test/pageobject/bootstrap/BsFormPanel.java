@@ -65,7 +65,20 @@ public class BsFormPanel extends Form {
 
     @Override
     public boolean moveToNext() {
-        return false;
+        Optional<FluentElement> first;
+
+        if (current == null) {
+            first = form.find().div(withClass("form-group")).firstIfPresent();
+        } else {
+            first = current.element.find().followingSibling().div(withClass("form-group")).firstIfPresent();
+        }
+        if (first.isPresent()) {
+            current = new BsField(first.get());
+            return true;
+        } else {
+            current = null;
+            return false;
+        }
     }
 
     @Override
@@ -122,7 +135,7 @@ public class BsFormPanel extends Form {
 
         @Override
         public void fill(LocalDate date) {
-            fill(date.toString("M/d/YY"));
+            fill(date.toString("M/d/YY") + "\n");
         }
 
         private FluentElements items() {

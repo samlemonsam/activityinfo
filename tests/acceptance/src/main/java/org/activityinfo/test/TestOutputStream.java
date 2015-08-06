@@ -1,5 +1,6 @@
 package org.activityinfo.test;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
 import java.io.ByteArrayOutputStream;
@@ -14,6 +15,9 @@ public class TestOutputStream extends OutputStream {
 
     private static PrintStream standardOutput;
     private static PrintStream standardError;
+
+    private static ThreadLocal<OutputStream> threadOutput = new ThreadLocal<>();
+
 
     /**
      * Initializes the TestOutputStream. Must be called from the Main application thread.
@@ -30,18 +34,15 @@ public class TestOutputStream extends OutputStream {
         TestOutputStream testOutputStream = new TestOutputStream();
         
         // Send the main thread output directly to the console
-        testOutputStream.threadOutput.set(standardOutput);
+        threadOutput.set(standardOutput);
 
         PrintStream wrapper = new PrintStream(testOutputStream);
         
         System.setOut(wrapper);
         System.setErr(wrapper);
     }
-    
-    private ThreadLocal<OutputStream> threadOutput = new ThreadLocal<>();
-    
 
-    private OutputStream getOrCreate() {
+    private static OutputStream getOrCreate() {
         OutputStream out = threadOutput.get();
         if(out == null) {
             out = new ByteArrayOutputStream();
@@ -49,7 +50,18 @@ public class TestOutputStream extends OutputStream {
         }
         return out;
     }
-
+    
+    public static String drainThreadOutput() {
+        OutputStream out = getOrCreate();
+        if(!(out instanceof ByteArrayOutputStream)) {
+            throw new UnsupportedOperationException("Cannot reset output of main thread.");
+        }
+        ByteArrayOutputStream baos = (ByteArrayOutputStream) out;
+        String output = new String(baos.toByteArray(), Charsets.UTF_8);
+        baos.reset();
+        return output;
+    }
+    
     @Override
     public void write(int b) throws IOException {
         getOrCreate().write(b);

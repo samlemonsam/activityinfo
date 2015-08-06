@@ -10,10 +10,12 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.test.driver.BsDataEntryDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -65,9 +67,21 @@ public class DataEntryTab {
         return this;
     }
     
-    public GxtDataEntryDriver newSubmission() {
+    public DataEntryDriver newSubmission() {
         buttonClick(I18N.CONSTANTS.newSite());
-        return new GxtDataEntryDriver(new GxtModal(container));
+        final FluentElement windowElement = container.root();
+        return container.waitFor(new Function<WebDriver, DataEntryDriver>() {
+            @Override
+            public DataEntryDriver apply(WebDriver input) {
+                if(windowElement.find().div(withClass(GxtModal.CLASS_NAME)).exists()) {
+                    return new GxtDataEntryDriver(new GxtModal(windowElement));
+                } else if(windowElement.find().div(withClass(BsModal.CLASS_NAME)).exists()) {
+                    return new BsDataEntryDriver(windowElement);
+                } else {
+                    return null;
+                }
+            }
+        });
     }
     
     public DataEntryDriver updateSubmission() {

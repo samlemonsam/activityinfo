@@ -19,6 +19,7 @@ import org.joda.time.LocalDate;
 import org.json.JSONException;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +88,10 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public void submitForm(String formName, FieldValue... values) throws Exception {
+        submitForm(formName, Arrays.asList(values));
+    }
+    
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         fillForm(startNewSubmission(formName), FieldValue.toMap(values));
     }
@@ -140,7 +145,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    protected DataEntryDriver startNewSubmission(String formName) {
+    public DataEntryDriver startNewSubmission(String formName) {
         throw new PendingException();
     }
     

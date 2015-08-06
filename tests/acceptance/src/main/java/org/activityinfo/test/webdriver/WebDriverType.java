@@ -6,5 +6,6 @@ package org.activityinfo.test.webdriver;
 public enum WebDriverType {
     CHROME,
     SAUCE,
-    PHANTOM_JS
+    PHANTOM_JS;
+    
 }
