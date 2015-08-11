@@ -1,6 +1,5 @@
 package org.activityinfo.test.steps.common;
 
-import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -232,7 +231,7 @@ public class DataEntrySteps {
     }
 
     private void assertHasRows(DataTable dataTable, boolean hideBuiltInColumns) throws Throwable {
-        BsTable table = tablePage().table();
+        BsTable table = driver.tablePage().table();
         if (hideBuiltInColumns) {
             table.hideBuiltInColumns();
         }
@@ -243,18 +242,13 @@ public class DataEntrySteps {
     public void filter_column_with(String columnName, List<String> filterValues) throws Throwable {
         columnName = driver.getAliasTable().getAlias(columnName);
 
-        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        BsTable table = driver.tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
         table.filter(columnName).select(filterValues).apply();
     }
 
     @When("^open table for the \"([^\"]*)\" form in the database \"([^\"]*)\"$")
     public void open_table_for_the_form_in_the_database(String formName, String databaseName) throws Throwable {
         openFormTable(databaseName, formName);
-    }
-
-    private TablePage tablePage() {
-        Preconditions.checkState(driver.getCurrentPage() instanceof TablePage);
-        return (TablePage) driver.getCurrentPage();
     }
 
     private TablePage openFormTable(String databaseName, String formName) {
@@ -268,7 +262,12 @@ public class DataEntrySteps {
     public void filter_date_column_with_start_date_and_end_date_(String columnName, String startDate, String endDate) throws Throwable {
         columnName = driver.getAliasTable().getAlias(columnName);
 
-        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        BsTable table = driver.tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
         table.filter(columnName).fillRange(LocalDate.parse(startDate), LocalDate.parse(endDate)).apply();
+    }
+
+    @And("^delete rows with text:$")
+    public void delete_rows_with_text(List<String> cells) throws Throwable {
+        driver.removeRows(cells);
     }
 }

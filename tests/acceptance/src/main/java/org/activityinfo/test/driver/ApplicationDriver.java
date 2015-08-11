@@ -307,6 +307,10 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public TablePage tablePage() {
+        throw new PendingException();
+    }
+
     public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
         throw new PendingException();
     }
@@ -392,5 +396,9 @@ public abstract class ApplicationDriver {
 
     public String alias(String testHandle) {
         return getAliasTable().getAlias(testHandle);
+    }
+
+    public void removeRows(List<String> cells) {
+        throw new PendingException();
     }
 }

@@ -108,6 +108,10 @@ public class BsTable {
         public FluentElement getContainer() {
             return container;
         }
+
+        public void select() {
+            container.clickWhenReady();
+        }
     }
 
     private final FluentElement container;
@@ -307,6 +311,14 @@ public class BsTable {
         dialog.hideBuiltInColumns();
         dialog.ok();
         dialog.getModal().waitUntilClosed();
+        return this;
+    }
+
+    public BsTable removeSelectedRow() {
+        buttonClick(I18N.CONSTANTS.remove());
+        BsModal.find(container.root()).
+                click(I18N.CONSTANTS.delete()).
+                waitUntilClosed();
         return this;
     }
 

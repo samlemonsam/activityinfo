@@ -15,6 +15,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
@@ -495,6 +496,11 @@ public class UiApplicationDriver extends ApplicationDriver {
         return (TablePage) currentPage;
     }
 
+    public TablePage tablePage() {
+        Preconditions.checkState(getCurrentPage() instanceof TablePage);
+        return (TablePage) getCurrentPage();
+    }
+
     public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
         TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
         BsModal modal = tablePage.table().newSubmission();
@@ -909,6 +915,17 @@ public class UiApplicationDriver extends ApplicationDriver {
                 default:
                     throw new UnsupportedOperationException("Unknown control type: " + field.getControlType());
             }
+        }
+    }
+
+    public void removeRows(List<String> cells) {
+        TablePage tablePage = tablePage();
+        BsTable table = tablePage.table();
+
+        table.showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        for (String cellText : cells) {
+            table.waitForCellByText(cellText).select();
+            table.removeSelectedRow();
         }
     }
 
