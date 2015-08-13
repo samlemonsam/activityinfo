@@ -26,6 +26,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ import static org.activityinfo.core.shared.criteria.ParentCriteria.isChildOf;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdminFieldId;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -192,6 +193,32 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getAdminEntity(2).getName(), equalTo("Irumu"));
         assertThat(location.getLatitude(), equalTo(-1d));
         assertThat(location.getLongitude(), equalTo(13d));
+
+        // remove location
+        assertResolves(resourceLocator.remove(instance.getId()));
+
+        // check whether location is removed
+        result = execute(query);
+        assertThat(result.getData(), IsEmptyCollection.empty());
+    }
+
+    @Test
+    public void siteDeletion() {
+
+        InstanceQuery query = new InstanceQuery(asList(new FieldPath(getNameFieldId(VILLAGE_CLASS))),
+                new ClassCriteria(NFI_DIST_FORM_CLASS));
+
+        List<Projection> projections = assertResolves(resourceLocator.query(query));
+        assertThat(projections.size(), equalTo(3));
+
+        final Projection firstProjection = projections.get(0);
+
+        assertResolves(resourceLocator.remove(firstProjection.getRootInstanceId()));
+
+        projections = assertResolves(resourceLocator.query(query));
+        assertThat(projections.size(), equalTo(2)); // size is reduced
+        assertThat(projections, not(hasItem(firstProjection)));
+
     }
 
     @Test

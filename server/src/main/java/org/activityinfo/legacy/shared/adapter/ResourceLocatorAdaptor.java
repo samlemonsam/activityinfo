@@ -27,6 +27,7 @@ import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -142,6 +143,9 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         return query(query).then(new InstanceQueryResultAdapter(query));
     }
 
+    public Promise<Void> remove(ResourceId resourceId) {
+        return remove(Collections.singleton(resourceId));
+    }
 
     @Override
     public Promise<Void> remove(Collection<ResourceId> resources) {

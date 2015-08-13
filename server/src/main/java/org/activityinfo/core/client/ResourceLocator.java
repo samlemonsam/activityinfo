@@ -46,6 +46,8 @@ public interface ResourceLocator {
 
     Promise<List<Projection>> query(InstanceQuery query);
 
+    Promise<Void> remove(ResourceId resourceId);
+
     Promise<Void> remove(Collection<ResourceId> resources);
 
     Promise<List<FormInstance>> queryInstances(Set<ResourceId> resourceIds);
