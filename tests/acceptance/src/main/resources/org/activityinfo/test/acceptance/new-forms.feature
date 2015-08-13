@@ -17,6 +17,20 @@ Feature: New form
     When I have added 21 partners
     Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "suggestbox"
 
+  @AI-1124
+  @web
+  Scenario: Add entry without project in database
+    Given I have submitted to "Medical Activities" form table in "Patient Registration" database:
+      | Number of patients | Donor   | Diseases treated this month    | Comments         | Partner | Start Date | End Date   |
+      | quantity           | enum    | enum                           | text             | enum    | date       | date       |
+      | 13                 | USAID   | cholera                        | no comment       | NRC     | 2014-01-02 | 2014-01-04 |
+    Then table has rows with hidden built-in columns:
+      | Number of patients | Donor   | Diseases treated this month    |
+      | quantity           | enum    | enum                           |
+      | 230                | USAID   | cholera, malaria, tuberculosis |
+      | 11                 | ECHO    | cholera                        |
+      | 13                 | USAID   | cholera                        |
+
   @AI-1033
   @AI-1009
   @web

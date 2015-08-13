@@ -271,4 +271,14 @@ public class DataEntrySteps {
         BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
         table.filter(columnName).fillRange(LocalDate.parse(startDate), LocalDate.parse(endDate)).apply();
     }
+
+    @Given("^I have submitted to \"([^\"]*)\" form table in \"([^\"]*)\" database:$")
+    public void I_have_submitted_to_form_table_in_database(String formName, String database, DataTable dataTable) throws Throwable {
+        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
+        BsModal modal = tablePage.table().newSubmission();
+
+        modal.fill(dataTable, driver.getAliasTable());
+
+        modal.click(I18N.CONSTANTS.save()).waitUntilClosed();
+    }
 }
