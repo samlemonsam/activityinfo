@@ -233,6 +233,7 @@ public class DataEntrySteps {
 
     private void assertHasRows(DataTable dataTable, boolean hideBuiltInColumns) throws Throwable {
         BsTable table = tablePage().table();
+        table.showAllColumns();
         if (hideBuiltInColumns) {
             table.hideBuiltInColumns();
         }
