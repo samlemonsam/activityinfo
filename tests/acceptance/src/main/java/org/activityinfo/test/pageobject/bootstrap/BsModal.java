@@ -23,12 +23,15 @@ package org.activityinfo.test.pageobject.bootstrap;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
@@ -110,6 +113,42 @@ public class BsModal extends ModalDialog {
                 item.select(value.getValue());
             }
         }
+    }
+
+
+    public void fill(DataTable dataTable, AliasTable aliasTable) {
+
+        BsFormPanel form = form();
+        DataTableRow labelRow = dataTable.getGherkinRows().get(0);
+        DataTableRow typeRow = dataTable.getGherkinRows().get(1);
+
+        for (int i = 2; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+            for (int j = 0; j < row.getCells().size(); j++) {
+                String value = row.getCells().get(j);
+                String label = labelRow.getCells().get(j);
+                String type = typeRow.getCells().get(j);
+
+                label = isBuiltinLabel(label) ? label : aliasTable.getAlias(label);
+
+                BsFormPanel.BsField field = form.findFieldByLabel(label);
+                if (type.equalsIgnoreCase("text") || type.equalsIgnoreCase("quantity")) {
+                    field.fill(value);
+                } else if (type.equalsIgnoreCase("enum")) {
+                    field.select(aliasTable.getAlias(value));
+                } else if (type.equalsIgnoreCase("date")) {
+                    field.fill(org.joda.time.LocalDate.parse(value));
+                } else {
+                    throw new RuntimeException("Unsupported type: " + type);
+                }
+            }
+        }
+    }
+
+    private static boolean isBuiltinLabel(String label) {
+        return label.equalsIgnoreCase("partner") || label.equalsIgnoreCase("comments") ||
+                label.equalsIgnoreCase("start date") || label.equalsIgnoreCase("end date") ||
+                label.equalsIgnoreCase("project");
     }
 
     private FluentElement buttonsContainer() {
