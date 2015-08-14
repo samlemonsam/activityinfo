@@ -15,7 +15,6 @@ import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
-import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -75,7 +74,7 @@ public class DataEntryTab {
             public DataEntryDriver apply(WebDriver input) {
                 if(windowElement.find().div(withClass(GxtModal.CLASS_NAME)).exists()) {
                     return new GxtDataEntryDriver(new GxtModal(windowElement));
-                } else if(windowElement.find().div(withClass(BsModal.CLASS_NAME)).exists()) {
+                } else if(windowElement.find().div(withClass("formPanel")).firstIfPresent().isPresent()) {
                     return new BsDataEntryDriver(windowElement);
                 } else {
                     return null;
