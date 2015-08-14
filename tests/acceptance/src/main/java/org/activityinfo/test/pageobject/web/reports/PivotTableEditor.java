@@ -41,7 +41,7 @@ public class PivotTableEditor {
     public DataTable extractData() {
 
         try {
-            Thread.sleep(2000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
