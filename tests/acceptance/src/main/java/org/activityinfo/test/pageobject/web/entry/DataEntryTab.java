@@ -65,6 +65,11 @@ public class DataEntryTab {
         
         return this;
     }
+
+    public DataEntryFilter filter(String labelOfFilter) {
+        FluentElement element = container.find().descendants().span(withText(labelOfFilter)).ancestor().div(withClass("x-panel")).first();
+        return new DataEntryFilter(element, labelOfFilter);
+    }
     
     public DataEntryDriver newSubmission() {
         buttonClick(I18N.CONSTANTS.newSite());

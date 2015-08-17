@@ -929,6 +929,22 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    public void assertOldFilterHasValues(String filterName, String formName, List<String> filterValues) {
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+
+        DataEntryFilter filter = dataEntryTab.filter(filterName);
+
+        List<String> filterItemsOnUi = filter.select().filterItems();
+
+        filterItemsOnUi = aliasTable.deAlias(filterItemsOnUi);
+        filterItemsOnUi.removeAll(filterValues);
+
+        assertTrue(filterItemsOnUi.isEmpty());
+
+        // reset state for next step
+        dataEntryTab.filter("Forms").select();
+    }
+
     public Object getCurrentPage() {
         return currentPage;
     }

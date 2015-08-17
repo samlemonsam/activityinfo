@@ -401,4 +401,8 @@ public abstract class ApplicationDriver {
     public void removeRows(List<String> cells) {
         throw new PendingException();
     }
+
+    public void assertOldFilterHasValues(String filterName, String formName, List<String> filterValues) {
+        throw new PendingException();
+    }
 }

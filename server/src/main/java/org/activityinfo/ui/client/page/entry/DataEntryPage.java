@@ -71,8 +71,6 @@ import java.util.Set;
  */
 public class DataEntryPage extends LayoutContainer implements Page, ActionListener {
 
-    private static final boolean IMPORT_FUNCTION_ENABLED = true;
-
     public static final PageId PAGE_ID = new PageId("data-entry");
 
     private final Dispatcher dispatcher;
@@ -192,9 +190,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         }
         toolBar.add(new SeparatorToolItem());
 
-        if (IMPORT_FUNCTION_ENABLED) {
-            toolBar.addImportButton();
-        }
+        toolBar.addImportButton();
         toolBar.addExcelExportButton();
 
         toolBar.addPrintButton();
@@ -329,9 +325,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         // also embedding is only implemented for one activity
         toolBar.setActionEnabled("EMBED", activities.size() == 1);
 
-        if (IMPORT_FUNCTION_ENABLED) {
-            toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
-        }
+        toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
 
         // adding is also only enabled for one activity, but we have to
         // lookup to see whether it possible for this activity
@@ -352,9 +346,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             public void onSuccess(SchemaDTO result) {
                 boolean isAllowed = result.getActivityById(activityId).isEditAllowed();
                 toolBar.setActionEnabled(UIActions.ADD, isAllowed);
-                if (IMPORT_FUNCTION_ENABLED) {
-                    toolBar.setActionEnabled("IMPORT", isAllowed);
-                }
+                toolBar.setActionEnabled("IMPORT", isAllowed);
             }
         });
     }
@@ -362,14 +354,17 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     @Override
     public void onUIAction(String actionId) {
+        final Filter filter = currentPlace.getFilter();
+
         if (UIActions.ADD.equals(actionId)) {
 
             SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus);
-            formHelper.addSite(currentPlace.getFilter(), new SiteDialogCallback() {
+            formHelper.addSite(filter, new SiteDialogCallback() {
 
                 @Override
                 public void onSaved() {
                     gridPanel.refresh();
+                    filterPane.getSet().applyBaseFilter(filter);
                 }
             });
 
@@ -381,6 +376,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                 @Override
                 public void onSaved() {
                     gridPanel.refresh();
+                    filterPane.getSet().applyBaseFilter(filter);
                 }
             });
         }else if (UIActions.OPEN_TABLE.equals(actionId)) {
@@ -392,19 +388,19 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             onDelete();
 
         } else if (UIActions.PRINT.equals(actionId)) {
-            int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
+            int activityId = filter.getRestrictedCategory(DimensionType.Activity);
             PrintDataEntryForm form = new PrintDataEntryForm(dispatcher);
             form.print(activityId);
 
         } else if (UIActions.EXPORT.equals(actionId)) {
             ExportDialog dialog = new ExportDialog(dispatcher);
-            dialog.exportSites(currentPlace.getFilter());
+            dialog.exportSites(filter);
 
         } else if ("EMBED".equals(actionId)) {
             EmbedDialog dialog = new EmbedDialog(dispatcher);
             dialog.show(currentPlace);
 
-        } else if (IMPORT_FUNCTION_ENABLED && UIActions.IMPORT.equals(actionId)) {
+        } else if (UIActions.IMPORT.equals(actionId)) {
             doImport();
 
         }
@@ -471,6 +467,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                     @Override
                     public void onSuccess(VoidResult result) {
                         gridPanel.refresh();
+                        filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
                     }
                 });
     }
