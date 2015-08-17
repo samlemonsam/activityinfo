@@ -7,18 +7,21 @@ Feature: Site API
     And I have created a published form named "Distributions"
     And I have created a quantity field "kits" in "Distributions" with code "kits"
     And I have created a quantity field "score" in "Distributions" with code "score"
+    And I have created a text field "contact" in "Distributions"
+    And I have created a narrative field "description" in "Distributions"
     And I have created a enumerated field "donor" with items:
       | USAID  |
       | ECHO   |
       | NRC    |
     When I have submitted a "Distributions" form with:
-      | field     | value      |
-      | kits      | 1          |
-      | score     | 2          |
-      | partner   | NRC        |
-      | donor     | USAID      |
-      | fromDate  | 2014-01-01 |
-      | toDate    | 2014-04-10 |
+      | field       | value                                        |
+      | kits        | 1                                            |
+      | score       | 2                                            |
+      | partner     | NRC                                          |
+      | contact     | Alex B                                       |
+      | description | Took place with the support of the community |
+      | fromDate    | 2014-01-01                                   |
+      | toDate      | 2014-04-10                                   |
 
   @AI-574
   Scenario: Querying site's points on public database with unauthenticated user
@@ -40,6 +43,8 @@ Feature: Site API
           indicators :
             $kits : 1.0
             $score : 2.0
+            $contact : Alex B
+            $description: Took place with the support of the community
         geometry :
           type : Point
           coordinates :
@@ -67,6 +72,7 @@ Feature: Site API
           indicators :
             $kits : 1.0
             $score : 2.0
+            $contact : Alex B
         geometry :
           type : Point
           coordinates :
@@ -94,6 +100,7 @@ Feature: Site API
           indicators :
             $kits : 1.0
             $score : 2.0
+            $contact : Alex B
         geometry :
           type : Point
           coordinates :
@@ -162,6 +169,33 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
+            
+          - id: $contact
+            name: contact
+            code: contact
+            type: FREE_TEXT
+            description: null
+            aggregation: 0
+            listHeader: null
+            units:
+            calculatedAutomatically: false
+            expression: null
+            category: null
+            mandatory: false
+            
+          - id: $description
+            name: description
+            code: description
+            type: NARRATIVE
+            description: null
+            aggregation: 0
+            listHeader: null
+            units:
+            calculatedAutomatically: false
+            expression: null
+            category: null
+            mandatory: false  
+            
         attributeGroups: 
           - id: $donor
             name: donor

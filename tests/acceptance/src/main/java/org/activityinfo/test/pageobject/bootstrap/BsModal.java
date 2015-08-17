@@ -104,7 +104,7 @@ public class BsModal extends ModalDialog {
 
         // fill by type
         Optional<? extends FieldTypeClass> type = value.getType();
-        if (type == null || !type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
+        if (!type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
             item.fill(value.getValue());
         } else {
             if (type.get() == LocalDateType.TYPE_CLASS) {
