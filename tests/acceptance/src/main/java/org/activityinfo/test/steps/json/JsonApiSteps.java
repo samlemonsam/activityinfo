@@ -131,7 +131,8 @@ public class JsonApiSteps {
         JsonNode expected = jsonParser.parse(expectedResponse);
         JsonNode actual = response.getJson();
 
-        System.out.println(actual.toString());
+        scenario.write(actual.toString());
+        scenario.write("\n");
 
         new JsonChecker(placeholders, ignorePositionInArray).check(expected, actual);
     }
