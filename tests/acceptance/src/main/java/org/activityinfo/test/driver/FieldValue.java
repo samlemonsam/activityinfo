@@ -16,6 +16,7 @@ public class FieldValue {
     private String field;
     private String value;
     private Optional<? extends FieldTypeClass> type = Optional.absent();
+    
     @Nullable
     private String controlType;
 
@@ -89,6 +90,9 @@ public class FieldValue {
     }
 
     public Optional<? extends FieldTypeClass> getType() {
+        if(type == null) {
+            return Optional.absent();
+        }
         return type;
     }
 

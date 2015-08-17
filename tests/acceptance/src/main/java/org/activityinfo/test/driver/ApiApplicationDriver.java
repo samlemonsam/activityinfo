@@ -214,7 +214,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
     @Override
     public void createForm(TestObject form) throws Exception {
 
-
         JSONObject properties = new JSONObject();
         properties.put("name", form.getAlias());
         properties.put("databaseId", form.getId("database"));
@@ -279,7 +278,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("name", field.getAlias());
             properties.put("activityId", field.getId("form"));
             properties.put("type", type);
-            properties.put("units", field.getString("units", "parsects"));
+            if(type.equals("quantity")) {
+                properties.put("units", field.getString("units", "parsects"));
+            }
             properties.put("aggregation", field.getInteger("aggregation", AggregationMethod.Sum.code()));
 
             // switch also server nameInExpression -> code
@@ -336,7 +337,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     break;
                 default:
 
-                    if (value.getType() != null && value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                    if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
                         for (String item : value.getValue().split("\\s*,\\s*")) {
                             int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
                             properties.put("ATTRIB" + attributeId, true);

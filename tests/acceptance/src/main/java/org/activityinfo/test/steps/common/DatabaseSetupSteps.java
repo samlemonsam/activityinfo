@@ -214,7 +214,7 @@ public class DatabaseSetupSteps {
         
     }
     
-    @Given("^I have created a (text|quantity) field \"([^\"]*)\" in \"([^\"]*)\"$")
+    @Given("^I have created a (text|quantity|narrative) field \"([^\"]*)\" in \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName, String formName) throws Throwable {
         driver.setup().createField(
                 property("form", formName),
