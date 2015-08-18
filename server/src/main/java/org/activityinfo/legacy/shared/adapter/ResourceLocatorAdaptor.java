@@ -134,8 +134,12 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<List<Projection>> query(InstanceQuery query) {
-        return new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria()).apply(query);
+    public Promise<List<Projection>> query(final InstanceQuery query) {
+        Joiner joiner = new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria());
+        if (query.isFilter()) {
+            return joiner.apply(query).join(new ProjectionsByUniqueColumnFilter(query.getFieldPaths().get(0)));
+        }
+        return joiner.apply(query);
     }
 
     @Override

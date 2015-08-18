@@ -42,7 +42,6 @@ import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.util.Pair;
 import org.activityinfo.ui.client.component.table.FieldColumn;
-import org.activityinfo.ui.client.component.table.InstanceTable;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.ButtonWithSize;
 import org.activityinfo.ui.client.widget.DateRangePanel;
@@ -65,13 +64,11 @@ public class FilterContentDate extends Composite implements FilterContent {
     @UiField
     DateRangePanel rangePanel;
 
-    private final InstanceTable table;
     private final FieldColumn column;
 
     private LocalDateRange currentRange = null;
 
-    public FilterContentDate(InstanceTable table, FieldColumn column) {
-        this.table = table;
+    public FilterContentDate(FieldColumn column) {
         this.column = column;
         initWidget(uiBinder.createAndBindUi(this));
 

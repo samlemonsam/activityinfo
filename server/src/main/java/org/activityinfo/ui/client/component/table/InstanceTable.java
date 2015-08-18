@@ -105,6 +105,10 @@ public class InstanceTable implements IsWidget {
         this.criteria = criteria;
     }
 
+    public Criteria getCriteria() {
+        return criteria;
+    }
+
     public void setColumns(List<FieldColumn> columns) {
         removeAllColumns();
         for (FieldColumn column : columns) {

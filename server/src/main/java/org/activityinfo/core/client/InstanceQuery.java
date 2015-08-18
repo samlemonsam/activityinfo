@@ -19,17 +19,23 @@ public class InstanceQuery {
     private final Criteria criteria;
     private final int offset;
     private final int maxCount;
+    private final boolean isFilter;
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria) {
-        this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT);
+        this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT, false);
     }
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount) {
+        this(fieldPaths, criteria, offset, maxCount, false);
+    }
+
+    public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount, boolean isFilter) {
         assert criteria != null;
         this.criteria = criteria;
         this.fieldPaths = fieldPaths;
         this.offset = offset;
         this.maxCount = maxCount;
+        this.isFilter = isFilter;
     }
 
     public List<FieldPath> getFieldPaths() {
@@ -48,6 +54,9 @@ public class InstanceQuery {
         return criteria;
     }
 
+    public boolean isFilter() {
+        return isFilter;
+    }
 
     public static Builder select(ResourceId... fieldIds) {
         return new Builder().select(fieldIds);
@@ -58,6 +67,7 @@ public class InstanceQuery {
         private Criteria criteria;
         private int offset = 0;
         private int maxCount = FALLBACK_MAX_COUNT;
+        private boolean filter = false;
 
         private Builder() {
         }
@@ -84,6 +94,12 @@ public class InstanceQuery {
             this.maxCount = maxCount;
             return this;
         }
+
+        public Builder filter(boolean filter) {
+            this.filter = filter;
+            return this;
+        }
+
 
         public InstanceQuery build() {
             if (criteria == null) {

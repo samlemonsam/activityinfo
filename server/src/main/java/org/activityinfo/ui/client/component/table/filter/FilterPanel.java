@@ -50,7 +50,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     private final InstanceTable table;
     private final FieldColumn column;
-    private final FilterContent filterContent;
+    private FilterContent filterContent;
 
     @UiField
     PopupPanel popup;
@@ -59,7 +59,7 @@ public class FilterPanel extends Composite implements HasCriteria {
     @UiField
     Button okButton;
 
-    public FilterPanel(InstanceTable table, FieldColumn column) {
+    public FilterPanel(final InstanceTable table, final FieldColumn column) {
         this.table = table;
         this.column = column;
 
@@ -67,10 +67,13 @@ public class FilterPanel extends Composite implements HasCriteria {
 
         initWidget(uiBinder.createAndBindUi(this));
 
-        filterContent = FilterContentFactory.create(table, column);
-        if (filterContent != null) { // we may have null for unsupported types
-            contentContainer.add(filterContent);
-        }
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                filterContent = FilterContentFactory.create(column, table);
+                contentContainer.add(filterContent);
+            }
+        });
     }
 
     @Override

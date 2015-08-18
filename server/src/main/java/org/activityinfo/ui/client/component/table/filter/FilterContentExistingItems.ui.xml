@@ -13,6 +13,6 @@
       <g:Button addStyleNames="btn btn-default btn-xs" ui:field="selectAllButton" text="{i18n.selectAll}"/>
       <g:Button addStyleNames="btn btn-default btn-xs" ui:field="deselectAllButton" text="{i18n.deselectAll}"/>
     </g:HTMLPanel>
-    <g:HTMLPanel ui:field="gridContainer"/>
+    <a:LoadingPanel ui:field="loadingPanel"/>
   </g:HTMLPanel>
 </ui:UiBinder>
