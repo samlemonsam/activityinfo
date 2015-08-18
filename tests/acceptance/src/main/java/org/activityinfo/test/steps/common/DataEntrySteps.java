@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @ScenarioScoped
 public class DataEntrySteps {
@@ -284,6 +285,11 @@ public class DataEntrySteps {
 
     @Then("^\"([^\"]*)\" filter for \"([^\"]*)\" form has values:$")
     public void filter_for_form_has_values(String filterName, String formName, List<String> filterValues) throws Throwable {
-        driver.assertOldFilterHasValues(filterName, formName, filterValues);
+        List<String> filterItemsOnUi = driver.getFilterValues(filterName, formName);
+
+        filterItemsOnUi = driver.getAliasTable().deAlias(filterItemsOnUi);
+        filterItemsOnUi.removeAll(filterValues);
+
+        assertTrue(filterItemsOnUi.isEmpty());
     }
 }

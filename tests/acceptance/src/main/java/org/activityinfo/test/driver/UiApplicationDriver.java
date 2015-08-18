@@ -132,9 +132,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
-        DataEntryDriver driver = dataEntryTab.newSubmission();
-
-        return driver;
+        return dataEntryTab.newSubmission();
     }
 
     private void fillForm(Map<String, FieldValue> valueMap, DataEntryDriver driver) throws InterruptedException {
@@ -853,9 +851,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     }
 
-    public void assertDesignerFieldMandatory(String fieldLabel) {
-        assertTrue("Designer field with label " + fieldLabel + " is not mandatory",
-                formDesigner().dropTarget().fieldByLabel(fieldLabel).isMandatory());
+    public DesignerField getDesignerField(String fieldLabel) {
+        return formDesigner().dropTarget().fieldByLabel(fieldLabel);
     }
 
     public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
@@ -929,20 +926,18 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
-    public void assertOldFilterHasValues(String filterName, String formName, List<String> filterValues) {
+    @Override
+    public List<String> getFilterValues(String filterName, String formName) {
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
 
         DataEntryFilter filter = dataEntryTab.filter(filterName);
 
         List<String> filterItemsOnUi = filter.select().filterItems();
 
-        filterItemsOnUi = aliasTable.deAlias(filterItemsOnUi);
-        filterItemsOnUi.removeAll(filterValues);
-
-        assertTrue(filterItemsOnUi.isEmpty());
-
         // reset state for next step
         dataEntryTab.filter("Forms").select();
+
+        return filterItemsOnUi;
     }
 
     public Object getCurrentPage() {
