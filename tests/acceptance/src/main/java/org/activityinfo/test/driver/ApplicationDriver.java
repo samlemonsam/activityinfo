@@ -402,7 +402,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertOldFilterHasValues(String filterName, String formName, List<String> filterValues) {
+    public List<String> getFilterValues(String filterName, String formName) {
         throw new PendingException();
     }
 }
