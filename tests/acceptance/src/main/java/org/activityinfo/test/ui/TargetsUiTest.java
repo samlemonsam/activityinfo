@@ -22,14 +22,19 @@ package org.activityinfo.test.ui;
  */
 
 import com.google.common.collect.Lists;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
+import org.activityinfo.test.sut.DevServerAccounts;
 import org.junit.Test;
 
 import javax.inject.Inject;
+
+import java.util.Locale;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -47,7 +52,17 @@ public class TargetsUiTest {
     @Inject
     private UiApplicationDriver driver;
 
+    @Inject
+    private DevServerAccounts accounts;
+
     private void background() throws Exception {
+
+        LocaleProxy.initialize();
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag("en"));
+        accounts.setLocale("en");
+
+        System.out.println(I18N.CONSTANTS.databases());
+
         driver.login();
         driver.setup().createDatabase(property("name", DATABASE));
 
