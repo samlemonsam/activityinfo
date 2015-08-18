@@ -31,6 +31,8 @@ import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropert
 import javax.inject.Inject;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author yuriyz on 05/12/2015.
  */
@@ -120,7 +122,8 @@ public class DesignSteps {
 
     @Then("^\"([^\"]*)\" designer field is mandatory$")
     public void designer_field_is_mandatory(String fieldLabel) throws Throwable {
-        driver.assertDesignerFieldMandatory(fieldLabel);
+        assertTrue("Designer field with label " + fieldLabel + " is not mandatory",
+                driver.getDesignerField(fieldLabel).isMandatory());
     }
 
     @Then("^change designer field \"([^\"]*)\" with:$")

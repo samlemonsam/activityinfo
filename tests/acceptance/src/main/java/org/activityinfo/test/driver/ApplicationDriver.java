@@ -9,6 +9,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
+import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
 import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
@@ -351,7 +352,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertDesignerFieldMandatory(String fieldLabel) {
+    public DesignerField getDesignerField(String fieldLabel) {
         throw new PendingException();
     }
 

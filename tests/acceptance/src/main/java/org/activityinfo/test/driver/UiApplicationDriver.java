@@ -851,9 +851,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     }
 
-    public void assertDesignerFieldMandatory(String fieldLabel) {
-        assertTrue("Designer field with label " + fieldLabel + " is not mandatory",
-                formDesigner().dropTarget().fieldByLabel(fieldLabel).isMandatory());
+    public DesignerField getDesignerField(String fieldLabel) {
+        return formDesigner().dropTarget().fieldByLabel(fieldLabel);
     }
 
     public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
