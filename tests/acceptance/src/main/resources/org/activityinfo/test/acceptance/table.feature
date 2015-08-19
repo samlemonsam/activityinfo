@@ -41,17 +41,27 @@ Feature: New table (based on new form)
       | 13                 | USAID   | cholera, malaria               |
       | 11                 | USAID   | cholera                        |
 
-  @AI-835
+  @AI-835 @AI-1173
   Scenario: Column filtering by items
     When open table for the "Medical Activities" form in the database "Patient Registration"
     And filter column "Number of patients" with:
       | 230 |
       | 1   |
     Then table has rows with hidden built-in columns:
-      | Number of patients | Donor   | Diseases treated this month    |
-      | quantity           | enum    | enum                           |
-      | 230                | USAID   | cholera, malaria, tuberculosis |
-      | 1                  | ECHO    | cholera                        |
+      | Number of patients | Donor | Diseases treated this month    |
+      | quantity           | enum  | enum                           |
+      | 230                | USAID | cholera, malaria, tuberculosis |
+      | 1                  | ECHO  | cholera                        |
+    And filter column "Number of patients" with:
+      | 51 |
+      | 13 |
+    Then table has rows with hidden built-in columns:
+      | Number of patients | Donor | Diseases treated this month    |
+      | quantity           | enum  | enum                           |
+      | 230                | USAID | cholera, malaria, tuberculosis |
+      | 1                  | ECHO  | cholera                        |
+      | 51                 | ECHO  | cholera                        |
+      | 13                 | USAID | cholera, malaria               |
 
   @AI-1102
   Scenario: Column filtering by date

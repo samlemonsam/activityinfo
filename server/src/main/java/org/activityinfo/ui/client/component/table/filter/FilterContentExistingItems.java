@@ -36,21 +36,31 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.inject.Provider;
+import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ProjectionKeyProvider;
+import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaUnion;
 import org.activityinfo.core.shared.criteria.CriteriaVisitor;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
-import org.activityinfo.ui.client.widget.DataGrid;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.widget.DataGrid;
+import org.activityinfo.ui.client.widget.DisplayWidget;
+import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.TextBox;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * @author yuriyz on 4/3/14.
@@ -75,22 +85,20 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
 
     private final FieldColumn column;
-    private final InstanceTable table;
     private final DataGrid<Projection> filterGrid;
-    private final List<Projection> allItems;
+    private List<Projection> allItems;
 
     @UiField
     TextBox textBox;
     @UiField
-    HTMLPanel gridContainer;
+    LoadingPanel<QueryResult<Projection>> loadingPanel;
     @UiField
     HTMLPanel textBoxContainer;
 
-    public FilterContentExistingItems(InstanceTable table, FieldColumn column) {
+    public FilterContentExistingItems(final FieldColumn column, final InstanceTable table) {
 
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.table = table;
         this.column = column;
 
         textBox.addKeyUpHandler(new KeyUpHandler() {
@@ -107,7 +115,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
             }
         };
 
-        filterGrid = new DataGrid<>(100, FilterDataGridResources.INSTANCE);
+        filterGrid = new DataGrid<>(1000, FilterDataGridResources.INSTANCE);
         filterGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager
                 .<Projection>createCheckboxManager());
         filterGrid.addColumn(checkColumn);
@@ -118,14 +126,32 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         filterGrid.setAutoFooterRefreshDisabled(true);
 
         tableDataProvider.addDataDisplay(filterGrid);
-        allItems = extractItems(table.getTable().getVisibleItems());
-        if (allItems.size() < SEARCH_BOX_PRESENCE_ITEM_COUNT) {
-            textBoxContainer.remove(textBox);
-        }
-        filterData();
-        initByCriteriaVisit();
 
-        gridContainer.add(filterGrid);
+        loadingPanel.setDisplayWidget(new DisplayWidget<QueryResult<Projection>>() {
+            @Override
+            public Promise<Void> show(QueryResult<Projection> values) {
+                allItems = extractItems(values.getProjections());
+                if (allItems.size() < SEARCH_BOX_PRESENCE_ITEM_COUNT) {
+                    textBoxContainer.remove(textBox);
+                }
+
+                filterData();
+                initByCriteriaVisit();
+                return Promise.done();
+            }
+
+            @Override
+            public Widget asWidget() {
+                return filterGrid;
+            }
+        });
+        loadingPanel.show(new Provider<Promise<QueryResult<Projection>>>() {
+            @Override
+            public Promise<QueryResult<Projection>> get() {
+                InstanceQuery query = new InstanceQuery(Lists.newArrayList(column.getFieldPaths()), table.getCriteria(), 0, 10000, true);
+                return table.getResourceLocator().queryProjection(query);
+            }
+        });
     }
 
     private void initByCriteriaVisit() {
@@ -153,9 +179,9 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         }
     }
 
-    private List<Projection> extractItems(List<Projection> visibleItems) {
+    private List<Projection> extractItems(List<Projection> projections) {
         final SortedMap<String, Projection> labelToProjectionMap = Maps.newTreeMap();
-        for (Projection projection : visibleItems) {
+        for (Projection projection : projections) {
             final String value = column.getValue(projection).replace(String.valueOf((char) 160), " ").trim();
             if (!Strings.isNullOrEmpty(value) && !labelToProjectionMap.containsKey(value)) {
                 labelToProjectionMap.put(value, projection);

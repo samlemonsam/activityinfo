@@ -21,24 +21,41 @@ package org.activityinfo.ui.client.component.table.filter;
  * #L%
  */
 
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.ui.client.component.table.FieldColumn;
-import org.activityinfo.ui.client.component.table.InstanceTable;
-
 /**
- * @author yuriyz on 4/3/14.
+ * @author yuriyz on 08/18/2015.
  */
-public class FilterContentFactory {
+public class FilterValue<T> {
 
-    private FilterContentFactory() {
+    private T value;
+
+    public FilterValue() {
     }
 
-    public static FilterContent create(FieldColumn column, InstanceTable table) {
-        FieldType type = column.getNode().getField().getType();
-        if (type == LocalDateType.INSTANCE) {
-            return new FilterContentDate(column);
-        }
-        return new FilterContentExistingItems(column, table);
+    public FilterValue(T value) {
+        this.value = value;
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FilterValue<?> that = (FilterValue<?>) o;
+
+        return !(value != null ? !value.equals(that.value) : that.value != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
     }
 }
