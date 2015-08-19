@@ -27,7 +27,7 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
     public static final int BAVON_USER_ID = 2;
 
     @Test @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void partnersFieldIsNotVisibleIfThereIsOnlyOneChoice() {
+    public void partnersFieldIsAlwaysVisible() {
 
         setUser(BAVON_USER_ID);
 
@@ -38,7 +38,7 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
         ResourceId partnerFieldId = CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD);
         FormField partnerField = formClass.getField(partnerFieldId);
 
-        assertThat(partnerField, hasProperty("visible", equalTo(false)));
+        assertThat(partnerField, hasProperty("visible", equalTo(true))); // according to ai-1009 : partner field is always visible
 
         // Make sure we can update if partner is not specified
         FormInstance instance = new FormInstance(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());

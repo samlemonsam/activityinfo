@@ -34,8 +34,6 @@ import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
@@ -310,15 +308,20 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         ModelData selected = view.getSelection();
 
         if ("Activity".equals(entityName)) {
-            final NewFormDialog newFormDialog = new NewFormDialog();
-            newFormDialog.show();
-            newFormDialog.setSuccessHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    createNewActivity(newFormDialog);
-                }
-            });
-            return;
+            newEntity = new ActivityDTO();
+            newEntity.set("databaseId", db.getId());
+            newEntity.set("classicView", true);
+            newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
+
+        } else if("Form".equals(entityName)) {
+            newEntity = new ActivityDTO();
+            newEntity.set("databaseId", db.getId());
+            newEntity.set("classicView", false);
+            newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
+            newEntity.set("locationTypeId", db.getCountry().getNullLocationType().getId());
+            newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
 
         } else if ("LocationType".equals(entityName)) {
             newEntity = new LocationTypeDTO();
@@ -518,16 +521,18 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     public void onSelectionChanged(ModelData selectedItem) {
         view.setActionEnabled(UIActions.EDIT, this.db.isDesignAllowed() && canEditWithFormDesigner(selectedItem));
         view.setActionEnabled(UIActions.DELETE, this.db.isDesignAllowed() && selectedItem instanceof EntityDTO);
-        view.setActionEnabled(UIActions.OPEN_TABLE, getSelectedActivity(selectedItem) != null || selectedItem instanceof IsFormClass);
+
+        // in case of activity enable only if reportingFrequency==once (monthly implementation with subforms is on the way...)
+        boolean enableTable = selectedItem instanceof IsFormClass;
+        if (getSelectedActivity(selectedItem) != null) {
+            enableTable = ((IsActivityDTO) selectedItem).getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        }
+        view.setActionEnabled(UIActions.OPEN_TABLE, enableTable);
     }
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
         IsActivityDTO activity = getSelectedActivity(selectedItem);
-        if (activity != null) {
-            return  activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
-        } else {
-            return selectedItem instanceof IsFormClass;
-        }
+        return activity != null;
     }
 
     private IsActivityDTO getSelectedActivity(ModelData selectedItem) {

@@ -26,7 +26,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.server.command.handler.PermissionOracle;
-import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -56,7 +55,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
         locationType.setVersion(1L);
         locationType.setName(properties.<String>get("name"));
         locationType.setCountry(database.getCountry());
-        locationType.setWorkflowId(Workflow.CLOSED_WORKFLOW_ID);
+        locationType.setWorkflowId(properties.getOptionalString("workflowId", Workflow.CLOSED_WORKFLOW_ID));
         locationType.setDatabase(database);
 
         em.persist(locationType);

@@ -4216,3 +4216,10 @@ INSERT INTO adminentity (AdminEntityId, x1, x2, y1, y2, Code, Name, AdminLevelId
 INSERT INTO adminentity (AdminEntityId, x1, x2, y1, y2, Code, Name, AdminLevelId, AdminEntityParentId) VALUES (435394,33.42307385619148,35.2234368780189,-4.084184840018844,-2.178393226297066,'24','Simiyu',1465,NULL);
 /*!40000 ALTER TABLE adminentity ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+LOCK TABLES locationtype WRITE;
+
+INSERT INTO locationtype (locationtypeId, name, reuse, boundAdminLevelId, countryId) values (99999, "Province", false, 1, 1);
+
+UNLOCK TABLES;

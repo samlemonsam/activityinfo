@@ -26,10 +26,12 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.server.database.hibernate.entity.Deleteable;
+import org.activityinfo.server.database.hibernate.entity.ReallyDeleteable;
+import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
-import java.util.Date;
 import java.util.logging.Logger;
 
 public class DeleteHandler implements CommandHandler<Delete> {

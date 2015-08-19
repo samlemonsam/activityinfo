@@ -34,8 +34,8 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
-import org.activityinfo.legacy.shared.reports.model.DateUnit;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.date.DateUnit;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -49,6 +49,8 @@ import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.command.LocationDTOs;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.export.SiteExporter;
+import org.activityinfo.server.endpoint.export.TaskContext;
+import org.activityinfo.server.report.NullStorageProvider;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -192,7 +194,7 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
         // Export to excel
         ActivityFormDTO activity = execute(new GetActivityForm(activityId));
 
-        SiteExporter exporter = new SiteExporter(getDispatcherSync());
+        SiteExporter exporter = new SiteExporter(new TaskContext(getDispatcherSync(), new NullStorageProvider(), "XYZ"));
         exporter.export(activity, Filter.filter().onActivity(activityId));
 
         exporter.done();

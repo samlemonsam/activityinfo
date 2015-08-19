@@ -88,7 +88,7 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public <R> Promise<R> join(final Function<? super T, Promise<R>> function) {
-        final Promise<R> chained = new Promise<R>();
+        final Promise<R> chained = new Promise<>();
         then(new AsyncCallback<T>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -192,15 +192,9 @@ public final class Promise<T> implements AsyncCallback<T> {
         return fmap(new ConcatList<T>()).apply(aList, b);
     }
 
-
-    /**
-     *
-     * @param function
-     * @param <R>
-     * @return
-     */
+    
     public <R> Promise<R> then(final Function<? super T, R> function) {
-        final Promise<R> chained = new Promise<R>();
+        final Promise<R> chained = new Promise<>();
         then(new AsyncCallback<T>() {
 
             @Override
@@ -275,7 +269,7 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public static <T> Promise<T> resolved(T value) {
-        Promise<T> promise = new Promise<T>();
+        Promise<T> promise = new Promise<>();
         promise.resolve(value);
         return promise;
     }
@@ -285,17 +279,13 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public static <X> Promise<X> rejected(Throwable exception) {
-        Promise<X> promise = new Promise<X>();
+        Promise<X> promise = new Promise<>();
         promise.reject(exception);
         return promise;
     }
 
     /**
      * Applies an asynchronous function to each of the elements in {@code items},
-     * @param items
-     * @param function
-     * @param <T>
-     * @return
      */
     public static <T> Promise<Void> forEach(Iterable<T> items, final Function<? super T, Promise<Void>> function) {
         Promise<Void> promise = Promise.resolved(null);
@@ -323,7 +313,7 @@ public final class Promise<T> implements AsyncCallback<T> {
 
         final Promise<Void> result = new Promise<>();
         final int[] remaining = new int[] { promises.size() };
-        AsyncCallback callback = new AsyncCallback() {
+        AsyncCallback<Object> callback = new AsyncCallback<Object>() {
             @Override
             public void onFailure(Throwable caught) {
                 result.onFailure(caught);

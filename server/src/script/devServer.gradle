@@ -37,13 +37,72 @@ def healthCheck() {
     }
 }
 
-appengineRun {
-
-    dependsOn 'migrateDatabaseDev'
+task appengineExplodeDevMode(type: Copy) {
+    group = "Google App Engine"
+    description = "Creates a partial, exploded web app layout for GWT Dev Mode"
     
-    doFirst {
-        writeConfiguration mysql.localDev
+    // In order to run (super)dev mode, we need ONLY the part of the
+    // web app required for the server side, which includes
+    // compiled Java classes, resources, and server-side libraries
+    
+    dependsOn compileJava
+    from("$projectDir/src/main/webapp")
+    from(configurations.runtime) {
+        into "WEB-INF/lib"
     }
+    from(sourceSets.main.output) {
+        into "WEB-INF/classes"
+    }
+    into "$buildDir/explodedDevMode"
+}
+
+
+task appengineDevMode(type: JavaExec) {
+    dependsOn appengineDownloadSdk
+    dependsOn appengineExplodeDevMode
+
+    main = 'com.google.gwt.dev.DevMode'
+    
+    // Java sources first, so that changes get picked up on refresh
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath project(":i18n").sourceSets.main.java.srcDirs
+    classpath project(":i18n").sourceSets.main.resources.srcDirs
+
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+
+
+    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
+    args '-war', "${buildDir}/explodedDevMode"
+    args '-startupUrl', 'login'
+    args '-port', devServerPort
+    args 'org.activityinfo.ui.ActivityInfoFFTest'
+
+    doFirst {
+        // The SDK root is only available after appengineDownloadSdk runs
+        def sdkRoot = System.getProperty('appengine.sdk.root')
+        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
+        
+        // Write the application configuration pointing to the development database
+        writeConfiguration mysql.localDev
+        jvmArgs "-Dactivityinfo.config=${configFile}"
+        jvmArgs "-Xdebug"
+        jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+    }
+}
+
+appengineRun {
+    ext.database = mysql.localDev
+    
+    // Bind to all address so that we can test ODK from the local network
+    // For example, http://192.168.1.1
+    httpAddress = "0.0.0.0"
 }
 
 task appengineStartAT(type: RunTask) {
@@ -53,36 +112,28 @@ task appengineStartAT(type: RunTask) {
     dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
 
     daemon = true
-    
-    doFirst {
-        writeConfiguration mysql.localAT
-    }
+    ext.database = mysql.localAT
 }
 
 task appengineRunAT(type: RunTask) {
     group = "Google App Engine"
     description = "Runs a local AppEngine Development Server for Acceptance Testing"
 
-    dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
-    
-    doFirst {
-        writeConfiguration mysql.localAT
-    }
+    dependsOn 'appengineExplodeApp', 'setupDatabaseAT', 'classes', 'compileGwt'
+    ext.database = mysql.localAT
 }
 
 task appengineStartInstrumentedAT(type: RunTask) {
     group = "Google App Engine"
     description = "Starts a local AppEngine Dev Server instrumented for measuring test coverage"
 
+    dependsOn 'classes', 'compileGwt'
     dependsOn 'setupDatabaseAT'
     dependsOn 'appengineExplodeInstrumentedApp'
 
     daemon = true
     explodedAppDirectory = appengineExplodeInstrumentedApp.warDir
-    
-    doFirst {
-        writeConfiguration(mysql.localAT)
-    }
+    ext.database = mysql.localAT
 
     doFirst {
         def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
@@ -99,6 +150,9 @@ tasks.withType(RunTask) {
     // Provide a configuration for the server
     jvmFlags = ["-Dactivityinfo.config=${configFile}"]
 
+    doFirst {
+        writeConfiguration ext.database
+    }
     
     doLast {
         if(daemon) {

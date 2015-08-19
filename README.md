@@ -20,10 +20,10 @@ ActivityInfo is Open Source software managed by BeDataDriven and
 supported by UNICEF, UNHCR, and many other organizations working 
 humanitarian relief and development.
 
+Please read the [Contributor's Guide](CONTRIBUTING.md) to get started developing on ActivityInfo.
+
 Pull requests are welcome!
 
-Developer's documentation can be found here:
-https://bedatadriven.atlassian.net/wiki/display/AIDOC/AI+Developer+Documentation
 
 RUNNING
 =======

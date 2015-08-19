@@ -124,6 +124,9 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     
     public void setProject(ProjectDTO value) {
         set("project", value);
+        if (value != null) { // keep also id, we still stick to id in bindings
+            set("projectId", value.getId());
+        }
     }
 
     @JsonProperty
@@ -144,6 +147,9 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     
     public void setPartner(PartnerDTO value) {
         set("partner", value);
+        if (value != null) { // keep also id, we still stick to id in bindings
+            set("partnerId", value.getId());
+        }
     }
 
     public AdminEntityDTO getAdminEntity() {

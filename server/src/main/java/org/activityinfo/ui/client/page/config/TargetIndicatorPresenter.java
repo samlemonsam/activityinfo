@@ -22,17 +22,19 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.data.ModelData;
+import com.extjs.gxt.ui.client.data.*;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
+import com.google.common.base.Optional;
+import com.google.common.collect.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
-import org.activityinfo.i18n.shared.UiConstants;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
+import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
@@ -48,9 +50,10 @@ import org.activityinfo.ui.client.page.common.nav.Link;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelData> {
 
@@ -65,6 +68,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     private final Dispatcher service;
     private final View view;
     private final Map<ActivityDTO, ActivityFormDTO> activities = Maps.newHashMap();
+    private final Loader loader = new Loader();
     private TargetDTO targetDTO;
 
     private UserDatabaseDTO db;
@@ -74,8 +78,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     public TargetIndicatorPresenter(EventBus eventBus,
                                     Dispatcher service,
                                     StateProvider stateMgr,
-                                    View view,
-                                    UiConstants messages) {
+                                    View view) {
         super(eventBus, service, stateMgr, view);
         this.eventBus = eventBus;
         this.service = service;
@@ -83,103 +86,41 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     }
 
     public void go(UserDatabaseDTO db) {
-
         this.db = db;
+        this.treeStore = new TreeStore<ModelData>(loader);
 
-        treeStore = new TreeStore<ModelData>();
-
+        // key provider is required to keep TreeGrid stateful (see GXT 2 com.extjs.gxt.ui.client.widget.treegrid.TreeGrid.setExpanded(M, boolean, boolean))
+        this.treeStore.setKeyProvider(new ModelKeyProvider<ModelData>() {
+            @Override
+            public String getKey(ModelData model) {
+                if (model instanceof ActivityDTO) {
+                    return Integer.toString(((ActivityDTO)model).getId());
+                } else if (model instanceof Link) {
+                    return ((Link) model).getKey();
+                } else if (model instanceof TargetValueDTO) {
+                    TargetValueDTO v = (TargetValueDTO) model;
+                    return v.getTargetId() + "" + v.getIndicatorId();
+                }
+                return "";
+            }
+        });
         initListeners(treeStore, null);
 
         this.view.init(this, db, treeStore);
         this.view.setActionEnabled(UIActions.DELETE, false);
     }
 
-    public void load(TargetDTO targetDTO) {
-        this.targetDTO = targetDTO;
-        treeStore.removeAll();
+    public void load(Optional<TargetDTO> targetDTO) {     
+        this.loader.clearCache();
 
-        fillStore();
-        view.expandAll();
-    }
-
-    private void fillStore() {
-
-        Map<String, Link> categories = new HashMap<String, Link>();
-        for (ActivityDTO activity : db.getActivities()) {
-
-            if (activity.getCategory() != null) {
-                Link actCategoryLink = categories.get(activity.getCategory());
-
-                if (actCategoryLink == null) {
-
-                    actCategoryLink = createCategoryLink(activity, categories);
-                    categories.put(activity.getCategory(), actCategoryLink);
-                    treeStore.add(actCategoryLink, false);
-                }
-
-                treeStore.add(actCategoryLink, activity, false);
-                addIndicator(activity, activity);
-
-            } else {
-                treeStore.add(activity, false);
-                addIndicator(activity, activity);
-            }
-
-        }
-    }
-
-    private void addIndicator(final ActivityDTO activity, final ModelData parent) {
-        service.execute(new GetActivityForm(activity.getId())).then(new Function<ActivityFormDTO, Object>() {
-            @Override
-            public Object apply(ActivityFormDTO input) {
-                activities.put(activity, input);
-                addIndicatorLinks(input, parent);
-                view.expandAll();
-                return null;
-            }
-        });
+        if (targetDTO.isPresent()) {
+            this.targetDTO = targetDTO.get();
+            this.loader.load();
+        } 
     }
 
     public ActivityFormDTO getActivityFormDTO(ActivityDTO activity) {
         return activities.get(activity);
-    }
-
-    private void addIndicatorLinks(ActivityFormDTO activity, ModelData parent) {
-        Map<String, Link> indicatorCategories = new HashMap<String, Link>();
-
-        for (IndicatorDTO indicator : activity.getIndicators()) {
-
-            // yuriy : right now we support only quantity indicators in targets, skip other types
-            if (indicator.getType() != FieldTypeClass.QUANTITY) {
-                continue;
-            }
-
-            if (indicator.getCategory() != null) {
-                Link indCategoryLink = indicatorCategories.get(indicator.getCategory());
-
-                if (indCategoryLink == null) {
-                    indCategoryLink = createIndicatorCategoryLink(indicator, indicatorCategories);
-                    indicatorCategories.put(indicator.getCategory(), indCategoryLink);
-                    treeStore.add(parent, indCategoryLink, false);
-                }
-
-                TargetValueDTO targetValueDTO = getTargetValueByIndicatorId(indicator.getId());
-                if (null != targetValueDTO) {
-                    treeStore.add(indCategoryLink, targetValueDTO, false);
-                } else {
-                    treeStore.add(indCategoryLink, createTargetValueModel(indicator), false);
-                }
-
-            } else {
-                TargetValueDTO targetValueDTO = getTargetValueByIndicatorId(indicator.getId());
-                if (null != targetValueDTO) {
-                    treeStore.add(parent, targetValueDTO, false);
-                } else {
-                    treeStore.add(parent, createTargetValueModel(indicator), false);
-                }
-            }
-        }
-
     }
 
     private TargetValueDTO createTargetValueModel(IndicatorDTO indicator) {
@@ -209,17 +150,17 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     private Link createIndicatorCategoryLink(IndicatorDTO indicatorNode, Map<String, Link> categories) {
         return Link.folderLabelled(indicatorNode.getCategory())
-                   .usingKey(categoryKey(indicatorNode, categories))
-                   .withIcon(IconImageBundle.ICONS.folder())
-                   .build();
+                .usingKey(categoryKey(indicatorNode, categories))
+                .withIcon(IconImageBundle.ICONS.folder())
+                .build();
     }
 
     private Link createCategoryLink(ActivityDTO activity, Map<String, Link> categories) {
 
         return Link.folderLabelled(activity.getCategory())
-                   .usingKey(categoryKey(activity, categories))
-                   .withIcon(IconImageBundle.ICONS.folder())
-                   .build();
+                .usingKey(categoryKey(activity, categories))
+                .withIcon(IconImageBundle.ICONS.folder())
+                .build();
     }
 
     private String categoryKey(ActivityDTO activity, Map<String, Link> categories) {
@@ -258,12 +199,7 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     @Override
     protected void onDeleteConfirmed(final ModelData model) {
-        service.execute(new Delete((EntityDTO) model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
+        service.execute(new Delete((EntityDTO) model), view.getDeletingMonitor(), new SuccessCallback<VoidResult>() {
             @Override
             public void onSuccess(VoidResult result) {
                 treeStore.remove(model);
@@ -281,16 +217,22 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     protected Command createSaveCommand() {
         BatchCommand batch = new BatchCommand();
 
+        modifiedValues.clear();
         for (ModelData model : treeStore.getRootItems()) {
             prepareBatch(batch, model);
         }
+
         return batch;
     }
+
+    private final Set<TargetValueDTO> modifiedValues = Sets.newHashSet();
 
     protected void prepareBatch(BatchCommand batch, ModelData model) {
         if (model instanceof EntityDTO) {
             Record record = treeStore.getRecord(model);
             if (record.isDirty()) {
+                modifiedValues.add((TargetValueDTO) model);
+
                 UpdateTargetValue cmd = new UpdateTargetValue((Integer) model.get("targetId"),
                         (Integer) model.get("indicatorId"),
                         changes(record));
@@ -330,6 +272,23 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
     @Override
     protected void onSaved() {
         treeStore.commitChanges();
+
+        if (targetDTO != null) {
+            List<TargetValueDTO> targetValues = targetDTO.getTargetValues();
+            if (targetValues == null) {
+                targetValues = Lists.newArrayList();
+            }
+            for (TargetValueDTO targetValueDTO : targetValues) {
+                for (TargetValueDTO modified : modifiedValues) {
+                    if (targetValueDTO.getTargetId() == modified.getTargetId() && targetValueDTO.getIndicatorId() == modified.getIndicatorId()) {
+                        targetValueDTO.setValue(modified.getValue());
+                    } else {
+                        targetValues.add(modified);
+                    }
+                }
+            }
+            targetDTO.setTargetValues(targetValues);
+        }
     }
 
     @Override
@@ -344,5 +303,158 @@ public class TargetIndicatorPresenter extends AbstractEditorGridPresenter<ModelD
 
     @Override
     public void shutdown() {
+    }
+
+    public IndicatorDTO getIndicatorById(int indicatorId) {
+        for (ActivityFormDTO activityFormDTO : activities.values()) {
+            IndicatorDTO indicator = activityFormDTO.getIndicatorById(indicatorId);
+            if (indicator != null) {
+                return indicator;
+            }
+        }
+        return null;
+    }
+
+    private class Loader extends BaseTreeLoader<ModelData> {
+        public Loader() {
+            super(new Proxy());
+        }
+
+        @Override
+        public boolean hasChildren(ModelData parent) {
+            return !(parent instanceof TargetValueDTO);
+        }
+
+        public void clearCache() {
+            ((Proxy)proxy).clearCache();
+        }
+    }
+
+    private class Proxy implements DataProxy<List<ModelData>> {
+
+        private final BiMap<String, Link> categories = HashBiMap.create();
+        private final Map<String, Link> indicatorCategories = Maps.newHashMap();
+        private final Map<Link, Set<TargetValueDTO>> indicatorLinkChilds = Maps.newHashMap();
+
+        @Override
+        public void load(DataReader<List<ModelData>> listDataReader,
+                         Object parent,
+                         final AsyncCallback<List<ModelData>> callback) {
+
+            if (targetDTO == null) {
+                callback.onSuccess(new ArrayList<ModelData>()); // targetDTO is not selected yet, ignore initial loading
+                return;
+            }
+
+            if (parent == null) { // root : activities and activity categories
+
+                List<ModelData> childs = Lists.newArrayList();
+
+                for (ActivityDTO activity : db.getActivities()) {
+                    if (activity.getCategory() != null) {
+                        Link actCategoryLink = categories.get(activity.getCategory());
+
+                        if (actCategoryLink == null) {
+
+                            actCategoryLink = createCategoryLink(activity, categories);
+                            categories.put(activity.getCategory(), actCategoryLink);
+                            childs.add(actCategoryLink);
+                        }
+                    } else {
+                        childs.add(activity);
+                    }
+                }
+                callback.onSuccess(childs);
+            } else if (parent instanceof Link) { // links : here we handle both activity and indicator links
+                List<ModelData> childs = Lists.newArrayList();
+
+                for (ActivityDTO activity : db.getActivities()) { // activity links
+                    if (activity.getCategory() != null && activity.getCategory().equals(categories.inverse().get(parent))) {
+                        childs.add(activity);
+                    }
+                }
+
+                if (childs.isEmpty()) { // try maybe it's indicator links
+                    Set<TargetValueDTO> targetValueDTOs = indicatorLinkChilds.get(parent);
+                    if (targetValueDTOs != null && !targetValueDTOs.isEmpty()) {
+                        childs.addAll(targetValueDTOs);
+                    }
+                }
+
+                callback.onSuccess(childs);
+            } else if (parent instanceof ActivityDTO) {
+                final ActivityDTO activity = (ActivityDTO) parent;
+                ActivityFormDTO activityFormDTO = activities.get(activity);
+                if (activityFormDTO != null) {
+                    activityChilds(activityFormDTO, activity, callback);
+                } else {
+                    service.execute(new GetActivityForm(activity.getId()),
+                            new MaskingAsyncMonitor((TargetIndicatorView) view, I18N.CONSTANTS.loading()),
+                            new SuccessCallback<ActivityFormDTO>() {
+
+                                @Override
+                                public void onSuccess(ActivityFormDTO result) {
+                                    activities.put(activity, result);
+                                    activityChilds(result, activity, callback);
+                                }
+                            });
+                }
+            }
+        }
+
+        private void activityChilds(ActivityFormDTO result, ActivityDTO activity, AsyncCallback<List<ModelData>> callback) {
+            Set<ModelData> childs = Sets.newHashSet();
+
+
+            for (IndicatorDTO indicator : result.getIndicators()) {
+
+                // yuriy : right now we support only quantity indicators in targets, skip other types
+                if (indicator.getType() != FieldTypeClass.QUANTITY) {
+                    continue;
+                }
+
+                if (indicator.getCategory() != null) {
+                    String key = indicator.getCategory() + result.getId();
+                    Link indCategoryLink = indicatorCategories.get(key);
+
+                    if (indCategoryLink == null) {
+                        indCategoryLink = createIndicatorCategoryLink(indicator, indicatorCategories);
+                        indicatorCategories.put(key, indCategoryLink);
+                    }
+                    childs.add(indCategoryLink);
+
+                    TargetValueDTO targetValueDTO = getTargetValueByIndicatorId(indicator.getId());
+                    if (null != targetValueDTO) {
+                        addIndicatorLinkChild(indCategoryLink, targetValueDTO);
+                    } else {
+                        addIndicatorLinkChild(indCategoryLink, createTargetValueModel(indicator));
+                    }
+
+                } else {
+                    TargetValueDTO targetValueDTO = getTargetValueByIndicatorId(indicator.getId());
+                    if (null != targetValueDTO) {
+                        childs.add(targetValueDTO);
+                    } else {
+                        childs.add(createTargetValueModel(indicator));
+                    }
+                }
+            }
+            callback.onSuccess(Lists.newArrayList(childs));
+        }
+
+        public void addIndicatorLinkChild(Link indCategoryLink, TargetValueDTO targetValueDTO) {
+            Set<TargetValueDTO> list = indicatorLinkChilds.get(indCategoryLink);
+            if (list == null) {
+                list = Sets.newHashSet();
+                indicatorLinkChilds.put(indCategoryLink, list);
+            }
+            list.add(targetValueDTO);
+        }
+
+        public void clearCache() {
+            categories.clear();
+            indicatorCategories.clear();
+            indicatorLinkChilds.clear();
+        }
     }
 }

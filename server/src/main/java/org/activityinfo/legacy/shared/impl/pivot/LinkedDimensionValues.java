@@ -69,6 +69,8 @@ public class LinkedDimensionValues extends BaseTable {
         query.appendColumn("0", ValueFields.COUNT);
         query.appendColumn(Integer.toString(IndicatorDTO.AGGREGATE_SITE_COUNT), ValueFields.AGGREGATION);
 
+        query.where("Site.dateDeleted").isNull();
+
         // QUICK FIX: limit result sets returned until we have a dedicated query for this
         query.setLimitClause("LIMIT 50");
     }

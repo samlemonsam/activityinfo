@@ -147,7 +147,12 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
             @Override
             public AbstractImagePrototype getIcon(ModelData model) {
                 if (model instanceof IsActivityDTO) {
-                    return IconImageBundle.ICONS.activity();
+                    IsActivityDTO activity = (IsActivityDTO) model;
+                    if(activity.getClassicView()) {
+                        return IconImageBundle.ICONS.activity();
+                    } else {
+                        return IconImageBundle.ICONS.form();
+                    }
                 } else if (model instanceof Folder) {
                     return GXT.IMAGES.tree_folder_closed();
                 } else if (model instanceof AttributeGroupDTO) {
@@ -230,10 +235,14 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
 
     protected void initNewMenu(Menu menu, SelectionListener<MenuEvent> listener) {
 
-        MenuItem newActivity = new MenuItem(I18N.CONSTANTS.newActivity(), IconImageBundle.ICONS.activity(), listener);
+        MenuItem newActivity = new MenuItem(I18N.CONSTANTS.newActivity(), IconImageBundle.ICONS.addActivity(), listener);
         newActivity.setItemId("Activity");
         menu.add(newActivity);
 
+        MenuItem newForm = new MenuItem(I18N.CONSTANTS.newForm(), IconImageBundle.ICONS.form(), listener);
+        newForm.setItemId("Form");
+        menu.add(newForm);
+        
         MenuItem newLocationType = new MenuItem(
                 I18N.CONSTANTS.newLocationType(),
                 IconImageBundle.ICONS.marker(), listener);

@@ -25,8 +25,8 @@ package org.activityinfo.legacy.client.type;
 import com.extjs.gxt.ui.client.util.DateWrapper;
 import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
-import org.activityinfo.legacy.shared.reports.model.DateUnit;
 import org.activityinfo.legacy.shared.reports.util.DateUtil;
+import org.activityinfo.model.date.DateUnit;
 
 import java.util.Date;
 
@@ -95,12 +95,12 @@ public class DateUtilGWTImpl extends DateUtil {
     }
 
     @Override
-    public Date floor(Date date, DateUnit dateUnit) {
+    public Date floorMonth(Date date) {
         throw new RuntimeException("not implemented");
     }
 
     @Override
-    public Date ceil(Date date, DateUnit dateUnit) {
+    public Date ceilMonth(Date date) {
         throw new RuntimeException("not implemented");
     }
 

@@ -19,7 +19,9 @@ class MySqlServer {
     }
 
     String getUrl(String databaseName) {
-        def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull"
+        def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true" +
+                "&characterEncoding=UTF-8" +
+                "&zeroDateTimeBehavior=convertToNull"
         if(keyStore) {
             url += "&useSSL=true"
         }
@@ -34,7 +36,7 @@ class MySqlServer {
         Logger logger = Logger.getLogger(MySqlServer.class.getName())
         logger.info("Connecting to database:" + databaseName + ", host: " + host + ", port: " + port + ", user:" + username)
 
-        def url = "jdbc:mysql://${host}:${port}/${databaseName}?useUnicode=true&characterEncoding=UTF-8"
+        def url = getUrl(databaseName)
         def driver = new Driver()
         return driver.connect(url, connectionProperties)
     }

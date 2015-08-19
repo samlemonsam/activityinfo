@@ -35,6 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Serves a simple KML file containing a network link to
@@ -47,6 +49,8 @@ import java.util.Map;
  */
 @Singleton
 public class KmlLinkServlet extends HttpServlet {
+    
+    private static final Logger LOGGER = Logger.getLogger(KmlLinkServlet.class.getName());
 
     private final Configuration templateCfg;
 
@@ -72,7 +76,7 @@ public class KmlLinkServlet extends HttpServlet {
             tpl.process(link, resp.getWriter());
         } catch (TemplateException e) {
             resp.setStatus(500);
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception serving KML link", e);
         }
     }
 }

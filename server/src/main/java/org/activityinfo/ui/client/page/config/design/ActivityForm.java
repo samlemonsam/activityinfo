@@ -31,10 +31,7 @@ import com.extjs.gxt.ui.client.widget.form.*;
 import com.google.gwt.user.client.ui.Anchor;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.legacy.shared.model.Published;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
@@ -115,47 +112,60 @@ class ActivityForm extends AbstractDesignForm {
 
         this.add(publishedCombo);
 
-        // hack : we represent boolean value with radiobuttons (instead of checkbox)
-        // therefore radio buttons order is important: true - first button selected, false - second button selected
-        final Radio classicView = new Radio();
-        classicView.setBoxLabel(I18N.CONSTANTS.classicView());
-        classicView.setToolTip(I18N.CONSTANTS.classicViewExplanation());
+        getBinding().addListener(Events.Bind, new Listener<BindingEvent>() {
 
-        final Radio modernView = new Radio();
-        modernView.setBoxLabel(I18N.CONSTANTS.modernView());
-        modernView.setToolTip(I18N.CONSTANTS.modernViewExplanation());
-
-        frequencyCombo.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
-            public void selectionChanged(SelectionChangedEvent se) {
-                Object value = frequencyCombo.getValue();
-                boolean isMonthlySelected = value instanceof ModelData && ((ModelData)value).get("value") instanceof Integer &&
-                        ((ModelData)value).get("value").equals(ActivityFormDTO.REPORT_MONTHLY);
-                if (isMonthlySelected && modernView.getValue()) {
-                    classicView.setValue(true);
-                }
-                modernView.setEnabled(!isMonthlySelected);
+            public void handleEvent(BindingEvent be) {
+                ActivityDTO activity = (ActivityDTO) be.getModel();
+                locationTypeCombo.setVisible(activity.getClassicView());
+                frequencyCombo.setVisible(activity.getClassicView());
+                ActivityForm.this.setHeadingText(activity.getClassicView() ?
+                        I18N.CONSTANTS.newActivity() :
+                        I18N.CONSTANTS.newForm());
             }
         });
 
-        RadioGroup radioViewGroup = new RadioGroup();
-        radioViewGroup.add(classicView); // order is important! - true is first button, false is second button
-        radioViewGroup.add(modernView);
-
-        radioViewGroup.setFieldLabel(I18N.CONSTANTS.viewType());
-
-        binding.addFieldBinding(new OnlyValidFieldBinding(radioViewGroup, "classicView"));
-
-        this.add(radioViewGroup);
-        this.add(new LabelField(I18N.CONSTANTS.classicViewExplanation()));
-        this.add(new LabelField(I18N.CONSTANTS.modernViewExplanation()));
-
-        Anchor linkOnExplanation = new Anchor();
-        linkOnExplanation.setTarget("_blank");
-        linkOnExplanation.setHref(NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL);
-        linkOnExplanation.setText(I18N.CONSTANTS.moreAboutView());
-
-        this.add(new AdapterField(linkOnExplanation));
+//        // hack : we represent boolean value with radiobuttons (instead of checkbox)
+//        // therefore radio buttons order is important: true - first button selected, false - second button selected
+//        final Radio classicView = new Radio();
+//        classicView.setBoxLabel(I18N.CONSTANTS.classicView());
+//        classicView.setToolTip(I18N.CONSTANTS.classicViewExplanation());
+//
+//        final Radio modernView = new Radio();
+//        modernView.setBoxLabel(I18N.CONSTANTS.modernView());
+//        modernView.setToolTip(I18N.CONSTANTS.modernViewExplanation());
+//
+//        frequencyCombo.addSelectionChangedListener(new SelectionChangedListener() {
+//            @Override
+//            public void selectionChanged(SelectionChangedEvent se) {
+//                Object value = frequencyCombo.getValue();
+//                boolean isMonthlySelected = value instanceof ModelData && ((ModelData)value).get("value") instanceof Integer &&
+//                        ((ModelData)value).get("value").equals(ActivityFormDTO.REPORT_MONTHLY);
+//                if (isMonthlySelected && modernView.getValue()) {
+//                    classicView.setValue(true);
+//                }
+//                modernView.setEnabled(!isMonthlySelected);
+//            }
+//        });
+//
+//        RadioGroup radioViewGroup = new RadioGroup();
+//        radioViewGroup.add(classicView); // order is important! - true is first button, false is second button
+//        radioViewGroup.add(modernView);
+//
+//        radioViewGroup.setFieldLabel(I18N.CONSTANTS.viewType());
+//
+//        binding.addFieldBinding(new OnlyValidFieldBinding(radioViewGroup, "classicView"));
+//
+//        this.add(radioViewGroup);
+//        this.add(new LabelField(I18N.CONSTANTS.classicViewExplanation()));
+//        this.add(new LabelField(I18N.CONSTANTS.modernViewExplanation()));
+//
+//        Anchor linkOnExplanation = new Anchor();
+//        linkOnExplanation.setTarget("_blank");
+//        linkOnExplanation.setHref(NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL);
+//        linkOnExplanation.setText(I18N.CONSTANTS.moreAboutView());
+//
+//        this.add(new AdapterField(linkOnExplanation));
 
         hideFieldWhenNull(idField);
     }

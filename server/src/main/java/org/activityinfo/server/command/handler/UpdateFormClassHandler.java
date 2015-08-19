@@ -205,7 +205,11 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         } else if (field.getType() instanceof CalculatedFieldType) {
             CalculatedFieldType type = (CalculatedFieldType) field.getType();
             indicator.setType(QuantityType.TYPE_CLASS.getId());
-            indicator.setExpression(type.getExpression().getExpression());
+            if(type.getExpression() == null) {
+                indicator.setExpression(null);
+            } else {
+                indicator.setExpression(type.getExpression().getExpression());
+            }
 
         } else if (field.getType() instanceof BarcodeType) {
             indicator.setType(TextType.TYPE_CLASS.getId());

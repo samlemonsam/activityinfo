@@ -144,7 +144,7 @@ public class SiteRenderer {
                          .append("</td>");
                 } else {
                     groupHtml
-                         .append("<td colspan=2>")
+                         .append("<td colspan='2' class='indicatorValue'>")
                          .append(formatValue(indicator, value))
                          .append("</td>");
                 }

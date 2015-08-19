@@ -27,6 +27,7 @@ import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -133,14 +134,23 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<List<Projection>> query(InstanceQuery query) {
-        return new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria()).apply(query);
+    public Promise<List<Projection>> query(final InstanceQuery query) {
+        Joiner joiner = new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria());
+        if (query.isUniqueValueForGivenColumn()) {
+            // table filter : fetching unique values for given column
+            return joiner.apply(query).join(new ProjectionsByUniqueColumnFilter(query.getFieldPaths().get(0)));
+        }
+        return joiner.apply(query);
     }
 
+    @Override
     public Promise<QueryResult<Projection>> queryProjection(InstanceQuery query) {
         return query(query).then(new InstanceQueryResultAdapter(query));
     }
 
+    public Promise<Void> remove(ResourceId resourceId) {
+        return remove(Collections.singleton(resourceId));
+    }
 
     @Override
     public Promise<Void> remove(Collection<ResourceId> resources) {

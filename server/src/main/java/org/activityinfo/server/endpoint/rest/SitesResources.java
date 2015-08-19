@@ -7,6 +7,9 @@ import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.JsonGenerator;
@@ -16,9 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SitesResources {
 
@@ -68,7 +69,7 @@ public class SitesResources {
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.Activity, activityIds);
         filter.addRestriction(DimensionType.Database, databaseIds);
-
+    
         List<SiteDTO> sites = dispatcher.execute(new GetSites(filter)).getData();
 
         StringWriter writer = new StringWriter();
@@ -170,15 +171,14 @@ public class SitesResources {
         json.writeStartObject();
         json.writeStringField("type", "FeatureCollection");
         json.writeArrayFieldStart("features");
-
+        
         Map<Integer, ActivityFormDTO> forms = Maps.newHashMap();
-
+        
         for (SiteDTO site : sites) {
             if (site.hasLatLong()) {
                 json.writeStartObject();
                 json.writeStringField("type", "Feature");
                 json.writeNumberField("id", site.getId());
-                //                json.writeNumberField("timestamp", site.getTimeEdited());
 
                 ActivityFormDTO form = forms.get(site.getActivityId());
                 if(form == null) {
@@ -206,49 +206,33 @@ public class SitesResources {
                     json.writeStringField("endDate", site.getDate2().toString());
                 }
 
-                final Map<String, Object> indicatorsMap = Maps.newHashMap();
-                final Map<AttributeGroupDTO, Map<String, Object>> attributesGroupMap = Maps.newHashMap();
-
-                // write indicators and attributes
-                for (String propertyName : site.getPropertyNames()) {
-                    if (propertyName.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
-                        Object value = site.get(propertyName);
-                        final int indicatorId = IndicatorDTO.indicatorIdForPropertyName(propertyName);
-                        final IndicatorDTO dto = form.getIndicatorById(indicatorId);
-                        if (value instanceof Number) {
-                            final double doubleValue = ((Number) value).doubleValue();
-                            indicatorsMap.put(dto.getName(), doubleValue);
-                        } else if (value instanceof String || value instanceof LocalDate) {
-                            indicatorsMap.put(dto.getName(), value);
-                        } else if (value instanceof Boolean) {
-                            indicatorsMap.put(dto.getName(), value);
-                        }
-                    } else if (propertyName.startsWith(AttributeDTO.PROPERTY_PREFIX)) {
-                        Object value = site.get(propertyName);
-                        final int attributeId = AttributeDTO.idForPropertyName(propertyName);
-                        for (AttributeGroupDTO attributeGroupDTO : form.getAttributeGroups()) {
-                            final AttributeDTO attributeDTO = attributeGroupDTO.getAttributeById(attributeId);
-                            if (attributeDTO != null) {
-                                if (attributesGroupMap.containsKey(attributeGroupDTO)) {
-                                    final Map<String, Object> map = attributesGroupMap.get(attributeGroupDTO);
-                                    map.put(attributeDTO.getName(), value == Boolean.TRUE);
-                                } else {
-                                    final Map<String, Object> map = Maps.newHashMap();
-                                    map.put(attributeDTO.getName(), value == Boolean.TRUE);
-                                    attributesGroupMap.put(attributeGroupDTO, map);
-                                }
-                                break;
-                            }
-                        }
+                // write indicators
+                json.writeObjectFieldStart("indicators");
+                for (IndicatorDTO indicator : form.getIndicators()) {
+                    Object value = getTypedValue(site, indicator);
+                    if(value instanceof String) {
+                        json.writeStringField(indicator.getName(), (String)value);
+                    } else if(value instanceof Number) {
+                        json.writeNumberField(indicator.getName(), ((Number) value).doubleValue());
                     }
                 }
-
-                // write indicators inside properties
-                Jackson.writeMap(json, "indicators", indicatorsMap);
-
-                // write attribute groups
-                for (Map.Entry<AttributeGroupDTO, Map<String, Object>> entry : attributesGroupMap.entrySet()) {
-                    Jackson.writeMap(json, entry.getKey().getName(), entry.getValue());
+                json.writeEndObject();
+                
+                // write attributes 
+                for (AttributeGroupDTO group : form.getAttributeGroups()) {
+                    Set<String> values = new HashSet<>();
+                    for (AttributeDTO attribute : group.getAttributes()) {
+                        if(site.get(attribute.getPropertyName()) == Boolean.TRUE) {
+                            values.add(attribute.getName());
+                        }
+                    }
+                    if(!values.isEmpty()) {
+                        json.writeObjectFieldStart(group.getName());
+                        for (String value : values) {
+                            json.writeBooleanField(value, true);
+                        }
+                        json.writeEndObject();
+                    }
                 }
 
                 json.writeEndObject();
@@ -265,9 +249,29 @@ public class SitesResources {
                 json.writeEndObject();
             }
         }
+
         json.writeEndArray();
         json.writeEndObject();
         json.close();
+    }
+
+    /**
+     * Returns an indicator value IFF the value matches the declared type of the indicator,
+     * otherwise null.
+     */
+    private Object getTypedValue(SiteDTO site, IndicatorDTO indicator) {
+        Object value = site.get(indicator.getPropertyName());
+        if(indicator.getType() instanceof QuantityType.TypeClass) {
+            if(value instanceof Number) {
+                return value;
+            }
+        } else if(indicator.getType() == TextType.TYPE_CLASS || 
+                  indicator.getType() == NarrativeType.TYPE_CLASS) {
+            if(value instanceof String) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private Set<Integer> getIndicatorIds(SiteDTO site) {

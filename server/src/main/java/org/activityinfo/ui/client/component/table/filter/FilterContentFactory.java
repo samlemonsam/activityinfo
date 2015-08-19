@@ -21,6 +21,8 @@ package org.activityinfo.ui.client.component.table.filter;
  * #L%
  */
 
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
 
@@ -32,7 +34,11 @@ public class FilterContentFactory {
     private FilterContentFactory() {
     }
 
-    public static FilterContent create(InstanceTable table, FieldColumn column) {
-        return new FilterContentString(table, column);
+    public static FilterContent create(FieldColumn column, InstanceTable table) {
+        FieldType type = column.getNode().getField().getType();
+        if (type == LocalDateType.INSTANCE) {
+            return new FilterContentDate(column);
+        }
+        return new FilterContentExistingItems(column, table);
     }
 }

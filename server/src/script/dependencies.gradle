@@ -9,6 +9,7 @@ dependencies {
     compile project(':io:match')
     
     compile project(':store:mysql')
+    gwt project(':ui:icons')
 
     testCompile project(':core:model').sourceSets.test.output
 
@@ -55,7 +56,6 @@ dependencies {
 
     // GWT User Interface Dependencies
     compile libraries.gxt
-    compile libraries.gwt.user
     gwt libraries.gwt.dnd
     gwt libraries.gwt.guice
     gwt libraries.gwt.gson
@@ -76,11 +76,10 @@ dependencies {
     compile libraries.rebar.sync
     
     compile libraries.appengineMetrics
-    compile 'com.bedatadriven.appengine:appengine-hibernate:24'
+    compile 'com.bedatadriven.appengine:appengine-hibernate:25'
 
     gwt libraries.rebar.style
     
-
 
     // Report Rendering
     compile libraries.appengine.export.itext

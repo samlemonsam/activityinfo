@@ -25,6 +25,7 @@ package org.activityinfo.ui.client.widget.legacy;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
+import org.activityinfo.i18n.shared.I18N;
 
 /**
  * ComboBox that wraps primitive values (integers, Strings, etc) with labels.
@@ -78,6 +79,7 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
     }
 
     private ListStore<Wrapper<T>> myStore;
+    private boolean isNoneAdded = false;
 
     public MappingComboBox() {
         super();
@@ -98,10 +100,23 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
 
     public Wrapper wrap(T value) {
         if (value == null) {
-            return null;
+            if (isNoneAdded) {
+                return new Wrapper(null, I18N.CONSTANTS.none());
+            } else {
+                return null;
+            }
         } else {
             return myStore.findModel("value", value);
         }
+    }
+
+    public void addNone() {
+        add(null, I18N.CONSTANTS.none());
+        isNoneAdded = true;
+    }
+
+    public boolean isNoneAdded() {
+        return isNoneAdded;
     }
 
     public void setOriginalMappedValue(T value) {

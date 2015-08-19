@@ -27,13 +27,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
-import org.activityinfo.ui.client.widget.ConfirmDialog;
 
 /**
  * @author yuriyz on 7/8/14.
@@ -81,11 +79,6 @@ public class WidgetContainerPanel {
                 WidgetContainerPanel.this.onClick();
             }
         });
-    }
-
-    @UiHandler("removeButton")
-    public void onRemove(ClickEvent clickEvent) {
-        ConfirmDialog.confirm(new DeleteFormFieldAction(focusPanel, formDesigner));
     }
 
     public Button getRemoveButton() {

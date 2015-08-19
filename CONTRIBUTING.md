@@ -1,102 +1,100 @@
 
-# Contributor's Guide
- 
-ActivityInfo is an open-source web application with a single-page javascript interface
-built using Java and the Google Web Toolkit, and designed to run on the Google AppEngine
-Platform. 
+# Contributing to ActivityInfo
+
+## Fork the project
+
+Contributes to the ActivityInfo source are made through pull requests on GitHub. To submit a pull request:
+
+1. [Create a GitHub account](https://github.com/join) if you don't have one already
+2. Fork the [bedatadriven/activityinfo](https://github.com/bedatadriven/activityinfo) repository
+
+If you're not familiar with Git or GitHub, read GitHub's [Forking Projects Guide](https://guides.github.com/activities/forking/).
+
+Checkout your forked sources to a local directory. We'll refer to this directory as $ACTIVITYINFO for the rest
+of the document.
+
+## Setting up your Development Environment
+
+The next step is to set up an environment on your own machine where you 
+can make changes to the source code, test those changes quickly, and run automated tests to confirm that you haven't
+broken anything.
+
+### Installing Java
+
+You will need a recent version of a Java Development Kit (JDK) running on your local machine. You can download
+this from [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+
+### Installing MySQL
+
+ActivityInfo uses MySql 5.5 for storage, and you will need a locally running database to run 
+and test the application locally.
+
+Read the MySql documentation on [setting up MySql](https://dev.mysql.com/doc/refman/5.5/en/installing.html) on your
+local machine.
+
+### Defining Gradle Properties
+
+ActivityInfo uses Gradle for building, testing and deployment. Gradle needs certain information about your local
+environment in order to run, and these properties are stored in your local gradle.properties file, which you can find:
+
+* On Linux and OS X systems: /home/username/.gradle/gradle.properties
+* On Windows: C:\Users\username\.gradle\gradle.properties
+
+You should create or add to this text file the following lines:
 
 
-## Workflow
+    localMySqlUsername=root
+    localMySqlPassword=<the password you set when installing mysql>
 
-All development is planned through our [JIRA project](https://bedatadriven.atlassian.net/secure/RapidBoard.jspa?rapidView=9) and submitted as pull requests to our 
-[GitHub Repository](https://github.com/bedatadriven/activityinfo).
+See the [$ACTIVITYINFO/gradle.properties](gradle.properties) file for other properties that can be changed.
 
-## Setting up Development Environment
+### Running Gradle
 
-Contributing to AI development requires the following tools installed on your development
-machine:
+To confirm that your environment is set up correctly, open a terminal in your $ACTIVITYINFO directory and run:
 
-* [Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) 7 or 8 
-* [MySQL Server 5.5](https://dev.mysql.com/downloads/mysql/5.5.html)
+    $ ./gradlew test
 
+If you are using Windows, open the Command Prompt and run:
 
-### Gradle
+    > gradlew.bat test
+    
+Gradle should complete with the message:
 
-ActivityInfo uses the [Gradle](https://gradle.org) build automation tool to manage the 
-building, testing, and deployment of ActivityInfo.
+    BUILD SUCCESSFUL
+    
+## Running ActivityInfo in Development Mode
 
-Gradle is invoked from the command line using a wrapper that is included in the source
-repository. To invoke a gradle task, open a Terminal and change to the root of the project,
-and then enter:
+ActivityInfo's user interface is built using [GWT](http://gwtproject.org), a toolchain which compiles Java
+source code to Javascript, which then runs in the browser as a 
+[single-page application](https://en.wikipedia.org/wiki/Single-page_application).
 
-```
-./gradlew --tasks
-```
+GWT provides a [development mode](http://www.gwtproject.org/doc/latest/DevGuideCompilingAndDebugging.html)
+that allows you to interactively make changes to the source code, and then refresh
+the browser to see the result.
 
-This will display a list of build, test, and deployment tasks.
+*Note:* we are still using the "classic" GWT Dev Mode which requires a browser plugin to function. This browser
+plugin no longer works on the most recent versions of most browsers; we recommend installing a local copy of
+[FireFox 24.2.0esr](https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/24.2.0esr/) and following this 
+[tutorial](https://openbpm.wordpress.com/2014/05/31/getting-gwt-plugin-to-work-on-firefox-on-ubuntu-14-04/) to setup
+a seperate FireFox profile for testing ActivityInfo. We expect to transition to GWT 2.7 and the new "Super" Dev Mode 
+before the end of 2015.
 
-### MySQL
+The very first time you run AI locally, you'll need to create an `activityinfo_dev` database by running:
 
+    $ ./gradlew setupDevDatabase
+    
+This will create the required MySQL tables and populate the database with a bare minimum of geographic reference
+data to run AI.
 
-Gradle will create the MySQL databases needed for testing and development automatically,
-but you must provide the username and password gradle will use to connect to your local
-MySQL server. 
+You can start development mode from Gradle by running:
 
-Since these properties are developer-specific, they should be set in your local
-[gradle.properties](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties), for example:
+    $ ./gradlew appengineDevMode
+    
+And then navigating to [http://127.0.0.1:8080/login?gwt.codesvr=127.0.0.1:9997](http://127.0.0.1:8080/login?gwt.codesvr=127.0.0.1:9997)
+with Firefox 24. 
 
-```
-localMySqlUsername=root
-localMySqlPassword=mysecretpassword
-```
+You can log in with the account `test@test.org` and any password.
 
-### Verifying your setup
-
-Double-check that you have Java 1.7 installed:
-
-```
-$ java -version
-java version "1.7.0_80"
-Java(TM) SE Runtime Environment (build 1.7.0_80-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 24.80-b11, mixed mode)
-```
-
-And then run the unit tests:
-
-```
-$ ./gradlew test
-```
-
-### Configuring IntelliJ
-
-ActivityInfo is primarily developed using the IntelliJ IDE from JetBrains, who have
-graciously provided the project with an open source license for their IDE. Active contributors
-to AI may request a license key from [Alex Bertram](mailto:alex@bedatadriven.com).
-
-It should certainly be possible to use other IDEs, but we only provide instructions for
-IntelliJ at this time.
-
-Before opening IntelliJ, you can generate the IntelliJ project file by running:
-
-```
-./gradlew idea
-```
-
-This will create an `activityinfo.ipr` file that you can open with IntelliJ.
-
-## Running Locally
-
-Invoking
-
-```
-$ ./gradlew appengineRun
-```
-
-from the command line will fully build the application, initialize a local database called `activityinfo_dev` if
-one does not exist, and then start the AppEngine Development Server.
-
-By default, the application will serve from http://localhost:8080/, but you can change the port by setting the
-`devServerPort` Gradle property.
 
 
 

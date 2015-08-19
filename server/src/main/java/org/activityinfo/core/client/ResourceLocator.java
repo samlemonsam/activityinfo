@@ -47,6 +47,8 @@ public interface ResourceLocator extends AsyncFormClassProvider {
 
     Promise<List<Projection>> query(InstanceQuery query);
 
+    Promise<Void> remove(ResourceId resourceId);
+
     Promise<Void> remove(Collection<ResourceId> resources);
 
     Promise<List<FormInstance>> queryInstances(Set<ResourceId> resourceIds);

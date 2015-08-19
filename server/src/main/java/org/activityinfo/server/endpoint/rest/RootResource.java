@@ -186,4 +186,9 @@ public class RootResource {
             }
         });
     }
+
+    @Path("/users")
+    public UsersResource getUsers() {
+        return new UsersResource(config, entityManager);
+    }
 }

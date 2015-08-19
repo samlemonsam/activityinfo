@@ -43,6 +43,11 @@ public class NarrativeValue implements FieldValue, IsRecord, HasStringValue {
         return text;
     }
 
+    @Override
+    public String toString() {
+        return text;
+    }
+
     public static FieldValue fromRecord(Record record) {
         return valueOf(record.getString("text"));
     }

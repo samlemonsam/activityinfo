@@ -23,12 +23,13 @@ package org.activityinfo.ui.client.page.dashboard;
  */
 
 import com.extjs.gxt.ui.client.widget.custom.Portal;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
-import org.activityinfo.legacy.shared.command.GetDashboard;
-import org.activityinfo.legacy.shared.command.result.DashboardResult;
-import org.activityinfo.legacy.shared.model.ReportDTO;
+import org.activityinfo.legacy.shared.command.GetReports;
+import org.activityinfo.legacy.shared.command.result.ReportsResult;
+import org.activityinfo.legacy.shared.model.ReportMetadataDTO;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.Page;
@@ -66,14 +67,20 @@ public class DashboardPage extends Portal implements Page {
     }
 
     private void loadDashboard() {
-        dispatcher.execute(new GetDashboard(), new SuccessCallback<DashboardResult>() {
+        dispatcher.execute(new GetReports(), new SuccessCallback<ReportsResult>() {
             @Override
-            public void onSuccess(DashboardResult result) {
-                List<ReportDTO> reports = result.getReportList();
-                if (reports.isEmpty()) {
+            public void onSuccess(ReportsResult result) {
+                List<ReportMetadataDTO> dashboardReports = Lists.newArrayList();
+                for (ReportMetadataDTO report : result.getData()) {
+                    if(report.isDashboard()) {
+                        dashboardReports.add(report);
+                    }
+                }
+                
+                if (dashboardReports.isEmpty()) {
                     add(new ChooseReportsPortlet(), 0);
                 } else {
-                    for (ReportDTO report  : reports) {
+                    for (ReportMetadataDTO report  : dashboardReports) {
                         add(new ReportPortlet(dispatcher, eventBus, report), 0);
                     }
                 }

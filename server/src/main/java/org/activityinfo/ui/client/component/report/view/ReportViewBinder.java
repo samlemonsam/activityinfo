@@ -23,6 +23,8 @@ package org.activityinfo.ui.client.component.report.view;
  */
 
 import com.extjs.gxt.ui.client.widget.Component;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -50,6 +52,8 @@ public class ReportViewBinder<C extends Content, R extends ReportElement<C>> imp
     private Timer updateTimer;
 
     private R elementModel;
+
+    private GenerateElement latestRequest;
 
     public static <C extends Content, R extends ReportElement<C>> ReportViewBinder<C, R> create(EventBus eventBus,
                                                                                                 Dispatcher dispatcher,
@@ -95,20 +99,33 @@ public class ReportViewBinder<C extends Content, R extends ReportElement<C>> imp
     }
 
     private void load() {
+        
         if (!elementModel.getFilter().getRestrictions(DimensionType.Indicator).isEmpty()) {
-            GenerateElement<C> request = new GenerateElement<C>(elementModel);
 
+            final GenerateElement<C> request = new GenerateElement<C>(elementModel);
+            
+            latestRequest = request;
+
+            view.loading();
             dispatcher.execute(request, new AsyncCallback<C>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
                     Log.error(caught.getMessage(), caught);
+                    view.onFailure(caught, new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            load();
+                        }
+                    });
                 }
 
                 @Override
                 public void onSuccess(C result) {
-                    elementModel.setContent(result);
-                    view.show(elementModel);
+                    if(request == latestRequest) {
+                        elementModel.setContent(result);
+                        view.show(elementModel);
+                    }
                 }
             });
         }

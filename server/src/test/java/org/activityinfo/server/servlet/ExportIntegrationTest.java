@@ -22,7 +22,6 @@ package org.activityinfo.server.servlet;
  * #L%
  */
 
-import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
@@ -31,14 +30,19 @@ import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.DTOs;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.export.DbUserExport;
 import org.activityinfo.server.endpoint.export.SiteExporter;
+import org.activityinfo.server.endpoint.export.TaskContext;
+import org.activityinfo.server.report.NullStorageProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.FileOutputStream;
 
 @RunWith(InjectionSupport.class)
@@ -54,16 +58,20 @@ public class ExportIntegrationTest extends CommandTestCase2 {
 
         SchemaDTO schema = execute(new GetSchema());
 
-        SiteExporter export = new SiteExporter(getDispatcherSync());
+        TaskContext context = new TaskContext(getDispatcherSync(), new NullStorageProvider(), "XYZ");
+        SiteExporter export = new SiteExporter(context);
         for (UserDatabaseDTO db : schema.getDatabases()) {
             for (ActivityDTO activity : db.getActivities()) {
                 export.export(execute(new GetActivityForm(activity)), new Filter());
             }
         }
 
-        try(FileOutputStream fos = TestOutput.open(getClass(), "ExportTest.xls")) {
-            export.getBook().write(fos);
-        }
+        File outputDir = new File("target/report-test/");
+        outputDir.mkdirs();
+
+        FileOutputStream fos = new FileOutputStream("target/report-test/ExportTest.xls");
+        export.getBook().write(fos);
+        fos.close();
     }
 
     @Test
@@ -72,8 +80,12 @@ public class ExportIntegrationTest extends CommandTestCase2 {
         DbUserExport export = new DbUserExport(DTOs.rrmUsers().getData());
         export.createSheet();
 
-        try(FileOutputStream fos = TestOutput.open(getClass(), "DbUserExportTest.xls")) {
-            export.getBook().write(fos);
-        }
+        File outputDir = new File("target/report-test/");
+        outputDir.mkdirs();
+
+        FileOutputStream fos = new FileOutputStream(
+                "target/report-test/DbUserExportTest.xls");
+        export.getBook().write(fos);
+        fos.close();
     }
 }

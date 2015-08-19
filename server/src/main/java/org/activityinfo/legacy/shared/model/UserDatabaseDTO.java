@@ -310,7 +310,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * @return the id of the Partner to which the client belongs
      */
     public int getMyPartnerId() {
-        return (Integer) get("myPartnerId");
+        return hasPartnerId() ? (Integer) get("myPartnerId") : 0;
     }
 
     /**

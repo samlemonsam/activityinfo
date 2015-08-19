@@ -1,0 +1,51 @@
+
+plugins {
+    id "com.moowork.grunt" version "0.10"
+}
+
+apply plugin: 'com.moowork.grunt'
+apply plugin: 'gwt-base'
+
+dependencies {
+    compile project(':core:promises')
+
+    gwt     libraries.gwt.user
+}
+
+node {
+    // Version of node to use.
+    version = '0.10.25'
+
+    // Enabled the automatic download. False is the default (for now).
+    download = true
+}
+
+grunt {
+    // Set the directory where Gruntfile.js should be found
+    workDir = file("${project.projectDir}")
+
+    // Whether colors should output on the terminal
+    colors = false
+
+    // Whether output from Grunt should be buffered - useful when running tasks in parallel
+    bufferOutput = false
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from "${buildDir}/fonts"
+}
+
+
+// makes sure on each build that grunt is installed
+grunt_build.dependsOn 'installGrunt'
+
+// processes your package.json before running grunt build
+grunt_build.dependsOn 'npmInstall'
+
+jar.dependsOn grunt_build
+
+grunt_build.inputs.dir "${projectDir}/src/main/svg"
+grunt_build.inputs.dir "${projectDir}/src/main/template"
+grunt_dist.outputs.dir "${buildDir}/fonts"

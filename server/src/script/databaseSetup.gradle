@@ -21,8 +21,8 @@ task configureDatabase(type: org.activityinfo.gcloud.FetchCloudSqlConfiguration)
 configureDatabase.onlyIf { project.hasProperty('env') }
 
 
-task setupDatabase(type: MySqlSetupTask) {
-    description = "Creates and populates a database called 'activityinfo' locally for development"
+task setupDevDatabase(type: MySqlSetupTask) {
+    description = "Creates and populates a database called 'activityinfo_dev' locally for development"
     dropDatabase = true
     database = mysql.localDev
     scripts = setupScripts

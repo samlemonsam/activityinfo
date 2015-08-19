@@ -34,6 +34,7 @@ import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
@@ -87,7 +88,23 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
     }
 
     @Override
+    public void loading() {
+        if(isRendered()) {
+            el().mask();
+        }
+    }
+
+    @Override
+    public void onFailure(Throwable caught, ClickHandler retryCallback) {
+        ReportViewRetrier.onFailure(this, caught, retryCallback);
+    }
+
+    @Override
     public void show(final PivotReportElement element) {
+        if(isRendered()) {
+            el().unmask();
+        }
+
         if (grid != null) {
             removeAll();
         }

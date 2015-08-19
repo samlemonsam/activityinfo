@@ -30,10 +30,17 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.HasCriteria;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.util.GwtUtil;
+import org.activityinfo.ui.client.util.Rectangle;
+import org.activityinfo.ui.client.widget.Button;
+import org.activityinfo.ui.client.widget.DisplayWidget;
+import org.activityinfo.ui.client.widget.LoadingPanel;
 
 /**
  * @author yuriyz on 4/3/14.
@@ -47,21 +54,22 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     private final InstanceTable table;
     private final FieldColumn column;
-    private final FilterContent filterContent;
+    private FilterContent filterContent;
 
     @UiField
     PopupPanel popup;
     @UiField
-    HTMLPanel contentContainer;
+    LoadingPanel loadingPanel;
+    @UiField
+    Button okButton;
 
-    public FilterPanel(InstanceTable table, FieldColumn column) {
+    public FilterPanel(final InstanceTable table, final FieldColumn column) {
         this.table = table;
         this.column = column;
+
+        FilterDataGridResources.INSTANCE.dataGridStyle().ensureInjected();
+
         initWidget(uiBinder.createAndBindUi(this));
-        filterContent = FilterContentFactory.create(table, column);
-        if (filterContent != null) { // we may have null for unsupported types
-            contentContainer.add(filterContent);
-        }
     }
 
     @Override
@@ -74,8 +82,44 @@ public class FilterPanel extends Composite implements HasCriteria {
             @Override
             public void execute() {
                 popup.setPopupPositionAndShow(positionCallback);
+
+                forcePopupToBeVisible();
+
+                filterContent = FilterContentFactory.create(column, table);
+                loadingPanel.setDisplayWidget(new DisplayWidget() {
+                    @Override
+                    public Promise<Void> show(Object value) {
+                        return Promise.done();
+                    }
+
+                    @Override
+                    public Widget asWidget() {
+                        return (Widget) filterContent;
+                    }
+                });
+
+                loadingPanel.showWithoutLoad();
             }
         });
+    }
+
+    private void forcePopupToBeVisible() {
+        final Rectangle bsContainerRectangle = GwtUtil.getBsContainerRectangle(okButton.getElement());
+        final Rectangle elementRectangle = GwtUtil.getRectangle(okButton.getElement());
+
+        //GWT.log("element: " + elementRectangle + ", bs container: " + bsContainerRectangle);
+
+        boolean isInViewport = bsContainerRectangle.has(elementRectangle);
+
+        if (!isInViewport) {
+            popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                @Override
+                public void setPosition(int offsetWidth, int offsetHeight) {
+                    int bottomDifference = -(bsContainerRectangle.getBottom() - elementRectangle.getBottom());
+                    popup.setPopupPosition(popup.getAbsoluteLeft(), popup.getPopupTop() - bottomDifference);
+                }
+            });
+        }
     }
 
     public PopupPanel getPopup() {
@@ -84,6 +128,9 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     @UiHandler("clearButton")
     public void onClear(ClickEvent event) {
+        if (filterContent != null) { // may be null in case user is fast enough to click button before items loaded
+            filterContent.clear();
+        }
         column.setCriteria(null);
         table.getTable().redrawHeaders();
         table.reload();

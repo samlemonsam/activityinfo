@@ -8,6 +8,7 @@ import org.activityinfo.service.DeploymentConfiguration;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -23,13 +24,6 @@ public class UsersResource {
 
     public static final String USER_API_ENABLED = "user.api.enabled";
 
-    public static class NewUser {
-        private String email;
-        private String name;
-        private String password;
-        private String locale;
-    }
-
     private DeploymentConfiguration deploymentConfiguration;
     private Provider<EntityManager> entityManager;
 
@@ -40,20 +34,25 @@ public class UsersResource {
     }
 
     private boolean isApiEnabled() {
-        return "true".equals(deploymentConfiguration.getProperty(USER_API_ENABLED));
+        return DeploymentEnvironment.isAppEngineDevelopment() ||
+                "true".equals(deploymentConfiguration.getProperty(USER_API_ENABLED));
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response createUser(NewUser newUser) {
+    public Response createUser(
+            @FormParam("email") String email,
+            @FormParam("name") String name, 
+            @FormParam("password") String password,
+            @FormParam("locale") String locale) {
 
-        if(DeploymentEnvironment.isAppEngineDevelopment() && !isApiEnabled()) {
+        if(!isApiEnabled()) {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("User API is disabled.").build();
         }
 
-        if(Strings.isNullOrEmpty(newUser.email) ||
-            Strings.isNullOrEmpty(newUser.name) ||
-            Strings.isNullOrEmpty(newUser.password)) {
+        if(Strings.isNullOrEmpty(email) ||
+            Strings.isNullOrEmpty(name) ||
+            Strings.isNullOrEmpty(password)) {
            
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("The email, name, and password properties are required.")
@@ -62,19 +61,22 @@ public class UsersResource {
 
         User user = new User();
         user.setDateCreated(new Date());
-        user.setEmail(newUser.email);
+        user.setName(name);
+        user.setEmail(email);
         user.setEmailNotification(false);
-        user.changePassword(newUser.password);
+        user.changePassword(password);
         
-        if(Strings.isNullOrEmpty(newUser.locale)) {
+        if(Strings.isNullOrEmpty(locale)) {
             user.setLocale("en");
-        } else if("en".equals(newUser.locale) || "fr".equals(newUser.locale)) {
-            user.setLocale(newUser.locale);
+        } else if("en".equals(locale) || "fr".equals(locale)) {
+            user.setLocale(locale);
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid locale").build();
         }
         
+        entityManager.get().getTransaction().begin();
         entityManager.get().persist(user);
+        entityManager.get().getTransaction().commit();
         
         return Response.status(Response.Status.CREATED).build();
     }

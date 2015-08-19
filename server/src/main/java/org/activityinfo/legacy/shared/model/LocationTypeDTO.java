@@ -76,6 +76,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("id", id);
     }
 
+    @Override
     @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public int getId() {
@@ -91,6 +92,7 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("name", value);
     }
 
+    @Override
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public String getName() {
         return get("name");

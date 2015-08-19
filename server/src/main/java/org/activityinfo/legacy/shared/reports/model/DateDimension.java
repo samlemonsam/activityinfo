@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.reports.model;
  */
 
 import org.activityinfo.legacy.shared.command.DimensionType;
+import org.activityinfo.model.date.DateUnit;
 
 /**
  * Models a data dimension that can be grouped by week, month, quarter, year,

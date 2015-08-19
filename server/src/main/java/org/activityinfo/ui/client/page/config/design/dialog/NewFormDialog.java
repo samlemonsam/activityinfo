@@ -68,18 +68,6 @@ public class NewFormDialog {
                 validate();
             }
         });
-        content.getFormDesigner().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validate();
-            }
-        });
-        content.getClassic().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validate();
-            }
-        });
         validate();
     }
 
@@ -93,12 +81,11 @@ public class NewFormDialog {
     }
 
     public ViewType getViewType() {
-        if (content.getClassic().getValue()) {
-            return ViewType.CLASSIC;
-        } else if (content.getFormDesigner().getValue()) {
+        if (content.getNewFormLayout().getValue()) {
             return ViewType.NEW_FORM_DESIGNER;
+        } else {
+            return ViewType.CLASSIC;
         }
-        return null;
     }
 
     public NewFormDialog show() {

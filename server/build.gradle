@@ -36,6 +36,12 @@ gwt {
     }
 }
 
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.gwt ]
+    }
+}
+
 appengine {
     downloadSdk = true
     
@@ -71,10 +77,32 @@ test {
             showStandardStreams = false
             events = ['failed']
         }
+        
+        // still have a few tests writing to maven 'target' dir
+        project.file('target').mkdirs()
+    }
+}
+
+compileJava {
+    
+    doLast {
+        ant.taskdef(name: 'hibernateInstrumentation',
+                classpath: project.sourceSets.main.compileClasspath.asPath,
+                classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask') {
+
+        }
+        
+        ant.hibernateInstrumentation() {
+            fileset(
+                    dir: "${project.buildDir}/classes/main",
+                    includes: 'org/activityinfo/server/database/hibernate/entity/*.class'
+            )
+        }
     }
 }
 
 processResources {
+    inputs.property "project.version", project.version.toString()
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
             .replace('$[git.commit.id]', commitId)
@@ -89,6 +117,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     appCacheDownloadSizeLimit "2000kb"
 }
 
+tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 tasks.warTemplate.enabled = false
 
@@ -152,8 +181,10 @@ task deployBetaApi(type: com.google.appengine.task.appcfg.UpdateTask) {
 
 }
 
+
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"
+    dependsOn appengineDownloadSdk
 
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true

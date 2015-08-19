@@ -13,7 +13,7 @@ import java.util.List;
 public class CheckboxTemplate implements FieldTemplate {
     @Override
     public String getLabel() {
-        return I18N.CONSTANTS.checkboxes();
+        return I18N.CONSTANTS.multipleSelection();
     }
 
     @Override

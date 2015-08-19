@@ -68,11 +68,13 @@ public class AppBar extends Composite {
         return sectionTabStrip;
     }
 
-    @UiHandler("logo") void handleLogoClick(ClickEvent e) {
+    @UiHandler("logo") 
+    void handleLogoClick(ClickEvent e) {
         Window.open("http://about.activityinfo.org/", "_blank", null);
     }
 
-    @UiHandler("settingsButton") void handleSettingsClick(ClickEvent e) {
+    @UiHandler("settingsButton") 
+    void handleSettingsClick(ClickEvent e) {
         if (settingsPopup == null) {
             settingsPopup = new SettingsPopup(eventBus, offlineController);
         }
@@ -80,4 +82,8 @@ public class AppBar extends Composite {
         settingsPopup.show();
     }
 
+    @UiHandler("helpButton")
+    void helpClick(ClickEvent e) {
+        Window.open("http://help.activityinfo.org", "_blank", null);
+    }
 }

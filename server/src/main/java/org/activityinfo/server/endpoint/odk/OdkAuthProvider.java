@@ -11,8 +11,11 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.logging.Logger;
 
 public class OdkAuthProvider implements Provider<AuthenticatedUser> {
+
+    private static final Logger LOGGER = Logger.getLogger(OdkAuthProvider.class.getName());
 
     public static final String DEBUG_USER_ID = "odk.debug.authorization.userid";
 
@@ -57,9 +60,24 @@ public class OdkAuthProvider implements Provider<AuthenticatedUser> {
                 }
             }
             // otherwise ask for (basic) authentication
-            throw new WebApplicationException(Response
-                    .status(401)
-                    .header("WWW-Authenticate", "Basic realm=\"Activityinfo\"").build());
+            // ODK supports two forms of authentication: BASIC and DIGEST
+            // We do not support DIGEST authentication because it would require storing passwords in plaintext or
+            // with a weak level of hashing.
+            // We support BASIC authentication, but ODK (correctly) will refuse to send passwords in plaintext over a
+            // non-https connection. This is desirable in production, but it makes it difficult to test against
+            // the local development server which does not support https. As a workaround, we will ONLY support a dummy
+            // form of digest authentication when running in development mode.
+            if(DeploymentEnvironment.isAppEngineDevelopment()) {
+                LOGGER.info("Requested digest authentication for ODK testing purposes.");
+                throw new WebApplicationException(Response
+                        .status(401)
+                        .header("WWW-Authenticate", 
+                                "Digest realm=\"Activityinfo\" qop=\"auth\" nonce=\"XYZ\" opaque=\"opaque\"").build());
+            } else {
+                throw new WebApplicationException(Response
+                        .status(401)
+                        .header("WWW-Authenticate", "Basic realm=\"Activityinfo\"").build());
+            }
         } else {
             // authorized user, continue
             return authProvider.get();

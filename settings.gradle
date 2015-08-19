@@ -10,6 +10,7 @@ include 'store:transactor'
 include 'geoadmin'
 include 'server'
 include 'io:xform'
+include 'ui:icons'
 include 'io:match'
 include 'tests:acceptance'
 

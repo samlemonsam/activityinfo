@@ -24,10 +24,9 @@ package org.activityinfo.server.digest;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import org.activityinfo.TestOutput;
+import org.activityinfo.server.generated.StorageProvider;
+import org.activityinfo.server.generated.StorageProviderStub;
 import org.activityinfo.server.geo.TestGeometry;
-import org.activityinfo.server.report.output.LocalStorageProvider;
-import org.activityinfo.server.report.output.StorageProvider;
 import org.activityinfo.server.report.renderer.image.ImageMapRenderer;
 
 public class TestDigestModule extends AbstractModule {
@@ -43,6 +42,6 @@ public class TestDigestModule extends AbstractModule {
 
     @Provides
     public StorageProvider provideImageStorageProvider() {
-        return new LocalStorageProvider(TestOutput.getBasePath());
+        return new StorageProviderStub("target");
     }
 }

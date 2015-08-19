@@ -6,7 +6,7 @@ ext {
     rebarVersion = '2.4.4'
     gwtVersion = '2.6.0-rc3'
     jerseyVersion = '1.17'
-    gaeVersion = '1.9.6'
+    gaeVersion = '1.9.24'
     jacksonVersion = '1.9.2'
     cucumberVersion = '1.2.2'
     libraries = [
@@ -20,6 +20,7 @@ ext {
         appengine: [
             api:            "com.google.appengine:appengine-api-1.0-sdk:${gaeVersion}",
             sdk:            "com.google.appengine:appengine-java-sdk:${gaeVersion}",
+            sdkTools:       "com.google.appengine:appengine-tools-sdk:${gaeVersion}",
             gcs:            "com.google.appengine.tools:appengine-gcs-client:0.4.4",  
             testing:        "com.google.appengine:appengine-testing:${gaeVersion}",
             stubs:          "com.google.appengine:appengine-api-stubs:${gaeVersion}",
@@ -148,6 +149,11 @@ subprojects {
         exclude group:'xml-apis', module: 'xml-apis'
         exclude module: 'guava-jdk5'
         
+        //  javax.servlet:servlet-api:2.5 is not generically typed
+        // use the implementation provided by gwt-servlet
+        exclude group: 'javax.servlet', module: 'servlet-api'
+
+
         // Exclude CGLIB which is actually repackaged by guice
         exclude group: 'org.sonatype.sisu.inject', module:'cglib'
         
@@ -170,6 +176,8 @@ subprojects {
                     details.useVersion jacksonVersion
                 } else if(details.requested.group == 'com.google.appengine') {
                     details.useVersion gaeVersion
+                } else if(details.requested.group == 'org.apache.poi' && details.requested.name == 'poi') {
+                    details.useVersion '3.12-beta1'
                 }
             }
         }

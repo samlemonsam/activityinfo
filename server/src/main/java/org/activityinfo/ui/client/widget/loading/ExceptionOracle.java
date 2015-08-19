@@ -1,8 +1,10 @@
 package org.activityinfo.ui.client.widget.loading;
 
+import com.google.gwt.http.client.RequestTimeoutException;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.style.Icons;
+import org.activityinfo.ui.icons.Icons;
 
 /**
  * Provides user-intelligible information about exceptions
@@ -16,6 +18,19 @@ public class ExceptionOracle {
     }
 
     private static boolean isConnectionFailure(Throwable caught) {
+        if(caught instanceof StatusCodeException) {
+            // Status code 0 indicates that the xhr error flag is set,
+            // or loading has been canceled by the browser
+            // http://stackoverflow.com/questions/3825581/does-an-http-status-code-of-0-have-any-meaning/26451773#26451773
+            StatusCodeException sce = (StatusCodeException) caught;
+            if(sce.getStatusCode() == 0) {
+                return true;
+            }
+        } else if(caught instanceof RequestTimeoutException) {
+            // if the *browser* is timing out the HTTP connection, then it is likely
+            // a network failure as AppEngine should time the request out long before this
+            return true;
+        }
         return false;
     }
 

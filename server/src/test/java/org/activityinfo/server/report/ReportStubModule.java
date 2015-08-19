@@ -24,11 +24,10 @@ package org.activityinfo.server.report;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import org.activityinfo.TestOutput;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.server.generated.StorageProvider;
+import org.activityinfo.server.generated.StorageProviderStub;
 import org.activityinfo.server.report.generator.MapIconPath;
-import org.activityinfo.server.report.output.LocalStorageProvider;
-import org.activityinfo.server.report.output.StorageProvider;
 
 public class ReportStubModule extends AbstractModule {
 
@@ -41,7 +40,7 @@ public class ReportStubModule extends AbstractModule {
 
     @Provides
     public StorageProvider provideImageStorageProvider() {
-        return new LocalStorageProvider(TestOutput.getDir(getClass()).getAbsolutePath());
+        return new StorageProviderStub("target");
     }
 
     @Provides

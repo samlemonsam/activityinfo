@@ -24,13 +24,13 @@ package org.activityinfo.ui.client.component.table.action;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
 import org.activityinfo.ui.client.component.importDialog.ImportResultEvent;
 import org.activityinfo.ui.client.component.table.InstanceTable;
-import org.activityinfo.ui.client.style.Icons;
+import org.activityinfo.ui.icons.Icons;
 
 /**
  * @author yuriyz on 4/28/14.

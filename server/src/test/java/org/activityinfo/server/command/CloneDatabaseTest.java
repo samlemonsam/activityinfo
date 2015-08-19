@@ -143,8 +143,15 @@ public class CloneDatabaseTest extends CommandTestCase2 {
         assertFormClassesCloned(sourceDb, targetDb);
 
         if (cloneDatabase.isCopyPartners()) {
-            assertPropertyForEach(sourceDb.getPartners(), targetDb.getPartners(),
-                    "name", "fullName");
+            for (PartnerDTO sourceItem : sourceDb.getPartners()) {
+                String name = sourceItem.get("name");
+                if (name.equals("Default")) {
+                    continue;
+                }
+                PartnerDTO targetTarget = entityByName(targetDb.getPartners(), name);
+
+                assertProperties(sourceItem, targetTarget, "name", "fullName");
+            }
         }
         if (cloneDatabase.isCopyUserPermissions()) {
             // todo

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Site;
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
 public class PermissionOracle {
 
     private final Provider<EntityManager> em;
-    
+
     private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
 
     @Inject
@@ -111,7 +112,7 @@ public class PermissionOracle {
                     " site %d", user.getId(), site.getId()));
         }
     }
-    
+
     public boolean isEditSiteAllowed(User user, Activity activity, Partner partner) {
         UserPermission permission = getPermissionByUser(activity.getDatabase(), user);
         if(permission.isAllowEditAll()) {
@@ -128,14 +129,14 @@ public class PermissionOracle {
                     " sites in activity %d and partner %d", user.getId(), activity.getId(), partner.getId()));
         }
     }
-    
+
     /**
      * Returns true if the given user is allowed to edit the values of the
      * given site.
      */
     public boolean isViewAllowed(Site site, User user) {
 
-        if(site.getActivity().getPublished() == 1) {
+        if(site.getActivity().getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
             return true;
         }
 

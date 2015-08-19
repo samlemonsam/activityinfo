@@ -51,7 +51,7 @@ public class ReadLockedPeriodTypeColumn extends ColumnConfig {
                                  Grid<LockedPeriodDTO> grid) {
 
                 if (model.getParent() instanceof IsActivityDTO) {
-                    return IconImageBundle.ICONS.activity().getHTML();
+                    return IconImageBundle.ICONS.form().getHTML();
                 }
 
                 if (model.getParent() instanceof UserDatabaseDTO) {
