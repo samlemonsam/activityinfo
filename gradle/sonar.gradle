@@ -20,6 +20,7 @@ subprojects {
             property "sonar.genericcoverage.itReportPaths", "$buildDir/coverage-at.xml"
         }
     }
+    
 }
 
 buildscript {
@@ -34,5 +35,15 @@ repositories {
 
 // Ensure that we run the acceptanceTest with coverage enabled
 // to ensure that we have the coverage data to provide sonar
-tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
+//tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
 
+tasks.sonarRunner.doFirst {
+    logger.info("sonar properties: ${sonarProperties}");
+
+}
+
+//
+//task sonarPullRequest(type: SonarRunner) {
+//    sonarProperties.put "sonar.projectName", "ActivityInfo"
+//    sonarProperties.put "sonar."
+//}

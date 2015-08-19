@@ -34,7 +34,7 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
     }
 
     @Override
-    public void filterOn(ResourceId resourceId) {
+    public void only(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 

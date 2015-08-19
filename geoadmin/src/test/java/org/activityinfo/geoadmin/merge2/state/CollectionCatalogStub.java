@@ -1,9 +1,7 @@
 package org.activityinfo.geoadmin.merge2.state;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.ResourceCollection;
@@ -19,17 +17,17 @@ public class CollectionCatalogStub implements CollectionCatalog {
     
     @Override
     public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
-        return Preconditions.checkNotNull(map.get(resourceId));
+        return Optional.<ResourceCollection>fromNullable(map.get(resourceId));
     }
 
     @Override
-    public Resource getResource(ResourceId resourceId) {
+    public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public FormClass getFormClass(ResourceId resourceId) {
-        return getCollection(resourceId).getFormClass();
+        return getCollection(resourceId).get().getFormClass();
     }
     
     public void addJsonCollection(String resourceName) throws IOException {

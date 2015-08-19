@@ -83,7 +83,7 @@ public class ResourceStoreStub implements ResourceStore {
 
         @Override
         public FormClass getFormClass(ResourceId resourceId) {
-            return getCollection(resourceId).getFormClass();
+            return getCollection(resourceId).get().getFormClass();
         }
     }
 

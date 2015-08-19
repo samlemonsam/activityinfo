@@ -59,7 +59,7 @@ public class FeatureSourceCatalog implements CollectionCatalog {
                 throw new IllegalArgumentException("Could not load " + resourceId, e);
             }
         }
-        return accessor;
+        return Optional.<ResourceCollection>of(accessor);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class FeatureSourceCatalog implements CollectionCatalog {
 
     @Override
     public FormClass getFormClass(ResourceId resourceId) {
-        return getCollection(resourceId).getFormClass();
+        return getCollection(resourceId).get().getFormClass();
     }
 
 

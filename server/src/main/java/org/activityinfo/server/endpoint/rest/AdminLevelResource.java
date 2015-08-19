@@ -88,7 +88,7 @@ public class AdminLevelResource {
 
     @Path("/form")
     public FormResource getForm() {
-        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), queryExecutor);
+        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), queryExecutor, userProvider);
     }
     
     @DELETE
