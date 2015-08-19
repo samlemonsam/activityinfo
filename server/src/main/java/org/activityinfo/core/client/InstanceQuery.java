@@ -19,7 +19,9 @@ public class InstanceQuery {
     private final Criteria criteria;
     private final int offset;
     private final int maxCount;
-    private final boolean isFilter;
+
+    // table filter : used to fetch unique filter items
+    private final boolean uniqueValueForGivenColumn;
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria) {
         this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT, false);
@@ -29,13 +31,13 @@ public class InstanceQuery {
         this(fieldPaths, criteria, offset, maxCount, false);
     }
 
-    public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount, boolean isFilter) {
+    public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount, boolean uniqueValueForGivenColumn) {
         assert criteria != null;
         this.criteria = criteria;
         this.fieldPaths = fieldPaths;
         this.offset = offset;
         this.maxCount = maxCount;
-        this.isFilter = isFilter;
+        this.uniqueValueForGivenColumn = uniqueValueForGivenColumn;
     }
 
     public List<FieldPath> getFieldPaths() {
@@ -54,8 +56,8 @@ public class InstanceQuery {
         return criteria;
     }
 
-    public boolean isFilter() {
-        return isFilter;
+    public boolean isUniqueValueForGivenColumn() {
+        return uniqueValueForGivenColumn;
     }
 
     public static Builder select(ResourceId... fieldIds) {
@@ -67,7 +69,7 @@ public class InstanceQuery {
         private Criteria criteria;
         private int offset = 0;
         private int maxCount = FALLBACK_MAX_COUNT;
-        private boolean filter = false;
+        private boolean uniqueValueForGivenColumn = false;
 
         private Builder() {
         }
@@ -95,8 +97,8 @@ public class InstanceQuery {
             return this;
         }
 
-        public Builder filter(boolean filter) {
-            this.filter = filter;
+        public Builder uniqueValueForGivenColumn(boolean uniqueValueForGivenColumn) {
+            this.uniqueValueForGivenColumn = uniqueValueForGivenColumn;
             return this;
         }
 
