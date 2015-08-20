@@ -369,6 +369,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Publish to website")
     String embed();
 
+    @DefaultStringValue("If you don''t wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
+    String digestUnsubscribe();
+
     @DefaultStringValue("Your dashboard is empty! You can choose which reports appear on your dashboard by starring them in the reports page.")
     String emptyDashboard();
 

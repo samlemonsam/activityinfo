@@ -7,7 +7,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.reports.content.BubbleMapMarker;
 import org.activityinfo.legacy.shared.reports.content.MapMarker;
@@ -57,7 +56,9 @@ public class GeoDigestRenderer implements DigestRenderer {
         html.append("<div class='geo-header'>");
         html.append(I18N.MESSAGES.geoDigestIntro(model.getUserDigest().getDays() * 24));
         html.append("<br/>");
-        html.append(I18N.MESSAGES.digestUnsubscribe(model.getUserDigest().getUnsubscribeLink()));
+        html.append(I18N.CONSTANTS.digestUnsubscribe());
+        // uncomment when AI-709 is ready
+//        html.append(I18N.MESSAGES.digestUnsubscribe(model.getUserDigest().getUnsubscribeLink()));
         html.append("</div>");
     }
 
