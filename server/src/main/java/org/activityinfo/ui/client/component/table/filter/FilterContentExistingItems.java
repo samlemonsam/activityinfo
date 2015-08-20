@@ -148,7 +148,8 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         loadingPanel.show(new Provider<Promise<QueryResult<Projection>>>() {
             @Override
             public Promise<QueryResult<Projection>> get() {
-                InstanceQuery query = new InstanceQuery(Lists.newArrayList(column.getFieldPaths()), table.getCriteria(), 0, 10000, true);
+                InstanceQuery query = table.getDataLoader().createInstanceQuery(0, 10000)
+                        .setUniqueValueForGivenColumn(true);
                 return table.getResourceLocator().queryProjection(query);
             }
         });

@@ -21,7 +21,7 @@ public class InstanceQuery {
     private final int maxCount;
 
     // table filter : used to fetch unique filter items
-    private final boolean uniqueValueForGivenColumn;
+    private boolean uniqueValueForGivenColumn;
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria) {
         this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT, false);
@@ -58,6 +58,11 @@ public class InstanceQuery {
 
     public boolean isUniqueValueForGivenColumn() {
         return uniqueValueForGivenColumn;
+    }
+
+    public InstanceQuery setUniqueValueForGivenColumn(boolean uniqueValueForGivenColumn) {
+        this.uniqueValueForGivenColumn = uniqueValueForGivenColumn;
+        return this;
     }
 
     public static Builder select(ResourceId... fieldIds) {
