@@ -47,7 +47,7 @@ public class ActivityDigestRenderer implements DigestRenderer {
         html.append(I18N.MESSAGES.activityDigestIntro(model.getUserDigest().getDays()));
         html.append("<br/>");
 
-        html.append(I18N.CONSTANTS.digestUnsubscribe());
+        html.append(I18N.CONSTANTS.digestUnsubscribeConstant());
         // uncomment when AI-709 is ready
 //        html.append(I18N.MESSAGES.digestUnsubscribe(model.getUserDigest().getUnsubscribeLink()));
         html.append("</div>");

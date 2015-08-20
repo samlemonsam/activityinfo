@@ -56,7 +56,7 @@ public class GeoDigestRenderer implements DigestRenderer {
         html.append("<div class='geo-header'>");
         html.append(I18N.MESSAGES.geoDigestIntro(model.getUserDigest().getDays() * 24));
         html.append("<br/>");
-        html.append(I18N.CONSTANTS.digestUnsubscribe());
+        html.append(I18N.CONSTANTS.digestUnsubscribeConstant());
         // uncomment when AI-709 is ready
 //        html.append(I18N.MESSAGES.digestUnsubscribe(model.getUserDigest().getUnsubscribeLink()));
         html.append("</div>");
