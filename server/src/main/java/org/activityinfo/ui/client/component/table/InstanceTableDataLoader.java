@@ -192,8 +192,10 @@ public class InstanceTableDataLoader {
     }
 
     public void reload() {
+        prefetchedResult = null;
         instanceTotalCount = -1;
         tableDataProvider.getList().clear();
+
         load(0, PAGE_SIZE, false);
     }
 
@@ -201,4 +203,8 @@ public class InstanceTableDataLoader {
         return fields;
     }
 
+    public void reset() {
+        fields.clear();
+        prefetchedResult = null;
+    }
 }
