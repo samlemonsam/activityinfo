@@ -107,7 +107,7 @@ public class InstanceTableUiTest {
                         new FieldValue("Partner", "NRC"),
                         new FieldValue("quantity", i),
                         new FieldValue("enum", i % 2 == 0 ? "item1" : "item1, item2"),
-                        new FieldValue("text", "text"),
+                        new FieldValue("text", "text" + i),
                         new FieldValue("multi-line", "line1\nline2"),
                         new FieldValue("barcode", "barcode")
                 ));
