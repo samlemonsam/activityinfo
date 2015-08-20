@@ -111,10 +111,12 @@ public class InstanceTableDataLoader {
         }
     }
 
+    public InstanceQuery createInstanceQuery(int offset, int countToLoad) {
+        return new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, countToLoad);
+    }
 
     private Promise<QueryResult<Projection>> query(int offset, int countToLoad) {
-        InstanceQuery query = new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, countToLoad);
-        return table.getResourceLocator().queryProjection(query);
+        return table.getResourceLocator().queryProjection(createInstanceQuery(offset, countToLoad));
     }
 
     public boolean isAllLoaded() {
