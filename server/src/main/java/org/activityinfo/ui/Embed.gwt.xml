@@ -22,6 +22,7 @@
 <module rename-to="Embed">
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="org.activityinfo.ui.ActivityInfoCore"/>
+  <inherits name="com.extjs.gxt.ui.GXTAssets"/>
 
   <entry-point class="org.activityinfo.ui.client.EmbedEntryPoint"/>
 

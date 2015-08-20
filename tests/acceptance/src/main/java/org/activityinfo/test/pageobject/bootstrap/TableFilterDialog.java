@@ -21,8 +21,10 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
+import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
 import org.joda.time.LocalDate;
+import org.openqa.selenium.WebDriver;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +41,12 @@ public class TableFilterDialog {
     }
 
     public BsTable table() {
+        modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return modal.getWindowElement().find().table().firstIfPresent().isPresent();
+            }
+        });
         return new BsTable(modal.getWindowElement().find().table().first(), BsTable.Type.GRID_TABLE);
     }
 
