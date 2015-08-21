@@ -1592,4 +1592,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Single selection")
     String singleSelection();
+
+    @DefaultStringValue("Please select at least one item")
+    String pleaseSelectAtLeastOneItem();
 }

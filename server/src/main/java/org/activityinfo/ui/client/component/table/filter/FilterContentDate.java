@@ -154,6 +154,15 @@ public class FilterContentDate extends Composite implements FilterContent {
         rangePanel.clear();
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void setChangeHandler(ValueChangeHandler handler) {
+    }
+
     public void setCurrentRange(LocalDateRange currentRange) {
         this.currentRange = currentRange;
         rangePanel.setDateRange(currentRange != null ? currentRange.asDateRange() : null);

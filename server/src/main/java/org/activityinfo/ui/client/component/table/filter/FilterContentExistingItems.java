@@ -26,10 +26,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -40,6 +43,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Provider;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ProjectionKeyProvider;
@@ -48,6 +52,7 @@ import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaUnion;
 import org.activityinfo.core.shared.criteria.CriteriaVisitor;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
@@ -86,6 +91,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     private final FieldColumn column;
     private final DataGrid<Projection> filterGrid;
     private List<Projection> allItems;
+    private ValueChangeHandler changeHandler;
 
     @UiField
     TextBox textBox;
@@ -93,6 +99,10 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     LoadingPanel<List<Projection>> loadingPanel;
     @UiField
     HTMLPanel textBoxContainer;
+    @UiField
+    HTMLPanel messageSpanContainer;
+    @UiField
+    SpanElement messageSpan;
 
     public FilterContentExistingItems(final FieldColumn column, final InstanceTable table) {
 
@@ -123,6 +133,15 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         filterGrid.setHeight(FILTER_GRID_HEIGHT);
         filterGrid.setAutoHeaderRefreshDisabled(true);
         filterGrid.setAutoFooterRefreshDisabled(true);
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (changeHandler != null) {
+                    changeHandler.onValueChange(null);
+                }
+            }
+        });
 
         tableDataProvider.addDataDisplay(filterGrid);
 
@@ -231,5 +250,20 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     @Override
     public void clear() {
         selectAll(false);
+    }
+
+    @Override
+    public boolean isValid() {
+        boolean isValid = !selectionModel.getSelectedSet().isEmpty();
+
+        messageSpan.setInnerHTML(SafeHtmlUtils.fromString(I18N.CONSTANTS.pleaseSelectAtLeastOneItem()).asString());
+
+        messageSpanContainer.setVisible(!isValid);
+        return isValid;
+    }
+
+    @Override
+    public void setChangeHandler(ValueChangeHandler handler) {
+        this.changeHandler = handler;
     }
 }
