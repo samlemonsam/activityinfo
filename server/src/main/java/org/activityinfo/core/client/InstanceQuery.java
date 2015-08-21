@@ -21,23 +21,23 @@ public class InstanceQuery {
     private final int maxCount;
 
     // table filter : used to fetch unique filter items
-    private boolean uniqueValueForGivenColumn;
+    private FieldPath filterFieldPath;
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria) {
-        this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT, false);
+        this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT, null);
     }
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount) {
-        this(fieldPaths, criteria, offset, maxCount, false);
+        this(fieldPaths, criteria, offset, maxCount, null);
     }
 
-    public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount, boolean uniqueValueForGivenColumn) {
+    public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount, FieldPath filterFieldPath) {
         assert criteria != null;
         this.criteria = criteria;
         this.fieldPaths = fieldPaths;
         this.offset = offset;
         this.maxCount = maxCount;
-        this.uniqueValueForGivenColumn = uniqueValueForGivenColumn;
+        this.filterFieldPath = filterFieldPath;
     }
 
     public List<FieldPath> getFieldPaths() {
@@ -56,12 +56,12 @@ public class InstanceQuery {
         return criteria;
     }
 
-    public boolean isUniqueValueForGivenColumn() {
-        return uniqueValueForGivenColumn;
+    public FieldPath getFilterFieldPath() {
+        return filterFieldPath;
     }
 
-    public InstanceQuery setUniqueValueForGivenColumn(boolean uniqueValueForGivenColumn) {
-        this.uniqueValueForGivenColumn = uniqueValueForGivenColumn;
+    public InstanceQuery setFilterFieldPath(FieldPath filterFieldPath) {
+        this.filterFieldPath = filterFieldPath;
         return this;
     }
 
@@ -74,7 +74,6 @@ public class InstanceQuery {
         private Criteria criteria;
         private int offset = 0;
         private int maxCount = FALLBACK_MAX_COUNT;
-        private boolean uniqueValueForGivenColumn = false;
 
         private Builder() {
         }
@@ -101,12 +100,6 @@ public class InstanceQuery {
             this.maxCount = maxCount;
             return this;
         }
-
-        public Builder uniqueValueForGivenColumn(boolean uniqueValueForGivenColumn) {
-            this.uniqueValueForGivenColumn = uniqueValueForGivenColumn;
-            return this;
-        }
-
 
         public InstanceQuery build() {
             if (criteria == null) {

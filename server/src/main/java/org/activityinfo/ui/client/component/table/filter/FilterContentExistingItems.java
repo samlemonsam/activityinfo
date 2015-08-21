@@ -43,7 +43,6 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.inject.Provider;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ProjectionKeyProvider;
-import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaUnion;
@@ -91,7 +90,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     @UiField
     TextBox textBox;
     @UiField
-    LoadingPanel<QueryResult<Projection>> loadingPanel;
+    LoadingPanel<List<Projection>> loadingPanel;
     @UiField
     HTMLPanel textBoxContainer;
 
@@ -127,10 +126,10 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
         tableDataProvider.addDataDisplay(filterGrid);
 
-        loadingPanel.setDisplayWidget(new DisplayWidget<QueryResult<Projection>>() {
+        loadingPanel.setDisplayWidget(new DisplayWidget<List<Projection>>() {
             @Override
-            public Promise<Void> show(QueryResult<Projection> values) {
-                allItems = extractItems(values.getProjections());
+            public Promise<Void> show(List<Projection> values) {
+                allItems = extractItems(values);
                 if (allItems.size() < SEARCH_BOX_PRESENCE_ITEM_COUNT) {
                     textBoxContainer.remove(textBox);
                 }
@@ -145,12 +144,12 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 return filterGrid;
             }
         });
-        loadingPanel.show(new Provider<Promise<QueryResult<Projection>>>() {
+        loadingPanel.show(new Provider<Promise<List<Projection>>>() {
             @Override
-            public Promise<QueryResult<Projection>> get() {
+            public Promise<List<Projection>> get() {
                 InstanceQuery query = table.getDataLoader().createInstanceQuery(0, 10000)
-                        .setUniqueValueForGivenColumn(true);
-                return table.getResourceLocator().queryProjection(query);
+                        .setFilterFieldPath(column.getFieldPaths().get(0));
+                return table.getResourceLocator().query(query);
             }
         });
     }
