@@ -24,6 +24,8 @@ package org.activityinfo.ui.client.component.table.filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -99,6 +101,14 @@ public class FilterPanel extends Composite implements HasCriteria {
                 });
 
                 loadingPanel.showWithoutLoad();
+
+                filterContent.setChangeHandler(new ValueChangeHandler() {
+                    @Override
+                    public void onValueChange(ValueChangeEvent event) {
+                        okButton.setEnabled(filterContent.isValid());
+                    }
+                });
+                okButton.setEnabled(filterContent.isValid());
             }
         });
     }
