@@ -1,4 +1,6 @@
 
+evaluationDependsOn ":ui:app"
+
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
@@ -60,6 +62,7 @@ war {
         return !file.name.startsWith('guava-gwt') &&
                 !file.name.startsWith('gwt-user')
     }
+    from project(':ui:app').tasks.getByName('compileGwt').outputs
     exclude("**/*.symbolMap")
 }
 

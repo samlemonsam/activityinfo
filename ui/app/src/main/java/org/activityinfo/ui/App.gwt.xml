@@ -1,0 +1,47 @@
+<!--
+  #%L
+  ActivityInfo Server
+  %%
+  Copyright (C) 2009 - 2013 UNICEF
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+
+<module rename-to="App">
+
+  <inherits name='com.google.gwt.user.User'/>
+  <inherits name="com.google.gwt.i18n.I18N"/>
+  <inherits name="com.google.gwt.logging.Logging"/>
+  
+  <inherits name="org.activityinfo.i18n.I18n"/>
+  <inherits name="org.activityinfo.ui.Style"/>
+  <inherits name="org.activityinfo.ui.Icons"/>
+
+  <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
+
+  <set-property name="user.agent" value="ie8,ie9,ie10,safari,gecko1_8"/>
+  <extend-property name="locale" values="ar"/>
+
+  <define-linker name="appcache" class="org.activityinfo.ui.rebind.AppCacheLinker"/>
+  <add-linker name="appcache" />
+
+
+  <entry-point class="org.activityinfo.ui.client.App"/>
+
+  <!-- Include generated sources -->
+  <source path='client'/>
+  <source path="shared"/>
+</module>

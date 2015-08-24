@@ -1,0 +1,47 @@
+//@import (reference) "../../style/bootstrap/variables.less";
+//@import (reference) "../../style/bootstrap/mixins.less";
+
+@header-panel-bg: @panel-inner-border;
+@form-panel-text: @alert-info-text;
+@main-panel-bg: @panel-footer-bg;
+@padding: 4px;
+
+.widget-container {
+  padding: 10px;
+  width: 100%;
+  border-collapse: separate !important; // override .bs table -> border-collapse: collapse
+  border-width: 1px; // keep border to avoid jumping effect
+  border-color: @main-panel-bg; // color is the same as background of main panel to make it invisible
+  border-style: dashed;
+}
+
+.widget-container:hover {
+  border-color: #0055ff;
+}
+
+.widget-container-selected {
+  background-color: @state-success-bg;
+  border-color: @state-success-text !important;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.spacer {
+  background-color: @state-success-bg;
+  border-color: @state-success-text !important;
+  border-style: dashed;
+  border-width: 1px;
+  width: 100%;
+}
+
+.header-container {
+  background-color: @header-panel-bg;
+}
+
+.main-panel {
+  background-color: @main-panel-bg;
+  color: @form-panel-text;
+  border-color: @panel-default-border;
+  border-width: 1px;
+  min-height: 500px;
+}

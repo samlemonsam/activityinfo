@@ -24,3 +24,4 @@ atlassian-ide-plugin.xml
 build.log
 build
 .gradle
+node_modules
