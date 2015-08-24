@@ -144,6 +144,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Basemap")
     String basemap();
+    
+    @DefaultStringValue("Boundaries")
+    String boundaries();
 
     @DefaultStringValue("OK")
     String ok();

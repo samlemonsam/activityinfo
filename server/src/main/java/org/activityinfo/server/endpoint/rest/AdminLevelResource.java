@@ -61,16 +61,18 @@ public class AdminLevelResource {
 
     private final HibernateQueryExecutor queryExecutor;
     private final Provider<EntityManager> entityManager;
+    private final Provider<AuthenticatedUser> userProvider;
     private final AdminLevel level;
 
 
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
-    public AdminLevelResource(HibernateQueryExecutor queryExecutor, Provider<EntityManager> entityManager, AdminLevel level) {
+    public AdminLevelResource(HibernateQueryExecutor queryExecutor, Provider<EntityManager> entityManager, Provider<AuthenticatedUser> userProvider, AdminLevel level) {
         super();
         this.queryExecutor = queryExecutor;
         this.entityManager = entityManager;
+        this.userProvider = userProvider;
         this.level = level;
     }
 

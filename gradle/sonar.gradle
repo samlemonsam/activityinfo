@@ -4,6 +4,7 @@ apply plugin: "sonar-runner"
 
 sonarRunner {
     sonarProperties {
+        property "sonar.analysis.mode", "incremental"
         property "sonar.projectName", "ActivityInfo"
         property "sonar.host.url", "http://sonar.bedatadriven.com"
         property "sonar.jdbc.url", "jdbc:mysql://sonar.bedatadriven.com/sonardb"
@@ -11,6 +12,13 @@ sonarRunner {
         property "sonar.jdbc.username", "sonar"
         property "sonar.jdbc.password", sonarDatabasePassword
         property "sonar.issuesReport.html.enable", true
+        
+        if(project.hasProperty("pullRequest")) {
+            property "sonar.github.login", "bddsonar"
+            property "sonar.github.repository", "bedatadriven/activityinfo"
+            property "sonar.github.pullRequest", project.property("pullRequest")
+            property "sonar.github.oauth", project.property("sonarGitHubToken")
+        }
     }
 }
 
@@ -35,15 +43,7 @@ repositories {
 
 // Ensure that we run the acceptanceTest with coverage enabled
 // to ensure that we have the coverage data to provide sonar
-//tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
 
-tasks.sonarRunner.doFirst {
-    logger.info("sonar properties: ${sonarProperties}");
-
+if(project.hasProperty("coverage")) {
+    tasks.sonarRunner.dependsOn ':tests:acceptance:acceptanceTestCoverage'
 }
-
-//
-//task sonarPullRequest(type: SonarRunner) {
-//    sonarProperties.put "sonar.projectName", "ActivityInfo"
-//    sonarProperties.put "sonar."
-//}

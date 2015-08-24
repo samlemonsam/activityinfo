@@ -14,6 +14,7 @@ import org.activityinfo.observable.MockObserver;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.TableObserver;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
+@Ignore
 public class MatchTableTest {
 
 

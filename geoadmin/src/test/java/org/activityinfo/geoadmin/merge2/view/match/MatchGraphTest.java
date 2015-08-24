@@ -22,6 +22,7 @@ import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
+@Ignore
 public class MatchGraphTest {
 
     public static final int COLUMN_WIDTH = 25;

@@ -61,17 +61,18 @@ public class RootResource {
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
     private HibernateQueryExecutor queryExecutor;
-    private Provider<AuthenticatedUser> user;
+    private Provider<AuthenticatedUser> userProvider;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config, HibernateQueryExecutor queryExecutor) {
+                        DeploymentConfiguration config, HibernateQueryExecutor queryExecutor, Provider<AuthenticatedUser> userProvider) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.config = config;
         this.queryExecutor = queryExecutor;
+        this.userProvider = userProvider;
     }
 
     @Path("/adminEntity/{id}")
@@ -133,7 +134,7 @@ public class RootResource {
 
     @Path("/adminLevel/{id}")
     public AdminLevelResource getAdminLevel(@PathParam("id") int id) {
-        return new AdminLevelResource(queryExecutor, entityManager, entityManager.get().find(AdminLevel.class, id));
+        return new AdminLevelResource(queryExecutor, entityManager, userProvider, entityManager.get().find(AdminLevel.class, id));
     }
 
     @Path("/sites")
@@ -166,7 +167,7 @@ public class RootResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
         
-        if(!DeploymentEnvironment.isAppEngineDevelopment() && !user.get().getEmail().endsWith("@bedatadriven.com")) {
+        if(!DeploymentEnvironment.isAppEngineDevelopment() && !userProvider.get().getEmail().endsWith("@bedatadriven.com")) {
             return Response.status(Status.FORBIDDEN).build();
         }
         
