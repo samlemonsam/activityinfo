@@ -33,6 +33,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
@@ -161,11 +162,19 @@ public class FormFieldWidgetFactory {
                     @Override
                     public FormFieldWidget apply(List<FormInstance> input) {
 
-                        if (input.size() < SMALL_BALANCE_NUMBER) {
+                        int size = input.size();
+
+                        boolean isProjectField = !type.getRange().isEmpty() &&
+                                type.getRange().iterator().next().getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
+                        if (size == 0 && isProjectField) { // for now hide only project field (AI-1200)
+                            return NullFieldWidget.INSTANCE;
+                        }
+
+                        if (size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
                             return new CheckBoxFieldWidget(type, input, valueUpdater);
 
-                        } else if (input.size() < MEDIUM_BALANCE_NUMBER) {
+                        } else if (size < MEDIUM_BALANCE_NUMBER) {
                             // Dropdown list
                             return new ComboBoxFieldWidget(input, valueUpdater);
 
