@@ -19,11 +19,8 @@ module.exports = function(grunt) {
             }
         }
     });
-
-    // Load the plugin that provides the “uglify” task.
     grunt.loadNpmTasks("grunt-webfont");
 
-    // Default task(s).
     grunt.registerTask("build", ["webfont"]);
 
 };

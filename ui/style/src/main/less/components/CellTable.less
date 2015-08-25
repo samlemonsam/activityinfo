@@ -1,0 +1,31 @@
+
+//@import "../bootstrap/variables";
+//@import "../bootstrap/mixins";
+//@import (reference) "../bootstrap/tables";
+
+@table-bg-accent-dark: darken(@table-bg-accent, 8%);
+
+
+.cellTableWidget {
+  .table;
+  .table-bordered;
+  .table-condensed;
+
+  td {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  thead {
+    background-color: @table-bg-accent;
+  }
+
+  th {
+    font-weight: bold;
+  }
+}
+
+.cellTableSelectedRow {
+  background-color: @state-success-bg;
+  color: @state-success-text;
+}

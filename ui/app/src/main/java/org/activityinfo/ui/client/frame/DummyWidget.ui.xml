@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:f="urn:import:org.activityinfo.ui.client.frame"
+             xmlns:i="urn:import:org.activityinfo.ui.icons">
+  
+<g:HTMLPanel styleName="panel panel-default">
+  <div class="panel-body">
+    <span ui:field="localeSpan"/>
+  </div>
+</g:HTMLPanel>
+</ui:UiBinder>

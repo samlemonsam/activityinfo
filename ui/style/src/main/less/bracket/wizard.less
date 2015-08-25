@@ -1,0 +1,88 @@
+
+
+// Wizard
+
+.basic-wizard .nav li a {
+  background: @sub-bg-color;
+  border-bottom: 1px solid #cccccc;
+  color: #4a535e;
+  border-right: 1px solid #cccccc;
+  .border-radius(0);
+  opacity: 0.75;
+}
+
+.basic-wizard .nav li a:hover {
+  background-color: #f7f7f7;
+  opacity: 1;
+}
+
+.basic-wizard .nav li:last-child a {
+  border-right: 0;
+}
+
+.basic-wizard .nav li.active {
+  a, a:focus, a:active {
+    background: #fcfcfc;
+    border-bottom-color: #fcfcfc;
+    color: #333333;
+    opacity :1;
+  }
+}
+
+.basic-wizard ul li a span {
+  font-family: @font-family-bold;
+}
+
+.basic-wizard .pager {
+  margin: 0;
+  border-top: 1px solid #dddddd;
+  background: #f7f7f7;
+  padding: 10px;
+  li a {
+    .border-radius(2px);
+    border-color: #357ebd;
+    background-color: #428bca;
+    color: @white-color;
+  }
+  li a:hover {
+    background-color: #3276b1;
+    border-color: #285e8e;
+  }
+  li.disabled a {
+    background: #eeeeee;
+    color: #999999;
+    border-color: #cccccc;
+  }
+}
+
+.basic-wizard .progress {
+  height: 12px;
+  .border-radius(2px);
+}
+.basic-wizard .nav-disabled-click li {
+  a:hover, a:active, a:focus {
+    background-color: #e4e7ea;
+    opacity: 0.75;
+    color: #4a535e;
+    cursor: default;
+  }
+}
+.basic-wizard .nav-disabled-click li.active {
+  a:hover, a:active, a:focus {
+    background: #fcfcfc;
+    color: #333333;
+    opacity: 1;
+  }
+}
+
+.basic-wizard .tab-content {
+  .noshadow;
+  .border-radius(0);
+}
+
+.tab-pane::after {
+  clear: both;
+  display: block;
+  content: '';
+}
+
