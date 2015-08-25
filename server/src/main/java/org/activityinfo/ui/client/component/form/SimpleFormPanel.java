@@ -23,6 +23,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
+import org.activityinfo.ui.client.component.form.field.NullFieldWidget;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 
 import javax.annotation.Nullable;
@@ -211,7 +212,10 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             } else if (element instanceof FormField) {
                 FormField formField = (FormField) element;
                 if (formField.isVisible()) {
-                    panel.add(containers.get(formField.getId()));
+                    FieldContainer fieldContainer = containers.get(formField.getId());
+                    if (!(fieldContainer.getFieldWidget() instanceof NullFieldWidget)) {
+                        panel.add(fieldContainer);
+                    }
                 }
             }
         }

@@ -31,6 +31,11 @@ Feature: New form
       | 11                 | ECHO    | cholera                        |
       | 13                 | USAID   | cholera                        |
 
+  @AI-1200
+  Scenario: Project built-in field is not shown if there is not projects in the database
+    When I open a new form submission for "Patient Visits" then following fields are invisible:
+      | Project |
+
   @AI-1033
   @AI-1009
   @web
