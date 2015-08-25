@@ -165,6 +165,9 @@ public class PropertiesPresenter {
 
         view.getRequired().setEnabled(!isBuiltIn);
         view.getVisible().setEnabled(!isBuiltIn);
+        if (isBuiltIn && !formField.isVisible()) { // in case it's invisible we should give user ability to make it visible again
+            view.getVisible().setEnabled(true);
+        }
 
         setRelevanceState(formField, !isBuiltIn);
         validateCode(fieldWidgetContainer);
