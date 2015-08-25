@@ -62,6 +62,7 @@ public class UiApplicationDriver extends ApplicationDriver {
     
     private String currentDatabase;
     private String currentForm;
+    private BsModal currentModal;
     
     @Inject
     public UiApplicationDriver(ApiApplicationDriver apiDriver,
@@ -893,6 +894,22 @@ public class UiApplicationDriver extends ApplicationDriver {
         BsModal bsModal = FormModal.find(dataEntryTab.getContainer());
         for (String fieldLabel : fieldLabels) {
             assertNotNull("Failed to find field with label: " + fieldLabel, bsModal.form().findFieldByLabel(fieldLabel));
+        }
+    }
+
+    public Optional<BsFormPanel.BsField> getFormFieldFromNewSubmission(String formName, String fieldLabel) {
+        ensureLoggedIn();
+
+        if (currentModal == null) {
+            DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+            dataEntryTab.buttonClick(I18N.CONSTANTS.newSite());
+
+            currentModal = FormModal.find(dataEntryTab.getContainer());
+        }
+        try {
+            return Optional.fromNullable(currentModal.form().findFieldByLabel(fieldLabel));
+        } catch (AssertionError e) {
+            return Optional.absent();
         }
     }
 

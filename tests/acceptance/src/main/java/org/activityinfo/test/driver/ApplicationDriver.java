@@ -1,6 +1,7 @@
 package org.activityinfo.test.driver;
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
@@ -8,6 +9,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.model.IndicatorLink;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
@@ -404,6 +406,10 @@ public abstract class ApplicationDriver {
     }
 
     public List<String> getFilterValues(String filterName, String formName) {
+        throw new PendingException();
+    }
+
+    public Optional<BsFormPanel.BsField> getFormFieldFromNewSubmission(String formName, String fieldLabel) {
         throw new PendingException();
     }
 }
