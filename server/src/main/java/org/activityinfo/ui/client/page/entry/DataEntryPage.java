@@ -26,15 +26,18 @@ import com.extjs.gxt.ui.client.Style.LayoutRegion;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
-import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.extjs.gxt.ui.client.widget.layout.*;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
+import com.google.common.base.Optional;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
@@ -44,6 +47,7 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.Beta;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
@@ -95,6 +99,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private SiteHistoryTab siteHistoryTab;
 
     private ActionToolBar toolBar;
+    private ContentPanel betaLinkPanel;
+
 
     @Inject
     public DataEntryPage(final EventBus eventBus, Dispatcher dispatcher) {
@@ -132,6 +138,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         LayoutContainer center = new LayoutContainer();
         center.setLayout(new BorderLayout());
 
+        center.add(createNewInterfaceLink(), new BorderLayoutData(LayoutRegion.NORTH, 30));
         center.add(gridPanel, new BorderLayoutData(LayoutRegion.CENTER));
 
         gridPanel.addSelectionChangedListener(new SelectionChangedListener<SiteDTO>() {
@@ -162,6 +169,21 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         center.add(tabPanel, tabPanel.getBorderLayoutData());
         onNoSelection();
         add(center, new BorderLayoutData(LayoutRegion.CENTER));
+    }
+    
+    private Component createNewInterfaceLink() {
+        betaLinkPanel = new ContentPanel();
+        betaLinkPanel.setHeaderVisible(false);
+        betaLinkPanel.setLayout(new CenterLayout());
+        Anchor betaLink = new Anchor(I18N.CONSTANTS.tryNewDataEntryInterface());
+        betaLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                navigateToNewInterface();
+            }
+        });
+        betaLinkPanel.add(betaLink);
+        return betaLinkPanel;
     }
 
     private ActionToolBar createToolBar() {
@@ -330,10 +352,40 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         // adding is also only enabled for one activity, but we have to
         // lookup to see whether it possible for this activity
         toolBar.setActionEnabled(UIActions.ADD, false);
+        
+        betaLinkPanel.setVisible(false);
+        
         if (activities.size() == 1) {
             enableToolbarButtons(activities.iterator().next());
-        }
+            maybeShowBetaLinkPanel(activities.iterator().next());
+        } 
         onNoSelection();
+    }
+
+    private void maybeShowBetaLinkPanel(final Integer activityId) {
+        dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+                // sigh, ignore.
+                // will try again when the user navigates
+            }
+
+            @Override
+            public void onSuccess(ActivityFormDTO form) {
+                // make sure we haven't navigated away by the time the request comes back
+                Optional<Integer> currentActivityId = getCurrentActivityId();
+                if(!currentActivityId.isPresent() || currentActivityId.get() != activityId) {
+                    return;
+                }
+                if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
+                    return;
+                }
+                if(form.getClassicView()) {
+                    return;
+                }
+                betaLinkPanel.setVisible(true);
+            }
+        });
     }
 
     private void enableToolbarButtons(final int activityId) {
@@ -380,10 +432,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                 }
             });
         }else if (UIActions.OPEN_TABLE.equals(actionId)) {
-            final SiteDTO selection = gridPanel.getSelection();
-            eventBus.fireEvent(new NavigationEvent(
-                    NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(selection.getFormClassId(), InstancePage.TABLE_PAGE_ID)));
+            navigateToNewInterface();
+            
         } else if (UIActions.DELETE.equals(actionId)) {
             onDelete();
 
@@ -404,7 +454,26 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             doImport();
 
         }
+    }
+    
+    private Optional<Integer> getCurrentActivityId() {
+        Filter filter = currentPlace.getFilter();
+        Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);
+        if(activities.size() == 1) {
+            return Optional.of(activities.iterator().next());
+        } else {
+            return Optional.absent();
+        }
+    }
 
+    private void navigateToNewInterface() {
+        Optional<Integer> activityId = getCurrentActivityId();
+        if(activityId.isPresent()) {
+            ResourceId formClassId = CuidAdapter.activityFormClass(activityId.get());
+            eventBus.fireEvent(new NavigationEvent(
+                    NavigationHandler.NAVIGATION_REQUESTED,
+                    new InstancePlace(formClassId, InstancePage.TABLE_PAGE_ID)));
+        }
     }
 
     private void onDelete() {

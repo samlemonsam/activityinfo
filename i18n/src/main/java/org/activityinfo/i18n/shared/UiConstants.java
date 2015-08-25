@@ -1379,7 +1379,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("or")
     String orWithSpaces();
-
+    
+    @DefaultStringValue("Try the new data entry page (BETA)")
+    String tryNewDataEntryInterface();
+    
     @DefaultStringValue("Always applicable")
     String relevanceEnabled();
 
