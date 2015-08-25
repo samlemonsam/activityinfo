@@ -106,7 +106,7 @@ public class SiteDialog extends Window {
         setLayout(new BorderLayout());
 
         // show alert only for report frequency ONCE
-        if (Beta.ENABLED && activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
+        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             BorderLayoutData alertLayout = new BorderLayoutData(LayoutRegion.NORTH);
             alertLayout.setSize(30);
             add(modernViewAlert(), alertLayout);

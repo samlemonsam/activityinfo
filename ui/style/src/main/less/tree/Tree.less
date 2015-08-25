@@ -1,0 +1,88 @@
+
+@tree-icon-width:         (30em / 14);
+@tree-node-padding:     2px 5px;
+
+.tree-container {
+  max-height: 300px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.tree {
+  margin-left: @tree-icon-width;
+  margin-bottom: 0;
+  padding-left: 0; // Override default ul/ol
+  list-style: none;
+  &:extend(.clearfix all);
+
+  > li {
+//    position: relative;
+//    display: block;
+
+    > .node-overlay {
+      position: absolute;
+      display: block;
+      padding: @tree-node-padding;
+      left: 0;
+      right: 0;
+      &:hover,
+      &:focus {
+        background-color: @nav-link-hover-bg;
+      }
+    }
+
+//
+//    &:hover > .node-overlay {
+//      background-color: @nav-link-hover-bg;
+//    }
+
+    > .node-container {
+      position: relative;
+      display: block;
+      padding: @tree-node-padding;
+
+      > .node-icon,
+      > .node-control {
+        cursor: pointer;
+        position: absolute;
+        left: -(@tree-icon-width);
+        width: @tree-icon-width;
+        padding: @tree-node-padding;
+        top: (2em / 14);
+        text-align: center;
+      }
+
+      > .node-control {
+        left: -(@tree-icon-width*2)
+      }
+
+      > a {
+        color: @text-color;
+        text-decoration: none;
+      }
+    }
+
+    &.selected {
+      > .node-overlay {
+        background-color: @component-active-bg;
+        border-color: darken(@component-active-bg, 10%);
+      }
+      color: @component-active-color;
+    }
+
+
+    // Disabled state sets text to gray and nukes hover/tab effects
+    &.disabled > a {
+      color: @nav-disabled-link-color;
+
+      &:hover,
+      &:focus {
+        color: @nav-disabled-link-hover-color;
+        text-decoration: none;
+        background-color: transparent;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+

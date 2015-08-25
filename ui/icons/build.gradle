@@ -48,4 +48,4 @@ jar.dependsOn grunt_build
 
 grunt_build.inputs.dir "${projectDir}/src/main/svg"
 grunt_build.inputs.dir "${projectDir}/src/main/template"
-grunt_dist.outputs.dir "${buildDir}/fonts"
+grunt_build.outputs.dir "${buildDir}/fonts"
