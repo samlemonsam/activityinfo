@@ -36,6 +36,7 @@
     <include path="/Login/**.cache.html" expiration="365d"/>
     <include path="/static/**.png" expiration="365d"/>
     <include path="/error.html"/>
+    <include path="/app.html"/>
   </static-files>
  
   <inbound-services>
