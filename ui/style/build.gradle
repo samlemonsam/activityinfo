@@ -20,7 +20,7 @@ node {
 
 grunt {
     // Set the directory where Gruntfile.js should be found
-    workDir = file("${project.projectDir}")
+    workDir = project.projectDir
 
     // Whether colors should output on the terminal
     colors = false
@@ -35,18 +35,18 @@ jar {
     from "${buildDir}/css"
 }
 
+task compileCss(type: GruntTask) {
+    args = ["build"]
+    dependsOn 'npmInstall'
+    dependsOn 'installGrunt'
 
-// makes sure on each build that grunt is installed
-grunt_build.dependsOn 'installGrunt'
+    inputs.file "${projectDir}/Gruntfile.js"
+    inputs.dir "${projectDir}/src/main/less"
+    outputs.dir "${buildDir}/css"
+}
 
-// processes your package.json before running grunt build
-grunt_build.dependsOn 'npmInstall'
+jar.dependsOn compileCss
 
-jar.dependsOn grunt_build
-
-grunt_build.inputs.file "${projectDir}/Gruntfile.js"
-grunt_build.inputs.dir "${projectDir}/src/main/less"
-grunt_build.outputs.dir "${buildDir}/css"
 
 idea {
     module {

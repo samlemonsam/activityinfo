@@ -31,7 +31,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-cssjanus");
 
 
-    // Default task(s).
     grunt.registerTask("build", ["less", "cssjanus"]);
 
 };

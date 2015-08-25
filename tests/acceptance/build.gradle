@@ -1,6 +1,4 @@
 
-logger.lifecycle("Configuring acceptance...")
-
 dependencies {
 
 
