@@ -143,16 +143,16 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
         LOGGER.log(Level.INFO, msg);
     }
 
-    @Override
-    protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request,
-                                                           String moduleBaseURL,
-                                                           String strongName) {
-        if (policyProvider == null) {
-            return super.doGetSerializationPolicy(request, moduleBaseURL, strongName);
-        } else {
-            return policyProvider.getSerializationPolicy(moduleBaseURL, strongName);
-        }
-    }
+//    @Override
+//    protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request,
+//                                                           String moduleBaseURL,
+//                                                           String strongName) {
+//        if (policyProvider == null) {
+//            return super.doGetSerializationPolicy(request, moduleBaseURL, strongName);
+//        } else {
+//            return policyProvider.getSerializationPolicy(moduleBaseURL, strongName);
+//        }
+//    }
 
     private boolean checkAuthentication(String authToken) {
         if (authToken.equals(AnonymousUser.AUTHTOKEN)) {
