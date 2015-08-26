@@ -21,7 +21,12 @@ Scenario: Offline Data Entry
     | partner            | NRC             |
     | nb. kits           | 5000            |
    Then the "NFI Distribution" form should have 2 submissions
-   When an internet connection becomes available
+   When I have submitted to "NFI Distribution" form table in "RRMP" database:
+    | nb. kits | Satisfaction score | Comments   | Partner | Start Date | End Date   |
+    | quantity | quantity           | text       | enum    | date       | date       |
+    | 13       | 4                  | no comment | NRC     | 2014-01-02 | 2014-01-04 |
+   Then the "NFI Distribution" form should have 3 submissions
+  When an internet connection becomes available
     And I synchronize with the server
     And I open a new session as jim@nrc.org
-   Then the "NFI Distribution" form should have 2 submissions
+   Then the "NFI Distribution" form should have 3 submissions
