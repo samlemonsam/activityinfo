@@ -49,7 +49,8 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
                                    GetLocationsHandler getLocationsHandler,
                                    DeleteSiteHandlerAsync deleteSiteHandler,
                                    GetSiteAttachmentsHandler getSiteAttachmentsHandler,
-                                   GetActivityFormHandler getActivityHandler) {
+                                   GetActivityFormHandler getActivityHandler,
+                                   GetFormClassHandlerAsync getFormClassHandler) {
 
         registry = new HandlerRegistry();
         registry.registerHandler(GetSchema.class, schemaHandler);
@@ -71,6 +72,7 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
 
         // new
         registry.registerHandler(GetActivityForm.class, getActivityHandler);
+        registry.registerHandler(GetFormClass.class, getFormClassHandler);
     }
 
     @Override
