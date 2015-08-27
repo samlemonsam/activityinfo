@@ -1,4 +1,4 @@
-package org.activityinfo.server.command.handler;
+package org.activityinfo.legacy.shared.impl;
 
 /*
  * #%L
@@ -28,8 +28,6 @@ import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
-import org.activityinfo.legacy.shared.impl.ExecutionContext;
 
 import java.util.ArrayList;
 import java.util.List;
