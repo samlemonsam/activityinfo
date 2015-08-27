@@ -25,7 +25,7 @@
 
   <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
-  <set-property name="gwt.logging.enabled" value="FALSE"/>
+  <set-property name="gwt.logging.enabled" value="TRUE"/>
 
   <set-property name="gwt.logging.logLevel" value="FINEST"/>
   <set-property name="compiler.stackMode" value="emulated"/>
