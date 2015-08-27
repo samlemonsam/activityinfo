@@ -12,7 +12,6 @@ buildscript {
 apply plugin:'msbuild'
 apply plugin:'nuget'
 
-
 assemblyInfoPatcher {
     
     if(project.buildNumber.equals('dev')) {
@@ -27,6 +26,7 @@ assemblyInfoPatcher {
 
 msbuild {
     
+    dependsOn 'nugetRestore'
     dependsOn 'assemblyInfoPatcher'
     
     solutionFile = "${projectDir}/dotnet.sln"
