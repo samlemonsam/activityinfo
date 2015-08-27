@@ -13,4 +13,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture ("")]
 
 // The assembly version will be updated by the assemblyInfoPatcher gradle task
-[assembly: AssemblyVersion("2.9.431.0")]
+[assembly: AssemblyVersion("2.9.0.0")]
