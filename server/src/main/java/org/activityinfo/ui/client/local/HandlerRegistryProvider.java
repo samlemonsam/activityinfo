@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.impl.*;
+import org.activityinfo.server.command.handler.BatchCommandHandlerAsync;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;
 
 public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
@@ -50,6 +51,7 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
                                    DeleteSiteHandlerAsync deleteSiteHandler,
                                    GetSiteAttachmentsHandler getSiteAttachmentsHandler,
                                    GetActivityFormHandler getActivityHandler,
+                                   BatchCommandHandlerAsync batchCommandHandler,
                                    GetFormClassHandlerAsync getFormClassHandler) {
 
         registry = new HandlerRegistry();
@@ -73,6 +75,7 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
         // new
         registry.registerHandler(GetActivityForm.class, getActivityHandler);
         registry.registerHandler(GetFormClass.class, getFormClassHandler);
+        registry.registerHandler(BatchCommand.class, batchCommandHandler);
     }
 
     @Override
