@@ -17,17 +17,15 @@ allprojects {
         // Starting a new pipeline build
         project.version = "${majorVersion}.${System.env.BUILD_NUMBER}"
         project.ext.buildNumber = System.env.BUILD_NUMBER
-    
+
+    } else if(project.hasProperty('build')) {
+        project.ext.buildNumber = Integer.parseInt(project.property('build'))
+        project.version = "${majorVersion}.${project.property('build')}"
+
     } else {
         // Development
         project.version = "${majorVersion}-dev"      
         project.ext.buildNumber = 'dev'
-    }
-    
-    // Override the build number to support deploying past builds to
-    // new environments etc
-    if(project.hasProperty('build')) {
-        project.ext.buildNumber = Integer.parseInt(project.property('build'))
     }
     
     ext.commitId = repo.head().id

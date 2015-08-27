@@ -4,8 +4,8 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.9"
-        classpath "com.ullink.gradle:gradle-nuget-plugin:2.5"
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.10"
+        classpath "com.ullink.gradle:gradle-nuget-plugin:2.7"
     }
 }
 
@@ -14,15 +14,15 @@ apply plugin:'nuget'
 
 
 assemblyInfoPatcher {
-    // mandatory if you want to patch your AssemblyInfo.cs/fs
-    // TODO: not yet normalized, beware than .Net version must be X.Y.Z.B format, with Z/B optionals
+    
+    if(project.buildNumber.equals('dev')) {
+        enabled = false
+    }
+
     version = project.version
 
     // defaults to above version, fewer restrictions on the format
-    // fileVersion = version + '-Beta'
-
-    // default to msbuild main project (of solution)
-    //projects = [ 'MyProject1', 'MyProject2' ]
+    fileVersion = version + '-Beta'
 }
 
 msbuild {
@@ -31,12 +31,8 @@ msbuild {
     
     solutionFile = "${projectDir}/dotnet.sln"
 
-    // MsBuild project name (/p:Project=...)
-    //projectName = 'Client'z
-
-    // Verbosity (/v:detailed, by default uses gradle logging level)
-//    verbosity = 'detailed'
-
+    projectName = 'Client'
+    
     // targets to execute (/t:Clean;Rebuild, no default)
     targets = ['Clean', 'Rebuild']
 
@@ -51,15 +47,6 @@ msbuild {
     // Generates XML documentation file (from javadoc through custom DocLet)
     generateDoc = false
 
-    // Other msbuild options can be set:
-    // loggerAssembly, generateDoc, debugType, optimize, debugSymbols, configuration, platform, defineConstants ...
-
-    // you can also provide properties by name (/p:SomeProperty=Value)
-//    parameters.SomeProperty = 'Value'
-
-    // Or, if you use built-in msbuild parameters that aren't directly available here,
-    // you can take advantage of the ExtensionAware interface
-  //  ext["flp1"] = "LogFile=" + file("${project.name}.errors.log").path + ";ErrorsOnly;Verbosity=diag"
 }
 
 task copyAssembly(type: Copy) {
@@ -75,12 +62,14 @@ nugetPack {
     
     dependsOn copyAssembly
     
+
+    
     // this Closure will be applied to the nuspec XMLBuilder
     nuspec {
         metadata() {
             id 'ActivityInfo.Client'
-            delegate.version version
-            title 'ActivityInfo.org REST Client'
+            delegate.version project.version
+            title 'ActivityInfo.org Client'
             authors 'BeDataDriven'
             delegate.description 'API Client for ActivityInfo.org'
             projectUrl('https://www.activityinfo.org')
@@ -91,6 +80,10 @@ nugetPack {
         delegate.files() {
             delegate.file(src: "ActivityInfo.Client.dll".replace('/', '\\'), target: 'lib')
         }
+    }
+    
+    doFirst {
+        logger.lifecycle("Nuspecfile: ${nuspecFile}")    
     }
 }
 
