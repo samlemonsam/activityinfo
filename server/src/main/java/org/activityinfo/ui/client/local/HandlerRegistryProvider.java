@@ -26,7 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.impl.*;
-import org.activityinfo.server.command.handler.BatchCommandHandlerAsync;
+import org.activityinfo.legacy.shared.impl.BatchCommandHandlerAsync;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;
 
 public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
