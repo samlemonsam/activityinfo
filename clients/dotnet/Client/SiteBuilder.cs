@@ -10,6 +10,7 @@ namespace ActivityInfo.Client
 		public SiteBuilder ()
 		{
 			SetId (KeyGenerator.GenerateId ());
+			SetReportingPeriodId (KeyGenerator.GenerateId ());
 		}
 
 		public void SetActivityId(int activityId) {
@@ -27,6 +28,10 @@ namespace ActivityInfo.Client
 
 		public void SetId(int id) {
 			properties.Add ("id", new JValue (id));
+		}
+
+		public void setReportingPeriodId(int reportingPeriodId) {
+			properties.Add ("reportingPeriodId", reportingPeriodId);
 		}
 
 		public void SetStartDate(DateTime date) {

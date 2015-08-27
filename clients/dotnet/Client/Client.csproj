@@ -43,5 +43,6 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Client.nuspec" />
   </ItemGroup>
 </Project>

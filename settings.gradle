@@ -11,4 +11,5 @@ include 'ui:icons'
 include 'ui:style'
 include 'ui:app'
 include 'tests:acceptance'
-
+include 'tests:acceptance'
+include 'clients:dotnet'
