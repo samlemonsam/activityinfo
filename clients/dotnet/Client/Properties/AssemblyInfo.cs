@@ -10,14 +10,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCompany ("BeDataDriven")]
 [assembly: AssemblyProduct ("ActivityInfo Client")]
 [assembly: AssemblyCopyright ("BeDataDriven BV")]
-[assembly: AssemblyCulture ("en_us")]
+[assembly: AssemblyCulture ("")]
 
 // The assembly version will be updated by the assemblyInfoPatcher gradle task
-[assembly: AssemblyVersion("2.9.*")]
-
-// The following attributes are used to specify the signing key for the assembly,
-// if desired. See the Mono documentation for more information about signing.
-
-//[assembly: AssemblyDelaySign(false)]
-//[assembly: AssemblyKeyFile("")]
-
+[assembly: AssemblyVersion("2.9.431.0")]

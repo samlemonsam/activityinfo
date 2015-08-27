@@ -1,10 +1,13 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url "http://nexus.bedatadriven.com/content/groups/public/"
+        }
     }
 
     dependencies {
-        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.10"
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.11-bedatadriven2"
         classpath "com.ullink.gradle:gradle-nuget-plugin:2.7"
     }
 }
@@ -12,16 +15,17 @@ buildscript {
 apply plugin:'msbuild'
 apply plugin:'nuget'
 
+// Update the library version in AssemblyInfo.cs
 assemblyInfoPatcher {
     
     if(project.buildNumber.equals('dev')) {
         enabled = false
     }
 
-    version = project.version
+    version = "${project.version}.0"
 
     // defaults to above version, fewer restrictions on the format
-    fileVersion = version + '-Beta'
+    fileVersion = version
 }
 
 msbuild {
@@ -46,7 +50,6 @@ msbuild {
 
     // Generates XML documentation file (from javadoc through custom DocLet)
     generateDoc = false
-
 }
 
 task copyAssembly(type: Copy) {
@@ -62,9 +65,6 @@ nugetPack {
     
     dependsOn copyAssembly
     
-
-    
-    // this Closure will be applied to the nuspec XMLBuilder
     nuspec {
         metadata() {
             id 'ActivityInfo.Client'
@@ -78,20 +78,20 @@ nugetPack {
             copyright 'Copyright © BeDataDriven 2010-2015'
         }
         delegate.files() {
-            delegate.file(src: "ActivityInfo.Client.dll".replace('/', '\\'), target: 'lib')
+            delegate.file(src: "ActivityInfo.Client.dll", target: 'lib')
         }
-    }
-    
-    doFirst {
-        logger.lifecycle("Nuspecfile: ${nuspecFile}")    
     }
 }
 
 
+nugetPush {
+    dependsOn 'nugetPack'
+    nupkgFile = "build/distributions/ActivityInfo.Client.${project.version}.nupkg"
+}
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
-    description = "Builds, verifies, and archives the binary WAR that is used by subsequent stages"
+    description = "Archives the .NET client library"
     dependsOn 'nugetPack'
     archivePath = nugetPack.packageFile
 }
