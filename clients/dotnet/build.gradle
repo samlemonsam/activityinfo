@@ -1,0 +1,97 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.10"
+        classpath "com.ullink.gradle:gradle-nuget-plugin:2.7"
+    }
+}
+
+apply plugin:'msbuild'
+apply plugin:'nuget'
+
+assemblyInfoPatcher {
+    
+    if(project.buildNumber.equals('dev')) {
+        enabled = false
+    }
+
+    version = project.version
+
+    // defaults to above version, fewer restrictions on the format
+    fileVersion = version + '-Beta'
+}
+
+msbuild {
+    
+    dependsOn 'nugetRestore'
+    dependsOn 'assemblyInfoPatcher'
+    
+    solutionFile = "${projectDir}/dotnet.sln"
+
+    projectName = 'Client'
+    
+    // targets to execute (/t:Clean;Rebuild, no default)
+    targets = ['Clean', 'Rebuild']
+
+    // Below values can override settings from the project file
+
+    // overrides project OutputPath
+    destinationDir = 'build/msbuild/bin'
+
+    // overrides project IntermediaryOutputPath
+    intermediateDir = 'build/msbuild/obj'
+
+    // Generates XML documentation file (from javadoc through custom DocLet)
+    generateDoc = false
+
+}
+
+task copyAssembly(type: Copy) {
+    dependsOn 'msbuild'
+    from("${buildDir}/msbuild/bin") {
+        include "ActivityInfo.Client.dll"
+        include "ActivityInfo.Client.pdb"
+    }
+    into "${buildDir}/tmp/nugetPack"
+}
+
+nugetPack {
+    
+    dependsOn copyAssembly
+    
+
+    
+    // this Closure will be applied to the nuspec XMLBuilder
+    nuspec {
+        metadata() {
+            id 'ActivityInfo.Client'
+            delegate.version project.version
+            title 'ActivityInfo.org Client'
+            authors 'BeDataDriven'
+            delegate.description 'API Client for ActivityInfo.org'
+            projectUrl('https://www.activityinfo.org')
+            licenseUrl('http://www.gnu.org/licenses/gpl-3.0.en.html')
+            iconUrl('https://www.activityinfo.org/img/logo.png')
+            copyright 'Copyright © BeDataDriven 2010-2015'
+        }
+        delegate.files() {
+            delegate.file(src: "ActivityInfo.Client.dll".replace('/', '\\'), target: 'lib')
+        }
+    }
+    
+    doFirst {
+        logger.lifecycle("Nuspecfile: ${nuspecFile}")    
+    }
+}
+
+
+
+task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
+    group = "Delivery Pipeline"
+    description = "Builds, verifies, and archives the binary WAR that is used by subsequent stages"
+    dependsOn 'nugetPack'
+    archivePath = nugetPack.packageFile
+}
