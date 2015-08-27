@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.11-bedatadriven2"
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.11-bedatadriven3"
         classpath "com.ullink.gradle:gradle-nuget-plugin:2.7"
     }
 }
