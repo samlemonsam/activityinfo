@@ -94,4 +94,5 @@ task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     description = "Archives the .NET client library"
     dependsOn 'nugetPack'
     archivePath = nugetPack.packageFile
+    renameTo "ActivityInfo.Client-b${project.buildNumber}.nupkg"
 }
