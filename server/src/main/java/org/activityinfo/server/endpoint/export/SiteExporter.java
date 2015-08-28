@@ -86,8 +86,8 @@ public class SiteExporter {
 
     private CellStyle attribValueStyle;
 
+    private ActivityFormDTO activity;
     private List<Integer> indicators;
-    private List<Integer> attributes;
     private List<Integer> levels;
     private HSSFCellStyle dateTimeStyle;
 
@@ -155,6 +155,7 @@ public class SiteExporter {
     }
 
     public void export(ActivityFormDTO activity, Filter filter) {
+        this.activity = activity;
 
         HSSFSheet sheet = book.createSheet(composeUniqueSheetName(activity));
         sheet.createFreezePane(4, 2);
@@ -246,16 +247,19 @@ public class SiteExporter {
             }
         }
 
-        attributes = new ArrayList<>();
         for (AttributeGroupDTO group : activity.getAttributeGroups()) {
             if (group.getAttributes().size() != 0) {
-                createHeaderCell(headerRow1, column, group.getName(), CellStyle.ALIGN_CENTER);
-                sheet.addMergedRegion(new CellRangeAddress(0, 0, column, column + group.getAttributes().size() - 1));
+                if (group.isMultipleAllowed()) {
+                    createHeaderCell(headerRow1, column, group.getName(), CellStyle.ALIGN_CENTER);
+                    sheet.addMergedRegion(new CellRangeAddress(0, 0, column, column + group.getAttributes().size() - 1));
 
-                for (AttributeDTO attrib : group.getAttributes()) {
-                    attributes.add(attrib.getId());
-                    createHeaderCell(headerRow2, column, attrib.getName(), attribHeaderStyle);
-                    sheet.setColumnWidth(column, characters(ATTRIBUTE_COLUMN_WIDTH));
+                    for (AttributeDTO attrib : group.getAttributes()) {
+                        createHeaderCell(headerRow2, column, attrib.getName(), attribHeaderStyle);
+                        sheet.setColumnWidth(column, characters(ATTRIBUTE_COLUMN_WIDTH));
+                        column++;
+                    }
+                } else {
+                    createHeaderCell(headerRow2, column, group.getName(), CellStyle.ALIGN_CENTER);
                     column++;
                 }
             }
@@ -345,12 +349,23 @@ public class SiteExporter {
             createIndicatorValueCell(row, column++, site.getIndicatorValue(indicatorId));
         }
 
-        for (Integer attribId : attributes) {
-
-            boolean value = site.getAttributeValue(attribId);
-            Cell valueCell = createCell(row, column, value);
-            valueCell.setCellStyle(attribValueStyle);
-            column++;
+        for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
+            for (AttributeDTO attrib : attributeGroup.getAttributes()) {
+                if (attributeGroup.isMultipleAllowed()) {
+                    boolean value = site.getAttributeValue(attrib.getId());
+                    Cell valueCell = createCell(row, column, value);
+                    valueCell.setCellStyle(attribValueStyle);
+                    column++;
+                } else {
+                    boolean value = site.getAttributeValue(attrib.getId());
+                    if (value) {
+                        Cell valueCell = createCell(row, column, attrib.getName());
+                        valueCell.setCellStyle(attribValueStyle);
+                        column++;
+                        break;
+                    }
+                }
+            }
         }
 
         for (Integer levelId : levels) {
