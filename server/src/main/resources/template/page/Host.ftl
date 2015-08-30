@@ -21,11 +21,7 @@
 -->
 <#-- @ftlvariable name="" type="org.activityinfo.server.login.model.HostPageModel" -->
 <!DOCTYPE html>
-<#if appCacheEnabled>
 <html manifest="ActivityInfo/ActivityInfo.appcache">
-<#else>
-<html>
-</#if>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="application-name" content="ActivityInfo"/>

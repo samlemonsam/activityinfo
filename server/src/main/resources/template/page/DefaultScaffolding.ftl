@@ -19,16 +19,23 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>${title}</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=10">
-
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <!-- CSS Files -->
-    <link href="/css/style.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
     <script type="text/javascript">
         var _gaq = _gaq || [];
@@ -47,93 +54,18 @@
     </script>
 </head>
 <body>
-<div id="wrap">
 
-    <header role="banner">
-
-        <div id="inner-header" class="clearfix">
-
-            <div class="navbar navbar-static-top">
-                <div class="navbar-inner">
-                    <div class="container nav-container">
-                        <nav role="navigation">
-                            <a class="brand" href="http://about.activityinfo.org" style=""><img
-                                    src="/img/logo-shadow.png"><span>${label.activityInfo}</span></a>
-                            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                            </a>
-
-                            <div class="pull-right">
-                                <ul class="upper nav">
-                                    <li class="language <#if .lang="en">active</#if>"><a href="">en</a></li>
-                                    <li class="language <#if .lang="fr">active</#if>"><a href="">fr</a></li>
-                                    <li class="normal-header">
-                                        <a href="/login" class="btn">${label.login}</a>
-                                    </li>
-                                    <li>
-                                        <a href="/signUp" class="btn">${label.signUpButton}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="nav-collapse pull-right normal-header">
-                                <ul id="menu-activity-info" class="nav">
-                                    <li><a href="//about.activityinfo.org/">Home</a></li>
-                                    <li><a href="//about.activityinfo.org/feature/flexible/">Features</a></li>
-                                    <li><a href="//about.activityinfo.org/case-studies/">Who uses AI?</a></li>
-                                    <li><a href="//about.activityinfo.org/learn/">Learning Center</a></li>
-                                </ul>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
+    <nav class="navbar navbar-inverse navbar-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">ActivityInfo</a>
             </div>
-            <!-- /.navbar -->
-
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/signUp">${label.signUpButton}</a></li>
+                <li><a href="/login">${label.login}</a></li>
+            </ul>
         </div>
-        <!-- end #inner-header -->
-
+    </nav>
     ${body}
-
-        <div id="push"></div>
-</div>
-
-<div id="footer">
-    <footer role="contentinfo" class="container">
-        <div id="inner-footer" class="row">
-            <div class="span3">
-                <div id="text-4" class="widget widget_text">
-                    <h4>Developed by</h4>
-
-                    <div class="textwidget">
-                        <p><a href="http://www.unicef.org" target="_blank">
-                            <img src="/img/unicef-logo.png"></a></p>
-
-                        <p><a href="http://www.bedatadriven.com" target="_blank">
-                            <img src="/img/bdd.png"></a></p>
-                    </div>
-                </div>
-            </div>
-            <div class="span3">
-                <div id="text-5" class="widget widget_text">
-                    <h4>Partners</h4>
-
-                    <div class="textwidget">
-                        <p><a href="http://www.unocha.org" target="_blank">
-                            <img src="/img/OCHA-Logo.png"></a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="span3">
-                &nbsp;
-            </div>
-            <div class="span3">
-            </div>
-        </div>
-</div>
-</footer> <!-- end footer -->
-</div>
 </body>
 </html>

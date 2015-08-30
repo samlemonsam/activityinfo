@@ -19,161 +19,126 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "Scaffolding.ftl">
 <@scaffolding title="${label.signUpTitle}">
+<div class="container">
 
-    <@content>
-
-        <#if !domain.signUpAllowed>
+    <#if !domain.signUpAllowed>
         <p>Please contact your local focal point to connect to this
             ActivityInfo database.</p>
-        <#else>
-        <div class="row">
-            <div class="span12">
-                <h3>${label.signUpTitle}</h3>
-            </div>
+    <#else>
+        <div class="page-header">
+            <h1>${label.signUpTitle}</h1>
         </div>
         <div class="row">
-            <div class="span6">
-
+            <div class="col-md-6">
                 <#if genericError == true || formError == true>
-                    <div class="alert alert-error">
+                    <div class="alert alert-danger">
                     ${label.signUpGenericError}
                     </div>
                 </#if>
-
+        
                 <#if confirmationEmailSent == true>
                     <div class="alert alert-success">
                     ${label.signUpEmailSent}
                     </div>
-
+        
                 <#else>
-
                     <form action="" method="post" id="signUpForm">
-
-                        <div class="control-group" id="nameGroup">
-                            <label class="control-label" for="nameInput">${label.name}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="name" id="nameInput" value="${name}">
-                                <span class="help-inline hide" id="nameHelp">${label.pleaseEnterYourFullName}</span>
-                            </div>
+        
+                        <div class="form-group" id="nameGroup">
+                            <label for="nameInput">${label.name}:</label>
+                            <input type="text" class="form-control" name="name" id="nameInput" value="${name}">
+                            <p class="help-block hide" id="nameHelp">${label.pleaseEnterYourFullName}</p>
                         </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="organizationInput">${label.organization}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="organization" id="organizationInput" value="${organization}">
-                            </div>
+        
+                        <div class="form-group">
+                            <label for="organizationInput">${label.organization}:</label>
+                            <input type="text" class="form-control" name="organization" id="organizationInput" value="${organization}">
                         </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="jobtitleInput">${label.jobtitle}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="jobtitle" id="jobtitleInput" value="${jobtitle}">
-                            </div>
+        
+                        <div class="form-group">
+                            <label for="jobtitleInput">${label.jobtitle}:</label>
+                            <input type="text" class="form-control" name="jobtitle" id="jobtitleInput" value="${jobtitle}">
                         </div>
-
-                        <div class="control-group" id="emailGroup">
-                            <label class="control-label" for="emailInput">${label.emailAddress}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="email" id="emailInput" value="${email}">
-                                <span class="help-inline hide"
-                                      id="emailHelp">${label.pleaseEnterAValidEmailAddress}</span>
-                            </div>
+        
+                        <div class="form-group" id="emailGroup">
+                            <label for="emailInput">${label.emailAddress}:</label>
+                            <input type="text" class="form-control" name="email" id="emailInput" value="${email}">
+                            <p class="help-block hide" id="emailHelp">${label.pleaseEnterAValidEmailAddress}</p>
                         </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="localeInput">${label.preferredLanguage}:</label>
-
-                            <div class="controls">
-                                <select name="locale" id="localeInput">
-                                    <option value="en">${label.english}</option>
-                                    <option value="fr">${label.francais}</option>
-                                </select>
-                            </div>
+        
+                        <div class="form-group">
+                            <label for="localeInput">${label.preferredLanguage}:</label>
+                            <select name="locale" id="localeInput" class="form-control">
+                                <option value="en">${label.english}</option>
+                                <option value="fr">${label.francais}</option>
+                            </select>
                         </div>
-
-                        <div class="control-group">
-                            <label class="control-label">&nbsp;</label>
-
-                            <div class="controls">
-                                <button type="submit" class="btn btn-primary btn-large">${label.signUpButton}</button>
-                            </div>
-                        </div>
+        
+                        <button type="submit" class="btn btn-primary btn-large">${label.signUpButton}</button>
                     </form>
                 </#if>
             </div>
-            <div class="span6">
-
-
+            <div class="col-md-6">
                 <div class="well">
                     <h4>Free for teams of ten or less</h4>
-
+        
                     <p>Please feel free to use ActivityInfo.org for
                         small field teams. If you plan to adopt the system
                         across your organization, we'll ask to you to make
                         an annual contribution to the system's running costs.
-
+        
                     <p>
-
+        
                     <p><a href="mailto:support@activityinfo.org">Contact us</a>
                         for more information.</p>
-
+        
                     <p>In any case, you're welcome to evaluate the system without
                         restriction as long as needed!</p>
-
+        
                 </div>
                 <div class="alert">
                     <h4>Looking for your Cluster's database?</h4>
-
+        
                     <p>Only your cluster lead can grant you access
                         to the cluster's database. Please contact your local
                         focal point and request access.</p>
-
+        
                 </div>
             </div>
         </div>
-        </#if>
-    </@content>
+    </#if>
+</div>
+<script type="text/javascript">
+    var validateName = function () {
+        var valid = !!( $('#nameInput').val() );
+        $('#nameGroup').toggleClass('error', !valid);
+        $('#nameHelp').toggleClass('hide', valid);
+        return valid;
+    };
 
-    <@footer/>
+    var validateEmail = function () {
+        var email = $('#emailInput').val();
+        var valid = !!email;
+        if (valid) {
+            var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            valid = regex.test(email);
+        }
+        $('#emailGroup').toggleClass('error', !valid);
+        $('#emailHelp').toggleClass('hide', valid);
+        return valid;
+    };
 
-    <@scripts>
-    <script type="text/javascript">
-        var validateName = function () {
-            var valid = !!( $('#nameInput').val() );
-            $('#nameGroup').toggleClass('error', !valid);
-            $('#nameHelp').toggleClass('hide', valid);
-            return valid;
-        };
+    $("#nameInput").change(validateName);
+    $("#emailInput").change(validateEmail);
+    $("#signUpForm").submit(function () {
+        var valid = validateName() && validateEmail();
+        return !!valid;
+    });
 
-        var validateEmail = function () {
-            var email = $('#emailInput').val();
-            var valid = !!email;
-            if (valid) {
-                var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-                valid = regex.test(email);
-            }
-            $('#emailGroup').toggleClass('error', !valid);
-            $('#emailHelp').toggleClass('hide', valid);
-            return valid;
-        };
-
-        $("#nameInput").change(validateName);
-        $("#emailInput").change(validateEmail);
-        $("#signUpForm").submit(function () {
-            var valid = validateName() && validateEmail();
-            return !!valid;
-        });
-
-        $(document).ready(function () {
-            $("#localeInput").val("${locale}");
-            $("#nameInput").focus();
-        });
-    </script>
-    </@scripts>
+    $(document).ready(function () {
+        $("#localeInput").val("${locale}");
+        $("#nameInput").focus();
+    });
+</script>
 </@scaffolding>

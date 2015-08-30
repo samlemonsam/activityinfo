@@ -19,21 +19,17 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "Scaffolding.ftl">
 <@scaffolding title="${label.invalidOrExpiredInvite}">
-
-    <@content>
+<div class="container">
     <div class="row">
-        <div class="span12">
-            <div class="page-header"><h1 class="page-title">${label.invalidInvitation}</h1></div>
-
-        ${label.invalidInvitationDetail}
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1>${label.invalidInvitation}</h1>
+            </div>
+             ${label.invalidInvitationDetail}
 
             <p><a href="login" class="btn btn-primary">${label.loginNow}</a></p>
         </div>
     </div>
-    </@content>
-
-    <@footer/>
-    <@scripts/>
+</div>
 </@scaffolding>

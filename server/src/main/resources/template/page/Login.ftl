@@ -19,88 +19,76 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "Scaffolding.ftl">
 <@scaffolding title="${label.login}">
-
-    <@content>
-    <div id="main" class="row clearfix" role="main">
-
-        <div class="span8">
-            <h4 style="margin-top:50px">${label.whatIsActivityInfo}</h4>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h3>${label.whatIsActivityInfo}</h3>
 
             <p class="lead">${label.activityInfoIntro}</p>
 
             <p>
-                <a href="/" class="btn">${label.learnMore}&nbsp;&raquo;</a>
-                <#if domain.signUpAllowed><a href="/signUp" class="btn">Sign Up&nbsp;&raquo;</a></#if>
+                <a href="/" class="btn btn-info">${label.learnMore}&nbsp;&raquo;</a>
+                <#if domain.signUpAllowed><a href="/signUp" class="btn btn-info">${label.signUpButton}&nbsp;&raquo;</a></#if>
             </p>
         </div>
-
-        <div class="span4">
+        <div class="col-md-4">
             <form class="form-signin" id="loginForm" action="/login" method="POST">
                 <h3 class="form-signin-heading">${label.login}</h3>
-                <input type="text" name="email" id="emailInput" class="input-block-level"
-                       placeholder="${label.emailAddress}">
-                <input type="password" name="password" id="passwordInput" class="input-block-level"
-                       placeholder="${label.password}">
+                <div class="controls">
+                    <input type="text" name="email" id="emailInput" class="form-control" placeholder="${label.emailAddress}">
+                    <input type="password" name="password" id="passwordInput" class="form-control" placeholder="${label.password}">
 
-                <div class="alert alert-error <#if !loginError>hide</#if>" id="loginAlert">
-                ${label.incorrectLogin}
+                    <div class="alert alert-danger help-block <#if !loginError>hide</#if>" id="loginAlert">
+                    ${label.incorrectLogin}
+                    </div>
+
+                    <button class="btn btn-primary btn-large" type="submit" id="loginButton">${label.login}</button>
+                    <img src="img/ajax-loader-spinner.gif" width="16" height="16" class="hide" id="loginSpinner">
+
+                    <div class="login-problem"><a href="loginProblem">${label.forgottenYourPassword}</a></div>
                 </div>
-
-                <button class="btn btn-info btn-primary btn-large" type="submit"
-                        id="loginButton">${label.login}</button>
-                <img src="img/ajax-loader-spinner.gif" width="16" height="16" class="hide" id="loginSpinner">
-
-                <div class="login-problem"><a href="loginProblem">${label.forgottenYourPassword}</a></div>
-
             </form>
         </div>
-
-
     </div>
-    </@content>
-    <@footer/>
-    <@scripts>
-    <script type="text/javascript">
+</div>
+<script type="text/javascript">
 
+    var enableForm = function (enabled) {
+        $('#loginButton').prop('disabled', !enabled);
+        $('#loginSpinner').toggleClass('hide', enabled);
+    }
 
-        var enableForm = function (enabled) {
-            $('#loginButton').prop('disabled', !enabled);
-            $('#loginSpinner').toggleClass('hide', enabled);
-        }
+    $('#loginForm').submit(function () {
 
-        $('#loginForm').submit(function () {
+        $('#loginAlert').addClass('hide');
 
-            $('#loginAlert').addClass('hide');
-
-            enableForm(false);
-            $.ajax({
-                url: '/login/ajax',
-                type: 'POST',
-                data: {
-                    email: $('#emailInput').val(),
-                    password: $('#passwordInput').val(),
-                    ajax: 'true'
-                },
-                success: function () {
-                    if (window.location.pathname != '/') {
-                        window.location = '/' + window.location.search + window.location.hash;
-                    } else {
-                        window.location.reload(true);
-                    }
-                },
-                error: function (xhr) {
-                    $('#loginAlert').toggleClass('hide', false);
-                },
-                complete: function () {
-                    enableForm(true);
+        enableForm(false);
+        $.ajax({
+            url: '/login/ajax',
+            type: 'POST',
+            data: {
+                email: $('#emailInput').val(),
+                password: $('#passwordInput').val(),
+                ajax: 'true'
+            },
+            success: function () {
+                if (window.location.pathname != '/') {
+                    window.location = '/' + window.location.search + window.location.hash;
+                } else {
+                    window.location.reload(true);
                 }
-            });
-            return false;
+            },
+            error: function (xhr) {
+                $('#loginAlert').toggleClass('hide', false);
+            },
+            complete: function () {
+                enableForm(true);
+            }
         });
+        return false;
+    });
 
-        $('#emailInput').focus();
-    </script>
-    </@scripts>
+    $('#emailInput').focus();
+</script>
 </@scaffolding>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dispatch-entries>
+  
+  <dispatch>
+    <url>*/about/*</url>
+    <module>site</module>
+  </dispatch>
+  
+  <dispatch>
+    <url>*/blog/*</url>
+    <module>site</module>
+  </dispatch>
+  
+</dispatch-entries>
