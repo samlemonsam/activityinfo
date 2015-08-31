@@ -67,7 +67,7 @@ public class ConfirmInviteController {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
             return new ConfirmInvitePageModel(user).asViewable();
 
-        } catch (NoResultException e) {
+        } catch (NoResultException e) { 
             return new InvalidInvitePageModel().asViewable();
         }
     }

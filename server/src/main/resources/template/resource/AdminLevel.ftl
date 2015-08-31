@@ -19,28 +19,26 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>
  #L%
 -->
-<#include "../page/Scaffolding.ftl">
 <@scaffolding title="${name}" leaflet=true>
 
-    <@content>
-    <h1>${name}</h1>
-
+<div class="container">
+    <div class="page-header">
+        <h1>${name}</h1>
+    </div>
     <p>Administrative Level in ${country.name}</p>
 
-    <div id="map" style="height:350px;"></div>
-
-        <#if parent?has_content >
+    <#if parent?has_content >
         <p>Subdivision of <a href="/resources/adminLevel/${parent.id?c}">${parent.name}</a></p>
-        </#if>
+    </#if>
 
-        <#if childLevels?has_content >
+    <#if childLevels?has_content >
         <h2>Child Levels</h2>
         <ul>
             <#list childLevels as child>
                 <li><a href="/resources/adminLevel/${child.id?c}">${child.name}</a></li>
             </#list>
         </ul>
-        </#if>
+    </#if>
 
     <h2>Entities</h2>
     <ul>
@@ -58,14 +56,5 @@
             <dd>${version.message!"No commit message"}</dd>
         </#list>
     </dl>
-
-
-    </@content>
-<script type="application/javascript">
-    var map = L.map('map').setView([${country.bounds.centerLat?c}, ${country.bounds.centerLon?c}], 6);
-    L.tileLayer('/resources/adminLevel/${id?c}/tiles/{z}/{x}/{y}.png', {
-        attribution: 'ActivityInfo',
-        maxZoom: 10
-    }).addTo(map);
-</script>
+</div>
 </@scaffolding>

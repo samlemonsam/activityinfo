@@ -26,10 +26,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
+import org.activityinfo.server.branding.Domain;
 import org.activityinfo.server.database.hibernate.dao.Transactional;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDAOImpl;
-import org.activityinfo.server.database.hibernate.entity.Domain;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.SignUpAddressExistsPageModel;
 import org.activityinfo.server.login.model.SignUpPageModel;
@@ -117,6 +117,10 @@ public class SignUpController {
                                               .asViewable()).build();
         }
 
+        // Trim extra spaces
+        email = email.trim();
+        name = name.trim();
+        
         try {
             // check duplicate email
             if (userDAO.get().doesUserExist(email)) {
