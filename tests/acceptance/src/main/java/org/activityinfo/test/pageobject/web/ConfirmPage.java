@@ -68,6 +68,6 @@ public class ConfirmPage {
 
 
     public void assertPasswordIsTooShort() {
-        page.find().span(containingText("Password must be at least")).waitForFirst();
+        page.find().div(containingText("Password must be at least")).waitForFirst();
     }
 }
