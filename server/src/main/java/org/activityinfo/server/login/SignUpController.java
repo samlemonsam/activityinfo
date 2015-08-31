@@ -117,6 +117,10 @@ public class SignUpController {
                                               .asViewable()).build();
         }
 
+        // Trim extra spaces
+        email = email.trim();
+        name = name.trim();
+        
         try {
             // check duplicate email
             if (userDAO.get().doesUserExist(email)) {

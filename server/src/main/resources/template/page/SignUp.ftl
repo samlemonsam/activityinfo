@@ -47,7 +47,7 @@
         
                         <div class="form-group" id="nameGroup">
                             <label for="nameInput">${label.name}:</label>
-                            <input type="text" class="form-control" name="name" id="nameInput" value="${name}">
+                            <input type="text" class="form-control" name="name" id="nameInput" value="${name}" autofocus >
                             <p class="help-block hide" id="nameHelp">${label.pleaseEnterYourFullName}</p>
                         </div>
         
@@ -63,14 +63,14 @@
         
                         <div class="form-group" id="emailGroup">
                             <label for="emailInput">${label.emailAddress}:</label>
-                            <input type="text" class="form-control" name="email" id="emailInput" value="${email}">
+                            <input type="text" class="form-control" name="email" id="emailInput" value="${email}" >
                             <p class="help-block hide" id="emailHelp">${label.pleaseEnterAValidEmailAddress}</p>
                         </div>
         
                         <div class="form-group">
                             <label for="localeInput">${label.preferredLanguage}:</label>
-                            <select name="locale" id="localeInput" class="form-control">
-                                <option value="en">${label.english}</option>
+                            <select name="locale" id="localeInput" class="form-control" >
+                                <option value="en" selected>${label.english}</option>
                                 <option value="fr">${label.francais}</option>
                             </select>
                         </div>
@@ -121,7 +121,7 @@
         var email = $('#emailInput').val();
         var valid = !!email;
         if (valid) {
-            var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            var regex = /^\s*\S+\@\S+\s*$/;
             valid = regex.test(email);
         }
         $('#emailGroup').toggleClass('error', !valid);
@@ -134,11 +134,6 @@
     $("#signUpForm").submit(function () {
         var valid = validateName() && validateEmail();
         return !!valid;
-    });
-
-    $(document).ready(function () {
-        $("#localeInput").val("${locale}");
-        $("#nameInput").focus();
     });
 </script>
 </@scaffolding>
