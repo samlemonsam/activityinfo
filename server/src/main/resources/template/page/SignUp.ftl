@@ -133,6 +133,7 @@
     $("#emailInput").change(validateEmail);
     $("#signUpForm").submit(function () {
         var valid = validateName() && validateEmail();
+        console.log("valid: " + !!valid);
         return !!valid;
     });
 </script>

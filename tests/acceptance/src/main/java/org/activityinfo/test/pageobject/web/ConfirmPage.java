@@ -42,7 +42,7 @@ public class ConfirmPage {
         });
         page.findElement(PASSWORD_INPUT).clear().sendKeys(password);
         page.findElement(PASSWORD_CONFIRM_INPUT).clear().sendKeys(password);
-        page.findElement(SUBMIT_BUTTON).click();
+        page.findElement(SUBMIT_BUTTON).submit();
 
         ApplicationPage applicationPage = new ApplicationPage(page);
         applicationPage.waitUntilLoaded();
@@ -68,6 +68,6 @@ public class ConfirmPage {
 
 
     public void assertPasswordIsTooShort() {
-        page.find().div(containingText("Password must be at least")).waitForFirst();
+        page.find().p(containingText("Password must be at least")).waitForFirst();
     }
 }
