@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import freemarker.core.Environment;
 import freemarker.template.*;
-import org.activityinfo.server.database.hibernate.entity.Domain;
 
 import java.io.IOException;
 import java.io.StringWriter;

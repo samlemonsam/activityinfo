@@ -32,7 +32,7 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.activityinfo.server.database.hibernate.entity.Domain;
+import org.activityinfo.server.branding.Domain;
 
 /**
  * Provides Dependency Injection of the FreeMarker Template Configuration
