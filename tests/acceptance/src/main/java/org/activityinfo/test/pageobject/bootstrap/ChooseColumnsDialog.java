@@ -31,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -142,7 +141,7 @@ public class ChooseColumnsDialog {
 
             modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
                 @Override
-                public boolean apply(@Nullable WebDriver input) {
+                public boolean apply(WebDriver input) {
                     // if not in invisible row list then stop waiting
                     for (BsTable.Row notVisible : allColumnsRows(false)) {
                         if (notVisible.getContainer().text().contains(text)) {

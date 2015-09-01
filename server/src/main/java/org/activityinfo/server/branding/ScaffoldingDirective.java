@@ -5,12 +5,16 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import freemarker.core.Environment;
 import freemarker.template.*;
-import org.activityinfo.server.database.hibernate.entity.Domain;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 
+/**
+ * Freemarker directive that decorates the page with a domain-specific 
+ * template. This allows the site to be dynamically white-labled for different
+ * domains, for example, www.syrianrefugeeresponse.org or www.washinfo.org
+ */
 public class ScaffoldingDirective implements TemplateDirectiveModel {
 
     private Provider<Domain> domainProvider;

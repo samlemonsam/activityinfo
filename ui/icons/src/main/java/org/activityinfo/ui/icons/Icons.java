@@ -137,4 +137,8 @@ public class Icons  {
         return "icon icon_exception";
     }
 
+    public String bars() {
+        return "icon icon_bars";
+    }
+    
 }

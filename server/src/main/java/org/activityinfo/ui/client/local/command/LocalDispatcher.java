@@ -114,7 +114,7 @@ public class LocalDispatcher extends AbstractDispatcher {
     }
 
     private <R extends CommandResult> void executeRemotely(final Command<R> command, final AsyncCallback<R> callback) {
-        Log.debug("No handler for " + command + ", executing remotely.");
+        Log.debug("No offline handler for " + command + ", executing remotely.");
 
         remoteDispatcher.execute(command, new ChainedCallback<R>(callback) {
 

@@ -1,4 +1,6 @@
 
+evaluationDependsOn ":ui:app"
+
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
@@ -60,9 +62,9 @@ war {
         return !file.name.startsWith('guava-gwt') &&
                 !file.name.startsWith('gwt-user')
     }
+    from project(':ui:app').tasks.getByName('compileGwt').outputs
     exclude("**/*.symbolMap")
 }
-
 
 
 test {
@@ -181,6 +183,13 @@ task deployBetaApi(type: com.google.appengine.task.appcfg.UpdateTask) {
 
 }
 
+task deployDispatch(type: com.google.appengine.task.appcfg.UpdateDispatchTask) {
+    dependsOn appengineDownloadSdk
+    webAppSourceDirectory = new File("${projectDir}/src/main/webapp")
+
+    extraOptions = ["--application=${environment.projectId}", '--version=qa']
+
+}
 
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"

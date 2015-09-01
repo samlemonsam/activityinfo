@@ -19,16 +19,15 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "../page/Scaffolding.ftl">
 <@scaffolding title="${name}">
-
-
-    <@content>
+<div class="container">
+    <div class="page-header">
     <h1>${name}</h1>
-
+    </div>
+    
     <h2>Administrative Unit Levels</h2>
-        <@showLevels children=adminLevels/>
-    </@content>
+    <@showLevels children=adminLevels/>
+</div>
 </@scaffolding>
 
 <#macro showLevels children>

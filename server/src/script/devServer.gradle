@@ -97,6 +97,49 @@ task appengineDevMode(type: JavaExec) {
     }
 }
 
+
+task appengineDevMode3(type: JavaExec) {
+    dependsOn appengineDownloadSdk
+    dependsOn appengineExplodeDevMode
+
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Java sources first, so that changes get picked up on refresh
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    for(subProject in [':i18n', ':ui:app', ':ui:style', ':ui:icons']) {
+        classpath project(subProject).sourceSets.main.java.srcDirs
+        classpath project(subProject).sourceSets.main.resources.srcDirs
+    }
+    classpath project(':ui:style').task('grunt_build').outputs.files
+    
+    // Compiled java classes and libraries second
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
+    args '-war', "${buildDir}/explodedDevMode"
+    args '-startupUrl', 'app'
+    args '-port', devServerPort
+    args 'org.activityinfo.ui.App'
+
+    doFirst {
+        // The SDK root is only available after appengineDownloadSdk runs
+        def sdkRoot = System.getProperty('appengine.sdk.root')
+        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+        classpath project(':ui:app').configurations.getByName('gwt').files
+        classpath project(':ui:style').configurations.getByName('gwt').files
+
+        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
+
+        // Write the application configuration pointing to the development database
+        writeConfiguration mysql.localDev
+        jvmArgs "-Dactivityinfo.config=${configFile}"
+        jvmArgs "-Xdebug"
+        jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+    }
+}
+
 appengineRun {
     ext.database = mysql.localDev
     

@@ -19,90 +19,73 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "Scaffolding.ftl">
 <@scaffolding title="${label.signUpConfirmationTitle}">
 
-    <@content>
-    <div class="row">
-        <div class="span12">
+<div class="container">
 
-            <#if genericError == true>
-                <div class="alert alert-error">
-                ${label.signUpGenericError}
-                </div>
-            </#if>
-
-            <h3>${label.signUpConfirmationTitle}</h3>
-
-            <p class="well">${label.signUpConfirmationDetail}</p>
-
-            <form action="" method="post" id="confirmForm">
-                <input type="hidden" name="key" value="${key}"/>
-
-                <div class="control-group" id="passwordGroup">
-                    <label class="control-label" for="passwordInput">${label.choosePassword}:</label>
-
-                    <div class="controls">
-                        <input type="password" name="password" id="passwordInput">
-                        <span class="help-inline hide" id="passwordHelp">${label.passwordHelp}.</span>
-                    </div>
-                </div>
-                <div class="control-group" id="confirmPasswordGroup">
-                    <label class="control-label" for="confirmPasswordInput">${label.confirmYourPassword}:</label>
-
-                    <div class="controls">
-                        <input type="password" name="password2" id="confirmPasswordInput">
-                        <span class="help-inline hide" id="confirmPasswordHelp">${label.passwordDoNotMatch}</span>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="checkbox">
-                        <input type="checkbox" checked="true" name="newsletter" value="true">
-                    ${label.newsletter}
-                    </label>
-                </div>
-
-                <div class="control-group">
-                    <div class="controls">
-                        <button type="submit" class="btn btn-primary btn-large">${label.continue}  &raquo;</button>
-                    </div>
-                </div>
-            </form>
+    <#if genericError == true>
+        <div class="alert alert-danger">
+        ${label.signUpGenericError}
         </div>
+    </#if>
+
+    <div class="page-header">
+        <h1>${label.signUpConfirmationTitle}</h1>
     </div>
-    </@content>
 
-    <@footer/>
+    <p class="well">${label.signUpConfirmationDetail}</p>
 
-    <@scripts>
-    <script type="text/javascript">
+    <form action="" method="post" id="confirmForm">
+        <input type="hidden" name="key" value="${key}"/>
 
-        var validatePass = function () {
-            var pass1 = $('#passwordInput').val();
-            var pass2 = $('#confirmPasswordInput').val();
+        <div class="form-group" id="passwordGroup">
+            <label for="passwordInput">${label.choosePassword}:</label>
 
-            var valid = pass1 && pass1.length >= 6;
-            $('#passwordGroup').toggleClass('error', !valid);
-            $('#passwordHelp').toggleClass('hide', valid);
+            <input type="password" class="form-control" name="password" id="passwordInput">
+            <p class="help-block hide" id="passwordHelp">${label.passwordHelp}.</p>
+        </div>
+        <div class="form-group" id="confirmPasswordGroup">
+            <label for="confirmPasswordInput">${label.confirmYourPassword}:</label>
+            <input type="password" class="form-control" name="password2" id="confirmPasswordInput">
+            <p class="help-block hide" id="confirmPasswordHelp">${label.passwordDoNotMatch}</p>
+        </div>
 
-            var confirmed = pass2 && (pass1 == pass2);
-            $('#confirmPasswordGroup').toggleClass('error', !confirmed);
-            $('#confirmPasswordHelp').toggleClass('hide', confirmed);
+        <div class="check-box">
+            <label>
+                <input type="checkbox" checked="true" name="newsletter" value="true">
+            ${label.newsletter}
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-large">${label.continue}  &raquo;</button>
+    </form>
+</div>
 
-            return valid && confirmed;
-        };
+<script type="text/javascript">
 
-        $("#passwordInput").change(validatePass);
-        $("#confirmPasswordInput").change(validatePass);
-        $("#confirmForm").submit(function () {
-            var valid = validatePass();
-            return !!valid;
-        });
+    var validatePass = function () {
+        var pass1 = $('#passwordInput').val();
+        var pass2 = $('#confirmPasswordInput').val();
 
-        $(document).ready(function () {
-            $("#passwordInput").focus();
-        });
-    </script>
-    </@scripts>
+        var valid = pass1 && pass1.length >= 6;
+        $('#passwordGroup').toggleClass('error', !valid);
+        $('#passwordHelp').toggleClass('hide', valid);
+
+        var confirmed = pass2 && (pass1 == pass2);
+        $('#confirmPasswordGroup').toggleClass('error', !confirmed);
+        $('#confirmPasswordHelp').toggleClass('hide', confirmed);
+
+        return valid && confirmed;
+    };
+
+    $("#passwordInput").change(validatePass);
+    $("#confirmPasswordInput").change(validatePass);
+    $("#confirmForm").submit(function () {
+        var valid = validatePass();
+        return !!valid;
+    });
+
+    $(document).ready(function () {
+        $("#passwordInput").focus();
+    });
+</script>
 </@scaffolding>

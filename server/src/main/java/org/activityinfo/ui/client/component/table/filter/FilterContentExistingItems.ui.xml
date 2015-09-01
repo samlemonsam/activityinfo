@@ -14,5 +14,8 @@
       <g:Button addStyleNames="btn btn-default btn-xs" ui:field="deselectAllButton" text="{i18n.deselectAll}"/>
     </g:HTMLPanel>
     <a:LoadingPanel ui:field="loadingPanel"/>
+    <g:HTMLPanel addStyleNames="has-error" ui:field="messageSpanContainer" visible="false">
+      <span class="help-block" ui:field="messageSpan"/>
+    </g:HTMLPanel>
   </g:HTMLPanel>
 </ui:UiBinder>

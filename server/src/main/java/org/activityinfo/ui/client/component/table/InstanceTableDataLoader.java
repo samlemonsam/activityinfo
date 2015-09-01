@@ -111,10 +111,12 @@ public class InstanceTableDataLoader {
         }
     }
 
+    public InstanceQuery createInstanceQuery(int offset, int countToLoad) {
+        return new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, countToLoad);
+    }
 
     private Promise<QueryResult<Projection>> query(int offset, int countToLoad) {
-        InstanceQuery query = new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, countToLoad);
-        return table.getResourceLocator().queryProjection(query);
+        return table.getResourceLocator().queryProjection(createInstanceQuery(offset, countToLoad));
     }
 
     public boolean isAllLoaded() {
@@ -192,8 +194,10 @@ public class InstanceTableDataLoader {
     }
 
     public void reload() {
+        prefetchedResult = null;
         instanceTotalCount = -1;
         tableDataProvider.getList().clear();
+
         load(0, PAGE_SIZE, false);
     }
 
@@ -201,4 +205,8 @@ public class InstanceTableDataLoader {
         return fields;
     }
 
+    public void reset() {
+        fields.clear();
+        prefetchedResult = null;
+    }
 }

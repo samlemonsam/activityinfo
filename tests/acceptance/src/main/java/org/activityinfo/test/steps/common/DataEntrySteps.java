@@ -1,5 +1,6 @@
 package org.activityinfo.test.steps.common;
 
+import com.google.common.base.Optional;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -11,6 +12,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.TableDataParser;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
@@ -19,6 +21,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
+import org.junit.Assert;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -200,6 +203,15 @@ public class DataEntrySteps {
     @When("^I open a new form submission for \"([^\"]*)\" then following fields are visible:$")
     public void I_open_a_new_form_submission_for_then_following_fields_are_visible(String formName, List<String> fieldLabels) throws Throwable {
         driver.assertFieldsOnNewForm(formName, fieldLabels);
+    }
+
+    @When("^I open a new form submission for \"([^\"]*)\" then following fields are invisible:$")
+    public void I_open_a_new_form_submission_for_then_following_fields_are_invisible(String formName, List<String> fieldLabels) throws Throwable {
+
+        for (String fieldLabel : fieldLabels) {
+            Optional<BsFormPanel.BsField> formItem = driver.getFormFieldFromNewSubmission(formName, fieldLabel);
+            Assert.assertTrue(!formItem.isPresent());
+        }
     }
 
     @When("^I open a new form submission for \"([^\"]*)\" then field values are:$")

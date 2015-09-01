@@ -1,0 +1,115 @@
+
+// Styles for the column mapping grid
+//
+//@import (reference) "../bootstrap/variables";
+//@import (reference) "../bootstrap/mixins";
+//@import (reference) "../bootstrap/tables";
+//@import (reference) "datagrid";
+
+@cm-accent-color: @brand-primary;
+@cm-accent-text-color: #fff;
+
+.cm-datagrid {
+
+  td {
+    cursor: pointer;
+  }
+
+  // Table Headers
+  th {
+    white-space: nowrap;
+    overflow: hidden;
+
+    // The first row header shows the
+    // original column header
+    &.source-column {
+      background-color: @table-bg-accent;
+      font-weight: bold;
+
+      &.state-ignored { text-decoration: line-through; }
+    }
+
+    // The second row header shows the
+    // binding to the destination field
+    &.mapping {
+      background-color: lighter(@table-bg-accent, 25%);
+      font-style: italic;
+      color: @input-color-placeholder;
+
+      &.state-ignored {
+        font-style: normal;
+        color: @state-danger-text;
+      }
+      &.state-unset {
+        font-style: italic;
+        color: @input-color-placeholder;
+      }
+      &.state-bound {
+        font-style: normal;
+        color: @state-success-text;
+      }
+      &.selected {
+        background-color: white;
+      }
+    }
+  }
+
+  // Body Columns
+  col {
+    &.state-ignored { background-color: @state-danger-bg; }
+    &.state-bound { background-color: @state-success-bg; }
+    &.selected { background-color: @table-bg-active; }
+  }
+
+}
+
+.cm-field-selector {
+
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  // to match table
+  margin-left: 1.5em;
+
+  // need correct reference to this variable
+  //font-size: @datagrid-font-size;
+
+  .radio.state-ignored {
+    margin-bottom: 1.5em;
+  }
+
+  .radio.state-ignored label {
+    color: @brand-danger;
+  }
+
+  .radio.state-bound label {
+    background-color: @state-success-bg;
+  }
+
+  .radio.state-unset label {
+    background-color: @state-danger-bg;
+  }
+
+  .radio.type-matched label {
+    color: @gray-dark;
+  }
+
+  .radio.type-not-matched label {
+    color: @gray-light;
+  }
+
+  .panel-heading {
+    padding: 5px;
+  }
+
+  &.incomplete .panel-heading {
+    background-color: @panel-danger-heading-bg;
+    color: @panel-danger-text;
+  }
+
+}
+
+.mandatory {
+  color: @brand-danger;
+}

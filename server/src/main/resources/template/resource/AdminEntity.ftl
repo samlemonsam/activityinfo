@@ -19,23 +19,24 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "../page/Scaffolding.ftl">
 <@scaffolding title="${name}">
 
-    <@content>
-    <h1>${name}</h1>
+<div class="container">
+    <div class="page-header">
+        <h1>${name}</h1>
+    </div>
 
     <p><a href="/resources/adminLevel/${level.id?c}">${level.name}</a> in <a
             href="/resources/country/${level.country.codeISO}">${level.country.name}</a></p>
-        <#if parents?has_content>
+    <#if parents?has_content>
         <h2>Parents</h2>
         <ul>
             <li>${parent.level.name}: <a href="/resources/adminEntity/${parent.id?c}">${parent.name}</a></li>
         </ul>
-        </#if>
-        <#if level.childLevels?has_content>
+    </#if>
+    <#if level.childLevels?has_content>
         <h2>Child entities</h2>
-            <#list level.childLevels as childLevel>
+        <#list level.childLevels as childLevel>
             <h3>${childLevel.name}</h3>
             <ul>
                 <#list childLevel.entities?sort_by("name") as childEntity>
@@ -44,7 +45,7 @@
                     </#if>
                 </#list>
             </ul>
-            </#list>
-        </#if>
-    </@content>
+        </#list>
+    </#if>
+</div>
 </@scaffolding>

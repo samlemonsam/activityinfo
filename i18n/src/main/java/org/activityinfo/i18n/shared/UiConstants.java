@@ -372,6 +372,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Publish to website")
     String embed();
 
+    @DefaultStringValue("If you don''t wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
+    String digestUnsubscribeConstant();
+
     @DefaultStringValue("Your dashboard is empty! You can choose which reports appear on your dashboard by starring them in the reports page.")
     String emptyDashboard();
 
@@ -1379,7 +1382,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("or")
     String orWithSpaces();
-
+    
+    @DefaultStringValue("Try the new data entry page (BETA)")
+    String tryNewDataEntryInterface();
+    
     @DefaultStringValue("Always applicable")
     String relevanceEnabled();
 
@@ -1592,4 +1598,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Single selection")
     String singleSelection();
+
+    @DefaultStringValue("Please select at least one item")
+    String pleaseSelectAtLeastOneItem();
 }

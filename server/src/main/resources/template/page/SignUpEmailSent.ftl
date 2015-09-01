@@ -19,26 +19,14 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "Scaffolding.ftl">
 <@scaffolding title="${label.signUpTitle}">
-
-    <@content>
-    <div class="row">
-        <div class="span12">
-            <h3>${label.signUpEmailSentHeader}</h3>
-        </div>
-    </div>
-    <div class="row">
-        <div class="span12">
-
-            <p class="lead">
-            ${label.signUpEmailSent}
-            </p>
-        </div>
+<div class="container">
+    <div class="page-header">
+        <h1>${label.signUpEmailSentHeader}</h1>
     </div>
 
-    </@content>
-
-    <@footer/>
-
+    <p class="lead">
+    ${label.signUpEmailSent}
+    </p>
+</div>
 </@scaffolding>

@@ -19,41 +19,36 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
-<#include "Scaffolding.ftl">
 <@scaffolding title="${label.resetYourPassword}">
+<div class="container">
 
-    <@content>
-    <div class="row">
-        <div class="span12">
 
-            <h3>${label.resetYourPassword}</h3>
-
-            <p>${label.resetDetailMessage}</p>
-
-            <form class="form-inline" action="loginProblem" method="POST">
-                <input type="text" name="email" class="input-xlarge" placeholder="${label.emailAddress}">
-                <button type="submit" class="btn btn-primary">${label.reset}</button>
-            </form>
-
-            <#if loginError == true>
-                <div class="alert alert-error">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a>
-                ${label.loginError}
-                </div>
-            </#if>
-            <#if emailSent == true>
-                <div class="alert alert-success">
-                ${label.emailSent}
-                </div>
-            </#if>
-            <#if emailError == true>
-                <div class="alert alert-error">
-                ${label.emailErrorAlert}
-                </div>
-            </#if>
-        </div>
+    <div class="page-header">
+        <h1>${label.resetYourPassword}</h1>
     </div>
-    </@content>
-    <@footer/>
-    <@scripts/>
+    <p>${label.resetDetailMessage}</p>
+
+    <#if loginError == true>
+        <div class="alert alert-danger" role="alert">
+        ${label.loginError}
+        </div>
+    </#if>
+    <#if emailSent == true>
+        <div class="alert alert-success" role="alert">
+        ${label.emailSent}
+        </div>
+    </#if>
+    <#if emailError == true>
+        <div class="alert alert-danger" role="alert">
+        ${label.emailErrorAlert}
+        </div>
+    </#if>
+
+    <form class="form-inline" action="loginProblem" method="POST">
+        <input type="text" name="email" class="form-control" placeholder="${label.emailAddress}">
+        <button type="submit" class="btn btn-primary">${label.reset}</button>
+    </form>
+
+</div>
+
 </@scaffolding>

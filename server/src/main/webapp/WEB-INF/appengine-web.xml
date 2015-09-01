@@ -10,6 +10,7 @@
 
   <application>ai-staging</application>
   <version>staging</version>
+  <module>default</module>
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="user.name" value="ActivityInfo"/>
@@ -36,6 +37,7 @@
     <include path="/Login/**.cache.html" expiration="365d"/>
     <include path="/static/**.png" expiration="365d"/>
     <include path="/error.html"/>
+    <include path="/app.html"/> 
   </static-files>
  
   <inbound-services>

@@ -46,22 +46,22 @@ Feature: New table (based on new form)
     When open table for the "Medical Activities" form in the database "Patient Registration"
     And filter column "Number of patients" with:
       | 230 |
+      | 51  |
       | 1   |
     Then table has rows with hidden built-in columns:
       | Number of patients | Donor | Diseases treated this month    |
       | quantity           | enum  | enum                           |
       | 230                | USAID | cholera, malaria, tuberculosis |
+      | 51                 | ECHO  | cholera                        |
       | 1                  | ECHO  | cholera                        |
     And filter column "Number of patients" with:
       | 51 |
-      | 13 |
+      | 1  |
     Then table has rows with hidden built-in columns:
-      | Number of patients | Donor | Diseases treated this month    |
-      | quantity           | enum  | enum                           |
-      | 230                | USAID | cholera, malaria, tuberculosis |
-      | 1                  | ECHO  | cholera                        |
-      | 51                 | ECHO  | cholera                        |
-      | 13                 | USAID | cholera, malaria               |
+      | Number of patients | Donor | Diseases treated this month |
+      | quantity           | enum  | enum                        |
+      | 51                 | ECHO  | cholera                     |
+      | 1                  | ECHO  | cholera                     |
 
   @AI-1102
   Scenario: Column filtering by date
