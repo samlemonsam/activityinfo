@@ -8,7 +8,7 @@ Feature: Mobile Data Collection with ODK
       And I have added partner "NRC"
       And I have created a location type "Waterpoint"
       And I have created a form named "Water Quality Survey" with location type "Waterpoint"
-      And I have created a enumerated field "Quality" with items:
+      And I have created a single-valued enumerated field "Quality" with items:
         | Good   |
         | Bad    |
         | Ugly   |

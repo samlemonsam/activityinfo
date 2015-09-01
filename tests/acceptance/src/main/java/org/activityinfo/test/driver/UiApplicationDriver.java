@@ -993,6 +993,16 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
+    public void importForm(String formName, DataTable dataTable) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        dataEntryTab.importData(dataTable);
+    }
+
+    @Override
     public void cleanup() throws Exception {
         setup().cleanup();
     }

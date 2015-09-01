@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import cucumber.api.DataTable;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.BsDataEntryDriver;
@@ -271,5 +272,12 @@ public class DataEntryTab {
 
     public FluentElement getContainer() {
         return container;
+    }
+
+    public void importData(DataTable dataTable) {
+        container.find().button(withText(I18N.CONSTANTS.importText())).clickWhenReady();
+
+        //BsModal importDialog = BsModal.find(container);
+        //importDialog.form()
     }
 }

@@ -9,7 +9,7 @@ Feature: Site API
     And I have created a quantity field "score" in "Distributions" with code "score"
     And I have created a text field "contact" in "Distributions"
     And I have created a narrative field "description" in "Distributions"
-    And I have created a enumerated field "donor" with items:
+    And I have created a single-valued enumerated field "donor" with items:
       | USAID  |
       | ECHO   |
       | NRC    |
