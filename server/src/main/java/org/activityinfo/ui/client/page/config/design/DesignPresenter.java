@@ -532,7 +532,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
         IsActivityDTO activity = getSelectedActivity(selectedItem);
-        return activity != null;
+        return activity != null && !activity.getClassicView();
     }
 
     private IsActivityDTO getSelectedActivity(ModelData selectedItem) {
