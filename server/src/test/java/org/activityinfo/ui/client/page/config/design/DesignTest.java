@@ -225,7 +225,9 @@ public class DesignTest {
         resetToDefault(view);
         view.setActionEnabled(UIActions.DELETE, true);
         view.setActionEnabled(UIActions.OPEN_TABLE, true);
-        view.setActionEnabled(UIActions.EDIT, true);
+        
+        // should be disabled because the selection is a classic form
+        view.setActionEnabled(UIActions.EDIT, false);
         replay(view);
 
         designer.onSelectionChanged(schema.getActivityById(91));

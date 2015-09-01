@@ -1379,10 +1379,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("or")
     String orWithSpaces();
-    
+
     @DefaultStringValue("Try the new data entry page (BETA)")
     String tryNewDataEntryInterface();
-    
+
     @DefaultStringValue("Always applicable")
     String relevanceEnabled();
 
@@ -1392,7 +1392,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("This form field will only applicable based on the answer of another form field. Please define the relevance or applicability of the form field.")
     String relevanceWelcomeText();
 
-    @DefaultStringValue("Invalid code. Valid code must starting with a letter and containing only letters, numbers, and the underscore symbol")
+    @DefaultStringValue("Invalid code. Valid code must start with a letter and contain only letters, numbers, and the underscore symbol.")
     String invalidCodeMessage();
 
     @DefaultStringValue("Please enter label.")
@@ -1440,7 +1440,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("ActivityInfo Classic - Monthly : attributes and indicators appear separately and users enter indicator results in a monthly grid.")
     String newFormAsClassicMonthly();
 
-    @DefaultStringValue("New Form")
+    @DefaultStringValue("New Form (Beta)")
     String newForm();
 
     @DefaultStringValue("Please enter a name for the new form")
