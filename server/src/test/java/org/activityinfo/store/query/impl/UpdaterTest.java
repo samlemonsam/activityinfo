@@ -61,7 +61,7 @@ public class UpdaterTest {
         updater.execute(updateObject);
     }
 
-    @Test
+    @Test(expected = InvalidUpdateException.class)
     public void newResourceWithInvalidClass() {
         Updater updater = new Updater(emptyCatalog());
 
