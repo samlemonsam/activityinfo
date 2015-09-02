@@ -8,8 +8,11 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.util.Pair;
 import org.activityinfo.test.driver.BsDataEntryDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
@@ -272,4 +275,27 @@ public class DataEntryTab {
     public FluentElement getContainer() {
         return container;
     }
+
+    public void importData(DataTable dataTable) {
+        container.find().button(withText(I18N.CONSTANTS.importText())).clickWhenReady();
+
+        ImportDialog.find(container)
+                .enterExcelData(dataTable)
+                .clickNextButton()
+                //.enterMapping(createMapping(dataTable))
+                .clickNextButton()
+                .clickFinishButton()
+                .waitUntilClosed();
+    }
+
+    private List<Pair<String, String>> createMapping(DataTable dataTable) {
+        List<Pair<String, String>> mapping = Lists.newArrayList();
+        DataTableRow headerRow = dataTable.getGherkinRows().get(0);
+        for (String cell : headerRow.getCells()) {
+            mapping.add(Pair.newPair(cell, cell));
+        }
+        return mapping;
+    }
+
+
 }

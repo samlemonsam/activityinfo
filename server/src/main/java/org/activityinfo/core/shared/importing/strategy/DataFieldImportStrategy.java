@@ -23,7 +23,7 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
 
     @Override
     public boolean accept(FormTree.Node fieldNode) {
-        return !fieldNode.isReference();
+        return !fieldNode.isReference() && !fieldNode.isEnum();
     }
 
     @Override

@@ -304,4 +304,9 @@ public class DataEntrySteps {
 
         assertTrue(filterItemsOnUi.isEmpty());
     }
+
+    @When("^I import into the form \"([^\"]*)\" spreadsheet:$")
+    public void I_import_into_the_form_spreadsheet(String formName, DataTable dataTable) throws Throwable {
+        driver.importForm(formName, dataTable);
+    }
 }

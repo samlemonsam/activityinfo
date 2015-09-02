@@ -258,6 +258,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
             JSONObject properties = new JSONObject();
             properties.put("name", aliases.createAliasIfNotExists(field.getName()));
             properties.put("activityId", field.getId("form"));
+            properties.put("multipleAllowed", field.getBoolean("multipleAllowed", false));
+            properties.put("mandatory", field.getBoolean("mandatory", false));
 
             PendingId groupId = createEntityAndBindId("AttributeGroup", properties);
 
