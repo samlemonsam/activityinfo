@@ -105,13 +105,6 @@ public class SiteDialog extends Window {
 
         setLayout(new BorderLayout());
 
-        // show alert only for report frequency ONCE
-        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            BorderLayoutData alertLayout = new BorderLayoutData(LayoutRegion.NORTH);
-            alertLayout.setSize(30);
-            add(modernViewAlert(), alertLayout);
-        }
-
         navigationListView = new FormNavigationListView();
         BorderLayoutData navigationLayout = new BorderLayoutData(LayoutRegion.WEST);
         navigationLayout.setSize(150);
@@ -190,52 +183,6 @@ public class SiteDialog extends Window {
                 });
 
         getButtonBar().add(finishButton);
-    }
-
-    private LayoutContainer modernViewAlert() {
-        Anchor linkToDesign = new Anchor(I18N.CONSTANTS.switchToNewLayout());
-        linkToDesign.setHref("#");
-        linkToDesign.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (activity.isDesignAllowed()) {
-                    Map<String, Object> changes = Maps.newHashMap();
-                    changes.put("classicView", Boolean.FALSE);
-
-                    dispatcher.execute(new UpdateEntity(activity, changes)).then(new SuccessCallback<VoidResult>() {
-                        @Override
-                        public void onSuccess(VoidResult result) {
-                            SiteDialog.this.hide();
-                            resourceLocator.getFormInstance(site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
-                                @Override
-                                public void onSuccess(FormInstance result) {
-                                    SiteDialogLauncher.showModernFormDialog(activity.getName(), result, callback, newSite, resourceLocator);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.noDesignPrivileges(), new SelectionListener<MessageBoxEvent>() {
-                        @Override
-                        public void componentSelected(MessageBoxEvent ce) {
-                        }
-                    });
-                }
-            }
-        });
-
-        Anchor linkToMore = new Anchor(I18N.CONSTANTS.learnMore());
-        linkToMore.setHref(NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL);
-        linkToMore.setTarget("_blank");
-
-        ContentPanel panel = new ContentPanel();
-        panel.setHeaderVisible(false);
-        panel.setLayout(new FlowLayout());
-        panel.add(new Label(I18N.CONSTANTS.alertAboutModerView()));
-        panel.add(linkToDesign);
-        panel.add(new InlineLabel(I18N.CONSTANTS.orWithSpaces()));
-        panel.add(linkToMore);
-        return panel;
     }
 
     public void showNew(SiteDTO site, LocationDTO location, boolean locationIsNew, SiteDialogCallback callback) {

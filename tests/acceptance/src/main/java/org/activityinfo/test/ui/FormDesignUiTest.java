@@ -29,7 +29,7 @@ public class FormDesignUiTest {
     public void addingFields() throws Exception {
         driver.login();
         driver.setup().createDatabase(name(DATABASE));
-        driver.setup().createForm(name("Form"), property("database", DATABASE));
+        driver.setup().createForm(name("Form"), property("database", DATABASE), property("classicView", false));
         ApplicationPage applicationPage = driver.getApplicationPage();
         FormDesignerPage designer = applicationPage.navigateToFormDesigner(
                 aliasTable.getAlias(DATABASE),
@@ -47,9 +47,5 @@ public class FormDesignUiTest {
         }
         
         designer.fields().add(I18N.CONSTANTS.fieldTypeCalculated());
-        
-        
-
-
     }
 }
