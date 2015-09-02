@@ -34,11 +34,25 @@ public class ExcelConvertor {
 
     public static String asExcelData(DataTable dataTable) {
         String s = "";
-        for (DataTableRow row : dataTable.getGherkinRows()) {
-            for (String cell : row.getCells()) {
-                s = s + cell + " ";
+
+        for (int i = 0; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+
+            for (int j = 0; j < row.getCells().size(); j++) {
+                String cell = row.getCells().get(j);
+
+                s = s + cell;
+
+                boolean isLastCell = j == (row.getCells().size() - 1);
+                if (!isLastCell) {
+                    s += ";";
+                }
             }
-            s = s + "\n";
+            boolean isLastRow = i == (dataTable.getGherkinRows().size() - 1);
+            if (!isLastRow) {
+                s = s + "\n";
+            }
+
         }
         return s;
     }

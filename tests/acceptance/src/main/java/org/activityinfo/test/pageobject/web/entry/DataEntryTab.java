@@ -282,7 +282,8 @@ public class DataEntryTab {
         ImportDialog.find(container)
                 .enterExcelData(dataTable)
                 .clickNextButton()
-                .enterMapping(createMapping(dataTable))
+                //.enterMapping(createMapping(dataTable))
+                .clickNextButton()
                 .clickFinishButton()
                 .waitUntilClosed();
     }

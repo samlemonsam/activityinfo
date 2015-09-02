@@ -999,6 +999,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
         currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
+        aliasTable.alias(dataTable);
         dataEntryTab.importData(dataTable);
     }
 

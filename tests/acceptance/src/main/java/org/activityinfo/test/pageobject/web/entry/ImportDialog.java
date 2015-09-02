@@ -52,7 +52,7 @@ public class ImportDialog {
     }
 
     public ImportDialog enterExcelData(String excelData) {
-        FluentElement textArea = modal.getWindowElement().find().textArea(withClass("form-control")).first();
+        FluentElement textArea = modal.form().getForm().find().textArea(withClass("form-control")).first();
         textArea.element().clear();
         textArea.sendKeys(excelData);
         return this;
