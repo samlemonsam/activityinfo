@@ -51,7 +51,8 @@ public class BsTable {
 
     public static enum Type {
         CELL_TABLE("cellTableCell", "cellTableOddRow", "cellTableEvenRow"),
-        GRID_TABLE("data-grid-cell", "data-grid-odd-row", "data-grid-even-row");
+        GRID_TABLE("data-grid-cell", "data-grid-odd-row", "data-grid-even-row"),
+        DATA_GRID_TABLE("data-grid-widget", "data-grid-odd-row", "data-grid-even-row");
 
         private final String tdClass;
         private final String trOddClass;
