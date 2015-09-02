@@ -1,4 +1,4 @@
-@web @api
+@web
 Feature: Import from Excel
 
   Background:
