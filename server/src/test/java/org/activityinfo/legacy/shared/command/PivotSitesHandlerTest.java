@@ -464,18 +464,15 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
     @Test
     @OnDataSet("/dbunit/sites-zeros.db.xml")
-    public void testZerosExcluded() {
+    public void zerosIncluded() {
 
         withIndicatorAsDimension();
-        filter.addRestriction(DimensionType.Indicator, 5);
+        filter.addRestriction(DimensionType.Indicator, asList(5, 6));
 
         execute();
 
-        assertEquals(1, buckets.size());
-        assertEquals(0, (int) buckets.get(0).doubleValue());
-        assertEquals(5,
-                ((EntityCategory) buckets.get(0).getCategory(this.indicatorDim))
-                        .getId());
+        assertThat().forIndicator(5).thereIsOneBucketWithValue(0); // average indicator
+        assertThat().forIndicator(6).thereIsOneBucketWithValue(0);  // sum indicator
     }
 
     @Test
