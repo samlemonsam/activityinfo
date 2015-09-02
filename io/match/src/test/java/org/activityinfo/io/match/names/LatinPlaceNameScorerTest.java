@@ -81,6 +81,14 @@ public class LatinPlaceNameScorerTest {
     }
 
     @Test
+    public void consonantClusters() {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+        double score = scorer.score("AMBOALIMENA", "ABOALIMENA");
+
+        System.out.println(score);
+    }
+    
+    @Test
     public void somalia() {
         LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
 

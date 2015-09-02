@@ -17,16 +17,18 @@ import org.activityinfo.store.mysql.update.BaseTableUpdater;
 public class SimpleTableCollection implements ResourceCollection {
 
     private final TableMapping mapping;
+    private Authorizer authorizer;
     private QueryExecutor executor;
 
-    public SimpleTableCollection(TableMapping mapping, QueryExecutor executor) {
+    public SimpleTableCollection(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
         this.mapping = mapping;
+        this.authorizer = authorizer;
         this.executor = executor;
     }
 
     @Override
     public CollectionPermissions getPermissions(int userId) {
-        throw new UnsupportedOperationException();
+        return authorizer.getPermissions(userId);
     }
 
     @Override

@@ -151,9 +151,19 @@ public class MatchGraphTest {
 
         assertThat(targetIndex, equalTo(findSourceIndex("COMMUNE", "Komajia")));
         
-        // Am
+
 
     }
+
+    @Test
+    public void aboalimena() {
+        graph.build();
+
+        int targetIndex = findTargetIndex("Name", "Amboalimena");
+        int sourceIndex = graph.getBestMatchForTarget(targetIndex);
+
+    }
+    
     @Test
     public void elonty() {
         graph.rankScoreMatrix();

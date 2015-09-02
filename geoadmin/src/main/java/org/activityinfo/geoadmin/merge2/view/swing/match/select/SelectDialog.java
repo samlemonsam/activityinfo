@@ -16,7 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Allows the user to choose 
+ * Allows the user to choose a match for an instance in the opposing collection.
  */
 public class SelectDialog extends JDialog {
 
@@ -28,6 +28,7 @@ public class SelectDialog extends JDialog {
     private MatchSide fromSide;
     private int fromIndex;
     private final KeyFieldPairSet keyFields;
+    private final CandidateTableModel candidateModel;
 
     public SelectDialog(MatchStepPanel parent, ImportView viewModel, 
                         final int matchRowIndex, 
@@ -58,8 +59,8 @@ public class SelectDialog extends JDialog {
         /**
          * THe rest of of the model shows 
          */
-        
-        final CandidateTableModel candidateModel = new CandidateTableModel(matchTable.getGraph().get(), fromIndex, fromSide);
+
+        candidateModel = new CandidateTableModel(matchTable.getGraph().get(), fromIndex, fromSide);
 
         headerTable = new JTable( headerModel );
         headerTable.setRowSelectionAllowed(false);
@@ -73,11 +74,7 @@ public class SelectDialog extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if(e.getClickCount() == 2) {
-                    int viewRow = candidateTable.getSelectedRow();
-                    int candidateIndex = candidateTable.convertRowIndexToModel(viewRow);
-                    int targetIndex = candidateModel.candidateRowToInstanceIndex(candidateIndex);
-                    
-                    updateMatch(targetIndex);
+                    updateMatchToSelection();
                 }
             }
         });
@@ -122,6 +119,7 @@ public class SelectDialog extends JDialog {
         changeButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                updateMatchToSelection();
                 setVisible(false);
             }
         });
@@ -133,7 +131,15 @@ public class SelectDialog extends JDialog {
         add(buttonPanel, BorderLayout.PAGE_END);
     }
 
-   
+    private void updateMatchToSelection() {
+        int viewRow = candidateTable.getSelectedRow();
+        int candidateIndex = candidateTable.convertRowIndexToModel(viewRow);
+        int targetIndex = candidateModel.candidateRowToInstanceIndex(candidateIndex);
+
+        updateMatch(targetIndex);
+    }
+
+
     private void updateMatch(int matchedIndex) {
 
         ResourceId fromId = keyFields.getForm(fromSide).getRowId(fromIndex);

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -21,12 +22,12 @@ public class MySqlCatalogProvider {
     private List<CollectionProvider> mappings = Lists.newArrayList();
 
     public MySqlCatalogProvider() {
-        mappings.add(new SimpleTableCollectionProvider(new DatabaseCollection()));
-        mappings.add(new SimpleTableCollectionProvider(new UserCollection()));
-        mappings.add(new SimpleTableCollectionProvider(new CountryCollection()));
-        mappings.add(new SimpleTableCollectionProvider(new AdminCollectionProvider()));
-        mappings.add(new SimpleTableCollectionProvider(new LocationCollectionProvider()));
-        mappings.add(new SimpleTableCollectionProvider(new PartnerCollectionProvider()));
+        mappings.add(new SimpleTableCollectionProvider(new DatabaseCollection(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new UserCollection(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new CountryCollection(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new AdminCollectionProvider(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new LocationCollectionProvider(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new PartnerCollectionProvider(), CollectionPermissions.readonly()));
         mappings.add(new SiteCollectionProvider());
         mappings.add(new ReportingPeriodCollectionProvider());
     }
