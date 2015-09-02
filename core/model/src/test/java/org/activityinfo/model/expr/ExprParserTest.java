@@ -2,6 +2,8 @@ package org.activityinfo.model.expr;
 
 
 import org.activityinfo.model.expr.functions.*;
+import org.activityinfo.model.type.NullFieldType;
+import org.activityinfo.model.type.NullFieldValue;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -19,6 +21,11 @@ public class ExprParserTest {
                 new ConstantExpr(2)));
     }
 
+    @Test
+    public void parseEmpty() {
+        expect("", new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE));
+    }
+    
     @Test
     public void parseCompound() {
         expect("a.b", new CompoundExpr(new SymbolExpr("a"), new SymbolExpr("b")));
