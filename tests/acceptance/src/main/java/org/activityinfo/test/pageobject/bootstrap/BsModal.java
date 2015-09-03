@@ -97,7 +97,7 @@ public class BsModal extends ModalDialog {
         BsFormPanel.BsField item = form.findFieldByLabel(value.getField());
 
         // fill by control type
-        if ("radio".equalsIgnoreCase(value.getControlType())) {
+        if ("radio".equalsIgnoreCase(value.getControlType()) || "dropdown".equalsIgnoreCase(value.getControlType())) {
             item.select(value.getValue());
             return;
         }

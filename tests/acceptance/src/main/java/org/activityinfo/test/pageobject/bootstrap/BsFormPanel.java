@@ -25,6 +25,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.web.components.Form;
@@ -110,7 +111,12 @@ public class BsFormPanel extends Form {
 
         @Override
         public boolean isDropDown() {
-            return element.exists(By.tagName("a"));
+            return element.exists(By.tagName("select"));
+        }
+
+        @Override
+        public boolean isSuggestBox() {
+            return getPlaceholder().equals(I18N.CONSTANTS.suggestBoxPlaceholder());
         }
 
         public boolean isCheckBox() {
@@ -145,10 +151,10 @@ public class BsFormPanel extends Form {
         private FluentElements items() {
             final FluentElements items;
             if (isDropDown()) {
-                element.findElement(By.tagName("a")).click();
+                element.findElement(By.tagName("select")).click();
 
-                FluentElement list = this.element.waitFor(By.tagName("ul"));
-                items = list.findElements(By.tagName("li"));
+                FluentElement list = this.element.waitFor(By.tagName("select"));
+                items = list.findElements(By.tagName("option"));
             } else {
                 items = element.findElements(By.tagName("label"));
             }

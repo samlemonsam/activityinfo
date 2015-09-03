@@ -500,15 +500,10 @@ public class UiApplicationDriver extends ApplicationDriver {
         return (TablePage) getCurrentPage();
     }
 
-    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName) {
         TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
         BsModal modal = tablePage.table().newSubmission();
-        Form.FormItem fieldByLabel = modal.form().findFieldByLabel(fieldName);
-
-        assertNotNull(fieldByLabel);
-        if (ControlType.fromValue(controlType) == ControlType.SUGGEST_BOX) {
-            assertEquals(fieldByLabel.getPlaceholder(), I18N.CONSTANTS.suggestBoxPlaceholder());
-        }
+        return modal.form().findFieldByLabel(fieldName);
     }
 
     @Override

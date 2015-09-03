@@ -25,7 +25,8 @@ package org.activityinfo.test.driver;
  * @author yuriyz on 06/09/2015.
  */
 public enum ControlType {
-    SUGGEST_BOX("suggestbox");
+    SUGGEST_BOX("suggestbox"),
+    DROP_DOWN("dropdown");
 
     private final String value;
 

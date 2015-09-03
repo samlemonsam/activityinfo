@@ -26,6 +26,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
 
 import javax.inject.Inject;
@@ -82,7 +83,16 @@ public class DesignSteps {
 
     @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\"$")
     public void form_in_database_has_field_represented_by(String formName, String databaseName, String fieldName, String controlType) throws Throwable {
-        driver.assertFieldVisible(formName, databaseName, fieldName, controlType);
+        Form.FormItem formField = driver.getFormField(formName, databaseName, fieldName);
+
+        switch (ControlType.fromValue(controlType)) {
+            case SUGGEST_BOX:
+                assertTrue(formField.isSuggestBox());
+                break;
+            case DROP_DOWN:
+                assertTrue(formField.isDropDown());
+                break;
+        }
     }
 
     @When("^I add a lock \"([^\"]*)\" on the database \"([^\"]*)\" from \"([^\"]*)\" to \"([^\"]*)\"$")

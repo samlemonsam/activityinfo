@@ -17,6 +17,15 @@ Feature: New form
     When I have added 21 partners
     Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "suggestbox"
 
+  @AI-1213
+  @web
+  Scenario: Partners field is represented by combo box
+    When I have added 11 partners
+    Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "dropdown"
+    When edit entry in new table with field name "Partner Name" and value "Default" in the database "Patient Registration" in the form "Medical Activities" with:
+      | field        | value    | controlType |
+      | Partner Name | partner5 | dropdown    |
+
   @AI-1124
   @web
   Scenario: Add entry without project in database

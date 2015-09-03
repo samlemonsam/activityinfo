@@ -10,6 +10,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
@@ -314,7 +315,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName) {
         throw new PendingException();
     }
 
