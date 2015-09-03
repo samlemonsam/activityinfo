@@ -117,9 +117,16 @@ public class BsFormPanel extends Form {
         }
 
         private boolean isGwtDropDown() {
-            return element.exists(By.tagName("select"));
+            Optional<FluentElement> select = element.find().select().firstIfPresent();
+            if (select.isPresent()) {
+                String classAttr = select.get().element().getAttribute("class");
+                String selectWithSuggestBoxClass = "chzn-done";
+                if (!classAttr.contains(selectWithSuggestBoxClass)) {
+                    return true;
+                }
+            }
+            return false;
         }
-
 
         private boolean isDropDownWithSuggestBox() {
             return element.exists(By.tagName("a"));
