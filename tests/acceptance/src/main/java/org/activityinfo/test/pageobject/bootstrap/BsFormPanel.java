@@ -113,7 +113,23 @@ public class BsFormPanel extends Form {
 
         @Override
         public boolean isDropDown() {
-            return element.exists(By.tagName("select"));
+            return isGwtDropDown() || isDropDownWithSuggestBox();
+        }
+
+        private boolean isGwtDropDown() {
+            Optional<FluentElement> select = element.find().select().firstIfPresent();
+            if (select.isPresent()) {
+                String classAttr = select.get().element().getAttribute("class");
+                String selectWithSuggestBoxClass = "chzn-done";
+                if (!classAttr.contains(selectWithSuggestBoxClass)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean isDropDownWithSuggestBox() {
+            return element.exists(By.tagName("a"));
         }
 
         @Override
@@ -153,10 +169,19 @@ public class BsFormPanel extends Form {
         private FluentElements items() {
             final FluentElements items;
             if (isDropDown()) {
-                element.findElement(By.tagName("select")).click();
+                if (isGwtDropDown()) {
+                    element.findElement(By.tagName("select")).click();
 
-                FluentElement list = this.element.waitFor(By.tagName("select"));
-                items = list.findElements(By.tagName("option"));
+                    FluentElement list = this.element.waitFor(By.tagName("select"));
+                    items = list.findElements(By.tagName("option"));
+                } else if (isDropDownWithSuggestBox()) {
+                    element.findElement(By.tagName("a")).click();
+
+                    FluentElement list = this.element.waitFor(By.tagName("ul"));
+                    items = list.findElements(By.tagName("li"));
+                } else {
+                    throw new RuntimeException("Failed to identify type of dropdown control.");
+                }
             } else {
                 items = element.findElements(By.tagName("label"));
             }
@@ -176,7 +201,7 @@ public class BsFormPanel extends Form {
 
         @Override
         public void select(String itemLabel) {
-            if (isDropDown()) {
+            if (isGwtDropDown()) {
                 Select select = new Select(element.find().select().first().element());
                 select.selectByVisibleText(itemLabel);
                 return;
