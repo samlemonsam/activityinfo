@@ -6,7 +6,7 @@ import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.common.io.ByteStreams;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.branding.Domain;
+import org.activityinfo.server.database.hibernate.entity.Domain;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

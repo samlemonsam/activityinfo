@@ -173,13 +173,6 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     }
 }
 
-task deployDispatch(type: com.google.appengine.task.appcfg.UpdateDispatchTask) {
-    dependsOn appengineDownloadSdk
-    webAppSourceDirectory = new File("${projectDir}/src/main/webapp")
-
-    extraOptions = ["--application=${environment.projectId}", '--version=qa']
-
-}
 
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"

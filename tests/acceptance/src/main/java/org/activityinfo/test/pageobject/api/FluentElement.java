@@ -180,8 +180,8 @@ public class FluentElement {
         return this;
     }
 
-    public void submit() {
-        element().submit();
+    public void focus() {
+        new Actions(webDriver).moveToElement(element()).perform();
     }
 
     public Optional<FluentElement> focusedElement() {

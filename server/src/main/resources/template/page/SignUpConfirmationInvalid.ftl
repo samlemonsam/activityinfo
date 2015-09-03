@@ -19,16 +19,25 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
+<#include "Scaffolding.ftl">
 <@scaffolding title="${label.signUpConfirmationInvalidTitle}">
 
-<div class="container">
+    <@content>
+    <div class="row">
+        <div class="span12">
+            <h3>${label.signUpConfirmationInvalidTitle}</h3>
 
-    <div class="page-header">
-        <h1>${label.signUpConfirmationInvalidTitle}</h1>
+        ${label.signUpConfirmationInvalidDetail}
+
+            <p><a href="login" class="btn btn-primary">${label.loginNow}</a></p>
+        </div>
     </div>
+    </@content>
 
-    <p>${label.signUpConfirmationInvalidDetail}</p>
+    <@footer/>
 
-    <p><a href="login" class="btn btn-primary">${label.loginNow}</a></p>
-</div>
+
+    <@scripts>
+    </@scripts>
+
 </@scaffolding>
