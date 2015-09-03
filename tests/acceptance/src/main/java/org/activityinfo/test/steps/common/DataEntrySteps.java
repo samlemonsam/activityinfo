@@ -226,11 +226,12 @@ public class DataEntrySteps {
     ) throws Throwable {
 
         TablePage tablePage = openFormTable(database, formName);
-        tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().showAllColumns();//.waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
         tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
-        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();
+        bsModal.fill(driver.getAliasTable().alias(fieldValues))
+                .save();
     }
 
     @Then("^table has rows:$")

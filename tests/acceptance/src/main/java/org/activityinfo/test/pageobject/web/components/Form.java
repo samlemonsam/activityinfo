@@ -29,7 +29,9 @@ public abstract class Form {
         
         String getLabel();
         String getPlaceholder();
+
         boolean isDropDown();
+        boolean isSuggestBox();
         
         void fill(String value);
         void fill(LocalDate date);

@@ -24,12 +24,15 @@ package org.activityinfo.test.pageobject.bootstrap;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 import java.util.List;
 
@@ -110,7 +113,12 @@ public class BsFormPanel extends Form {
 
         @Override
         public boolean isDropDown() {
-            return element.exists(By.tagName("a"));
+            return element.exists(By.tagName("select"));
+        }
+
+        @Override
+        public boolean isSuggestBox() {
+            return getPlaceholder().equals(I18N.CONSTANTS.suggestBoxPlaceholder());
         }
 
         public boolean isCheckBox() {
@@ -145,10 +153,10 @@ public class BsFormPanel extends Form {
         private FluentElements items() {
             final FluentElements items;
             if (isDropDown()) {
-                element.findElement(By.tagName("a")).click();
+                element.findElement(By.tagName("select")).click();
 
-                FluentElement list = this.element.waitFor(By.tagName("ul"));
-                items = list.findElements(By.tagName("li"));
+                FluentElement list = this.element.waitFor(By.tagName("select"));
+                items = list.findElements(By.tagName("option"));
             } else {
                 items = element.findElements(By.tagName("label"));
             }
@@ -168,11 +176,20 @@ public class BsFormPanel extends Form {
 
         @Override
         public void select(String itemLabel) {
+            if (isDropDown()) {
+                Select select = new Select(element.find().select().first().element());
+                select.selectByVisibleText(itemLabel);
+                return;
+            }
+
             final FluentElements items = items();
 
             List<String> itemLabels = Lists.newArrayList();
             for (FluentElement element : items) {
                 String text = element.text();
+                if (Strings.isNullOrEmpty(text)) {
+                    text = element.element().getAttribute("text");
+                }
                 itemLabels.add(text);
                 if (text.equalsIgnoreCase(itemLabel)) {
                     element.click();

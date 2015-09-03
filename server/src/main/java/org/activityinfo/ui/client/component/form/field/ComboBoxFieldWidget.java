@@ -79,7 +79,7 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
 
     @Override
     public Promise<Void> setValue(ReferenceValue value) {
-        for(int i=0;i!=dropBox.getSelectedIndex();++i) {
+        for(int i=0;i!=dropBox.getItemCount();++i) {
             ResourceId id = ResourceId.valueOf(dropBox.getValue(i));
             if(value.getResourceIds().contains(id)) {
                 dropBox.setSelectedIndex(i);

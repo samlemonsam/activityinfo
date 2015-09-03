@@ -82,6 +82,14 @@ public class XPathBuilder {
         return tagName("div", conditions);
     }
 
+    public XPathBuilder select(String... conditions) {
+        return tagName("select", conditions);
+    }
+
+    public XPathBuilder option(String... conditions) {
+        return tagName("option", conditions);
+    }
+
     public XPathBuilder table(String... conditions) {
         return tagName("table", conditions);
     }
