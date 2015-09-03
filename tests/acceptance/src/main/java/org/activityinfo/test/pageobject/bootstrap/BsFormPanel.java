@@ -213,7 +213,7 @@ public class BsFormPanel extends Form {
             for (FluentElement element : items) {
                 String text = element.text();
                 if (Strings.isNullOrEmpty(text)) {
-                    text = element.element().getAttribute("text");
+                    text = Strings.nullToEmpty(element.element().getAttribute("text"));
                 }
                 itemLabels.add(text);
                 if (text.equalsIgnoreCase(itemLabel)) {
