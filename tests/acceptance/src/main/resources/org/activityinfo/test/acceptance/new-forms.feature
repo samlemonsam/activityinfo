@@ -21,10 +21,12 @@ Feature: New form
   @web
   Scenario: Partners field is represented by combo box
     When I have added 11 partners
-    Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "dropdown"
-    When edit entry in new table with field name "Partner Name" and value "Default" in the database "Patient Registration" in the form "Medical Activities" with:
-      | field        | value    | controlType |
-      | Partner Name | partner5 | dropdown    |
+    And I have submitted to "Patient Visits" form table in "Patient Registration" database:
+      | Comments   | Partner  | Start Date | End Date   |
+      | text       | enum     | date       | date       |
+      | no comment | partner5 | 2014-01-02 | 2014-01-04 |
+    Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "dropdown" with value "partner5"
+
 
   @AI-1124
   @web

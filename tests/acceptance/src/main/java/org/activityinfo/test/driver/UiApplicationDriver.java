@@ -500,10 +500,18 @@ public class UiApplicationDriver extends ApplicationDriver {
         return (TablePage) getCurrentPage();
     }
 
-    public Form.FormItem getFormField(String formName, String databaseName, String fieldName) {
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName, Optional<String> selectedValue) {
         TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
-        BsModal modal = tablePage.table().newSubmission();
-        return modal.form().findFieldByLabel(fieldName);
+        final BsModal modal;
+        if (selectedValue.isPresent()) {
+            tablePage.table().waitForCellByText(selectedValue.get()).getContainer().clickWhenReady();
+            modal = tablePage.table().editSubmission();
+        } else {
+            modal = tablePage.table().newSubmission();
+        }
+        BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
+        modal.cancel();
+        return fieldByLabel;
     }
 
     @Override

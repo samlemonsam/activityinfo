@@ -45,7 +45,10 @@ public class ChooseColumnsDialog {
             I18N.CONSTANTS.comments(),
             I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.name(),
             I18N.CONSTANTS.project() + " " + I18N.CONSTANTS.name(),
-            I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.fullName()
+            I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.fullName(),
+            I18N.CONSTANTS.partner(),
+            I18N.CONSTANTS.project()
+
     );
 
     private BsModal modal;

@@ -193,6 +193,18 @@ public class BsModal extends ModalDialog {
         waitUntilClosed();
     }
 
+    public BsModal save() {
+        click(I18N.CONSTANTS.save());
+        waitUntilClosed();
+        return this;
+    }
+
+    public BsModal cancel() {
+        click(I18N.CONSTANTS.cancel());
+        waitUntilClosed();
+        return this;
+    }
+
     public boolean isClosed() {
         return !windowElement.isDisplayed();
     }

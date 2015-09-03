@@ -315,7 +315,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public Form.FormItem getFormField(String formName, String databaseName, String fieldName) {
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName, Optional<String> selectedValue) {
         throw new PendingException();
     }
 

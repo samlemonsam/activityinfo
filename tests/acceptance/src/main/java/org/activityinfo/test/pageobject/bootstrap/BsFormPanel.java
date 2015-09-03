@@ -24,6 +24,7 @@ package org.activityinfo.test.pageobject.bootstrap;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -31,6 +32,7 @@ import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 import java.util.List;
 
@@ -174,11 +176,20 @@ public class BsFormPanel extends Form {
 
         @Override
         public void select(String itemLabel) {
+            if (isDropDown()) {
+                Select select = new Select(element.find().select().first().element());
+                select.selectByVisibleText(itemLabel);
+                return;
+            }
+
             final FluentElements items = items();
 
             List<String> itemLabels = Lists.newArrayList();
             for (FluentElement element : items) {
                 String text = element.text();
+                if (Strings.isNullOrEmpty(text)) {
+                    text = element.element().getAttribute("text");
+                }
                 itemLabels.add(text);
                 if (text.equalsIgnoreCase(itemLabel)) {
                     element.click();
