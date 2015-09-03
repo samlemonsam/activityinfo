@@ -1,4 +1,4 @@
-package org.activityinfo.server.branding;
+package org.activityinfo.server.database.hibernate.entity;
 
 /*
  * #%L
@@ -22,18 +22,17 @@ package org.activityinfo.server.branding;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
  * Defines a custom domain for ActivityInfo that has its own branding, titles,
  * and scaffolding template.
  */
+@Entity
 public class Domain implements Serializable {
     private static final long serialVersionUID = 241542892559897521L;
+
 
     public static final String DEFAULT_HOST = "www.activityinfo.org";
     public static final String DEFAULT_TITLE = "ActivityInfo";
