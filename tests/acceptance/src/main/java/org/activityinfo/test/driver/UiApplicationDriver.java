@@ -16,6 +16,7 @@ import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
@@ -509,6 +510,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         } else {
             modal = tablePage.table().newSubmission();
         }
+        Gxt.sleep(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
         BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
         modal.cancel();
         return fieldByLabel;
