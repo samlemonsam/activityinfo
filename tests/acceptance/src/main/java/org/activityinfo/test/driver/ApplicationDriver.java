@@ -412,4 +412,8 @@ public abstract class ApplicationDriver {
     public Optional<BsFormPanel.BsField> getFormFieldFromNewSubmission(String formName, String fieldLabel) {
         throw new PendingException();
     }
+
+    public void importForm(String formName, DataTable dataTable) {
+        throw new PendingException();
+    }
 }

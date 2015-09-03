@@ -6,14 +6,21 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.util.Pair;
+import org.activityinfo.test.pageobject.bootstrap.ChooseColumnsDialog;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -272,6 +279,51 @@ public class AliasTable {
             }
         }
         return fieldValues;
+    }
+
+    public DataTable alias(DataTable dataTable) {
+        Set<Integer> columnsToAlias = Sets.newHashSet();
+        Map<Pair<Integer, Integer>, String> aliasMatrix = Maps.newHashMap();
+
+        for (int i = 0; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+            for (int j = 0; j < row.getCells().size(); j++) {
+
+                String cell = row.getCells().get(j);
+
+                if (i != 0 && columnsToAlias.contains(j) && !isNumber(cell)) { // not header
+                    aliasMatrix.put(Pair.newPair(i, j), getAlias(cell));
+                }
+
+                if (i == 0) { // only for header
+
+                    boolean isPartnerField = cell.equalsIgnoreCase(I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.name());
+                    if (!ChooseColumnsDialog.BUILT_IN_COLUMNS.contains(cell) || isPartnerField) {
+                        columnsToAlias.add(j);
+                    }
+
+                    if (!ChooseColumnsDialog.BUILT_IN_COLUMNS.contains(cell)) {
+                        aliasMatrix.put(Pair.newPair(i, j), getAlias(cell));
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Pair<Integer, Integer>, String> entry : aliasMatrix.entrySet()) {
+            Integer row = entry.getKey().getFirst();
+            Integer column = entry.getKey().getSecond();
+            dataTable.getGherkinRows().get(row).getCells().set(column, entry.getValue());
+        }
+        return dataTable;
+    }
+
+    private boolean isNumber(String cell) {
+        try {
+            NumberFormat.getNumberInstance().parse(cell);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 
     public static class TestHandle {

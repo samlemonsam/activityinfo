@@ -81,6 +81,10 @@ public class BsFormPanel extends Form {
         }
     }
 
+    public FluentElement getForm() {
+        return form;
+    }
+
     @Override
     public FormItem current() {
         return current;

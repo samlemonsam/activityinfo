@@ -10,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.*;
 
@@ -35,6 +36,10 @@ public class FormTree {
 
         public boolean isReference() {
             return field.getType() instanceof ReferenceType;
+        }
+
+        public boolean isEnum() {
+            return field.getType() instanceof EnumType;
         }
 
         public Node addChild(FormClass declaringClass, FormField field) {
