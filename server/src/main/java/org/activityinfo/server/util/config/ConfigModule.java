@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.util.jaxrs.JaxRsContainer;
 import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.servlet.ServletContext;
@@ -53,7 +54,7 @@ public class ConfigModule extends ServletModule {
     protected void configureServlets() {
         if (DeploymentEnvironment.isAppEngine()) {
             bind(AppengineConfigResource.class);
-            filter("/admin/config*").through(GuiceContainer.class);
+            filter("/admin/config*").through(JaxRsContainer.class);
         }
     }
 
