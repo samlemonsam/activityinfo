@@ -34,6 +34,7 @@ gwt {
         }
     } else {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
+                'org.activityinfo.ui.ActivityInfoReleaseLogging',
                 'org.activityinfo.ui.Embed'
     }
 }
