@@ -22,26 +22,12 @@ package org.activityinfo.server.branding;
  * #L%
  */
 
-import com.google.appengine.api.appidentity.AppIdentityService;
-import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
-import com.google.appengine.tools.cloudstorage.*;
-import com.google.common.base.Charsets;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.server.database.hibernate.entity.Domain;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.channels.Channels;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.google.common.base.Strings.emptyToNull;
 
@@ -51,37 +37,36 @@ import static com.google.common.base.Strings.emptyToNull;
  */
 public class DomainProvider implements Provider<Domain> {
 
-    private static final Logger LOGGER = Logger.getLogger(DomainProvider.class.getName());
-
     private final Provider<HttpServletRequest> request;
-    private final LoadingCache<String, Domain> domainCache;
-    
+    private final Provider<EntityManager> entityManager;
+
+    protected DomainProvider() {
+        request = null;
+        entityManager = null;
+    }
+
     @Inject
-    public DomainProvider(Provider<HttpServletRequest> request) {
+    public DomainProvider(Provider<HttpServletRequest> request, Provider<EntityManager> entityManager) {
+        super();
         this.request = request;
-        this.domainCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(10)
-                .build(new DomainLoader());
+        this.entityManager = entityManager;
     }
 
     @Override
     public Domain get() {
-        String host = getBrandHostName();
-        try {
-            return domainCache.get(host);
-        } catch (ExecutionException e) {
-            LOGGER.log(Level.SEVERE, "Exception while loading domain properties for " + host, e);
-            return defaultDomain();
-        }
-    }
 
-    private Domain defaultDomain() {
-        Domain result;
-        result = new Domain();
-        result.setTitle("ActivityInfo");
-        result.setHost(getBrandHostName());
-        result.setPort(request.get().getServerPort());
-        result.setSignUpAllowed(true);
+        String host = getBrandHostName();
+        Domain result = entityManager.get().find(Domain.class, host);
+        if (result == null) {
+            result = new Domain();
+            result.setTitle("ActivityInfo");
+            result.setHost(host);
+            result.setPort(request.get().getServerPort());
+            result.setSignUpAllowed(true);
+        } else {
+            entityManager.get().detach(result);
+        }
+        result.setHost(getExternalHostName());
         return result;
     }
 
@@ -121,63 +106,4 @@ public class DomainProvider implements Provider<Domain> {
     private String getHeader(String headerName) {
         return emptyToNull(request.get().getHeader(headerName));
     }
-
-    private class DomainLoader extends CacheLoader<String, Domain> {
-
-        private final GcsService gcsService =
-                GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
-
-        private final String bucketName;
-
-        public DomainLoader() {
-            AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
-            bucketName = appIdentityService.getDefaultGcsBucketName();
-        }
-        
-        @Override
-        public Domain load(String domainName) throws Exception {
-                
-            LOGGER.info("Loading domain theme for " + domainName);
-
-            GcsFilename propertiesFile = domainResource(domainName, "domain.properties");
-
-            if(exists(propertiesFile)) {
-
-                Properties domainProperties = new Properties();
-                domainProperties.load(new StringReader(toString(propertiesFile)));
-         
-                Domain domain = new Domain();
-                domain.setHost(domainName);
-                domain.setTitle(domainProperties.getProperty("title", "ActivityInfo"));
-                domain.setSignUpAllowed(Boolean.valueOf(domainProperties.getProperty("signUpAllowed", "false")));
-                domain.setScaffolding(toString(domainResource(domainName, "Scaffolding.ftl")));
-                domain.setHomePageBody(toString(domainResource(domainName, "HomePageBody.html")));
-                return domain;
-                
-            } else {
-                LOGGER.info(propertiesFile + " does not exist, using default theme.");
-                return defaultDomain();
-            }
-        }
-
-        private GcsFilename domainPropertiesFilename(String domainName) {
-            return domainResource(domainName, "domain.properties");
-        }
-
-        private String toString(GcsFilename filename) throws IOException {
-            try(Reader reader = Channels.newReader(gcsService.openReadChannel(filename, 0), Charsets.UTF_8.name())) {
-                return CharStreams.toString(reader);
-            }
-        }
-        
-        private boolean exists(GcsFilename filename) throws IOException {
-            GcsFileMetadata metadata = gcsService.getMetadata(filename);
-            return metadata != null;
-        }
-
-        private GcsFilename domainResource(String domainName, String resourceName) {
-            return new GcsFilename(bucketName, String.format("domains/%s/%s", domainName, resourceName));
-        }
-    }
-
 }

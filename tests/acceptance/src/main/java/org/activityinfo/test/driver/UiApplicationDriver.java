@@ -16,6 +16,7 @@ import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
@@ -500,15 +501,19 @@ public class UiApplicationDriver extends ApplicationDriver {
         return (TablePage) getCurrentPage();
     }
 
-    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName, Optional<String> selectedValue) {
         TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
-        BsModal modal = tablePage.table().newSubmission();
-        Form.FormItem fieldByLabel = modal.form().findFieldByLabel(fieldName);
-
-        assertNotNull(fieldByLabel);
-        if (ControlType.fromValue(controlType) == ControlType.SUGGEST_BOX) {
-            assertEquals(fieldByLabel.getPlaceholder(), I18N.CONSTANTS.suggestBoxPlaceholder());
+        final BsModal modal;
+        if (selectedValue.isPresent()) {
+            tablePage.table().waitForCellByText(selectedValue.get()).getContainer().clickWhenReady();
+            modal = tablePage.table().editSubmission();
+        } else {
+            modal = tablePage.table().newSubmission();
         }
+        Gxt.sleep(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
+        BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
+        modal.cancel();
+        return fieldByLabel;
     }
 
     @Override

@@ -275,6 +275,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.setActionEnabled(UIActions.DELETE, false);
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, false);
         monthlyPanel.onNoSelection();
+        attachmentsTab.onNoSelection();
     }
 
     @Override

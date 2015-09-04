@@ -19,23 +19,12 @@
  <http://www.gnu.org/licenses/gpl-3.0.html>.
  #L%
 -->
+<#include "Scaffolding.ftl">
 <@scaffolding title="${domain.title}">
 
- <#if domain.homePageBody?? >
- ${domain.homePageBody!''}
- <#else>
- <div class="container">
 
-     <div class="page-header">
-         <h1>ActivityInfo is Running!</h1>
-     </div>
-     <p>You're currently viewing the un-themed landing page for the ActivityInfo Server. The appearance of this
-         page, and all of the login and sign up pages can be customized at deploy time with a custom theme and content
-         based on the host name.</p>
+${domain.homePageBody!''}
 
-     <p><a href="/admin/branding/${domain.host}" class="btn btn-primary">Customize ${domain.host}</a></p>
-
- </div>
- </#if>
-
+    <@scripts>
+    </@scripts>
 </@scaffolding>

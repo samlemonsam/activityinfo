@@ -93,6 +93,11 @@ public class GxtFormPanel extends Form {
         }
 
         @Override
+        public boolean isSuggestBox() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isEnabled() {
             boolean enabled = !this.element.exists(By.className(READ_ONLY_CLASS));
             System.out.println(getLabel() + ".enabled = " + enabled);

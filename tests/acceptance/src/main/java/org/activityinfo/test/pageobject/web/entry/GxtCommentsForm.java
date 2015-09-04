@@ -59,6 +59,11 @@ public class GxtCommentsForm extends Form {
         }
 
         @Override
+        public boolean isSuggestBox() {
+            return false;
+        }
+
+        @Override
         public void fill(String value) {
             textArea.sendKeys(value);
         }

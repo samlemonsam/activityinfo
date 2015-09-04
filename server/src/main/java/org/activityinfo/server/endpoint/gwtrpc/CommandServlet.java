@@ -23,7 +23,6 @@ package org.activityinfo.server.endpoint.gwtrpc;
  */
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -36,7 +35,6 @@ import org.activityinfo.model.auth.AnonymousUser;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -66,10 +64,6 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
 
     @Inject
     private ServerSideAuthProvider authProvider;
-
-    @Inject(optional = true)
-    private PersistentPolicyProvider policyProvider;
-
 
     @Override
     public List<CommandResult> execute(String authToken, List<Command> commands) throws CommandException {

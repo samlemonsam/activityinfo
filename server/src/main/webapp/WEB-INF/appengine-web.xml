@@ -10,7 +10,6 @@
 
   <application>ai-staging</application>
   <version>staging</version>
-  <module>default</module>
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="user.name" value="ActivityInfo"/>

@@ -97,7 +97,7 @@ public class BsModal extends ModalDialog {
         BsFormPanel.BsField item = form.findFieldByLabel(value.getField());
 
         // fill by control type
-        if ("radio".equalsIgnoreCase(value.getControlType())) {
+        if ("radio".equalsIgnoreCase(value.getControlType()) || "dropdown".equalsIgnoreCase(value.getControlType())) {
             item.select(value.getValue());
             return;
         }
@@ -191,6 +191,18 @@ public class BsModal extends ModalDialog {
     public void accept() {
         click(I18N.CONSTANTS.ok());
         waitUntilClosed();
+    }
+
+    public BsModal save() {
+        click(I18N.CONSTANTS.save());
+        waitUntilClosed();
+        return this;
+    }
+
+    public BsModal cancel() {
+        click(I18N.CONSTANTS.cancel());
+        waitUntilClosed();
+        return this;
     }
 
     public boolean isClosed() {
