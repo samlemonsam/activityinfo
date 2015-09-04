@@ -95,8 +95,7 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
             @Override
             public void handleEvent(ListViewEvent<SiteAttachmentDTO> event) {
                 event.getModel().getBlobId();
-                Window.Location.assign(GWT.getModuleBaseURL() + "attachment?blobId=" +
-                                       event.getModel().getBlobId());
+                Window.Location.assign(GWT.getModuleBaseURL() + "attachment?blobId=" + event.getModel().getBlobId());
             }
         });
         panel.add(attachmentList);
@@ -168,6 +167,12 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
 
     public void setSite(SiteDTO site) {
         presenter.showSite(site);
+        toolBar.setActionEnabled(UIActions.UPLOAD, true);
     }
 
+    public void onNoSelection() {
+        store.removeAll();
+        toolBar.setActionEnabled(UIActions.UPLOAD, false);
+        toolBar.setActionEnabled(UIActions.DELETE, false);
+    }
 }
