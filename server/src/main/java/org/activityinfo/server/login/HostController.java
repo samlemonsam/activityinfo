@@ -58,7 +58,8 @@ public class HostController {
     public Response getHostPage(@Context UriInfo uri,
                                 @Context HttpServletRequest req,
                                 @QueryParam("redirect") boolean redirect,
-                                @QueryParam("ui") String ui) throws Exception {
+                                @QueryParam("ui") String ui,
+                                @QueryParam("logging") String logging) throws Exception {
 
         if (!authProvider.isAuthenticated()) {
             // Otherwise, go to the default ActivityInfo root page
@@ -81,6 +82,11 @@ public class HostController {
         if("new".equals(ui)) {
             model.setAppCacheEnabled(false);
             model.setNewUI(true);
+        }
+
+        if ("true".equalsIgnoreCase(logging)) {
+            model.setAppCacheEnabled(false);
+            model.setIsLoggingEnabled(true);
         }
 
         return Response.ok(model.asViewable())

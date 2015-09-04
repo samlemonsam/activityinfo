@@ -27,6 +27,7 @@ public class HostPageModel extends PageModel {
     private String appUrl;
     private boolean appCacheEnabled;
     private boolean newUI;
+    private boolean isLoggingEnabled;
 
     public HostPageModel(String appUrl) {
         this.appUrl = appUrl;
@@ -50,5 +51,13 @@ public class HostPageModel extends PageModel {
 
     public void setNewUI(boolean newUI) {
         this.newUI = newUI;
+    }
+
+    public boolean isLoggingEnabled() {
+        return isLoggingEnabled;
+    }
+
+    public void setIsLoggingEnabled(boolean isLoggingEnabled) {
+        this.isLoggingEnabled = isLoggingEnabled;
     }
 }
