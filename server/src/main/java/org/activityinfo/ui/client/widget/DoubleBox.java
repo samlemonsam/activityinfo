@@ -21,6 +21,8 @@ package org.activityinfo.ui.client.widget;
  * #L%
  */
 
+import com.google.gwt.user.client.Window;
+
 /**
  * @author yuriyz on 3/14/14.
  */
@@ -28,6 +30,16 @@ public class DoubleBox extends com.google.gwt.user.client.ui.DoubleBox {
 
     public DoubleBox() {
         setStyleName("form-control");
-        getElement().setPropertyString("type", "number");
+
+        // user type=number for all browsers except Chrome. In Chrome all numbers (independent from locale)
+        // are converted into number with dot as separator.
+        //https://www.aeyoun.com/webdev/html5-input-number-localization.html
+        if (!isChrome()) {
+            getElement().setPropertyString("type", "number");
+        }
+    }
+
+    public boolean isChrome() {
+        return Window.Navigator.getUserAgent().toLowerCase().contains("chrome");
     }
 }
