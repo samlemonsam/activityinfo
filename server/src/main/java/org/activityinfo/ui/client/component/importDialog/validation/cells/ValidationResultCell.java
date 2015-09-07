@@ -40,7 +40,7 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
 
         public static final Templates INSTANCE = GWT.create(Templates.class);
 
-        @Template("<div class='{0}'>{1}</div>")
+        @Template("<div class='{0}'>&nbsp;{1}</div>")
         public SafeHtml html(String style, String text);
     }
 
