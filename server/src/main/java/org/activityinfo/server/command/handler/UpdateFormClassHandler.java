@@ -9,6 +9,7 @@ import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -118,6 +119,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private void syncEntities(Activity activity, FormClass formClass) {
 
         activity.setName(formClass.getLabel());
+        updateLocationType(activity, formClass);
 
         List<FormFieldEntity> fields = new ArrayList<>();
         fields.addAll(activity.getIndicators());
@@ -151,6 +153,35 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // delete any entities that were not matched to FormFields
         for(FormFieldEntity entity : entityMap.values()) {
             entity.delete();
+        }
+    }
+
+    private void updateLocationType(Activity activity, FormClass formClass) {
+        boolean hasLocationTypeField = false;
+        for (FormField formField : formClass.getFields()) {
+            int fieldIndex = CuidAdapter.getBlockSilently(formField.getId(), 1);
+            if (fieldIndex == CuidAdapter.LOCATION_FIELD) {
+                hasLocationTypeField = true;
+            }
+        }
+        if (!hasLocationTypeField) {
+            // if there is no location type field then we have to stick to "Nationwide" location type (null location type) - AI-1216
+
+            boolean hasNullLocationType = false;
+            final UserDatabase database = activity.getDatabase();
+            for (LocationType locationType : database.getCountry().getLocationTypes()) {
+                if (LocationTypeDTO.isNullObject(locationType.getName(), locationType.getId())) {
+                    activity.setLocationType(locationType);
+                    hasNullLocationType = true;
+                }
+            }
+
+            if (hasNullLocationType) {
+                entityManager.get().persist(activity);
+            } else {
+                throw new RuntimeException("Failed to find nationwide location type, db:" + database.getName() +
+                        ", country:" + database.getCountry().getName());
+            }
         }
     }
 

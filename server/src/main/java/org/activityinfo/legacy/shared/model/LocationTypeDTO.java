@@ -98,9 +98,12 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         return get("name");
     }
 
-    public boolean isNationwide() {
-        // hack!!
-        return NATIONWIDE_NAME.equals(getName()) && getId() != NOT_NATIONWIDE_LOCATION_TYPE_ID;
+    public boolean isNationwide() { // hack!!
+        return isNullObject(getName(), getId());
+    }
+
+    public static boolean isNullObject(String name, int id) { // hack!!
+        return NATIONWIDE_NAME.equals(name) && id != NOT_NATIONWIDE_LOCATION_TYPE_ID;
     }
 
     @JsonProperty("adminLevelId") @JsonView(DTOViews.Schema.class)
