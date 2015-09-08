@@ -33,6 +33,11 @@ public class ValidationResult {
         return result;
     }
 
+    public static ValidationResult missing() {
+        return new ValidationResult(State.MISSING);
+    }
+
+
     public static ValidationResult converted(String value, double confidence) {
         ValidationResult result = new ValidationResult(State.CONFIDENCE);
         result.convertedValue = value;
@@ -72,8 +77,9 @@ public class ValidationResult {
         return instanceId;
     }
 
-    public void setInstanceId(ResourceId instanceId) {
+    public ValidationResult setInstanceId(ResourceId instanceId) {
         this.instanceId = instanceId;
+        return this;
     }
 
     public boolean hasReferenceMatch() {
