@@ -1,5 +1,7 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.model.type.geo.Extents;
+
 import java.util.Date;
 
 public interface ColumnView {
@@ -20,6 +22,8 @@ public interface ColumnView {
     String getString(int row);
 
     Date getDate(int row);
+    
+    Extents getExtents(int row);
 
     /**
      *

@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -60,6 +61,12 @@ public class AdminCollectionProvider implements MappingProvider {
             code.setRequired(true);
             code.setType(TextType.INSTANCE);            
             
+            FormField bounds = new FormField(CuidAdapter.field(formClassId, CuidAdapter.GEOMETRY_FIELD));
+            bounds.setCode("boundary");
+            bounds.setLabel(I18N.CONSTANTS.geography());
+            bounds.setRequired(false);
+            bounds.setType(GeoAreaType.INSTANCE);
+            
             FormField parent = null;
             int parentId = rs.getInt("parentId");
             if(!rs.wasNull()) {
@@ -78,6 +85,7 @@ public class AdminCollectionProvider implements MappingProvider {
             mapping.setFormLabel(rs.getString("Name"));
             mapping.addTextField(label, "name");
             mapping.addTextField(code, "code");
+            mapping.addGeoAreaField(bounds);
 
             if(parent != null) {
                 mapping.add(new FieldMapping(parent, "adminEntityParentId", new ForeignKeyMapping(ADMIN_ENTITY_DOMAIN)));

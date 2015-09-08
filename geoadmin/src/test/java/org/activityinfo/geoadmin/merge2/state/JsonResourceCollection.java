@@ -16,6 +16,9 @@ import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.type.geo.GeoArea;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.CollectionPermissions;
@@ -126,6 +129,8 @@ public class JsonResourceCollection implements ResourceCollection {
                 bindings.add(new TextFieldBinding(fieldId.asString(), observer));
             } else if(field.getType() instanceof ReferenceType) {
                 bindings.add(new ReferenceFieldBinding(fieldId.asString(), observer));
+            } else if(field.getType() instanceof GeoAreaType) {
+                bindings.add(new GeoAreaFieldBinding(fieldId.asString(), observer));
             } else {
                 throw new UnsupportedOperationException("type: " + field.getType());
             }
@@ -198,6 +203,25 @@ public class JsonResourceCollection implements ResourceCollection {
         @Override
         protected FieldValue convert(JsonElement jsonElement) {
             return TextValue.valueOf(jsonElement.getAsString());
+        }
+    }
+    
+    private static class GeoAreaFieldBinding extends FieldBinding {
+
+        public GeoAreaFieldBinding(String field, CursorObserver<FieldValue> observer) {
+            super(field, observer);
+        }
+
+        @Override
+        protected FieldValue convert(JsonElement jsonElement) {
+            JsonArray array = jsonElement.getAsJsonObject().get("extents").getAsJsonArray();
+            Extents extents = Extents.create(
+                    array.get(0).getAsDouble(),
+                    array.get(1).getAsDouble(),
+                    array.get(2).getAsDouble(),
+                    array.get(3).getAsDouble());
+            
+            return new GeoArea(extents, "");
         }
     }
     

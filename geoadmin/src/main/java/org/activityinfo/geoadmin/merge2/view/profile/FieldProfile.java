@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -23,10 +24,23 @@ public class FieldProfile {
         this.node = node;
         this.columnView = columnView;
     }
-
+    
+    public boolean isText() {
+        if(columnView == null) {
+            return false;
+        }
+        return columnView.getType() == ColumnType.STRING;
+    }
+    
+    public boolean isGeoArea() {
+        if(columnView == null) {
+            return false;
+        }
+        return columnView.getType() == ColumnType.GEOGRAPHIC;
+    }
 
     public Set<String> uniqueValues() {
-        if(columnView == null) {
+        if(columnView == null || columnView.getType() != ColumnType.STRING) {
             return Collections.emptySet();
         } 
         
@@ -50,7 +64,6 @@ public class FieldProfile {
         } else {
             return node.getDefiningFormClass().getLabel() + "." + node.getField().getLabel();
         }
-        
     }
 
     public ColumnView getView() {

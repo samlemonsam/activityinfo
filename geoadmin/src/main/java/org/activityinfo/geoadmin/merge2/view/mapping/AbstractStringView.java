@@ -2,6 +2,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.Date;
 
@@ -24,6 +25,11 @@ public abstract class AbstractStringView implements ColumnView {
 
     @Override
     public final Date getDate(int row) {
+        return null;
+    }
+
+    @Override
+    public Extents getExtents(int row) {
         return null;
     }
 

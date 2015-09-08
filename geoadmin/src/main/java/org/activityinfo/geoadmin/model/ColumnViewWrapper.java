@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.Date;
 
@@ -53,6 +54,11 @@ public class ColumnViewWrapper implements ColumnView {
     @Override
     public Date getDate(int row) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Extents getExtents(int row) {
+        return null;
     }
 
     @Override

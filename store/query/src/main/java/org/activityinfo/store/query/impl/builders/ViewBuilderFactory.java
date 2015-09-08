@@ -4,6 +4,7 @@ import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.image.ImageType;
 import org.activityinfo.model.type.image.ImageValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -11,7 +12,8 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.model.type.time.*;
+import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateType;
 
 import java.util.Date;
 import java.util.logging.Level;
@@ -44,6 +46,8 @@ public class ViewBuilderFactory {
             return new DateColumnBuilder(new LocalDateReader());
         } else if(type instanceof ImageType) {
             return new StringColumnBuilder(new ImageBlobIdReader());
+        } else if(type instanceof GeoAreaType) {
+            return new GeoColumnBuilder();
         } else {
             LOGGER.log(Level.SEVERE, "Unsupported type: " + type);
             return null;
@@ -115,6 +119,7 @@ public class ViewBuilderFactory {
             return null;
         }
     }
+    
 //
 //    private static class YearReader implements DoubleReader {
 //        @Override

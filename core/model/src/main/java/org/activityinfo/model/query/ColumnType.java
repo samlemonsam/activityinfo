@@ -10,5 +10,6 @@ public enum ColumnType {
     STRING,
     NUMBER,
     BOOLEAN,
-    DATE
+    DATE,
+    GEOGRAPHIC
 }

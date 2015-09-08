@@ -20,7 +20,7 @@ public class ScoreDistribution {
      * @return the index of the frequency bin in the range [0, BIN_COUNT - 1]
      */
     public static int binIndexOf(double score) {
-        assert score >= 0 && score <= 1;
+        assert score >= 0 && score <= 1 : "Invalid score: " + score;
         return (int)Math.floor(score * (double)(BIN_COUNT - 1));
     }
 

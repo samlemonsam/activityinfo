@@ -3,6 +3,7 @@ package org.activityinfo.store.query.output;
 import com.google.gson.stream.JsonWriter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -117,6 +118,24 @@ public class RowBasedJsonWriter {
                             writer.name(id);
                             writer.value(dateFormat.format(date));
                         }
+                    }
+                };
+            
+            case GEOGRAPHIC:
+                return new FieldWriter() {
+                    @Override
+                    public void write(int rowIndex) throws IOException {
+                        Extents extents = view.getExtents(rowIndex);
+                        writer.name(id);
+                        writer.beginObject();
+                        writer.name("extents");
+                        writer.beginArray();
+                        writer.value(extents.getX1());
+                        writer.value(extents.getY1());
+                        writer.value(extents.getX2());
+                        writer.value(extents.getY2());
+                        writer.endArray();
+                        writer.endObject();
                     }
                 };
         }

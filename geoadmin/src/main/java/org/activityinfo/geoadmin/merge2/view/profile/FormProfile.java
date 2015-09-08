@@ -1,14 +1,12 @@
 package org.activityinfo.geoadmin.merge2.view.profile;
 
 import com.google.common.base.Function;
-import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPair;
-import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.BiFunction;
@@ -30,6 +28,7 @@ public class FormProfile {
     private final ColumnSet columnSet;
     private final ColumnView id;
     private final List<FieldProfile> fields = new ArrayList<>();
+    private final List<FieldProfile> geometryFields = new ArrayList<>();
     private final Map<ResourceId, Integer> idMap = new HashMap<>();
 
     public FormProfile(FormTree formTree, ColumnSet columnSet) {
@@ -57,7 +56,6 @@ public class FormProfile {
         return fields;
     }
 
-
     public String getLabel() {
         return formTree.getRootFormClass().getLabel();
     }
@@ -81,6 +79,8 @@ public class FormProfile {
                 QueryModel queryModel = new QueryModel(tree.getRootFormClass().getId());
                 queryModel.selectResourceId().as(ID_COLUMN);
 
+
+                // Add all reachable text fields as matchable fields
                 for (FormTree.Node node : tree.getLeaves()) {
                     if(node.getType() instanceof TextType) {
                         queryModel
@@ -88,6 +88,17 @@ public class FormProfile {
                                 .as(node.getFieldId().asString());
                     }
                 }
+
+                // Add only geometry from the root form
+                for (FormTree.Node node : tree.getRootFields()) {
+                    if(node.getType() instanceof GeoAreaType) {
+                        queryModel
+                                .selectField(node.getFieldId())
+                                .as(node.getFieldId().asString());
+                    }
+                }
+
+
                 return resourceStore.queryColumns(queryModel);
             }
         });
@@ -117,20 +128,9 @@ public class FormProfile {
         StringBuilder s = new StringBuilder();
         for (FieldProfile field : fields) {
             if(field.getView() != null) {
-                s.append("[").append(field.getLabel()).append(" = ").append(field.getView().getString(index)).append("]");
+                s.append("[").append(field.getLabel()).append(" = ").append(field.getView().get(index)).append("]");
             }
         }
         return s.toString();
     }
-
-//    /**
-//     * Create new, synthetic FormProfile that contains distinct 
-//     * @param fieldPath
-//     * @return
-//     */
-//    public FormProfile distinct(List<FieldPath> fieldPath) {
-//        
-//        
-//        
-//    }
 }

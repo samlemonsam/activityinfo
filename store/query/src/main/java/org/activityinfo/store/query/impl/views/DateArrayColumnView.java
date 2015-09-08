@@ -2,9 +2,9 @@ package org.activityinfo.store.query.impl.views;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +44,11 @@ public class DateArrayColumnView implements ColumnView, Serializable {
     @Override
     public Date getDate(int row) {
         return values.get(row);
+    }
+
+    @Override
+    public Extents getExtents(int row) {
+        return null;
     }
 
     @Override

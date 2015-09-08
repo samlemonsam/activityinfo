@@ -22,6 +22,16 @@
         "typeClass": "FREE_TEXT"
       },
       "required": true
+    },
+    {
+      "code": "boundary",
+      "visible": true,
+      "id": "E00000013790000000005",
+      "label": "Geography",
+      "type": {
+        "typeClass": "geoArea"
+      },
+      "required": false
     }
   ],
   "_class_label": "Region"

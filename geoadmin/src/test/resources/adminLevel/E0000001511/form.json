@@ -1,4 +1,3 @@
-
 {
   "@id": "E0000001511",
   "@owner": "_root",
@@ -23,6 +22,16 @@
         "typeClass": "FREE_TEXT"
       },
       "required": true
+    },
+    {
+      "code": "boundary",
+      "visible": true,
+      "id": "E00000015110000000005",
+      "label": "Geography",
+      "type": {
+        "typeClass": "geoArea"
+      },
+      "required": false
     },
     {
       "code": "parent",

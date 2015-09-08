@@ -25,6 +25,16 @@
       "required": true
     },
     {
+      "code": "boundary",
+      "visible": true,
+      "id": "E00000015080000000005",
+      "label": "Geography",
+      "type": {
+        "typeClass": "geoArea"
+      },
+      "required": false
+    },
+    {
       "code": "parent",
       "visible": true,
       "id": "E00000015080000000007",

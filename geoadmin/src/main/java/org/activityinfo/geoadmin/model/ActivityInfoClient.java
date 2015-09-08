@@ -4,6 +4,7 @@ import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
@@ -28,6 +29,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.views.GeoColumnView;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -123,9 +125,9 @@ public class ActivityInfoClient implements FormClassProvider {
             .path(countryCode)
             .path("adminLevels").build();
         return Arrays.asList(
-            client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(AdminLevel[].class));
+                client.resource(uri)
+                        .accept(MediaType.APPLICATION_JSON_TYPE)
+                        .get(AdminLevel[].class));
 	}
 	
 	public List<LocationType> getLocationTypesByCountryCode(String countryCode) {
@@ -211,9 +213,9 @@ public class ActivityInfoClient implements FormClassProvider {
             .build();
 
         return Arrays.asList(
-            client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(AdminEntity[].class));
+                client.resource(uri)
+                        .accept(MediaType.APPLICATION_JSON_TYPE)
+                        .get(AdminEntity[].class));
     }
 
     /**
@@ -275,7 +277,8 @@ public class ActivityInfoClient implements FormClassProvider {
         return client.resource(uri)
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .type(MediaType.APPLICATION_JSON_TYPE)
-            .post(new GenericType<List<List<AdminEntity>>>() { }, points);
+            .post(new GenericType<List<List<AdminEntity>>>() {
+            }, points);
     }
 
     public ObjectMapper getObjectMapper() {
@@ -339,12 +342,23 @@ public class ActivityInfoClient implements FormClassProvider {
                 case "array":
                     columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
                     break;
+                case "coordinates":
+                    columnMap.put(column.getKey(), parseCoordinates(columnValue.getAsJsonArray("coordinates")));
+                    break;
                 default:
                     throw new UnsupportedOperationException(storage);
             }
         }
 
         return new ColumnSet(numRows, columnMap);
+    }
+
+    private ColumnView parseCoordinates(JsonArray coordinateArray) {
+        double[] coordinates = new double[coordinateArray.size()];
+        for (int i = 0; i < coordinateArray.size(); i++) {
+            coordinates[i] = coordinateArray.get(i).getAsDouble();
+        }
+        return new GeoColumnView(coordinates);
     }
 
     private WebResource formResource(ResourceId resourceId) {

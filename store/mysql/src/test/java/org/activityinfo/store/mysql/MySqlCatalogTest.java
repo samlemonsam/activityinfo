@@ -70,7 +70,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void testAdmin() {
-        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code");
+        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");
         assertThat(column("province.name"), hasValues("Ituri", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
         assertThat(column("name"), hasValues("Bukavu", "Walungu", "Shabunda", "Kalehe", "Irumu"));
         assertThat(column("code"), hasValues( "203", "201", "202", "203", "203"));

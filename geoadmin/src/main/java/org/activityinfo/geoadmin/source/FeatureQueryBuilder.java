@@ -3,13 +3,14 @@ package org.activityinfo.geoadmin.source;
 import com.google.common.base.Function;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.AttributeType;
+import org.opengis.feature.type.GeometryType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,14 +49,20 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
         QueryField field = new QueryField();
         field.attributeIndex = findIndex(fieldId);
         field.observer = observer;
-        field.converter = new Function<Object, FieldValue>() {
-            @Override
-            public FieldValue apply(Object input) {
-                assert input instanceof String;
-                return TextValue.valueOf((String)input);
-            }
-        };
+        field.converter = converterForAttribute(field.attributeIndex);
         fields.add(field);
+    }
+
+    private Function<Object, FieldValue> converterForAttribute(int attributeIndex) {
+        AttributeDescriptor descriptor = featureSource.getSchema().getAttributeDescriptors().get(attributeIndex);
+        AttributeType type = descriptor.getType();
+        if(type instanceof GeometryType) {
+            return new GeometryConverter((GeometryType)type);
+            
+        } else {
+            return new StringAttributeConverter();
+        }
+      
     }
 
     private int findIndex(ResourceId fieldId) {
@@ -69,6 +76,7 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
         throw new IllegalArgumentException(fieldId.asString());
     }
 
+    
     @Override
     public void execute() throws IOException {
         SimpleFeatureIterator it = featureSource.getFeatures().features();

@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl.views;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.Date;
 
@@ -54,6 +55,15 @@ public class JoinedColumnView implements ColumnView {
     @Override
     public Date getDate(int row) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Extents getExtents(int row) {
+        int right = joinMap[row];
+        if(right != -1) {
+            return columnView.getExtents(right);
+        }
+        return null;
     }
 
     @Override

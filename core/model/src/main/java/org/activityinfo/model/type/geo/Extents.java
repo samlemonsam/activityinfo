@@ -24,7 +24,6 @@ package org.activityinfo.model.type.geo;
 
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSetter;
 
@@ -179,6 +178,8 @@ public class Extents implements Serializable, IsRecord {
     }
 
     public static Extents create(double x1, double y1, double x2, double y2) {
+        assert x1 <= x2 : x1 + " should be less than or equal to " + x2;
+        assert y1 <= y2 : y1 + " should be less than or equal to " + y2;
         return new Extents(y1, y2, x1, x2);
     }
     
@@ -208,6 +209,14 @@ public class Extents implements Serializable, IsRecord {
 
     public AiLatLng center() {
         return new AiLatLng((minLat + maxLat) / 2.0, (minLon + maxLon) / 2.0);
+    }
+    
+    public double area() {
+        if(isEmpty()) {
+            return 0d; 
+        } else {
+            return (maxLat - minLat) * (maxLon - minLon);
+        }
     }
 
     @JsonSetter

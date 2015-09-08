@@ -1,7 +1,5 @@
 package org.activityinfo.geoadmin.merge2.view.swing.match;
 
-import com.google.common.base.Optional;
-import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.swing.MatchColors;
 
@@ -9,8 +7,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class CellRenderers {
@@ -18,6 +19,8 @@ public class CellRenderers {
     private MatchTable matchTable;
     
     private final TexturePaint unmatchedPaint = createUnmatchedPaint();
+    
+    private Font strikeThroughFont;
 
     public CellRenderers(MatchTable table) {
         this.matchTable = table;
@@ -71,19 +74,36 @@ public class CellRenderers {
             matched = matchRow.isMatched(side);
             if(matchRow.isMatched()) {
                 MatchColors.update(c, columnModel.getMatchConfidence(matchIndex));
-            } else {
+            } else if(isSource()) {
+                // Show empty
                 c.setBackground(Color.WHITE);
+                c.setForeground(Color.BLACK);
+            } else {
+                // Unmatched targets will be deleted from the dataset
+                // Render as striken-through text
+                if(strikeThroughFont == null) {
+                    Map<TextAttribute, Object> attributes = new HashMap<>();
+                    attributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
+                    strikeThroughFont = c.getFont().deriveFont(attributes);
+                }
+                
+                c.setFont(strikeThroughFont);
+                c.setBackground(Color.LIGHT_GRAY);
                 c.setForeground(Color.BLACK);
             }
             return c;
         }
 
+        private boolean isSource() {
+            return columnModel.getSide().get() == MatchSide.SOURCE;
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
-            if (matched) {
-                super.paintComponent(g);
-            } else {
+            if (!matched && isSource()) {
                 paintUnmatchedCell(g);
+            } else {
+                super.paintComponent(g);
             } 
         }
 

@@ -5,6 +5,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.impl.views.ConstantColumnView;
 import org.activityinfo.store.query.impl.views.EmptyColumnView;
+import org.activityinfo.store.query.impl.views.GeoColumnView;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,6 +56,9 @@ public class ColumnJsonWriter {
         } else if (view instanceof ConstantColumnView) {
             writeConstantView(view);
 
+        } else if (view instanceof GeoColumnView) {
+            writeCoordinates((GeoColumnView) view);
+            
         } else {
             writeArrayView(view);
         }
@@ -74,6 +78,21 @@ public class ColumnJsonWriter {
             case DATE:
                 throw new UnsupportedOperationException("todo");
         }
+    }
+    
+    private void writeCoordinates(GeoColumnView view) throws IOException {
+        writer.name("storage").value("coordinates");
+        writer.name("coordinates");
+        writer.beginArray();
+        for (int i = 0; i < view.numCoordinates(); i++) {
+            double coordinate = view.getCoordinate(i);
+            if(Double.isNaN(coordinate)) {
+                writer.nullValue();
+            } else {
+                writer.value(coordinate);
+            }
+        }
+        writer.endArray();
     }
 
     private void writeArrayView(ColumnView view) throws IOException {

@@ -14,15 +14,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 public class MatchGraphTest {
 
     public static final int COLUMN_WIDTH = 25;
@@ -46,8 +45,13 @@ public class MatchGraphTest {
 
         keyFields = KeyFieldPairSet.matchKeys(sourceForm, targetForm);
 
+        for (KeyFieldPair keyField : keyFields) {
+            System.out.println(keyField.getSourceField().getLabel() + " <=> " + keyField.getTargetField().getLabel());
+        }
+
         graph = new MatchGraph(keyFields);
     }
+    
     
     @Test
     @Ignore
@@ -144,11 +148,15 @@ public class MatchGraphTest {
      */
     @Test
     public void singleParetoOptimal() {
+
+        assertThat(sourceForm.getField("the_geom").getView().getExtents(0), notNullValue());
+
         graph.build();
 
         int sourceIndex = findTargetIndex("Name", "Komajia");
         int targetIndex = graph.getBestMatchForTarget(sourceIndex);
 
+        checkMatch("Komajia", "Komajia");
         assertThat(targetIndex, equalTo(findSourceIndex("COMMUNE", "Komajia")));
         
 

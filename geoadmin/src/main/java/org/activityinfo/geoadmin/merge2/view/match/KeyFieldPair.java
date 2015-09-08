@@ -3,6 +3,7 @@ package org.activityinfo.geoadmin.merge2.view.match;
 import com.google.common.base.Strings;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
+import org.activityinfo.model.type.geo.Extents;
 
 /**
  * Pair of key fields, one from the source form, and one from the target field, which 
@@ -36,12 +37,32 @@ public class KeyFieldPair {
      * @return a score of similarity in the range [0, 1] where 1 is an exact match.              
      */
     public double score(int sourceIndex, int targetIndex) {
-        String sourceValue = sourceField.getView().getString(sourceIndex);
-        String targetValue = targetField.getView().getString(targetIndex);
-        if (Strings.isNullOrEmpty(sourceValue) || Strings.isNullOrEmpty(targetValue)) {
-            return Double.NaN;
+        if(sourceField.isText() && targetField.isText()) {
+            String sourceValue = sourceField.getView().getString(sourceIndex);
+            String targetValue = targetField.getView().getString(targetIndex);
+            if (Strings.isNullOrEmpty(sourceValue) || Strings.isNullOrEmpty(targetValue)) {
+                return Double.NaN;
+            } else {
+                return scorer.score(sourceValue, targetValue);
+            }
+        } else if(sourceField.isGeoArea() && targetField.isGeoArea()) {
+            Extents sourceExtents = sourceField.getView().getExtents(sourceIndex);
+            Extents targetExtents = targetField.getView().getExtents(targetIndex);
+            return jaccard(sourceExtents, targetExtents);
+
+
         } else {
-            return scorer.score(sourceValue, targetValue);
+            return Double.NaN;
         }
+    }
+
+    private double jaccard(Extents a, Extents b) {
+        // https://en.wikipedia.org/wiki/Jaccard_index
+        double areaA = a.area();
+        double areaB = b.area();
+        double areaIntersection = a.intersect(b).area();
+        double jaccardIndex = areaIntersection / (a.area() + b.area() - areaIntersection);
+
+        return jaccardIndex;
     }
 }

@@ -45,7 +45,6 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
      * sets of values.
      */
     public static KeyFieldPairSet matchKeys(FormProfile source, FormProfile target) {
-
         ScoreMatrix scoreMatrix = new FieldScoreMatrix(source.getFields(), target.getFields());
         MatchBuilder fieldGraph = new MatchBuilder(scoreMatrix);
 

@@ -67,27 +67,27 @@ public class TableMappingBuilder {
     }
     
     public void addGeoAreaField(FormField field) {
-        add(new FieldMapping(field, Arrays.asList("y1", "y1", "x1", "x2"), new FieldValueMapping() {
+        add(new FieldMapping(field, Arrays.asList("x1", "y1", "x2", "y2"), new FieldValueMapping() {
             @Override
             public FieldValue extract(ResultSet rs, int index) throws SQLException {
-                double minLat = rs.getDouble(index + 2);
+                double x1 = rs.getDouble(index);
                 if (rs.wasNull()) {
                     return null;
                 }
-                double maxLat = rs.getDouble(index + 3);
+                double y1 = rs.getDouble(index + 1);
                 if (rs.wasNull()) {
                     return null;
                 }
-                double minLon = rs.getDouble(index);
+                double x2 = rs.getDouble(index + 2);
                 if (rs.wasNull()) {
                     return null;
                 }
-                double maxLon = rs.getDouble(index + 1);
+                double y2 = rs.getDouble(index + 3);
                 if (rs.wasNull()) {
                     return null;
                 }
 
-                return new GeoArea(new Extents(minLat, maxLat, minLon, maxLon), "FIXME");
+                return new GeoArea(Extents.create(x1, y1, x2, y2), "FIXME");
             }
 
             @Override

@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
@@ -15,9 +16,9 @@ public class FieldScoreMatrix extends ScoreMatrix {
     private List<FieldProfile> sourceColumns;
     private List<FieldProfile> targetColumns;
 
-    public FieldScoreMatrix(List<FieldProfile> sourceColumns, List<FieldProfile> targetColumns) {
-        this.sourceColumns = sourceColumns;
-        this.targetColumns = targetColumns;
+    public FieldScoreMatrix(Iterable<FieldProfile> sourceColumns, Iterable<FieldProfile> targetColumns) {
+        this.sourceColumns = Lists.newArrayList(sourceColumns);
+        this.targetColumns = Lists.newArrayList(targetColumns);
     }
 
     @Override
@@ -43,9 +44,31 @@ public class FieldScoreMatrix extends ScoreMatrix {
 
     @Override
     public double score(int i, int j, int d) {
-        Set<String> targetValues = targetColumns.get(i).uniqueValues();
-        Set<String> sourceValues = sourceColumns.get(j).uniqueValues();
+
+
+        FieldProfile x = targetColumns.get(i);
+        FieldProfile y = sourceColumns.get(j);
+
+        if(x.isText() && y.isText()) {
+            return scoreTextColumnMatch(x, y);
+
+        } else if(x.isGeoArea() && y.isGeoArea()) {
+            return scoreGeoAreaMatch(x, y);
         
+        } else {
+            return 0;
+        }
+    }
+
+    private double scoreGeoAreaMatch(FieldProfile x, FieldProfile y) {
+        // TODO: only really needed if we have forms with multiple geo area fields.
+        return 1.0;
+    }
+
+    private double scoreTextColumnMatch(FieldProfile x, FieldProfile y) {
+        Set<String> targetValues = x.uniqueValues();
+        Set<String> sourceValues = y.uniqueValues();
+
         // Alternative: Relative information
         // I(s; p) = sum(i = 1 to n)  s[i] * log(s[i]/p[i])
 
