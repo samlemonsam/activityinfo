@@ -36,9 +36,9 @@ gwt {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
                 'org.activityinfo.ui.ActivityInfoReleaseLogging',
                 'org.activityinfo.ui.Embed'
-        compiler {
-            style = de.richsource.gradle.plugins.gwt.Style.DETAILED;
-        }
+//        compiler {
+//            style = de.richsource.gradle.plugins.gwt.Style.DETAILED;
+//        }
     }
 }
 
