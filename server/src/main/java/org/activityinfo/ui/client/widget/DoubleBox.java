@@ -31,15 +31,8 @@ public class DoubleBox extends com.google.gwt.user.client.ui.DoubleBox {
     public DoubleBox() {
         setStyleName("form-control");
 
-        // AI-1217 : use type=number for all browsers except Chrome. In Chrome all numbers (independent from locale)
-        // are converted into number with dot as separator.
+        // AI-1217 : removed type=number for all browsers because it's too tricky
         //https://www.aeyoun.com/webdev/html5-input-number-localization.html
-//        if (!isChrome()) {
-//            getElement().setPropertyString("type", "number");
-//        }
-    }
-
-    public boolean isChrome() {
-        return Window.Navigator.getUserAgent().toLowerCase().contains("chrome");
+        //getElement().setPropertyString("type", "number");
     }
 }
