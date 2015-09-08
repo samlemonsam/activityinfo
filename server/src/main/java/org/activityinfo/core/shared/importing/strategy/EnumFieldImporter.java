@@ -85,7 +85,7 @@ public class EnumFieldImporter implements FieldImporter {
     @Override
     public boolean updateInstance(SourceRow row, FormInstance instance) {
         final ValidationResult validateResult = validate(row);
-        if (validateResult.shouldPersist()) {
+        if (validateResult.isPersistable()) {
             String value = source.getValue(row);
             final Set<ResourceId> result = Sets.newHashSet();
             for (EnumItem enumItem : enumType.getValues()) {

@@ -56,20 +56,22 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
 
     @Override
     public void render(Context context, ValidatedRow data, SafeHtmlBuilder sb) {
-        final SafeHtml safeHtml = Templates.INSTANCE.html(style(data.getResult(columnIndex).getState()), accessor.getValue(data.getSourceRow()));
+        final SafeHtml safeHtml = Templates.INSTANCE.html(style(data.getResult(columnIndex)), accessor.getValue(data.getSourceRow()));
         sb.append(safeHtml);
     }
 
-    private static String style(ValidationResult.State state) {
+    private static String style(ValidationResult state) {
         if (state != null) {
-            switch (state) {
+            switch (state.getState()) {
                 case OK:
                     return ValidationPageStyles.INSTANCE.stateOk();
                 case CONFIDENCE:
                     return ValidationPageStyles.INSTANCE.stateConfidence();
                 case ERROR:
                 case MISSING:
-                    return ValidationPageStyles.INSTANCE.stateError();
+                    if (!state.hasReferenceMatch()) {
+                        return ValidationPageStyles.INSTANCE.stateError();
+                    }
             }
         }
         return "";
