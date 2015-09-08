@@ -124,7 +124,8 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 //        assertThat(result.getTotalLength(), equalTo(313));
 
         SiteDTO lastSite = result.getData().get(0);
-        assertThat(lastSite.getDate2(), equalTo(new LocalDate(2013,4,26)));
+//        assertThat(lastSite.getDate2(), equalTo(new LocalDate(2013,4,26)));
+        assertThat(lastSite.getDate2(), equalTo(new LocalDate(2013,4,30)));
         assertThat(lastSite.getLocationName(), equalTo("Bukombo(Camp)"));
         assertThat(lastSite.getAdminEntity(PROVINCE_LEVEL).getName(), equalTo("Nord Kivu"));
         assertThat(lastSite.getAdminEntity(DISTRICT_LEVEL).getName(), equalTo("Nord Kivu"));
