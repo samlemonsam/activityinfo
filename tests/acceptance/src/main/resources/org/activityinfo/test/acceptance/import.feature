@@ -11,12 +11,13 @@ Feature: Import from Excel
       | ECHO  |
       | NRC   |
 
+  @AI-999
   Scenario: Import single-valued enum from Excel
     When I import into the form "NFI Distribution" spreadsheet:
-      | Partner Name | Donor | Nb. kits | Start Date | End Date   | Comments |
-      | NRC          | USAID | 1,000    | 01/02/2014 | 01/03/2014 | row 1    |
-      | NRC          | ECHO  | 500      | 01/03/2014 | 01/04/2014 | row 2    |
-      | NRC          | ECHO  | 2,000    | 01/04/2014 | 01/05/2014 | row 3    |
+      | Partner Name | Partner Full Name | Donor | Nb. kits | Start Date | End Date   | Comments |
+      | NRC          |                   | USAID | 1,000    | 01/02/2014 | 01/03/2014 | row 1    |
+      | NRC          |                   | ECHO  | 500      | 01/03/2014 | 01/04/2014 | row 2    |
+      | NRC          |                   | ECHO  | 2,000    | 01/04/2014 | 01/05/2014 | row 3    |
     And open table for the "NFI Distribution" form in the database "Import"
     Then table has rows with hidden built-in columns:
       | Donor | Nb. kits |
