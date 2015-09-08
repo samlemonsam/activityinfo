@@ -120,8 +120,8 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         query.setSortInfo(new SortInfo("date2", Style.SortDir.DESC));
 
         SiteResult result = execute(query);
-//        assertThat(result.getTotalLength(), equalTo(651));
-        assertThat(result.getTotalLength(), equalTo(313));
+        assertThat(result.getTotalLength(), equalTo(651));
+//        assertThat(result.getTotalLength(), equalTo(313));
 
         SiteDTO lastSite = result.getData().get(0);
         assertThat(lastSite.getDate2(), equalTo(new LocalDate(2013,4,26)));
