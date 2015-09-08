@@ -134,7 +134,7 @@ public class HierarchyClassImporter implements FieldImporter {
 
         final Map<ResourceId, ResourceId> toSave = Maps.newHashMap();
         for (ValidationResult result : validationResults) {
-            if (result.shouldPersist() && result.getRangeWithInstanceId() != null) {
+            if (result.isPersistable() && result.getRangeWithInstanceId() != null) {
                 ResourceId range = result.getRangeWithInstanceId().getA();
                 ResourceId value = toSave.get(range);
                 if (value == null) {

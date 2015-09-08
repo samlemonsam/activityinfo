@@ -6,14 +6,13 @@ import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -118,8 +117,9 @@ public class SingleClassImporter implements FieldImporter {
         final List<ValidationResult> validationResults = Lists.newArrayList();
         validateInstance(row, validationResults);
         for (ValidationResult result : validationResults) {
-            if (result.shouldPersist() && result.getInstanceId() != null) {
+            if (result.isPersistable() && result.getInstanceId() != null) {
                 instance.set(fieldId, result.getInstanceId());
+                break;
             }
         }
 

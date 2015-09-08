@@ -64,7 +64,7 @@ public class ValidationResult {
         return state;
     }
 
-    public boolean shouldPersist() {
+    public boolean isPersistable() {
         return state == State.OK || (state == State.CONFIDENCE && confidence >= InstanceScorer.MINIMUM_SCORE);
     }
 
@@ -74,6 +74,10 @@ public class ValidationResult {
 
     public void setInstanceId(ResourceId instanceId) {
         this.instanceId = instanceId;
+    }
+
+    public boolean hasReferenceMatch() {
+        return instanceId != null;
     }
 
     public Pair<ResourceId, ResourceId> getRangeWithInstanceId() {
