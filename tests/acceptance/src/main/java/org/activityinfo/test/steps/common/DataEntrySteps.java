@@ -310,4 +310,15 @@ public class DataEntrySteps {
     public void I_import_into_the_form_spreadsheet(String formName, DataTable dataTable) throws Throwable {
         driver.importForm(formName, dataTable);
     }
+
+    @When("^I import into the form \"([^\"]*)\" spreadsheet with (\\d+) rows:$")
+    public void I_import_into_the_form_spreadsheet_with_rows(String formName, int quantityOfRowCopy, DataTable dataTable) throws Throwable {
+        driver.importRowIntoForm(formName, dataTable, quantityOfRowCopy);
+    }
+
+    @Then("^\"([^\"]*)\" table has (\\d+) rows in \"([^\"]*)\" database$")
+    public void table_has_rows_in_database(String formName, int numberOfExpectedRows, String database) throws Throwable {
+        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(formName), driver.getAliasTable().getAlias(formName));
+        BsTable.waitUntilRowsLoaded(tablePage, numberOfExpectedRows);
+    }
 }

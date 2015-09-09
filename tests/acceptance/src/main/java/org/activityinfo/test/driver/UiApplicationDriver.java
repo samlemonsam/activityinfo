@@ -1008,6 +1008,23 @@ public class UiApplicationDriver extends ApplicationDriver {
         dataEntryTab.importData(dataTable);
     }
 
+    public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        aliasTable.alias(dataTable);
+
+        copyLastRow(dataTable, quantityOfRowCopy);
+
+        dataEntryTab.importData(dataTable);
+    }
+
+    private static void copyLastRow(DataTable dataTable, int quantityOfRowCopy) {
+        List<DataTableRow> gherkinRows = dataTable.getGherkinRows();
+    }
+
     @Override
     public void cleanup() throws Exception {
         setup().cleanup();
