@@ -24,6 +24,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.promise.PromisesExecutionGuard;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -119,13 +120,16 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources) {
-        final List<Promise<Void>> promises = Lists.newArrayList();
-        if (resources != null && !resources.isEmpty()) {
-            for (final IsResource resource : resources) {
-                promises.add(persist(resource));
-            }
+        final List<Function<Void, Promise<Void>>> operations = Lists.newArrayList();
+        for (final IsResource resource : resources) {
+            operations.add(new Function<Void, Promise<Void>>() {
+                @Override
+                public Promise<Void> apply(Void input) {
+                    return persist(resource);
+                }
+            });
         }
-        return Promise.waitAll(promises);
+        return PromisesExecutionGuard.newInstance().executeSerially(operations);
     }
 
     @Override
