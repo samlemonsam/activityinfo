@@ -1016,13 +1016,33 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         aliasTable.alias(dataTable);
 
-        copyLastRow(dataTable, quantityOfRowCopy);
+        dataTable = copyLastRow(dataTable, quantityOfRowCopy);
 
         dataEntryTab.importData(dataTable);
     }
 
-    private static void copyLastRow(DataTable dataTable, int quantityOfRowCopy) {
-        List<DataTableRow> gherkinRows = dataTable.getGherkinRows();
+    private static DataTable copyLastRow(DataTable dataTable, int quantityOfRowCopy) {
+        List<List<String>> rows = Lists.newArrayList();
+
+        // copy existing rows
+        for (DataTableRow row : dataTable.getGherkinRows()) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : row.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+
+        // copy last row
+        DataTableRow lastRow = dataTable.getGherkinRows().get(dataTable.getGherkinRows().size() - 1);
+        for (int i = 0; i < (quantityOfRowCopy - 1); i++) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : lastRow.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+        return DataTable.create(rows);
     }
 
     @Override
