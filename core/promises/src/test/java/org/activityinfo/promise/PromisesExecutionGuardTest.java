@@ -47,7 +47,7 @@ public class PromisesExecutionGuardTest {
         };
         PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance().withMonitor(monitor);
 
-        List<Function<Void, Promise<Void>>> operations = Lists.newArrayList();
+        List<PromiseExecutionOperation> operations = Lists.newArrayList();
         int operationsToRun = 500;
         for (int i = 1; i <= operationsToRun; i++) {
             operations.add(createOperation(i, guard));
@@ -74,8 +74,8 @@ public class PromisesExecutionGuardTest {
         assertTrue("Job is not finished.", finished[0]);
     }
 
-    private Function<Void, Promise<Void>> createOperation(final int i, final PromisesExecutionGuard guard) {
-        return new Function<Void, Promise<Void>>() {
+    private PromiseExecutionOperation createOperation(final int i, final PromisesExecutionGuard guard) {
+        return new PromiseExecutionOperation() {
             @Nullable
             @Override
             public Promise<Void> apply(Void input) {

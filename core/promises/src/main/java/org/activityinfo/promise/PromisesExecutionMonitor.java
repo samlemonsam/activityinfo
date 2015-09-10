@@ -21,6 +21,10 @@ package org.activityinfo.promise;
  * #L%
  */
 
+import com.google.gwt.thirdparty.guava.common.collect.Lists;
+
+import java.util.List;
+
 /**
  * @author yuriyz on 09/10/2015.
  */
@@ -33,6 +37,7 @@ public interface PromisesExecutionMonitor {
         private int completed;
         private int retries;
         private int total;
+        private List<PromiseExecutionOperation> notFinishedOperations = Lists.newArrayList();
 
         public PromisesExecutionStatistic() {
         }
@@ -78,6 +83,10 @@ public interface PromisesExecutionMonitor {
         public PromisesExecutionStatistic setTotal(int total) {
             this.total = total;
             return this;
+        }
+
+        public List<PromiseExecutionOperation> getNotFinishedOperations() {
+            return notFinishedOperations;
         }
 
         @Override

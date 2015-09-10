@@ -10,6 +10,7 @@ import org.activityinfo.core.shared.importing.strategy.ImportTarget;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import java.util.List;
 
@@ -60,8 +61,8 @@ public class Importer {
         return modeller.execute(new ValidateClassImportCommand());
     }
 
-    public Promise<Void> persist(final ImportModel model) {
+    public Promise<Void> persist(final ImportModel model, PromisesExecutionMonitor monitor) {
         final ImportCommandExecutor modeller = new ImportCommandExecutor(model, fields, resourceLocator);
-        return modeller.execute(new PersistImportCommand());
+        return modeller.execute(new PersistImportCommand(monitor));
     }
 }

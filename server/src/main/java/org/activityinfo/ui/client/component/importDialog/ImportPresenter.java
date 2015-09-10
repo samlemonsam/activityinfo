@@ -20,6 +20,7 @@ import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.strategy.ImportTarget;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.promise.PromisesExecutionMonitor;
 import org.activityinfo.ui.client.component.importDialog.mapping.ColumnMappingPage;
 import org.activityinfo.ui.client.component.importDialog.source.ChooseSourcePage;
 import org.activityinfo.ui.client.component.importDialog.validation.ValidationPage;
@@ -126,7 +127,14 @@ public class ImportPresenter {
         dialogBox.getFinishButton().setEnabled(false);
         dialogBox.setStatusText(I18N.CONSTANTS.importing());
 
-        importer.persist(importModel).then(new AsyncCallback<Void>() {
+        PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
+            @Override
+            public void onChange(PromisesExecutionStatistic statistic) {
+                // todo
+            }
+        };
+
+        importer.persist(importModel, monitor).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 showDelayedFailure(caught);

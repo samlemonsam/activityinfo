@@ -21,12 +21,12 @@ package org.activityinfo.promise;
  * #L%
  */
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -41,12 +41,13 @@ public class PromisesExecutionGuard {
     private final int maxParallelExecutions;
     private final int maxRetryCount;
 
-    private Map<Function<Void, Promise<Void>>, Integer> retryMap = Maps.newHashMap();
-    private List<Function<Void, Promise<Void>>> toRun = Lists.newArrayList();
+    private Map<PromiseExecutionOperation, Integer> retryMap = Maps.newHashMap();
+    private List<PromiseExecutionOperation> toRun = Lists.newArrayList();
 
     private int runningOperationsCount = 0;
 
     // monitor
+    @Nullable
     private PromisesExecutionMonitor monitor;
     private PromisesExecutionMonitor.PromisesExecutionStatistic statistic = new PromisesExecutionMonitor.PromisesExecutionStatistic();
 
@@ -65,7 +66,7 @@ public class PromisesExecutionGuard {
         return new PromisesExecutionGuard();
     }
 
-    public PromisesExecutionGuard withMonitor(PromisesExecutionMonitor monitor) {
+    public PromisesExecutionGuard withMonitor(@Nullable PromisesExecutionMonitor monitor) {
         this.monitor = monitor;
         return this;
     }
@@ -76,7 +77,7 @@ public class PromisesExecutionGuard {
         toRun = Lists.newArrayList();
     }
 
-    public Promise<Void> executeSerially(final List<Function<Void, Promise<Void>>> operations) {
+    public Promise<Void> executeSerially(final List<PromiseExecutionOperation> operations) {
 
         if (operations.isEmpty()) {
             return Promise.done();
@@ -95,7 +96,7 @@ public class PromisesExecutionGuard {
         return result;
     }
 
-    private void incrementRetry(Function<Void, Promise<Void>> operation) {
+    private void incrementRetry(PromiseExecutionOperation operation) {
         Integer counter = retryMap.get(operation);
         counter++;
         retryMap.put(operation, counter);
@@ -113,7 +114,7 @@ public class PromisesExecutionGuard {
                 return;
             }
 
-            for (final Function<Void, Promise<Void>> operation : Lists.newArrayList(toRun)) {
+            for (final PromiseExecutionOperation operation : Lists.newArrayList(toRun)) {
 
                 debugState();
                 if (runningOperationsCount >= maxParallelExecutions) {
@@ -138,6 +139,9 @@ public class PromisesExecutionGuard {
                         Integer retryCount = retryMap.get(operation);
                         if (retryCount > maxRetryCount) {
                             result.onFailure(caught);
+
+                            statistic.getNotFinishedOperations().clear();
+                            statistic.getNotFinishedOperations().addAll(toRun);
                         } else {
                             executeSeries(result);
                         }
@@ -171,9 +175,9 @@ public class PromisesExecutionGuard {
         }
     }
 
-    private static Map<Function<Void, Promise<Void>>, Integer> createRetryMap(List<Function<Void, Promise<Void>>> operations) {
-        Map<Function<Void, Promise<Void>>, Integer> toRun = Maps.newHashMap();
-        for (Function<Void, Promise<Void>> operation : operations) {
+    private static Map<PromiseExecutionOperation, Integer> createRetryMap(List<PromiseExecutionOperation> operations) {
+        Map<PromiseExecutionOperation, Integer> toRun = Maps.newHashMap();
+        for (PromiseExecutionOperation operation : operations) {
             toRun.put(operation, 0);
         }
         return toRun;

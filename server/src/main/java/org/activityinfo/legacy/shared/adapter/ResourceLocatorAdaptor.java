@@ -24,7 +24,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.promise.PromiseExecutionOperation;
 import org.activityinfo.promise.PromisesExecutionGuard;
+import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -120,16 +122,31 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources) {
-        final List<Function<Void, Promise<Void>>> operations = Lists.newArrayList();
+        return persist(resources, null);
+    }
+
+    @Override
+    public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
+        final List<PromiseExecutionOperation> operations = Lists.newArrayList();
         for (final IsResource resource : resources) {
-            operations.add(new Function<Void, Promise<Void>>() {
+            operations.add(new PromiseExecutionOperation() {
                 @Override
                 public Promise<Void> apply(Void input) {
                     return persist(resource);
                 }
             });
         }
-        return PromisesExecutionGuard.newInstance().executeSerially(operations);
+        return persistOperation(operations, monitor);
+    }
+
+    @Override
+    public Promise<Void> persistOperation(List<PromiseExecutionOperation> operations) {
+        return persistOperation(operations, null);
+    }
+
+    @Override
+    public Promise<Void> persistOperation(List<PromiseExecutionOperation> operations, @Nullable PromisesExecutionMonitor monitor) {
+        return PromisesExecutionGuard.newInstance().withMonitor(monitor).executeSerially(operations);
     }
 
     @Override
