@@ -28,6 +28,12 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Projects for database {0}")
     String projectsForDatabase(String arg0);
 
+    @DefaultMessage("Importing... {0}/{1}, retries: {2}")
+    String importing(int completed, int total, int retries);
+
+    @DefaultMessage("Imported {0} rows from {1}. Retry import of {2} failed  rows?")
+    String imported(int completed, int total, int failed);
+
     /**
      * Translated "{0,number,integer}Q{1,number,integer}".
      *

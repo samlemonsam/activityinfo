@@ -150,14 +150,16 @@ public class PromisesExecutionGuard {
                     @Override
                     public void onSuccess(Void none) {
 
-                        debugState();
                         runningOperationsCount--;
+                        debugState();
 
                         statistic.incrementCompleted();
                         triggerMonitor();
 
                         if (toRun.isEmpty()) {
-                            result.onSuccess(none);
+                            if (runningOperationsCount == 0) {
+                                result.onSuccess(none);
+                            }
                         } else {
                             executeSeries(result);
                         }

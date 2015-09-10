@@ -21,7 +21,7 @@ package org.activityinfo.promise;
  * #L%
  */
 
-import com.google.gwt.thirdparty.guava.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 

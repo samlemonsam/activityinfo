@@ -12,14 +12,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.client.form.tree.AsyncFormTreeBuilder;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.strategy.ImportTarget;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromisesExecutionMonitor;
 import org.activityinfo.ui.client.component.importDialog.mapping.ColumnMappingPage;
 import org.activityinfo.ui.client.component.importDialog.source.ChooseSourcePage;
@@ -122,26 +123,38 @@ public class ImportPresenter {
         return columnActions;
     }
 
+    private boolean persistFinished;
+    private boolean retryFailedRows = false;
+    private PromisesExecutionMonitor.PromisesExecutionStatistic lastStatistic;
+
+
     protected void persistData() {
 
+
+        persistFinished = false;
         dialogBox.getFinishButton().setEnabled(false);
         dialogBox.setStatusText(I18N.CONSTANTS.importing());
 
         PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
             @Override
             public void onChange(PromisesExecutionStatistic statistic) {
-                // todo
+                if (!persistFinished) {
+                    dialogBox.setStatusText(I18N.MESSAGES.importing(statistic.getCompleted(), statistic.getTotal(), statistic.getRetries()));
+                    lastStatistic = statistic;
+                }
             }
         };
 
-        importer.persist(importModel, monitor).then(new AsyncCallback<Void>() {
+        AsyncCallback<Void> callback = new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
+                persistFinished = true;
                 showDelayedFailure(caught);
             }
 
             @Override
             public void onSuccess(Void result) {
+                persistFinished = true;
                 overlay.hide();
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                     @Override
@@ -150,17 +163,32 @@ public class ImportPresenter {
                     }
                 });
             }
-        });
+        };
+
+        if (retryFailedRows) {
+            importer.getResourceLocator().persistOperation(lastStatistic.getNotFinishedOperations(), monitor);
+            retryFailedRows = false;
+            return;
+        }
+
+        importer.persist(importModel, monitor).then(callback);
     }
 
     private void showDelayedFailure(final Throwable caught) {
+        Log.error(caught.getMessage(), caught);
         // Show failure message only after a short fixed delay to ensure that
         // the progress stage is displayed. Otherwise if we have a synchronous error, clicking
         // the retry button will look like it's not working.
         Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
             @Override
             public boolean execute() {
-                dialogBox.setStatusText(I18N.CONSTANTS.importFailed());
+                retryFailedRows = lastStatistic != null;
+                if (lastStatistic != null) {
+                    dialogBox.setStatusText(I18N.MESSAGES.imported(
+                            lastStatistic.getCompleted(), lastStatistic.getTotal(), lastStatistic.getNotFinishedOperations().size()));
+                } else {
+                    dialogBox.setStatusText(I18N.CONSTANTS.importFailed());
+                }
                 dialogBox.getFinishButton().setText(I18N.CONSTANTS.retry());
                 dialogBox.getFinishButton().setEnabled(true);
                 eventBus.fireEvent(new ImportResultEvent(false));
