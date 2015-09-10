@@ -166,7 +166,7 @@ public class ImportPresenter {
         };
 
         if (retryFailedRows) {
-            importer.getResourceLocator().persistOperation(lastStatistic.getNotFinishedOperations(), monitor);
+            importer.getResourceLocator().persistOperation(lastStatistic.getNotFinishedOperations(), monitor).then(callback);
             retryFailedRows = false;
             return;
         }
