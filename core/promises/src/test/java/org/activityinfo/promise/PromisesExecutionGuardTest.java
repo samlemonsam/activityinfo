@@ -39,11 +39,17 @@ public class PromisesExecutionGuardTest {
 
     @Test
     public void executeSerially() {
-        PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance();
+        PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
+            @Override
+            public void onChange(PromisesExecutionStatistic statistic) {
+                System.out.println("onChange, statistic: " + statistic);
+            }
+        };
+        PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance().withMonitor(monitor);
 
         List<Function<Void, Promise<Void>>> operations = Lists.newArrayList();
         int operationsToRun = 500;
-        for (int i = 0; i < operationsToRun; i++) {
+        for (int i = 1; i <= operationsToRun; i++) {
             operations.add(createOperation(i, guard));
         }
 

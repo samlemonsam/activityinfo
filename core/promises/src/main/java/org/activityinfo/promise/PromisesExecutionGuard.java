@@ -46,6 +46,10 @@ public class PromisesExecutionGuard {
 
     private int runningOperationsCount = 0;
 
+    // monitor
+    private PromisesExecutionMonitor monitor;
+    private PromisesExecutionMonitor.PromisesExecutionStatistic statistic = new PromisesExecutionMonitor.PromisesExecutionStatistic();
+
     private boolean executeSeriesRunning = false;
 
     public PromisesExecutionGuard() {
@@ -59,6 +63,11 @@ public class PromisesExecutionGuard {
 
     public static PromisesExecutionGuard newInstance() {
         return new PromisesExecutionGuard();
+    }
+
+    public PromisesExecutionGuard withMonitor(PromisesExecutionMonitor monitor) {
+        this.monitor = monitor;
+        return this;
     }
 
     public void reset() {
@@ -78,6 +87,8 @@ public class PromisesExecutionGuard {
 
         toRun = Lists.newArrayList(operations);
         retryMap = createRetryMap(operations);
+        statistic = new PromisesExecutionMonitor.PromisesExecutionStatistic().
+                setTotal(operations.size());
 
         final Promise<Void> result = new Promise<>();
         executeSeries(result);
@@ -121,6 +132,9 @@ public class PromisesExecutionGuard {
                         runningOperationsCount--;
                         toRun.add(operation);
 
+                        statistic.incrementRetry();
+                        triggerMonitor();
+
                         Integer retryCount = retryMap.get(operation);
                         if (retryCount > maxRetryCount) {
                             result.onFailure(caught);
@@ -135,6 +149,9 @@ public class PromisesExecutionGuard {
                         debugState();
                         runningOperationsCount--;
 
+                        statistic.incrementCompleted();
+                        triggerMonitor();
+
                         if (toRun.isEmpty()) {
                             result.onSuccess(none);
                         } else {
@@ -145,6 +162,12 @@ public class PromisesExecutionGuard {
             }
         } finally {
             executeSeriesRunning = false;
+        }
+    }
+
+    private void triggerMonitor() {
+        if (monitor != null) {
+            monitor.onChange(statistic);
         }
     }
 
