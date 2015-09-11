@@ -174,7 +174,7 @@ public class PromisesExecutionGuard {
                         triggerMonitor();
 
                         if (toRun.isEmpty()) {
-                            if (runningOperationsCount == 0) {
+                            if (statistic.getCompleted() == statistic.getTotal()) {
                                 result.onSuccess(none);
                             }
                         } else {

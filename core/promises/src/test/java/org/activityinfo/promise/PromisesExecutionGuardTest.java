@@ -43,7 +43,7 @@ public class PromisesExecutionGuardTest {
         PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
             @Override
             public void onChange(PromisesExecutionStatistic statistic) {
-                System.out.println("onChange, statistic: " + statistic);
+                //System.out.println("onChange, statistic: " + statistic);
             }
         };
         PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance().withMonitor(monitor);
@@ -74,7 +74,7 @@ public class PromisesExecutionGuardTest {
         PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
             @Override
             public void onChange(PromisesExecutionStatistic statistic) {
-                System.out.println("onChange, statistic: " + statistic);
+                //System.out.println("onChange, statistic: " + statistic);
             }
         };
         PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance().withMonitor(monitor);
@@ -123,22 +123,23 @@ public class PromisesExecutionGuardTest {
             @Nullable
             @Override
             public Promise<Void> apply(Void input) {
-                System.out.println("function: " + i + ", runningOperationsCount: " + guard.getRunningOperationsCount() +
-                        ", toRun: " + guard.getLeftOperationToRun());
+//                System.out.println("function: " + i + ", runningOperationsCount: " + guard.getRunningOperationsCount() +
+//                        ", toRun: " + guard.getLeftOperationToRun());
 
                 final Promise promise = new Promise();
                 Executors.newSingleThreadExecutor().submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(new java.util.Random().nextInt(10));
-                            promise.resolve(null);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            promise.reject(e);
-                        }
-                    }
-                });
+                              @Override
+                              public void run() {
+                                  try {
+                                      Thread.sleep(new java.util.Random().nextInt(3));
+                                  } catch (InterruptedException e) {
+                                      e.printStackTrace();
+                                  }
+                                  promise.resolve(null);
+                              }
+                          }
+
+                );
 
                 return promise;
             }
