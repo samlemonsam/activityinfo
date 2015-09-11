@@ -124,23 +124,27 @@ public class ImportPresenter {
     }
 
     private boolean persistFinished;
+    private boolean persistFailed;
     private boolean retryFailedRows = false;
     private PromisesExecutionMonitor.PromisesExecutionStatistic lastStatistic;
 
 
     protected void persistData() {
-
-
         persistFinished = false;
+        persistFailed = false;
         dialogBox.getFinishButton().setEnabled(false);
         dialogBox.setStatusText(I18N.CONSTANTS.importing());
 
         PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
             @Override
             public void onChange(PromisesExecutionStatistic statistic) {
-                if (!persistFinished) {
+                lastStatistic = statistic;
+                if (persistFinished) {
+                    if (persistFailed) {
+                        showFailure();
+                    }
+                } else {
                     dialogBox.setStatusText(I18N.MESSAGES.importing(statistic.getCompleted(), statistic.getTotal(), statistic.getRetries()));
-                    lastStatistic = statistic;
                 }
             }
         };
@@ -149,7 +153,9 @@ public class ImportPresenter {
             @Override
             public void onFailure(Throwable caught) {
                 persistFinished = true;
-                showDelayedFailure(caught);
+                persistFailed = true;
+                Log.error(caught.getMessage(), caught);
+                showDelayedFailure();
             }
 
             @Override
@@ -174,27 +180,30 @@ public class ImportPresenter {
         importer.persist(importModel, monitor).then(callback);
     }
 
-    private void showDelayedFailure(final Throwable caught) {
-        Log.error(caught.getMessage(), caught);
+    private void showDelayedFailure() {
         // Show failure message only after a short fixed delay to ensure that
         // the progress stage is displayed. Otherwise if we have a synchronous error, clicking
         // the retry button will look like it's not working.
         Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
             @Override
             public boolean execute() {
-                retryFailedRows = lastStatistic != null;
-                if (lastStatistic != null) {
-                    dialogBox.setStatusText(I18N.MESSAGES.imported(
-                            lastStatistic.getCompleted(), lastStatistic.getTotal(), lastStatistic.getNotFinishedOperations().size()));
-                } else {
-                    dialogBox.setStatusText(I18N.CONSTANTS.importFailed());
-                }
-                dialogBox.getFinishButton().setText(I18N.CONSTANTS.retry());
-                dialogBox.getFinishButton().setEnabled(true);
+                showFailure();
                 eventBus.fireEvent(new ImportResultEvent(false));
                 return false;
             }
         }, 500);
+    }
+
+    private void showFailure() {
+        retryFailedRows = lastStatistic != null;
+        if (lastStatistic != null) {
+            dialogBox.setStatusText(I18N.MESSAGES.imported(
+                    lastStatistic.getCompleted(), lastStatistic.getTotal(), lastStatistic.getNotFinishedOperations().size()));
+        } else {
+            dialogBox.setStatusText(I18N.CONSTANTS.importFailed());
+        }
+        dialogBox.getFinishButton().setText(I18N.CONSTANTS.retry());
+        dialogBox.getFinishButton().setEnabled(true);
     }
 
     public void show() {
