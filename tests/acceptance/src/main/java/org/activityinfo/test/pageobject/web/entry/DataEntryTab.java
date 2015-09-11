@@ -290,6 +290,8 @@ public class DataEntryTab {
         Gxt.sleepMillis(size * 10);
 
         importDialog.clickFinishButton();
+        Gxt.sleepMillis(size * 20);
+
         importDialog.waitUntilClosed();
     }
 

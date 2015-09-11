@@ -134,11 +134,13 @@ public class FluentElement {
     public void sendKeys(CharSequence... keys) {
         // workaround for https://code.google.com/p/selenium/issues/detail?id=4469
         // Very slow in entering huge string in textarea(using send keys in java)
-        if (keys[0].length() < 10000) {
+        if (keys[0].length() < 1000) {
             element().sendKeys(keys);
         } else {
-            // value visualy appears but for some reason is not visible for some element (e.g. in importdialog while with sendKeys it works)
             ((JavascriptExecutor) webDriver).executeScript("arguments[0].value = arguments[1];", element, keys[0]);
+
+            // force trigger key listeners
+            element().sendKeys("a", Keys.BACK_SPACE);
         }
     }
 
