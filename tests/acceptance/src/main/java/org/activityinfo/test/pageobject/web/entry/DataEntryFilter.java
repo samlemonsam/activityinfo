@@ -50,7 +50,7 @@ public class DataEntryFilter {
     public DataEntryFilter select(boolean wait) {
         container.clickWhenReady();
         if (wait) {
-            Gxt.sleep(2);
+            Gxt.sleepSeconds(2);
         }
         return this;
     }

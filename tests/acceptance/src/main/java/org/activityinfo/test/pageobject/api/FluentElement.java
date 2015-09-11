@@ -135,7 +135,13 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
-        element().sendKeys(keys);
+        // workaround for https://code.google.com/p/selenium/issues/detail?id=4469
+        // Very slow in entering huge string in textarea(using send keys in java)
+        if (keys[0].length() < 1000) {
+            element().sendKeys(keys);
+        } else {
+            ((JavascriptExecutor) webDriver).executeScript("arguments[0].value = arguments[1];", element, keys);
+        }
     }
 
     public boolean exists(By by) {
