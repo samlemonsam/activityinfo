@@ -417,4 +417,8 @@ public abstract class ApplicationDriver {
     public void importForm(String formName, DataTable dataTable) {
         throw new PendingException();
     }
+
+    public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
+        throw new PendingException();
+    }
 }

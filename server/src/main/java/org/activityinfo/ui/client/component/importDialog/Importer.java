@@ -10,7 +10,9 @@ import org.activityinfo.core.shared.importing.strategy.ImportTarget;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.promise.PromisesExecutionMonitor;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 
@@ -42,6 +44,10 @@ public class Importer {
         }
     }
 
+    public ResourceLocator getResourceLocator() {
+        return resourceLocator;
+    }
+
     public List<ImportTarget> getImportTargets() {
         List<ImportTarget> targets = Lists.newArrayList();
         for(TargetField binding : fields) {
@@ -61,7 +67,11 @@ public class Importer {
     }
 
     public Promise<Void> persist(final ImportModel model) {
+        return persist(model, null);
+    }
+
+    public Promise<Void> persist(final ImportModel model, @Nullable PromisesExecutionMonitor monitor) {
         final ImportCommandExecutor modeller = new ImportCommandExecutor(model, fields, resourceLocator);
-        return modeller.execute(new PersistImportCommand());
+        return modeller.execute(new PersistImportCommand(monitor));
     }
 }

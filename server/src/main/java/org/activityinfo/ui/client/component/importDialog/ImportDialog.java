@@ -63,7 +63,7 @@ public class ImportDialog extends ResizeComposite {
     }
 
     public void setStatusText(String text) {
-        statusText.setInnerText(text);
+        statusText.setInnerHTML(text);
     }
 
     public SpanElement getStatusText() {

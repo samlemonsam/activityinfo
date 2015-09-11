@@ -25,3 +25,10 @@ Feature: Import from Excel
       | USAID | 1000     |
       | ECHO  | 500      |
       | ECHO  | 2000     |
+
+  @AI-1209
+  Scenario: Import with 500 rows
+    When I import into the form "NFI Distribution" spreadsheet with 500 rows:
+      | Partner Name | Partner Full Name | Donor | Nb. kits | Start Date | End Date   | Comments |
+      | NRC          |                   | USAID | 1,000    | 01/02/2014 | 01/03/2014 | row 1    |
+    Then "NFI Distribution" table has 500 rows in "Import" database

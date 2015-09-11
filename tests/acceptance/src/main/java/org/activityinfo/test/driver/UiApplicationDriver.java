@@ -510,7 +510,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         } else {
             modal = tablePage.table().newSubmission();
         }
-        Gxt.sleep(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
+        Gxt.sleepSeconds(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
         BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
         modal.cancel();
         return fieldByLabel;
@@ -1006,6 +1006,43 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         aliasTable.alias(dataTable);
         dataEntryTab.importData(dataTable);
+    }
+
+    public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        aliasTable.alias(dataTable);
+
+        dataTable = copyLastRow(dataTable, quantityOfRowCopy);
+
+        dataEntryTab.importData(dataTable);
+    }
+
+    private static DataTable copyLastRow(DataTable dataTable, int quantityOfRowCopy) {
+        List<List<String>> rows = Lists.newArrayList();
+
+        // copy existing rows
+        for (DataTableRow row : dataTable.getGherkinRows()) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : row.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+
+        // copy last row
+        DataTableRow lastRow = dataTable.getGherkinRows().get(dataTable.getGherkinRows().size() - 1);
+        for (int i = 0; i < (quantityOfRowCopy - 1); i++) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : lastRow.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+        return DataTable.create(rows);
     }
 
     @Override

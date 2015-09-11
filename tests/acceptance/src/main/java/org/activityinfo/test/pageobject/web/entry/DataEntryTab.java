@@ -18,10 +18,7 @@ import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
-import org.activityinfo.test.pageobject.gxt.GxtGrid;
-import org.activityinfo.test.pageobject.gxt.GxtModal;
-import org.activityinfo.test.pageobject.gxt.GxtPanel;
-import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.activityinfo.test.pageobject.gxt.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -279,13 +276,23 @@ public class DataEntryTab {
     public void importData(DataTable dataTable) {
         container.find().button(withText(I18N.CONSTANTS.importText())).clickWhenReady();
 
-        ImportDialog.find(container)
-                .enterExcelData(dataTable)
-                .clickNextButton()
-                //.enterMapping(createMapping(dataTable))
-                .clickNextButton()
-                .clickFinishButton()
-                .waitUntilClosed();
+        ImportDialog importDialog = ImportDialog.find(container)
+                .enterExcelData(dataTable);
+
+        int size = dataTable.getGherkinRows().size();
+        Gxt.sleepMillis(100);
+
+        importDialog.clickNextButton();
+        //importDialog.enterMapping(createMapping(dataTable))
+        Gxt.sleepMillis(size * 10);
+
+        importDialog.clickNextButton();
+        Gxt.sleepMillis(size * 10);
+
+        importDialog.clickFinishButton();
+        Gxt.sleepMillis(size * 20);
+
+        importDialog.waitUntilClosed();
     }
 
     private List<Pair<String, String>> createMapping(DataTable dataTable) {
