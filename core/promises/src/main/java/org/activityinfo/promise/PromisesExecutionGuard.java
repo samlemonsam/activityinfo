@@ -23,7 +23,7 @@ package org.activityinfo.promise;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import javax.annotation.Nullable;
@@ -52,6 +52,7 @@ public class PromisesExecutionGuard {
     private PromisesExecutionMonitor.PromisesExecutionStatistic statistic = new PromisesExecutionMonitor.PromisesExecutionStatistic();
 
     private boolean executeSeriesRunning = false;
+    private boolean executeSeriesAgain = false;
 
     public PromisesExecutionGuard() {
         this(DEFAULT_MAX_PARALLEL_EXECUTIONS, DEFAULT_MAX_RETRY_COUNT);
@@ -99,6 +100,9 @@ public class PromisesExecutionGuard {
     private void incrementRetry(PromiseExecutionOperation operation) {
         Integer counter = retryMap.get(operation);
         counter++;
+        if (counter > 1) {
+            statistic.incrementRetry();
+        }
         retryMap.put(operation, counter);
     }
 
@@ -121,6 +125,15 @@ public class PromisesExecutionGuard {
                     return;
                 }
 
+                Integer retryCount = retryMap.get(operation);
+                if (retryCount > maxRetryCount) {
+                    statistic.getNotFinishedOperations().clear();
+                    statistic.getNotFinishedOperations().addAll(toRun);
+
+                    result.onFailure(new RuntimeException("Exceeds maximum retry count: " + maxRetryCount));
+                    return;
+                }
+
                 runningOperationsCount++;
                 incrementRetry(operation);
                 toRun.remove(operation);
@@ -133,17 +146,21 @@ public class PromisesExecutionGuard {
                         runningOperationsCount--;
                         toRun.add(operation);
 
-                        statistic.incrementRetry();
                         triggerMonitor();
 
                         Integer retryCount = retryMap.get(operation);
                         if (retryCount > maxRetryCount) {
-                            result.onFailure(caught);
-
                             statistic.getNotFinishedOperations().clear();
                             statistic.getNotFinishedOperations().addAll(toRun);
+
+                            result.onFailure(caught);
+                            return;
                         } else {
-                            executeSeries(result);
+                            if (executeSeriesRunning) {
+                                executeSeriesAgain = true;
+                            } else {
+                                executeSeries(result);
+                            }
                         }
                     }
 
@@ -168,6 +185,10 @@ public class PromisesExecutionGuard {
             }
         } finally {
             executeSeriesRunning = false;
+            if (executeSeriesAgain) {
+                executeSeriesAgain = false;
+                executeSeries(result);
+            }
         }
     }
 
@@ -186,7 +207,7 @@ public class PromisesExecutionGuard {
     }
 
     private void debugState() {
-        GWT.log("runningOperationsCount: " + runningOperationsCount + ", toRun: " + toRun.size());
+        GWT.log("runningOperationsCount: " + runningOperationsCount + ", toRun: " + toRun.size() + ", statistic: " + statistic);
     }
 
     public int getRunningOperationsCount() {

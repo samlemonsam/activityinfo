@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * @author yuriyz on 09/09/2015.
@@ -47,11 +48,45 @@ public class PromisesExecutionGuardTest {
         };
         PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance().withMonitor(monitor);
 
-        List<PromiseExecutionOperation> operations = Lists.newArrayList();
-        int operationsToRun = 500;
-        for (int i = 1; i <= operationsToRun; i++) {
-            operations.add(createOperation(i, guard));
+        final Boolean[] finished = new Boolean[]{false};
+        Promise<Void> voidPromise = guard.executeSerially(createOperations(guard));
+        voidPromise.then(new Function<Void, Object>() {
+            @Nullable
+            @Override
+            public Object apply(@Nullable Void input) {
+                System.out.println("Finished all operations!");
+                finished[0] = true;
+                return null;
+            }
+        });
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        assertEquals(guard.getLeftOperationToRun(), 0);
+        assertTrue("Job is not finished.", finished[0]);
+    }
+
+    @Test
+    public void executeSeriallyWithRetry() {
+        PromisesExecutionMonitor monitor = new PromisesExecutionMonitor() {
+            @Override
+            public void onChange(PromisesExecutionStatistic statistic) {
+                System.out.println("onChange, statistic: " + statistic);
+            }
+        };
+        PromisesExecutionGuard guard = PromisesExecutionGuard.newInstance().withMonitor(monitor);
+
+        List<PromiseExecutionOperation> operations = createOperations(guard);
+        operations.add(new PromiseExecutionOperation() {
+            @Nullable
+            @Override
+            public Promise<Void> apply(@Nullable Void input) {
+                return Promise.rejected(new RuntimeException("fail"));
+            }
+        });
 
         final Boolean[] finished = new Boolean[]{false};
         Promise<Void> voidPromise = guard.executeSerially(operations);
@@ -70,8 +105,17 @@ public class PromisesExecutionGuardTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertEquals(guard.getLeftOperationToRun(), 0);
-        assertTrue("Job is not finished.", finished[0]);
+        assertEquals(guard.getLeftOperationToRun(), 1);
+        assertFalse("Job is finished.", finished[0]);
+    }
+
+    private List<PromiseExecutionOperation> createOperations(PromisesExecutionGuard guard) {
+        List<PromiseExecutionOperation> operations = Lists.newArrayList();
+        int operationsToRun = 500;
+        for (int i = 1; i <= operationsToRun; i++) {
+            operations.add(createOperation(i, guard));
+        }
+        return operations;
     }
 
     private PromiseExecutionOperation createOperation(final int i, final PromisesExecutionGuard guard) {
