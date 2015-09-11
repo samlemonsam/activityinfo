@@ -1,9 +1,6 @@
 package org.activityinfo.test.pageobject.api;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -137,10 +134,11 @@ public class FluentElement {
     public void sendKeys(CharSequence... keys) {
         // workaround for https://code.google.com/p/selenium/issues/detail?id=4469
         // Very slow in entering huge string in textarea(using send keys in java)
-        if (keys[0].length() < 1000) {
+        if (keys[0].length() < 10000) {
             element().sendKeys(keys);
         } else {
-            ((JavascriptExecutor) webDriver).executeScript("arguments[0].value = arguments[1];", element, keys);
+            // value visualy appears but for some reason is not visible for some element (e.g. in importdialog while with sendKeys it works)
+            ((JavascriptExecutor) webDriver).executeScript("arguments[0].value = arguments[1];", element, keys[0]);
         }
     }
 

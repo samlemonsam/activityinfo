@@ -318,7 +318,7 @@ public class DataEntrySteps {
 
     @Then("^\"([^\"]*)\" table has (\\d+) rows in \"([^\"]*)\" database$")
     public void table_has_rows_in_database(String formName, int numberOfExpectedRows, String database) throws Throwable {
-        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(formName), driver.getAliasTable().getAlias(formName));
+        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
         BsTable.waitUntilRowsLoaded(tablePage, numberOfExpectedRows);
     }
 }

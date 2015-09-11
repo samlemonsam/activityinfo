@@ -48,7 +48,7 @@ public class Server {
         } else {
             url += path;
         }
-        return url;
+        return url + "?logging=true";
     }
 
     /**
