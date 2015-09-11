@@ -144,7 +144,7 @@ public class ImportPresenter {
                         showFailure();
                     }
                 } else {
-                    dialogBox.setStatusText(I18N.MESSAGES.importing(statistic.getCompleted(), statistic.getTotal(), statistic.getRetries()));
+                    dialogBox.setStatusText(I18N.MESSAGES.importingData(statistic.getCompleted(), statistic.getTotal(), statistic.getRetries()));
                 }
             }
         };
