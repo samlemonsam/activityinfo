@@ -17,10 +17,10 @@ Feature: Export to Excel
     When I export the form "NFI Distribution"
     Then the exported spreadsheet contains:
       | Partner | Donor | cholera | malaria | Nb. kits |
-      | NRC     | USAID | FALSE   | FALSE   | 1,000    |
-      | NRC     | ECHO  | FALSE   | FALSE   | 500      |
-      | NRC     | ECHO  | FALSE   | FALSE   | 2,000    |
-      | NRC     |       | FALSE   | FALSE   | 2,000    |
+      | NRC     | USAID | false   | false   | 1,000    |
+      | NRC     | ECHO  | false   | false   | 500      |
+      | NRC     | ECHO  | false   | false   | 2,000    |
+      | NRC     |       | false   | false   | 2,000    |
 
   Scenario: Export single form without submissions to Excel
     Given I have created a database "RRMP"
