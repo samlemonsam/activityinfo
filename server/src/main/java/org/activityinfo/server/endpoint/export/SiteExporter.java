@@ -351,17 +351,16 @@ public class SiteExporter {
 
         for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
             for (AttributeDTO attrib : attributeGroup.getAttributes()) {
+                column++;
                 if (attributeGroup.isMultipleAllowed()) {
                     boolean value = site.getAttributeValue(attrib.getId());
                     Cell valueCell = createCell(row, column, value);
                     valueCell.setCellStyle(attribValueStyle);
-                    column++;
                 } else {
                     boolean value = site.getAttributeValue(attrib.getId());
                     if (value) {
                         Cell valueCell = createCell(row, column, attrib.getName());
                         valueCell.setCellStyle(attribValueStyle);
-                        column++;
                         break;
                     }
                 }
