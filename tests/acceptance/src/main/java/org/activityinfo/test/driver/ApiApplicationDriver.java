@@ -2,10 +2,7 @@ package org.activityinfo.test.driver;
 
 
 import com.codahale.metrics.Meter;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
+import com.google.common.base.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -341,8 +338,10 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
                     if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
                         for (String item : value.getValue().split("\\s*,\\s*")) {
-                            int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
-                            properties.put("ATTRIB" + attributeId, true);
+                            if (!Strings.isNullOrEmpty(item)) {
+                                int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
+                                properties.put("ATTRIB" + attributeId, true);
+                            }
                         }
                     } else {
                         int indicatorId = aliases.getId(value.getField());
