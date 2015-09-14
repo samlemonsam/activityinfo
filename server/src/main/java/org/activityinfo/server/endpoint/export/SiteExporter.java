@@ -351,11 +351,11 @@ public class SiteExporter {
 
         for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
             for (AttributeDTO attrib : attributeGroup.getAttributes()) {
-                column++;
                 if (attributeGroup.isMultipleAllowed()) {
                     boolean value = site.getAttributeValue(attrib.getId());
                     Cell valueCell = createCell(row, column, value);
                     valueCell.setCellStyle(attribValueStyle);
+                    column++;
                 } else {
                     boolean value = site.getAttributeValue(attrib.getId());
                     if (value) {
@@ -364,6 +364,9 @@ public class SiteExporter {
                         break;
                     }
                 }
+            }
+            if (!attributeGroup.isMultipleAllowed()) {
+                column++;
             }
         }
 
