@@ -258,7 +258,7 @@ public class DatabaseSetupSteps {
         I_have_created_a_field_in(fieldType, fieldName, currentForm);
     }
 
-    @Given("^I have created a multi-valued enumerated field \"([^\"]*)\" with items:$")
+    @And("^I have created a multi-valued enumerated field \"([^\"]*)\" with items:$")
     public void I_have_created_a_multi_valued_enumerated_field_with_options(String fieldName, List<String> items) throws Exception {
         createEnumField(fieldName, true, items);
     }
