@@ -37,7 +37,7 @@ public class SourceKeySet {
 
         for (FieldProfile targetField : fieldMatching.getTarget().getFields()) {
             Optional<FieldProfile> sourceField = fieldMatching.targetToSource(targetField);
-            if(sourceField.isPresent()) {
+            if(sourceField.isPresent() && sourceField.get().isText()) {
                 sourceFields.add(sourceField.get());
                 targetFields.add(targetField);
             }

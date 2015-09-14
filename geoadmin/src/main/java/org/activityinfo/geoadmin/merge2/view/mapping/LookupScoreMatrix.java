@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
+import com.google.common.base.Strings;
 import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
@@ -61,6 +62,9 @@ public class LookupScoreMatrix extends ScoreMatrix {
     public double score(int i, int j, int d) {
         String source = getSourceValue(i, d);
         String target = getTargetValue(j, d);
+        if(Strings.isNullOrEmpty(source) || Strings.isNullOrEmpty(target)) {
+            return Double.NaN;
+        }
         return scorer.score(source, target);
     }
 }

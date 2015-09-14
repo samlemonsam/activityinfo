@@ -48,9 +48,24 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
         ScoreMatrix scoreMatrix = new FieldScoreMatrix(source.getFields(), target.getFields());
         MatchBuilder fieldGraph = new MatchBuilder(scoreMatrix);
 
+        dumpScoreMatrix(source, target, scoreMatrix);
+        
         BiMap<FieldProfile, FieldProfile> map = fieldGraph.buildMap(source.getFields(), target.getFields());
         
         return new KeyFieldPairSet(source, target, map);
+    }
+
+    private static void dumpScoreMatrix(FormProfile source, FormProfile target, ScoreMatrix scoreMatrix) {
+        System.out.println("===== FieldScoreMatrix ============== ");
+        for (int sourceIndex = 0; sourceIndex < source.getFields().size(); sourceIndex++) {
+            for (int targetIndex = 0; targetIndex < target.getFields().size(); targetIndex++) {
+                System.out.println(String.format("%20s %20s %5f",
+                        source.getFields().get(sourceIndex).getLabel(),
+                        target.getFields().get(targetIndex).getLabel(),
+                        scoreMatrix.score(targetIndex, sourceIndex, 0)));
+            }   
+        }
+        System.out.println("===================================== ");
     }
 
     public int getSourceCount() {

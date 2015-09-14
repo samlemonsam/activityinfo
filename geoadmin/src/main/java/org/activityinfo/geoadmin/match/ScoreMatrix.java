@@ -4,6 +4,8 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.io.PrintWriter;
+
 /**
  * Multidimensional matrix which scores the similarity between two sets of objects along
  * one or more dimensions.
@@ -209,6 +211,5 @@ public abstract class ScoreMatrix {
         
         return scores;
     }
-
     
 }

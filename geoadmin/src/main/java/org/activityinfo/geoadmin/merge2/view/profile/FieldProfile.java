@@ -90,4 +90,20 @@ public class FieldProfile {
     public String toString() {
         return getLabel();
     }
+
+    public boolean hasIdenticalContents(ColumnView view) {
+        // Can only find text fields to be identical
+        if(!this.isText() || view.getType() != ColumnType.STRING) {
+            return false;
+        }
+    
+        for (int i = 0; i < view.numRows(); i++) {
+            String x = Strings.nullToEmpty(this.columnView.getString(i));
+            String y = Strings.nullToEmpty(view.getString(i));
+            if(!x.equalsIgnoreCase(y)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

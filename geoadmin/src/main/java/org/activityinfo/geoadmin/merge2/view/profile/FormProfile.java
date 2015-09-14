@@ -3,6 +3,7 @@ package org.activityinfo.geoadmin.merge2.view.profile;
 import com.google.common.base.Function;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -35,13 +36,37 @@ public class FormProfile {
         this.formTree = formTree;
         this.columnSet = columnSet;
         for (FormTree.Node node : formTree.getLeaves()) {
-            fields.add(new FieldProfile(node, columnSet.getColumnView(node.getFieldId().asString())));
+            ColumnView view = columnSet.getColumnView(node.getFieldId().asString());
+            if(view != null && !isDuplicateColumn(view)) {
+                fields.add(new FieldProfile(node, view));
+            }
         }
+        
+        
 
         this.id = columnSet.getColumnView(ID_COLUMN);
         for (int i = 0; i < columnSet.getNumRows(); i++) {
             idMap.put(ResourceId.valueOf(id.getString(i)), i);
         }
+    }
+
+    /**
+     * Checks to see if the given column is an exact duplicate of an existing column in the
+     * {@code fields} array. This is important to check because identical duplicates of columns will
+     * lead to degenerate results in identifying column pairs for matching.
+     * 
+     * @param view
+     * @return
+     */
+    private boolean isDuplicateColumn(ColumnView view) {
+        if(view.getType() == ColumnType.STRING) {
+            for (FieldProfile existingField : fields) {
+                if(existingField.hasIdenticalContents(view)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public FormTree getFormTree() {
