@@ -21,18 +21,21 @@ package org.activityinfo.core.shared.importing.strategy;
  * #L%
  */
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.core.shared.importing.match.ColumnTypeGuesser;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -43,13 +46,13 @@ import java.util.Set;
  */
 public class EnumFieldImporter implements FieldImporter {
 
-    private final ColumnAccessor source;
-    private final ImportTarget target;
+    private final List<ColumnAccessor> sources;
+    private final List<ImportTarget> targets;
     private final EnumType enumType;
 
-    public EnumFieldImporter(ColumnAccessor source, ImportTarget target, EnumType enumType) {
-        this.source = source;
-        this.target = target;
+    public EnumFieldImporter(List<ColumnAccessor> sources, List<ImportTarget> targets, EnumType enumType) {
+        this.sources = sources;
+        this.targets = targets;
         this.enumType = enumType;
     }
 
@@ -60,12 +63,30 @@ public class EnumFieldImporter implements FieldImporter {
 
     @Override
     public void validateInstance(SourceRow row, List<ValidationResult> results) {
-        results.add(validate(row));
+        if (enumType.getCardinality() == Cardinality.SINGLE) {
+            results.add(validateSingleValuedEnum(row));
+        } else {
+            results.addAll(validateMultiValuedEnum(row));
+        }
     }
 
-    private ValidationResult validate(SourceRow row) {
+    private List<ValidationResult> validateMultiValuedEnum(SourceRow row) {
+        List<ValidationResult> result = Lists.newArrayList();
+        for (ColumnAccessor source : sources) {
+            String value = source.getValue(row);
+            if (!Strings.isNullOrEmpty(value) && !ColumnTypeGuesser.isBoolean(value)) {
+                result.add(ValidationResult.error("Unknown value: " + value));
+            } else {
+                result.add(ValidationResult.OK);
+            }
+        }
+        return result;
+    }
+
+    private ValidationResult validateSingleValuedEnum(SourceRow row) {
+        ColumnAccessor source = sources.get(0);
         if (source.isMissing(row)) {
-            if (target.getFormField().isRequired()) {
+            if (targets.get(0).getFormField().isRequired()) {
                 return ValidationResult.error("Required value is missing");
             } else {
                 return ValidationResult.MISSING;
@@ -78,23 +99,51 @@ public class EnumFieldImporter implements FieldImporter {
                 return ValidationResult.OK;
             }
         }
-
         return ValidationResult.error("Unknown value: " + value);
     }
 
     @Override
     public boolean updateInstance(SourceRow row, FormInstance instance) {
-        final ValidationResult validateResult = validate(row);
-        if (validateResult.isPersistable()) {
-            String value = source.getValue(row);
+        if (enumType.getCardinality() == Cardinality.SINGLE) {
+            return persistSingleValuedEnum(row, instance);
+        } else {
+            return persistMultiValuedEnum(row, instance);
+        }
+    }
+
+    private boolean persistMultiValuedEnum(SourceRow row, FormInstance instance) {
+        if (ValidationResult.isPersistable(validateMultiValuedEnum(row))) {
             final Set<ResourceId> result = Sets.newHashSet();
+            for (ColumnAccessor source : sources) {
+                for (EnumItem enumItem : enumType.getValues()) {
+                    if (enumItem.getLabel().equalsIgnoreCase(source.getHeading()) && Boolean.valueOf(source.getValue(row))) {
+                        result.add(enumItem.getId());
+                        break;
+                    }
+                }
+            }
+
+            if (!result.isEmpty()) {
+                instance.set(targets.get(0).getFormField().getId(), new EnumValue(result));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean persistSingleValuedEnum(SourceRow row, FormInstance instance) {
+        if (validateSingleValuedEnum(row).isPersistable()) {
+            final Set<ResourceId> result = Sets.newHashSet();
+            String value = sources.get(0).getValue(row);
             for (EnumItem enumItem : enumType.getValues()) {
                 if (enumItem.getLabel().equalsIgnoreCase(value)) {
                     result.add(enumItem.getId());
+                    break;
                 }
             }
+
             if (!result.isEmpty()) {
-                instance.set(target.getFormField().getId(), new EnumValue(result));
+                instance.set(targets.get(0).getFormField().getId(), new EnumValue(result));
                 return true;
             }
         }
@@ -103,6 +152,10 @@ public class EnumFieldImporter implements FieldImporter {
 
     @Override
     public List<FieldImporterColumn> getColumns() {
-        return Collections.singletonList(new FieldImporterColumn(target, source));
+        List<FieldImporterColumn> columns = Lists.newArrayList();
+        for (int i = 0; i < targets.size(); i++) {
+            columns.add(new FieldImporterColumn(targets.get(i), sources.get(i)));
+        }
+        return columns;
     }
 }

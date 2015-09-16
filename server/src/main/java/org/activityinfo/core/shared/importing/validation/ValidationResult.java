@@ -4,6 +4,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Pair;
 import org.activityinfo.core.shared.importing.strategy.InstanceScorer;
 
+import java.util.List;
+
 public class ValidationResult {
 
     public static enum State {
@@ -92,5 +94,14 @@ public class ValidationResult {
 
     public void setRangeWithInstanceId(Pair<ResourceId, ResourceId> rangeWithInstanceId) {
         this.rangeWithInstanceId = rangeWithInstanceId;
+    }
+
+    public static boolean isPersistable(List<ValidationResult> results) {
+        for (ValidationResult result : results) {
+            if (!result.isPersistable()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

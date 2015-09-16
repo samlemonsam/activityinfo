@@ -59,6 +59,15 @@ public class ChooseSourcePage extends ResizeComposite implements ImportPage {
         try {
             pastedTable = new PastedTable(textArea.getValue());
             valid = !pastedTable.getRows().isEmpty();
+            if (valid) {
+                boolean isFirstColumnHeaderBlank = Strings.isNullOrEmpty(pastedTable.getColumnHeader(0));
+                if (isFirstColumnHeaderBlank) { // first row may be occupied by attribute group name, so we just cut it
+                    valid = false;
+                    String source = textArea.getValue().substring(textArea.getValue().indexOf("\n") + 1);
+                    pastedTable = new PastedTable(source);
+                    valid = !pastedTable.getRows().isEmpty();
+                }
+            }
         } catch (Exception e) {
             // ignore : text is not valid
         }

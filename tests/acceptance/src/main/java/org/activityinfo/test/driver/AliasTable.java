@@ -294,7 +294,7 @@ public class AliasTable {
 
                 String cell = row.getCells().get(j);
 
-                if (i != 0 && columnsToAlias.contains(j) && !isNumber(cell)) { // not header
+                if (i != 0 && columnsToAlias.contains(j) && !isNumber(cell) && !isBoolean(cell)) { // not header
                     aliasMatrix.put(Pair.newPair(i, j), getAlias(cell));
                 }
 
@@ -320,13 +320,17 @@ public class AliasTable {
         return dataTable;
     }
 
-    private boolean isNumber(String cell) {
+    public static boolean isNumber(String cell) {
         try {
             NumberFormat.getNumberInstance().parse(cell);
             return true;
         } catch (ParseException e) {
             return false;
         }
+    }
+
+    public static boolean isBoolean(String value) {
+        return value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false");
     }
 
     public static class TestHandle {

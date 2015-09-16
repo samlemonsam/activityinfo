@@ -26,6 +26,25 @@ Feature: Import from Excel
       | ECHO  | 500      |
       | ECHO  | 2000     |
 
+  @AI-1208
+  Scenario: Import multi-valued enum from Excel
+    And I have created a multi-valued enumerated field "Which options apply?" with items:
+      | Option 1 |
+      | Option 2 |
+      | Option 3 |
+    When I import into the form "NFI Distribution" spreadsheet:
+      | Partner Name | Partner Full Name | Donor | Option 1 | Option 2 | Option 3 | Nb. kits | Start Date | End Date   | Comments |
+      | NRC          |                   | USAID | true     | false    | false    | 1,000    | 01/02/2014 | 01/03/2014 | row 1    |
+      | NRC          |                   | ECHO  | false    | true     | true     | 500      | 01/03/2014 | 01/04/2014 | row 2    |
+      | NRC          |                   | ECHO  | false    | false    | false    | 2,000    | 01/04/2014 | 01/05/2014 | row 3    |
+    And open table for the "NFI Distribution" form in the database "Import"
+    Then table has rows with hidden built-in columns:
+      | Donor | Which options apply? | Nb. kits |
+      | enum  | text                 | quantity |
+      | USAID | Option 1             | 1000     |
+      | ECHO  | Option 2, Option 3   | 500      |
+      | ECHO  |                      | 2000     |
+
   @AI-1209
   Scenario: Import with 500 rows
     When I import into the form "NFI Distribution" spreadsheet with 500 rows:
