@@ -27,6 +27,8 @@ import org.activityinfo.core.shared.importing.model.MapExistingAction;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.core.shared.importing.strategy.ImportTarget;
 import org.activityinfo.model.expr.StringUtil;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,17 @@ public class ColumnMappingGuesser {
     public TreeMap<Integer, ImportTarget> getDistanceMap(String sourceLabel) {
         final TreeMap<Integer, ImportTarget> distanceMap = Maps.newTreeMap();
         for (ImportTarget target : importTargets) {
-            final String targetLabel = target.getLabel();
+            String targetLabel = target.getLabel();
+            if (target.getFormField().getType() instanceof EnumType) {
+                EnumType enumType = (EnumType) target.getFormField().getType();
+                if (enumType.getCardinality() == Cardinality.MULTIPLE) {
+                    int index = targetLabel.indexOf("-");
+                    if (index != -1) {
+                        targetLabel = targetLabel.substring(0, index - 1);
+                    }
+                }
+            }
+
             final int distance = StringUtil.getLevenshteinDistance(sourceLabel, targetLabel);
             distanceMap.put(distance, target);
         }

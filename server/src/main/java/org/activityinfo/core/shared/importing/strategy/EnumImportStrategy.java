@@ -21,10 +21,12 @@ package org.activityinfo.core.shared.importing.strategy;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,15 +44,37 @@ public class EnumImportStrategy implements FieldImportStrategy {
 
     @Override
     public List<ImportTarget> getImportSites(FormTree.Node node) {
-        return Collections.singletonList(target(node));
+        EnumType type = (EnumType) node.getType();
+        List<ImportTarget> result = Lists.newArrayList();
+        if (type.getCardinality() == Cardinality.SINGLE) {
+            result.add(new ImportTarget(node.getField(), VALUE, node.getField().getLabel(), node.getDefiningFormClass().getId()));
+        } else {
+            for (EnumItem item : type.getValues()) {
+                result.add(new ImportTarget(node.getField(), new TargetSiteId(item.getId().asString()), label(item.getLabel(), node.getField().getLabel()), node.getDefiningFormClass().getId()));
+            }
+        }
+        return result;
+    }
+
+    public static String label(String itemLabel, String fieldLabel) {
+        return itemLabel + " - " + fieldLabel;
     }
 
     @Override
     public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings) {
-        return new EnumFieldImporter(mappings.get(VALUE), target(node), (EnumType) node.getType());
+
+        EnumType type = (EnumType) node.getType();
+        List<ColumnAccessor> sourceColumns = Lists.newArrayList();
+
+        if (type.getCardinality() == Cardinality.SINGLE) {
+            sourceColumns.add(mappings.get(VALUE));
+        } else {
+            for (EnumItem item : type.getValues()) {
+                sourceColumns.add(mappings.get(new TargetSiteId(item.getId().asString())));
+            }
+        }
+
+        return new EnumFieldImporter(sourceColumns, getImportSites(node), type);
     }
 
-    private ImportTarget target(FormTree.Node node) {
-        return new ImportTarget(node.getField(), VALUE, node.getField().getLabel(), node.getDefiningFormClass().getId());
-    }
 }
