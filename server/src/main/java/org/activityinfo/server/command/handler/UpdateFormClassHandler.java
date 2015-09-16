@@ -74,11 +74,8 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
 //        activity.setClassicView(false);
 
-        if (cmd.isSyncActivityEntities()) {
-            syncEntities(activity, formClass);
-        } else {
-            entityManager.get().persist(activity);
-        }
+        syncEntities(activity, formClass);
+        entityManager.get().persist(activity);
 
         return new VoidResult();
     }
@@ -102,8 +99,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private FormClass validateFormClass(String json) {
         try {
             Resource resource = Resources.fromJson(json);
-            FormClass formClass = FormClass.fromResource(resource);
-            return formClass;
+            return FormClass.fromResource(resource);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormClass json: " + e.getMessage(), e);
             throw new CommandException();
