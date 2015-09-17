@@ -80,7 +80,7 @@ public class MatchRow {
     }
 
     public InstanceMatch asInstanceMatch() {
-        return new InstanceMatch(getSourceId().get(), getTargetId().get());
+        return new InstanceMatch(getSourceId(), getTargetId());
     }
 
     public boolean isMatched(MatchSide matchSide) {

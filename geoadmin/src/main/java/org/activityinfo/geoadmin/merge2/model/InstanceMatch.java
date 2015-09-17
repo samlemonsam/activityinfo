@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.model;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -19,19 +20,24 @@ import org.activityinfo.model.resource.ResourceId;
  */
 public class InstanceMatch {
     
-    private ResourceId sourceId;
-    private ResourceId targetId;
+    private Optional<ResourceId> sourceId;
+    private Optional<ResourceId> targetId;
 
     public InstanceMatch(ResourceId sourceId, ResourceId targetId) {
+        this.sourceId = Optional.of(sourceId);
+        this.targetId = Optional.of(targetId);
+    }
+
+    public InstanceMatch(Optional<ResourceId> sourceId, Optional<ResourceId> targetId) {
         this.sourceId = sourceId;
         this.targetId = targetId;
     }
 
-    public ResourceId getSourceId() {
+    public Optional<ResourceId> getSourceId() {
         return sourceId;
     }
 
-    public ResourceId getTargetId() {
+    public Optional<ResourceId> getTargetId() {
         return targetId;
     }
 

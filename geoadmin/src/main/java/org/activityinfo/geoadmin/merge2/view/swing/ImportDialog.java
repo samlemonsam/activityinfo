@@ -7,6 +7,7 @@ import org.activityinfo.geoadmin.merge2.view.mapping.ReferenceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.lookup.LookupStep;
 import org.activityinfo.geoadmin.merge2.view.swing.match.MatchStep;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.TransactionBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
@@ -95,6 +96,19 @@ public class ImportDialog extends JFrame {
     }
     
     private void runImport() {
+        Observable<Integer> unresolvedCount = viewModel.getMatchTable().getUnresolvedCount();
+        if(!unresolvedCount.isLoading()) {
+            if(unresolvedCount.get() > 0) {
+                JOptionPane.showMessageDialog(null, String.format("There are %d unresolved matches. " +
+                        "Please resolve these first."), "Unresolved matches", JOptionPane.PLAIN_MESSAGE);
+            } else {
+                executeImport();        
+            }
+        }
+    }
+
+    private void executeImport() {
+      
 
     }
 

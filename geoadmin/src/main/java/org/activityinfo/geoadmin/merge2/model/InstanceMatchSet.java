@@ -42,24 +42,30 @@ public class InstanceMatchSet extends ObservableSet<InstanceMatch> {
             removeMatchesWith(match.getSourceId());
             removeMatchesWith(match.getTargetId());
 
-            map.put(match.getSourceId(), match);
-            map.put(match.getTargetId(), match);
+            if(match.getSourceId().isPresent()) {
+                map.put(match.getSourceId().get(), match);
+            }
+            if(match.getTargetId().isPresent()) {
+                map.put(match.getTargetId().get(), match);
+            }
             set.add(match);
             fireAdded(match);
         }
     }
 
-    private void removeMatchesWith(ResourceId id) {
-        InstanceMatch match = map.remove(id);
-        if(match != null) {
-            set.remove(match);
-            fireRemoved(match);
+    private void removeMatchesWith(Optional<ResourceId> id) {
+        if(id.isPresent()) {
+            InstanceMatch match = map.remove(id);
+            if (match != null) {
+                set.remove(match);
+                fireRemoved(match);
+            }
         }
     }
 
     /**
      * Removes the given match between target and source instances from the set, notifying
-     * any registered 
+     * any registered listeners 
      * @param match
      */
     public void remove(InstanceMatch match) {

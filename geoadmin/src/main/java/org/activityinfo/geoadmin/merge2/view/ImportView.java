@@ -3,11 +3,11 @@ package org.activityinfo.geoadmin.merge2.view;
 import com.google.common.base.Function;
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
-import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
-import org.activityinfo.geoadmin.merge2.view.match.MatchGraph;
-import org.activityinfo.geoadmin.merge2.view.match.MatchTable;
+import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.geoadmin.merge2.view.swing.SwingSchedulers;
+import org.activityinfo.geoadmin.model.TransactionBuilder;
+import org.activityinfo.geoadmin.model.UpdateBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
@@ -76,6 +76,31 @@ public class ImportView {
 
     public ImportModel getModel() {
         return model;
+    }
+    
+    
+    public void buildTransaction() {
+        TransactionBuilder tx = new TransactionBuilder();
+
+        ResourceId targetClassId = model.getTargetFormId().get();
+
+        MatchTable matchTable = getMatchTable();
+        int numRows = matchTable.getRowCount();
+        for (int i = 0; i < numRows; i++) {
+            MatchRow matchRow = matchTable.get(i);
+            if (matchRow.isMatched()) {
+                // update target with properties from the source
+                TransactionBuilder update = tx.update(matchRow.getTargetId().get());
+                
+            } else if(matchRow.isMatched(MatchSide.SOURCE)) {
+                // create new source row
+                UpdateBuilder update = tx.create(targetClassId, ResourceId.generateId());
+            
+            } else {
+                // delete unmatched target
+                tx.delete(matchRow.getTargetId().get());
+            }
+        }
     }
 }
 

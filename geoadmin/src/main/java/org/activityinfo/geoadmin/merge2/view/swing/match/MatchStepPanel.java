@@ -162,10 +162,18 @@ public class MatchStepPanel extends StepPanel {
         MatchRow row = viewModel.getMatchTable().get(table.convertRowIndexToModel(selectedRow));
 
         if(row.isMatched()) {
+            // The match is iffy, so confirm it by adding an explicit pairing between the
+            // matches
             if(!row.isResolved()) {
                 instanceMatchSet.add(row.asInstanceMatch());
             } else {
                 instanceMatchSet.remove(row.asInstanceMatch());
+            }
+        } else {
+            if(!row.isMatched(MatchSide.SOURCE)) {
+                // An instance in the target collection has not been matched
+                // and will be deleted. Confirm this by add an explicit non-matching
+                instanceMatchSet.add(row.asInstanceMatch());
             }
         }
     }

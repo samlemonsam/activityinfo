@@ -162,15 +162,14 @@ public class MatchTable {
             if(explicitMatch.isPresent()) {
 
                 // the user has provided an explicit match between the two rows
-
-                ResourceId sourceId = explicitMatch.get().getSourceId();
-                int sourceRow = keyFields.getSource().indexOf(sourceId);
-
-                row.setSourceRow(sourceRow);
+                if(explicitMatch.get().getSourceId().isPresent()) {
+                    ResourceId sourceId = explicitMatch.get().getSourceId().get();
+                    int sourceRow = keyFields.getSource().indexOf(sourceId);
+                    row.setSourceRow(sourceRow);
+                    matchedSources.add(sourceRow);
+                }
                 row.setResolved(true);
                 row.setInputRequired(true);
-                
-                matchedSources.add(sourceRow);
             
             } else {
                 

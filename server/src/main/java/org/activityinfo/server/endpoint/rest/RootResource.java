@@ -181,7 +181,9 @@ public class RootResource {
                 try {
                     updater.execute(jsonElement.getAsJsonObject());
                 } catch (InvalidUpdateException e) {
-                    throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+                    throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                            .entity(e.getMessage())
+                            .build());
                 }
                 return Response.ok().build();
             }
