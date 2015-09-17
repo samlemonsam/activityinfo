@@ -59,11 +59,11 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
     public void render(Context context, ValidatedRow data, SafeHtmlBuilder sb) {
         ValidationResult result = data.getResult(columnIndex);
         SafeHtml safeHtml = Templates.INSTANCE.html(style(result), tooltip(result), accessor.getValue(data.getSourceRow()));
-        sb.append(avoidAmpEscaping(safeHtml));
+        sb.append(correctNewLineCharacter(safeHtml));
     }
 
-    private static SafeHtml avoidAmpEscaping(SafeHtml safeHtml) {
-        return SafeHtmlUtils.fromTrustedString(safeHtml.asString().replace("&amp;", "&"));
+    private static SafeHtml correctNewLineCharacter(SafeHtml safeHtml) {
+        return SafeHtmlUtils.fromTrustedString(safeHtml.asString().replace("#013;", "&#013;"));
     }
 
     private static String tooltip(ValidationResult result) {
