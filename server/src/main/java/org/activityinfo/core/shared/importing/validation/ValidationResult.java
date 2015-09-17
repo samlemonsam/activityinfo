@@ -22,7 +22,7 @@ public class ValidationResult {
     private Pair<ResourceId, ResourceId> rangeWithInstanceId;
     private ResourceId instanceId;
     private String typeConversionErrorMessage;
-    private String convertedValue;
+    private String targetValue;
     private double confidence;
 
     private ValidationResult(State state) {
@@ -40,9 +40,9 @@ public class ValidationResult {
     }
 
 
-    public static ValidationResult converted(String value, double confidence) {
+    public static ValidationResult converted(String targetValue, double confidence) {
         ValidationResult result = new ValidationResult(State.CONFIDENCE);
-        result.convertedValue = value;
+        result.targetValue = targetValue;
         result.confidence = confidence;
         return result;
     }
@@ -55,8 +55,8 @@ public class ValidationResult {
         return typeConversionErrorMessage;
     }
 
-    public String getConvertedValue() {
-        return convertedValue;
+    public String getTargetValue() {
+        return targetValue;
     }
 
     public double getConfidence() {
@@ -64,7 +64,7 @@ public class ValidationResult {
     }
 
     public boolean wasConverted() {
-        return convertedValue != null;
+        return targetValue != null;
     }
 
     public State getState() {
