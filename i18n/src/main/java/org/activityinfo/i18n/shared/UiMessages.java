@@ -269,7 +269,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @Messages.DefaultMessage("{0} Users")
     String databaseUserGroup(String databaseName);
 
-    @Messages.DefaultMessage("Confidence: {0}% &#013;Matched to: {1} &#013; Value will be imported with {0} confidence.")
+    @Messages.DefaultMessage("Confidence: {0}% &#013;Matched to: {1} &#013;Value will be imported with {0} confidence.")
     String importValidationCellTooltip(int confidencePercent, String matchedValue);
 
 }
