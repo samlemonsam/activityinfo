@@ -268,4 +268,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @Messages.DefaultMessage("{0} Users")
     String databaseUserGroup(String databaseName);
+
+    @Messages.DefaultMessage("Confidence {0}%")
+    String confidence(int confidence);
 }

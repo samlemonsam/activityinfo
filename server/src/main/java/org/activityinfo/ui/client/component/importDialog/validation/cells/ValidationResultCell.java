@@ -29,6 +29,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.activityinfo.core.shared.importing.strategy.ColumnAccessor;
 import org.activityinfo.core.shared.importing.validation.ValidatedRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.component.importDialog.validation.ValidationPageStyles;
 
 /**
@@ -40,8 +41,8 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
 
         public static final Templates INSTANCE = GWT.create(Templates.class);
 
-        @Template("<div class='{0}'>&nbsp;{1}</div>")
-        public SafeHtml html(String style, String text);
+        @Template("<div class='{0}' title='{1}'>&nbsp;{2}</div>")
+        public SafeHtml html(String style, String tooltip, String text);
     }
 
 
@@ -56,20 +57,32 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
 
     @Override
     public void render(Context context, ValidatedRow data, SafeHtmlBuilder sb) {
-        final SafeHtml safeHtml = Templates.INSTANCE.html(style(data.getResult(columnIndex)), accessor.getValue(data.getSourceRow()));
+        ValidationResult result = data.getResult(columnIndex);
+        final SafeHtml safeHtml = Templates.INSTANCE.html(style(result), tooltip(result), accessor.getValue(data.getSourceRow()));
         sb.append(safeHtml);
     }
 
-    private static String style(ValidationResult state) {
-        if (state != null) {
-            switch (state.getState()) {
+    private static String tooltip(ValidationResult result) {
+        if (result.getState() == ValidationResult.State.CONFIDENCE && result.getConfidence() < 1) {
+            int confidencePercent = (int) (result.getConfidence() * 100);
+            return I18N.MESSAGES.confidence(confidencePercent);
+        }
+        return "";
+    }
+
+    private static String style(ValidationResult result) {
+        if (result != null) {
+            switch (result.getState()) {
                 case OK:
                     return ValidationPageStyles.INSTANCE.stateOk();
                 case CONFIDENCE:
+                    if (result.getConfidence() == 1) {
+                        return ValidationPageStyles.INSTANCE.stateOk();
+                    }
                     return ValidationPageStyles.INSTANCE.stateConfidence();
                 case ERROR:
                 case MISSING:
-                    if (!state.hasReferenceMatch()) {
+                    if (!result.hasReferenceMatch()) {
                         return ValidationPageStyles.INSTANCE.stateError();
                     }
             }
