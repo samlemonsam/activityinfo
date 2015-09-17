@@ -289,7 +289,6 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
                 targetField.setRelevanceConditionExpression(sourceField.getRelevanceConditionExpression());
                 targetField.setLabel(sourceField.getLabel());
                 targetField.setDescription(sourceField.getDescription());
-                targetField.setReadOnly(sourceField.isReadOnly());
                 targetField.setRequired(sourceField.isRequired());
                 targetField.setSuperProperties(sourceField.getSuperProperties());
 
