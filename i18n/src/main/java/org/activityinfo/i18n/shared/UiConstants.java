@@ -1281,7 +1281,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("There was an error matching references.")
     String errorMatchingReferences();
 
-    @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns")
+    @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns. Please mouse over on particular cell to see detail explanation.")
     String correctProblems();
 
     @DefaultStringValue("Matching references...")
@@ -1598,4 +1598,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please select at least one item")
     String pleaseSelectAtLeastOneItem();
+
+    @DefaultStringValue("Perfect match.")
+    String importPerfectMatchTooltip();
+
+    @DefaultStringValue("Failed to match. Row will not be imported.")
+    String failedToMatchValue();
 }

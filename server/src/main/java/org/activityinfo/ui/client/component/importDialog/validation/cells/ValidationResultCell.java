@@ -26,6 +26,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.core.shared.importing.strategy.ColumnAccessor;
 import org.activityinfo.core.shared.importing.validation.ValidatedRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
@@ -41,10 +42,9 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
 
         public static final Templates INSTANCE = GWT.create(Templates.class);
 
-        @Template("<div class='{0}' title='{1}'>&nbsp;{2}</div>")
+        @Template("<div class='{0}' title='{1}' style='white-space: pre-line;'>&nbsp;{2}</div>")
         public SafeHtml html(String style, String tooltip, String text);
     }
-
 
     private final ColumnAccessor accessor;
     private final int columnIndex;
@@ -58,16 +58,25 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
     @Override
     public void render(Context context, ValidatedRow data, SafeHtmlBuilder sb) {
         ValidationResult result = data.getResult(columnIndex);
-        final SafeHtml safeHtml = Templates.INSTANCE.html(style(result), tooltip(result), accessor.getValue(data.getSourceRow()));
-        sb.append(safeHtml);
+        SafeHtml safeHtml = Templates.INSTANCE.html(style(result), tooltip(result), accessor.getValue(data.getSourceRow()));
+        sb.append(avoidAmpEscaping(safeHtml));
+    }
+
+    private static SafeHtml avoidAmpEscaping(SafeHtml safeHtml) {
+        return SafeHtmlUtils.fromTrustedString(safeHtml.asString().replace("&amp;", "&"));
     }
 
     private static String tooltip(ValidationResult result) {
-        if (result.getState() == ValidationResult.State.CONFIDENCE && result.getConfidence() < 1) {
+        boolean isGreen = result.getState() == ValidationResult.State.OK ||
+                (result.getState() == ValidationResult.State.CONFIDENCE && result.getConfidence() == 1);
+        boolean isPercentConfidence = result.getState() == ValidationResult.State.CONFIDENCE && result.getConfidence() < 1;
+        if (isGreen) {
+            return I18N.CONSTANTS.importPerfectMatchTooltip();
+        } else if (isPercentConfidence) {
             int confidencePercent = (int) (result.getConfidence() * 100);
-            return I18N.MESSAGES.confidence(confidencePercent);
+            return I18N.MESSAGES.importValidationCellTooltip(confidencePercent, result.getTargetValue());
         }
-        return "";
+        return I18N.CONSTANTS.failedToMatchValue();
     }
 
     private static String style(ValidationResult result) {

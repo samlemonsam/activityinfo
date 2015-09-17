@@ -92,7 +92,7 @@ public class AbstractImporterTest extends CommandTestCase2 {
 
                 String cell = "";
                 if(result.wasConverted()) {
-                    cell = importedValue + " [" + result.getConvertedValue() + "]";
+                    cell = importedValue + " [" + result.getTargetValue() + "]";
                 } else {
                     cell = importedValue;
                 }
