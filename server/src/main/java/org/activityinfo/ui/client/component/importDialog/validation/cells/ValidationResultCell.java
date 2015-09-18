@@ -74,7 +74,7 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
             return I18N.CONSTANTS.importPerfectMatchTooltip();
         } else if (isPercentConfidence) {
             int confidencePercent = (int) (result.getConfidence() * 100);
-            return I18N.MESSAGES.importValidationCellTooltip(confidencePercent, result.getTargetValue());
+            return I18N.MESSAGES.importValidationCellTooltip(result.getTargetValue(), confidencePercent);
         }
         return I18N.CONSTANTS.failedToMatchValue();
     }
