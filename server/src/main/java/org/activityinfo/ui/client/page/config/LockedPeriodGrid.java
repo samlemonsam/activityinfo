@@ -59,7 +59,6 @@ import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.LockedPeriodListEditor;
 import org.activityinfo.ui.client.page.config.mvp.CanCreate;
-import org.activityinfo.ui.client.page.config.mvp.CanDelete;
 import org.activityinfo.ui.client.page.config.mvp.CanUpdate;
 
 import java.util.ArrayList;
@@ -253,8 +252,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
                     public void handleEvent(MessageBoxEvent be) {
                         if (be.getButtonClicked().getItemId().equals(Dialog.YES)) {
                             eventBus.fireEvent(new ConfirmDeleteEvent());
-                        } else {
-                            eventBus.fireEvent(new CancelDeleteEvent());
                         }
                     }
                 });
@@ -313,11 +310,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public HandlerRegistration addStartCreateHandler(CanCreate.StartCreateHandler handler) {
         return eventBus.addHandler(StartCreateEvent.TYPE, handler);
-    }
-
-    @Override
-    public HandlerRegistration addCancelDeleteHandler(CanDelete.CancelDeleteHandler handler) {
-        return eventBus.addHandler(CancelDeleteEvent.TYPE, handler);
     }
 
     @Override
