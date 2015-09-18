@@ -38,18 +38,11 @@ public interface CanDelete<M extends DTO> {
         void onRequestDelete(RequestDeleteEvent deleteEvent);
     }
 
-    interface CancelDeleteHandler extends EventHandler {
-        void onCancelDelete(CancelDeleteEvent cancelDeleteEvent);
-    }
-
     // The user intends to remove an item
     HandlerRegistration addRequestDeleteHandler(RequestDeleteHandler handler);
 
     // The user confirmed his request to remove an item
     HandlerRegistration addConfirmDeleteHandler(ConfirmDeleteHandler handler);
-
-    // The user confirmed his request to remove an item
-    HandlerRegistration addCancelDeleteHandler(CancelDeleteHandler handler);
 
     // Update the views' store with deletion information
     void delete(M item);
@@ -90,7 +83,7 @@ public interface CanDelete<M extends DTO> {
     // Since View<T> extends TakesValue<T>, the value does not need to be
     // encapsulated
     class ConfirmDeleteEvent extends GwtEvent<ConfirmDeleteHandler> {
-        public static final Type TYPE = new Type<ConfirmDeleteHandler>();
+        public static final Type<ConfirmDeleteHandler> TYPE = new Type<>();
 
         @Override
         public Type<ConfirmDeleteHandler> getAssociatedType() {
@@ -100,22 +93,6 @@ public interface CanDelete<M extends DTO> {
         @Override
         protected void dispatch(ConfirmDeleteHandler handler) {
             handler.onConfirmDelete(this);
-        }
-    }
-
-    // Since View<T> extends TakesValue<T>, the value does not need to be
-    // encapsulated
-    class CancelDeleteEvent extends GwtEvent<CancelDeleteHandler> {
-        public static final Type TYPE = new Type<CancelDeleteHandler>();
-
-        @Override
-        public Type<CancelDeleteHandler> getAssociatedType() {
-            return TYPE;
-        }
-
-        @Override
-        protected void dispatch(CancelDeleteHandler handler) {
-            handler.onCancelDelete(this);
         }
     }
 }
