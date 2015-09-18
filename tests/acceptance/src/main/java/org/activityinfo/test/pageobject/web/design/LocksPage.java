@@ -23,6 +23,7 @@ package org.activityinfo.test.pageobject.web.design;
 
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
@@ -43,9 +44,18 @@ public class LocksPage {
         this.toolbarMenu = panel.toolbarMenu();
     }
 
+    public GxtGrid grid() {
+        return GxtGrid.waitForGrids(container).get(0);
+    }
+
     public LocksDialog addLock() {
         getToolbarMenu().clickButton("Add");
         return new LocksDialog(GxtModal.waitForModal(container));
+    }
+
+    public GxtModal clickDelete() {
+        getToolbarMenu().clickButton(I18N.CONSTANTS.delete());
+        return GxtModal.waitForModal(container);
     }
 
     public ToolbarMenu getToolbarMenu() {
