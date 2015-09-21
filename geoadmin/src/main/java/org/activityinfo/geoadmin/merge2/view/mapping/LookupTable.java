@@ -25,7 +25,7 @@ public class LookupTable {
     private final BitSet resolved;
 
     /**
-     * Matches 
+     * Matches, indexed by source key index. (sourceKey -> target)
      */
     private int[] matching;
 

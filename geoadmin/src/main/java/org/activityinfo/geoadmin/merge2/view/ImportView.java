@@ -2,6 +2,7 @@ package org.activityinfo.geoadmin.merge2.view;
 
 import com.google.common.base.Function;
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
+import org.activityinfo.geoadmin.merge2.view.mapping.FieldMapping;
 import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
 import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
@@ -43,7 +44,7 @@ public class ImportView {
         keyFields = KeyFieldPairSet.compute(sourceProfile, targetProfile);
         matchGraph = MatchGraph.build(scheduler, keyFields);
         matchTable = new MatchTable(model, matchGraph);
-        mapping = FormMapping.computeFromMatching(store, keyFields);
+        mapping = FormMapping.computeFromMatching(store, keyFields, model.getReferenceMatches());
     }
 
     private Observable<FormProfile> profile(Observable<ResourceId> formId) {
@@ -77,9 +78,13 @@ public class ImportView {
     public ImportModel getModel() {
         return model;
     }
-    
-    
-    public void buildTransaction() {
+
+
+    /**
+     * Based on the users explict choices and the automatic matching / mapping, 
+     * build a transaction to effect the import.
+     */
+    public TransactionBuilder buildTransaction() {
         TransactionBuilder tx = new TransactionBuilder();
 
         ResourceId targetClassId = model.getTargetFormId().get();
@@ -88,19 +93,32 @@ public class ImportView {
         int numRows = matchTable.getRowCount();
         for (int i = 0; i < numRows; i++) {
             MatchRow matchRow = matchTable.get(i);
-            if (matchRow.isMatched()) {
-                // update target with properties from the source
-                TransactionBuilder update = tx.update(matchRow.getTargetId().get());
-                
-            } else if(matchRow.isMatched(MatchSide.SOURCE)) {
-                // create new source row
-                UpdateBuilder update = tx.create(targetClassId, ResourceId.generateId());
-            
-            } else {
+            if (!matchRow.isMatched(MatchSide.SOURCE)) {
+                // no corresponding row in the source:
                 // delete unmatched target
                 tx.delete(matchRow.getTargetId().get());
+
+            } else {
+
+                UpdateBuilder update;
+                if (matchRow.isMatched(MatchSide.TARGET)) {
+                    // update target with properties from the source
+                    update = tx.update(matchRow.getTargetId().get());
+                } else {
+                    // create a new instance with properties from the source
+                    update = tx.create(targetClassId, ResourceId.generateId());
+                }
+                
+                // apply properties from field mapping
+                for (FieldMapping fieldMapping : mapping.get().getFieldMappings()) {
+                    update.setProperty(
+                            fieldMapping.getTargetFieldId(), 
+                            fieldMapping.mapFieldValue(matchRow.getSourceRow()));
+                }
+                
             }
         }
+        return tx;
     }
 }
 

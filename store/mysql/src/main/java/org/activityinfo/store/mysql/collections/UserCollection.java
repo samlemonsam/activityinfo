@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -8,6 +9,8 @@ import org.activityinfo.store.mysql.mapping.MappingProvider;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+
+import java.sql.SQLException;
 
 
 public class UserCollection implements MappingProvider {
@@ -42,5 +45,10 @@ public class UserCollection implements MappingProvider {
     @Override
     public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) {
         return mapping;
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        return Optional.absent();
     }
 }

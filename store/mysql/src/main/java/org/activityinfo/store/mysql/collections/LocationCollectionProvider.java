@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
@@ -80,6 +81,11 @@ public class LocationCollectionProvider implements MappingProvider {
             mapping.addGeoPoint(pointField);
             return mapping.build();
         }
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        return Optional.absent();
     }
 //
 //    private FieldType queryAdminType(QueryExecutor executor, int countryId) throws SQLException {

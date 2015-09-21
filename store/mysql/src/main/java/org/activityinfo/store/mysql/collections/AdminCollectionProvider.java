@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -15,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
+import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_LEVEL_DOMAIN;
 
 /**
  * Provides access to collections of administrative entities
@@ -81,16 +83,31 @@ public class AdminCollectionProvider implements MappingProvider {
             TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, ADMIN_ENTITY_TABLE);
             mapping.setOwnerId(ResourceId.ROOT_ID);
             mapping.setPrimaryKeyMapping(CuidAdapter.ADMIN_ENTITY_DOMAIN, "adminEntityId");
-            mapping.setBaseFilter("base.AdminLevelId=" + CuidAdapter.getLegacyIdFromCuid(formClassId));
+            mapping.setBaseFilter("base.AdminLevelId=" + CuidAdapter.getLegacyIdFromCuid(formClassId) + " AND base.deleted=0");
             mapping.setFormLabel(rs.getString("Name"));
             mapping.addTextField(label, "name");
             mapping.addTextField(code, "code");
             mapping.addGeoAreaField(bounds);
-
+            mapping.setDeleteMethod(DeleteMethod.SOFT_BY_BOOLEAN);
+            
             if(parent != null) {
                 mapping.add(new FieldMapping(parent, "adminEntityParentId", new ForeignKeyMapping(ADMIN_ENTITY_DOMAIN)));
             }
             return mapping.build();
         }
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        if(id.getDomain() == ADMIN_ENTITY_DOMAIN) {
+            try(ResultSet rs = queryExecutor.query(String.format("SELECT adminLevelId FROM adminentity WHERE adminEntityId=%d",
+                    CuidAdapter.getLegacyIdFromCuid(id)))) {
+                if (rs.next()) {
+                    int adminLevelId = rs.getInt(1);
+                    return Optional.of(CuidAdapter.adminLevelFormClass(adminLevelId));
+                }
+            }
+        }
+        return Optional.absent();
     }
 }

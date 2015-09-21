@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -56,5 +57,14 @@ public class CountryCollection implements MappingProvider {
         mapping.addGeoAreaField(boundaryField);
 
         return mapping.build();
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        if(id.getDomain() == CuidAdapter.COUNTRY_DOMAIN) {
+            return Optional.of(FORM_CLASS_ID);
+        } else {
+            return Optional.absent();
+        }
     }
 }

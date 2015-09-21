@@ -3,6 +3,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
+import org.activityinfo.geoadmin.merge2.model.ReferenceMatch;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
@@ -12,6 +13,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulSet;
 import org.activityinfo.observable.SynchronousScheduler;
 import org.activityinfo.store.ResourceStore;
 
@@ -25,6 +27,7 @@ import java.util.List;
 public class FormMappingBuilder {
     
     private final ResourceStore resourceStore;
+    private StatefulSet<ReferenceMatch> referenceMatches;
     private final FormProfile source;
     private final FormProfile target;
     
@@ -33,8 +36,10 @@ public class FormMappingBuilder {
     private List<Observable<FieldMapping>> mappings = new ArrayList<>();
 
     public FormMappingBuilder(ResourceStore resourceStore,
-                              KeyFieldPairSet keyFields) {
+                              KeyFieldPairSet keyFields, 
+                              StatefulSet<ReferenceMatch> referenceMatches) {
         this.resourceStore = resourceStore;
+        this.referenceMatches = referenceMatches;
         this.source = keyFields.getSource();
         this.target = keyFields.getTarget();
         this.fieldMatching = keyFields;
@@ -91,7 +96,10 @@ public class FormMappingBuilder {
             Observable<FieldMapping> mapping = targetReferencedFormProfile.transform(new Function<FormProfile, FieldMapping>() {
                 @Override
                 public FieldMapping apply(FormProfile target) {
-                    return new ReferenceFieldMapping(targetField, KeyFieldPairSet.matchKeys(source, target));
+                    return new ReferenceFieldMapping(
+                            target.getField(targetField.getId()), 
+                            KeyFieldPairSet.matchKeys(source, target), 
+                            referenceMatches);
                 }
             });
             mappings.add(mapping);

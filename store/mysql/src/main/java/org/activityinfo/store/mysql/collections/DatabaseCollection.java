@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
@@ -11,6 +12,8 @@ import org.activityinfo.store.mysql.mapping.MappingProvider;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+
+import java.sql.SQLException;
 
 
 public class DatabaseCollection implements MappingProvider {
@@ -69,5 +72,10 @@ public class DatabaseCollection implements MappingProvider {
     public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) {
         Preconditions.checkArgument(formClassId.equals(FORM_CLASS_ID));
         return mapping;
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        return Optional.absent();
     }
 }

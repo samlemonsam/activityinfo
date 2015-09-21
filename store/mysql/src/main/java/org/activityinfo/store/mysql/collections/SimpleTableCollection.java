@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
@@ -12,6 +13,8 @@ import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
+
+import java.sql.SQLException;
 
 
 public class SimpleTableCollection implements ResourceCollection {
@@ -33,7 +36,19 @@ public class SimpleTableCollection implements ResourceCollection {
 
     @Override
     public Optional<Resource> get(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
+        Resource resource = Resources.createResource();
+        resource.setId(resourceId);
+        resource.setOwnerId(getFormClass().getId());
+
+        try {
+            if(mapping.queryFields(executor, resource)) {
+                return Optional.of(resource);
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.absent();
     }
 
     @Override

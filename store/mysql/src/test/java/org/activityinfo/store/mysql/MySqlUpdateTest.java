@@ -56,6 +56,35 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         assertThat(column("partner.label"), hasValues("Solidarites", "NRC", "Solidarites"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
     }
+    
+    @Test
+    public void updateAdminEntity() {
+        JsonObject changeObject = new JsonObject();
+        changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
+        changeObject.addProperty("name", "Nouveau Irumu");
+        
+        Updater updater = new Updater(catalogProvider);
+        updater.executeChange(changeObject);
+        
+        query(adminLevelFormClass(2), "_id", "name");
+        
+        assertThat(column("_id"), hasValues("z0000000010", "z0000000011", "z0000000012", "z0000000013", "z0000000021"));
+        assertThat(column("name"), hasValues("Bukavu", "Walungu", "Shabunda", "Kalehe", "Nouveau Irumu"));
+    }
+    
+    @Test
+    public void deleteAdminEntity() {
+        JsonObject changeObject = new JsonObject();
+        changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
+        changeObject.addProperty("@deleted", true);
+
+        Updater updater = new Updater(catalogProvider);
+        updater.executeChange(changeObject);
+
+        query(adminLevelFormClass(2), "_id", "name");
+
+        assertThat(column("name"), hasValues("Bukavu", "Walungu", "Shabunda", "Kalehe"));
+    }
 
 
     @Test

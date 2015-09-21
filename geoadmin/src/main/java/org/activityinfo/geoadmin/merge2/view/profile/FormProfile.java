@@ -1,6 +1,7 @@
 package org.activityinfo.geoadmin.merge2.view.profile;
 
 import com.google.common.base.Function;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
@@ -145,6 +146,16 @@ public class FormProfile {
         throw new IllegalArgumentException("No such field: " + fieldName);
     }
 
+
+    public FieldProfile getField(ResourceId id) {
+        for (FieldProfile field : fields) {
+            if(field.getId().equals(id)) {
+                return field;
+            }
+        }
+        throw new IllegalArgumentException("No such field: " + id);
+    }
+
     public void dump(int index) {
         System.out.println(toString(index));
     }
@@ -158,4 +169,5 @@ public class FormProfile {
         }
         return s.toString();
     }
+
 }

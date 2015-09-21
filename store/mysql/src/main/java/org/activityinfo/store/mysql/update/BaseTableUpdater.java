@@ -75,6 +75,11 @@ public class BaseTableUpdater {
                 mapping.getPrimaryKey().getDomain(),
                 update.getResourceId().asString());
 
+        // Update delete flag
+        if(update.isDeleted()) {
+            delete();
+        }
+        
         // Describe all the updates
         for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
             update(change.getKey(), change.getValue());
@@ -99,17 +104,31 @@ public class BaseTableUpdater {
     private void appendSetClauses(StringBuilder sql) {
         sql.append(" SET ");
         if(deleted) {
-            sql.append(" dateDeleted = ?");
-            parameters.add(new Date());
+            switch (mapping.getDeleteMethod()) {
+                case SOFT_BY_DATE:
+                    sql.append(" dateDeleted = ?");
+                    parameters.add(new Date());
+                    break;
+                case SOFT_BY_BOOLEAN:
+                    sql.append(" deleted = 1");
+                    break;
+            }
         } else {
-            sql.append(" dateDeleted = NULL");
+            switch (mapping.getDeleteMethod()) {
+                case SOFT_BY_DATE:
+                    sql.append(" dateDeleted = NULL");
+                    break;                    
+                case SOFT_BY_BOOLEAN:
+                    sql.append(" deleted = 0");
+                    break;
+            }
         }
         for (String update : updates) {
             sql.append(", ").append(update);
         }
         parameters.addAll(updateParameters);
     }
-
+    
     private void appendWhereClause(StringBuilder sql) {
         sql.append(" WHERE ").append(mapping.getPrimaryKey().getColumnName()).append(" = ?");
         parameters.add(siteId);

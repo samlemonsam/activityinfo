@@ -16,6 +16,7 @@ import java.util.*;
 
 public class TableMapping {
 
+    private DeleteMethod deleteMethod;
     private String baseTable;
     private String baseFromClause;
     private String baseFilter;
@@ -25,12 +26,14 @@ public class TableMapping {
 
     private Map<ResourceId, FieldMapping> fieldMappings = Maps.newHashMap();
 
-    TableMapping(String baseTable, String baseFromClause, String baseFilter, PrimaryKeyMapping primaryKey, List<FieldMapping> mappings, FormClass formClass) {
+    TableMapping(String baseTable, String baseFromClause, String baseFilter, PrimaryKeyMapping primaryKey, 
+                 List<FieldMapping> mappings, FormClass formClass, DeleteMethod deleteMethod) {
         this.baseTable = baseTable;
         this.baseFromClause = baseFromClause;
         this.primaryKey = primaryKey;
         this.baseFilter = baseFilter;
         this.formClass = formClass;
+        this.deleteMethod = Preconditions.checkNotNull(deleteMethod, "deleteMethod");
         for(FieldMapping mapping : mappings) {
             fieldMappings.put(mapping.getResourceId(), mapping);
         }
@@ -105,5 +108,9 @@ public class TableMapping {
 
     public String getBaseTable() {
         return baseTable;
+    }
+
+    public DeleteMethod getDeleteMethod() {
+        return deleteMethod;
     }
 }

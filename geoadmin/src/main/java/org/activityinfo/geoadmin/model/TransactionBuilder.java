@@ -1,6 +1,8 @@
 package org.activityinfo.geoadmin.model;
 
 import com.google.common.base.Optional;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.ArrayList;
@@ -29,10 +31,22 @@ public class TransactionBuilder {
         return this;
     }
 
-    public TransactionBuilder update(ResourceId id) {
+    public UpdateBuilder update(ResourceId id) {
         UpdateBuilder update = new UpdateBuilder();
         update.setId(id);
         updates.add(update);
-        return this;
+        return update;
+    }
+    
+    public JsonObject build() {
+        JsonArray changes = new JsonArray();
+        for (UpdateBuilder update : updates) {
+            changes.add(update.build());
+        }
+        
+        JsonObject object = new JsonObject();
+        object.add("changes", changes);
+        
+        return object;
     }
 }

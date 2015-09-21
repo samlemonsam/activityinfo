@@ -32,7 +32,7 @@ public class SimpleTableCollectionProvider implements CollectionProvider {
 
     @Override
     public Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException {
-        return Optional.absent();
+        return mappingProvider.lookupCollection(executor, resourceId);
     }
 
 }

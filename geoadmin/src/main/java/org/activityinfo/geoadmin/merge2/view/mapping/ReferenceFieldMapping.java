@@ -1,10 +1,20 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
+import com.google.common.base.Function;
+import org.activityinfo.geoadmin.merge2.model.ReferenceMatch;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulSet;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Maps a source field to a reference target field using a set of key field pairs.
@@ -27,12 +37,19 @@ public class ReferenceFieldMapping implements FieldMapping {
     private final FormField targetReferenceField;
     private final SourceKeySet sourceKeySet;
     private final LookupGraph lookupGraph;
+    private final Observable<LookupTable> lookupTable;
+    private final ColumnView targetReferenceIds;
 
-    
-    public ReferenceFieldMapping(FormField targetReferenceField, KeyFieldPairSet keyFields) {
-        this.targetReferenceField = targetReferenceField;
+
+    public ReferenceFieldMapping(
+            FieldProfile targetReferenceField, 
+            KeyFieldPairSet keyFields, 
+            final StatefulSet<ReferenceMatch> referenceMatches) {
+        this.targetReferenceField = targetReferenceField.getFormField();
+        this.targetReferenceIds = targetReferenceField.getView();
         this.sourceKeySet = new SourceKeySet(keyFields);
         this.lookupGraph = new LookupGraph(sourceKeySet, keyFields.getTarget());
+        this.lookupTable = LookupTable.compute(lookupGraph, referenceMatches);
     }
     
     public List<FieldProfile> getSourceKeyFields() {
@@ -51,7 +68,23 @@ public class ReferenceFieldMapping implements FieldMapping {
         return lookupGraph;
     }
 
+    public Observable<LookupTable> getLookupTable() {
+        return lookupTable;
+    }
+
     public SourceKeySet getSourceKeySet() {
         return sourceKeySet;
+    }
+    
+    public FieldValue mapFieldValue(int sourceIndex) {
+        int keyIndex = sourceKeySet.getKeyIndexOfSourceRow(sourceIndex);
+        int targetIndex = lookupTable.get().getTargetMatchRow(keyIndex);
+        ResourceId targetId = ResourceId.valueOf(targetReferenceIds.getString(targetIndex));
+        return new ReferenceValue(targetId);
+    }
+
+    @Override
+    public ResourceId getTargetFieldId() {
+        return targetReferenceField.getId();
     }
 }

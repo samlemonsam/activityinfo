@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 public class ImportDialog extends JFrame {
 
+    private ActivityInfoClient client;
     private final ImportView viewModel;
 
     private List stepList;
@@ -32,8 +33,9 @@ public class ImportDialog extends JFrame {
     
     private java.util.List<Step> steps;
 
-    public ImportDialog(ImportView viewModel) {
+    public ImportDialog(ActivityInfoClient client, ImportView viewModel) {
         super("Merge");
+        this.client = client;
         this.viewModel = viewModel;
         setSize(650, 350);
         setLocationRelativeTo(null);
@@ -100,7 +102,7 @@ public class ImportDialog extends JFrame {
         if(!unresolvedCount.isLoading()) {
             if(unresolvedCount.get() > 0) {
                 JOptionPane.showMessageDialog(null, String.format("There are %d unresolved matches. " +
-                        "Please resolve these first."), "Unresolved matches", JOptionPane.PLAIN_MESSAGE);
+                        "Please resolve these first.", unresolvedCount.get()), "Unresolved matches", JOptionPane.PLAIN_MESSAGE);
             } else {
                 executeImport();        
             }
@@ -108,24 +110,13 @@ public class ImportDialog extends JFrame {
     }
 
     private void executeImport() {
-      
+        TransactionBuilder tx = viewModel.buildTransaction();
 
-    }
-
-    public static void main(String[] args) {
-
-        ActivityInfoClient client = new ActivityInfoClient("http://localhost:8898/resources", "akbertram@gmail.com", "notasecret");
-        ResourceStore resourceStore = new ResourceStoreImpl(client);
+        System.out.println(tx.build().toString());
         
-        ImportModel modelStore = new ImportModel(
-                ResourceId.valueOf("file:///home/alex/dev/activityinfo-beta/geoadmin/src/test/resources/mg/communes.shp"),
-                CuidAdapter.adminLevelFormClass(1511));
-        
-        ImportView viewModel = new ImportView(resourceStore, modelStore);
-        
-        ImportDialog dialog = new ImportDialog(viewModel);
-        dialog.setVisible(true);
-        
+        client.executeTransaction(tx);
+    
+        this.setVisible(false);
     }
 
     

@@ -19,8 +19,6 @@ public class SourceLookupKey {
         this.values = values;
         this.hashCode = Arrays.hashCode(values);
     }
-
-
     public static SourceLookupKey build(List<FieldProfile> sourceKeyFields, int rowIndex) {
         String[] values = new String[sourceKeyFields.size()];
         for(int fieldIndex=0;fieldIndex<sourceKeyFields.size();++fieldIndex) {

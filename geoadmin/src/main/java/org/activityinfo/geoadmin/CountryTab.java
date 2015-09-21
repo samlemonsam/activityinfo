@@ -225,7 +225,7 @@ public class CountryTab extends JPanel {
                 ResourceId sourceId = ResourceId.valueOf("file://" + source.getFile().getAbsolutePath());
                 ImportModel model = new ImportModel(sourceId, targetId);
                 ImportView viewModel = new ImportView(new ResourceStoreImpl(client), model);
-                ImportDialog dialog = new ImportDialog(viewModel);
+                ImportDialog dialog = new ImportDialog(client, viewModel);
                 dialog.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();

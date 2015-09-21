@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -323,7 +324,7 @@ public class ActivityInfoClient implements FormClassProvider {
             return queryColumnsRemotely(queryModel);
         }
     }
-
+    
     private ColumnSet queryColumnsRemotely(QueryModel queryModel) {
         String json = client.resource(root)
                 .path("query")
@@ -353,6 +354,20 @@ public class ActivityInfoClient implements FormClassProvider {
         return new ColumnSet(numRows, columnMap);
     }
 
+    public void executeTransaction(TransactionBuilder builder) {
+        ClientResponse response = client.resource(root)
+                .path("update")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(builder.build().toString(), MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class);
+        
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Transaction failed with status code: " + response.getStatus() + " "  +
+            response.getEntity(String.class));
+        }
+        
+    }
+    
     private ColumnView parseCoordinates(JsonArray coordinateArray) {
         double[] coordinates = new double[coordinateArray.size()];
         for (int i = 0; i < coordinateArray.size(); i++) {

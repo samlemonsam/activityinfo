@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -20,5 +21,10 @@ public class ProjectCollection implements MappingProvider {
         int databaseId = CuidAdapter.getLegacyIdFromCuid(formClassId);
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, "project");
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        return Optional.absent();
     }
 }

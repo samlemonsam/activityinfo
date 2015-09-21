@@ -53,6 +53,15 @@ public class SourceKeySet {
         this.distinctKeys = Lists.newArrayList(keys);
     }
 
+    /**
+     * For a given index of a row within the source table, find the index of the distinct
+     * lookup key.
+     */
+    public int getKeyIndexOfSourceRow(int sourceRowIndex) {
+        SourceLookupKey key = SourceLookupKey.build(sourceFields, sourceRowIndex);
+        return distinctKeys.indexOf(key);
+    }
+    
     public List<FieldProfile> getSourceFields() {
         return sourceFields;
     }

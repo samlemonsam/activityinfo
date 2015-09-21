@@ -1,5 +1,6 @@
 package org.activityinfo.model.type.geo;
 
+import com.google.common.base.Strings;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -33,10 +34,23 @@ public class GeoArea implements GeoFieldValue, IsRecord {
 
     @Override
     public Record asRecord() {
-        throw new UnsupportedOperationException("todo");
+        Record record = new Record();
+        if(envelope != null) {
+            record.set("bbox", envelope.asRecord());
+        }
+        if(!Strings.isNullOrEmpty(blobId)) {
+            record.set("blobId", blobId);
+        }
+        return record;
     }
 
     public static FieldValue fromRecord(Record record) {
-        throw new UnsupportedOperationException("todo");
+        Extents bbox = null;
+        Record bboxRecord = record.isRecord("bbox");
+        if(bbox != null) {
+            bbox = Extents.fromRecord(bboxRecord);
+        }
+        String blobId = record.isString("blobId");
+        return new GeoArea(bbox, blobId);
     }
 }

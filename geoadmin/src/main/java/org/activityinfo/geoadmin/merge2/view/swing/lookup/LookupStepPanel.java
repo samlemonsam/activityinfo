@@ -23,7 +23,7 @@ public class LookupStepPanel extends StepPanel {
 
     public LookupStepPanel(ImportView viewModel, ReferenceFieldMapping mapping) {
         this.viewModel = viewModel;
-        table = LookupTable.compute(mapping, viewModel);
+        table = mapping.getLookupTable();
 
         tableModel = new LookupTableModel(mapping, table);
         final JTable tableComponent = new JTable(tableModel);

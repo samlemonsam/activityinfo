@@ -23,6 +23,7 @@ public class TableMappingBuilder {
     private List<FieldMapping> mappings = Lists.newArrayList();
     private PrimaryKeyMapping primaryKeyMapping;
     private FormClass formClass;
+    private DeleteMethod deleteMethod = DeleteMethod.SOFT_BY_DATE;
 
     private TableMappingBuilder(ResourceId formClassId, String tableName) {
         this.tableName = tableName;
@@ -122,12 +123,17 @@ public class TableMappingBuilder {
             }
         }));
     }
+    
+    public void setDeleteMethod(DeleteMethod deleteMethod) {
+        this.deleteMethod = Preconditions.checkNotNull(deleteMethod);
+    }
 
 
     public TableMapping build() {
         Preconditions.checkState(primaryKeyMapping != null, tableName + ": Primary key is not set");
         Preconditions.checkState(formClass != null, tableName + ": FormClass is not set");
         Preconditions.checkState(formClass.getOwnerId() != null, tableName + ": ownerId is not set");
-        return new TableMapping(tableName, tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass);
+        return new TableMapping(tableName, tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass,
+                deleteMethod);
     }
 }

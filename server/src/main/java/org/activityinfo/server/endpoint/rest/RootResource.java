@@ -166,11 +166,9 @@ public class RootResource {
     @Path("/update") 
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
-        
-        if(!DeploymentEnvironment.isAppEngineDevelopment() && !userProvider.get().getEmail().endsWith("@bedatadriven.com")) {
-            return Response.status(Status.FORBIDDEN).build();
-        }
-        
+
+        assertUserIsTrustedWhileInBeta();
+
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
@@ -188,6 +186,13 @@ public class RootResource {
                 return Response.ok().build();
             }
         });
+    }
+    
+
+    private void assertUserIsTrustedWhileInBeta() {
+        if(!DeploymentEnvironment.isAppEngineDevelopment() && !userProvider.get().getEmail().endsWith("@bedatadriven.com")) {
+            throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
+        }
     }
 
     @Path("/users")
