@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import java.util.Locale;
 
 import static org.activityinfo.test.driver.Property.property;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author yuriyz on 09/18/2015.
@@ -70,6 +71,22 @@ public class LockUiTest {
         confirmDialog.clickButton(I18N.CONSTANTS.no());
 
         locksPage.grid().findCell(lockName); // assert lock is still in table
+    }
+
+    @Test // AI-1225
+    public void deleteLock() throws Exception {
+        background();
+
+        String lockName = "lockName";
+        driver.addLockOnDb(lockName, DATABASE, "2015-01-01", "2015-01-01", true);
+
+        LocksPage locksPage = locksPage();
+        locksPage.grid().clickCell(lockName);
+        GxtModal confirmDialog = locksPage.clickDelete();
+        confirmDialog.clickButton(I18N.CONSTANTS.yes());
+
+        assertFalse(locksPage.grid().findCellOptional(lockName).isPresent()); // assert lock is removed
+        assertFalse(locksPage.getToolbarMenu().button(I18N.CONSTANTS.delete()).isEnabled()); // assert delete button is disabled
     }
 
     private LocksPage locksPage() {

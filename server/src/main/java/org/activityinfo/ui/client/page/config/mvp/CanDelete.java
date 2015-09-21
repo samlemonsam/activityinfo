@@ -54,10 +54,6 @@ public interface CanDelete<M extends DTO> {
     // The user wants to exit the delete entity mode
     void cancelDelete();
 
-    // Whether or not the user should be asked to confirm deletion, or remove
-    // the entity right away
-    void setMustConfirmDelete(boolean mustConfirmDelete);
-
     // If true, the delete button is enabled
     void setDeleteEnabled(boolean deleteEnabled);
 

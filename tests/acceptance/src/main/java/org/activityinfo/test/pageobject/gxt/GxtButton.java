@@ -22,28 +22,31 @@ package org.activityinfo.test.pageobject.gxt;
  */
 
 import org.activityinfo.test.pageobject.api.FluentElement;
-import org.openqa.selenium.By;
 
 /**
- * @author yuriyz on 04/02/2015.
+ * @author yuriyz on 09/21/2015.
  */
-public class ToolbarMenu {
+public class GxtButton {
 
-    private FluentElement menu;
+    private final FluentElement button;
 
-    public ToolbarMenu(FluentElement menu) {
-        this.menu = menu;
+    public GxtButton(FluentElement button) {
+        this.button = button;
     }
 
-    public static ToolbarMenu find(FluentElement container) {
-        return new ToolbarMenu(container.findElement(By.className("x-toolbar-ct")));
+    public boolean isEnabled() {
+        return !button.attribute("aria-disabled").equals("true");
     }
 
-    public GxtButton button(final String buttonName) {
-        return new GxtButton(menu.waitFor(Gxt.button(buttonName)));
+    public void clickWhenReady() {
+        button.clickWhenReady();
     }
 
-    public void clickButton(final String buttonName) {
-        menu.waitFor(Gxt.button(buttonName)).clickWhenReady();
+    public void click() {
+        button.click();
+    }
+
+    public FluentElement getButtonElement() {
+        return button;
     }
 }

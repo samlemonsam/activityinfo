@@ -22,10 +22,7 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.event.ComponentEvent;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.MessageBoxEvent;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
@@ -37,6 +34,7 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -118,12 +116,24 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
         lockedPeriodGrid.addListener(Events.OnClick, new Listener<ComponentEvent>() {
             @Override
             public void handleEvent(ComponentEvent be) {
-                lockedPeriod = lockedPeriodGrid.getSelectionModel().getSelectedItem();
-                setDeleteEnabled(lockedPeriodGrid.getSelectionModel().getSelectedItem() != null);
+                updateState();
             }
         });
-
         add(lockedPeriodGrid);
+    }
+
+    private void updateState() {
+        lockedPeriod = lockedPeriodGrid.getSelectionModel().getSelectedItem();
+        setDeleteEnabled(lockedPeriodGrid.getSelectionModel().getSelectedItem() != null);
+    }
+
+    private void updateStateLater() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                updateState();
+            }
+        });
     }
 
     private void initializeComponent() {
@@ -137,6 +147,13 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
             @Override
             public void handleEvent(StoreEvent be) {
                 actionToolbar.setUpdateEnabled(true);
+                updateStateLater();
+            }
+        });
+        lockedPeriodStore.addListener(Store.Remove, new Listener<BaseEvent>() {
+            @Override
+            public void handleEvent(BaseEvent be) {
+                updateStateLater();
             }
         });
     }
@@ -416,10 +433,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public AsyncMonitor getDeletingMonitor() {
         return deletingMonitor;
-    }
-
-    @Override
-    public void setMustConfirmDelete(boolean mustConfirmDelete) {
     }
 
     @Override
