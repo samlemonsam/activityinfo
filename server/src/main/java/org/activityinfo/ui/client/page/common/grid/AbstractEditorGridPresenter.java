@@ -30,7 +30,9 @@ import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.loader.CommandLoadEvent;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.command.Command;
@@ -38,6 +40,8 @@ import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.PageState;
+import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
+import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 
 import java.util.HashMap;
@@ -149,17 +153,30 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
         if (getModifiedRecords().size() == 0) {
             callback.onDecided(true);
         } else {
-            service.execute(createSaveCommand(), view.getSavingMonitor(), new AsyncCallback<BatchResult>() {
-
+            final SavePromptMessageBox box = new SavePromptMessageBox();
+            box.show(new SaveChangesCallback() {
                 @Override
-                public void onSuccess(BatchResult result) {
-                    getStore().commitChanges();
-                    callback.onDecided(true);
+                public void save(AsyncMonitor monitor) {
+                    service.execute(createSaveCommand(), view.getSavingMonitor(), new SuccessCallback<BatchResult>() {
+                        @Override
+                        public void onSuccess(BatchResult result) {
+                            box.hide();
+                            getStore().commitChanges();
+                            callback.onDecided(true);
+                        }
+                    });
                 }
 
                 @Override
-                public void onFailure(Throwable caught) {
-                    // TODO
+                public void cancel() {
+                    box.hide();
+                    callback.onDecided(false);
+                }
+
+                @Override
+                public void discard() {
+                    box.hide();
+                    callback.onDecided(true);
                 }
             });
         }
