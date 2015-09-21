@@ -43,8 +43,10 @@ public class GxtTree {
         return new GxtTree(container, XPathProvider.TREE_GRID_PROVIDER);
     }
 
-    public void select(String... labels) {
-        findNode(labels).select();
+    public GxtNode select(String... labels) {
+        GxtNode node = findNode(labels);
+        node.select();
+        return node;
     }
 
 
@@ -415,6 +417,10 @@ public class GxtTree {
 
         public String getId() {
             return element.attribute("id");
+        }
+
+        public FluentElement getElement() {
+            return element;
         }
     }
 
