@@ -31,13 +31,15 @@ import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
  */
 public class DesignPage {
 
+    private FluentElement container;
     private GxtTree designTree;
     private ToolbarMenu toolbarMenu;
 
     public DesignPage(FluentElement container) {
 
-        GxtPanel panel = GxtPanel.findStartsWith(container, "Design");
+        GxtPanel panel = GxtPanel.findStartsWith(container, "Design ");
 
+        this.container = container;
         this.designTree = panel.treeGrid();
         this.toolbarMenu = panel.toolbarMenu();
     }
@@ -48,5 +50,9 @@ public class DesignPage {
 
     public ToolbarMenu getToolbarMenu() {
         return toolbarMenu;
+    }
+
+    public FluentElement getContainer() {
+        return container;
     }
 }

@@ -22,11 +22,19 @@ package org.activityinfo.test.ui;
  */
 
 import org.activityinfo.test.driver.UiApplicationDriver;
+import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.junit.Test;
 
 import javax.inject.Inject;
 
+import static junit.framework.Assert.assertNotNull;
+import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 /**
  * @author yuriyz on 06/30/2015.
@@ -34,6 +42,7 @@ import static org.activityinfo.test.driver.Property.property;
 public class DesignUiTest {
 
     private static final String DATABASE = "DesignUiDb";
+    private static final String FORM = "Form";
 
     @Inject
     public UiApplicationDriver driver;
@@ -45,5 +54,42 @@ public class DesignUiTest {
 
         driver.renameDatabase(DATABASE, "NewDesignUiDb", "New Desc");
 
+    }
+
+    @Test // AI-877
+    public void navigateAwayWithoutSavingChanges() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE));
+        driver.setup().createForm(name(FORM),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        driver.ensureLoggedIn();
+
+        String db = driver.getAliasTable().getAlias(DATABASE);
+        String form = driver.getAliasTable().getAlias(FORM);
+
+        DesignTab tab = driver.getApplicationPage().navigateToDesignTab().selectDatabase(db);
+        DesignPage designPage = tab.design();
+
+        GxtTree.GxtNode node = designPage.getDesignTree().select(form);
+        FluentElement nodeElement = node.getElement();
+        nodeElement.doubleClick();
+
+        FluentElement editor = findInputEditor(tab.getContainer());
+        editor.sendKeys("123");
+
+        try {
+            driver.getApplicationPage().navigateToDashboard();
+        } catch (Exception e) {
+            // ignore : our goal is to navigate away and make sure confirmation dialog appears
+        }
+
+        GxtModal confirmationModal = GxtModal.waitForModal(designPage.getContainer().root());
+        assertNotNull(confirmationModal);
+    }
+
+    private FluentElement findInputEditor(FluentElement container) {
+        return container.find().div(withClass("x-editor")).descendants().input(withClass("x-form-text")).first();
     }
 }
