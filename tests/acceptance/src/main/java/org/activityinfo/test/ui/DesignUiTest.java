@@ -28,9 +28,11 @@ import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 import javax.inject.Inject;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -87,6 +89,35 @@ public class DesignUiTest {
 
         GxtModal confirmationModal = GxtModal.waitForModal(designPage.getContainer().root());
         assertNotNull(confirmationModal);
+    }
+
+    @Test // AI-878
+    public void saveButtonState() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE));
+        driver.setup().createForm(name(FORM),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        driver.ensureLoggedIn();
+
+        String db = driver.getAliasTable().getAlias(DATABASE);
+        String form = driver.getAliasTable().getAlias(FORM);
+
+        DesignTab tab = driver.getApplicationPage().navigateToDesignTab().selectDatabase(db);
+        DesignPage designPage = tab.design();
+
+        GxtTree.GxtNode node = designPage.getDesignTree().select(form);
+        FluentElement nodeElement = node.getElement();
+        nodeElement.doubleClick();
+
+        FluentElement editor = findInputEditor(tab.getContainer());
+        editor.sendKeys("123", Keys.ENTER);
+
+        designPage.getToolbarMenu().clickButton("Save");
+
+        assertFalse(designPage.getToolbarMenu().button("Saved").isEnabled());
+
     }
 
     private FluentElement findInputEditor(FluentElement container) {

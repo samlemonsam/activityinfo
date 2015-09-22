@@ -123,6 +123,9 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
             public void onSuccess(Object result) {
                 getStore().commitChanges();
 
+                if (AbstractEditorGridPresenter.this.view.getToolBar() != null) {
+                    AbstractEditorGridPresenter.this.view.getToolBar().setDirty(false);
+                }
                 onSaved();
             }
         });

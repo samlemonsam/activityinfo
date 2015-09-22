@@ -67,8 +67,7 @@ public class DesignTest {
         service.setResult(UpdateEntity.class, new VoidResult());
 
         // Collaborator
-        DesignPresenter.View view = createNiceMock(DesignPresenter.View.class);
-        replay(view);
+        DesignPresenter.View view = new MockDesignTree();
 
         // Localisation resources
         UiConstants constants = createNiceMock(UiConstants.class);
