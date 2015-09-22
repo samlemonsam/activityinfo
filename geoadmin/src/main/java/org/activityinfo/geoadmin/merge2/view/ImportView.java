@@ -10,6 +10,8 @@ import org.activityinfo.geoadmin.merge2.view.swing.SwingSchedulers;
 import org.activityinfo.geoadmin.model.TransactionBuilder;
 import org.activityinfo.geoadmin.model.UpdateBuilder;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Scheduler;
@@ -88,6 +90,8 @@ public class ImportView {
         TransactionBuilder tx = new TransactionBuilder();
 
         ResourceId targetClassId = model.getTargetFormId().get();
+        
+        KeyGenerator generator = new KeyGenerator();
 
         MatchTable matchTable = getMatchTable();
         int numRows = matchTable.getRowCount();
@@ -106,7 +110,7 @@ public class ImportView {
                     update = tx.update(matchRow.getTargetId().get());
                 } else {
                     // create a new instance with properties from the source
-                    update = tx.create(targetClassId, ResourceId.generateId());
+                    update = tx.create(targetClassId, CuidAdapter.entity(generator.generateInt()));
                 }
                 
                 // apply properties from field mapping

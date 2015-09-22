@@ -12,9 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Resource;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
+import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -206,6 +204,10 @@ public class Updater {
     private static FieldValue parseFieldValue(FormField field, JsonElement jsonValue) {
         if(jsonValue.isJsonNull()) {
             return null;
+
+        } else if(isTypedRecord(jsonValue)) {
+            return parseTypedRecord(field, jsonValue.getAsJsonObject());
+            
         } else if(field.getType() instanceof TextType) {
             return TextValue.valueOf(jsonValue.getAsString());
             
@@ -226,6 +228,30 @@ public class Updater {
             
         }
         throw new InvalidUpdateException("Unsupported type: " + field.getType().getTypeClass().getId());
+    }
+
+    private static boolean isTypedRecord(JsonElement jsonValue) {
+        if(jsonValue.isJsonObject()) {
+            return jsonValue.getAsJsonObject().has("@type");
+        }
+        return false;
+    }
+
+
+    private static FieldValue parseTypedRecord(FormField field, JsonObject jsonObject) {
+        Record record = Resources.recordFromJson(jsonObject);
+        FieldValue fieldValue = TypeRegistry.get().deserializeFieldValue(record);
+        
+        if(!field.getType().getTypeClass().equals(fieldValue.getTypeClass())) {
+            throw new InvalidUpdateException(String.format(
+                    "Expected record of type %s for field '%s' (id: %s) but a record of type %s was provided", 
+                        field.getType().getTypeClass().getId(),
+                        field.getLabel(), 
+                        field.getId().asString(),
+                        record.get("@type")));
+        }
+
+        return fieldValue;
     }
 
     private static FieldValue parseQuantity(FormField field, JsonElement jsonValue) {

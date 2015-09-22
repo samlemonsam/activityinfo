@@ -118,7 +118,6 @@ public class MatchStepPanel extends StepPanel {
                         int modelColumn = table.convertColumnIndexToModel(viewColumn);
                         onDoubleClick(modelRow, modelColumn);
                     }
-
                 }
             }
         });
@@ -173,6 +172,10 @@ public class MatchStepPanel extends StepPanel {
             if(!row.isMatched(MatchSide.SOURCE)) {
                 // An instance in the target collection has not been matched
                 // and will be deleted. Confirm this by add an explicit non-matching
+                instanceMatchSet.add(row.asInstanceMatch());
+            } else {
+                // An instance in the source has not been matched and will be added to the 
+                // target collection
                 instanceMatchSet.add(row.asInstanceMatch());
             }
         }

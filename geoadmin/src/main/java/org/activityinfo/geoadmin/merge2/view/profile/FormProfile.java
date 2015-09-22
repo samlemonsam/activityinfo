@@ -43,8 +43,6 @@ public class FormProfile {
             }
         }
         
-        
-
         this.id = columnSet.getColumnView(ID_COLUMN);
         for (int i = 0; i < columnSet.getNumRows(); i++) {
             idMap.put(ResourceId.valueOf(id.getString(i)), i);
@@ -105,6 +103,7 @@ public class FormProfile {
                 QueryModel queryModel = new QueryModel(tree.getRootFormClass().getId());
                 queryModel.selectResourceId().as(ID_COLUMN);
 
+                
 
                 // Add all reachable text fields as matchable fields
                 for (FormTree.Node node : tree.getLeaves()) {
@@ -123,7 +122,7 @@ public class FormProfile {
                                 .as(node.getFieldId().asString());
                     }
                 }
-
+                
 
                 return resourceStore.queryColumns(queryModel);
             }

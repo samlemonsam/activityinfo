@@ -9,6 +9,7 @@ import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableSet;
 
@@ -172,6 +173,12 @@ public class LookupTable {
 
     public int getTargetMatchRow(int sourceKeyIndex) {
         return matching[sourceKeyIndex];
+    }
+    
+    public ResourceId getTargetMatchId(int sourceKeyIndex) {
+        int row = getTargetMatchRow(sourceKeyIndex);
+        ResourceId id = graph.getTargetForm().getRowId(row);
+        return id;
     }
 
     public SourceLookupKey getSourceKey(int sourceKeyIndex) {

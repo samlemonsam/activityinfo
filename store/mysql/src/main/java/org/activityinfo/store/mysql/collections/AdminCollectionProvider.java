@@ -66,7 +66,7 @@ public class AdminCollectionProvider implements MappingProvider {
             FormField bounds = new FormField(CuidAdapter.field(formClassId, CuidAdapter.GEOMETRY_FIELD));
             bounds.setCode("boundary");
             bounds.setLabel(I18N.CONSTANTS.geography());
-            bounds.setRequired(false);
+            bounds.setRequired(true);
             bounds.setType(GeoAreaType.INSTANCE);
             
             FormField parent = null;

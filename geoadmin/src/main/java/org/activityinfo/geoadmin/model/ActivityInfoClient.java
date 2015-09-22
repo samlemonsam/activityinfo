@@ -365,7 +365,6 @@ public class ActivityInfoClient implements FormClassProvider {
             throw new RuntimeException("Transaction failed with status code: " + response.getStatus() + " "  +
             response.getEntity(String.class));
         }
-        
     }
     
     private ColumnView parseCoordinates(JsonArray coordinateArray) {

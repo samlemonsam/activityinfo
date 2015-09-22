@@ -12,6 +12,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulSet;
 import org.activityinfo.observable.SynchronousScheduler;
@@ -49,9 +50,12 @@ public class FormMappingBuilder {
         // Add simple field mappings, where we just copy the text/quantity/etc field from 
         // the source to the target field
         for (FieldProfile targetField : target.getFields()) {
-            if(SimpleFieldMapping.isSimple(targetField)) {
-                buildSimpleMapping(targetField);
-            }
+            if (targetField.getNode().isRoot())
+                if (SimpleFieldMapping.isSimple(targetField)) {
+                    buildSimpleMapping(targetField);
+                } else if(targetField.getFormField().getType() instanceof GeoAreaType) {
+                    buildGeoMapping(targetField);
+                }
         }
         
         // Add mappings for ReferenceFields, for which we have to perform look ups
@@ -63,7 +67,6 @@ public class FormMappingBuilder {
         
         return Observable.flatten(SynchronousScheduler.INSTANCE, mappings);
     }
-    
 
 
     /**
@@ -91,14 +94,14 @@ public class FormMappingBuilder {
         if (type.getCardinality() == Cardinality.SINGLE && type.getRange().size() == 1) {
 
             ResourceId referenceFormId = Iterables.getOnlyElement(type.getRange());
-            Observable<FormProfile> targetReferencedFormProfile = FormProfile.profile(resourceStore, referenceFormId);
+            Observable<FormProfile> lookupForm = FormProfile.profile(resourceStore, referenceFormId);
 
-            Observable<FieldMapping> mapping = targetReferencedFormProfile.transform(new Function<FormProfile, FieldMapping>() {
+            Observable<FieldMapping> mapping = lookupForm.transform(new Function<FormProfile, FieldMapping>() {
                 @Override
-                public FieldMapping apply(FormProfile target) {
+                public FieldMapping apply(FormProfile lookupForm) {
                     return new ReferenceFieldMapping(
-                            target.getField(targetField.getId()), 
-                            KeyFieldPairSet.matchKeys(source, target), 
+                            targetField, 
+                            KeyFieldPairSet.matchKeys(source, lookupForm), 
                             referenceMatches);
                 }
             });
@@ -113,5 +116,14 @@ public class FormMappingBuilder {
             mappings.add(Observable.<FieldMapping>just(new SimpleFieldMapping(sourceField.get(), targetField)));
         }
     }
+
+
+    private void buildGeoMapping(FieldProfile targetField) {
+        Optional<FieldProfile> sourceField = fieldMatching.targetToSource(targetField);
+        if(sourceField.isPresent()) {
+            mappings.add(Observable.<FieldMapping>just(new GeoAreaFieldMapping(sourceField.get(), targetField)));
+        }
+    }
+
 
 }

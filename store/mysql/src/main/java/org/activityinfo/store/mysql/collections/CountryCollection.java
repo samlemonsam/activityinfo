@@ -61,10 +61,6 @@ public class CountryCollection implements MappingProvider {
 
     @Override
     public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
-        if(id.getDomain() == CuidAdapter.COUNTRY_DOMAIN) {
-            return Optional.of(FORM_CLASS_ID);
-        } else {
-            return Optional.absent();
-        }
+        return Optional.absent();
     }
 }

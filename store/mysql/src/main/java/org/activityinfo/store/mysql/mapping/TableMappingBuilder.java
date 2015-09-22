@@ -93,7 +93,9 @@ public class TableMappingBuilder {
 
             @Override
             public Collection<? extends Object> toParameters(FieldValue value) {
-                throw new UnsupportedOperationException();
+                GeoArea area = (GeoArea) value;
+                Extents bbox = area.getEnvelope();
+                return Arrays.asList(bbox.getX1(), bbox.getY1(), bbox.getX2(), bbox.getY2());
             }
         }));
     }

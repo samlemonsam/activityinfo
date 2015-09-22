@@ -118,7 +118,7 @@ public class Resources {
         return list;
     }
 
-    private static Record recordFromJson(JsonObject jsonObject) {
+    public static Record recordFromJson(JsonObject jsonObject) {
         Record record = new Record();
         for(Map.Entry<String, JsonElement> field : jsonObject.entrySet()) {
             if(!field.getValue().isJsonNull()) {

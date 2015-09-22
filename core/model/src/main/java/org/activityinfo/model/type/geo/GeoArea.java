@@ -19,6 +19,10 @@ public class GeoArea implements GeoFieldValue, IsRecord {
         this.blobId = blobId;
     }
 
+    public GeoArea(Extents envelope) {
+        this.envelope = envelope;
+    }
+
     public Extents getEnvelope() {
         return envelope;
     }
@@ -35,6 +39,8 @@ public class GeoArea implements GeoFieldValue, IsRecord {
     @Override
     public Record asRecord() {
         Record record = new Record();
+        record.set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId());
+        
         if(envelope != null) {
             record.set("bbox", envelope.asRecord());
         }

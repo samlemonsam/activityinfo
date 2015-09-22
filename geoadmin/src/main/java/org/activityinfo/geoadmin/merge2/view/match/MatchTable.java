@@ -127,7 +127,7 @@ public class MatchTable {
                 int count = 0;
                 for (int i = 0; i < input.getRowCount(); i++) {
                     MatchRow row = input.get(i);
-                    if(!row.isResolved()) {
+                    if(row.isInputRequired() && !row.isResolved()) {
                         count++;
                     }
                 }
@@ -191,9 +191,13 @@ public class MatchTable {
         // Add finally add an output row for each unmatched source
         for (int sourceRow = 0; sourceRow < keyFields.getSource().getRowCount(); ++sourceRow) {
             if (!matchedSources.contains(sourceRow)) {
+
+                Optional<InstanceMatch> explicitMatch = matchSet.find(keyFields.getSource().getRowId(sourceRow));
+
                 MatchRow row = new MatchRow(keyFields);
                 row.setSourceRow(sourceRow);
-                row.setResolved(false);
+                row.setInputRequired(true);
+                row.setResolved(explicitMatch.isPresent());
                 rows.add(row);
             }
         }
@@ -249,7 +253,7 @@ public class MatchTable {
                 if(sourceField.isPresent()) {
                     columns.add(new MatchedColumn(MatchTable.this, targetField, sourceField.get(), MatchSide.SOURCE));
                 } 
-            }            
+            } 
             
             // Also include the unmatched source columns as reference
             for (FieldProfile sourceField : keyFields.getSource().getFields()) {

@@ -38,15 +38,13 @@ public class ReferenceFieldMapping implements FieldMapping {
     private final SourceKeySet sourceKeySet;
     private final LookupGraph lookupGraph;
     private final Observable<LookupTable> lookupTable;
-    private final ColumnView targetReferenceIds;
 
 
     public ReferenceFieldMapping(
-            FieldProfile targetReferenceField, 
+            FormField targetReferenceField, 
             KeyFieldPairSet keyFields, 
             final StatefulSet<ReferenceMatch> referenceMatches) {
-        this.targetReferenceField = targetReferenceField.getFormField();
-        this.targetReferenceIds = targetReferenceField.getView();
+        this.targetReferenceField = targetReferenceField;
         this.sourceKeySet = new SourceKeySet(keyFields);
         this.lookupGraph = new LookupGraph(sourceKeySet, keyFields.getTarget());
         this.lookupTable = LookupTable.compute(lookupGraph, referenceMatches);
@@ -78,8 +76,8 @@ public class ReferenceFieldMapping implements FieldMapping {
     
     public FieldValue mapFieldValue(int sourceIndex) {
         int keyIndex = sourceKeySet.getKeyIndexOfSourceRow(sourceIndex);
-        int targetIndex = lookupTable.get().getTargetMatchRow(keyIndex);
-        ResourceId targetId = ResourceId.valueOf(targetReferenceIds.getString(targetIndex));
+        ResourceId targetId = lookupTable.get().getTargetMatchId(keyIndex);
+        
         return new ReferenceValue(targetId);
     }
 
