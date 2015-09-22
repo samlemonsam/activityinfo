@@ -35,7 +35,7 @@ public class GxtButton {
     }
 
     public boolean isEnabled() {
-        return !button.attribute("aria-disabled").equals("true");
+        return !"true".equals(button.attribute("aria-disabled")) && !"true".equals(button.attribute("disabled"));
     }
 
     public void clickWhenReady() {
