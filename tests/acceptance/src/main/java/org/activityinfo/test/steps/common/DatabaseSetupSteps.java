@@ -234,6 +234,19 @@ public class DatabaseSetupSteps {
         this.currentForm = formName;
     }
 
+    @And("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\" and relevance condition \"([^\"]*)\" $")
+    public void I_have_created_a_quantity_field_in_with_code(String fieldName, String formName, String fieldCode, String relevanceCondition) throws Throwable {
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("skipExpression", relevanceCondition),
+                property("code", fieldCode)
+        );
+
+        this.currentForm = formName;
+    }
+
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
     public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
         I_have_created_a_calculated_field_in_with_aggregation(fieldName, formName, expression, AggregationMethod.Sum.name());
