@@ -290,6 +290,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 properties.put("expression", field.getString("expression"));
             }
 
+            properties.put("skipExpression", field.getString("skipExpression"));
+
             createEntityAndBindId("Indicator", properties);
         }
     }
