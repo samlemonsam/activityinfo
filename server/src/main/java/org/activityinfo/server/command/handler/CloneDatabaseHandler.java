@@ -21,10 +21,10 @@ package org.activityinfo.server.command.handler;
  * #L%
  */
 
-import com.google.api.client.util.Lists;
-import com.google.api.client.util.Maps;
-import com.google.api.client.util.Strings;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -76,7 +76,8 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
     // Mappings old id (source db) -> new id (target/newly created db)
     private final Map<Integer, Partner> partnerMapping = Maps.newHashMap();
     private final Map<Integer, Activity> activityMapping = Maps.newHashMap();
-    private final Map<Integer, AttributeGroup> attributeGroupMapping = Maps.newHashMap();
+    private final Map<FormElement, FormElement> sourceIdToTargetFormElementMapping = Maps.newHashMap();
+    private final Map<ResourceId, ResourceId> typeIdMapping = Maps.newHashMap();
 
     private CloneDatabase command;
     private UserDatabase targetDb;
@@ -265,7 +266,9 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
         targetFormClass.setDescription(sourceFormClass.getDescription());
         targetFormClass.setParentId(CuidAdapter.databaseId(targetDb.getId()));
 
+        sourceIdToTargetFormElementMapping.clear();
         copyFormElements(sourceFormClass, targetFormClass, sourceFormClass.getId(), targetFormClass.getId());
+        correctRelevanceConditions(targetFormClass);
 
         return targetFormClass;
     }
@@ -278,6 +281,7 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
                 targetSection.setLabel(sourceSection.getLabel());
 
                 targetContainer.addElement(targetSection);
+                sourceIdToTargetFormElementMapping.put(sourceSection, targetSection);
 
                 copyFormElements(sourceSection, targetSection, sourceClassId, targetClassId);
             } else if (element instanceof FormField) {
@@ -293,10 +297,33 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
                 targetField.setSuperProperties(sourceField.getSuperProperties());
 
                 targetContainer.addElement(targetField);
+                sourceIdToTargetFormElementMapping.put(sourceField, targetField);
             } else {
                 throw new RuntimeException("Unsupported FormElement : " + element);
             }
         }
+    }
+
+    private void correctRelevanceConditions(FormClass targetFormClass) {
+        for (FormField field : targetFormClass.getFields()) {
+            field.setRelevanceConditionExpression(replaceSourceIdsToTargetIds(field.getRelevanceConditionExpression()));
+        }
+    }
+
+    private String replaceSourceIdsToTargetIds(String expression) {
+        if (!Strings.isNullOrEmpty(expression)) {
+
+            // replace element ids
+            for (Map.Entry<FormElement, FormElement> entry : sourceIdToTargetFormElementMapping.entrySet()) {
+                expression = expression.replace(entry.getKey().getId().asString(), entry.getValue().getId().asString());
+            }
+
+            // replace type ids
+            for (Map.Entry<ResourceId, ResourceId> entry :typeIdMapping.entrySet()) {
+                expression = expression.replace(entry.getKey().asString(), entry.getValue().asString());
+            }
+        }
+        return expression;
     }
 
     private FieldType targetFieldType(FormField sourceField) {
@@ -321,6 +348,7 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
 
                     ResourceId targetValueId = CuidAdapter.cuid(sourceValue.getId().getDomain(), generator.generateInt());
                     targetValues.add(new EnumItem(targetValueId, sourceValue.getLabel()));
+                    typeIdMapping.put(sourceValue.getId(), targetValueId);
                 }
                 return new EnumType(sourceEnumType.getCardinality(), targetValues);
             }
@@ -332,16 +360,21 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
             Set<ResourceId> sourceRange = sourceType.getRange();
             Set<ResourceId> targetRange = new HashSet<>();
 
-            switch (sourceRange.iterator().next().getDomain()) {
+            ResourceId next = sourceRange.iterator().next();
+            switch (next.getDomain()) {
                 case CuidAdapter.PARTNER_FORM_CLASS_DOMAIN:
                     if (command.isCopyPartners()) {
 
                         // as defined in ActivityFormClassBuilder.build() in reference range we stick to db id
-                        targetRange.add(CuidAdapter.partnerFormClass(targetDb.getId()));
+                        ResourceId partnerId = CuidAdapter.partnerFormClass(targetDb.getId());
+                        targetRange.add(partnerId);
+                        typeIdMapping.put(next, partnerId);
                     }
                     break;
                 case CuidAdapter.PROJECT_CLASS_DOMAIN:
-                    targetRange.add(CuidAdapter.projectFormClass(targetDb.getId()));
+                    ResourceId projectId = CuidAdapter.projectFormClass(targetDb.getId());
+                    targetRange.add(projectId);
+                    typeIdMapping.put(next, projectId);
                     break;
             }
 
