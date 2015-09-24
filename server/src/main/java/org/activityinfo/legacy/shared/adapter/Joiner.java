@@ -26,6 +26,7 @@ import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Naive implementation that joins and projects a multi-level
@@ -33,6 +34,7 @@ import java.util.*;
  */
 class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
 
+    private static final Logger LOGGER = Logger.getLogger(Joiner.class.getName());
 
     private final Criteria criteria;
     private final ClassProvider classProvider;
@@ -170,8 +172,13 @@ class Joiner implements Function<InstanceQuery, Promise<List<Projection>>> {
                     @Nullable
                     @Override
                     public List<Projection> apply(ActivityFormDTO schemaDTO) {
-                        final SiteProjector siteProjector = new SiteProjector(schemaDTO, criteria, fieldPaths);
-                        return siteProjector.apply(input);
+                        try {
+                            final SiteProjector siteProjector = new SiteProjector(schemaDTO, criteria, fieldPaths);
+                            return siteProjector.apply(input);
+                        } catch (Exception e) {
+                            LOGGER.severe("Failed to project sites, exception: " + e.getMessage());
+                            throw e;
+                        }
                     }
                 });
             }
