@@ -11,6 +11,8 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.expr.ExprFieldType;
 
 import java.util.*;
 
@@ -169,6 +171,9 @@ public class FormTree {
         }
 
 
+        public boolean isCalculated() {
+            return getType() instanceof ExprFieldType || getType() instanceof CalculatedFieldType;
+        }
     }
 
     public enum SearchOrder {
