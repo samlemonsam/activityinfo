@@ -184,6 +184,8 @@ public class InstanceTableDataLoader {
     }
 
     private void applyQueryResult(QueryResult<Projection> result) {
+        LOGGER.log(Level.FINE, "Loaded projections, size = " + result.getProjections().size() + ", total = " + result.getTotalCount());
+
         tableDataProvider.getList().addAll(result.getProjections());
 
         InstanceTableDataLoader.this.instanceTotalCount = result.getTotalCount();
