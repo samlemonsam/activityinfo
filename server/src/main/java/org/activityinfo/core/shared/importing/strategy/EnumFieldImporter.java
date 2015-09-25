@@ -114,9 +114,9 @@ public class EnumFieldImporter implements FieldImporter {
     private boolean persistMultiValuedEnum(SourceRow row, FormInstance instance) {
         if (ValidationResult.isPersistable(validateMultiValuedEnum(row))) {
             final Set<ResourceId> result = Sets.newHashSet();
-            for (ColumnAccessor source : sources) {
+            for (int i = 0; i< sources.size(); i++) {
                 for (EnumItem enumItem : enumType.getValues()) {
-                    if (enumItem.getLabel().equalsIgnoreCase(source.getHeading()) && Boolean.valueOf(source.getValue(row))) {
+                    if (enumItem.getId().asString().equals(targets.get(i).getSite().asString()) && Boolean.valueOf(sources.get(i).getValue(row))) {
                         result.add(enumItem.getId());
                         break;
                     }
