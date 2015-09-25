@@ -1,6 +1,7 @@
 package org.activityinfo.core.shared.importing.strategy;
 
 import org.activityinfo.core.shared.criteria.FormClassSet;
+import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.model.formTree.FormTree;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class SingleClassReferenceStrategy implements FieldImportStrategy {
     }
 
     @Override
-    public SingleClassImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings) {
+    public SingleClassImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings, ImportModel model) {
         return new SingleClassTargetBuilder(node).newImporter(mappings);
     }
 }

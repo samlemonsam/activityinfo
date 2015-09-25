@@ -1,6 +1,7 @@
 package org.activityinfo.core.shared.importing.strategy;
 
 import com.google.common.base.Objects;
+import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.type.converter.ConverterFactory;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.formTree.FormTree;
@@ -41,7 +42,7 @@ public class GeographicPointImportStrategy implements FieldImportStrategy {
     }
 
     @Override
-    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings) {
+    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings, ImportModel model) {
         ColumnAccessor sourceColumns[] = new ColumnAccessor[] {
                 Objects.firstNonNull(mappings.get(LATITUDE), MissingColumn.INSTANCE),
                 Objects.firstNonNull(mappings.get(LONGITUDE), MissingColumn.INSTANCE) };
