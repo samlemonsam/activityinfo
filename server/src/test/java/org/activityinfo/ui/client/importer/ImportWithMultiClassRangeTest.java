@@ -120,7 +120,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         query.setSortInfo(new SortInfo("date2", Style.SortDir.DESC));
 
         SiteResult result = execute(query);
-        assertThat(result.getTotalLength(), equalTo(651));
+        assertThat(result.getTotalLength(), equalTo(643)); // 651 - 8 = 643 (8 records where start date is before end date)
 //        assertThat(result.getTotalLength(), equalTo(313));
 
         SiteDTO lastSite = result.getData().get(0);

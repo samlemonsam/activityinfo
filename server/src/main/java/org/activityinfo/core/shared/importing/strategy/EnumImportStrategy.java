@@ -22,6 +22,7 @@ package org.activityinfo.core.shared.importing.strategy;
  */
 
 import com.google.common.collect.Lists;
+import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -61,7 +62,7 @@ public class EnumImportStrategy implements FieldImportStrategy {
     }
 
     @Override
-    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings) {
+    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings, ImportModel model) {
 
         EnumType type = (EnumType) node.getType();
         List<ColumnAccessor> sourceColumns = Lists.newArrayList();

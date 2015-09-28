@@ -61,6 +61,10 @@ public class DateRange implements Serializable {
         this.end = end;
     }
 
+    public boolean isValid() {
+        return start != null && end != null && start.getTime() <= end.getTime();
+    }
+
     public Date midDate() {
         long midDate = (start.getTime() + end.getTime()) / 2;
         return new Date(midDate);

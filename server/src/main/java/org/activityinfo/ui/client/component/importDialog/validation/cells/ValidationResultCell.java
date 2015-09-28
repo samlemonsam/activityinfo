@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.importDialog.validation.cells;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -75,6 +76,8 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
         } else if (isPercentConfidence) {
             int confidencePercent = (int) (result.getConfidence() * 100);
             return I18N.MESSAGES.importValidationCellTooltip(result.getTargetValue(), confidencePercent);
+        } else if (result.getState() == ValidationResult.State.ERROR && !Strings.isNullOrEmpty(result.getTypeConversionErrorMessage())) {
+            return result.getTypeConversionErrorMessage() + " " + I18N.CONSTANTS.failedToMatchValue();
         }
         return I18N.CONSTANTS.failedToMatchValue();
     }

@@ -1,8 +1,9 @@
 package org.activityinfo.core.shared.importing.strategy;
 
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.type.converter.Converter;
 import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.model.formTree.FormTree;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,7 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
     }
 
     @Override
-    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> bindings) {
+    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> bindings, ImportModel model) {
 
         ImportTarget requiredTarget = target(node);
         ColumnAccessor column = bindings.get(VALUE);
@@ -42,7 +43,7 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
 
         Converter converter = converterFactory.createStringConverter(node.getTypeClass());
 
-        return new DataFieldImporter(column, requiredTarget, converter);
+        return new DataFieldImporter(column, requiredTarget, converter, node, model);
     }
 
     private ImportTarget target(FormTree.Node node) {
