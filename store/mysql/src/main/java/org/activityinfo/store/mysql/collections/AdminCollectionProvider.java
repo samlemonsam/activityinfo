@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
-import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_LEVEL_DOMAIN;
 
 /**
  * Provides access to collections of administrative entities
@@ -60,7 +59,7 @@ public class AdminCollectionProvider implements MappingProvider {
             FormField code = new FormField(CuidAdapter.field(formClassId, CuidAdapter.CODE_FIELD));
             code.setCode("code");
             code.setLabel(I18N.CONSTANTS.codeFieldLabel());
-            code.setRequired(true);
+            code.setRequired(false);
             code.setType(TextType.INSTANCE);            
             
             FormField bounds = new FormField(CuidAdapter.field(formClassId, CuidAdapter.GEOMETRY_FIELD));

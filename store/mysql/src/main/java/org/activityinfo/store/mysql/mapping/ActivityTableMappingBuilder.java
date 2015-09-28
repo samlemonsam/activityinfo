@@ -5,12 +5,19 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.store.mysql.Join;
 import org.activityinfo.store.mysql.collections.Activity;
 import org.activityinfo.store.mysql.collections.ActivityField;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
@@ -65,6 +72,8 @@ public class ActivityTableMappingBuilder {
         for(ActivityField field : activity.getAttributeAndIndicatorFields()) {
             mapping.addIndicatorOrAttributeField(field);
         }
+        
+        mapping.addComments();
 
         return mapping;
     }
@@ -153,6 +162,30 @@ public class ActivityTableMappingBuilder {
         mappings.add(new FieldMapping(partnerField, "projectId", new ForeignKeyMapping(PROJECT_DOMAIN)));
     }
     
+    public void addComments(){
+        FormField commentsField = new FormField(field(classId, COMMENT_FIELD))
+                .setLabel("Comments")
+                .setCode("comments")
+                .setType(NarrativeType.INSTANCE)
+                .setRequired(false);
+        
+        formClass.addElement(commentsField);
+        mappings.add(new FieldMapping(commentsField, "comments", new FieldValueMapping() {
+            @Override
+            public FieldValue extract(ResultSet rs, int index) throws SQLException {
+                return NarrativeValue.valueOf(rs.getString(index));
+            }
+
+            @Override
+            public Collection<?> toParameters(FieldValue value) {
+                if(value instanceof NarrativeValue) {
+                    return Arrays.asList(((NarrativeValue) value).asString());
+                } else {
+                    return Arrays.asList(null);
+                }
+            }
+        }));
+    }
 
     public TableMapping build() {
         return new TableMapping("site", baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass,
