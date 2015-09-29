@@ -30,6 +30,7 @@ import org.activityinfo.model.util.Pair;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.openqa.selenium.TimeoutException;
 
 import java.util.List;
 
@@ -116,6 +117,10 @@ public class ImportDialog {
     }
 
     public void waitUntilClosed() {
-        modal.waitUntilClosed();
+        try {
+            modal.waitUntilClosed();
+        } catch (TimeoutException e) {
+            modal.waitUntilClosed();
+        }
     }
 }
