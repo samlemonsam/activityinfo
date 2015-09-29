@@ -88,8 +88,18 @@ public class ScenarioTestCase implements TestCase {
             result.output().append("\n");
             result.output().append("Exception thrown by test runner: ").append(e.getMessage()).append("\n");
             result.output().append(Throwables.getStackTraceAsString(e));
+        } finally {
+            logRuntimeErrors(runtime, result);
         }
         return result.build();
+    }
+
+    private void logRuntimeErrors(Runtime runtime, TestResult.Builder result) {
+        if (!runtime.getErrors().isEmpty()) {
+            for (Throwable e : runtime.getErrors()) {
+                result.output().append(Throwables.getStackTraceAsString(e));
+            }
+        }
     }
 
     private Runtime createCucumberRuntime() {

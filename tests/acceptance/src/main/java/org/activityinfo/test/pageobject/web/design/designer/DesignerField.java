@@ -23,6 +23,7 @@ package org.activityinfo.test.pageobject.web.design.designer;
 
 import com.google.common.base.Optional;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 
@@ -94,5 +95,9 @@ public class DesignerField {
 
     public FluentElement element() {
         return element;
+    }
+
+    public ControlType getControlType() {
+        throw new RuntimeException("Unable to find out control type");
     }
 }
