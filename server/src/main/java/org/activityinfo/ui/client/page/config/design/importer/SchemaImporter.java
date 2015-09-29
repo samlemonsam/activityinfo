@@ -232,9 +232,11 @@ public class SchemaImporter {
     }
 
     private AttributeDTO findAttrib(AttributeGroupDTO group, String attribName) {
-        for (AttributeDTO attrib : group.getAttributes()) {
-            if (attrib.getName().equals(attribName)) {
-                return attrib;
+        if (group != null) {
+            for (AttributeDTO attrib : group.getAttributes()) {
+                if (attrib.getName().equals(attribName)) {
+                    return attrib;
+                }
             }
         }
         return null;
