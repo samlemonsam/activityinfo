@@ -51,7 +51,7 @@ public class GeometryConverter implements Function<Object, FieldValue> {
             throw new RuntimeException(e);
         }
         
-        Envelope envelope = geometry.getEnvelopeInternal();
+        Envelope envelope = geometryInWgs84.getEnvelopeInternal();
         Extents extents = Extents.create(envelope.getMinX(), envelope.getMinY(), envelope.getMaxX(), envelope.getMaxY());
         GeoArea fieldValue = new GeoArea(extents, "");
         return fieldValue;

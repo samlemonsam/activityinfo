@@ -46,7 +46,6 @@ public class LookupScoreMatrix extends ScoreMatrix {
         return targetForm.getRowCount();
     }
 
-    @Override
     public boolean matches(int rowIndex, int columnIndex) {
         for(int i=0;i<dimCount;++i) {
             String source = getSourceValue(rowIndex, i);

@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.swing.match.select;
 
+import com.google.common.base.Optional;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
@@ -30,7 +31,8 @@ public class SelectDialog extends JDialog {
     private final KeyFieldPairSet keyFields;
     private final CandidateTableModel candidateModel;
 
-    public SelectDialog(MatchStepPanel parent, ImportView viewModel, 
+    public SelectDialog(MatchStepPanel parent, 
+                        ImportView viewModel, 
                         final int matchRowIndex, 
                         final MatchSide fromSide) {
         
@@ -123,10 +125,20 @@ public class SelectDialog extends JDialog {
                 setVisible(false);
             }
         });
+        
+        JButton unmatchButton = new JButton("No match");
+        unmatchButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                unmatch();
+                setVisible(false);
+            }
+        });
+        
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(cancelButton);
         buttonPanel.add(changeButton);
+        buttonPanel.add(unmatchButton);
 
         add(buttonPanel, BorderLayout.PAGE_END);
     }
@@ -137,6 +149,19 @@ public class SelectDialog extends JDialog {
         int targetIndex = candidateModel.candidateRowToInstanceIndex(candidateIndex);
 
         updateMatch(targetIndex);
+    }
+
+
+    private void unmatch() {
+        ResourceId resourceId = keyFields.getForm(fromSide).getRowId(fromIndex);
+        InstanceMatch explicitMatch;
+        if(fromSide == MatchSide.TARGET) {
+            explicitMatch = new InstanceMatch(Optional.<ResourceId>absent(), Optional.of(resourceId));
+        } else {
+            explicitMatch = new InstanceMatch(Optional.of(resourceId), Optional.of(resourceId));
+        }
+       
+        viewModel.getModel().getInstanceMatchSet().add(explicitMatch);
     }
 
 

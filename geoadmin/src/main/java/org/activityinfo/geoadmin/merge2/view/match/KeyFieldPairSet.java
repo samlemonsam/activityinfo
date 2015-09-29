@@ -3,8 +3,8 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import org.activityinfo.geoadmin.match.MatchBuilder;
 import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
@@ -46,13 +46,27 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
      */
     public static KeyFieldPairSet matchKeys(FormProfile source, FormProfile target) {
         ScoreMatrix scoreMatrix = new FieldScoreMatrix(source.getFields(), target.getFields());
-        MatchBuilder fieldGraph = new MatchBuilder(scoreMatrix);
 
         dumpScoreMatrix(source, target, scoreMatrix);
         
-        BiMap<FieldProfile, FieldProfile> map = fieldGraph.buildMap(source.getFields(), target.getFields());
+        MatchGraph matchGraph = new MatchGraph(scoreMatrix);
+        matchGraph.build();
         
-        return new KeyFieldPairSet(source, target, map);
+        BiMap<FieldProfile, FieldProfile> targetToSource = HashBiMap.create();
+        for(int sourceColumnIndex=0;sourceColumnIndex!=scoreMatrix.getRowCount();++sourceColumnIndex) {
+            int targetColumnIndex = matchGraph.getBestMatchForSource(sourceColumnIndex);
+            if(targetColumnIndex != -1) {
+                FieldProfile sourceColumn = source.getFields().get(sourceColumnIndex);
+                FieldProfile targetColumn = target.getFields().get(targetColumnIndex);
+
+                targetToSource.put(targetColumn, sourceColumn);
+
+                System.out.println("Matching FIELD " + sourceColumn.getLabel() + " => " + targetColumn.getLabel());
+            }
+        }
+
+
+        return new KeyFieldPairSet(source, target, targetToSource);
     }
 
     private static void dumpScoreMatrix(FormProfile source, FormProfile target, ScoreMatrix scoreMatrix) {
@@ -62,7 +76,7 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
                 System.out.println(String.format("%20s %20s %5f",
                         source.getFields().get(sourceIndex).getLabel(),
                         target.getFields().get(targetIndex).getLabel(),
-                        scoreMatrix.score(targetIndex, sourceIndex, 0)));
+                        scoreMatrix.score(sourceIndex, targetIndex, 0)));
             }   
         }
         System.out.println("===================================== ");
@@ -149,7 +163,18 @@ public class KeyFieldPairSet implements Iterable<KeyFieldPair> {
         return sb.toString();
     }
     
+    public void dump() {
+
+        System.out.println("================ PAIRLIST =============");
+        for (KeyFieldPair pair : this.pairs) {
+            System.out.println(pair.getSourceField().getLabel() + " => " + pair.getTargetField().getLabel());
+        }
+        System.out.println("=======================================");
+
+    }
+    
     public void dumpPair(int source, int target) {
         System.out.println(toDebugString(source, target));
     }
+    
 }

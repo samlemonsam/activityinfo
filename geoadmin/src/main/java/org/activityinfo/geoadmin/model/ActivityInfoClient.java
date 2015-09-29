@@ -370,7 +370,12 @@ public class ActivityInfoClient implements FormClassProvider {
     private ColumnView parseCoordinates(JsonArray coordinateArray) {
         double[] coordinates = new double[coordinateArray.size()];
         for (int i = 0; i < coordinateArray.size(); i++) {
-            coordinates[i] = coordinateArray.get(i).getAsDouble();
+            JsonElement coord = coordinateArray.get(i);
+            if(coord.isJsonNull()) {
+                coordinates[i] = Double.NaN;
+            } else {
+                coordinates[i] = coord.getAsDouble();
+            }
         }
         return new GeoColumnView(coordinates);
     }

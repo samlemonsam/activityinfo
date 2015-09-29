@@ -23,6 +23,15 @@ public class InstanceMatrix extends ScoreMatrix {
     }
 
     @Override
+    public String[] getDimensionNames() {
+        String[] names = new String[keyFields.size()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = keyFields.get(i).getTargetField().getLabel();
+        }
+        return names;
+    }
+
+    @Override
     public int getDimensionCount() {
         return dimensionCount;
     }
@@ -35,17 +44,6 @@ public class InstanceMatrix extends ScoreMatrix {
     @Override
     public int getColumnCount() {
         return targetCount;
-    }
-
-    @Override
-    public boolean matches(int sourceIndex, int targetIndex) {
-        for(int d=0;d<dimensionCount;++d) {
-            double score = keyFields.get(d).score(sourceIndex, targetIndex);
-            if(score > .50) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

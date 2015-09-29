@@ -25,7 +25,7 @@ public class MatchTable {
     
     private final InstanceMatchSet matchSet;
 
-    private final Observable<MatchGraph> graph;
+    private final Observable<InstanceMatchGraph> graph;
     private final Observable<List<MatchTableColumn>> columns;
 
     private List<TableObserver> observers = new CopyOnWriteArrayList<>();
@@ -34,7 +34,7 @@ public class MatchTable {
     
     private List<MatchRow> rows = new ArrayList<>();
     
-    public MatchTable(ImportModel model, Observable<MatchGraph> graph) {
+    public MatchTable(ImportModel model, Observable<InstanceMatchGraph> graph) {
         this.matchSet = model.getInstanceMatchSet();
         this.columns = graph.transform(new ColumnListBuilder());
         this.graph = graph;
@@ -57,9 +57,9 @@ public class MatchTable {
     }
 
     private void onConnect() {
-        subscriptions.add(graph.subscribe(new Observer<MatchGraph>() {
+        subscriptions.add(graph.subscribe(new Observer<InstanceMatchGraph>() {
             @Override
-            public void onChange(Observable<MatchGraph> observable) {
+            public void onChange(Observable<InstanceMatchGraph> observable) {
                 recompute();
             }
         }));
@@ -234,14 +234,14 @@ public class MatchTable {
         return columns;
     }
 
-    public Observable<MatchGraph> getGraph() {
+    public Observable<InstanceMatchGraph> getGraph() {
         return graph;
     }
 
-    private class ColumnListBuilder implements Function<MatchGraph, List<MatchTableColumn>> {
+    private class ColumnListBuilder implements Function<InstanceMatchGraph, List<MatchTableColumn>> {
 
         @Override
-        public List<MatchTableColumn> apply(MatchGraph graph) {
+        public List<MatchTableColumn> apply(InstanceMatchGraph graph) {
             KeyFieldPairSet keyFields = graph.getKeyFields();
             List<MatchTableColumn> columns = new ArrayList<>();
  

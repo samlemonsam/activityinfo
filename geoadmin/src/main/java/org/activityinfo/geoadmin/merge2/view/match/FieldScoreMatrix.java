@@ -29,25 +29,18 @@ public class FieldScoreMatrix extends ScoreMatrix {
 
     @Override
     public int getRowCount() {
-        return targetColumns.size();
-    }
-
-    @Override
-    public int getColumnCount() {
         return sourceColumns.size();
     }
 
     @Override
-    public boolean matches(int rowIndex, int columnIndex) {
-        return sumScores(rowIndex, columnIndex) > 0.25;
+    public int getColumnCount() {
+        return targetColumns.size();
     }
 
     @Override
     public double score(int i, int j, int d) {
-
-
-        FieldProfile x = targetColumns.get(i);
-        FieldProfile y = sourceColumns.get(j);
+        FieldProfile x = sourceColumns.get(i);
+        FieldProfile y = targetColumns.get(j);
 
         if(x.isText() && y.isText()) {
             return scoreTextColumnMatch(x, y);
@@ -66,8 +59,8 @@ public class FieldScoreMatrix extends ScoreMatrix {
     }
 
     private double scoreTextColumnMatch(FieldProfile x, FieldProfile y) {
-        Set<String> targetValues = x.uniqueValues();
-        Set<String> sourceValues = y.uniqueValues();
+        Set<String> sourceValues = x.uniqueValues();
+        Set<String> targetValues = y.uniqueValues();
 
         // Alternative: Relative information
         // I(s; p) = sum(i = 1 to n)  s[i] * log(s[i]/p[i])

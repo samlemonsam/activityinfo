@@ -29,7 +29,7 @@ public class ImportView {
     
     private final Observable<FormProfile> sourceProfile;
     private final Observable<FormProfile> targetProfile;
-    private final Observable<MatchGraph> matchGraph;
+    private final Observable<InstanceMatchGraph> matchGraph;
     private final Observable<KeyFieldPairSet> keyFields;
     private final MatchTable matchTable;
     private final Observable<FormMapping> mapping;
@@ -44,9 +44,10 @@ public class ImportView {
         sourceProfile = profile(model.getSourceFormId());
         targetProfile = profile(model.getTargetFormId());
         keyFields = KeyFieldPairSet.compute(sourceProfile, targetProfile);
-        matchGraph = MatchGraph.build(scheduler, keyFields);
-        matchTable = new MatchTable(model, matchGraph);
         mapping = FormMapping.computeFromMatching(store, keyFields, model.getReferenceMatches());
+
+        matchGraph = InstanceMatchGraph.build(scheduler, keyFields);
+        matchTable = new MatchTable(model, matchGraph);
     }
 
     private Observable<FormProfile> profile(Observable<ResourceId> formId) {
