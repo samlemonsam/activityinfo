@@ -28,39 +28,37 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestOracle;
+import org.activityinfo.ui.client.component.form.field.suggest.EnumItemSuggestOracle;
 import org.activityinfo.ui.client.component.form.field.suggest.Suggestion;
 import org.activityinfo.ui.client.widget.SuggestBox;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
- * @author yuriyz on 2/10/14.
+ * @author yuriyz on 09/28/2015.
  */
-public class SuggestBoxWidget implements ReferenceFieldWidget {
-
-    private final SuggestBox suggestBox;
+public class EnumSuggestBoxWidget implements FormFieldWidget<EnumValue> {
 
     private ResourceId value;
-    private List<FormInstance> range;
+    private final EnumType enumType;
+    private final SuggestBox suggestBox;
 
-    public SuggestBoxWidget(List<FormInstance> instances, final ValueUpdater<ReferenceValue> valueUpdater) {
-        this.range = instances;
-        this.suggestBox = new SuggestBox(new InstanceSuggestOracle(instances));
+    public EnumSuggestBoxWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater) {
+        this.enumType = enumType;
+        this.suggestBox = new SuggestBox(new EnumItemSuggestOracle(enumType.getValues()));
         this.suggestBox.setPlaceholder(I18N.CONSTANTS.suggestBoxPlaceholder());
         this.suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
                 Suggestion suggestion = (Suggestion) event.getSelectedItem();
-                if(!Objects.equals(suggestion.getId(), value)) {
-                    valueUpdater.update(new ReferenceValue(suggestion.getId()));
+                if (!Objects.equals(suggestion.getId(), value)) {
+                    valueUpdater.update(new EnumValue(suggestion.getId()));
                 }
             }
         });
@@ -72,11 +70,11 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     }
 
     @Override
-    public Promise<Void> setValue(ReferenceValue value) {
+    public Promise<Void> setValue(EnumValue value) {
         ResourceId newValue = Iterables.getFirst(value.getResourceIds(), null);
-        if(!Objects.equals(newValue, this.value)) {
+        if (!Objects.equals(newValue, this.value)) {
             this.value = newValue;
-            if(newValue == null) {
+            if (newValue == null) {
                 suggestBox.setValue(null);
             } else {
                 suggestBox.setValue(findDisplayLabel(newValue));
@@ -96,9 +94,9 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     }
 
     private String findDisplayLabel(ResourceId newValue) {
-        for(FormInstance instance : range) {
-            if(instance.getId().equals(newValue)) {
-                return FormInstanceLabeler.getLabel(instance);
+        for (EnumItem enumItem : enumType.getValues()) {
+            if (enumItem.getId().equals(newValue)) {
+                return enumItem.getLabel();
             }
         }
         return newValue.asString();
@@ -108,4 +106,5 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     public Widget asWidget() {
         return suggestBox;
     }
+
 }

@@ -27,6 +27,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
+import static org.junit.Assert.assertEquals;
 
 @ScenarioScoped
 public class DatabaseSetupSteps {
@@ -263,6 +264,23 @@ public class DatabaseSetupSteps {
                 property("calculatedAutomatically", true));
     }
 
+    private static List<String> createEnumItems(int numberOfItems) {
+        final List<String> result = Lists.newArrayListWithCapacity(numberOfItems);
+        for (int i = 0; i < numberOfItems; i++) {
+            result.add("Item " + (i + 1));
+        }
+        return result;
+    }
+
+    @Given("^I have created a multi-valued enumerated field \"([^\"]*)\" with (\\d+) items$")
+    public void I_have_created_a_multi_valued_enumerated_field_with_items(String fieldName, int numberOfItems) throws Throwable {
+        createEnumField(fieldName, true, createEnumItems(numberOfItems));
+    }
+
+    @And("^I have created a single-valued enumerated field \"([^\"]*)\" with (\\d+) items$")
+    public void I_have_created_a_single_valued_enumerated_field_with_items(String fieldName, int numberOfItems) throws Throwable {
+        createEnumField(fieldName, false, createEnumItems(numberOfItems));
+    }
 
     @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
@@ -559,6 +577,12 @@ public class DatabaseSetupSteps {
         for (int i = 0; i < numberOfPartners; i++) {
             driver.setup().addPartner("partner" + i, currentDatabase);
         }
+    }
+
+
+    @Then("^field \"([^\"]*)\" represented by \"([^\"]*)\"$")
+    public void field_represented_by(String fieldName, String controlType) throws Throwable {
+        assertEquals(driver.getFormFieldFromNewSubmission(currentForm, driver.getAliasTable().getAlias(fieldName)).get().getControlType(), ControlType.fromValue(controlType));
     }
 
 }
