@@ -12,9 +12,7 @@ import org.activityinfo.model.type.geo.GeoPoint;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 
 public class TableMappingBuilder {
@@ -24,6 +22,8 @@ public class TableMappingBuilder {
     private PrimaryKeyMapping primaryKeyMapping;
     private FormClass formClass;
     private DeleteMethod deleteMethod = DeleteMethod.SOFT_BY_DATE;
+    
+    private Map<String, Object> insertDefaults = new HashMap<>();
 
     private TableMappingBuilder(ResourceId formClassId, String tableName) {
         this.tableName = tableName;
@@ -126,6 +126,10 @@ public class TableMappingBuilder {
         }));
     }
     
+    public void defaultValueOnInsert(String fieldName, Object sqlValue) {
+        insertDefaults.put(fieldName, sqlValue);
+    }
+    
     public void setDeleteMethod(DeleteMethod deleteMethod) {
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod);
     }
@@ -136,6 +140,6 @@ public class TableMappingBuilder {
         Preconditions.checkState(formClass != null, tableName + ": FormClass is not set");
         Preconditions.checkState(formClass.getOwnerId() != null, tableName + ": ownerId is not set");
         return new TableMapping(tableName, tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass,
-                deleteMethod);
+                deleteMethod, insertDefaults);
     }
 }

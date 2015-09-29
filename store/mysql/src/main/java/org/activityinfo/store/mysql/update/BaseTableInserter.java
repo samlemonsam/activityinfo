@@ -59,6 +59,12 @@ public class BaseTableInserter {
                 mapping.getPrimaryKey().getDomain(),
                 update.getResourceId().asString());
 
+        // Add default values for inserts
+        for (Map.Entry<String, Object> entry : mapping.getInsertDefaults().entrySet()) {
+            columns.add(entry.getKey());
+            parameters.add(entry.getValue());
+        }
+        
         // Describe all the updates
         for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
             set(change.getKey(), change.getValue());

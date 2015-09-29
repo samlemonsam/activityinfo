@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
@@ -189,7 +190,7 @@ public class ActivityTableMappingBuilder {
 
     public TableMapping build() {
         return new TableMapping("site", baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass,
-                DeleteMethod.SOFT_BY_DATE);
+                DeleteMethod.SOFT_BY_DATE, Collections.<String, Object>emptyMap());
     }
 
     public void addIndicatorOrAttributeField(ActivityField field) {

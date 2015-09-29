@@ -53,7 +53,7 @@ public class GeoArea implements GeoFieldValue, IsRecord {
     public static FieldValue fromRecord(Record record) {
         Extents bbox = null;
         Record bboxRecord = record.isRecord("bbox");
-        if(bbox != null) {
+        if(bboxRecord != null) {
             bbox = Extents.fromRecord(bboxRecord);
         }
         String blobId = record.isString("blobId");

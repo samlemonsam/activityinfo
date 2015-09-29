@@ -83,6 +83,7 @@ public class AdminCollectionProvider implements MappingProvider {
             mapping.setOwnerId(ResourceId.ROOT_ID);
             mapping.setPrimaryKeyMapping(CuidAdapter.ADMIN_ENTITY_DOMAIN, "adminEntityId");
             mapping.setBaseFilter("base.AdminLevelId=" + CuidAdapter.getLegacyIdFromCuid(formClassId) + " AND base.deleted=0");
+            mapping.defaultValueOnInsert("AdminLevelId", CuidAdapter.getLegacyIdFromCuid(formClassId));
             mapping.setFormLabel(rs.getString("Name"));
             mapping.addTextField(label, "name");
             mapping.addTextField(code, "code");

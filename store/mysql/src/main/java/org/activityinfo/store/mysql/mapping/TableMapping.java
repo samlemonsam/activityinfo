@@ -21,18 +21,21 @@ public class TableMapping {
     private String baseFromClause;
     private String baseFilter;
     private FormClass formClass;
+    private Map<String, Object> insertDefaults;
     private PrimaryKeyMapping primaryKey;
     private Map<String, String> joins = Maps.newHashMap();
 
     private Map<ResourceId, FieldMapping> fieldMappings = Maps.newHashMap();
 
-    TableMapping(String baseTable, String baseFromClause, String baseFilter, PrimaryKeyMapping primaryKey, 
-                 List<FieldMapping> mappings, FormClass formClass, DeleteMethod deleteMethod) {
+    TableMapping(String baseTable, String baseFromClause, String baseFilter, PrimaryKeyMapping primaryKey,
+                 List<FieldMapping> mappings, FormClass formClass, DeleteMethod deleteMethod, 
+                 Map<String, Object> insertDefaults) {
         this.baseTable = baseTable;
         this.baseFromClause = baseFromClause;
         this.primaryKey = primaryKey;
         this.baseFilter = baseFilter;
         this.formClass = formClass;
+        this.insertDefaults = insertDefaults;
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod, "deleteMethod");
         for(FieldMapping mapping : mappings) {
             fieldMappings.put(mapping.getResourceId(), mapping);
@@ -65,7 +68,11 @@ public class TableMapping {
 
         Preconditions.checkState(rowsUpdated == 1);
     }
-    
+
+    public Map<String, Object> getInsertDefaults() {
+        return insertDefaults;
+    }
+
     public boolean queryFields(QueryExecutor executor, Resource resource) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");

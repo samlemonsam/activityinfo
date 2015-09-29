@@ -12,6 +12,7 @@ import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
 
 import java.sql.SQLException;
@@ -64,7 +65,9 @@ public class SimpleTableCollection implements ResourceCollection {
 
     @Override
     public void add(ResourceUpdate update) {
-        throw new UnsupportedOperationException();
+        ResourceId formClassId = getFormClass().getId();
+        BaseTableInserter inserter = new BaseTableInserter(mapping, update.getResourceId());
+        inserter.insert(executor, update);
     }
 
     @Override
