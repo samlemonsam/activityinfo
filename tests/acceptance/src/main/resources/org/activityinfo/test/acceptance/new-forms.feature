@@ -27,6 +27,23 @@ Feature: New form
       | no comment | partner5 | 2014-01-02 | 2014-01-04 |
     Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "dropdown" with value "partner5"
 
+  @AI-1220
+  @web
+  Scenario: Enumeration field representation
+    Given I have created a form "Enum representation" using the new layout
+    And I have created a multi-valued enumerated field "7 items multiple" with 7 items
+    And I have created a multi-valued enumerated field "17 items multiple" with 17 items
+    And I have created a multi-valued enumerated field "27 items multiple" with 27 items
+    And I have created a single-valued enumerated field "7 items single" with 7 items
+    And I have created a single-valued enumerated field "17 items single" with 17 items
+    And I have created a single-valued enumerated field "27 items single" with 27 items
+    When I open the form designer for "Enum representation" in database "Patient Registration"
+    Then field "7 items multiple" represented by "checkboxes"
+    Then field "17 items multiple" represented by "dropdown"
+    Then field "27 items multiple" represented by "dropdown"
+    Then field "7 items single" represented by "radiobuttons"
+    Then field "17 items single" represented by "dropdown"
+    Then field "27 items single" represented by "suggestbox"
 
   @AI-1124
   @web

@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.web.components.Form;
@@ -251,11 +252,27 @@ public class BsFormPanel extends Form {
             return element.find().label(withText(label)).precedingSibling().input().first();
         }
 
+        public boolean isRadio() {
+            return element.exists(By.className("radio"));
+        }
+
         public boolean isRadioSelected(String label) {
             FluentElement radio = radioElement(label);
             Preconditions.checkState(radio.element().getAttribute("type").equals("radio"), "Element is not radio element");
             return radio.element().isSelected();
         }
 
+        public ControlType getControlType() {
+            if (isRadio()) {
+                return ControlType.RADIO_BUTTONS;
+            } else if (isCheckBox()) {
+                return ControlType.CHECK_BOXES;
+            } else if (isDropDown()) {
+                return ControlType.DROP_DOWN;
+            } else if (isSuggestBox()) {
+                return ControlType.SUGGEST_BOX;
+            }
+            return null;
+        }
     }
 }
