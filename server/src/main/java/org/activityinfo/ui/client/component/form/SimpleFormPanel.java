@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -234,6 +235,16 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         FieldValue value = getCurrentValue(field);
         if (value != null && value.getTypeClass() != field.getType().getTypeClass()) {
             value = null;
+        }
+        if (BuiltinFields.isBuiltInDate(field.getId())) {
+            if (!BuiltinFields.getDateRange(workingInstance, formClass).isValid()) {
+                container.setInvalid(I18N.CONSTANTS.inconsistentDateRangeWarning());
+                return false;
+            } else {
+                getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setValid();
+                getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setValid();
+                return true;
+            }
         }
         if (field.isRequired() && isEmpty(value) && field.isVisible()) { // if field is not visible user doesn't have chance to fix it
             container.setInvalid(I18N.CONSTANTS.requiredFieldMessage());

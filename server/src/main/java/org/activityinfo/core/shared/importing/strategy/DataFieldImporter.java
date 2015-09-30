@@ -11,7 +11,7 @@ import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.promise.Promise;
 
 import java.util.Collections;
@@ -58,7 +58,7 @@ public class DataFieldImporter implements FieldImporter {
         try {
             converter.convert(source.getValue(row));
 
-            if (CuidAdapter.isBuiltInDate(target.getFormField().getId())) {
+            if (BuiltinFields.isBuiltInDate(target.getFormField().getId())) {
                 DateRange rangeDate = getRangeDate(row, converter);
                 if (!rangeDate.isValid()) {
                     return ValidationResult.error(I18N.CONSTANTS.inconsistentDateRangeWarning());
@@ -75,10 +75,10 @@ public class DataFieldImporter implements FieldImporter {
         ColumnAccessor startDateAccessor = null;
         ColumnAccessor endDateAccessor = null;
         for (FormField field : node.getDefiningFormClass().getFields()) {
-            if (CuidAdapter.isStartDate(field.getId())) {
+            if (BuiltinFields.isStartDate(field.getId())) {
                 startDateAccessor = model.getMappedColumns(field.getId()).get(DataFieldImportStrategy.VALUE);
             }
-            if (CuidAdapter.isEndDate(field.getId())) {
+            if (BuiltinFields.isEndDate(field.getId())) {
                 endDateAccessor = model.getMappedColumns(field.getId()).get(DataFieldImportStrategy.VALUE);
             }
         }

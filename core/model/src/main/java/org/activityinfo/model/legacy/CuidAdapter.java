@@ -268,18 +268,6 @@ public class CuidAdapter {
         }
     }
 
-    public static boolean isBuiltInDate(ResourceId fieldId) {
-        return isStartDate(fieldId) || isEndDate(fieldId);
-    }
-
-    public static boolean isStartDate(ResourceId fieldId) {
-        return CuidAdapter.getBlockSilently(fieldId, 1) == CuidAdapter.START_DATE_FIELD;
-    }
-
-    public static boolean isEndDate(ResourceId fieldId) {
-        return CuidAdapter.getBlockSilently(fieldId, 1) == CuidAdapter.END_DATE_FIELD;
-    }
-
     public static ResourceId databaseId(int databaseId) {
         return cuid(DATABASE_DOMAIN, databaseId);
     }
