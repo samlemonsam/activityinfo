@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -99,6 +100,7 @@ public class SchemaImportDialog {
     @UiField HTMLPanel successPanel;
     @UiField HTMLPanel failurePanel;
     @UiField ScrollPanel warningPanel;
+    @UiField ParagraphElement errorDescription;
 
 
     private ModalDialog dialog;
@@ -323,6 +325,7 @@ public class SchemaImportDialog {
         currentState = State.IMPORT_FAILED;
         progressPanel.setVisible(false);
         failurePanel.setVisible(true);
+        errorDescription.setInnerText(SafeHtmlUtils.htmlEscape(caught.getMessage()));
         dialog.getPrimaryButton().setEnabled(true);
         dialog.getPrimaryButton().setText(I18N.CONSTANTS.retry());
     }
