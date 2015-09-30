@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.resource.Resource;
@@ -237,13 +238,16 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             value = null;
         }
         if (BuiltinFields.isBuiltInDate(field.getId())) {
-            if (!BuiltinFields.getDateRange(workingInstance, formClass).isValid()) {
+            DateRange dateRange = BuiltinFields.getDateRange(workingInstance, formClass);
+            if (!dateRange.isValidWithNull()) {
                 container.setInvalid(I18N.CONSTANTS.inconsistentDateRangeWarning());
                 return false;
             } else {
-                getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setValid();
-                getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setValid();
-                return true;
+                if (dateRange.isValid()) {
+                    getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setValid();
+                    getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setValid();
+                    return true;
+                }
             }
         }
         if (field.isRequired() && isEmpty(value) && field.isVisible()) { // if field is not visible user doesn't have chance to fix it
