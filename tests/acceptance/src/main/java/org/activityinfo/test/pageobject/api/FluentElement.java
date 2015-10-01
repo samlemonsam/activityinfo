@@ -78,10 +78,14 @@ public class FluentElement {
         return element;
     }
 
-    public void waitUntil(Predicate<WebDriver> predicate) {
-        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+    public void waitUntil(Predicate<WebDriver> predicate, int timeInSeconds) {
+        WebDriverWait wait = new WebDriverWait(webDriver, timeInSeconds);
         wait.ignoring(StaleElementReferenceException.class);
         wait.until(predicate);
+    }
+
+    public void waitUntil(Predicate<WebDriver> predicate) {
+        waitUntil(predicate, TIMEOUT_SECONDS);
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {

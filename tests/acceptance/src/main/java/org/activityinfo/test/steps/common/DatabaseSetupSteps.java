@@ -11,12 +11,14 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.driver.model.IndicatorLink;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -583,6 +585,18 @@ public class DatabaseSetupSteps {
     @Then("^field \"([^\"]*)\" represented by \"([^\"]*)\"$")
     public void field_represented_by(String fieldName, String controlType) throws Throwable {
         assertEquals(driver.getFormFieldFromNewSubmission(currentForm, driver.getAliasTable().getAlias(fieldName)).get().getControlType(), ControlType.fromValue(controlType));
+    }
+
+
+    @Then("^new entry cannot be submitted in \"([^\"]*)\" form$")
+    public void new_entry_with_end_date_cannot_be_submitted_in_database(String formName, DataTable dataTable) throws Throwable {
+        // old form
+        driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, TableDataParser.getFirstColumnValue(dataTable, "End Date"));
+
+        // new form
+        BsModal modal = driver.openFormTable(currentDatabase, driver.getAliasTable().getAlias(formName)).table().newSubmission();
+        modal.fill(dataTable, driver.getAliasTable());
+        modal.click(I18N.CONSTANTS.save()).waitUntilNotClosed(5);
     }
 
 }

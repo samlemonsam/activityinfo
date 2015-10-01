@@ -23,6 +23,7 @@ package org.activityinfo.test.driver;
 
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -97,6 +98,31 @@ public class TableDataParser {
         }
 
         return DataTable.create(rows);
+    }
+
+    public static String getFirstColumnValue(DataTable table, String columnName) {
+        List<String> values = getColumnValues(table, columnName);
+        return !values.isEmpty() ? values.get(0) : null;
+    }
+
+    public static List<String> getColumnValues(DataTable table, String columnName) {
+        List<String> headerRow = table.getGherkinRows().get(0).getCells();
+
+        int columnIndex = -1;
+        for (int i = 0; i < headerRow.size(); i++) {
+            columnIndex = i;
+            if (headerRow.get(i).equalsIgnoreCase(columnName)) {
+                break;
+            }
+        }
+
+        List<String> columnCells = Lists.newArrayList();
+        if (columnIndex != -1) {
+            for (DataTableRow row : table.getGherkinRows()) {
+                columnCells.add(row.getCells().get(columnIndex));
+            }
+        }
+        return columnCells;
     }
 }
 
