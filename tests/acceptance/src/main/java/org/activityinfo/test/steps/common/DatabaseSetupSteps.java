@@ -565,7 +565,7 @@ public class DatabaseSetupSteps {
 
     @When("^selecting \"([^\"]*)\" as the source link database$")
     public void selecting_as_the_source_link_database(String databaseName) throws Throwable {
-        driver.getLinkIndicatorPage().getSourceDb().clickCell(driver.getAliasTable().getAlias(databaseName));
+        driver.getLinkIndicatorPage().getSourceDb().clickCell(alias(databaseName));
     }
 
     @Then("^source indicator link database shows:$")
@@ -584,7 +584,7 @@ public class DatabaseSetupSteps {
 
     @Then("^field \"([^\"]*)\" represented by \"([^\"]*)\"$")
     public void field_represented_by(String fieldName, String controlType) throws Throwable {
-        assertEquals(driver.getFormFieldFromNewSubmission(currentForm, driver.getAliasTable().getAlias(fieldName)).get().getControlType(), ControlType.fromValue(controlType));
+        assertEquals(driver.getFormFieldFromNewSubmission(currentForm, alias(fieldName)).get().getControlType(), ControlType.fromValue(controlType));
     }
 
 
@@ -594,9 +594,13 @@ public class DatabaseSetupSteps {
         driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, TableDataParser.getFirstColumnValue(dataTable, "End Date"));
 
         // new form
-        BsModal modal = driver.openFormTable(currentDatabase, driver.getAliasTable().getAlias(formName)).table().newSubmission();
+        BsModal modal = driver.openFormTable(alias(currentDatabase), alias(formName)).table().newSubmission();
         modal.fill(dataTable, driver.getAliasTable());
         modal.click(I18N.CONSTANTS.save()).waitUntilNotClosed(5);
+    }
+
+    private String alias(String testHandle) {
+        return driver.getAliasTable().getAlias(testHandle);
     }
 
 }
