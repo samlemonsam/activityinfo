@@ -211,12 +211,8 @@ public class DataEntryTab {
     }
 
     public DetailsEntry details() {
+        Gxt.sleepSeconds(2); // sometimes it's too fast and we read details of previous row, give it time to switch
         selectTab("Details");
-        try {
-            Thread.sleep(300); // sometimes it's too fast and we read details of previous row, give it time to switch
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         container.waitFor(By.className("indicatorHeading"));
         return container.waitFor(new Function<WebDriver, DetailsEntry>() {
             @Override
