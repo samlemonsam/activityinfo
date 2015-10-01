@@ -37,6 +37,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import java.util.List;
@@ -221,4 +222,19 @@ public class BsModal extends ModalDialog {
             }
         });
     }
+
+    public void waitUntilNotClosed(int waitSeconds) {
+        try {
+            getWindowElement().waitUntil(new Predicate<WebDriver>() {
+                @Override
+                public boolean apply(WebDriver input) {
+                    return !windowElement.isDisplayed();
+                }
+            }, waitSeconds);
+            throw new RuntimeException("Dialog was closed.");
+        } catch (TimeoutException e) {
+            // we are lucky and dialog is not closed
+        }
+    }
+
 }
