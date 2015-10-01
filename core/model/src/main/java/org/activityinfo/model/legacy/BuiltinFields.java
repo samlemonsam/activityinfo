@@ -27,6 +27,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.Date;
@@ -87,6 +88,19 @@ public class BuiltinFields {
         });
     }
 
+    public static FormField getProjectField(FormClass formClass) {
+        return findField(formClass, new Predicate<FormField>() {
+            @Override
+            public boolean apply(FormField input) {
+                return isProjectField(input.getId());
+            }
+        });
+    }
+
+    public static FieldValue getProjectValue(FormInstance instance, FormClass formClass) {
+        return instance.get(getProjectField(formClass).getId());
+    }
+
     public static boolean isBuiltInDate(ResourceId fieldId) {
         return isStartDate(fieldId) || isEndDate(fieldId);
     }
@@ -97,5 +111,9 @@ public class BuiltinFields {
 
     public static boolean isEndDate(ResourceId fieldId) {
         return CuidAdapter.getBlockSilently(fieldId, 1) == CuidAdapter.END_DATE_FIELD;
+    }
+
+    public static boolean isProjectField(ResourceId fieldId) {
+        return CuidAdapter.getBlockSilently(fieldId, 1) == CuidAdapter.PROJECT_FIELD;
     }
 }

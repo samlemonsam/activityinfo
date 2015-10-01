@@ -25,6 +25,12 @@ package org.activityinfo.legacy.shared.model;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.BuiltinFields;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
 
 import java.util.Collection;
 import java.util.Date;
@@ -79,12 +85,31 @@ public class LockedPeriodSet {
         }
     }
 
+    public boolean isLocked(FormInstance instance, FormClass formClass) {
+        Date endDate = BuiltinFields.getDateRange(instance, formClass).getEnd();
+        if (endDate != null) {
+            int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
+            int projectId = -1;
+            FieldValue projectValue = BuiltinFields.getProjectValue(instance, formClass);
+            if (projectValue instanceof ReferenceValue && !((ReferenceValue) projectValue).getResourceIds().isEmpty() ) {
+                projectId = CuidAdapter.getLegacyIdFromCuid(((ReferenceValue) projectValue).getResourceIds().iterator().next());
+            }
+            return isLocked(activityId, new LocalDate(endDate), projectId);
+        }
+        return false;
+    }
+
     public boolean isLocked(SiteDTO site) {
-        if (isActivityLocked(site.getActivityId(), site.getDate2())) {
+        int projectId = site.getProject() != null ? site.getProject().getId() : -1;
+        return isLocked(site.getActivityId(), site.getDate2(), projectId);
+    }
+
+    public boolean isLocked(int activityId, LocalDate endDate, int projectId) {
+        if (isActivityLocked(activityId, endDate)) {
             return true;
         }
-        if (site.getProject() != null) {
-            if (dateRangeLocked(site.getDate2(), projectLocks.get(site.getProject().getId()))) {
+        if (projectId != -1) {
+            if (dateRangeLocked(endDate, projectLocks.get(projectId))) {
                 return true;
             }
         }
