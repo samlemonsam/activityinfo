@@ -599,6 +599,7 @@ public class UiApplicationDriver extends ApplicationDriver {
                             return !input.isValid();
                         }
                     });
+                    GxtModal.waitForModal(dataEntryTab.getContainer()).closeByWindowHeaderButton();
                     return; // success, field is marked as not valid and therefore submission is not possible
             }
         }

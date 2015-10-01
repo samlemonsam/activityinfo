@@ -57,6 +57,10 @@ public class GxtModal extends ModalDialog {
         clickButton("Close");
     }
 
+    public void closeByWindowHeaderButton() {
+        windowElement.find().div(XPathBuilder.withClass("x-tool-close")).clickWhenReady();
+    }
+
     public void discardChanges() {
         clickButton("Discard Changes");
     }
