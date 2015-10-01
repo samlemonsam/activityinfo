@@ -102,7 +102,7 @@ public class TableDataParser {
 
     public static String getFirstColumnValue(DataTable table, String columnName) {
         List<String> values = getColumnValues(table, columnName);
-        return !values.isEmpty() ? values.get(0) : null;
+        return values.size() > 2 ? values.get(2) : null; // first row is header, second row is type
     }
 
     public static List<String> getColumnValues(DataTable table, String columnName) {
