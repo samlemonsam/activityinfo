@@ -44,6 +44,6 @@ Feature: Locks
       | field           | value     |
       | Name of patient | J. Smith  |
     Then new entry cannot be submitted in "Patient Registration" form
-      | sex of patient | Partner | Start Date | End Date   |
-      | enum           | enum    | date       | date       |
-      | M              | NRC     | 2015-01-03 | 2015-01-04 |
+      | sex of patient | Partner | Project  | Start Date | End Date   |
+      | enum           | enum    | enum     | date       | date       |
+      | M              | NRC     | Project1 | 2015-01-03 | 2015-01-04 |
