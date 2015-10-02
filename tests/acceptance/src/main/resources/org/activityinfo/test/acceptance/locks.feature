@@ -34,7 +34,7 @@ Feature: Locks
       | field           | value     |
       | # of students   | 3         |
     Then new entry cannot be submitted in "Staff training" form
-      | # of students | start date | end date   | Project  | Partner |
+      | # of students | Start Date | End Date   | Project  | Partner |
       | quantity      | date       | date       | enum     | enum    |
       | 25            | 2015-01-02 | 2015-01-03 | Project1 | NRC     |
 
