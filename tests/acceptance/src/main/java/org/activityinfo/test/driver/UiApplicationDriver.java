@@ -1046,6 +1046,20 @@ public class UiApplicationDriver extends ApplicationDriver {
         return DataTable.create(rows);
     }
 
+    public void importSchema(String databaseName, String cvsText) {
+        ensureLoggedIn();
+
+        DesignTab designTab = getApplicationPage().navigateToDesignTab();
+        designTab.selectDatabase(databaseName);
+
+        ImportSchemaDialog dialog = designTab.design().clickImport();
+        dialog.enterCvsText(cvsText);
+        dialog.clickOk();
+        dialog.clickImportAnyway();
+        dialog.closeOnSuccess();
+
+    }
+
     @Override
     public void cleanup() throws Exception {
         setup().cleanup();

@@ -3,18 +3,18 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:a="urn:import:org.activityinfo.ui.client.widget">
 
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
 
 <g:FlowPanel ui:field="container" width="500px" height="300px">
 
   <!-- INPUT -->
   <g:HTMLPanel ui:field="inputPanel">
-    <p>The import schema wizard allows you to import and
-      (soon) update activities, indicators, and attributes
-      from a spreadsheet.
+    <p>
+      <ui:text from='{i18n.importWelcomeText}'/>
     </p>
 
-    <p>To begin, copy your table from Excel and paste in
-      the box below:
+    <p>
+      <ui:text from='{i18n.importHelpText}'/>
     </p>
 
     <form class="form">
@@ -28,13 +28,13 @@
   <!-- IMPORTING -->
   <g:ScrollPanel ui:field="warningPanel" visible="false">
     <g:HTMLPanel>
-      <p>Don't panic!</p>
+      <p><ui:text from='{i18n.dontPanic}'/></p>
 
-      <p>We noticed a few issues with your import:</p>
+      <p><ui:text from='{i18n.weNoticedIssuesWithImport}'/></p>
 
       <ul ui:field="warningList"/>
 
-      <p>Do you want to import anyway?</p>
+      <p><ui:text from='{i18n.doYouWantToImportAnyway}'/></p>
 
     </g:HTMLPanel>
   </g:ScrollPanel>
@@ -43,7 +43,7 @@
   <!-- IMPORTING -->
   <g:HTMLPanel ui:field="progressPanel" visible="false">
 
-    <p>Importing...</p>
+    <p><ui:text from='{i18n.importing}'/></p>
 
     <a:ProgressBar ui:field="progressBar"/>
 
@@ -51,13 +51,13 @@
 
   <!-- IMPORT_SUCCEEDED -->
   <g:HTMLPanel ui:field="successPanel" visible="false">
-    <div class="alert alert-success">Database structure successfully imported.</div>
+    <div class="alert alert-success"><ui:text from='{i18n.databaseStructureSuccessfullyImported}'/></div>
   </g:HTMLPanel>
 
 
   <!-- IMPORT_FAILED -->
   <g:HTMLPanel ui:field="failurePanel" visible="false">
-    <div class="alert alert-danger">Oh no, there was an error importing your schema:</div>
+    <div class="alert alert-danger"><ui:text from='{i18n.failedToImportSchema}'/></div>
 
     <p ui:field="errorDescription"/>
   </g:HTMLPanel>

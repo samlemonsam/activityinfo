@@ -1604,4 +1604,25 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Failed to match. Row will not be imported.")
     String failedToMatchValue();
+
+    @DefaultStringValue("Database structure successfully imported.")
+    String databaseStructureSuccessfullyImported();
+
+    @DefaultStringValue("Oh no, there was an error importing your schema:")
+    String failedToImportSchema();
+
+    @DefaultStringValue("Do you want to import anyway?")
+    String doYouWantToImportAnyway();
+
+    @DefaultStringValue("Don't panic!")
+    String dontPanic();
+
+    @DefaultStringValue("We noticed a few issues with your import:")
+    String weNoticedIssuesWithImport();
+
+    @DefaultStringValue("The import schema wizard allows you to import and (soon) update activities, indicators, and attributes from a spreadsheet.")
+    String importWelcomeText();
+
+    @DefaultStringValue("To begin, copy your table from Excel and paste in the box below:")
+    String importHelpText();
 }
