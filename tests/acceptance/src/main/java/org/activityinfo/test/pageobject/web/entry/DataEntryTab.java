@@ -13,6 +13,7 @@ import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.util.Pair;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.BsDataEntryDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
@@ -211,7 +212,7 @@ public class DataEntryTab {
     }
 
     public DetailsEntry details() {
-        Gxt.sleepSeconds(2); // sometimes it's too fast and we read details of previous row, give it time to switch
+        Sleep.sleepSeconds(2); // sometimes it's too fast and we read details of previous row, give it time to switch
         selectTab("Details");
         container.waitFor(By.className("indicatorHeading"));
         return container.waitFor(new Function<WebDriver, DetailsEntry>() {
@@ -276,17 +277,17 @@ public class DataEntryTab {
                 .enterExcelData(dataTable);
 
         int size = dataTable.getGherkinRows().size();
-        Gxt.sleepMillis(100);
+        Sleep.sleepMillis(100);
 
         importDialog.clickNextButton();
         //importDialog.enterMapping(createMapping(dataTable))
-        Gxt.sleepMillis(size * 10);
+        Sleep.sleepMillis(size * 10);
 
         importDialog.clickNextButton();
-        Gxt.sleepMillis(size * 10);
+        Sleep.sleepMillis(size * 10);
 
         importDialog.clickFinishButton();
-        Gxt.sleepMillis(size * 20);
+        Sleep.sleepMillis(size * 20);
 
         importDialog.waitUntilClosed();
     }

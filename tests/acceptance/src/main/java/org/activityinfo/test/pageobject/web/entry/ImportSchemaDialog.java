@@ -24,6 +24,7 @@ package org.activityinfo.test.pageobject.web.entry;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.openqa.selenium.WebDriver;
@@ -50,21 +51,25 @@ public class ImportSchemaDialog {
         FluentElement textArea = modal.form().getForm().find().textArea(withClass("form-control")).first();
         textArea.element().clear();
         textArea.sendKeys(cvsText);
+        Sleep.sleepSeconds(1);
         return this;
     }
 
     public ImportSchemaDialog clickOk() {
         modal.click(I18N.CONSTANTS.ok());
+        Sleep.sleepSeconds(1);
         return this;
     }
 
     public ImportSchemaDialog clickImportAnyway() {
         modal.click(I18N.CONSTANTS.ignoreImportWarnings());
+        Sleep.sleepSeconds(1);
         return this;
     }
 
     public ImportSchemaDialog clickClose() {
         modal.click(I18N.CONSTANTS.close());
+        Sleep.sleepSeconds(1);
         return this;
     }
 
