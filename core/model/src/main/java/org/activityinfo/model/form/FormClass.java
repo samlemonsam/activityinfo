@@ -232,7 +232,7 @@ public class FormClass implements IsResource, FormElementContainer {
         resource.setOwnerId(ownerId);
         resource.set("classId", CLASS_ID);
         resource.set(LABEL_FIELD_ID, label);
-        resource.set("elements", FormElement.asRecordList(elements));
+        resource.set("elements", Resources.asRecordList(elements));
         return resource;
     }
 

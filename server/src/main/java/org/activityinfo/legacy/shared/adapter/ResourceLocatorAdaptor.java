@@ -21,6 +21,7 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -105,6 +106,14 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
+    public Promise<ResourceLock> queryLocks(ResourceId resourceId) {
+        if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            //todo
+        }
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
     public Promise<Void> persist(IsResource resource) {
         if (resource instanceof FormInstance) {
             FormInstance instance = (FormInstance) resource;
@@ -181,9 +190,5 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<List<FormInstance>> queryInstances(Set<ResourceId> formClassIds) {
         return queryInstances(ClassCriteria.union(formClassIds));
-    }
-
-    public Dispatcher getDispatcher() {
-        return dispatcher;
     }
 }

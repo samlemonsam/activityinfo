@@ -5,6 +5,7 @@ import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -27,6 +28,8 @@ public interface ResourceLocator {
     Promise<FormClass> getFormClass(ResourceId formId);
 
     Promise<FormInstance> getFormInstance(ResourceId formId);
+
+    Promise<ResourceLock> queryLocks(ResourceId resourceId);
 
     /**
      * Persists a resource to the server, creating or updating as necessary.
