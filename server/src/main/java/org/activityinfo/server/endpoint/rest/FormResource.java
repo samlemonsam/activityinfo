@@ -73,6 +73,9 @@ public class FormResource {
         FormClass formClass = queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<FormClass>() {
             @Override
             public FormClass execute(CollectionCatalog catalog) {
+                
+                assertVisible(catalog, resourceId);
+                
                 return catalog.getFormClass(resourceId);
             }
         });

@@ -87,4 +87,14 @@ public final class CollectionPermissions implements IsRecord {
                 .setVisible(true)
                 .setEditAllowed(true);
     }
+
+    @Override
+    public String toString() {
+        return "CollectionPermissions{" +
+                "visible=" + visible +
+                ", visibilityFilter='" + visibilityFilter + '\'' +
+                ", editAllowed=" + editAllowed +
+                ", editFilter='" + editFilter + '\'' +
+                '}';
+    }
 }
