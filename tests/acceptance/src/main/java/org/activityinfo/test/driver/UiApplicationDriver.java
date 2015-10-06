@@ -10,13 +10,13 @@ import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
-import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
@@ -510,7 +510,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         } else {
             modal = tablePage.table().newSubmission();
         }
-        Gxt.sleepSeconds(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
+        Sleep.sleepSeconds(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
         BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
         modal.cancel();
         return fieldByLabel;
@@ -1044,6 +1044,20 @@ public class UiApplicationDriver extends ApplicationDriver {
             rows.add(newRow);
         }
         return DataTable.create(rows);
+    }
+
+    public void importSchema(String databaseName, String cvsText) {
+        ensureLoggedIn();
+
+        DesignTab designTab = getApplicationPage().navigateToDesignTab();
+        designTab.selectDatabase(databaseName);
+
+        ImportSchemaDialog dialog = designTab.design().clickImport();
+        dialog.enterCvsText(cvsText);
+        dialog.clickOk();
+        dialog.clickImportAnyway();
+        dialog.closeOnSuccess();
+
     }
 
     @Override

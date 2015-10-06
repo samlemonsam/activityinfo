@@ -99,8 +99,9 @@ public class SchemaImportDialog {
     @UiField HTMLPanel progressPanel;
     @UiField HTMLPanel successPanel;
     @UiField HTMLPanel failurePanel;
-    @UiField ScrollPanel warningPanel;
+    @UiField HTMLPanel warningPanel;
     @UiField ParagraphElement errorDescription;
+    @UiField ScrollPanel warningScrollPanel;
 
 
     private ModalDialog dialog;
