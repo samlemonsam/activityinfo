@@ -49,6 +49,7 @@ public class SchemaImporter {
         void submittingBatch(int batchNumber, int batchCount);
     }
 
+    private static final int MAX_BATCH_SIZE = 40;
 
     private Dispatcher dispatcher;
     private UserDatabaseDTO db;
@@ -350,15 +351,31 @@ public class SchemaImporter {
         this.callback = callback;
 
         List<List<? extends EntityDTO>> batches = Lists.newArrayList();
-        batches.add(newActivities);
-        batches.add(getNewIndicators());
-        batches.add(getNewAttributeGroups());
-        batches.add(getNewAttributes());
+
+        addFixedBatchSize(batches, newActivities);
+        addFixedBatchSize(batches, getNewIndicators());
+        addFixedBatchSize(batches, getNewAttributeGroups());
+        addFixedBatchSize(batches, getNewAttributes());
 
         batchCount = batches.size();
         batchNumber = 1;
 
         persistBatch(batches.iterator());
+    }
+
+    private static void addFixedBatchSize(List<List<? extends EntityDTO>> batches, List<? extends EntityDTO> toAdd) {
+        toAdd = Lists.newArrayList(toAdd);
+
+        while (toAdd.size() > 0) {
+            if (toAdd.size() > MAX_BATCH_SIZE) {
+                List<? extends EntityDTO> subList = Lists.newArrayList(toAdd.subList(0, MAX_BATCH_SIZE - 1));
+                batches.add(subList);
+                toAdd.removeAll(subList);
+            } else {
+                batches.add(toAdd);
+                return;
+            }
+        }
     }
 
     private void persistBatch(final Iterator<List<? extends EntityDTO>> batchIterator) {

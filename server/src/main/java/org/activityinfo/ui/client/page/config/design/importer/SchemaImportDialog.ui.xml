@@ -5,7 +5,7 @@
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
 
-<g:FlowPanel ui:field="container" width="500px" height="300px">
+<g:FlowPanel ui:field="container" width="500px" height="400px">
 
   <!-- INPUT -->
   <g:HTMLPanel ui:field="inputPanel">
@@ -19,25 +19,33 @@
 
     <form class="form">
       <div ui:field="textAreaGroup" class="form-group">
-        <g:TextArea ui:field="textArea" styleName="form-control" width="100%" height="75px"/>
+        <g:TextArea ui:field="textArea" styleName="form-control" width="100%" height="175px"/>
         <p ui:field="textAreaHelp" class="help-block"/>
       </div>
     </form>
   </g:HTMLPanel>
 
   <!-- IMPORTING -->
-  <g:ScrollPanel ui:field="warningPanel" visible="false">
-    <g:HTMLPanel>
-      <p><ui:text from='{i18n.dontPanic}'/></p>
+  <g:HTMLPanel ui:field="warningPanel" visible="false">
+    <p>
+      <ui:text from='{i18n.dontPanic}'/>
+    </p>
 
-      <p><ui:text from='{i18n.weNoticedIssuesWithImport}'/></p>
+    <p>
+      <ui:text from='{i18n.weNoticedIssuesWithImport}'/>
+    </p>
 
-      <ul ui:field="warningList"/>
+    <g:ScrollPanel ui:field="warningScrollPanel" height="300px">
+      <g:HTMLPanel>
+        <ul ui:field="warningList"/>
+      </g:HTMLPanel>
+    </g:ScrollPanel>
 
-      <p><ui:text from='{i18n.doYouWantToImportAnyway}'/></p>
+    <p>
+      <ui:text from='{i18n.doYouWantToImportAnyway}'/>
+    </p>
 
-    </g:HTMLPanel>
-  </g:ScrollPanel>
+  </g:HTMLPanel>
 
 
   <!-- IMPORTING -->
