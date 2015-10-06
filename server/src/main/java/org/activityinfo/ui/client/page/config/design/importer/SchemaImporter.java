@@ -366,15 +366,19 @@ public class SchemaImporter {
     private static void addFixedBatchSize(List<List<? extends EntityDTO>> batches, List<? extends EntityDTO> toAdd) {
         toAdd = Lists.newArrayList(toAdd);
 
-        while (toAdd.size() > 0) {
-            if (toAdd.size() > MAX_BATCH_SIZE) {
-                List<? extends EntityDTO> subList = Lists.newArrayList(toAdd.subList(0, MAX_BATCH_SIZE - 1));
-                batches.add(subList);
-                toAdd.removeAll(subList);
-            } else {
-                batches.add(toAdd);
-                return;
-            }
+        int index = 0;
+        int size = toAdd.size();
+
+        if (size <= MAX_BATCH_SIZE) {
+            batches.add(toAdd);
+            return;
+        }
+
+        while (index < size) {
+            int endIndex = (index + MAX_BATCH_SIZE) < size ? (index + MAX_BATCH_SIZE) : size;
+            List<? extends EntityDTO> subList = Lists.newArrayList(toAdd.subList(index, endIndex));
+            index = endIndex;
+            batches.add(subList);
         }
     }
 
