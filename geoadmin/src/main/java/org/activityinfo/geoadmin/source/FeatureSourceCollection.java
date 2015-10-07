@@ -13,9 +13,13 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.PropertyDescriptor;
 
+import java.util.List;
+
 
 public class FeatureSourceCollection implements ResourceCollection {
 
+    public static final String FIELD_ID_PREFIX = "ATTRIB";
+    
     private final ResourceId resourceId;
     private final SimpleFeatureSource featureSource;
 
@@ -39,8 +43,10 @@ public class FeatureSourceCollection implements ResourceCollection {
     public FormClass getFormClass() {
         FormClass formClass = new FormClass(resourceId);
         formClass.setLabel(featureSource.getName().getLocalPart());
-        for (AttributeDescriptor attribute : featureSource.getSchema().getAttributeDescriptors()) {
-            formClass.addElement(toField(attribute));
+        List<AttributeDescriptor> attributes = featureSource.getSchema().getAttributeDescriptors();
+        for (int i = 0; i < attributes.size(); i++) {
+            AttributeDescriptor attribute = attributes.get(i);
+            formClass.addElement(toField(i, attribute));
         }
         return formClass;
     }
@@ -56,8 +62,8 @@ public class FeatureSourceCollection implements ResourceCollection {
     }
 
 
-    private FormField toField(PropertyDescriptor descriptor) {
-        FormField field = new FormField(ResourceId.valueOf(descriptor.getName().getURI()));
+    private FormField toField(int i, PropertyDescriptor descriptor) {
+        FormField field = new FormField(ResourceId.valueOf(FIELD_ID_PREFIX + i));
         field.setLabel(descriptor.getName().getLocalPart());
         field.setCode(descriptor.getName().getLocalPart());
         field.setType(AttributeTypeAdapters.of(descriptor).createType());

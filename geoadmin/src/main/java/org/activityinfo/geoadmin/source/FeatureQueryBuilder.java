@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.activityinfo.geoadmin.source.FeatureSourceCollection.FIELD_ID_PREFIX;
+
 
 public class FeatureQueryBuilder implements ColumnQueryBuilder {
 
@@ -66,14 +68,11 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
     }
 
     private int findIndex(ResourceId fieldId) {
-        int index = 0;
-        for (AttributeDescriptor attribute : featureSource.getSchema().getAttributeDescriptors()) {
-            if(attribute.getName().getURI().equals(fieldId.asString())) {
-                return index;
-            }
-            index++;
+        try {
+            return Integer.parseInt(fieldId.asString().substring(FIELD_ID_PREFIX.length()));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid field id: '" + fieldId + "'");
         }
-        throw new IllegalArgumentException(fieldId.asString());
     }
 
     
