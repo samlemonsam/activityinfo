@@ -73,7 +73,7 @@ public class DTOs {
 
     public static final AdminEntityDTO SUD_KIVU = rootEntity().atLevel(PROVINCE)
                                                               .named("Sud Kivu")
-                                                              .withBounds(Extents.create(0, 0, -100, -100))
+                                                              .withBounds(Extents.create(0, -100, 0, -100))
                                                               .build();
 
     public static final AdminEntityDTO SHABUNDA = childOf(SUD_KIVU).atLevel(TERRITOIRE).named("Shabunda").build();

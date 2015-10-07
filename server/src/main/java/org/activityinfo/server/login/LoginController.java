@@ -22,7 +22,6 @@ package org.activityinfo.server.login;
  * #L%
  */
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.Authenticator;
@@ -38,14 +37,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Path(LoginController.ENDPOINT)
 public class LoginController {
 
-    private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
-    
     public static final String ENDPOINT = "/login";
 
     @Inject
@@ -69,24 +64,14 @@ public class LoginController {
     public Response ajaxLogin(@FormParam("email") String email,
                               @FormParam("password") String password) throws Exception {
 
-        if(Strings.isNullOrEmpty(email)) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-        
         User user;
         try {
-            user = userDAO.get().findUserByEmail(email.trim());
+            user = userDAO.get().findUserByEmail(email);
         } catch(NoResultException e) {
-            LOGGER.log(Level.WARNING, "Attempted login for non existant user " + email);
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            throw new LoginException();
         }
-        try {
-            checkPassword(password, user);
-        } catch (LoginException e) {
-            LOGGER.log(Level.WARNING, "Failed login for user " + email);
-            return Response.status(Response.Status.BAD_REQUEST).build();
+        checkPassword(password, user);
 
-        }
         return Response.ok().cookie(authTokenProvider.get().createNewAuthCookies(user)).build();
     }
 
@@ -97,7 +82,7 @@ public class LoginController {
 
         User user;
         try {
-            user = userDAO.get().findUserByEmail(email.trim());
+            user = userDAO.get().findUserByEmail(email);
             checkPassword(password, user);
             
         } catch (Exception e) {

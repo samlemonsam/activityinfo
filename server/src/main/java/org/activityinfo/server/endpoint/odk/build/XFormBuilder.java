@@ -148,9 +148,7 @@ public class XFormBuilder {
                 Bind bind = new Bind();
                 bind.setNodeSet(field.getAbsoluteFieldName());
                 bind.setType(field.getBuilder().getModelBindType());
-                if (field.getModel().isReadOnly()) {
-                    bind.setReadonly(XPathBuilder.TRUE);
-                }
+
                 //TODO Fix this
                 //bind.calculate = formField.getExpression();
                 bind.setRelevant(xPathBuilder.build(field.getModel().getRelevanceConditionExpression()));

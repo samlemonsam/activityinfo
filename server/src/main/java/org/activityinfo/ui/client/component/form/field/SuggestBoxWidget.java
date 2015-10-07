@@ -35,7 +35,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestOracle;
-import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestion;
+import org.activityinfo.ui.client.component.form.field.suggest.Suggestion;
 import org.activityinfo.ui.client.widget.SuggestBox;
 
 import java.util.List;
@@ -58,9 +58,9 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
         this.suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                InstanceSuggestion suggestion = (InstanceSuggestion) event.getSelectedItem();
-                if(!Objects.equals(suggestion.getInstanceId(), value)) {
-                    valueUpdater.update(new ReferenceValue(suggestion.getInstanceId()));
+                Suggestion suggestion = (Suggestion) event.getSelectedItem();
+                if(!Objects.equals(suggestion.getId(), value)) {
+                    valueUpdater.update(new ReferenceValue(suggestion.getId()));
                 }
             }
         });

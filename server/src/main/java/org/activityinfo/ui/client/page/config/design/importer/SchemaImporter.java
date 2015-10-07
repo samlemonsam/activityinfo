@@ -49,6 +49,7 @@ public class SchemaImporter {
         void submittingBatch(int batchNumber, int batchCount);
     }
 
+    private static final int MAX_BATCH_SIZE = 40;
 
     private Dispatcher dispatcher;
     private UserDatabaseDTO db;
@@ -232,9 +233,11 @@ public class SchemaImporter {
     }
 
     private AttributeDTO findAttrib(AttributeGroupDTO group, String attribName) {
-        for (AttributeDTO attrib : group.getAttributes()) {
-            if (attrib.getName().equals(attribName)) {
-                return attrib;
+        if (group != null) {
+            for (AttributeDTO attrib : group.getAttributes()) {
+                if (attrib.getName().equals(attribName)) {
+                    return attrib;
+                }
             }
         }
         return null;
@@ -348,15 +351,35 @@ public class SchemaImporter {
         this.callback = callback;
 
         List<List<? extends EntityDTO>> batches = Lists.newArrayList();
-        batches.add(newActivities);
-        batches.add(getNewIndicators());
-        batches.add(getNewAttributeGroups());
-        batches.add(getNewAttributes());
+
+        addFixedBatchSize(batches, newActivities);
+        addFixedBatchSize(batches, getNewIndicators());
+        addFixedBatchSize(batches, getNewAttributeGroups());
+        addFixedBatchSize(batches, getNewAttributes());
 
         batchCount = batches.size();
         batchNumber = 1;
 
         persistBatch(batches.iterator());
+    }
+
+    private static void addFixedBatchSize(List<List<? extends EntityDTO>> batches, List<? extends EntityDTO> toAdd) {
+        toAdd = Lists.newArrayList(toAdd);
+
+        int index = 0;
+        int size = toAdd.size();
+
+        if (size <= MAX_BATCH_SIZE) {
+            batches.add(toAdd);
+            return;
+        }
+
+        while (index < size) {
+            int endIndex = (index + MAX_BATCH_SIZE) < size ? (index + MAX_BATCH_SIZE) : size;
+            List<? extends EntityDTO> subList = Lists.newArrayList(toAdd.subList(index, endIndex));
+            index = endIndex;
+            batches.add(subList);
+        }
     }
 
     private void persistBatch(final Iterator<List<? extends EntityDTO>> batchIterator) {

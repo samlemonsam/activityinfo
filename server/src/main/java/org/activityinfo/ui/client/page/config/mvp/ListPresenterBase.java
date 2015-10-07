@@ -39,7 +39,7 @@ import java.util.List;
 public class ListPresenterBase<M extends DTO, L extends List<M>, P extends DTO, V extends CrudView<M,
         P>> extends PresenterBase<V, M> implements UpdateHandler, CancelUpdateHandler, ConfirmDeleteHandler,
         CreateHandler, FilterHandler, RefreshHandler, RequestDeleteHandler, StartCreateHandler, CancelCreateHandler,
-        RequestUpdateHandler, CancelDeleteHandler {
+        RequestUpdateHandler {
 
     protected P parentModel;
 
@@ -61,7 +61,6 @@ public class ListPresenterBase<M extends DTO, L extends List<M>, P extends DTO, 
 
         // Delete
         view.addRequestDeleteHandler(this);
-        view.addCancelDeleteHandler(this);
         view.addConfirmDeleteHandler(this);
 
         view.addFilterHandler(this);
@@ -70,56 +69,34 @@ public class ListPresenterBase<M extends DTO, L extends List<M>, P extends DTO, 
 
     @Override
     public void onRequestDelete(RequestDeleteEvent deleteEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onRefresh(RefreshEvent refreshEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onFilter(FilterEvent filterEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onCreate(CreateEvent createEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onConfirmDelete(ConfirmDeleteEvent deleteEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onCancelUpdate(CancelUpdateEvent updateEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onUpdate(UpdateEvent updateEvent) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onCancelDelete(CancelDeleteEvent cancelDeleteEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onRequestUpdate(RequestUpdateEvent requestUpdateEvent) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

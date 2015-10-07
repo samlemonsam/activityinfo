@@ -29,6 +29,7 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.ListView;
+import com.extjs.gxt.ui.client.widget.ListViewSelectionModel;
 import com.extjs.gxt.ui.client.widget.TabItem;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
@@ -81,6 +82,11 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
         attachmentList.setStore(store);
         attachmentList.setItemSelector("dd");
         attachmentList.setOverStyle("over");
+        
+        ListViewSelectionModel<SiteAttachmentDTO> selectionModel = new ListViewSelectionModel<>();
+        selectionModel.setSelectionMode(Style.SelectionMode.SINGLE);
+        
+        attachmentList.setSelectionModel(selectionModel);
 
         attachmentList.addListener(Events.Select, new Listener<ListViewEvent<SiteAttachmentDTO>>() {
 
@@ -95,8 +101,7 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
             @Override
             public void handleEvent(ListViewEvent<SiteAttachmentDTO> event) {
                 event.getModel().getBlobId();
-                Window.Location.assign(GWT.getModuleBaseURL() + "attachment?blobId=" +
-                                       event.getModel().getBlobId());
+                Window.Location.assign(GWT.getModuleBaseURL() + "attachment?blobId=" + event.getModel().getBlobId());
             }
         });
         panel.add(attachmentList);
@@ -168,6 +173,12 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
 
     public void setSite(SiteDTO site) {
         presenter.showSite(site);
+        toolBar.setActionEnabled(UIActions.UPLOAD, true);
     }
 
+    public void onNoSelection() {
+        store.removeAll();
+        toolBar.setActionEnabled(UIActions.UPLOAD, false);
+        toolBar.setActionEnabled(UIActions.DELETE, false);
+    }
 }

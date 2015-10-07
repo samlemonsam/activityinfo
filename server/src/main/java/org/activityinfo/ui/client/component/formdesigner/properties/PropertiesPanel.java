@@ -53,10 +53,6 @@ public class PropertiesPanel extends Composite {
     @UiField
     HTMLPanel requiredGroup;
     @UiField
-    HTMLPanel readOnlyGroup;
-    @UiField
-    CheckBox readOnly;
-    @UiField
     Button relevanceButton;
     @UiField
     HTMLPanel relevanceGroup;
@@ -99,14 +95,6 @@ public class PropertiesPanel extends Composite {
 
     public HTMLPanel getRequiredGroup() {
         return requiredGroup;
-    }
-
-    public HTMLPanel getReadOnlyGroup() {
-        return readOnlyGroup;
-    }
-
-    public CheckBox getReadOnly() {
-        return readOnly;
     }
 
     public Button getRelevanceButton() {

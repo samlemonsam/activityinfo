@@ -1,11 +1,13 @@
 package org.activityinfo.test.steps.json;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.client.ClientResponse;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,6 +74,17 @@ class ApiResponse {
         if(!message.toLowerCase().contains(errorMessage.toLowerCase())) {
             throw new AssertionError(String.format("Expected an error message containing the phrase '%s' but received:%n%s",
                     errorMessage, message));
+        }
+    }
+    
+    public void assertCorrectJsonContentType() {
+        MediaType type = response.getType();
+        if(!type.getType().equals("application") || !type.getSubtype().equals("json")) {
+            throw new AssertionError(String.format("Expected Content-Type header application/json; found: " + type.toString()));
+        }
+        String charset = type.getParameters().get("charset");
+        if(!"UTF-8".equals(charset)) {
+            throw new AssertionError(String.format("Expected charset UTF-8, found: '%s'", type.toString()));
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.component.form;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -13,7 +14,13 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
+import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.model.LockedPeriodSet;
+import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -65,6 +72,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     // reference to formClass that is currently editing on FormDesigner.
     // it can be null.
     private FormClass validationFormClass = null;
+
+    private LockedPeriodSet lockedPeriodSet; // todo we have to remove some day this legacy class
 
     public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory) {
@@ -128,6 +137,18 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             @Override
             public Promise<Void> apply(@Nullable Void input) {
                 return setValue(instance);
+            }
+        }).join(new Function<Void, Promise<Void>>() {
+            @Nullable
+            @Override
+            public Promise<Void> apply(@Nullable Void input) {
+                return ((ResourceLocatorAdaptor) locator).getDispatcher().execute(new GetSchema()).then(new Function<SchemaDTO, Void>() {
+                    @Override
+                    public Void apply(SchemaDTO input) {
+                        lockedPeriodSet = new LockedPeriodSet(input);
+                        return null;
+                    }
+                });
             }
         });
     }
@@ -235,6 +256,12 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         if (value != null && value.getTypeClass() != field.getType().getTypeClass()) {
             value = null;
         }
+
+        Optional<Boolean> validatedBuiltInDates = validateBuiltinDates(container, field);
+        if (validatedBuiltInDates.isPresent()) {
+            return validatedBuiltInDates.get();
+        }
+
         if (field.isRequired() && isEmpty(value) && field.isVisible()) { // if field is not visible user doesn't have chance to fix it
             container.setInvalid(I18N.CONSTANTS.requiredFieldMessage());
             return false;
@@ -242,6 +269,32 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             container.setValid();
             return true;
         }
+    }
+
+    private Optional<Boolean> validateBuiltinDates(FieldContainer container, FormField field) {
+        if (BuiltinFields.isBuiltInDate(field.getId())) {
+            DateRange dateRange = BuiltinFields.getDateRange(workingInstance, formClass);
+
+            if (lockedPeriodSet != null) {
+                if (lockedPeriodSet.isLocked(workingInstance, formClass)) {
+                    getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+                    getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+                    return Optional.of(false);
+                }
+            }
+
+            if (!dateRange.isValidWithNull()) {
+                container.setInvalid(I18N.CONSTANTS.inconsistentDateRangeWarning());
+                return Optional.of(false);
+            } else {
+                if (dateRange.isValid()) {
+                    getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setValid();
+                    getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setValid();
+                    return Optional.of(true);
+                }
+            }
+        }
+        return Optional.absent();
     }
 
     private boolean isEmpty(FieldValue value) {

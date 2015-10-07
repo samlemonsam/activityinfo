@@ -30,6 +30,7 @@ public class GwtRpcModule extends ServletModule {
     @Override
     protected void configureServlets() {
         serve("/ActivityInfo/cmd").with(CommandServlet.class);
+        serve("/ActivityInfoLogging/cmd").with(CommandServlet.class);
         serve("/Embed/cmd").with(CommandServlet.class);
         serve("/ActivityInfo/attachment").with(AttachmentServlet.class);
     }

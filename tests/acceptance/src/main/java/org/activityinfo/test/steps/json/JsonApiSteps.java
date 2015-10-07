@@ -128,6 +128,11 @@ public class JsonApiSteps {
     }
 
     private void responseShouldBe(String expectedResponse, boolean ignorePositionInArray) throws IOException {
+        
+        // ALWAYS verify the charset parameter; don't consider the response to be valid
+        // JSON without it.
+        response.assertCorrectJsonContentType();
+        
         JsonNode expected = jsonParser.parse(expectedResponse);
         JsonNode actual = response.getJson();
 

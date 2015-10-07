@@ -34,7 +34,7 @@ public class CalculatedField implements FieldValueSource {
         this.field = field;
         CalculatedFieldType type = (CalculatedFieldType) field.getType();
         try {
-            expr = ExprParser.parse(type.getExpression().getExpression());
+            expr = ExprParser.parse(type.getExpressionAsString());
         } catch(ExprException e) {
             LOGGER.log(Level.WARNING, "Expression failed to parse: " + type.getExpression(), e);
             expr = null;

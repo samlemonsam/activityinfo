@@ -29,7 +29,7 @@ public class ValidatedRow {
      */
     public boolean isValid() {
         for (ValidationResult column : columns) {
-            if (column.getState() == ValidationResult.State.ERROR) {
+            if (column.getState() == ValidationResult.State.ERROR && !column.hasReferenceMatch()) {
                 return false;
             }
         }

@@ -61,6 +61,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         activity.setDatabase(database);
         activity.setSortOrder(calculateNextSortOrderIndex(database.getId()));
         activity.setLocationType(getLocationType(properties));
+        
+        // activity should be classic by default
+        activity.setClassicView(true);
 
         applyProperties(activity, properties);
 

@@ -37,6 +37,7 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import java.util.List;
@@ -97,7 +98,7 @@ public class BsModal extends ModalDialog {
         BsFormPanel.BsField item = form.findFieldByLabel(value.getField());
 
         // fill by control type
-        if ("radio".equalsIgnoreCase(value.getControlType())) {
+        if ("radio".equalsIgnoreCase(value.getControlType()) || "dropdown".equalsIgnoreCase(value.getControlType())) {
             item.select(value.getValue());
             return;
         }
@@ -193,6 +194,18 @@ public class BsModal extends ModalDialog {
         waitUntilClosed();
     }
 
+    public BsModal save() {
+        click(I18N.CONSTANTS.save());
+        waitUntilClosed();
+        return this;
+    }
+
+    public BsModal cancel() {
+        click(I18N.CONSTANTS.cancel());
+        waitUntilClosed();
+        return this;
+    }
+
     public boolean isClosed() {
         return !windowElement.isDisplayed();
     }
@@ -209,4 +222,19 @@ public class BsModal extends ModalDialog {
             }
         });
     }
+
+    public void waitUntilNotClosed(int waitSeconds) {
+        try {
+            getWindowElement().waitUntil(new Predicate<WebDriver>() {
+                @Override
+                public boolean apply(WebDriver input) {
+                    return !windowElement.isDisplayed();
+                }
+            }, waitSeconds);
+            throw new RuntimeException("Dialog was closed.");
+        } catch (TimeoutException e) {
+            // we are lucky and dialog is not closed
+        }
+    }
+
 }

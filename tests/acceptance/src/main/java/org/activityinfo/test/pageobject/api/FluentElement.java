@@ -1,9 +1,6 @@
 package org.activityinfo.test.pageobject.api;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -81,10 +78,14 @@ public class FluentElement {
         return element;
     }
 
-    public void waitUntil(Predicate<WebDriver> predicate) {
-        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+    public void waitUntil(Predicate<WebDriver> predicate, int timeInSeconds) {
+        WebDriverWait wait = new WebDriverWait(webDriver, timeInSeconds);
         wait.ignoring(StaleElementReferenceException.class);
         wait.until(predicate);
+    }
+
+    public void waitUntil(Predicate<WebDriver> predicate) {
+        waitUntil(predicate, TIMEOUT_SECONDS);
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {
@@ -135,7 +136,16 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
-        element().sendKeys(keys);
+        // workaround for https://code.google.com/p/selenium/issues/detail?id=4469
+        // Very slow in entering huge string in textarea(using send keys in java)
+        if (keys[0].length() < 1000) {
+            element().sendKeys(keys);
+        } else {
+            ((JavascriptExecutor) webDriver).executeScript("arguments[0].value = arguments[1];", element, keys[0]);
+
+            // force trigger key listeners
+            element().sendKeys("a", Keys.BACK_SPACE);
+        }
     }
 
     public boolean exists(By by) {
@@ -180,8 +190,8 @@ public class FluentElement {
         return this;
     }
 
-    public void submit() {
-        element().submit();
+    public void focus() {
+        new Actions(webDriver).moveToElement(element()).perform();
     }
 
     public Optional<FluentElement> focusedElement() {

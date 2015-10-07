@@ -11,12 +11,14 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.driver.model.IndicatorLink;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -27,6 +29,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
+import static org.junit.Assert.assertEquals;
 
 @ScenarioScoped
 public class DatabaseSetupSteps {
@@ -234,6 +237,19 @@ public class DatabaseSetupSteps {
         this.currentForm = formName;
     }
 
+    @And("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\" and relevance condition \"([^\"]*)\" $")
+    public void I_have_created_a_quantity_field_in_with_code(String fieldName, String formName, String fieldCode, String relevanceCondition) throws Throwable {
+        driver.setup().createField(
+                property("form", formName),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("skipExpression", relevanceCondition),
+                property("code", fieldCode)
+        );
+
+        this.currentForm = formName;
+    }
+
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
     public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
         I_have_created_a_calculated_field_in_with_aggregation(fieldName, formName, expression, AggregationMethod.Sum.name());
@@ -250,6 +266,23 @@ public class DatabaseSetupSteps {
                 property("calculatedAutomatically", true));
     }
 
+    private static List<String> createEnumItems(int numberOfItems) {
+        final List<String> result = Lists.newArrayListWithCapacity(numberOfItems);
+        for (int i = 0; i < numberOfItems; i++) {
+            result.add("Item " + (i + 1));
+        }
+        return result;
+    }
+
+    @Given("^I have created a multi-valued enumerated field \"([^\"]*)\" with (\\d+) items$")
+    public void I_have_created_a_multi_valued_enumerated_field_with_items(String fieldName, int numberOfItems) throws Throwable {
+        createEnumField(fieldName, true, createEnumItems(numberOfItems));
+    }
+
+    @And("^I have created a single-valued enumerated field \"([^\"]*)\" with (\\d+) items$")
+    public void I_have_created_a_single_valued_enumerated_field_with_items(String fieldName, int numberOfItems) throws Throwable {
+        createEnumField(fieldName, false, createEnumItems(numberOfItems));
+    }
 
     @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
@@ -258,14 +291,24 @@ public class DatabaseSetupSteps {
         I_have_created_a_field_in(fieldType, fieldName, currentForm);
     }
 
-    @Given("^I have created a enumerated field \"([^\"]*)\" with items:$")
+    @And("^I have created a multi-valued enumerated field \"([^\"]*)\" with items:$")
+    public void I_have_created_a_multi_valued_enumerated_field_with_options(String fieldName, List<String> items) throws Exception {
+        createEnumField(fieldName, true, items);
+    }
+
+    @Given("^I have created a single-valued enumerated field \"([^\"]*)\" with items:$")
     public void I_have_created_a_enumerated_field_with_options(String fieldName, List<String> items) throws Exception {
+        createEnumField(fieldName, false, items);
+    }
+
+    private void createEnumField(String fieldName, boolean multipleAllowed, List<String> items) throws Exception {
         Preconditions.checkState(currentForm != null, "No current form");
 
         driver.setup().createField(
                 property("form", currentForm),
                 property("name", fieldName),
                 property("type", "enumerated"),
+                property("multipleAllowed", multipleAllowed),
                 property("items", items));
     }
 
@@ -522,7 +565,7 @@ public class DatabaseSetupSteps {
 
     @When("^selecting \"([^\"]*)\" as the source link database$")
     public void selecting_as_the_source_link_database(String databaseName) throws Throwable {
-        driver.getLinkIndicatorPage().getSourceDb().clickCell(driver.getAliasTable().getAlias(databaseName));
+        driver.getLinkIndicatorPage().getSourceDb().clickCell(alias(databaseName));
     }
 
     @Then("^source indicator link database shows:$")
@@ -536,6 +579,28 @@ public class DatabaseSetupSteps {
         for (int i = 0; i < numberOfPartners; i++) {
             driver.setup().addPartner("partner" + i, currentDatabase);
         }
+    }
+
+
+    @Then("^field \"([^\"]*)\" represented by \"([^\"]*)\"$")
+    public void field_represented_by(String fieldName, String controlType) throws Throwable {
+        assertEquals(driver.getFormFieldFromNewSubmission(currentForm, alias(fieldName)).get().getControlType(), ControlType.fromValue(controlType));
+    }
+
+
+    @Then("^new entry cannot be submitted in \"([^\"]*)\" form$")
+    public void new_entry_with_end_date_cannot_be_submitted_in_database(String formName, DataTable dataTable) throws Throwable {
+        // old form
+        driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, TableDataParser.getFirstColumnValue(dataTable, "End Date"));
+
+        // new form
+        BsModal modal = driver.openFormTable(alias(currentDatabase), alias(formName)).table().newSubmission();
+        modal.fill(dataTable, driver.getAliasTable());
+        modal.click(I18N.CONSTANTS.save()).waitUntilNotClosed(5);
+    }
+
+    private String alias(String testHandle) {
+        return driver.getAliasTable().getAlias(testHandle);
     }
 
 }

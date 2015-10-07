@@ -23,11 +23,11 @@ package org.activityinfo.core.shared.importing.match;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormFieldType;
-import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.core.shared.type.converter.Converter;
 import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.model.form.FormFieldType;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.primitive.BooleanType;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,6 +78,13 @@ public class ColumnTypeGuesser {
             boolean hasMatch = false;
             for (Map.Entry<FieldTypeClass, Integer> entry : copyMap.entrySet()) {
                 try {
+
+                    if (isBoolean(value) && entry.getKey().equals(BooleanType.TYPE_CLASS)) {
+                        increaseValue(entry.getKey());
+                        hasMatch = true;
+                        break;
+                    }
+
                     final Converter stringConverter = converterFactory.createStringConverter(entry.getKey());
                     final Object convertedValue = stringConverter.convert(value);
 
@@ -102,6 +109,10 @@ public class ColumnTypeGuesser {
                 }
             }
         }
+    }
+
+    public static boolean isBoolean(String value) {
+        return value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false");
     }
 
     private void increaseValue(FieldTypeClass type) {

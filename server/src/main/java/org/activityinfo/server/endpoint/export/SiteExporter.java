@@ -361,10 +361,12 @@ public class SiteExporter {
                     if (value) {
                         Cell valueCell = createCell(row, column, attrib.getName());
                         valueCell.setCellStyle(attribValueStyle);
-                        column++;
                         break;
                     }
                 }
+            }
+            if (!attributeGroup.isMultipleAllowed()) {
+                column++;
             }
         }
 

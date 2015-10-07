@@ -9,7 +9,7 @@ Feature: Data Entry History
       And I have added partner "NRC" to "RRMP"
       And I have created a form named "NFI Distribution"
       And I have created a quantity field "nb. kits" in "NFI Distribution"
-      And I have created a enumerated field "donor" with items:
+      And I have created a single-valued enumerated field "donor" with items:
         | USAID  |  
         | ECHO   |
         | NRC    |

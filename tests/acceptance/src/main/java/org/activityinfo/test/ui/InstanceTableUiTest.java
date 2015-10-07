@@ -21,21 +21,18 @@ package org.activityinfo.test.ui;
  * #L%
  */
 
-import com.google.common.base.Predicate;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import java.util.Arrays;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author yuriyz on 06/18/2015.
@@ -124,47 +121,8 @@ public class InstanceTableUiTest {
         final TablePage tablePage = driver.getApplicationPage().navigateToTable(
                 driver.getAliasTable().getAlias(DATABASE), 
                 driver.getAliasTable().getAlias(FORM_NAME));
-        
-        BsTable table = tablePage.table();
 
-        // start scrolling down and check that rows are loaded during scrolling
-        for (int i = 1; i < 11; i++) {
-            final int index = i;
-
-            table.scrollToTheBottom();
-
-            table.getContainer().waitUntil(new Predicate<WebDriver>() {
-                @Override
-                public boolean apply(WebDriver input) {
-
-                    final BsTable table = tablePage.table(); // not clear why but we may get StaleReferenceException here sometimes, refresh reference
-
-                    // we don't really use scroll but just back end forth to emulate it. Need something better here
-                    table.scrollToTheTop();
-                    table.scrollToTheBottom();
-                    int rowCount = table.rowCount();
-                    System.out.println("infiniteScroll, rowCount: " + rowCount);
-                    return rowCount > index * LOAD_COUNT;
-                }
-            });
-
-            table = tablePage.table(); // not clear why but we may get StaleReferenceException here sometimes, refresh reference
-            int rowCount = table.rowCount();
-            assertRowCount(rowCount, i);
-            if (rowCount == SUBMISSIONS_COUNT) {
-                return;
-            }
-        }
-
-        throw new AssertionError("Failed to load all rows on infinite scroll. Expected: " + SUBMISSIONS_COUNT +
-                ", but got: " + table.rowCount());
-    }
-
-
-    private static void assertRowCount(int rowCount, int iteration) {
-        assertTrue("rowCount: " + rowCount + ", expected to be more then: " + LOAD_COUNT * iteration +
-                        ", end less/equals then: " + (LOAD_COUNT * (iteration + 1)),
-                rowCount >= LOAD_COUNT * iteration /*&& rowCount <= (LOAD_COUNT * (iteration + 1))*/);
+        BsTable.waitUntilRowsLoaded(tablePage, SUBMISSIONS_COUNT);
     }
 
 }

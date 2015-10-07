@@ -7,6 +7,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A Value Type that represents a value calculated from a symbolic expression,
  * such as "A + B"
@@ -63,8 +66,20 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         this.expression = expression;
     }
 
+    @Nullable
     public ExprValue getExpression() {
         return expression;
+    }
+    
+    @Nonnull
+    public String getExpressionAsString() {
+        if(expression == null) {
+            return "";
+        } 
+        if(expression.getExpression() == null) {
+            return "";
+        }
+        return expression.getExpression();
     }
 
     public void setExpression(String expression) {

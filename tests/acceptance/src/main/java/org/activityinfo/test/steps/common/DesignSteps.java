@@ -21,16 +21,20 @@ package org.activityinfo.test.steps.common;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
+import org.openqa.selenium.support.ui.Select;
 
 import javax.inject.Inject;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -82,7 +86,34 @@ public class DesignSteps {
 
     @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\"$")
     public void form_in_database_has_field_represented_by(String formName, String databaseName, String fieldName, String controlType) throws Throwable {
-        driver.assertFieldVisible(formName, databaseName, fieldName, controlType);
+        assertFieldControl(formName, databaseName, fieldName, controlType, Optional.<String>absent());
+    }
+
+    @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\" with value \"([^\"]*)\"$")
+    public void form_in_database_has_field_represented_by_with_value(String formName, String databaseName, String fieldName, String controlType, String selectedValue) throws Throwable {
+        assertFieldControl(formName, databaseName, fieldName, controlType, Optional.fromNullable(selectedValue));
+    }
+
+    private void assertFieldControl(String formName, String databaseName, String fieldName, String controlType, Optional<String> selectedValue) {
+        if (selectedValue.isPresent()) {
+            selectedValue = Optional.of(driver.getAliasTable().getAlias(selectedValue.get()));
+        }
+
+        Form.FormItem formField = driver.getFormField(formName, databaseName, fieldName, selectedValue);
+
+        switch (ControlType.fromValue(controlType)) {
+            case SUGGEST_BOX:
+                assertTrue(formField.isSuggestBox());
+                break;
+            case DROP_DOWN:
+                assertTrue(formField.isDropDown());
+
+                if (selectedValue.isPresent()) {
+                    Select select = new Select(formField.getElement().find().select().first().element());
+                    assertEquals(select.getFirstSelectedOption().getAttribute("text"), selectedValue.get());
+                }
+                break;
+        }
     }
 
     @When("^I add a lock \"([^\"]*)\" on the database \"([^\"]*)\" from \"([^\"]*)\" to \"([^\"]*)\"$")

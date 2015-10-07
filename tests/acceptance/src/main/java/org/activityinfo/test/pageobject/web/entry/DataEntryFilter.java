@@ -22,10 +22,10 @@ package org.activityinfo.test.pageobject.web.entry;
  */
 
 import com.google.common.collect.Lists;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
-import org.activityinfo.test.pageobject.gxt.Gxt;
 import org.openqa.selenium.By;
 
 import java.util.List;
@@ -50,7 +50,7 @@ public class DataEntryFilter {
     public DataEntryFilter select(boolean wait) {
         container.clickWhenReady();
         if (wait) {
-            Gxt.sleep(2);
+            Sleep.sleepSeconds(2);
         }
         return this;
     }

@@ -1,5 +1,6 @@
 package org.activityinfo.core.shared.importing.strategy;
 
+import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.model.formTree.FormTree;
 
 import java.util.List;
@@ -24,6 +25,6 @@ public interface FieldImportStrategy {
     List<ImportTarget> getImportSites(FormTree.Node node);
 
 
-    FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings);
+    FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings, ImportModel model);
 
 }

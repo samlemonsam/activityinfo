@@ -28,6 +28,12 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Projects for database {0}")
     String projectsForDatabase(String arg0);
 
+    @DefaultMessage("Importing... {0}/{1}, retries: {2}")
+    String importingData(int completed, int total, int retries);
+
+    @DefaultMessage("Imported {0} rows from {1}. Retry import of {2} failed  rows?")
+    String imported(int completed, int total, int failed);
+
     /**
      * Translated "{0,number,integer}Q{1,number,integer}".
      *
@@ -255,11 +261,15 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     String dateFieldInvalidValue(String format);
 
     @DefaultMessage("Please enter a number. For example: {0} or {1} or {2}")
-    String quantityFieldInvalidValue(int integer, double doubleWithoutPoint, double doubleWithPoint);
+    String quantityFieldInvalidValue(int integer, String doubleWithoutPoint, String doubleWithPoint);
 
     @Messages.DefaultMessage("Failed to find nationwide location type, db: {0}, country: {1}")
     String noNationWideLocationType(String dbName, String countryName);
 
     @Messages.DefaultMessage("{0} Users")
     String databaseUserGroup(String databaseName);
+
+    @Messages.DefaultMessage("Correct value will be imported with {0}% confidence.#013;Matched to: {1}")
+    String importValidationCellTooltip(String matchedValue, int confidencePercent);
+
 }

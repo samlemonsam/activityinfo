@@ -39,6 +39,10 @@ public class ToolbarMenu {
         return new ToolbarMenu(container.findElement(By.className("x-toolbar-ct")));
     }
 
+    public GxtButton button(final String buttonName) {
+        return new GxtButton(menu.waitFor(Gxt.button(buttonName)));
+    }
+
     public void clickButton(final String buttonName) {
         menu.waitFor(Gxt.button(buttonName)).clickWhenReady();
     }

@@ -22,17 +22,17 @@ package org.activityinfo.server.attachment;
  * #L%
  */
 
+import com.google.appengine.api.appidentity.AppIdentityService;
+import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-import com.google.appengine.api.files.AppEngineFile;
-import com.google.appengine.api.files.FileService;
-import com.google.appengine.api.files.FileServiceFactory;
-import com.google.appengine.api.files.FileWriteChannel;
-import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
+import com.google.appengine.tools.cloudstorage.GcsFileOptions;
+import com.google.appengine.tools.cloudstorage.GcsFilename;
+import com.google.appengine.tools.cloudstorage.GcsService;
+import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
-import org.activityinfo.server.util.blob.BlobService;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -45,47 +45,44 @@ import java.nio.charset.Charset;
 public class AppEngineAttachmentService implements AttachmentService {
 
     private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+    private AppIdentityService identityService = AppIdentityServiceFactory.getAppIdentityService();
 
-    private final BlobService blobService;
-    private final String attachmentRoot;
-
+    private final String attachmentBucket;
+    private final String attachmentPrefix;
+    
     @Inject
-    public AppEngineAttachmentService(BlobService blobService, DeploymentConfiguration config) {
-        this.blobService = blobService;
-        this.attachmentRoot = config.getProperty("attachment.blob.root", "/gs/activityinfo-attachments");
+    public AppEngineAttachmentService(DeploymentConfiguration config) {
+        this.attachmentBucket = config.getProperty("attachment.bucket", identityService.getDefaultGcsBucketName());
+        this.attachmentPrefix = config.getProperty("attachment.prefix", "attachments/");
     }
-
-
+    
     @Override
     public void serveAttachment(String blobId, HttpServletResponse response) throws IOException {
         BlobKey blobKey = blobKey(blobId);
         blobstoreService.serve(blobKey, response);
     }
+    
+    private String gcsKey(String blobId) {
+        return attachmentPrefix + blobId;
+    }
 
     private BlobKey blobKey(String blobId) {
-        BlobKey blobKey = blobstoreService.createGsBlobKey("/gs/activityinfo-attachments/" + blobId);
-        return blobKey;
+        return blobstoreService.createGsBlobKey("/gs/" + attachmentBucket + "/" + gcsKey(blobId));
     }
 
     @Override
     public void upload(String key, FileItem fileItem, InputStream uploadingStream) {
         try {
-
-            GSFileOptionsBuilder builder = new GSFileOptionsBuilder().setBucket("activityinfo-attachments")
-                                                                     .setKey(key)
-                                                                     .setContentDisposition("attachment; filename=\"" +
-                                                                                            fileItem.getName() + "\"")
-                                                                     .setMimeType(fileItem.getContentType());
-
-            FileService fileService = FileServiceFactory.getFileService();
-            AppEngineFile writableFile = fileService.createNewGSFile(builder.build());
-            boolean lock = true;
-            FileWriteChannel writeChannel = fileService.openWriteChannel(writableFile, lock);
-            OutputStream os = Channels.newOutputStream(writeChannel);
-            ByteStreams.copy(fileItem.getInputStream(), os);
-            os.flush();
-            writeChannel.closeFinally();
-
+            GcsService gcsService = GcsServiceFactory.createGcsService();
+            GcsFilename gcsFilename = new GcsFilename(attachmentBucket, gcsKey(key));
+            GcsFileOptions options = new GcsFileOptions.Builder()
+                    .contentDisposition("attachment; filename=\"" + fileItem.getName() + "\"")
+                    .mimeType(fileItem.getContentType())
+                    .build();
+            
+            try(OutputStream output = Channels.newOutputStream(gcsService.createOrReplace(gcsFilename, options))) {
+                ByteStreams.copy(fileItem.getInputStream(), output);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

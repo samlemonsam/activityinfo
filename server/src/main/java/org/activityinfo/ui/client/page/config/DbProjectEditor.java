@@ -93,6 +93,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
 
         view.init(this, db, store);
         view.setActionEnabled(UIActions.DELETE, false);
+        view.setActionEnabled(UIActions.EDIT, false);
     }
 
 
@@ -174,11 +175,6 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
         });
     }
 
-    // @Override
-    // public void onSelectionChanged(ProjectDTO selectedItem) {
-    // view.setActionEnabled(UIActions.delete, true);
-    // }
-
     @Override
     public PageId getPageId() {
         return PAGE_ID;
@@ -196,8 +192,6 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
 
     @Override
     public void shutdown() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -207,6 +201,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
 
     @Override
     public void onSelectionChanged(ModelData selectedItem) {
-        view.setActionEnabled(UIActions.DELETE, true);
+        view.setActionEnabled(UIActions.DELETE, selectedItem != null);
+        view.setActionEnabled(UIActions.EDIT, selectedItem != null);
     }
 }

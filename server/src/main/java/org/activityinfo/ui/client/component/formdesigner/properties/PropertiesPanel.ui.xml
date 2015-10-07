@@ -37,14 +37,6 @@
           <a:CheckBox ui:field="required"/>
         </div>
       </g:HTMLPanel>
-      <g:HTMLPanel ui:field="readOnlyGroup">
-        <label class="control-label col-xs-4">
-          <ui:text from='{i18n.readonly}'/>
-        </label>
-        <div class="col-xs-2">
-          <a:CheckBox ui:field="readOnly"/>
-        </div>
-      </g:HTMLPanel>
     </g:HTMLPanel>
 
     <!-- Visible -->

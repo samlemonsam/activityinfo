@@ -64,12 +64,12 @@ public abstract class AbstractRestModule extends ServletModule {
         }
 
         LOGGER.info("binding REST path '" + pattern + "'");
-        filter(pattern).through(GuiceContainer.class);
+        filter(pattern).through(JaxRsContainer.class);
     }
 
     protected final void bindResource(Class clazz, String pattern, String... morePatterns) {
         bind(clazz);
-        filter(pattern, morePatterns).through(GuiceContainer.class);
+        filter(pattern, morePatterns).through(JaxRsContainer.class);
     }
 
 }

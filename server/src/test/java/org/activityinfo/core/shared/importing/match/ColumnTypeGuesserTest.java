@@ -43,6 +43,7 @@ public class ColumnTypeGuesserTest {
         assertType(FieldTypeClass.LOCAL_DATE, "2012-12-18 12:38:40.0");
         assertType(FieldTypeClass.FREE_TEXT, "df", "fsdf", "ff");
         assertType(FieldTypeClass.NARRATIVE, "fKholishaur dffsdffsdffsdffsdffsdffsdfdfsdfsdfsdgfdfghdfgddddddddddddddddddddddddddddddddd", "fKholishaur fsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdffsdfdffsdffsdffsdffsdffsdffsdfdffsdffsdffsdffsdffsdffsdfdffsdffsdffsdffsdffsdffsdf", "ff");
+        assertType(FieldTypeClass.BOOLEAN, "true", "false");
     }
 
     private void assertType(FieldTypeClass exptectedType, String... columnValueList) {

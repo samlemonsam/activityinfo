@@ -25,6 +25,7 @@ package org.activityinfo.server.login;
 import com.google.common.collect.Maps;
 import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import org.activityinfo.server.util.jaxrs.JaxRsContainer;
 
 import java.util.Map;
 
@@ -41,8 +42,8 @@ public class LoginModule extends ServletModule {
         serve("/ActivityInfo/ActivityInfo.appcache").with(SelectionServlet.class);
 
         Map<String, String> initParams = Maps.newHashMap();
-        filter("/login*").through(GuiceContainer.class);
-        filter("/unsupportedBrowser").through(GuiceContainer.class);
+        filter("/login*").through(JaxRsContainer.class);
+        filter("/unsupportedBrowser").through(JaxRsContainer.class);
 
         filterContainer(initParams,
                 HostController.class,
@@ -69,7 +70,7 @@ public class LoginModule extends ServletModule {
                 throw new RuntimeException(exc);
             }
 
-            filter(path).through(GuiceContainer.class, params);
+            filter(path).through(JaxRsContainer.class, params);
         }
     }
 }

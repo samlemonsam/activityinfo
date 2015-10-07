@@ -24,12 +24,16 @@ package org.activityinfo.test.pageobject.bootstrap;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 import java.util.List;
 
@@ -81,6 +85,10 @@ public class BsFormPanel extends Form {
         }
     }
 
+    public FluentElement getForm() {
+        return form;
+    }
+
     @Override
     public FormItem current() {
         return current;
@@ -106,7 +114,28 @@ public class BsFormPanel extends Form {
 
         @Override
         public boolean isDropDown() {
+            return isGwtDropDown() || isDropDownWithSuggestBox();
+        }
+
+        private boolean isGwtDropDown() {
+            Optional<FluentElement> select = element.find().select().firstIfPresent();
+            if (select.isPresent()) {
+                String classAttr = select.get().element().getAttribute("class");
+                String selectWithSuggestBoxClass = "chzn-done";
+                if (!classAttr.contains(selectWithSuggestBoxClass)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean isDropDownWithSuggestBox() {
             return element.exists(By.tagName("a"));
+        }
+
+        @Override
+        public boolean isSuggestBox() {
+            return getPlaceholder().equals(I18N.CONSTANTS.suggestBoxPlaceholder());
         }
 
         public boolean isCheckBox() {
@@ -141,10 +170,19 @@ public class BsFormPanel extends Form {
         private FluentElements items() {
             final FluentElements items;
             if (isDropDown()) {
-                element.findElement(By.tagName("a")).click();
+                if (isGwtDropDown()) {
+                    element.findElement(By.tagName("select")).click();
 
-                FluentElement list = this.element.waitFor(By.tagName("ul"));
-                items = list.findElements(By.tagName("li"));
+                    FluentElement list = this.element.waitFor(By.tagName("select"));
+                    items = list.findElements(By.tagName("option"));
+                } else if (isDropDownWithSuggestBox()) {
+                    element.findElement(By.tagName("a")).click();
+
+                    FluentElement list = this.element.waitFor(By.tagName("ul"));
+                    items = list.findElements(By.tagName("li"));
+                } else {
+                    throw new RuntimeException("Failed to identify type of dropdown control.");
+                }
             } else {
                 items = element.findElements(By.tagName("label"));
             }
@@ -164,11 +202,20 @@ public class BsFormPanel extends Form {
 
         @Override
         public void select(String itemLabel) {
+            if (isGwtDropDown()) {
+                Select select = new Select(element.find().select().first().element());
+                select.selectByVisibleText(itemLabel);
+                return;
+            }
+
             final FluentElements items = items();
 
             List<String> itemLabels = Lists.newArrayList();
             for (FluentElement element : items) {
                 String text = element.text();
+                if (Strings.isNullOrEmpty(text)) {
+                    text = Strings.nullToEmpty(element.element().getAttribute("text"));
+                }
                 itemLabels.add(text);
                 if (text.equalsIgnoreCase(itemLabel)) {
                     element.click();
@@ -205,11 +252,27 @@ public class BsFormPanel extends Form {
             return element.find().label(withText(label)).precedingSibling().input().first();
         }
 
+        public boolean isRadio() {
+            return element.exists(By.className("radio"));
+        }
+
         public boolean isRadioSelected(String label) {
             FluentElement radio = radioElement(label);
             Preconditions.checkState(radio.element().getAttribute("type").equals("radio"), "Element is not radio element");
             return radio.element().isSelected();
         }
 
+        public ControlType getControlType() {
+            if (isRadio()) {
+                return ControlType.RADIO_BUTTONS;
+            } else if (isCheckBox()) {
+                return ControlType.CHECK_BOXES;
+            } else if (isDropDown()) {
+                return ControlType.DROP_DOWN;
+            } else if (isSuggestBox()) {
+                return ControlType.SUGGEST_BOX;
+            }
+            return null;
+        }
     }
 }

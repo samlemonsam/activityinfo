@@ -102,7 +102,7 @@ public class AuthenticationFilter implements Filter {
                 AuthenticatedUser currentUser = authTokenCache.get(authToken);
                 authProvider.set(currentUser);
 
-                LOGGER.info("Setting locale to " + currentUser.getUserLocale());
+                LOGGER.info("Setting locale to " + currentUser.getUserLocale() + " for " + currentUser.getEmail()) ;
 
             } catch (Exception e) {
                 authProvider.clear();

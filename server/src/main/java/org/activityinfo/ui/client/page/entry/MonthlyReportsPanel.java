@@ -113,7 +113,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
 
         DateWrapper today = new DateWrapper();
         DateTimeFormat monthFormat = DateTimeFormat.getFormat("MMM yyyy");
-        for (int year = today.getFullYear(); year != today.getFullYear() - 3; --year) {
+        for (int year = today.getFullYear() + 2; year != today.getFullYear() - 3; --year) {
 
             for (int month = 12; month != 0; --month) {
                 DateWrapper d = new DateWrapper(year, month, 1);

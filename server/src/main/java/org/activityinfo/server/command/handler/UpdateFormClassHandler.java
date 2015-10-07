@@ -9,6 +9,7 @@ import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -73,11 +74,8 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
 //        activity.setClassicView(false);
 
-        if (cmd.isSyncActivityEntities()) {
-            syncEntities(activity, formClass);
-        } else {
-            entityManager.get().persist(activity);
-        }
+        syncEntities(activity, formClass);
+        entityManager.get().persist(activity);
 
         return new VoidResult();
     }
@@ -101,8 +99,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private FormClass validateFormClass(String json) {
         try {
             Resource resource = Resources.fromJson(json);
-            FormClass formClass = FormClass.fromResource(resource);
-            return formClass;
+            return FormClass.fromResource(resource);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormClass json: " + e.getMessage(), e);
             throw new CommandException();
@@ -118,6 +115,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private void syncEntities(Activity activity, FormClass formClass) {
 
         activity.setName(formClass.getLabel());
+        updateLocationType(activity, formClass);
 
         List<FormFieldEntity> fields = new ArrayList<>();
         fields.addAll(activity.getIndicators());
@@ -151,6 +149,35 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // delete any entities that were not matched to FormFields
         for(FormFieldEntity entity : entityMap.values()) {
             entity.delete();
+        }
+    }
+
+    private void updateLocationType(Activity activity, FormClass formClass) {
+        boolean hasLocationTypeField = false;
+        for (FormField formField : formClass.getFields()) {
+            int fieldIndex = CuidAdapter.getBlockSilently(formField.getId(), 1);
+            if (fieldIndex == CuidAdapter.LOCATION_FIELD) {
+                hasLocationTypeField = true;
+            }
+        }
+        if (!hasLocationTypeField) {
+            // if there is no location type field then we have to stick to "Nationwide" location type (null location type) - AI-1216
+
+            boolean hasNullLocationType = false;
+            final UserDatabase database = activity.getDatabase();
+            for (LocationType locationType : database.getCountry().getLocationTypes()) {
+                if (LocationTypeDTO.isNullObject(locationType.getName(), locationType.getId())) {
+                    activity.setLocationType(locationType);
+                    hasNullLocationType = true;
+                }
+            }
+
+            if (hasNullLocationType) {
+                entityManager.get().persist(activity);
+            } else {
+                throw new RuntimeException("Failed to find nationwide location type, db:" + database.getName() +
+                        ", country:" + database.getCountry().getName());
+            }
         }
     }
 
@@ -205,11 +232,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         } else if (field.getType() instanceof CalculatedFieldType) {
             CalculatedFieldType type = (CalculatedFieldType) field.getType();
             indicator.setType(QuantityType.TYPE_CLASS.getId());
-            if(type.getExpression() == null) {
-                indicator.setExpression(null);
-            } else {
-                indicator.setExpression(type.getExpression().getExpression());
-            }
+            indicator.setExpression(type.getExpressionAsString());
 
         } else if (field.getType() instanceof BarcodeType) {
             indicator.setType(TextType.TYPE_CLASS.getId());

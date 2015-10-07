@@ -1284,7 +1284,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("There was an error matching references.")
     String errorMatchingReferences();
 
-    @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns")
+    @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns. Please mouse over on particular cell to see detail explanation.")
     String correctProblems();
 
     @DefaultStringValue("Matching references...")
@@ -1601,4 +1601,31 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please select at least one item")
     String pleaseSelectAtLeastOneItem();
+
+    @DefaultStringValue("Perfect match.")
+    String importPerfectMatchTooltip();
+
+    @DefaultStringValue("Failed to match. Row will not be imported.")
+    String failedToMatchValue();
+
+    @DefaultStringValue("Database structure successfully imported.")
+    String databaseStructureSuccessfullyImported();
+
+    @DefaultStringValue("Oh no, there was an error importing your schema:")
+    String failedToImportSchema();
+
+    @DefaultStringValue("Do you want to import anyway?")
+    String doYouWantToImportAnyway();
+
+    @DefaultStringValue("Don't panic!")
+    String dontPanic();
+
+    @DefaultStringValue("We noticed a few issues with your import:")
+    String weNoticedIssuesWithImport();
+
+    @DefaultStringValue("The import schema wizard allows you to import and (soon) update activities, indicators, and attributes from a spreadsheet.")
+    String importWelcomeText();
+
+    @DefaultStringValue("To begin, copy your table from Excel and paste in the box below:")
+    String importHelpText();
 }

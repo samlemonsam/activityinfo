@@ -67,7 +67,12 @@ public class GxtGrid {
                     .ancestor().td(withClass("x-grid3-cell"))
                     .firstIfPresent();
             if (!cell.isPresent()) {
-                throw makeAssertion(text);
+                cell = container.find()
+                        .div(withClass("x-grid3-cell-inner")).span(withText(text))
+                        .ancestor().td(withClass("x-grid3-cell")).firstIfPresent();
+                if (!cell.isPresent()) {
+                    throw makeAssertion(text);
+                }
             }
         }
         

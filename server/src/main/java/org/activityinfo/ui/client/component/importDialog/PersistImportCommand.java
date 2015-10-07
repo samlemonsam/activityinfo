@@ -31,6 +31,7 @@ import org.activityinfo.core.shared.importing.strategy.FieldImporter;
 import org.activityinfo.core.shared.importing.validation.ValidatedRow;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -43,6 +44,11 @@ public class PersistImportCommand implements ImportCommand<Void> {
 //    private static final Logger LOGGER = Logger.getLogger(PersistImportCommand.class.getName());
 
     private ImportCommandExecutor commandExecutor;
+    private PromisesExecutionMonitor monitor;
+
+    public PersistImportCommand(PromisesExecutionMonitor monitor) {
+        this.monitor = monitor;
+    }
 
     @Nullable
     @Override
@@ -65,7 +71,7 @@ public class PersistImportCommand implements ImportCommand<Void> {
             }
         }
 
-        return commandExecutor.getResourceLocator().persist(toPersist);
+        return commandExecutor.getResourceLocator().persist(toPersist, monitor);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -107,6 +108,7 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     }
 
     private String invalidErrorMessage() {
-        return I18N.MESSAGES.quantityFieldInvalidValue(15, 2000, 1.5);
+        NumberFormat decimalFormat = NumberFormat.getDecimalFormat();
+        return I18N.MESSAGES.quantityFieldInvalidValue(15, decimalFormat.format(2000), decimalFormat.format(1.5));
     }
 }

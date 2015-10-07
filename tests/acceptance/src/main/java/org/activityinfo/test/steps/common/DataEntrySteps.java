@@ -190,11 +190,6 @@ public class DataEntrySteps {
         driver.assertEntryCannotBeModifiedOrDeleted(databaseName, values);
     }
 
-    @Then("^new entry with end date \"([^\"]*)\" cannot be submitted in \"([^\"]*)\" form$")
-    public void new_entry_with_end_date_cannot_be_submitted_in_database(String endDate, String formName) throws Throwable {
-        driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, endDate);
-    }
-
     @Then("^\"([^\"]*)\" form entry appears with lock in Data Entry and cannot be modified nor deleted with any of these values:$")
     public void form_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with_any_of_these_values(String formName, List<FieldValue> values) throws Throwable {
         driver.assertEntryCannotBeModifiedOrDeleted(formName, values);
@@ -226,11 +221,12 @@ public class DataEntrySteps {
     ) throws Throwable {
 
         TablePage tablePage = openFormTable(database, formName);
-        tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().showAllColumns();//.waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
         tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
-        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();
+        bsModal.fill(driver.getAliasTable().alias(fieldValues))
+                .save();
     }
 
     @Then("^table has rows:$")
@@ -303,5 +299,21 @@ public class DataEntrySteps {
         filterItemsOnUi.removeAll(filterValues);
 
         assertTrue(filterItemsOnUi.isEmpty());
+    }
+
+    @When("^I import into the form \"([^\"]*)\" spreadsheet:$")
+    public void I_import_into_the_form_spreadsheet(String formName, DataTable dataTable) throws Throwable {
+        driver.importForm(formName, dataTable);
+    }
+
+    @When("^I import into the form \"([^\"]*)\" spreadsheet with (\\d+) rows:$")
+    public void I_import_into_the_form_spreadsheet_with_rows(String formName, int quantityOfRowCopy, DataTable dataTable) throws Throwable {
+        driver.importRowIntoForm(formName, dataTable, quantityOfRowCopy);
+    }
+
+    @Then("^\"([^\"]*)\" table has (\\d+) rows in \"([^\"]*)\" database$")
+    public void table_has_rows_in_database(String formName, int numberOfExpectedRows, String database) throws Throwable {
+        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
+        BsTable.waitUntilRowsLoaded(tablePage, numberOfExpectedRows);
     }
 }

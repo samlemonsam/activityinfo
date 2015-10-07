@@ -10,6 +10,7 @@ import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
@@ -500,15 +501,19 @@ public class UiApplicationDriver extends ApplicationDriver {
         return (TablePage) getCurrentPage();
     }
 
-    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName, Optional<String> selectedValue) {
         TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
-        BsModal modal = tablePage.table().newSubmission();
-        Form.FormItem fieldByLabel = modal.form().findFieldByLabel(fieldName);
-
-        assertNotNull(fieldByLabel);
-        if (ControlType.fromValue(controlType) == ControlType.SUGGEST_BOX) {
-            assertEquals(fieldByLabel.getPlaceholder(), I18N.CONSTANTS.suggestBoxPlaceholder());
+        final BsModal modal;
+        if (selectedValue.isPresent()) {
+            tablePage.table().waitForCellByText(selectedValue.get()).getContainer().clickWhenReady();
+            modal = tablePage.table().editSubmission();
+        } else {
+            modal = tablePage.table().newSubmission();
         }
+        Sleep.sleepSeconds(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
+        BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
+        modal.cancel();
+        return fieldByLabel;
     }
 
     @Override
@@ -594,6 +599,7 @@ public class UiApplicationDriver extends ApplicationDriver {
                             return !input.isValid();
                         }
                     });
+                    GxtModal.waitForModal(dataEntryTab.getContainer()).closeByWindowHeaderButton();
                     return; // success, field is marked as not valid and therefore submission is not possible
             }
         }
@@ -990,6 +996,68 @@ public class UiApplicationDriver extends ApplicationDriver {
     public List<String> getDashboardPortlets() {
         Dashboard dashboard = getApplicationPage().navigateToDashboard();
         return aliasTable.deAlias(dashboard.getPortletTitles());
+    }
+
+    @Override
+    public void importForm(String formName, DataTable dataTable) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        aliasTable.alias(dataTable);
+        dataEntryTab.importData(dataTable);
+    }
+
+    public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        aliasTable.alias(dataTable);
+
+        dataTable = copyLastRow(dataTable, quantityOfRowCopy);
+
+        dataEntryTab.importData(dataTable);
+    }
+
+    private static DataTable copyLastRow(DataTable dataTable, int quantityOfRowCopy) {
+        List<List<String>> rows = Lists.newArrayList();
+
+        // copy existing rows
+        for (DataTableRow row : dataTable.getGherkinRows()) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : row.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+
+        // copy last row
+        DataTableRow lastRow = dataTable.getGherkinRows().get(dataTable.getGherkinRows().size() - 1);
+        for (int i = 0; i < (quantityOfRowCopy - 1); i++) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : lastRow.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+        return DataTable.create(rows);
+    }
+
+    public void importSchema(String databaseName, String cvsText) {
+        ensureLoggedIn();
+
+        DesignTab designTab = getApplicationPage().navigateToDesignTab();
+        designTab.selectDatabase(databaseName);
+
+        ImportSchemaDialog dialog = designTab.design().clickImport();
+        dialog.enterCvsText(cvsText);
+        dialog.clickOk();
+        dialog.clickImportAnyway();
+        dialog.closeOnSuccess();
+
     }
 
     @Override

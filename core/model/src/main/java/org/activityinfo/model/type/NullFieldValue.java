@@ -30,21 +30,6 @@ public class NullFieldValue implements FieldValue {
 
     @Override
     public FieldTypeClass getTypeClass() {
-        return new FieldTypeClass() {
-            @Override
-            public String getId() {
-                return "null";
-            }
-
-            @Override
-            public FieldType createType() {
-                return new FieldType() {
-                    @Override
-                    public FieldTypeClass getTypeClass() {
-                        return null;
-                    }
-                };
-            }
-        };
+        return NullFieldType.INSTANCE;
     }
 }

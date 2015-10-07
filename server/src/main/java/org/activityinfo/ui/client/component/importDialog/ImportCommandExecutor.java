@@ -72,7 +72,7 @@ class ImportCommandExecutor {
             if (!mappedColumns.isEmpty()) {
                 System.out.println(field + " => " + mappedColumns);
 
-                FieldImporter importer = field.strategy.createImporter(field.node, mappedColumns);
+                FieldImporter importer = field.strategy.createImporter(field.node, mappedColumns, model);
 
                 importers.add(importer);
             }

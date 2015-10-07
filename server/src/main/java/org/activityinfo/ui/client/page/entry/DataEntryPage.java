@@ -26,7 +26,10 @@ import com.extjs.gxt.ui.client.Style.LayoutRegion;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
-import com.extjs.gxt.ui.client.widget.layout.*;
+import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
+import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.google.common.base.Optional;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,7 +40,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
@@ -52,6 +54,7 @@ import org.activityinfo.ui.client.Beta;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
+import org.activityinfo.ui.client.component.importDialog.ImportResultEvent;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
@@ -272,6 +275,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.setActionEnabled(UIActions.DELETE, false);
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, false);
         monthlyPanel.onNoSelection();
+        attachmentsTab.onNoSelection();
     }
 
     @Override
@@ -519,6 +523,13 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                            @Override
                            public void onSuccess(ImportPresenter result) {
                                result.show();
+                               result.getEventBus().addHandler(ImportResultEvent.TYPE, new ImportResultEvent.Handler() {
+                                   @Override
+                                   public void onResultChanged(ImportResultEvent event) {
+                                       gridPanel.refresh();
+                                       filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+                                   }
+                               });
                            }
                        });
     }

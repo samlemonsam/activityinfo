@@ -1,4 +1,4 @@
-package org.activityinfo.core.shared.importing.validation;
+package org.activityinfo.test;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,26 +21,27 @@ package org.activityinfo.core.shared.importing.validation;
  * #L%
  */
 
-import java.util.List;
-
 /**
- * @author yuriyz on 4/30/14.
+ * @author yuriyz on 10/02/2015.
  */
-public class ValidatedResult {
+public class Sleep {
 
-    private final ValidatedRowTable rowTable;
-    private final List<ValidationResult> classValidation;
-
-    public ValidatedResult(ValidatedRowTable rowTable, List<ValidationResult> classValidation) {
-        this.rowTable = rowTable;
-        this.classValidation = classValidation;
+    private Sleep() {
     }
 
-    public ValidatedRowTable getRowTable() {
-        return rowTable;
+    public static void sleepSeconds(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    public List<ValidationResult> getClassValidation() {
-        return classValidation;
+    public static void sleepMillis(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

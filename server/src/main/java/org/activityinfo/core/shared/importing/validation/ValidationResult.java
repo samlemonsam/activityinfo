@@ -4,6 +4,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Pair;
 import org.activityinfo.core.shared.importing.strategy.InstanceScorer;
 
+import java.util.List;
+
 public class ValidationResult {
 
     public static enum State {
@@ -20,7 +22,7 @@ public class ValidationResult {
     private Pair<ResourceId, ResourceId> rangeWithInstanceId;
     private ResourceId instanceId;
     private String typeConversionErrorMessage;
-    private String convertedValue;
+    private String targetValue;
     private double confidence;
 
     private ValidationResult(State state) {
@@ -33,9 +35,14 @@ public class ValidationResult {
         return result;
     }
 
-    public static ValidationResult converted(String value, double confidence) {
+    public static ValidationResult missing() {
+        return new ValidationResult(State.MISSING);
+    }
+
+
+    public static ValidationResult converted(String targetValue, double confidence) {
         ValidationResult result = new ValidationResult(State.CONFIDENCE);
-        result.convertedValue = value;
+        result.targetValue = targetValue;
         result.confidence = confidence;
         return result;
     }
@@ -48,8 +55,8 @@ public class ValidationResult {
         return typeConversionErrorMessage;
     }
 
-    public String getConvertedValue() {
-        return convertedValue;
+    public String getTargetValue() {
+        return targetValue;
     }
 
     public double getConfidence() {
@@ -57,14 +64,14 @@ public class ValidationResult {
     }
 
     public boolean wasConverted() {
-        return convertedValue != null;
+        return targetValue != null;
     }
 
     public State getState() {
         return state;
     }
 
-    public boolean shouldPersist() {
+    public boolean isPersistable() {
         return state == State.OK || (state == State.CONFIDENCE && confidence >= InstanceScorer.MINIMUM_SCORE);
     }
 
@@ -72,8 +79,13 @@ public class ValidationResult {
         return instanceId;
     }
 
-    public void setInstanceId(ResourceId instanceId) {
+    public ValidationResult setInstanceId(ResourceId instanceId) {
         this.instanceId = instanceId;
+        return this;
+    }
+
+    public boolean hasReferenceMatch() {
+        return instanceId != null;
     }
 
     public Pair<ResourceId, ResourceId> getRangeWithInstanceId() {
@@ -82,5 +94,14 @@ public class ValidationResult {
 
     public void setRangeWithInstanceId(Pair<ResourceId, ResourceId> rangeWithInstanceId) {
         this.rangeWithInstanceId = rangeWithInstanceId;
+    }
+
+    public static boolean isPersistable(List<ValidationResult> results) {
+        for (ValidationResult result : results) {
+            if (!result.isPersistable()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

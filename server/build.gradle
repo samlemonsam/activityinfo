@@ -34,7 +34,11 @@ gwt {
         }
     } else {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
+                'org.activityinfo.ui.ActivityInfoReleaseLogging',
                 'org.activityinfo.ui.Embed'
+//        compiler {
+//            style = de.richsource.gradle.plugins.gwt.Style.DETAILED;
+//        }
     }
 }
 
@@ -184,12 +188,17 @@ task deployBetaApi(type: com.google.appengine.task.appcfg.UpdateTask) {
 
 }
 
-task deployDispatch(type: com.google.appengine.task.appcfg.UpdateDispatchTask) {
-    dependsOn appengineDownloadSdk
-    webAppSourceDirectory = new File("${projectDir}/src/main/webapp")
 
-    extraOptions = ["--application=${environment.projectId}", '--version=qa']
 
+appengineUpdateQueues {
+    extraOptions = ["--application=${environment.projectId}" ]
+    oauth2 = true
+
+    doFirst {
+        if(environment.local) {
+            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
+        }
+    }
 }
 
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {

@@ -37,10 +37,15 @@ import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
+import javax.persistence.QueryTimeoutException;
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CreateEntityHandler extends BaseEntityHandler implements CommandHandler<CreateEntity> {
+
+    private static final Logger LOGGER = Logger.getLogger(CreateEntityHandler.class.getName());
 
     private final Injector injector;
     private final KeyGenerator generator = new KeyGenerator();
@@ -126,7 +131,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         indicator.setId(generator.generateInt());
         Activity activity = entityManager().getReference(Activity.class, properties.get("activityId"));
         indicator.setActivity(activity);
-        assertDesignPrivileges(user, indicator.getActivity().getDatabase());
+        assertDesignPrivileges(user, activity.getDatabase());
 
         updateIndicatorProperties(indicator, properties);
         
@@ -141,15 +146,21 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
     }
 
     private int queryNextIndicatorSortOrdinal(Activity activity) {
-        Integer nextOrdinal = entityManager()
-                .createQuery("select max(i.sortOrder) from Indicator i where i.activity = :activity", Integer.class)
-                .setParameter("activity", activity)
-                .getSingleResult();
+        try {
 
-        if(nextOrdinal == null) {
+            Integer nextOrdinal = entityManager()
+                    .createQuery("select max(i.sortOrder) from Indicator i where i.activity = :activity", Integer.class)
+                    .setParameter("activity", activity)
+                    .getSingleResult();
+
+            if (nextOrdinal == null) {
+                return 1;
+            } else {
+                return nextOrdinal + 1;
+            }
+        } catch (QueryTimeoutException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
             return 1;
-        } else {
-            return nextOrdinal+1;
         }
     }
 
