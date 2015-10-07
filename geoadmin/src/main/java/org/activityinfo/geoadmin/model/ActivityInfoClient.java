@@ -24,12 +24,14 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.views.EmptyColumnView;
 import org.activityinfo.store.query.impl.views.GeoColumnView;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -346,12 +348,21 @@ public class ActivityInfoClient implements FormClassProvider {
                 case "coordinates":
                     columnMap.put(column.getKey(), parseCoordinates(columnValue.getAsJsonArray("coordinates")));
                     break;
+                case "empty":
+                    columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
+                    break;
                 default:
                     throw new UnsupportedOperationException(storage);
             }
         }
 
         return new ColumnSet(numRows, columnMap);
+    }
+
+    private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
+        String typeName = columnValue.get("type").getAsString();
+        ColumnType type = ColumnType.valueOf(typeName);
+        return new EmptyColumnView(numRows, type);
     }
 
     public void executeTransaction(TransactionBuilder builder) {
