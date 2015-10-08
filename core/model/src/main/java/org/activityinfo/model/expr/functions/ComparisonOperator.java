@@ -32,7 +32,7 @@ public abstract class ComparisonOperator extends ExprFunction {
         FieldValue b = arguments.get(1);
 
         // special handling if right operand is constant without units specified: {fieldId}==2.0
-        // then constract copy of Quantity without unit information for correct comparison.
+        // then construct copy of Quantity without unit information for correct comparison.
         if (a instanceof Quantity && b instanceof Quantity) {
             Quantity aQuantity = (Quantity) a;
             Quantity bQuantity = (Quantity) b;

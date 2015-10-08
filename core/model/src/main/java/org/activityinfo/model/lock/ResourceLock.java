@@ -21,32 +21,50 @@ package org.activityinfo.model.lock;
  * #L%
  */
 
-import org.activityinfo.model.resource.IsResource;
-import org.activityinfo.model.resource.Resource;
+import com.google.common.collect.Lists;
+import org.activityinfo.model.resource.IsRecord;
+import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 10/05/2015.
  */
-public class ResourceLock implements IsResource {
+public class ResourceLock implements IsRecord { // it's not Resource because we are going to keep lock inside payload of FormClass
 
     private ResourceId id;
     private ResourceId ownerId;
 
     private String name;
+    private boolean enabled;
     private String expression;
 
     public ResourceLock() {
     }
 
-    @Override
     public ResourceId getId() {
         return id;
     }
 
     public void setId(ResourceId id) {
         this.id = id;
+    }
+
+    public ResourceId getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(ResourceId ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getName() {
@@ -65,31 +83,60 @@ public class ResourceLock implements IsResource {
         this.expression = expression;
     }
 
-    @Override
-    public Resource asResource() {
-        Resource resource = Resources.createResource();
-        resource.setId(id);
-        resource.setOwnerId(ownerId);
-        resource.set("name", name);
-        resource.set("expression", expression);
-
-        return resource;
+    public static ResourceLock fromRecord(Record record) {
+        ResourceLock lock = new ResourceLock();
+        lock.id = record.getResourceId("id");
+        lock.ownerId = record.getResourceId("ownerId");
+        lock.name = record.getString("name");
+        lock.expression = record.getString("expression");
+        lock.enabled = record.getBoolean("enabled");
+        return lock;
     }
 
-    public static ResourceLock asLock(Resource resource) {
-        ResourceLock lock = new ResourceLock();
-        lock.id = resource.getId();
-        lock.ownerId = resource.getOwnerId();
-        lock.name = resource.getString("name");
-        lock.expression = resource.getString("expression");
-        return lock;
+    public static List<ResourceLock> fromRecords(List<Record> records) {
+        List<ResourceLock> locks = Lists.newArrayList();
+        for (Record record : records) {
+            locks.add(fromRecord(record));
+        }
+        return locks;
+    }
+
+    @Override
+    public Record asRecord() {
+        Record record = new Record();
+        record.set("id", id);
+        record.set("ownerId", ownerId);
+        record.set("name", name);
+        record.set("expression", expression);
+        record.set("enabled", enabled);
+
+        return record;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ResourceLock that = (ResourceLock) o;
+
+        return !(id != null ? !id.equals(that.id) : that.id != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "ResourceLock{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", ownerId=" + ownerId +
+                ", name='" + name + '\'' +
                 ", expression='" + expression + '\'' +
+                ", enabled='" + enabled + '\'' +
                 '}';
     }
 }

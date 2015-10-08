@@ -21,7 +21,6 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -103,14 +102,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
             });
         }
         return queryInstances(new IdCriteria(instanceId)).then(new SelectSingle());
-    }
-
-    @Override
-    public Promise<ResourceLock> queryLocks(ResourceId resourceId) {
-        if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            //todo
-        }
-        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override
