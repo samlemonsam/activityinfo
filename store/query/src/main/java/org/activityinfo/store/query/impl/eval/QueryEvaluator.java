@@ -12,6 +12,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.store.query.impl.CollectionScanBatch;
 import org.activityinfo.store.query.impl.Slot;
@@ -82,7 +83,12 @@ public class QueryEvaluator {
             }
 
             SymbolBinding fieldMatch = resolver.resolveSymbol(symbolExpr);
-            return batch.addColumn(fieldMatch.getField());
+            if(fieldMatch.getField().isCalculated()) {
+                CalculatedFieldType type = (CalculatedFieldType) fieldMatch.getField().getType();
+                return evaluateExpression(type.getExpressionAsString());
+            } else {
+                return batch.addColumn(fieldMatch.getField());
+            }
         }
 
         @Override
