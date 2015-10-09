@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.adapter.ActivityFormClassBuilder;
-import org.activityinfo.legacy.shared.adapter.ResourceLockBuilder;
+import org.activityinfo.legacy.shared.adapter.ActivityFormLockBuilder;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -156,6 +156,6 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
     }
 
     private void injectLocks(FormClass formClass, ActivityFormDTO activityDTO) {
-        formClass.getLocks().addAll(ResourceLockBuilder.fromLockedPeriods(activityDTO.getLockedPeriods()));
+        formClass.getLocks().addAll(ActivityFormLockBuilder.fromLockedPeriods(activityDTO.getLockedPeriods(), activityDTO.getResourceId()));
     }
 }

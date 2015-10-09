@@ -22,7 +22,6 @@ package org.activityinfo.model.expr.functions;
  */
 
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.number.Quantity;
 
 /**
  * @author yuriyz on 10/08/2015.
@@ -37,10 +36,11 @@ public class LessOrEqualFunction extends ComparisonOperator {
 
     @Override
     protected boolean apply(FieldValue a, FieldValue b) {
-        if (a instanceof Quantity && b instanceof Quantity) {
-            Quantity qa = (Quantity) a;
-            Quantity qb = (Quantity) b;
-            return qa.getValue() <= qb.getValue();
+        Double da = extractDouble(a);
+        Double db = extractDouble(b);
+
+        if (da != null && db != null) {
+            return da <= db;
         }
 
         throw new UnsupportedOperationException("Operators are not supported.");

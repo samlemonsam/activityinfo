@@ -49,7 +49,9 @@ public class ExprEvalTest {
         evaluate("1<=0", false);
 
 
-//        evaluate(" 3 < 4 && 4 < 5", true);
+        evaluate(" (3 < 4) && (4 < 5)", true);
+        evaluate(" (3 <= 3) && (4 <= 5)", true);
+        evaluate(" (3 > 2) && (4 > 5)", false);
     }
 
     private void evaluate(String exprString, double expectedValue) {

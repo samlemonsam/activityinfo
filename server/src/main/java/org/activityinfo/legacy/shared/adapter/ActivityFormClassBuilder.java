@@ -109,6 +109,8 @@ public class ActivityFormClassBuilder {
         commentsField.setLabel(I18N.CONSTANTS.comments());
         siteForm.addElement(commentsField);
 
+        siteForm.getLocks().addAll(ActivityFormLockBuilder.fromLockedPeriods(activity.getLockedPeriods(), activity.getResourceId()));
+
         return siteForm;
     }
 

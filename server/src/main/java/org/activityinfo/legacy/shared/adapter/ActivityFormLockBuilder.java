@@ -22,6 +22,7 @@ package org.activityinfo.legacy.shared.adapter;
  */
 
 import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
@@ -31,19 +32,28 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * @author yuriyz on 10/07/2015.
  */
-public class ResourceLockBuilder {
+public class ActivityFormLockBuilder {
 
     private LockedPeriodDTO lockedPeriodDTO;
+    private ResourceId classId;
 
-    public ResourceLockBuilder(LockedPeriodDTO lockedPeriodDTO) {
+    public ActivityFormLockBuilder(LockedPeriodDTO lockedPeriodDTO, int activityId) {
+        this(lockedPeriodDTO, CuidAdapter.activityFormClass(activityId));
+    }
+
+    public ActivityFormLockBuilder(@Nonnull LockedPeriodDTO lockedPeriodDTO, @Nonnull ResourceId classId) {
         Preconditions.checkNotNull(lockedPeriodDTO);
+        Preconditions.checkNotNull(classId);
+
         this.lockedPeriodDTO = lockedPeriodDTO;
+        this.classId = classId;
     }
 
     public ResourceLock build() {
@@ -57,7 +67,28 @@ public class ResourceLockBuilder {
     }
 
     private String createExpression() {
-        return null;
+        String endDateId = ActivityFormClassBuilder.createEndDateField(classId).getId().asString();
+        long start = lockedPeriodDTO.getFromDate().atMidnightInMyTimezone().getTime();
+        long end = lockedPeriodDTO.getToDate().atMidnightInMyTimezone().getTime();
+
+        String expression = "(" + start + "<={" + endDateId + "})" +
+                "&&" +
+                "({" + endDateId + "}<=" + end + ")";
+        if (!Strings.isNullOrEmpty(lockedPeriodDTO.getParentType())) {
+            if (ActivityDTO.ENTITY_NAME.equals(lockedPeriodDTO.getParentType())) {
+                if (lockedPeriodDTO.getParentId() != CuidAdapter.getLegacyIdFromCuid(classId)) {
+                    throw new RuntimeException("Lock activity id does not match activity id provided to builder! " +
+                            "It means that form class is not owner of the lock.");
+                }
+            } else if (ProjectDTO.ENTITY_NAME.equals(lockedPeriodDTO.getParentType())) {
+                String projectId = CuidAdapter.field(classId, CuidAdapter.PROJECT_FIELD).asString();
+                String lockProjectValue = CuidAdapter.projectInstanceId(lockedPeriodDTO.getParentId()).asString();
+                expression = expression + "&&"
+                        + "({" + projectId + "}==" + lockProjectValue + ")";
+            }
+
+        }
+        return expression;
     }
 
     private ResourceId createOwnerId() {
@@ -71,10 +102,14 @@ public class ResourceLockBuilder {
         return null;
     }
 
-    public static List<ResourceLock> fromLockedPeriods(Collection<LockedPeriodDTO> periods) {
+    public static ResourceLock fromLock(LockedPeriodDTO period, ResourceId activityId) {
+        return new ActivityFormLockBuilder(period, activityId).build();
+    }
+
+    public static List<ResourceLock> fromLockedPeriods(Collection<LockedPeriodDTO> periods, ResourceId activityId) {
         List<ResourceLock> locks = Lists.newArrayList();
         for (LockedPeriodDTO period : periods) {
-            locks.add(new ResourceLockBuilder(period).build());
+            locks.add(new ActivityFormLockBuilder(period, activityId).build());
         }
         return locks;
     }
