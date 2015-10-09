@@ -17,7 +17,8 @@ import java.util.Set;
 
 public class ExprParser {
 
-    private static final Set<String> INFIX_OPERATORS = Sets.newHashSet("+", "-", "*", "/", "&&", "||", "==", "!=" );
+    private static final Set<String> INFIX_OPERATORS = Sets.newHashSet(
+            "+", "-", "*", "/", "&&", "||", "==", "!=", "<", ">", ">=", "<=");
 
     private static final Set<String> PREFIX_OPERATORS = Sets.newHashSet("!" );
 

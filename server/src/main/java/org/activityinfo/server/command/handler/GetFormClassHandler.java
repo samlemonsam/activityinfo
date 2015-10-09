@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.adapter.ActivityFormClassBuilder;
+import org.activityinfo.legacy.shared.adapter.ActivityFormLockBuilder;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -84,13 +85,16 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
     // AI-1057 - Fix forms corrupted during cloning, partner and project range must reference to db id instead of partner id.
     private String fixIfNeeded(String json, Activity activity, ActivityFormDTO activityDTO) {
 
+        FormClass formClass = FormClass.fromResource(Resources.fromJson(json));
+
+        injectLocks(formClass, activityDTO);
+
         boolean hasPartner = false;
         boolean hasProject = false;
         boolean hasStartDate = false;
         boolean hasEndDate = false;
         boolean hasLocation = false;
 
-        FormClass formClass = FormClass.fromResource(Resources.fromJson(json));
         for (FormField formField : formClass.getFields()) {
             int fieldIndex = CuidAdapter.getBlockSilently(formField.getId(), 1);
             if (fieldIndex == CuidAdapter.PARTNER_FIELD) {
@@ -149,5 +153,9 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
         }
 
         return Resources.toJson(formClass.asResource());
+    }
+
+    private void injectLocks(FormClass formClass, ActivityFormDTO activityDTO) {
+        formClass.getLocks().addAll(ActivityFormLockBuilder.fromLockedPeriods(activityDTO.getLockedPeriods(), activityDTO.getResourceId()));
     }
 }

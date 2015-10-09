@@ -1,11 +1,9 @@
 package org.activityinfo.model.resource;
 
+import com.google.common.collect.Lists;
 import com.google.gson.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Resources {
 
@@ -179,5 +177,13 @@ public class Resources {
             jsonArray.add(propertyValueToJson(element));
         }
         return jsonArray;
+    }
+
+    public static List<Record> asRecordList(Collection<? extends IsRecord> list) {
+        List<Record> records = Lists.newArrayList();
+        for(IsRecord object : list) {
+            records.add(object.asRecord());
+        }
+        return records;
     }
 }

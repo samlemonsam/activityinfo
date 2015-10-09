@@ -5,6 +5,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public abstract class ComparisonOperator extends ExprFunction {
         FieldValue b = arguments.get(1);
 
         // special handling if right operand is constant without units specified: {fieldId}==2.0
-        // then constract copy of Quantity without unit information for correct comparison.
+        // then construct copy of Quantity without unit information for correct comparison.
         if (a instanceof Quantity && b instanceof Quantity) {
             Quantity aQuantity = (Quantity) a;
             Quantity bQuantity = (Quantity) b;
@@ -44,6 +45,16 @@ public abstract class ComparisonOperator extends ExprFunction {
 
         return BooleanFieldValue.valueOf(apply(a, b));
 
+    }
+
+    public Double extractDouble(FieldValue value) {
+        if (value instanceof Quantity) {
+            return ((Quantity) value).getValue();
+        }
+        if (value instanceof LocalDate) {
+            return (double) ((LocalDate) value).atMidnightInMyTimezone().getTime();
+        }
+        return null;
     }
 
     @Override
