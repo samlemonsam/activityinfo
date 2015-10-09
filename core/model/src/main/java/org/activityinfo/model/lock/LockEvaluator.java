@@ -54,6 +54,16 @@ public class LockEvaluator {
         return false;
     }
 
+    public boolean isLockedSilently(FormInstance instance) {
+        try {
+            return isLocked(instance);
+        } catch (UnsupportedOperationException e) {
+            // there are numerous use cases when operand may be null, which is not supported by comparison operators by design
+            // example: user selected start date (end date is not selected yet)
+            return false;
+        }
+    }
+
     private boolean isLocked(ResourceLock lock, FormInstance instance) {
         if (!lock.getEnabled()) {
             return false;

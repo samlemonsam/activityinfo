@@ -258,7 +258,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             DateRange dateRange = BuiltinFields.getDateRange(workingInstance, formClass);
 
             if (!formClass.getLocks().isEmpty()) {
-                if (new LockEvaluator(formClass).isLocked(workingInstance)) {
+                if (new LockEvaluator(formClass).isLockedSilently(workingInstance)) {
                     getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
                     getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
                     return Optional.of(false);
