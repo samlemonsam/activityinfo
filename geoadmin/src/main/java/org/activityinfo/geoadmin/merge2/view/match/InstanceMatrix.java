@@ -8,6 +8,8 @@ import java.util.List;
  * Matrix representing the distance between two sets of form instances.
  */
 public class InstanceMatrix extends ScoreMatrix {
+    
+    private static final double MIN_SCORE = 0.5;
 
     private int sourceCount;
     private int targetCount;
@@ -48,6 +50,12 @@ public class InstanceMatrix extends ScoreMatrix {
 
     @Override
     public double score(int sourceIndex, int targetIndex, int dimensionIndex) {
-       return keyFields.get(dimensionIndex).score(sourceIndex, targetIndex);
+        double score = keyFields.get(dimensionIndex).score(sourceIndex, targetIndex);
+        if(score > MIN_SCORE) {
+            return score;
+        } else {
+            // Discard low scores to avoid too much noise 
+            return 0.0;
+        }
     }
 }

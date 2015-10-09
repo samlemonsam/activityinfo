@@ -36,7 +36,6 @@ import java.util.logging.Logger;
  */
 public class MatchGraph {
 
-    private static final double MIN_SCORE = 0.5;
 
 
     public static class Candidate {
@@ -135,6 +134,8 @@ public class MatchGraph {
         for (int i = 0; i < matrix.getDimensionCount(); i++) {
             specificityWeights[i] = computeSpecificityWeight(i);
         }
+        
+        LOGGER.info("Specificity weights: " + Arrays.toString(specificityWeights));
     }
 
     private double computeSpecificityWeight(int dimensionIndex) {
@@ -182,7 +183,7 @@ public class MatchGraph {
 
                 // Must have a substantial score on at least ONE dimension
                 // to be considered a viable candidate, otherwise we end up with too much noise
-                if(maxScore >= MIN_SCORE) {
+                if(maxScore > 0) {
                     sourceCandidates.put(i, new Candidate(j, scores));
                     targetCandidates.put(j, new Candidate(i, scores));
                 }
