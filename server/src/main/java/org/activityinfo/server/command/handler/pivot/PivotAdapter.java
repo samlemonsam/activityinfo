@@ -8,6 +8,7 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
+import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
@@ -94,10 +95,11 @@ public class PivotAdapter {
                 return new DateAccessor((DateDimension) dimension);
             case AttributeGroup:
                 return new AttributeAccessor((AttributeGroupDimension) dimension, formTrees.values());
+            case AdminLevel:
+                return new AdminAccessor((AdminDimension) dimension);
             case Site:
             case ActivityCategory:
             case Database:
-            case AdminLevel:
             case Status:
             case Attribute:
                 break;

@@ -55,6 +55,10 @@ public class TableMappingBuilder {
         mappings.add(fieldMapping);
     }
     
+    public void addUnmappedField(FormField field) {
+        formClass.addElement(field);
+    }
+    
     public void addTextField(FormField field, String columnName) {
         add(new FieldMapping(field, columnName, Mapping.TEXT));
     }

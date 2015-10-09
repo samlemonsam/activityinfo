@@ -149,7 +149,6 @@ public class CollectionScan {
         // First try to retrieve as much as we can from the cache
         if(!resolveFromCache()) {
 
-
             // Run the query
             queryBuilder.execute();
 
@@ -181,6 +180,9 @@ public class CollectionScan {
             this.rowCount.get().set(cachedViews.values().iterator().next().numRows());
         }
 
-        return columnMap.isEmpty() && !rowCount.isPresent();
+        return columnMap.isEmpty() &&
+               foreignKeyMap.isEmpty() &&
+                !primaryKeyMapBuilder.isPresent() &&
+                !rowCount.isPresent();
     }
 }

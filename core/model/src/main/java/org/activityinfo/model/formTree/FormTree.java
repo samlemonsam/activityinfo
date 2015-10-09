@@ -32,6 +32,7 @@ public class FormTree {
         private FieldPath path;
         private FormClass formClass;
         private List<Node> children = Lists.newArrayList();
+        
         private int depth;
 
         public boolean isRoot() {
@@ -56,6 +57,8 @@ public class FormTree {
             childNode.formClass = declaringClass;
             children.add(childNode);
             nodeMap.put(childNode.path, childNode);
+            formClassMap.put(declaringClass.getId(), declaringClass);
+            
             if (childNode.parent != null) {
                 childNode.depth = childNode.parent.depth + 1;
             }
@@ -211,6 +214,7 @@ public class FormTree {
 
     private List<Node> rootFields = Lists.newArrayList();
     private Map<FieldPath, Node> nodeMap = Maps.newHashMap();
+    private Map<ResourceId, FormClass> formClassMap = new HashMap<>();
 
     public FormTree() {
 
@@ -222,6 +226,7 @@ public class FormTree {
         node.field = field;
         node.path = new FieldPath(field.getId());
         rootFields.add(node);
+        formClassMap.put(declaringClass.getId(), declaringClass);
         nodeMap.put(node.path, node);
         return node;
     }
@@ -248,6 +253,14 @@ public class FormTree {
             map.put(node.getDefiningFormClass().getId(), node.getDefiningFormClass());
         }
         return map;
+    }
+
+    public FormClass getFormClass(ResourceId formClassId) {
+        FormClass formClass = formClassMap.get(formClassId);
+        if(formClass == null) {
+            throw new IllegalArgumentException("No such FormClass: " + formClassId);
+        }
+        return formClass;
     }
 
     public Node getNodeByPath(FieldPath path) {

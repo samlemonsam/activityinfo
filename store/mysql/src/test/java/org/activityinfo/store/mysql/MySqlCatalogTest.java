@@ -61,12 +61,15 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void testLocation() {
-        query(CuidAdapter.locationFormClass(1), "label", "axe");
+        
+        FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
+        
+        query(CuidAdapter.locationFormClass(1), "label", "axe", "province.name" /* "Territoire.name" */);
         assertThat(column("label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga", "Boga"));
-
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
+        assertThat(column("province.name"), hasValues("Sud Kivu", "Sud Kivu", "Ituri", "Ituri"));
+       // assertThat(column("territoire.name"), hasValues("Shabunda", "Walungu", "Irumu", "Irumu"));
     }
-    
     
     @Test
     public void testAdmin() {
@@ -78,14 +81,19 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void testAdminTree() {
-        FormTreeBuilder builder = new FormTreeBuilder(catalogProvider);
-        FormTree formTree = builder.queryTree(adminLevelFormClass(2));
-        JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
-        formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
+        FormTree formTree = queryFormTree(adminLevelFormClass(2));
 
         FormTreePrettyPrinter.print(formTree);
     }
-    
+
+    private FormTree queryFormTree(ResourceId classId) {
+        FormTreeBuilder builder = new FormTreeBuilder(catalogProvider);
+        FormTree formTree = builder.queryTree(classId);
+        JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
+        formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
+        return formTree;
+    }
+
     @Test
     public void testNoColumns() {
         QueryModel queryModel = new QueryModel(CuidAdapter.activityFormClass(1));

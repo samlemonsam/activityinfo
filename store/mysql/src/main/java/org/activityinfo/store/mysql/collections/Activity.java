@@ -49,8 +49,6 @@ public class Activity {
     private boolean published;
     
     private List<ActivityField> fields = Lists.newArrayList();
-            ;
-
 
     public int getId() {
         return activityId;

@@ -71,7 +71,6 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         
         try {
             // Run base table
-            int rowCount = 0;
             Cursor cursor = baseCursor.open();
             while (cursor.next()) {
             }

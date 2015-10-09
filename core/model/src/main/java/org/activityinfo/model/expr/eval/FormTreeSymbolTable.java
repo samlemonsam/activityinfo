@@ -118,12 +118,20 @@ public class FormTreeSymbolTable {
             }
         }
 
+        // The field can also be matched against the _range_ of a field: for example,
+        // we might be interested in "Province.Name", where "Province" is a form class.
+        // In this event, match any reference field which includes in its range a form class with
+        // the id or label of "Province"
         if (fieldNode.getType() instanceof ReferenceType) {
             ReferenceType fieldType = (ReferenceType) fieldNode.getType();
             for (ResourceId formClassId : fieldType.getRange()) {
                 if (formClassId.asString().equals(symbolName)) {
                     return new SymbolBinding(fieldNode, formClassId);
                 }
+//                String formLabel = tree.getFormClass(formClassId).getLabel();
+//                if(formLabel.equalsIgnoreCase(symbolName)) {
+//                    return new SymbolBinding(fieldNode, formClassId);
+//                }
             }
         }
         return null;

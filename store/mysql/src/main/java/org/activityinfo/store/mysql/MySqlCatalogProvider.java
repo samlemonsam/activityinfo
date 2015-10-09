@@ -26,9 +26,9 @@ public class MySqlCatalogProvider {
         mappings.add(new SimpleTableCollectionProvider(new UserCollection(), CollectionPermissions.readonly()));
         mappings.add(new SimpleTableCollectionProvider(new CountryCollection(), CollectionPermissions.readonly()));
         mappings.add(new SimpleTableCollectionProvider(new AdminCollectionProvider(), CollectionPermissions.readonly()));
-        mappings.add(new SimpleTableCollectionProvider(new LocationCollectionProvider(), CollectionPermissions.readonly()));
         mappings.add(new SimpleTableCollectionProvider(new PartnerCollectionProvider(), CollectionPermissions.readonly()));
         mappings.add(new SiteCollectionProvider());
+        mappings.add(new LocationCollectionProvider());
         mappings.add(new ReportingPeriodCollectionProvider());
     }
 
