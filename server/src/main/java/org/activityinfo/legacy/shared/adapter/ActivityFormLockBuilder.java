@@ -21,7 +21,7 @@ package org.activityinfo.legacy.shared.adapter;
  * #L%
  */
 
-import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
