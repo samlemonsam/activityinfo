@@ -25,18 +25,13 @@ package org.activityinfo.server.database;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Provider;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -145,18 +140,18 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
     }
 
     private static void initializeDatabase() throws SQLException, LiquibaseException {
-
-        Connection connection = DriverManager.getConnection(connectionUrl(""), USERNAME, PASSWORD);
-        Statement stmt = connection.createStatement();
-        stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
-        stmt.execute("CREATE DATABASE " + DATABASE_NAME);
-        stmt.execute("USE " + DATABASE_NAME);
-
-        Liquibase liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
-                new ClassLoaderResourceAccessor(),
-                new JdbcConnection(connection));
-        liquibase.update(null);
-        connection.close();
+//
+//        Connection connection = DriverManager.getConnection(connectionUrl(""), USERNAME, PASSWORD);
+//        Statement stmt = connection.createStatement();
+//        stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
+//        stmt.execute("CREATE DATABASE " + DATABASE_NAME);
+//        stmt.execute("USE " + DATABASE_NAME);
+//
+//        Liquibase liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
+//                new ClassLoaderResourceAccessor(),
+//                new JdbcConnection(connection));
+//        liquibase.update(null);
+//        connection.close();
     }
 
     @Override

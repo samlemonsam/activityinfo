@@ -71,6 +71,12 @@ public class LocalDate implements FieldValue, IsRecord, TemporalValue {
         this.dayOfMonth = dayOfMonth;
     }
 
+    
+    public int getQuarter() {
+        int quarter0 = (monthOfYear - 1) / 3;
+        return quarter0 + 1;
+    }
+    
     /**
      *
      * @return a java.util.Date instance representing the instant at midnight on this date

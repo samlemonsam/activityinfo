@@ -43,6 +43,20 @@ public class HibernateQueryExecutor  {
         hem.getTransaction().commit();
         return collector.get(0);
     }
+    
+    public <T> T joinTxAndDoWork(final StoreSession<T> session) {
+        final List<T> collector = Lists.newArrayList();
+        HibernateEntityManager hem = (HibernateEntityManager) entityManager.get();
+        hem.getSession().doWork(new Work() {
+            @Override
+            public void execute(Connection connection) throws SQLException {
+                QueryExecutor executor = new QueryExecutorImpl(connection);
+                CollectionCatalog catalog = catalogProvider.openCatalog(executor);
+                collector.add(session.execute(catalog));
+            }
+        });
+        return collector.get(0);
+    }
 
     private class QueryExecutorImpl implements QueryExecutor {
         private final Connection connection;
