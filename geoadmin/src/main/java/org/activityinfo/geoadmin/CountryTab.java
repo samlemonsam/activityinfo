@@ -218,11 +218,11 @@ public class CountryTab extends JPanel {
     }
 
     private void updateLevel(AdminLevel level) {
-        ImportSource source = chooseSource();
+        File source = chooseFile();
         if (source != null) {
             try {
                 ResourceId targetId = CuidAdapter.adminLevelFormClass(level.getId());
-                ResourceId sourceId = ResourceId.valueOf("file://" + source.getFile().getAbsolutePath());
+                ResourceId sourceId = ResourceId.valueOf("file://" + source.getAbsolutePath());
                 ImportModel model = new ImportModel(sourceId, targetId);
                 ImportView viewModel = new ImportView(new ResourceStoreImpl(client), model);
                 ImportDialog dialog = new ImportDialog(client, viewModel);
