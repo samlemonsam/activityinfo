@@ -32,7 +32,7 @@ public class AttributeDimBinding extends DimBinding {
         // 2) OTHER attributes in other forms with the same name as the attribute group name are also
         //    included
         
-        this.groupId = CuidAdapter.attributeField(model.getAttributeGroupId());
+        this.groupId = CuidAdapter.attributeGroupField(model.getAttributeGroupId());
         this.groupName = findGroupName(formTrees);
         this.columnId = "A" + model.getAttributeGroupId();
     }
