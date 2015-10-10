@@ -42,7 +42,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.mysql.collections.CountryCollection;
+import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.codehaus.jackson.map.annotate.JsonView;
@@ -86,9 +86,9 @@ public class RootResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<CountryDTO> getCountries() {
 
-        QueryModel model = new QueryModel(CountryCollection.FORM_CLASS_ID);
-        model.selectField(CountryCollection.CODE_FIELD_ID).as("code");
-        model.selectField(CountryCollection.NAME_FIELD_ID).as("name");
+        QueryModel model = new QueryModel(CountryTable.FORM_CLASS_ID);
+        model.selectField(CountryTable.CODE_FIELD_ID).as("code");
+        model.selectField(CountryTable.NAME_FIELD_ID).as("name");
         
         return dispatcher.execute(new GetCountries()).getData();
     }

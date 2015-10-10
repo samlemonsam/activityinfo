@@ -9,6 +9,7 @@ import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.mysql.side.AdminColumnBuilder;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -20,14 +21,14 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
     private CountryStructure country;
     private int locationTypeId;
     private MySqlCursorBuilder baseTableBuilder;
-    private LocationLinkScanner locationLinkScanner;
+    private AdminColumnBuilder adminColumnBuilder;
     
     public LocationQueryBuilder(QueryExecutor executor, TableMapping tableMapping, CountryStructure country) {
         this.executor = executor;
         this.country = country;
         this.locationTypeId = CuidAdapter.getLegacyIdFromCuid(tableMapping.getFormClass().getId());
         baseTableBuilder = new MySqlCursorBuilder(tableMapping, executor);
-        locationLinkScanner = new LocationLinkScanner(locationTypeId, country);
+        adminColumnBuilder = new AdminColumnBuilder(locationTypeId, country);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
         if(fieldId.equals(LocationCollection.ADMIN_FIELD_ID)) {
-            locationLinkScanner.addObserver(observer);
+            adminColumnBuilder.addObserver(observer);
         } else {
             baseTableBuilder.addField(fieldId, observer);
         }
@@ -58,9 +59,9 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
         }
         
         // If we need the adminlevel, then we need to scan the locationadminlink table
-        if(locationLinkScanner.hasObservers()) {
+        if(adminColumnBuilder.hasObservers()) {
             try {
-                locationLinkScanner.execute(executor);
+                adminColumnBuilder.execute(executor);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

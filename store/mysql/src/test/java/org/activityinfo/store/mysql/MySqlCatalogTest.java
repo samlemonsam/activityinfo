@@ -14,8 +14,8 @@ import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.store.mysql.collections.CountryCollection;
-import org.activityinfo.store.mysql.collections.DatabaseCollection;
+import org.activityinfo.store.mysql.collections.CountryTable;
+import org.activityinfo.store.mysql.collections.DatabaseTable;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,14 +44,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void testCountry() {
-        query(CountryCollection.FORM_CLASS_ID, "label", "code");
+        query(CountryTable.FORM_CLASS_ID, "label", "code");
         assertThat(column("label"), hasValues("Rdc"));
         assertThat(column("code"), hasValues("CD"));
     }
 
     @Test
     public void testDatabase() {
-        query(DatabaseCollection.FORM_CLASS_ID, "label", "description", "country", "country.label", "country.code");
+        query(DatabaseTable.FORM_CLASS_ID, "label", "description", "country", "country.label", "country.code");
         assertThat(column("label"), hasValues("PEAR", "PEAR Plus", "Alpha", "Public"));
         assertThat(column("description"), hasAllNullValuesWithLengthOf(4));
         assertThat(column("country"), hasValues("c0000000001", "c0000000001", "c0000000001", "c0000000001"));

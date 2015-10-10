@@ -44,8 +44,8 @@ public class PivotAdapter {
 
     private final Map<ResourceId, FormTree> formTrees;
     
-    private final List<DimensionAccessor> dimensions;
-    private Optional<IndicatorAccessor> indicatorDimension = Optional.absent();
+    private final List<DimBinding> dimensions;
+    private Optional<IndicatorDimBinding> indicatorDimension = Optional.absent();
 
     private final Map<Object, Bucket> buckets = Maps.newHashMap();
 
@@ -68,7 +68,7 @@ public class PivotAdapter {
         dimensions = new ArrayList<>();
         for (Dimension dimension : command.getDimensions()) {
             if(dimension.getType() == DimensionType.Indicator) {
-                indicatorDimension = Optional.of(new IndicatorAccessor());
+                indicatorDimension = Optional.of(new IndicatorDimBinding());
             } else {
                 dimensions.add(buildAccessor(dimension));
             }
@@ -85,18 +85,18 @@ public class PivotAdapter {
         return map;
     }
 
-    private DimensionAccessor buildAccessor(Dimension dimension) {
+    private DimBinding buildAccessor(Dimension dimension) {
         switch (dimension.getType()) {
             case Partner:
-                return new PartnerAccessor();
+                return new PartnerDimBinding();
             case Activity:
-                return new ActivityAccessor();
+                return new ActivityDimBinding();
             case Date:
-                return new DateAccessor((DateDimension) dimension);
+                return new DateDimBinding((DateDimension) dimension);
             case AttributeGroup:
-                return new AttributeAccessor((AttributeGroupDimension) dimension, formTrees.values());
+                return new AttributeDimBinding((AttributeGroupDimension) dimension, formTrees.values());
             case AdminLevel:
-                return new AdminAccessor((AdminDimension) dimension);
+                return new AdminDimBinding((AdminDimension) dimension);
             case Site:
             case ActivityCategory:
             case Database:
@@ -133,7 +133,7 @@ public class PivotAdapter {
         }
 
         // Add dimensions columns as needed
-        for (DimensionAccessor dimension : dimensions) {
+        for (DimBinding dimension : dimensions) {
             for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
                 queryModel.addColumn(columnModel);
             }

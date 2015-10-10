@@ -38,7 +38,7 @@ public class TableMapping {
         this.insertDefaults = insertDefaults;
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod, "deleteMethod");
         for(FieldMapping mapping : mappings) {
-            fieldMappings.put(mapping.getResourceId(), mapping);
+            fieldMappings.put(mapping.getFieldId(), mapping);
         }
     }
 
@@ -101,7 +101,7 @@ public class TableMapping {
                 for (Map.Entry<ResourceId, FieldMapping> entry : fieldMappings.entrySet()) {
                     FieldMapping fieldMapping = entry.getValue();
                     int firstColumnIndex = columnMap.get(entry.getKey());
-                    FieldValue fieldValue = fieldMapping.getValueExtractor().extract(rs, firstColumnIndex);
+                    FieldValue fieldValue = fieldMapping.getValueExtractor().toFieldValue(rs, firstColumnIndex);
                     if (fieldValue != null) {
                         resource.set(entry.getKey(), fieldValue);
                     }

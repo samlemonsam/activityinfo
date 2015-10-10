@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class AdminAccessor extends DimensionAccessor {
+public class AdminDimBinding extends DimBinding {
     
     private final AdminDimension model;
 
     private final String idColumn;
     private final String labelColumn;
 
-    public AdminAccessor(AdminDimension model) {
+    public AdminDimBinding(AdminDimension model) {
         this.model = model;
         this.idColumn = "Admin" + model.getLevelId();
         this.labelColumn = "AdminName" + model.getLevelId();

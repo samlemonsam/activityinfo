@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.Cursor;
 import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.store.mysql.mapping.PrimaryKeyExtractor;
+import org.activityinfo.store.mysql.mapping.ResourceIdConverter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +14,7 @@ import java.util.List;
 class MySqlCursor implements Cursor {
 
     ResultSet resultSet;
-    PrimaryKeyExtractor primaryKey;
+    ResourceIdConverter primaryKey;
 
     List<Runnable> onNext = Lists.newArrayList();
     List<CursorObserver> onClosed = Lists.newArrayList();
@@ -41,6 +41,6 @@ class MySqlCursor implements Cursor {
 
     @Override
     public ResourceId getResourceId() {
-        return primaryKey.getPrimaryKey(resultSet);
+        return primaryKey.toResourceId(resultSet);
     }
 }

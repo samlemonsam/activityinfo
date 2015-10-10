@@ -11,15 +11,23 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 
-public class ForeignKeyMapping implements FieldValueMapping {
+/**
+ * Converts to and from a {@code ReferenceValue} and an integer foreign key column in
+ * an SQL table.
+ */
+public class ReferenceConverter implements FieldValueConverter {
     private char domain;
 
-    public ForeignKeyMapping(char domain) {
+    /**
+     * 
+     * @param domain the prefix to use in converting the integer id to a {@code ResourceId}
+     */
+    public ReferenceConverter(char domain) {
         this.domain = domain;
     }
 
     @Override
-    public FieldValue extract(ResultSet rs, int index) throws SQLException {
+    public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
         int id = rs.getInt(index);
         if (rs.wasNull()) {
             return null;

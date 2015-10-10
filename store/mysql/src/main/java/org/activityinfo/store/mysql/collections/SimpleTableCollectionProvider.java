@@ -5,34 +5,34 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
+import org.activityinfo.store.mysql.mapping.SimpleTable;
 
 import java.sql.SQLException;
 
 
 public class SimpleTableCollectionProvider implements CollectionProvider {
     
-    private final MappingProvider mappingProvider;
-    private Authorizer authorizer;
+    private final SimpleTable table;
+    private final Authorizer authorizer;
 
-    public SimpleTableCollectionProvider(MappingProvider mappingProvider, CollectionPermissions permissions) {
-        this.mappingProvider = mappingProvider;
+    public SimpleTableCollectionProvider(SimpleTable table, CollectionPermissions permissions) {
+        this.table = table;
         this.authorizer = new ConstantAuthorizer(permissions);
     }
 
     @Override
     public boolean accept(ResourceId formClassId) {
-        return mappingProvider.accept(formClassId);
+        return table.accept(formClassId);
     }
 
     @Override
-    public ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
-        return new SimpleTableCollection(mappingProvider.getMapping(executor, formClassId), authorizer, executor);
+    public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+        return new SimpleTableCollection(table.getMapping(executor, formClassId), authorizer, executor);
     }
 
     @Override
     public Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException {
-        return mappingProvider.lookupCollection(executor, resourceId);
+        return table.lookupCollection(executor, resourceId);
     }
 
 }

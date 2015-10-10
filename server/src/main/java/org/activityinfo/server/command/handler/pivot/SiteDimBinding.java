@@ -10,7 +10,7 @@ import org.activityinfo.model.query.ColumnSet;
 import java.util.Collections;
 import java.util.List;
 
-public class SiteAccessor extends DimensionAccessor {
+public class SiteDimBinding extends DimBinding {
 
     private static final String COLUMN_ID = "SiteId";
     

@@ -22,11 +22,11 @@ public class MySqlCatalogProvider {
     private List<CollectionProvider> mappings = Lists.newArrayList();
 
     public MySqlCatalogProvider() {
-        mappings.add(new SimpleTableCollectionProvider(new DatabaseCollection(), CollectionPermissions.readonly()));
-        mappings.add(new SimpleTableCollectionProvider(new UserCollection(), CollectionPermissions.readonly()));
-        mappings.add(new SimpleTableCollectionProvider(new CountryCollection(), CollectionPermissions.readonly()));
-        mappings.add(new SimpleTableCollectionProvider(new AdminCollectionProvider(), CollectionPermissions.readonly()));
-        mappings.add(new SimpleTableCollectionProvider(new PartnerCollectionProvider(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new DatabaseTable(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new UserTable(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new CountryTable(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new AdminEntityTable(), CollectionPermissions.readonly()));
+        mappings.add(new SimpleTableCollectionProvider(new PartnerTable(), CollectionPermissions.readonly()));
         mappings.add(new SiteCollectionProvider());
         mappings.add(new LocationCollectionProvider());
         mappings.add(new ReportingPeriodCollectionProvider());
@@ -39,7 +39,7 @@ public class MySqlCatalogProvider {
                 for(CollectionProvider mapping : mappings) {
                     if(mapping.accept(resourceId)) {
                         try {
-                            return Optional.of(mapping.getAccessor(executor, resourceId));
+                            return Optional.of(mapping.openCollection(executor, resourceId));
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
                         }

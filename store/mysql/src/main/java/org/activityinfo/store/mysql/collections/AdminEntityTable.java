@@ -20,7 +20,7 @@ import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
 /**
  * Provides access to collections of administrative entities
  */
-public class AdminCollectionProvider implements MappingProvider {
+public class AdminEntityTable implements SimpleTable {
 
 
     public static final String ADMIN_ENTITY_TABLE = "adminentity";
@@ -91,7 +91,7 @@ public class AdminCollectionProvider implements MappingProvider {
             mapping.setDeleteMethod(DeleteMethod.SOFT_BY_BOOLEAN);
             
             if(parent != null) {
-                mapping.add(new FieldMapping(parent, "adminEntityParentId", new ForeignKeyMapping(ADMIN_ENTITY_DOMAIN)));
+                mapping.add(new FieldMapping(parent, "adminEntityParentId", new ReferenceConverter(ADMIN_ENTITY_DOMAIN)));
             }
             return mapping.build();
         }

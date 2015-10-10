@@ -11,7 +11,7 @@ public interface CollectionProvider {
 
     boolean accept(ResourceId formClassId);
 
-    ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException;
+    ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException;
 
     Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException;
 }

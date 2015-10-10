@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Retrieves values for the dimension
  */
-public abstract class DimensionAccessor {
+public abstract class DimBinding {
     
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         return Collections.emptyList();

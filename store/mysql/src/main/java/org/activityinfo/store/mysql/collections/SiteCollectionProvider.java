@@ -23,7 +23,7 @@ public class SiteCollectionProvider implements CollectionProvider {
     }
 
     @Override
-    public ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         
         Activity activity = Activity.query(executor, CuidAdapter.getLegacyIdFromCuid(formClassId));
         ActivityTableMappingBuilder mapping = ActivityTableMappingBuilder.site(activity);

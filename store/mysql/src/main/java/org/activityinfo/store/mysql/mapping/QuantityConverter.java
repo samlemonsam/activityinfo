@@ -8,16 +8,16 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 
-public class QuantityMapping implements FieldValueMapping {
+public class QuantityConverter implements FieldValueConverter {
 
     private String units;
 
-    public QuantityMapping(String units) {
+    public QuantityConverter(String units) {
         this.units = units;
     }
 
     @Override
-    public FieldValue extract(ResultSet rs, int index) throws SQLException {
+    public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
         double value = rs.getDouble(index);
         if(rs.wasNull()) {
             return null;

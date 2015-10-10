@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Scans the indicatorValue and attributeValue tables 
+ */
 public class SideColumnBuilder {
     private static final Logger LOGGER = Logger.getLogger(SideColumnBuilder.class.getName());
 

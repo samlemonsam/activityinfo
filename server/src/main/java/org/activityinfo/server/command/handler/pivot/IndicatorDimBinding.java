@@ -7,7 +7,7 @@ import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 
-public class IndicatorAccessor {
+public class IndicatorDimBinding {
     
     private final Dimension model = new Dimension(DimensionType.Indicator);
     

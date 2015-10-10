@@ -16,14 +16,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class AttributeAccessor extends DimensionAccessor {
+public class AttributeDimBinding extends DimBinding {
 
     private final AttributeGroupDimension model;
     private final ResourceId groupId;
     private final String groupName;
     private final String columnId;
 
-    public AttributeAccessor(AttributeGroupDimension model, Collection<FormTree> formTrees) {
+    public AttributeDimBinding(AttributeGroupDimension model, Collection<FormTree> formTrees) {
         this.model = model;
         
         // The way that attributes are handled in pivot queries has evolved a bit strangely.

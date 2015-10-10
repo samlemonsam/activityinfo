@@ -109,7 +109,7 @@ public class ActivityTableMappingBuilder {
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true);
         formClass.addElement(date1);
-        mappings.add(new FieldMapping(date1, "date1", Mapping.DATE));
+        mappings.add(new FieldMapping(date1, "date1", DateConverter.INSTANCE));
 
         FormField date2 = new FormField(field(classId, END_DATE_FIELD))
                 .setLabel("End Date")
@@ -117,7 +117,7 @@ public class ActivityTableMappingBuilder {
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true);
         formClass.addElement(date2);
-        mappings.add(new FieldMapping(date2, "date2", Mapping.DATE));
+        mappings.add(new FieldMapping(date2, "date2", DateConverter.INSTANCE));
     }
     
     public void addSiteField() {
@@ -128,7 +128,7 @@ public class ActivityTableMappingBuilder {
         siteField.setRequired(true);
         
         formClass.addElement(siteField);
-        mappings.add(new FieldMapping(siteField, "siteId", new ForeignKeyMapping(SITE_DOMAIN)));
+        mappings.add(new FieldMapping(siteField, "siteId", new ReferenceConverter(SITE_DOMAIN)));
     }
     
     public void addLocationField() {
@@ -139,7 +139,7 @@ public class ActivityTableMappingBuilder {
         locationField.setRequired(true);
         
         formClass.addElement(locationField);
-        mappings.add(new FieldMapping(locationField, "locationId", new ForeignKeyMapping(LOCATION_DOMAIN)));
+        mappings.add(new FieldMapping(locationField, "locationId", new ReferenceConverter(LOCATION_DOMAIN)));
     }
 
     public void addPartnerField() {
@@ -150,7 +150,7 @@ public class ActivityTableMappingBuilder {
                 .setType(ReferenceType.single(CuidAdapter.partnerFormClass(activity.getDatabaseId())))
                 .setRequired(true);
         formClass.addElement(partnerField);
-        mappings.add(new FieldMapping(partnerField, "partnerId", new ForeignKeyMapping(PARTNER_DOMAIN)));
+        mappings.add(new FieldMapping(partnerField, "partnerId", new ReferenceConverter(PARTNER_DOMAIN)));
     }
 
     public void addProjectField() {
@@ -160,7 +160,7 @@ public class ActivityTableMappingBuilder {
                 .setType(ReferenceType.single(activity.getProjectFormClassId()))
                 .setRequired(false);
         formClass.addElement(partnerField);
-        mappings.add(new FieldMapping(partnerField, "projectId", new ForeignKeyMapping(PROJECT_DOMAIN)));
+        mappings.add(new FieldMapping(partnerField, "projectId", new ReferenceConverter(PROJECT_DOMAIN)));
     }
     
     public void addComments(){
@@ -171,9 +171,9 @@ public class ActivityTableMappingBuilder {
                 .setRequired(false);
         
         formClass.addElement(commentsField);
-        mappings.add(new FieldMapping(commentsField, "comments", new FieldValueMapping() {
+        mappings.add(new FieldMapping(commentsField, "comments", new FieldValueConverter() {
             @Override
-            public FieldValue extract(ResultSet rs, int index) throws SQLException {
+            public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
                 return NarrativeValue.valueOf(rs.getString(index));
             }
 

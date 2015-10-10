@@ -8,14 +8,14 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
+import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 
 import java.sql.SQLException;
 
 
-public class CountryCollection implements MappingProvider {
+public class CountryTable implements SimpleTable {
 
     public static final String TABLE_NAME = "country";
 

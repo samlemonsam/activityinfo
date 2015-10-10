@@ -1,9 +1,12 @@
 package org.activityinfo.store.mysql.mapping;
 
 
+/**
+ * Maps a collections' {@code resourceId} to a table's primary key
+ */
 public class PrimaryKeyMapping {
-    private final String columnName;
     private final char domain;
+    private final String columnName;
 
     public PrimaryKeyMapping(char domain, String columnName) {
         this.columnName = columnName;

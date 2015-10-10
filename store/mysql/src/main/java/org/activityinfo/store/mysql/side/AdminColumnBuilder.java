@@ -1,10 +1,11 @@
-package org.activityinfo.store.mysql.collections;
+package org.activityinfo.store.mysql.side;
 
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.mysql.collections.CountryStructure;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.ResultSet;
@@ -15,8 +16,7 @@ import java.util.*;
  * Scans the location / adminlink values for a given location type and emits
  * a ReferenceValue for each location.
  */
-public class LocationLinkScanner  {
-
+public class AdminColumnBuilder {
 
     private static final String NEW_LINE = "\n";
 
@@ -27,7 +27,7 @@ public class LocationLinkScanner  {
     private final int[] adminLevels;
     private final int[] adminParentMap;
 
-    public LocationLinkScanner(int locationTypeId, CountryStructure country) {
+    public AdminColumnBuilder(int locationTypeId, CountryStructure country) {
         this.locationTypeId = locationTypeId;
         this.country = country;
         this.adminLevels = country.getAdminLevelIdArray();
@@ -124,6 +124,4 @@ public class LocationLinkScanner  {
             observer.done();
         }
     }
-
-
 }

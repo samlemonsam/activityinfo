@@ -9,7 +9,7 @@ import java.sql.SQLException;
 /**
  * Provides a Mapping
  */
-public interface MappingProvider {
+public interface SimpleTable {
 
     boolean accept(ResourceId formClassId);
 

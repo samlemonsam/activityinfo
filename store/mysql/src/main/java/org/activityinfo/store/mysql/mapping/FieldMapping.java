@@ -9,26 +9,29 @@ import java.util.Collections;
 import java.util.List;
 
 
+/**
+ * Maps a {@code FormField} to one or more MySQL columns
+ */
 public class FieldMapping {
 
     private final FormField formField;
     private List<String> columnNames = Lists.newArrayList();
-    private FieldValueMapping valueExtractor;
+    private FieldValueConverter valueExtractor;
     private Join join;
 
-    public FieldMapping(FormField formField, String columnName, FieldValueMapping valueExtractor) {
+    public FieldMapping(FormField formField, String columnName, FieldValueConverter valueExtractor) {
         this.formField = formField;
         this.columnNames = Collections.singletonList(columnName);
         this.valueExtractor = valueExtractor;
     }
 
-    public FieldMapping(FormField formField, List<String> columnName, FieldValueMapping valueExtractor) {
+    public FieldMapping(FormField formField, List<String> columnName, FieldValueConverter valueExtractor) {
         this.formField = formField;
         this.columnNames = columnName;
         this.valueExtractor = valueExtractor;
     }
 
-    public FieldMapping(FormField formField, String columnName, Join join, FieldValueMapping valueExtractor) {
+    public FieldMapping(FormField formField, String columnName, Join join, FieldValueConverter valueExtractor) {
         this.formField = formField;
         this.columnNames = Collections.singletonList(columnName);
         this.valueExtractor = valueExtractor;
@@ -36,7 +39,7 @@ public class FieldMapping {
     }
 
 
-    public ResourceId getResourceId() {
+    public ResourceId getFieldId() {
         return formField.getId();
     }
 
@@ -48,11 +51,7 @@ public class FieldMapping {
         return columnNames;
     }
 
-    public void setColumnNames(List<String> columnNames) {
-        this.columnNames = columnNames;
-    }
-
-    public FieldValueMapping getValueExtractor() {
+    public FieldValueConverter getValueExtractor() {
         return valueExtractor;
     }
 

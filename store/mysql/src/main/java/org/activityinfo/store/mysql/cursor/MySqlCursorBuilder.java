@@ -14,7 +14,7 @@ import org.activityinfo.service.store.Cursor;
 import org.activityinfo.service.store.CursorBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.mapping.FieldMapping;
-import org.activityinfo.store.mysql.mapping.PrimaryKeyExtractor;
+import org.activityinfo.store.mysql.mapping.ResourceIdConverter;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 
 import java.sql.ResultSet;
@@ -42,11 +42,11 @@ public class MySqlCursorBuilder implements CursorBuilder {
         this.cursor.primaryKey = primaryKeyExtractor();
     }
 
-    private PrimaryKeyExtractor primaryKeyExtractor() {
+    private ResourceIdConverter primaryKeyExtractor() {
         String column = tableMapping.getPrimaryKey().getColumnName();
         int index = query.select(column);
 
-        return new PrimaryKeyExtractor(tableMapping.getPrimaryKey().getDomain(), index);
+        return new ResourceIdConverter(tableMapping.getPrimaryKey().getDomain(), index);
     }
     
     public void only(ResourceId resourceId) {

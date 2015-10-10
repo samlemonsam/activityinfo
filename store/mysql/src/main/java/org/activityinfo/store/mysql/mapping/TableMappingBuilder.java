@@ -60,21 +60,21 @@ public class TableMappingBuilder {
     }
     
     public void addTextField(FormField field, String columnName) {
-        add(new FieldMapping(field, columnName, Mapping.TEXT));
+        add(new FieldMapping(field, columnName, TextConverter.INSTANCE));
     }
 
     public void addDateField(FormField field, String columnName) {
-        add(new FieldMapping(field, columnName, Mapping.DATE));
+        add(new FieldMapping(field, columnName, DateConverter.INSTANCE));
     }
 
     public void addReferenceField(FormField field, final char domain, String columnName) {
-        add(new FieldMapping(field, columnName, new ForeignKeyMapping(domain)));
+        add(new FieldMapping(field, columnName, new ReferenceConverter(domain)));
     }
     
     public void addGeoAreaField(FormField field) {
-        add(new FieldMapping(field, Arrays.asList("x1", "y1", "x2", "y2"), new FieldValueMapping() {
+        add(new FieldMapping(field, Arrays.asList("x1", "y1", "x2", "y2"), new FieldValueConverter() {
             @Override
-            public FieldValue extract(ResultSet rs, int index) throws SQLException {
+            public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
                 double x1 = rs.getDouble(index);
                 if (rs.wasNull()) {
                     return null;
@@ -105,9 +105,9 @@ public class TableMappingBuilder {
     }
 
     public void addGeoPoint(FormField field) {
-        add(new FieldMapping(field, Arrays.asList("x1", "y1"), new FieldValueMapping() {
+        add(new FieldMapping(field, Arrays.asList("x1", "y1"), new FieldValueConverter() {
             @Override
-            public FieldValue extract(ResultSet rs, int index) throws SQLException {
+            public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
 
                 double lat = rs.getDouble(index + 1);
                 if (rs.wasNull()) {

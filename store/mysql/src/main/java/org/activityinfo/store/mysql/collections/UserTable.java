@@ -5,7 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
+import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -13,7 +13,7 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import java.sql.SQLException;
 
 
-public class UserCollection implements MappingProvider {
+public class UserTable implements SimpleTable {
 
     private static final String TABLE_NAME = "userlogin";
 
@@ -22,7 +22,7 @@ public class UserCollection implements MappingProvider {
 
     private final TableMapping mapping;
 
-    public UserCollection() {
+    public UserTable() {
 
         FormField nameField = new FormField(NAME_FIELD_ID);
         nameField.setLabel("Name");

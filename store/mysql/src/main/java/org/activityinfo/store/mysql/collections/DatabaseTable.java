@@ -8,7 +8,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
+import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -16,7 +16,7 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import java.sql.SQLException;
 
 
-public class DatabaseCollection implements MappingProvider {
+public class DatabaseTable implements SimpleTable {
 
     public static final String TABLE_NAME = "userdatabase";
 
@@ -29,7 +29,7 @@ public class DatabaseCollection implements MappingProvider {
 
     private final TableMapping mapping;
 
-    public DatabaseCollection() {
+    public DatabaseTable() {
         FormField labelField = new FormField(LABEL_FIELD_ID);
         labelField.setLabel(I18N.CONSTANTS.label());
         labelField.setCode("label");
@@ -44,13 +44,13 @@ public class DatabaseCollection implements MappingProvider {
         FormField ownerField = new FormField(OWNER_FIELD_ID);
         ownerField.setCode("owner");
         ownerField.setLabel(I18N.CONSTANTS.ownerName());
-        ownerField.setType(ReferenceType.single(UserCollection.FORM_CLASS_ID));
+        ownerField.setType(ReferenceType.single(UserTable.FORM_CLASS_ID));
         ownerField.setRequired(true);
 
         FormField countryField = new FormField(COUNTRY_FIELD_ID);
         countryField.setCode("country");
         countryField.setLabel(I18N.CONSTANTS.country());
-        countryField.setType(ReferenceType.single(CountryCollection.FORM_CLASS_ID));
+        countryField.setType(ReferenceType.single(CountryTable.FORM_CLASS_ID));
         countryField.setRequired(true);
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);

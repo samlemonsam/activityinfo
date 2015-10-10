@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class PartnerAccessor extends DimensionAccessor {
+public class PartnerDimBinding extends DimBinding {
 
     private static final String PARTNER_ID_COLUMN = "PartnerId";
     private static final String PARTNER_LABEL_COLUMN = "PartnerLabel";

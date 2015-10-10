@@ -16,13 +16,13 @@ import java.util.Date;
 import java.util.List;
 
 
-public class DateAccessor extends DimensionAccessor {
+public class DateDimBinding extends DimBinding {
 
     private static final String DATE_COLUMN_ID = "Date";
 
     private final DateDimension model;
 
-    public DateAccessor(DateDimension model) {
+    public DateDimBinding(DateDimension model) {
         this.model = model;
     }
 

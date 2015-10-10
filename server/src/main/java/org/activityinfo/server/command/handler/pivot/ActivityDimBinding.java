@@ -9,7 +9,7 @@ import org.activityinfo.model.query.ColumnSet;
 
 import java.util.Arrays;
 
-public class ActivityAccessor extends DimensionAccessor {
+public class ActivityDimBinding extends DimBinding {
    
     private final Dimension model = new Dimension(DimensionType.Activity);
 

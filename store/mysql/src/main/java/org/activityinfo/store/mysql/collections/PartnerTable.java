@@ -6,18 +6,17 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.mapping.MappingProvider;
+import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 
 import java.sql.SQLException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.NAME_FIELD;
-import static org.activityinfo.model.legacy.CuidAdapter.PARTNER_DOMAIN;
 import static org.activityinfo.model.legacy.CuidAdapter.field;
 
 
-public class PartnerCollectionProvider implements MappingProvider {
+public class PartnerTable implements SimpleTable {
 
 
     @Override

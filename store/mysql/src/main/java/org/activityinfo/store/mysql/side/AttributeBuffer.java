@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class AttributeBuffer implements ValueBuffer {
+class AttributeBuffer implements ValueBuffer {
 
     private static final Logger LOGGER = Logger.getLogger(AttributeBuffer.class.getName());
     

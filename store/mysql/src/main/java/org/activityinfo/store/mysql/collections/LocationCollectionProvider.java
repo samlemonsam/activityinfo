@@ -18,7 +18,7 @@ public class LocationCollectionProvider implements CollectionProvider {
     }
 
     @Override
-    public ResourceCollection getAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         return new LocationCollection(executor, formClassId);
     }
 
