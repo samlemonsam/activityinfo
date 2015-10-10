@@ -55,4 +55,13 @@ public class LocalDateType implements FieldType {
     public String toString() {
         return "LocalDateType";
     }
+
+    /**
+     *
+     * @return the singleton instance for this type
+     */
+    private Object readResolve() {
+        return INSTANCE;
+    }
+
 }

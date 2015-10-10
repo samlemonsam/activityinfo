@@ -36,4 +36,11 @@ public class TextType implements FieldType {
         return "TextType";
     }
 
+    
+    /**
+     * Returns the singleton instance for serialization
+     */
+    TextType readResolve() {
+        return INSTANCE;    
+    }
 }

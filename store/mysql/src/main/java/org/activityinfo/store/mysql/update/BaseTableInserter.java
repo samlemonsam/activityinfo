@@ -44,7 +44,7 @@ public class BaseTableInserter {
 
     private void addValue(FieldMapping fieldMapping, FieldValue value) {
         columns.addAll(fieldMapping.getColumnNames());
-        parameters.addAll(fieldMapping.getValueExtractor().toParameters(value));
+        parameters.addAll(fieldMapping.getConverter().toParameters(value));
     }
     
     public void addValue(String fieldName, Object value) {

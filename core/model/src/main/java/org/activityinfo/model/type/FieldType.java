@@ -1,7 +1,9 @@
 package org.activityinfo.model.type;
 
 
-public interface FieldType {
+import java.io.Serializable;
+
+public interface FieldType extends Serializable {
 
     /**
      * @return the {@code FieldTypeClass} of which this {@code FieldType}

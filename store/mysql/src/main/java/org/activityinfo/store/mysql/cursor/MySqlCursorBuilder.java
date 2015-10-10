@@ -114,7 +114,7 @@ public class MySqlCursorBuilder implements CursorBuilder {
             query.select(mapping.getJoin(), it.next());
         }
 
-        return new ResultSetFieldReader(startIndex, mapping.getValueExtractor(), mapping.getFormField().getType());
+        return new ResultSetFieldReader(startIndex, mapping.getConverter(), mapping.getFormField().getType());
     }
 
     @Override

@@ -71,4 +71,9 @@ public class CompoundExpr extends ExprNode {
         result = 31 * result + field.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return value + "." + field;
+    }
 }

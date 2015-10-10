@@ -6,7 +6,9 @@ import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
-public class EnumItem implements IsRecord {
+import java.io.Serializable;
+
+public class EnumItem implements IsRecord, Serializable {
     private ResourceId id;
     private String label;
     private String code;

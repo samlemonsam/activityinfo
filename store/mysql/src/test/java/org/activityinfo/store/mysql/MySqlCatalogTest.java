@@ -14,13 +14,17 @@ import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.store.mysql.collections.Activity;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.collections.DatabaseTable;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -100,6 +104,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         columnSet = executor.build(queryModel);
 
         assertThat(columnSet.getNumRows(), equalTo(3));
+    }
+    
+    @Test
+    public void testActivitySerialization() throws SQLException, IOException {
+        Activity activity = Activity.query(dbunit.getExecutor(), 1);
+
+        ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
+        oos.writeObject(activity);
     }
     
 

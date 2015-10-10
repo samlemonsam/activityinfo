@@ -17,6 +17,7 @@ import java.util.*;
 
 public class TableMappingBuilder {
     private String tableName;
+    private String fromClause;
     private String baseFilter;
     private List<FieldMapping> mappings = Lists.newArrayList();
     private PrimaryKeyMapping primaryKeyMapping;
@@ -27,6 +28,7 @@ public class TableMappingBuilder {
 
     private TableMappingBuilder(ResourceId formClassId, String tableName) {
         this.tableName = tableName;
+        this.fromClause = tableName + " base";
         this.formClass = new FormClass(formClassId);
     }
 
@@ -44,6 +46,10 @@ public class TableMappingBuilder {
 
     public void setOwnerId(ResourceId rootId) {
         formClass.setOwnerId(rootId);
+    }
+    
+    public void setFromClause(String fromClause) {
+        this.fromClause = fromClause;
     }
     
     public void setBaseFilter(String baseFilter) {
@@ -140,10 +146,10 @@ public class TableMappingBuilder {
 
 
     public TableMapping build() {
-        Preconditions.checkState(primaryKeyMapping != null, tableName + ": Primary key is not set");
-        Preconditions.checkState(formClass != null, tableName + ": FormClass is not set");
-        Preconditions.checkState(formClass.getOwnerId() != null, tableName + ": ownerId is not set");
-        return new TableMapping(tableName, tableName + " base", baseFilter, primaryKeyMapping, mappings, formClass,
+        Preconditions.checkState(primaryKeyMapping != null, fromClause + ": Primary key is not set");
+        Preconditions.checkState(formClass != null, fromClause + ": FormClass is not set");
+        Preconditions.checkState(formClass.getOwnerId() != null, fromClause + ": ownerId is not set");
+        return new TableMapping(tableName, fromClause, baseFilter, primaryKeyMapping, mappings, formClass,
                 deleteMethod, insertDefaults);
     }
 }

@@ -12,8 +12,7 @@ import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 
 import java.sql.SQLException;
 
-import static org.activityinfo.model.legacy.CuidAdapter.NAME_FIELD;
-import static org.activityinfo.model.legacy.CuidAdapter.field;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 
 
 public class PartnerTable implements SimpleTable {
@@ -31,8 +30,9 @@ public class PartnerTable implements SimpleTable {
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(classId, "partner");
         mapping.setFormLabel("Partner");
         mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
-
         mapping.setPrimaryKeyMapping(CuidAdapter.PARTNER_DOMAIN, "partnerId");
+        mapping.setFromClause("partnerindatabase pd LEFT JOIN partner base ON (pd.partnerId=base.partnerId)");
+        mapping.setBaseFilter("pd.databaseId=" + databaseId);
 
         FormField nameField = new FormField(field(classId, NAME_FIELD))
                 .setRequired(true)
@@ -43,15 +43,16 @@ public class PartnerTable implements SimpleTable {
         
         mapping.addTextField(nameField, "name");
         
-//        
-//        FormField fullNameField = new FormField(field(classId, FULL_NAME_FIELD))
-//                .setLabel("Full Name")
-//            //    .setSuperProperty(ApplicationProperties.DESCRIPTION_PROPERTY)
-//                .setRequired(false)
-//                .setType(TextType.INSTANCE);
+        
+        FormField fullNameField = new FormField(field(classId, FULL_NAME_FIELD))
+                .setLabel("Full Name")
+            //    .setSuperProperty(ApplicationProperties.DESCRIPTION_PROPERTY)
+                .setRequired(false)
+                .setType(TextType.INSTANCE);
+        
+        mapping.addTextField(fullNameField, "FullName");
 
         return mapping.build();
-        
     }
 
     @Override

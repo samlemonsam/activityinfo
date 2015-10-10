@@ -21,13 +21,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Scans the indicatorValue and attributeValue tables 
  */
 public class SideColumnBuilder {
+    
     private static final Logger LOGGER = Logger.getLogger(SideColumnBuilder.class.getName());
 
     /**
@@ -51,8 +51,6 @@ public class SideColumnBuilder {
     
     public void add(ActivityField field, final CursorObserver<FieldValue> observer) {
         ValueBuffer buffer = createBuffer(field.getFormField().getType(), observer);
-        
-        LOGGER.log(Level.INFO, field.getId() + ": Created buffer of type " + buffer.getClass().getSimpleName());
         
         fieldMap.put(field.getId(), buffer);
     }
@@ -88,7 +86,7 @@ public class SideColumnBuilder {
             if(siteId.isPresent()) {
                 sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
             } else {
-                sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+                sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
             }
             sql.append("ORDER BY site.siteId");
         } else {
@@ -103,7 +101,7 @@ public class SideColumnBuilder {
             if(siteId.isPresent()) {
                 sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
             } else {
-                sql.append("WHERE site.dateDeleted is null AND site.activityId=").append(activityId).append(newLine);
+                sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
             }
             sql.append("ORDER BY rp.reportingPeriodId");
         }
@@ -122,7 +120,7 @@ public class SideColumnBuilder {
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
         sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId)").append(newLine);
-        sql.append("WHERE site.dateDeleted IS NULL AND site.activityId=").append(activityId).append(newLine);
+        sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
         sql.append("ORDER BY site.siteId");
         
         execute(executor, sql);

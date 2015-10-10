@@ -56,7 +56,7 @@ public class BaseTableUpdater {
         for (String column : fieldMapping.getColumnNames()) {
             updates.add(format("%s = ?", column));
         }
-        updateParameters.addAll(fieldMapping.getValueExtractor().toParameters(value));
+        updateParameters.addAll(fieldMapping.getConverter().toParameters(value));
     }
 
     private void clearValue(FieldMapping fieldMapping) {

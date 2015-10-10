@@ -24,4 +24,13 @@ public final class NullFieldType implements FieldType, FieldTypeClass {
     public FieldType createType() {
         return this;
     }
+
+    /**
+     *
+     * @return the singleton instance for this type
+     */
+    private Object readResolve() {
+        return INSTANCE;
+    }
+
 }

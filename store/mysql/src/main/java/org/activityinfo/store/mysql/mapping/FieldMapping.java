@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.Join;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,29 +13,29 @@ import java.util.List;
 /**
  * Maps a {@code FormField} to one or more MySQL columns
  */
-public class FieldMapping {
+public class FieldMapping implements Serializable {
 
     private final FormField formField;
     private List<String> columnNames = Lists.newArrayList();
-    private FieldValueConverter valueExtractor;
+    private FieldValueConverter converter;
     private Join join;
 
-    public FieldMapping(FormField formField, String columnName, FieldValueConverter valueExtractor) {
+    public FieldMapping(FormField formField, String columnName, FieldValueConverter converter) {
         this.formField = formField;
         this.columnNames = Collections.singletonList(columnName);
-        this.valueExtractor = valueExtractor;
+        this.converter = converter;
     }
 
-    public FieldMapping(FormField formField, List<String> columnName, FieldValueConverter valueExtractor) {
+    public FieldMapping(FormField formField, List<String> columnName, FieldValueConverter converter) {
         this.formField = formField;
         this.columnNames = columnName;
-        this.valueExtractor = valueExtractor;
+        this.converter = converter;
     }
 
-    public FieldMapping(FormField formField, String columnName, Join join, FieldValueConverter valueExtractor) {
+    public FieldMapping(FormField formField, String columnName, Join join, FieldValueConverter converter) {
         this.formField = formField;
         this.columnNames = Collections.singletonList(columnName);
-        this.valueExtractor = valueExtractor;
+        this.converter = converter;
         this.join = join;
     }
 
@@ -51,8 +52,8 @@ public class FieldMapping {
         return columnNames;
     }
 
-    public FieldValueConverter getValueExtractor() {
-        return valueExtractor;
+    public FieldValueConverter getConverter() {
+        return converter;
     }
 
     public Join getJoin() {

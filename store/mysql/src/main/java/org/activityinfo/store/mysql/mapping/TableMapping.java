@@ -9,12 +9,13 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 
-public class TableMapping {
+public class TableMapping implements Serializable {
 
     private DeleteMethod deleteMethod;
     private String baseTable;
@@ -101,7 +102,7 @@ public class TableMapping {
                 for (Map.Entry<ResourceId, FieldMapping> entry : fieldMappings.entrySet()) {
                     FieldMapping fieldMapping = entry.getValue();
                     int firstColumnIndex = columnMap.get(entry.getKey());
-                    FieldValue fieldValue = fieldMapping.getValueExtractor().toFieldValue(rs, firstColumnIndex);
+                    FieldValue fieldValue = fieldMapping.getConverter().toFieldValue(rs, firstColumnIndex);
                     if (fieldValue != null) {
                         resource.set(entry.getKey(), fieldValue);
                     }

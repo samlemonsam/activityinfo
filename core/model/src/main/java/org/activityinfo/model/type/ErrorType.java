@@ -23,4 +23,13 @@ public class ErrorType implements FieldType {
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
     }
+
+    /**
+     *
+     * @return the singleton instance for this type
+     */
+    private Object readResolve() {
+        return INSTANCE;
+    }
+
 }

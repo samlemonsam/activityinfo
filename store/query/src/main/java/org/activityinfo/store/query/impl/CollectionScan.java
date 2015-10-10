@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
@@ -150,7 +151,10 @@ public class CollectionScan {
         if(!resolveFromCache()) {
 
             // Run the query
+            Stopwatch stopwatch = Stopwatch.createStarted();
             queryBuilder.execute();
+            
+            LOGGER.info("Collection scan of " + collection.getFormClass().getId() + " completed in " + stopwatch);
 
             // put to cache
             // TODO: cache.put(collection.getId(), columnMap);

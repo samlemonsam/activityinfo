@@ -1,6 +1,7 @@
 package org.activityinfo.server.command.handler.pivot;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.legacy.shared.command.DimensionType;
@@ -26,11 +27,14 @@ import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Executes a legacy PivotSites query against the new API
  */
 public class PivotAdapter {
+    
+    private static final Logger LOGGER = Logger.getLogger(PivotAdapter.class.getName());
 
     private final IndicatorOracle indicatorOracle;
     private final CollectionCatalog catalog;
@@ -49,7 +53,9 @@ public class PivotAdapter {
 
     private final Map<Object, Bucket> buckets = Maps.newHashMap();
 
-
+    private final Stopwatch queryTime = Stopwatch.createUnstarted();
+    private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
+    
 
     public PivotAdapter(IndicatorOracle indicatorOracle, CollectionCatalog catalog, PivotSites command) {
         this.indicatorOracle = indicatorOracle;
@@ -118,6 +124,9 @@ public class PivotAdapter {
         for (FormTree formTree : formTrees.values()) {
             queryForm(formTree);
         }
+        
+        LOGGER.info("Query time: " + queryTime + ", aggregate: " + aggregateTime);
+        
         return new PivotSites.PivotResult(Lists.newArrayList(buckets.values()));
     }
 
@@ -140,8 +149,13 @@ public class PivotAdapter {
         }
 
         // Query the table 
+        queryTime.start();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, ColumnCache.NULL);
         ColumnSet columnSet = builder.build(queryModel);
+        
+        queryTime.stop();
+        
+        aggregateTime.start();
         
         // Now add the results to the buckets
         DimensionCategory[][] categories = extractCategories(formTree, columnSet);
@@ -175,6 +189,7 @@ public class PivotAdapter {
                 }
             }
         }
+        aggregateTime.stop();
     }
 
     

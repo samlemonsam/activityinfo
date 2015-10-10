@@ -16,7 +16,6 @@ import org.activityinfo.store.mysql.collections.ActivityField;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +51,7 @@ public class ActivityTableMappingBuilder {
         mapping.activity = activity;
         mapping.baseTable = "site";
         mapping.baseFromClause = "site base";
-        mapping.baseFilter = "base.dateDeleted is NULL AND base.activityId=" + activity.getId();
+        mapping.baseFilter = "base.deleted=0     AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
         mapping.formClass.setLabel(activity.getName());
@@ -84,7 +83,7 @@ public class ActivityTableMappingBuilder {
         mapping.activity = activity;
         mapping.baseTable = "reportingperiod";
         mapping.baseFromClause = "reportingperiod base LEFT JOIN site on (site.siteId=base.siteId)";
-        mapping.baseFilter = "site.dateDeleted IS NULL AND site.activityId=" + activity.getId();
+        mapping.baseFilter = "site.deleted=0 AND site.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.reportingPeriodFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
         mapping.formClass.setLabel(activity.getName() + " Monthly Reports");
@@ -180,9 +179,9 @@ public class ActivityTableMappingBuilder {
             @Override
             public Collection<?> toParameters(FieldValue value) {
                 if(value instanceof NarrativeValue) {
-                    return Arrays.asList(((NarrativeValue) value).asString());
+                    return Collections.singleton(((NarrativeValue) value).asString());
                 } else {
-                    return Arrays.asList(null);
+                    return Collections.singleton(null);
                 }
             }
         }));

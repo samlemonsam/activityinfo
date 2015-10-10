@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.mapping;
 
 import org.activityinfo.model.type.FieldValue;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -9,7 +10,7 @@ import java.util.Collection;
 /**
  * Strategy for mapping a {@code FieldValue} to one or more MySQL columns
  */
-public interface FieldValueConverter {
+public interface FieldValueConverter extends Serializable {
 
     /**
      * Reads and converts column values from a {@code RecordSet} into a {@code FieldValue}

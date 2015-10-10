@@ -6,8 +6,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.*;
 
-import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
  * are called {@code FormInstances}.
 
  */
-public class FormClass implements IsResource, FormElementContainer {
+public class FormClass implements IsResource, FormElementContainer, Serializable {
 
 
     /**

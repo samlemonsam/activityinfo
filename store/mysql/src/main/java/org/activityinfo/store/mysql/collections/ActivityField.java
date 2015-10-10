@@ -6,9 +6,14 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.store.mysql.mapping.*;
+import org.activityinfo.store.mysql.mapping.FieldValueConverter;
+import org.activityinfo.store.mysql.mapping.QuantityConverter;
+import org.activityinfo.store.mysql.mapping.ReferenceConverter;
+import org.activityinfo.store.mysql.mapping.TextConverter;
 
-public class ActivityField {
+import java.io.Serializable;
+
+public class ActivityField implements Serializable {
     
     int id;
     private final String category;
@@ -71,16 +76,4 @@ public class ActivityField {
         return formField.getId();
     }
 
-    //
-//    public Join getJoin() {
-//
-//        String tableId = "I" + resourceId;
-//        Join join = new Join(periodJoin, tableId,
-//                ("LEFT JOIN indicatorvalue {table} ON (period.reportingPeriodId={table}.reportingPeriodId AND " +
-//                        "{table}.indicatorId={indicatorId})")
-//                        .replace("{table}", tableId)
-//                        .replace("{indicatorId}", Integer.toString(id)));
-//
-//
-//    }
 }

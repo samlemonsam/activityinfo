@@ -1,10 +1,12 @@
 package org.activityinfo.store.mysql.mapping;
 
 
+import java.io.Serializable;
+
 /**
  * Maps a collections' {@code resourceId} to a table's primary key
  */
-public class PrimaryKeyMapping {
+public class PrimaryKeyMapping implements Serializable {
     private final char domain;
     private final String columnName;
 

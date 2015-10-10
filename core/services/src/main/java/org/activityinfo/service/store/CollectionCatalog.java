@@ -6,7 +6,7 @@ import org.activityinfo.model.resource.ResourceId;
 
 /**
  * Contract for obtaining a {@link ResourceCollection}
- * for a given {@code Collection}
+ * for a given {@code ResourceId}
  */
 public interface CollectionCatalog extends FormClassProvider {
 

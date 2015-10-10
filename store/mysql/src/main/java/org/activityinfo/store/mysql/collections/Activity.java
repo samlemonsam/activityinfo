@@ -1,5 +1,8 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -26,16 +29,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
-public class Activity {
+public class Activity implements Serializable {
 
     public static final int REPORT_ONCE = 0;
     public static final int REPORT_MONTHLY = 1;
 
     private static final Logger LOGGER = Logger.getLogger(Activity.class.getName());
+
+    private static final MemcacheService MEMCACHE = MemcacheServiceFactory.getMemcacheService();
 
     private int activityId;
     private int databaseId;
@@ -47,6 +53,7 @@ public class Activity {
     private String name;
     private int ownerUserId;
     private boolean published;
+    private long version;
     
     private List<ActivityField> fields = Lists.newArrayList();
 
@@ -139,7 +146,26 @@ public class Activity {
 
     public static Activity query(QueryExecutor executor, int activityId) throws SQLException {
 
-
+        // First do a small query to get the version number of the activity and then fetch from 
+        // Memcache if available
+        try(ResultSet rs = executor.query("SELECT version FROM activity WHERE activityId = " + activityId)) {
+            if (!rs.next()) {
+                throw new ResourceNotFound(CuidAdapter.activityFormClass(activityId));
+            }
+            long version = rs.getLong(1);
+            try {
+                Activity cachedActivity = (Activity) MEMCACHE.get(memcacheKey(activityId, version));
+                if(cachedActivity != null) {
+                    LOGGER.fine("Loaded cached activity " + activityId);
+                    return cachedActivity;
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Exception deserializing cached Activity", e);
+            }
+        }
+        
+        // If not cached, query activity and all its indicators  from MySQL
+        
         Activity activity = new Activity();
         activity.activityId = activityId;
 
@@ -158,7 +184,8 @@ public class Activity {
                         "A.formClass, " + 
                         "A.gzFormClass, " + 
                         "d.ownerUserId, " +
-                        "A.published " +
+                        "A.published, " +
+                        "A.version " + 
                         "FROM activity A " +
                         "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                         "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -177,9 +204,9 @@ public class Activity {
             activity.adminLevelId = rs.getInt("boundAdminLevelId");
             activity.ownerUserId = rs.getInt("ownerUserId");
             activity.published = rs.getInt("published") == 1;
+            activity.version = rs.getLong("version");
 
             serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
-            
         }
 
         if(serializedFormClass == null) {
@@ -187,8 +214,19 @@ public class Activity {
         } else {
             activity.addFields(serializedFormClass);
         }
-
+        
+        // Store in memcache for subsequent requests
+        try {
+            MEMCACHE.put(memcacheKey(activityId, activity.version), activity,
+                    Expiration.byDeltaSeconds((int) TimeUnit.HOURS.toSeconds(8)));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception caching activity " + activityId + " to memcache.", e);
+        }
         return activity;
+    }
+
+    private static String memcacheKey(int activityId, long version) {
+        return Activity.class.getName() + "#" + activityId + "@" + version;
     }
 
     private static FormClass tryDeserialize(String formClass, byte[] formClassGz) {
@@ -210,7 +248,6 @@ public class Activity {
         }
     }
 
-
     private void addFields(FormClass formClass) {
         for (FormField formField : formClass.getFields()) {
             switch (formField.getId().getDomain()) {
@@ -222,7 +259,6 @@ public class Activity {
             }
         }
     }
-
 
     private void queryFields(QueryExecutor executor) throws SQLException {
 

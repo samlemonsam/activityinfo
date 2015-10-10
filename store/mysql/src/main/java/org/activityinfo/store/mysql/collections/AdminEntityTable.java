@@ -21,9 +21,9 @@ import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
  * Provides access to collections of administrative entities
  */
 public class AdminEntityTable implements SimpleTable {
-
-
+    
     public static final String ADMIN_ENTITY_TABLE = "adminentity";
+
 
     @Override
     public boolean accept(ResourceId formClassId) {
@@ -35,8 +35,7 @@ public class AdminEntityTable implements SimpleTable {
 
         // The shape of the AdminEntity FormClass is determined in part by the parameters
         // set in the adminlevel table
-
-        try(ResultSet rs = executor.query(
+        try (ResultSet rs = executor.query(
                 "SELECT " +
                         "L.Name, " +
                         "L.parentId ParentId, " +
