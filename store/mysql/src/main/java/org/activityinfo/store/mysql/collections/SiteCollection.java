@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
-import static java.lang.String.copyValueOf;
 import static java.lang.String.format;
 
 /**
@@ -49,8 +48,8 @@ public class SiteCollection implements ResourceCollection {
             CollectionPermissions permissions = new CollectionPermissions();
             
             try(ResultSet rs = queryExecutor.query(format("select * from userpermission where databaseId=%d and UserId = %d",
-                    userId,
-                    activity.getDatabaseId()))) {
+                    activity.getDatabaseId(),
+                    userId))) {
                 
                 if(rs.next()) {
                     int partnerId = rs.getInt("partnerId");
@@ -106,7 +105,7 @@ public class SiteCollection implements ResourceCollection {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        
+
         return Optional.of(resource);
     }
 
