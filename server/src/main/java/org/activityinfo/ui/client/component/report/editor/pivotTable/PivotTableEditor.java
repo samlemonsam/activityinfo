@@ -36,12 +36,10 @@ import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.RenderElement.Format;
-import org.activityinfo.legacy.shared.reports.content.PivotContent;
 import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.report.editor.chart.PivotFilterPanel;
 import org.activityinfo.ui.client.component.report.view.PivotGridPanel;
-import org.activityinfo.ui.client.component.report.view.ReportViewBinder;
 import org.activityinfo.ui.client.page.report.editor.ReportElementEditor;
 
 import java.util.Arrays;
@@ -55,7 +53,7 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
 
     private PivotTrayPanel pivotPanel;
     private PivotFilterPanel filterPane;
-    private ReportViewBinder<PivotContent, PivotTableReportElement> viewBinder;
+    private PivotTableBinder viewBinder;
 
     private DimensionPruner pruner;
 
@@ -131,7 +129,7 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
 
         center.add(gridPanel, new BorderLayoutData(Style.LayoutRegion.CENTER));
 
-        viewBinder = ReportViewBinder.create(eventBus, service, gridPanel);
+        viewBinder = new PivotTableBinder(eventBus, service, gridPanel);
     }
 
     public AsyncMonitor getMonitor() {

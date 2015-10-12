@@ -22,6 +22,7 @@ package org.activityinfo.legacy.shared.impl.pivot;
  * #L%
  */
 
+import com.google.common.collect.Iterables;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.impl.pivot.order.CategoryComparator;
@@ -29,19 +30,18 @@ import org.activityinfo.legacy.shared.impl.pivot.order.DefinedCategoryComparator
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.PivotTableData;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.legacy.shared.reports.model.PivotReportElement;
 
 import java.util.*;
 
 public class PivotTableDataBuilder {
 
-    public PivotTableData build(PivotReportElement<?> element,
-                                List<Dimension> rowDims,
+    public PivotTableData build(List<Dimension> rowDims,
                                 List<Dimension> colDims,
                                 List<Bucket> buckets) {
-
+        
         PivotTableData table = new PivotTableData();
-        Map<Dimension, Comparator<PivotTableData.Axis>> comparators = createComparators(element.allDimensions());
+        Map<Dimension, Comparator<PivotTableData.Axis>> comparators =
+                createComparators(Iterables.concat(rowDims, colDims));
 
         for (Bucket bucket : buckets) {
 
@@ -59,7 +59,7 @@ public class PivotTableDataBuilder {
         return table;
     }
 
-    protected Map<Dimension, Comparator<PivotTableData.Axis>> createComparators(Set<Dimension> dimensions) {
+    protected Map<Dimension, Comparator<PivotTableData.Axis>> createComparators(Iterable<Dimension> dimensions) {
         Map<Dimension, Comparator<PivotTableData.Axis>> map = new HashMap<Dimension, Comparator<PivotTableData.Axis>>();
 
         for (Dimension dimension : dimensions) {
