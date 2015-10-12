@@ -8,11 +8,13 @@ import com.google.common.cache.LoadingCache;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.mysql.collections.CollectionProvider;
+import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -23,12 +25,23 @@ class MySqlSession implements CollectionCatalog {
 
     private static Logger LOGGER = Logger.getLogger(MySqlSession.class.getName());
     
-    private List<CollectionProvider> providers;
+    private List<CollectionProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
     private LoadingCache<ResourceId, Optional<ResourceCollection>> sessionCache;
 
-    public MySqlSession(final List<CollectionProvider> providers, final QueryExecutor executor) {
-        this.providers = providers;
+    public MySqlSession(final QueryExecutor executor) {
+        
+        ActivityCache activityCache = new ActivityCache(executor);
+        
+        providers.add(new SimpleTableCollectionProvider(new DatabaseTable(), CollectionPermissions.readonly()));
+        providers.add(new SimpleTableCollectionProvider(new UserTable(), CollectionPermissions.readonly()));
+        providers.add(new SimpleTableCollectionProvider(new CountryTable(), CollectionPermissions.readonly()));
+        providers.add(new SimpleTableCollectionProvider(new AdminEntityTable(), CollectionPermissions.readonly()));
+        providers.add(new SimpleTableCollectionProvider(new PartnerTable(), CollectionPermissions.readonly()));
+        providers.add(new SiteCollectionProvider(activityCache));
+        providers.add(new LocationCollectionProvider());
+        providers.add(new ReportingPeriodCollectionProvider(activityCache));
+
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<ResourceCollection>>() {
             @Override

@@ -16,6 +16,14 @@ public class SiteCollectionProvider implements CollectionProvider {
     
     private static final Logger LOGGER = Logger.getLogger(SiteCollectionProvider.class.getName());
 
+    /**
+     * Caches activities within a session to avoid fetching Activity for both Site and ReportingFrequency table
+     */
+    private ActivityCache activityCache;
+
+    public SiteCollectionProvider(ActivityCache activityCache) {
+        this.activityCache = activityCache;
+    }
 
     @Override
     public boolean accept(ResourceId formClassId) {
@@ -24,8 +32,10 @@ public class SiteCollectionProvider implements CollectionProvider {
 
     @Override
     public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
-        
-        Activity activity = Activity.query(executor, CuidAdapter.getLegacyIdFromCuid(formClassId));
+
+        int activityId = CuidAdapter.getLegacyIdFromCuid(formClassId);
+
+        Activity activity = activityCache.getActivity(activityId);
         ActivityTableMappingBuilder mapping = ActivityTableMappingBuilder.site(activity);
 
         return new SiteCollection(activity, mapping.build(), executor);

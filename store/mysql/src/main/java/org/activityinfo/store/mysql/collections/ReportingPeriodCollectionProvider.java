@@ -11,6 +11,13 @@ import java.sql.SQLException;
 
 
 public class ReportingPeriodCollectionProvider implements CollectionProvider {
+
+    private final ActivityCache activityCache;
+
+    public ReportingPeriodCollectionProvider(ActivityCache activityCache) {
+        this.activityCache = activityCache;
+    }
+
     @Override
     public boolean accept(ResourceId formClassId) {
         return formClassId.getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS;
@@ -18,7 +25,6 @@ public class ReportingPeriodCollectionProvider implements CollectionProvider {
 
     @Override
     public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
-
         Activity activity = Activity.query(executor, CuidAdapter.getLegacyIdFromCuid(formClassId));
         ActivityTableMappingBuilder mapping = ActivityTableMappingBuilder.reportingPeriod(activity);
 
