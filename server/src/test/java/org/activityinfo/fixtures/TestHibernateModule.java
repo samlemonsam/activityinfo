@@ -29,8 +29,10 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.activityinfo.server.database.TestConnectionProvider;
 import org.activityinfo.server.database.hibernate.EntityManagerProvider;
+import org.activityinfo.server.database.hibernate.HibernateCatalogProvider;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
+import org.activityinfo.service.store.CollectionCatalog;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;
@@ -52,6 +54,7 @@ public class TestHibernateModule extends AbstractModule {
     protected void configure() {
 
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(TestScoped.class);
+        bind(CollectionCatalog.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
 
         bind(SqlDialect.class).to(MySqlDialect.class);
         bind(Connection.class).toProvider(TestConnectionProvider.class);
@@ -95,4 +98,6 @@ public class TestHibernateModule extends AbstractModule {
         }
         return emf;
     }
+    
+    
 }

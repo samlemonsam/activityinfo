@@ -30,12 +30,10 @@ import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.mysql.MySqlCatalogProvider;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;
 
-import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -57,6 +55,7 @@ public class HibernateModule extends ServletModule {
         bind(HibernateSessionScope.class).toInstance(sessionScope);
         
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(HibernateSessionScoped.class);
+        bind(CollectionCatalog.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
         /*
          * Important: the CloudSqlFilter must be listed before
          * the HibernateSessionFilter as otherwise the CloudSql filter
@@ -100,9 +99,4 @@ public class HibernateModule extends ServletModule {
         return (HibernateEntityManager) entityManager;
     }
     
-    @Provides
-    @HibernateSessionScoped
-    public CollectionCatalog provideCatalog(MySqlCatalogProvider provider, Provider<EntityManager> entityManager) {
-        return provider.openCatalog(new HibernateQueryExecutor(entityManager));
-    }
 }

@@ -109,7 +109,6 @@ public class UpdaterTest {
         assertTrue(update.getChangedFieldValues().containsKey(fieldId));
     }
     
-    
     @Test
     public void validQuantity() {
         ResourceId fieldId = ResourceId.valueOf("Q1");

@@ -23,6 +23,8 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.PivotSites.ValueType;
@@ -35,6 +37,7 @@ import org.activityinfo.model.date.DateUnit;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.report.util.DateUtilCalendarImpl;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +53,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class PivotSitesHandlerTest extends CommandTestCase2 {
+
+
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
+
 
     private Set<Dimension> dimensions;
     private Dimension indicatorDim = new Dimension(DimensionType.Indicator);
@@ -80,6 +88,12 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     public void setUp() throws Exception {
         dimensions = new HashSet<Dimension>();
         filter = new Filter();
+        helper.setUp();
+    }
+    
+    @After
+    public void tearDown() {
+        helper.tearDown();
     }
 
     @Test
