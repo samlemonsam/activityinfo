@@ -2,9 +2,10 @@ package org.activityinfo.model.query;
 
 import org.activityinfo.model.type.geo.Extents;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public interface ColumnView {
+public interface ColumnView extends Serializable {
 
     public static final int TRUE = 1;
     public static final int FALSE = 0;

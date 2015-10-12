@@ -13,7 +13,6 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.ResourceStore;
-import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
 import java.io.IOException;
@@ -60,7 +59,7 @@ public class ResourceStoreStub implements ResourceStore {
     @Override
     public Observable<ColumnSet> queryColumns(QueryModel queryModel) {
 
-        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog, ColumnCache.NULL);
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
         return new ConstantObservable<>(columnSetBuilder.build(queryModel));
     }
     

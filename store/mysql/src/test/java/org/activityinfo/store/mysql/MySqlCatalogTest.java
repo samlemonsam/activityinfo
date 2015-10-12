@@ -172,8 +172,24 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         
         query(CuidAdapter.reportingPeriodFormClass(3), "rate", "date1", "date2", "site.partner", "site.partner.label",
                 "site.location.label");
+
     }
 
+    @Test
+    public void testReportingPeriodCached() {
+
+        String[] columns = {
+                "rate", "date1", "date2", "site.partner", 
+                "site.partner.label",
+                "site.location.label"};
+
+        // First time cache will be cold
+        query(CuidAdapter.reportingPeriodFormClass(3), columns);
+
+        // Query again to verify that memcache works....
+        query(CuidAdapter.reportingPeriodFormClass(3), columns);
+        
+    }
 
     @Test
     public void testSiteIndicator() {

@@ -29,7 +29,6 @@ import java.util.Map;
 public class CollectionScanBatch {
 
     private final CollectionCatalog store;
-    private ColumnCache columnCache;
 
     /**
      * We want to do one pass over each FormClass so
@@ -38,9 +37,8 @@ public class CollectionScanBatch {
     private Map<ResourceId, CollectionScan> tableMap = Maps.newHashMap();
 
 
-    public CollectionScanBatch(CollectionCatalog store, ColumnCache columnCache) {
+    public CollectionScanBatch(CollectionCatalog store) {
         this.store = store;
-        this.columnCache = columnCache;
     }
 
 
@@ -51,7 +49,7 @@ public class CollectionScanBatch {
     private CollectionScan getTable(FormClass formClass) {
         CollectionScan scan = tableMap.get(formClass.getId());
         if(scan == null) {
-            scan = new CollectionScan(store.getCollection(formClass.getId()).get(), columnCache);
+            scan = new CollectionScan(store.getCollection(formClass.getId()).get());
             tableMap.put(formClass.getId(), scan);
         }
         return scan;

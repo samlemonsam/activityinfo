@@ -1,6 +1,8 @@
 package org.activityinfo.store.mysql;
 
 
+import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.io.Resources;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.query.ColumnSet;
@@ -8,13 +10,18 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 public abstract class AbstractMySqlTest {
 
     public static final int ADVOCACY = 4000;
+
+
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
 
 
     public static DbUnit dbunit;
@@ -27,6 +34,17 @@ public abstract class AbstractMySqlTest {
         System.out.println("Initializing Locale...");
         LocaleProxy.initialize();
     }
+
+
+    @Before
+    public void setUp() {
+        helper.setUp();
+    }
+
+    @After
+    public void tearDown() {
+        helper.tearDown();
+    }
     
     public static void resetDatabase() throws Throwable {
 
@@ -36,7 +54,7 @@ public abstract class AbstractMySqlTest {
         dbunit.dropAllRows();
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "sites-simple1.db.xml"));
         catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        executor = new ColumnSetBuilder(catalogProvider, ColumnCache.NULL);
+        executor = new ColumnSetBuilder(catalogProvider);
     }
 
 

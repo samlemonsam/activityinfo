@@ -36,7 +36,6 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
@@ -60,18 +59,19 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-    private HibernateQueryExecutor queryExecutor;
+    private Provider<CollectionCatalog> catalog;
     private Provider<AuthenticatedUser> userProvider;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
+                        Provider<CollectionCatalog> catalog,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config, HibernateQueryExecutor queryExecutor, Provider<AuthenticatedUser> userProvider) {
+                        DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
+        this.catalog = catalog;
         this.config = config;
-        this.queryExecutor = queryExecutor;
         this.userProvider = userProvider;
     }
 
@@ -134,7 +134,7 @@ public class RootResource {
 
     @Path("/adminLevel/{id}")
     public AdminLevelResource getAdminLevel(@PathParam("id") int id) {
-        return new AdminLevelResource(queryExecutor, entityManager, userProvider, entityManager.get().find(AdminLevel.class, id));
+        return new AdminLevelResource(catalog, entityManager, userProvider, entityManager.get().find(AdminLevel.class, id));
     }
 
     @Path("/sites")
@@ -154,12 +154,12 @@ public class RootResource {
 
     @Path("/form/{id}")
     public FormResource getForm(@PathParam("id") ResourceId id) {
-        return new FormResource(id, queryExecutor, userProvider);
+        return new FormResource(id, catalog, userProvider);
     }
     
     @Path("/query")
     public QueryResource query() {
-        return new QueryResource(queryExecutor);
+        return new QueryResource(catalog);
     }
     
     @POST
@@ -172,20 +172,15 @@ public class RootResource {
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
-        return queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<Response>() {
-            @Override
-            public Response execute(CollectionCatalog catalog) {
-                Updater updater = new Updater(catalog);
-                try {
-                    updater.execute(jsonElement.getAsJsonObject());
-                } catch (InvalidUpdateException e) {
-                    throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                            .entity(e.getMessage())
-                            .build());
-                }
-                return Response.ok().build();
-            }
-        });
+        Updater updater = new Updater(catalog.get());
+        try {
+            updater.execute(jsonElement.getAsJsonObject());
+        } catch (InvalidUpdateException e) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build());
+        }
+        return Response.ok().build();
     }
     
 

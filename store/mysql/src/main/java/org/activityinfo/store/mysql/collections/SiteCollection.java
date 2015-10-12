@@ -56,7 +56,6 @@ public class SiteCollection implements ResourceCollection {
                     String partnerFilter = format("%s=%s",
                             CuidAdapter.partnerField(activity.getId()),
                             CuidAdapter.partnerInstanceId(partnerId));
-                    permissions.setVisibilityFilter(partnerFilter);
                     
                     if(rs.getBoolean("AllowViewAll")) {
                         permissions.setVisible(true);
@@ -179,9 +178,13 @@ public class SiteCollection implements ResourceCollection {
         }
     }
 
-
     @Override
     public ColumnQueryBuilder newColumnQuery() {
         return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
+    }
+
+    @Override
+    public long cacheVersion() {
+        return activity.getVersion();
     }
 }

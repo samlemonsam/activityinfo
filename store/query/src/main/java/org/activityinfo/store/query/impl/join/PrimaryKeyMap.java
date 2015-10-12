@@ -1,9 +1,11 @@
 package org.activityinfo.store.query.impl.join;
 
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -11,10 +13,12 @@ import java.util.Map;
  */
 public class PrimaryKeyMap implements Serializable {
 
-    private final Map<ResourceId, Integer> map;
+    private final Map<ResourceId, Integer> map = new HashMap<>();
 
-    public PrimaryKeyMap(Map<ResourceId, Integer> map) {
-        this.map = map;
+    public PrimaryKeyMap(ColumnView id) {
+        for (int i = 0; i < id.numRows(); i++) {
+            map.put(ResourceId.valueOf(id.getString(i)), i);
+        }
     }
 
     /**

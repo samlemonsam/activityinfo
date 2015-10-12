@@ -23,7 +23,6 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.command.handler.IndicatorOracle;
 import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
 import java.util.*;
@@ -150,7 +149,7 @@ public class PivotAdapter {
 
         // Query the table 
         queryTime.start();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, ColumnCache.NULL);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
         ColumnSet columnSet = builder.build(queryModel);
         
         queryTime.stop();

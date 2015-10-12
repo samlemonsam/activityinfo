@@ -106,7 +106,10 @@ public class Activity implements Serializable {
         }
     }
 
-    
+    public long getVersion() {
+        return version;
+    }
+
     public Iterable<ActivityField> getIndicatorFields() {
         return Iterables.filter(fields, new Predicate<ActivityField>() {
             @Override

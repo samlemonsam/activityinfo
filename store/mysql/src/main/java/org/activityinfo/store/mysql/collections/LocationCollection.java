@@ -128,4 +128,10 @@ public class LocationCollection implements ResourceCollection {
     public ColumnQueryBuilder newColumnQuery() {
         return new LocationQueryBuilder(executor, mapping, country);
     }
+
+    @Override
+    public long cacheVersion() {
+        return 0;
+    }
+
 }

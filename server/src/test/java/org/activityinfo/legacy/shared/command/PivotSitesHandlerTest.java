@@ -712,7 +712,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         report.setRowDimensions(Arrays.<Dimension>asList(yearDim, monthDim));
 
         PivotTableDataBuilder tableDataBuilder = new PivotTableDataBuilder();
-        PivotTableData table = tableDataBuilder.build(report, report.getRowDimensions(), report.getColumnDimensions(),
+        PivotTableData table = tableDataBuilder.build(report.getRowDimensions(), report.getColumnDimensions(),
             buckets);
     }
 
@@ -753,7 +753,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         report.setRowDimensions(Arrays.<Dimension>asList(yearDim, monthDim));
 
         PivotTableDataBuilder tableDataBuilder = new PivotTableDataBuilder();
-        PivotTableData table = tableDataBuilder.build(report, report.getRowDimensions(), report.getColumnDimensions(),
+        PivotTableData table = tableDataBuilder.build(report.getRowDimensions(), report.getColumnDimensions(),
             buckets);
     }
 

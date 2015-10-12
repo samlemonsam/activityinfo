@@ -67,5 +67,11 @@ public class MockCollectionCatalog implements CollectionCatalog {
         public ColumnQueryBuilder newColumnQuery() {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public long cacheVersion() {
+            return 0;
+        }
+
     }
 }

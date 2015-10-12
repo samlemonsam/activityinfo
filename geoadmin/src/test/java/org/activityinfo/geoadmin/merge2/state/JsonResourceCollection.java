@@ -107,6 +107,12 @@ public class JsonResourceCollection implements ResourceCollection {
         return new JsonQueryBuilder();
     }
 
+    @Override
+    public long cacheVersion() {
+        return 0;
+    }
+
+
     private class JsonQueryBuilder implements ColumnQueryBuilder {
         
         private List<CursorObserver<JsonObject>> bindings = new ArrayList<>();

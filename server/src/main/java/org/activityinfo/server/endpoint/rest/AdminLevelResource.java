@@ -33,10 +33,10 @@ import com.vividsolutions.jts.io.ParseException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.model.*;
 import org.activityinfo.server.util.monitoring.Timed;
+import org.activityinfo.service.store.CollectionCatalog;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -59,8 +59,8 @@ public class AdminLevelResource {
 
     private static final Logger LOGGER = Logger.getLogger(AdminLevelResource.class.getName());
 
-    private final HibernateQueryExecutor queryExecutor;
     private final Provider<EntityManager> entityManager;
+    private final Provider<CollectionCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
     private final AdminLevel level;
 
@@ -68,9 +68,9 @@ public class AdminLevelResource {
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
-    public AdminLevelResource(HibernateQueryExecutor queryExecutor, Provider<EntityManager> entityManager, Provider<AuthenticatedUser> userProvider, AdminLevel level) {
+    public AdminLevelResource(Provider<CollectionCatalog> catalog, Provider<EntityManager> entityManager, Provider<AuthenticatedUser> userProvider, AdminLevel level) {
         super();
-        this.queryExecutor = queryExecutor;
+        this.catalog = catalog;
         this.entityManager = entityManager;
         this.userProvider = userProvider;
         this.level = level;
@@ -90,7 +90,7 @@ public class AdminLevelResource {
 
     @Path("/form")
     public FormResource getForm() {
-        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), queryExecutor, userProvider);
+        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), catalog, userProvider);
     }
     
     @DELETE

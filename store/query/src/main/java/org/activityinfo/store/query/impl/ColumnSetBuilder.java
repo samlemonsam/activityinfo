@@ -25,12 +25,10 @@ public class ColumnSetBuilder {
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
     private final CollectionCatalog resourceStore;
-    private final ColumnCache columnCache;
     private final FormTreeBuilder formTreeService;
 
-    public ColumnSetBuilder(CollectionCatalog resourceStore, ColumnCache columnCache) {
+    public ColumnSetBuilder(CollectionCatalog resourceStore) {
         this.resourceStore = resourceStore;
-        this.columnCache = columnCache;
         this.formTreeService = new FormTreeBuilder(resourceStore);
     }
 
@@ -46,7 +44,7 @@ public class ColumnSetBuilder {
 
         // We want to make at most one pass over every row set we need to scan,
         // so first queue up all necessary work before executing
-        CollectionScanBatch batch = new CollectionScanBatch(resourceStore, columnCache);
+        CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
         QueryEvaluator evaluator = new QueryEvaluator(tree, formClass, batch);
 
         Function<ColumnView, ColumnView> filter = Functions.identity();

@@ -8,6 +8,13 @@ dependencies {
     compile project(':i18n')
     compile libraries.guava
     compile libraries.jdbc.mysql
+
+
     testCompile 'org.dbunit:dbunit:2.5.0'
+
+    testCompile libraries.appengine.api
+    testCompile libraries.appengine.testing
+    testCompile libraries.appengine.stubs
+
 }
 

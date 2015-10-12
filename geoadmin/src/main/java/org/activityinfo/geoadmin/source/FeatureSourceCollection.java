@@ -76,4 +76,10 @@ public class FeatureSourceCollection implements ResourceCollection {
         return new FeatureQueryBuilder(featureSource);
     }
 
+    @Override
+    public long cacheVersion() {
+        return 0;
+    }
+
+
 }

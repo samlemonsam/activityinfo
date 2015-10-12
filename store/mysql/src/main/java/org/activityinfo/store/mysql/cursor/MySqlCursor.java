@@ -43,4 +43,5 @@ class MySqlCursor implements Cursor {
     public ResourceId getResourceId() {
         return primaryKey.toResourceId(resultSet);
     }
+    
 }

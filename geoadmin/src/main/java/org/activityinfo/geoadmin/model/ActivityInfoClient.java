@@ -29,7 +29,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
-import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.views.EmptyColumnView;
 import org.activityinfo.store.query.impl.views.GeoColumnView;
@@ -318,7 +317,7 @@ public class ActivityInfoClient implements FormClassProvider {
     public ColumnSet queryColumns(QueryModel queryModel) {
         
         if(localCatalog.isLocalQuery(queryModel)) {
-            ColumnSetBuilder builder = new ColumnSetBuilder(localCatalog, ColumnCache.NULL);
+            ColumnSetBuilder builder = new ColumnSetBuilder(localCatalog);
             return builder.build(queryModel);
 
         } else {

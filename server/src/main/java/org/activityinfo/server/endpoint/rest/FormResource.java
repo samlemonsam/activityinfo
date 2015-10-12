@@ -23,11 +23,9 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.query.impl.ColumnCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
@@ -48,45 +46,41 @@ import static java.lang.String.format;
 
 public class FormResource {
     public static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
-    
+
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
-    
-    private final HibernateQueryExecutor queryExecutor;
+
+    private final Provider<CollectionCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
+
     private final ResourceId resourceId;
     private final Gson prettyPrintingGson;
 
-    public FormResource(ResourceId resourceId, HibernateQueryExecutor queryExecutor, Provider<AuthenticatedUser> userProvider) {
+    public FormResource(ResourceId resourceId, Provider<CollectionCatalog> catalog, Provider<AuthenticatedUser> userProvider) {
         this.resourceId = resourceId;
-        this.queryExecutor = queryExecutor;
+        this.catalog = catalog;
         this.userProvider = userProvider;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
     }
 
     /**
-     * 
+     *
      * @return this collection's {@link org.activityinfo.model.form.FormClass}
      */
     @GET
     @Path("class")
     public Response getFormClass() {
-        FormClass formClass = queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<FormClass>() {
-            @Override
-            public FormClass execute(CollectionCatalog catalog) {
-                
-                assertVisible(catalog, resourceId);
-                
-                return catalog.getFormClass(resourceId);
-            }
-        });
-        
+
+        assertVisible(resourceId);
+
+        FormClass formClass = catalog.get().getFormClass(resourceId);
+
         JsonObject object = Resources.toJsonObject(formClass.asResource());
 
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }
 
     /**
-     * 
+     *
      * @return a list of {@link org.activityinfo.model.form.FormClass}es that includes the {@code FormClass}
      * of this collection and any {@code FormClass}es reachable from this collection's fields.
      */
@@ -96,7 +90,7 @@ public class FormResource {
 
         FormTree tree = fetchTree();
         JsonObject object = JsonFormTreeBuilder.toJson(tree);
-        
+
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }
 
@@ -113,24 +107,18 @@ public class FormResource {
     }
 
     private FormTree fetchTree() {
-        return queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<FormTree>() {
-            @Override
-            public FormTree execute(CollectionCatalog catalog) {
+        assertVisible(resourceId);
 
-                assertVisible(catalog, resourceId);
-
-                FormTreeBuilder builder = new FormTreeBuilder(catalog);
-                return builder.queryTree(resourceId);
-            }
-        });
+        FormTreeBuilder builder = new FormTreeBuilder(catalog.get());
+        return builder.queryTree(resourceId);
     }
-    
+
     @GET
     @Path("query/rows")
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryRows(@Context UriInfo uriInfo) {
         final ColumnSet columnSet = query(uriInfo);
-        
+
         LOGGER.info("Query completed with " + columnSet.getNumRows() + " rows.");
 
         final StreamingOutput output = new StreamingOutput() {
@@ -163,47 +151,41 @@ public class FormResource {
         return Response.ok(output).type(JSON_CONTENT_TYPE).build();
     }
 
-    
+
     private ColumnSet query(final UriInfo uriInfo) {
-  
-        return queryExecutor.doWork(new HibernateQueryExecutor.StoreSession<ColumnSet>() {
-            @Override
-            public ColumnSet execute(CollectionCatalog catalog) {
 
-                assertVisible(catalog, resourceId);
-                
-                final QueryModel queryModel = new QueryModel(resourceId);
-                if(uriInfo.getQueryParameters().isEmpty()) {
-                    LOGGER.info("No query fields provided, querying all.");
-                    FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog);
-                    FormTree tree = treeBuilder.queryTree(resourceId);
-                    for (FormTree.Node leaf : tree.getLeaves()) {
-                        if(includeInDefaultQuery(leaf)) {
-                            queryModel.selectField(leaf.getPath()).as(formatId(leaf));
-                        }
-                    }
-                    LOGGER.info("Query model: " + queryModel);
+        assertVisible(resourceId);
 
-                } else {
-                    for (String columnId : uriInfo.getQueryParameters().keySet()) {
-                        queryModel.selectExpr(uriInfo.getQueryParameters().getFirst(columnId)).as(columnId);
-                    }
+        final QueryModel queryModel = new QueryModel(resourceId);
+        if(uriInfo.getQueryParameters().isEmpty()) {
+            LOGGER.info("No query fields provided, querying all.");
+            FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
+            FormTree tree = treeBuilder.queryTree(resourceId);
+            for (FormTree.Node leaf : tree.getLeaves()) {
+                if(includeInDefaultQuery(leaf)) {
+                    queryModel.selectField(leaf.getPath()).as(formatId(leaf));
                 }
-                
-                ColumnSetBuilder builder = new ColumnSetBuilder(catalog, ColumnCache.NULL);
-                return builder.build(queryModel);
             }
-        });
+            LOGGER.info("Query model: " + queryModel);
+
+        } else {
+            for (String columnId : uriInfo.getQueryParameters().keySet()) {
+                queryModel.selectExpr(uriInfo.getQueryParameters().getFirst(columnId)).as(columnId);
+            }
+        }
+
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        return builder.build(queryModel);
     }
 
     private boolean includeInDefaultQuery(FormTree.Node leaf) {
         FieldType type = leaf.getType();
         return type instanceof TextType ||
-               type instanceof BarcodeType ||
-               type instanceof QuantityType ||
-               type instanceof EnumType ||
-               type instanceof ReferenceType ||
-               type instanceof LocalDateType;
+                type instanceof BarcodeType ||
+                type instanceof QuantityType ||
+                type instanceof EnumType ||
+                type instanceof ReferenceType ||
+                type instanceof LocalDateType;
     }
 
     private String formatId(FormTree.Node node) {
@@ -220,22 +202,22 @@ public class FormResource {
     private String formatIdField(FormTree.Node node) {
         return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
     }
-    
-    private void assertVisible(CollectionCatalog catalog, ResourceId collectionId) {
-        Optional<ResourceCollection> collection = catalog.getCollection(resourceId);
+
+    private void assertVisible(ResourceId collectionId) {
+        Optional<ResourceCollection> collection = this.catalog.get().getCollection(resourceId);
         if(!collection.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.NOT_FOUND)
-                        .entity(format("Collection %s does not exist.", collectionId.asString()))
-                        .build());
+                            .entity(format("Collection %s does not exist.", collectionId.asString()))
+                            .build());
         }
         CollectionPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
         if(!permissions.isVisible()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.FORBIDDEN)
-                        .entity(format("You do not have permission to view the collection %s", collectionId.asString()))
-                        .build());
-            
+                            .entity(format("You do not have permission to view the collection %s", collectionId.asString()))
+                            .build());
+
         }
     }
 }

@@ -5,9 +5,9 @@ import com.google.common.collect.Multimap;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
 import org.activityinfo.store.query.impl.Slot;
-import org.activityinfo.service.store.CursorObserver;
 
 
 public class ForeignKeyBuilder implements CursorObserver<FieldValue>, Slot<ForeignKeyMap> {
@@ -35,5 +35,9 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue>, Slot<Forei
 
     public ForeignKeyMap get() {
         return result.get();
+    }
+    
+    public void setFromCache(ForeignKeyMap cached) {
+        result.set(cached);
     }
 }

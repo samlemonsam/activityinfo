@@ -49,4 +49,9 @@ public interface ResourceCollection {
     ColumnQueryBuilder newColumnQuery();
 
 
+    /**
+     * 
+     * @return the current version of this collection to lookup.
+     */
+    long cacheVersion();
 }

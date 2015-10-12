@@ -1,11 +1,9 @@
 package org.activityinfo.server.database.hibernate;
 
-import com.google.common.collect.Lists;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.mysql.MySqlCatalogProvider;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.hibernate.ejb.HibernateEntityManager;
-import org.hibernate.jdbc.Work;
+import org.hibernate.jdbc.AbstractReturningWork;
+import org.hibernate.jdbc.ReturningWork;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -14,83 +12,48 @@ import java.sql.*;
 import java.util.List;
 
 
-public class HibernateQueryExecutor  {
+public class HibernateQueryExecutor implements QueryExecutor {
     private final Provider<EntityManager> entityManager;
-    private final MySqlCatalogProvider catalogProvider;
-
-    public interface StoreSession<T> {
-        T execute(CollectionCatalog catalog);
-    }
 
     @Inject
-    public HibernateQueryExecutor(Provider<EntityManager> entityManager, MySqlCatalogProvider catalogProvider) {
-        this.catalogProvider = catalogProvider;
+    public HibernateQueryExecutor(Provider<EntityManager> entityManager) {
         this.entityManager = entityManager;
     }
 
-    public <T> T doWork(final StoreSession<T> session) {
-        final List<T> collector = Lists.newArrayList();
-        HibernateEntityManager hem = (HibernateEntityManager) entityManager.get();
-        hem.getTransaction().begin();
-        hem.getSession().doWork(new Work() {
-            @Override
-            public void execute(Connection connection) throws SQLException {
-                QueryExecutor executor = new QueryExecutorImpl(connection);
-                CollectionCatalog catalog = catalogProvider.openCatalog(executor);
-                collector.add(session.execute(catalog));
-            }
-        });
-        hem.getTransaction().commit();
-        return collector.get(0);
-    }
-    
-    public <T> T joinTxAndDoWork(final StoreSession<T> session) {
-        final List<T> collector = Lists.newArrayList();
-        HibernateEntityManager hem = (HibernateEntityManager) entityManager.get();
-        hem.getSession().doWork(new Work() {
-            @Override
-            public void execute(Connection connection) throws SQLException {
-                QueryExecutor executor = new QueryExecutorImpl(connection);
-                CollectionCatalog catalog = catalogProvider.openCatalog(executor);
-                collector.add(session.execute(catalog));
-            }
-        });
-        return collector.get(0);
+    private <T> T doWork(ReturningWork<T> worker) {
+        HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) entityManager.get();
+        return hibernateEntityManager.getSession().doReturningWork(worker);
     }
 
-    private class QueryExecutorImpl implements QueryExecutor {
-        private final Connection connection;
-
-        public QueryExecutorImpl(Connection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public ResultSet query(String sql) {
-            try {
-                Statement statement = connection.createStatement();
-                return statement.executeQuery(sql);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+    @Override
+    public ResultSet query(final String sql) {
+        return doWork(new AbstractReturningWork<ResultSet>() {
+            @Override
+            public ResultSet execute(Connection connection) throws SQLException {
+                try {
+                    Statement statement = connection.createStatement();
+                    return statement.executeQuery(sql);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
-        }
+        });
+    }
 
-        @Override
-        public int update(String sql, List<?> parameters) {
-            
-            System.out.println(sql);
-            
-            try {
+    @Override
+    public int update(final String sql, final List<?> parameters) {
+        System.out.println(sql);
+        return doWork(new AbstractReturningWork<Integer>() {
+            @Override
+            public Integer execute(Connection connection) throws SQLException {
+
                 PreparedStatement statement = connection.prepareStatement(sql);
                 for (int i = 0; i < parameters.size(); i++) {
                     statement.setObject(i + 1, parameters.get(i));
                 }
                 return statement.executeUpdate();
-                
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
-        }
+        });
     }
-
 }
+

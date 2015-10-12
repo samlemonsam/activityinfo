@@ -75,4 +75,8 @@ public class SimpleTableCollection implements ResourceCollection {
         return new SimpleTableColumnQueryBuilder(new MySqlCursorBuilder(mapping, executor));
     }
 
+    @Override
+    public long cacheVersion() {
+        return 0;
+    }
 }
