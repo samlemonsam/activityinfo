@@ -6,6 +6,8 @@ import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
 
 public interface CollectionProvider {
 
@@ -14,4 +16,6 @@ public interface CollectionProvider {
     ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException;
 
     Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException;
+    
+    Map<ResourceId, ResourceCollection> openCollections(QueryExecutor executor, Set<ResourceId> resourceIds) throws SQLException;
 }

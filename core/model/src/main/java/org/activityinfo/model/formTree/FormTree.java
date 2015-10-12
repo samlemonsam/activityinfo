@@ -22,8 +22,7 @@ import java.util.*;
  */
 public class FormTree {
 
-
-
+    
     public class Node {
 
         private Node parent;

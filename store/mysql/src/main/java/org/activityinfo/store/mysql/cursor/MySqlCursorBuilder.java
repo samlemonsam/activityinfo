@@ -28,7 +28,6 @@ public class MySqlCursorBuilder implements CursorBuilder {
     private final PartialEvaluator<ResultSet> evaluator;
     private QueryExecutor executor;
     private MySqlCursor cursor;
-    private boolean hasObservers = false;
     private boolean open = false;
 
     public MySqlCursorBuilder(TableMapping tableMapping, QueryExecutor executor) {
@@ -133,4 +132,7 @@ public class MySqlCursorBuilder implements CursorBuilder {
         return cursor;
     }
 
+    public boolean hasObservers() {
+        return cursor.hasObservers();
+    }
 }

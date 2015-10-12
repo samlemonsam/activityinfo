@@ -7,6 +7,7 @@ import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.ResourceCollection;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,11 @@ public class CollectionCatalogStub implements CollectionCatalog {
 
     @Override
     public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
         throw new UnsupportedOperationException();
     }
 

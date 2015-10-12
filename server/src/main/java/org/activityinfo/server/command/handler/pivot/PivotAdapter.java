@@ -14,7 +14,6 @@ import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -22,6 +21,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.command.handler.IndicatorOracle;
+import org.activityinfo.service.store.BatchingFormTreeBuilder;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
@@ -56,7 +56,7 @@ public class PivotAdapter {
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
     
 
-    public PivotAdapter(IndicatorOracle indicatorOracle, CollectionCatalog catalog, PivotSites command) {
+    public PivotAdapter(IndicatorOracle indicatorOracle, CollectionCatalog catalog, PivotSites command) throws InterruptedException {
         this.indicatorOracle = indicatorOracle;
         this.catalog = catalog;
         this.command = command;
@@ -81,27 +81,33 @@ public class PivotAdapter {
     }
 
     private Map<ResourceId, FormTree> queryFormTrees(Collection<ResourceId> formClassIds) {
-        Map<ResourceId, FormTree> map = new HashMap<>();
-        FormTreeBuilder builder = new FormTreeBuilder(catalog);
-
-        for (ResourceId formClassId : formClassIds) {
-            map.put(formClassId, builder.queryTree(formClassId));
-        }
-        return map;
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        BatchingFormTreeBuilder builder = new BatchingFormTreeBuilder(catalog);
+        Map<ResourceId, FormTree> trees = builder.queryTrees(formClassIds);
+        
+        LOGGER.fine("FormTrees loaded in " + stopwatch);
+        
+        return trees;
+        
     }
 
     private DimBinding buildAccessor(Dimension dimension) {
         switch (dimension.getType()) {
             case Partner:
                 return new PartnerDimBinding();
+            
             case Activity:
                 return new ActivityDimBinding();
+            
             case Date:
                 return new DateDimBinding((DateDimension) dimension);
+            
             case AttributeGroup:
                 return new AttributeDimBinding((AttributeGroupDimension) dimension, formTrees.values());
+            
             case AdminLevel:
                 return new AdminDimBinding((AdminDimension) dimension);
+            
             case Site:
             case ActivityCategory:
             case Database:

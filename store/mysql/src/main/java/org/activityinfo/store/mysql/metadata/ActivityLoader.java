@@ -1,10 +1,7 @@
-package org.activityinfo.store.mysql.collections;
+package org.activityinfo.store.mysql.metadata;
 
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.common.base.Predicate;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -12,7 +9,6 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -20,184 +16,90 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
-public class Activity implements Serializable {
 
-    public static final int REPORT_ONCE = 0;
-    public static final int REPORT_MONTHLY = 1;
+public class ActivityLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(Activity.class.getName());
-
-    private static final MemcacheService MEMCACHE = MemcacheServiceFactory.getMemcacheService();
-
-    private int activityId;
-    private int databaseId;
-    private int reportingFrequency;
-    private int locationTypeId;
-    private String category;
-    private String locationTypeName;
-    private int adminLevelId;
-    private String name;
-    private int ownerUserId;
-    private boolean published;
-    private long version;
+    private static final Logger LOGGER = Logger.getLogger(ActivityLoader.class.getName());
     
-    private List<ActivityField> fields = Lists.newArrayList();
+    private final QueryExecutor executor;
+    private Map<Integer, Activity> activityMap = new HashMap<>();
 
-    public int getId() {
-        return activityId;
+    public ActivityLoader(QueryExecutor executor) {
+        this.executor = executor;
     }
 
-    public int getDatabaseId() {
-        return databaseId;
-    }
+    public Map<Integer, Activity> load(Set<Integer> activityIds) throws SQLException {
 
-    public int getReportingFrequency() {
-        return reportingFrequency;
-    }
+        if(!activityIds.isEmpty()) {
+            FormClass serializedFormClass = null;
 
-    public int getLocationTypeId() {
-        return locationTypeId;
-    }
+            Set<Integer> classicActivityIds = new HashSet<>();
 
-    public String getCategory() {
-        return category;
-    }
+            try (ResultSet rs = executor.query(
+                    "SELECT " +
+                            "A.ActivityId, " +
+                            "A.category, " +
+                            "A.Name, " +
+                            "A.ReportingFrequency, " +
+                            "A.DatabaseId, " +
+                            "A.LocationTypeId, " +
+                            "L.Name locationTypeName, " +
+                            "L.BoundAdminLevelId, " +
+                            "A.formClass, " +
+                            "A.gzFormClass, " +
+                            "d.ownerUserId, " +
+                            "A.published, " +
+                            "A.version " +
+                            "FROM activity A " +
+                            "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
+                            "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
+                            "WHERE A.ActivityId IN " + idList(activityIds))) {
 
-    public String getLocationTypeName() {
-        return locationTypeName;
-    }
+                while (rs.next()) {
+                    Activity activity = new Activity();
+                    activity.activityId = rs.getInt("ActivityId");
+                    activity.databaseId = rs.getInt("DatabaseId");
+                    activity.category = rs.getString("category");
+                    activity.name = rs.getString("name");
+                    activity.reportingFrequency = rs.getInt("reportingFrequency");
+                    activity.locationTypeId = rs.getInt("locationTypeId");
+                    activity.locationTypeName = rs.getString("locationTypeName");
+                    activity.adminLevelId = rs.getInt("boundAdminLevelId");
+                    activity.ownerUserId = rs.getInt("ownerUserId");
+                    activity.published = rs.getInt("published") == 1;
+                    activity.version = rs.getLong("version");
 
-    public int getAdminLevelId() {
-        return adminLevelId;
-    }
+                    serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
 
-    public List<ActivityField> getFields() {
-        return fields;
-    }
+                    if (serializedFormClass == null) {
+                        classicActivityIds.add(activity.getId());
+                    } else {
+                        addFields(activity, serializedFormClass);
+                    }
 
-    public String getName() {
-        return name;
-    }
-
-    public Iterable<ActivityField> getAttributeAndIndicatorFields() {
-        if(reportingFrequency == REPORT_ONCE) {
-            return fields;
-        } else {
-            return Iterables.filter(fields, new Predicate<ActivityField>() {
-                @Override
-                public boolean apply(ActivityField input) {
-                    return input.isAttributeGroup();
+                    activityMap.put(activity.getId(), activity);
                 }
-            });
-        }
-    }
-
-    public long getVersion() {
-        return version;
-    }
-
-    public Iterable<ActivityField> getIndicatorFields() {
-        return Iterables.filter(fields, new Predicate<ActivityField>() {
-            @Override
-            public boolean apply(ActivityField input) {
-                return !input.isAttributeGroup();
-            }
-        });
-    }
-    
-    public boolean hasLocationType() {
-        // hack!!
-        return !isNullLocationType();
-    }
-
-    public int getNullaryLocationId() {
-        // This is nasty hack to allow for activities without location types.
-        // Each country has one "nullary" location type called "Country"
-        // Each of these location types has exactly one location instance, with the same id.
-        return locationTypeId;
-    }
-
-
-    private boolean isNullLocationType() {
-        return "Country".equals(locationTypeName) && locationTypeId != 20301;
-    }
-
-    public ResourceId getProjectFormClassId() {
-        return CuidAdapter.projectFormClass(databaseId);
-    }
-    public ResourceId getPartnerFormClassId() {
-        return CuidAdapter.partnerFormClass(databaseId);
-    }
-
-    public ResourceId getLocationFormClassId() {
-        return CuidAdapter.locationFormClass(locationTypeId);
-    }
-
-    public static Activity query(QueryExecutor executor, int activityId) throws SQLException {
-        
-        
-        Activity activity = new Activity();
-        activity.activityId = activityId;
-
-        FormClass serializedFormClass = null;
-        
-        try (ResultSet rs = executor.query(
-                "SELECT " +
-                        "A.ActivityId, " +
-                        "A.category, " +
-                        "A.Name, " +
-                        "A.ReportingFrequency, " +
-                        "A.DatabaseId, " +
-                        "A.LocationTypeId, " +
-                        "L.Name locationTypeName, " +
-                        "L.BoundAdminLevelId, " +
-                        "A.formClass, " + 
-                        "A.gzFormClass, " + 
-                        "d.ownerUserId, " +
-                        "A.published, " +
-                        "A.version " + 
-                        "FROM activity A " +
-                        "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
-                        "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
-                        "WHERE A.ActivityId = " + activityId)) {
-
-            if (!rs.next()) {
-                throw new ResourceNotFound(CuidAdapter.activityFormClass(activityId));
             }
 
-            activity.databaseId = rs.getInt("DatabaseId");
-            activity.category = rs.getString("category");
-            activity.name = rs.getString("name");
-            activity.reportingFrequency = rs.getInt("reportingFrequency");
-            activity.locationTypeId = rs.getInt("locationTypeId");
-            activity.locationTypeName = rs.getString("locationTypeName");
-            activity.adminLevelId = rs.getInt("boundAdminLevelId");
-            activity.ownerUserId = rs.getInt("ownerUserId");
-            activity.published = rs.getInt("published") == 1;
-            activity.version = rs.getLong("version");
-
-            serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
+            if (!classicActivityIds.isEmpty()) {
+                loadFields(activityMap, classicActivityIds);
+            }
         }
+        return activityMap;
+    }
 
-        if(serializedFormClass == null) {
-            activity.queryFields(executor);
-        } else {
-            activity.addFields(serializedFormClass);
-        }
-        
-        return activity;
+    private String idList(Set<Integer> activityIds) {
+        return "(" + Joiner.on(",").join(activityIds) + ")";
     }
 
 
@@ -220,21 +122,21 @@ public class Activity implements Serializable {
         }
     }
 
-    private void addFields(FormClass formClass) {
+    private void addFields(Activity activity, FormClass formClass) {
         for (FormField formField : formClass.getFields()) {
             switch (formField.getId().getDomain()) {
                 case CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN:
                 case CuidAdapter.INDICATOR_DOMAIN:
                     int fieldId = CuidAdapter.getLegacyIdFromCuid(formField.getId());
-                    fields.add(new ActivityField(fieldId, null, formField));
+                    activity.fields.add(new ActivityField(fieldId, null, formField));
                     break;
             }
         }
     }
 
-    private void queryFields(QueryExecutor executor) throws SQLException {
+    private void loadFields(Map<Integer, Activity> activityMap, Set<Integer> activityIds) throws SQLException {
 
-        Map<Integer, List<EnumItem>> attributes = queryAttributes(executor);
+        Map<Integer, List<EnumItem>> attributes = loadAttributes(activityIds);
 
         String indicatorQuery = "(SELECT " +
                 "ActivityId, " +
@@ -253,12 +155,13 @@ public class Activity implements Serializable {
                 "Aggregation aggregation " +
                 "FROM indicator " +
                 "WHERE dateDeleted IS NULL AND " +
-                "ActivityId=" + activityId +
+                "ActivityId IN " + idList(activityIds) +
                 " ) " +
+                
                 "UNION ALL " +
+                
                 "(SELECT " +
                 "A.ActivityId, " +
-
                 "G.attributeGroupId as Id, " +
                 "NULL as Category, " +
                 "Name, " +
@@ -275,19 +178,21 @@ public class Activity implements Serializable {
                 "FROM attributegroup G " +
                 "INNER JOIN attributegroupinactivity A on G.attributeGroupId = A.attributeGroupId " +
                 "WHERE dateDeleted is null AND " +
-                "ActivityId=" + activityId +
+                "ActivityId IN " + idList(activityIds) +
                 ") " +
                 "ORDER BY SortOrder";
 
         try(ResultSet rs = executor.query(indicatorQuery)) {
             while(rs.next()) {
-                addField(rs, attributes);
+                int activityId = rs.getInt(1);
+                Activity activity = activityMap.get(activityId);
+                
+                addField(activity, rs, attributes);
             }
         }
     }
 
-
-    private void addField(ResultSet rs, Map<Integer, List<EnumItem>> attributes) throws SQLException {
+    private void addField(Activity activity, ResultSet rs, Map<Integer, List<EnumItem>> attributes) throws SQLException {
         int id = rs.getInt("id");
         FormField formField;
         if(rs.getString("Type").equals("ENUM")) {
@@ -322,7 +227,7 @@ public class Activity implements Serializable {
             }
         }
 
-        fields.add(new ActivityField(id, rs.getString("category"), formField));
+        activity.fields.add(new ActivityField(id, rs.getString("category"), formField));
     }
 
     private boolean getMandatory(ResultSet rs) throws SQLException {
@@ -365,7 +270,7 @@ public class Activity implements Serializable {
     }
 
 
-    private Map<Integer, List<EnumItem>> queryAttributes(QueryExecutor executor) throws SQLException {
+    private Map<Integer, List<EnumItem>> loadAttributes(Set<Integer> activityIds) throws SQLException {
 
         Map<Integer, List<EnumItem>> attributes = Maps.newHashMap();
 
@@ -373,7 +278,7 @@ public class Activity implements Serializable {
                 "FROM attribute A " +
                 "WHERE A.dateDeleted is null AND " +
                 "AttributeGroupId in" +
-                " (Select AttributeGroupId FROM attributegroupinactivity where ActivityId = " + activityId + ")" +
+                " (Select AttributeGroupId FROM attributegroupinactivity where ActivityId IN " + idList(activityIds) + ")" +
                 " ORDER BY A.SortOrder";
 
         try(ResultSet rs = executor.query(sql)) {
@@ -393,14 +298,5 @@ public class Activity implements Serializable {
         }
 
         return attributes;
-    }
-
-
-    public int getOwnerUserId() {
-        return ownerUserId;
-    }
-
-    public boolean isPublished() {
-        return published;
     }
 }

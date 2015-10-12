@@ -14,8 +14,8 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.store.mysql.collections.ActivityField;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

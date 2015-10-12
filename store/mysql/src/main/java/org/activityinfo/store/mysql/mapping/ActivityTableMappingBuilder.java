@@ -11,8 +11,8 @@ import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.store.mysql.Join;
-import org.activityinfo.store.mysql.collections.Activity;
-import org.activityinfo.store.mysql.collections.ActivityField;
+import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

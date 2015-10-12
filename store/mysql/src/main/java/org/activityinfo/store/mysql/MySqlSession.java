@@ -10,12 +10,13 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.ActivityLoader;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,16 +32,13 @@ class MySqlSession implements CollectionCatalog {
 
     public MySqlSession(final QueryExecutor executor) {
         
-        ActivityCache activityCache = new ActivityCache(executor);
-        
         providers.add(new SimpleTableCollectionProvider(new DatabaseTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new UserTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new CountryTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new AdminEntityTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new PartnerTable(), CollectionPermissions.readonly()));
-        providers.add(new SiteCollectionProvider(activityCache));
+        providers.add(new ActivityCollectionProvider(new ActivityLoader(executor)));
         providers.add(new LocationCollectionProvider());
-        providers.add(new ReportingPeriodCollectionProvider(activityCache));
 
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<ResourceCollection>>() {
@@ -89,6 +87,47 @@ class MySqlSession implements CollectionCatalog {
             }
         }
         return Optional.absent();
+    }
+
+    @Override
+    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
+        Map<ResourceId, FormClass> resultMap = new HashMap<>();
+        Set<ResourceId> toFetch = new HashSet<>();
+
+        // First check sessionCache for any collections which are already loaded
+        for (ResourceId collectionId : collectionIds) {
+            Optional<ResourceCollection> collection = sessionCache.getIfPresent(collectionId);
+            if(collection != null && collection.isPresent()) {
+                resultMap.put(collectionId, collection.get().getFormClass());
+            } else {
+                toFetch.add(collectionId);
+            }
+        }
+        
+        // Now consult each of our providers for collections
+        try {
+            for (CollectionProvider provider : providers) {
+                Map<ResourceId, ResourceCollection> fetched = provider.openCollections(executor, toFetch);
+                for (Map.Entry<ResourceId, ResourceCollection> entry : fetched.entrySet()) {
+                    if(resultMap.containsKey(entry.getKey())) {
+                        throw new IllegalStateException("Collection " + entry.getKey() + " returned by multiple providers");
+                    }
+                    sessionCache.put(entry.getKey(), Optional.of(entry.getValue()));
+                    resultMap.put(entry.getKey(), entry.getValue().getFormClass());
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        
+        // Finally, verify that all collections were loaded
+        for (ResourceId collectionId : collectionIds) {
+            if(!resultMap.containsKey(collectionId)) {
+                throw new ResourceNotFound(collectionId);
+            }
+        }
+        
+        return resultMap;
     }
 
     @Override

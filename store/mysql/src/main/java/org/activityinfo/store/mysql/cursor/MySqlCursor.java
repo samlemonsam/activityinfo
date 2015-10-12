@@ -43,5 +43,8 @@ class MySqlCursor implements Cursor {
     public ResourceId getResourceId() {
         return primaryKey.toResourceId(resultSet);
     }
-    
+
+    public boolean hasObservers() {
+        return onNext.size() > 0 || onClosed.size() > 0;
+    }
 }

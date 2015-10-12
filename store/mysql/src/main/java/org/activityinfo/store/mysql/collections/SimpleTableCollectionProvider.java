@@ -8,6 +8,9 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 public class SimpleTableCollectionProvider implements CollectionProvider {
@@ -33,6 +36,17 @@ public class SimpleTableCollectionProvider implements CollectionProvider {
     @Override
     public Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException {
         return table.lookupCollection(executor, resourceId);
+    }
+
+    @Override
+    public Map<ResourceId, ResourceCollection> openCollections(QueryExecutor executor, Set<ResourceId> collectionIds) throws SQLException {
+        Map<ResourceId, ResourceCollection> map = new HashMap<>();
+        for (ResourceId collectionId : collectionIds) {
+            if(table.accept(collectionId)) {
+                map.put(collectionId, openCollection(executor, collectionId));
+            }
+        }
+        return map;
     }
 
 }

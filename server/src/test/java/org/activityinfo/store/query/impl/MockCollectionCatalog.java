@@ -10,6 +10,9 @@ import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 
+import java.util.Collection;
+import java.util.Map;
+
 
 public class MockCollectionCatalog implements CollectionCatalog {
     
@@ -26,6 +29,11 @@ public class MockCollectionCatalog implements CollectionCatalog {
     @Override
     public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
         return Optional.absent();
+    }
+
+    @Override
+    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

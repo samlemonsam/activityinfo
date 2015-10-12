@@ -1,4 +1,4 @@
-package org.activityinfo.store.mysql.collections;
+package org.activityinfo.store.mysql.metadata;
 
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;

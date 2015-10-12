@@ -10,6 +10,8 @@ import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.side.SideColumnBuilder;
 
 import java.util.Map;
@@ -75,11 +77,13 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         
         try {
 
-            Stopwatch stopwatch = Stopwatch.createStarted();
+            Stopwatch stopwatch = Stopwatch.createUnstarted();
             
-            // Run base table
-            Cursor cursor = baseCursor.open();
-            while (cursor.next()) {
+            if(baseCursor.hasObservers()) {
+                // Run base table
+                Cursor cursor = baseCursor.open();
+                while (cursor.next()) {
+                }
             }
             
             stopwatch.stop();

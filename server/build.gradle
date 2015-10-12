@@ -208,3 +208,10 @@ task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
 }
+
+task rollbackBetaApi(type: com.google.appengine.task.appcfg.RollbackTask) {
+    dependsOn appengineDownloadSdk
+
+    extraOptions = ["--application=activityinfoeu", '--version=beta-api']
+    oauth2 = true
+}

@@ -14,9 +14,10 @@ import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.store.mysql.collections.Activity;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.collections.DatabaseTable;
+import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +26,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
@@ -108,7 +111,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void testActivitySerialization() throws SQLException, IOException {
-        Activity activity = Activity.query(dbunit.getExecutor(), 1);
+        ActivityLoader loader = new ActivityLoader(dbunit.getExecutor());
+        Map<Integer, Activity> map = loader.load(Collections.singleton(1));
+        Activity activity = map.get(1);
 
         ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
         oos.writeObject(activity);

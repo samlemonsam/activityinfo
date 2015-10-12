@@ -21,7 +21,12 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
 
     @Override
     public CommandResult execute(final PivotSites cmd, final User user) throws CommandException {
-        PivotAdapter adapter = new PivotAdapter(indicatorOracle, catalog.get(), cmd);
+        PivotAdapter adapter = null;
+        try {
+            adapter = new PivotAdapter(indicatorOracle, catalog.get(), cmd);
+        } catch (InterruptedException e) {
+            throw new CommandException("Interrupted");
+        }
         return adapter.execute();
     }
 }

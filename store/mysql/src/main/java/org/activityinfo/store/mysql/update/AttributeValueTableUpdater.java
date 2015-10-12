@@ -7,8 +7,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.mysql.collections.Activity;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
 import java.util.HashSet;

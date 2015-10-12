@@ -12,6 +12,7 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +66,18 @@ public class FeatureSourceCatalog implements CollectionCatalog {
     @Override
     public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
+        Map<ResourceId, FormClass> map = new HashMap<>();
+        for (ResourceId collectionId : collectionIds) {
+            Optional<ResourceCollection> collection = getCollection(collectionId);
+            if(collection.isPresent()) {
+                map.put(collectionId, collection.get().getFormClass());
+            }
+        }
+        return map;
     }
 
     @Override

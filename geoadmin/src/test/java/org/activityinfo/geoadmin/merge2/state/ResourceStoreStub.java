@@ -17,6 +17,8 @@ import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Map;
 
 import static com.google.common.io.Resources.getResource;
 
@@ -76,6 +78,11 @@ public class ResourceStoreStub implements ResourceStore {
 
         @Override
         public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
             throw new UnsupportedOperationException();
         }
 

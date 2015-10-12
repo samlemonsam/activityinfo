@@ -16,7 +16,6 @@ public class MySqlCatalogProvider {
     private List<CollectionProvider> providers = Lists.newArrayList();
 
     public MySqlCatalogProvider() {
-        
     }
 
     public CollectionCatalog openCatalog(final QueryExecutor executor) {

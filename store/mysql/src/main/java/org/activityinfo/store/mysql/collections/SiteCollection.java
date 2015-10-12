@@ -13,6 +13,7 @@ import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.update.AttributeValueTableUpdater;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
