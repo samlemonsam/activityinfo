@@ -2,7 +2,6 @@ package org.activityinfo.test.pageobject.web.entry;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
@@ -37,7 +36,10 @@ public class GxtFormDataEntryDriver implements DataEntryDriver {
 
     @Override
     public List<String> availableValues() {
-        return Lists.newArrayList();
+        if (currentField.isDropDown()) {
+            return currentField.availableItems();
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -328,7 +328,11 @@ public class DataEntrySteps {
                 case "Partner":
                     foundPartnerField = true;
                     List<String> items = Lists.newArrayList(dataEntryDriver.availableValues());
-                    items.removeAll(expectedPartnerValues);
+
+                    for (String expected : expectedPartnerValues) {
+                        items.remove(expected);
+                        items.remove(driver.getAliasTable().getAlias(expected));
+                    }
                     assertTrue(items.isEmpty());
                     break;
             }

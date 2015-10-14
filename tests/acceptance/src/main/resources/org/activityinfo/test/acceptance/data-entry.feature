@@ -27,12 +27,16 @@ Feature: Data entry
   Scenario: Partners are filtered according to permissions
     Given that the user "bob@bedatadriven.com" is signed up
     And I add "bob@bedatadriven.com" to database "Database" with partner "NRC" and permissions
-      | field     | value |
-      | View      | true  |
-      | Edit      | true  |
-      | View All  | true  |
-      | Edit All  | false |
+      | field             | value |
+      | View              | true  |
+      | Edit              | true  |
+      | View All          | true  |
+      | Edit All          | false |
+      | Manager users     | false |
+      | Manager all users | false |
+      | Design            | false |
     When I login as "bob@bedatadriven.com" with my correct password
     Then new form dialog for "NFI Distribution" form has following items for partner field
-      | NRC |
+      | Default |
+      | NRC     |
 

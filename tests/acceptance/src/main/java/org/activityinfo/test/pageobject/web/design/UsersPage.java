@@ -2,6 +2,7 @@ package org.activityinfo.test.pageobject.web.design;
 
 import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -92,6 +93,8 @@ public class UsersPage {
         if (design) {
             rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowDesign")).first().clickWhenReady();
         }
+        toolbarMenu.clickButton(I18N.CONSTANTS.save());
+        Sleep.sleepSeconds(1);
         return this;
     }
 

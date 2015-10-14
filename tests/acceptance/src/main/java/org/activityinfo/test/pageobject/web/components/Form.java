@@ -4,6 +4,8 @@ package org.activityinfo.test.pageobject.web.components;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 public abstract class Form {
 
     public void fillTextField(String label, String value) {
@@ -42,5 +44,7 @@ public abstract class Form {
         FluentElement getElement();
 
         boolean isValid();
+
+        List<String> availableItems();
     }
 }
