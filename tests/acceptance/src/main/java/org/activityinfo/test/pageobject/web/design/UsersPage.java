@@ -46,8 +46,8 @@ public class UsersPage {
         return new GxtModal(container);
     }
 
-    public UsersPage setPermissionForFirstRow(List<FieldValue> permissions) {
-        setPermission(grid().rows().get(0),
+    public UsersPage setPermission(String email, List<FieldValue> permissions) {
+        setPermission(email,
                 hasTrue("View", permissions),
                 hasTrue("Edit", permissions),
                 hasTrue("View All", permissions),
@@ -68,30 +68,35 @@ public class UsersPage {
         return false;
     }
 
-    public UsersPage setPermission(GxtGrid.GxtRow row, boolean view, boolean viewAll, boolean edit, boolean editAll,
+    public UsersPage setPermission(String email, boolean view, boolean viewAll, boolean edit, boolean editAll,
                                    boolean manageUsers, boolean manageAllUsers, boolean design) {
+
         if (!view) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowViewSimple")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowViewSimple")).first().clickWhenReady();
         }
         if (edit) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowEditSimple")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowEditSimple")).first().clickWhenReady();
         }
         if (viewAll) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowViewAll")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowViewAll")).first().clickWhenReady();
         }
         if (editAll) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowEditAll")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowEditAll")).first().clickWhenReady();
         }
         if (manageUsers) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowManageUsers")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowManageUsers")).first().clickWhenReady();
         }
         if (manageAllUsers) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowManageAllUsers")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowManageAllUsers")).first().clickWhenReady();
         }
         if (design) {
-            row.getElement().find().div(withClass("x-grid3-cc-allowDesign")).first().clickWhenReady();
+            rowByCellValue(email).getElement().find().div(withClass("x-grid3-cc-allowDesign")).first().clickWhenReady();
         }
         return this;
+    }
+
+    private GxtGrid.GxtRow rowByCellValue(String value) {
+        return new GxtGrid.GxtRow(grid().findCell(value).getElement().find().ancestor().div(withClass(GxtGrid.X_GRID3_ROW)).first());
     }
 
 
