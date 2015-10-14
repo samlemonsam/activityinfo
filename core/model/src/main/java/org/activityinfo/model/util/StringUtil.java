@@ -32,7 +32,7 @@ public class StringUtil {
     }
 
     public static String truncate(String s) {
-        return s.substring(0, Math.min(s.length(), 255));
+        return truncate(s, 255);
     }
 
     public static String truncate(String s, int maxLength) {
