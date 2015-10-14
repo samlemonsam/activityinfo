@@ -170,4 +170,9 @@ public class DesignSteps {
             }
         }
     }
+
+    @And("^I add \"([^\"]*)\" to database \"([^\"]*)\" with partner \"([^\"]*)\" and permissions$")
+    public void I_add_to_database_with_partner_and_permissions(String userEmail, String databaseName, String partner, List<FieldValue> permissions) throws Throwable {
+        driver.addUserToDatabase(userEmail, databaseName, partner, permissions);
+    }
 }

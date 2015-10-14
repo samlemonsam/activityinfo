@@ -1,7 +1,10 @@
 package org.activityinfo.test.pageobject.web.entry;
 
 import org.activityinfo.test.driver.DataEntryDriver;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 public class LocationDataEntryDriver implements DataEntryDriver {
     
@@ -57,6 +60,11 @@ public class LocationDataEntryDriver implements DataEntryDriver {
 
     @Override
     public void sendKeys(CharSequence keys) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> availableValues() {
         throw new UnsupportedOperationException();
     }
 }

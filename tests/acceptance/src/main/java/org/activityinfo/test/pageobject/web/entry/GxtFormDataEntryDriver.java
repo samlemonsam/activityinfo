@@ -2,6 +2,7 @@ package org.activityinfo.test.pageobject.web.entry;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
@@ -13,6 +14,7 @@ import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
@@ -31,6 +33,11 @@ public class GxtFormDataEntryDriver implements DataEntryDriver {
         sections = this.modal.getWindowElement()
                 .findElements(By.className("formSec"))
                 .iterator();
+    }
+
+    @Override
+    public List<String> availableValues() {
+        return Lists.newArrayList();
     }
 
     @Override

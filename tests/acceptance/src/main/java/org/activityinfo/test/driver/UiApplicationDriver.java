@@ -1064,4 +1064,21 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void cleanup() throws Exception {
         setup().cleanup();
     }
+
+    public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
+        ensureLoggedIn();
+
+        UsersPage usersPage = applicationPage.navigateToDesignTab().users();
+        GxtModal modal = usersPage.addUser();
+
+        modal.form().fillTextField("Name", userEmail);
+        modal.form().fillTextField("Email", userEmail);
+        modal.form().select("Partner", getAliasTable().getAlias("partner"));
+
+        modal.accept();
+
+        Sleep.sleepSeconds(1);
+
+        usersPage.setPermissionForFirstRow(permissions);
+    }
 }

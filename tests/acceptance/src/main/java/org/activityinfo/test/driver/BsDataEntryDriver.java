@@ -1,10 +1,14 @@
 package org.activityinfo.test.driver;
 
+import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * Drives a bootstrap-based form
@@ -65,5 +69,10 @@ public class BsDataEntryDriver implements DataEntryDriver {
     @Override
     public void sendKeys(CharSequence keys) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> availableValues() {
+        return Lists.newArrayList();
     }
 }

@@ -232,6 +232,10 @@ public class GxtGrid {
         public void select() {
             element.click();
         }
+
+        public FluentElement getElement() {
+            return element;
+        }
     }
     
     public class GxtCell {
