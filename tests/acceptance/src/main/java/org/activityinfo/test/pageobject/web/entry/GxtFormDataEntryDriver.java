@@ -13,6 +13,7 @@ import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
@@ -31,6 +32,14 @@ public class GxtFormDataEntryDriver implements DataEntryDriver {
         sections = this.modal.getWindowElement()
                 .findElements(By.className("formSec"))
                 .iterator();
+    }
+
+    @Override
+    public List<String> availableValues() {
+        if (currentField.isDropDown()) {
+            return currentField.availableItems();
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -23,7 +23,9 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.google.common.base.Optional;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO.HasLockedPeriod;
+import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonMethod;
@@ -43,6 +45,9 @@ import java.util.*;
 public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, HasLockedPeriod, ProvidesKey {
 
     public static final int MAX_NAME_LENGTH = 255;
+
+    public static final String MY_PARTNER_ID = "myPartnerId";
+
     private CountryDTO country;
     private List<PartnerDTO> partners = new ArrayList<PartnerDTO>(0);
     private List<ActivityDTO> activities = new ArrayList<>(0);
@@ -295,6 +300,19 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         set("manageAllUsersAllowed", allowed);
     }
 
+    public Optional<PartnerDTO> getDefaultPartner() {
+        return getDefaultPartner(getPartners());
+    }
+
+    public static Optional<PartnerDTO> getDefaultPartner(Collection<PartnerDTO> partners) {
+        for (PartnerDTO partner : partners) {
+            if (UserDatabasePolicy.DEFAULT_PARTNER_NAME.equals(partner.getName())) {
+                return Optional.of(partner);
+            }
+        }
+        return Optional.absent();
+    }
+
     /**
      * @return the Partner of the UserDatabase to which the client belongs
      */
@@ -303,21 +321,21 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean hasPartnerId() {
-        return (get("myPartnerId") != null);
+        return (get(MY_PARTNER_ID) != null);
     }
 
     /**
      * @return the id of the Partner to which the client belongs
      */
     public int getMyPartnerId() {
-        return hasPartnerId() ? (Integer) get("myPartnerId") : 0;
+        return hasPartnerId() ? (Integer) get(MY_PARTNER_ID) : 0;
     }
 
     /**
      * Sets the id of the Partner to which the current user belongs
      */
     public void setMyPartnerId(int partnerId) {
-        set("myPartnerId", partnerId);
+        set(MY_PARTNER_ID, partnerId);
     }
 
     /**

@@ -3,8 +3,11 @@ package org.activityinfo.test.pageobject.odk;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.TouchAction;
 import org.activityinfo.test.driver.DataEntryDriver;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.Dimension;
+
+import java.util.List;
 
 public class Question implements DataEntryDriver {
     private final AppiumDriver driver;
@@ -89,6 +92,11 @@ public class Question implements DataEntryDriver {
 
     @Override
     public void sendKeys(CharSequence keys) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> availableValues() {
         throw new UnsupportedOperationException();
     }
 }
