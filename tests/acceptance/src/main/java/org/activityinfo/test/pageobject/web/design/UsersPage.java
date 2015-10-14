@@ -25,7 +25,6 @@ public class UsersPage {
     public UsersPage(FluentElement container) {
         this.container = container;
         this.toolbarMenu = new ToolbarMenu(container.findElement(By.className("x-toolbar-ct")));
-        ;
     }
 
     public ToolbarMenu getToolbarMenu() {

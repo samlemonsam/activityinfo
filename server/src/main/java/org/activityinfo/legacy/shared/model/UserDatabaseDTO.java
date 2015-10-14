@@ -313,15 +313,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return Optional.absent();
     }
 
-    public static Optional<PartnerDTO> getMyPartner(Collection<PartnerDTO> partners) {
-        for (PartnerDTO partner : partners) {
-            if (MY_PARTNER_ID.equals(partner.getName())) {
-                return Optional.of(partner);
-            }
-        }
-        return Optional.absent();
-    }
-
     /**
      * @return the Partner of the UserDatabase to which the client belongs
      */
