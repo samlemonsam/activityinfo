@@ -36,6 +36,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import static org.activityinfo.model.util.StringUtil.truncate;
+
 public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
     private static final int MIN_GZIP_BYTES = 1024 * 5;
@@ -114,7 +116,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
      */
     private void syncEntities(Activity activity, FormClass formClass) {
 
-        activity.setName(formClass.getLabel());
+        activity.setName(truncate(formClass.getLabel()));
         updateLocationType(activity, formClass);
 
         List<FormFieldEntity> fields = new ArrayList<>();
@@ -239,14 +241,6 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
         } else {
             indicator.setType(field.getType().getTypeClass().getId());
-        }
-    }
-
-    private String truncate(String label, int maxLength) {
-        if(label.length() > maxLength) {
-            return label.substring(0, maxLength);
-        } else {
-            return label;
         }
     }
 

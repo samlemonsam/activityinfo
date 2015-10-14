@@ -24,7 +24,6 @@ package org.activityinfo.server.command.handler.crud;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
@@ -36,6 +35,8 @@ import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+
+import static org.activityinfo.model.util.StringUtil.truncate;
 
 public class ActivityPolicy implements EntityPolicy<Activity> {
 
@@ -101,7 +102,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
     private void applyProperties(Activity activity, PropertyMap changes) {
         if (changes.containsKey("name")) {
-            activity.setName((String) changes.get("name"));
+            activity.setName(truncate((String) changes.get("name")));
         }
 
         if (changes.containsKey("locationTypeId")) {
@@ -118,7 +119,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
         if (changes.containsKey("category")) {
             String category = Strings.nullToEmpty((String) changes.get("category")).trim();
-            activity.setCategory(Strings.emptyToNull(category));
+            activity.setCategory(truncate(Strings.emptyToNull(category)));
         }
 
         if (changes.containsKey("mapIcon")) {
