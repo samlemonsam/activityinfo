@@ -67,4 +67,8 @@ public class LocationDialog {
         marker.dragAndDropBy(pixelsToLeft, pixelsToRight);
 
     }
+
+    public void close() {
+        dialog.closeByWindowHeaderButton();
+    }
 }

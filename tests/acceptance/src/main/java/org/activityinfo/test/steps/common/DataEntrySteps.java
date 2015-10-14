@@ -338,6 +338,7 @@ public class DataEntrySteps {
             }
         }
 
+        dataEntryDriver.close();
         if (!foundPartnerField) {
             throw new RuntimeException("Failed to find partner field.");
         }

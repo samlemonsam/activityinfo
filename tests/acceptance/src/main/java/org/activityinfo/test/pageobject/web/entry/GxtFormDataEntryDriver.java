@@ -43,6 +43,11 @@ public class GxtFormDataEntryDriver implements DataEntryDriver {
     }
 
     @Override
+    public void close() {
+        modal.closeByWindowHeaderButton();
+    }
+
+    @Override
     public boolean nextField() {
         
         while(true) {

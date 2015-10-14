@@ -4,7 +4,6 @@ package org.activityinfo.test.pageobject.web.entry;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
-import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 
 import java.util.List;
@@ -80,5 +79,10 @@ public class GxtDataEntryDriver implements DataEntryDriver {
     @Override
     public List<String> availableValues() {
         return current.availableValues();
+    }
+
+    @Override
+    public void close() {
+        current.close();
     }
 }
