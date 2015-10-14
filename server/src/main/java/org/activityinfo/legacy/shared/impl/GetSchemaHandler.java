@@ -29,9 +29,7 @@ import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
 import com.google.common.base.Functions;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -39,7 +37,10 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.promise.Promise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDTO> {
 
@@ -279,7 +280,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 //                                loadAttributes(),
 //                                joinAttributesToActivities(),
                                 loadLockedPeriods())
-                               .then(promise);
+                                .then(promise);
                     }
                 }
             });
@@ -450,13 +451,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     int databaseId = row.getInt("databaseId");
                     UserDatabaseDTO database = databaseMap.get(databaseId);
                     activity.setDatabase(database);
-                    activity.setPartnerRange(getAllowablePartners(database));
+                    activity.setPartnerRange(database.getAllowablePartners());
                     database.getActivities().add(activity);
 
                     int locationTypeId = row.getInt("locationTypeId");
                     LocationTypeDTO locationType = locationTypes.get(locationTypeId);
 
-                    if(locationType == null) {
+                    if (locationType == null) {
                         throw new IllegalStateException("No location type for " + locationTypeId);
                     }
                     activity.setLocationType(locationType);
@@ -467,25 +468,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             });
         }
 
-        private List<PartnerDTO> getAllowablePartners(UserDatabaseDTO database) {
-
-            Set<PartnerDTO> result = Sets.newHashSet();
-            Optional<PartnerDTO> defaultPartner = database.getDefaultPartner();
-
-            if (defaultPartner.isPresent()) {
-                result.add(defaultPartner.get());
-            }
-
-            if (database.isEditAllAllowed()) {
-                result.addAll(database.getPartners());
-            } else if (database.hasPartnerId()) {
-                result.add(database.getMyPartner());
-            } else {
-                // if the user has no specific rights, they may not
-                // have any options to set the partner
-            }
-            return Lists.newArrayList(result);
-        }
 //
 //        public Promise<Void> loadIndicators() {
 //            SqlQuery query = SqlQuery.select("indicatorId",
