@@ -981,6 +981,8 @@ public class UiApplicationDriver extends ApplicationDriver {
         DatabasesPage databasesPage = designTab.showDatabasesGrid();
         databasesPage.rename(aliasTable.getAlias(oldName), newName, newDescription);
 
+        Sleep.sleepSeconds(2);
+
         // validate values are changed in table
         Assert.assertNotNull(databasesPage.grid().findCell(newName));
         Assert.assertNotNull(databasesPage.grid().findCell(newDescription));
