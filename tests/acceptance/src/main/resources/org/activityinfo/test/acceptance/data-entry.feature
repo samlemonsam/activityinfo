@@ -26,8 +26,7 @@ Feature: Data entry
 
   @AI-1221
   Scenario: Partners are filtered according to permissions
-    Given that the user "bob@bedatadriven.com" is signed up
-    And I add "bob@bedatadriven.com" to database "Database" with partner "NRC" and permissions
+    Given I add "bob@bedatadriven.com" to database "Database" with partner "NRC" and permissions
       | field             | value |
       | View              | true  |
       | Edit              | true  |
