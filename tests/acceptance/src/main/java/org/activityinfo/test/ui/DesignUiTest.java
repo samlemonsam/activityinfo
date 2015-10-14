@@ -126,11 +126,11 @@ public class DesignUiTest {
     public void longNamesSaving() throws Exception {
         driver.login();
         driver.setup().createDatabase(property("name", DATABASE));
-        driver.setup().createForm(name(Strings.padEnd("form_", 500, 'a')),
+        driver.setup().createForm(name(Strings.padEnd("form1_", 500, 'a')),
                 property("database", DATABASE),
                 property("classicView", false));
 
-        String formName = Strings.padEnd("form_", 500, 'a');
+        String formName = Strings.padEnd("form2_", 500, 'a');
         driver.setup().createForm(name(formName),
                 property("database", DATABASE),
                 property("classicView", true));
