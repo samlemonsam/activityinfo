@@ -1080,6 +1080,6 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         Sleep.sleepSeconds(1);
 
-        usersPage.setPermission(userEmail, permissions);
+        usersPage.setPermission(account.getEmail(), permissions);
     }
 }
