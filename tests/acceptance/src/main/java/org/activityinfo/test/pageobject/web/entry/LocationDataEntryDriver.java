@@ -1,7 +1,6 @@
 package org.activityinfo.test.pageobject.web.entry;
 
 import org.activityinfo.test.driver.DataEntryDriver;
-import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 
 import java.util.List;
@@ -66,5 +65,10 @@ public class LocationDataEntryDriver implements DataEntryDriver {
     @Override
     public List<String> availableValues() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void close() {
+        dialog.close();
     }
 }

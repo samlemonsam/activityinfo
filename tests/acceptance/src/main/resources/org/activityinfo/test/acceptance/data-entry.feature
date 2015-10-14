@@ -5,6 +5,7 @@ Feature: Data entry
     Given I have created a database "Database"
     And I have added partner "NRC" to "Database"
     And I have added partner "UPS" to "Database"
+    And I have created a form "Patient Visits" using the new layout
     And I have created a form named "NFI Distribution"
 
 
@@ -25,8 +26,7 @@ Feature: Data entry
 
   @AI-1221
   Scenario: Partners are filtered according to permissions
-    Given that the user "bob@bedatadriven.com" is signed up
-    And I add "bob@bedatadriven.com" to database "Database" with partner "NRC" and permissions
+    Given I add "bob@bedatadriven.com" to database "Database" with partner "NRC" and permissions
       | field             | value |
       | View              | true  |
       | Edit              | true  |
@@ -37,6 +37,9 @@ Feature: Data entry
       | Design            | false |
     When I login as "bob@bedatadriven.com" with my correct password
     Then new form dialog for "NFI Distribution" form has following items for partner field
+      | Default |
+      | NRC     |
+    Then new form dialog for "Patient Visits" form has following items for partner field
       | Default |
       | NRC     |
 

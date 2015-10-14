@@ -253,10 +253,15 @@ public class BsFormPanel extends Form {
             final FluentElements items = items();
 
             List<String> itemLabels = Lists.newArrayList();
+            boolean skipFirst = !isDropDown(); // if not drop down we gather all labels including widget lable, so we want skip it here
             for (FluentElement element : items) {
                 String text = element.text();
                 if (Strings.isNullOrEmpty(text)) {
                     text = Strings.nullToEmpty(element.element().getAttribute("text"));
+                }
+                if (skipFirst) {
+                    skipFirst = false;
+                    continue;
                 }
                 itemLabels.add(text);
             }

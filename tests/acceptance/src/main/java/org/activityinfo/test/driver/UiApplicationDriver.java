@@ -1066,13 +1066,14 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
+        UserAccount account = accounts.ensureAccountExists(userEmail);
         ensureLoggedIn();
 
         UsersPage usersPage = applicationPage.navigateToDesignTab().selectDatabase(getAliasTable().getAlias(databaseName)).users();
         GxtModal modal = usersPage.addUser();
 
-        modal.form().fillTextField("Name", userEmail);
-        modal.form().fillTextField("Email", userEmail);
+        modal.form().fillTextField("Name", account.getEmail());
+        modal.form().fillTextField("Email", account.getEmail());
         modal.form().select("Partner", getAliasTable().getAlias(partner));
 
         modal.accept();

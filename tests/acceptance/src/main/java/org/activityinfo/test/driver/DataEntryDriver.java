@@ -53,4 +53,6 @@ public interface DataEntryDriver {
     void sendKeys(CharSequence keys);
 
     List<String> availableValues();
+
+    void close();
 }

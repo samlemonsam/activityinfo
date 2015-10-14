@@ -3,7 +3,6 @@ package org.activityinfo.test.pageobject.odk;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.TouchAction;
 import org.activityinfo.test.driver.DataEntryDriver;
-import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.Dimension;
 
@@ -97,6 +96,11 @@ public class Question implements DataEntryDriver {
 
     @Override
     public List<String> availableValues() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void close() {
         throw new UnsupportedOperationException();
     }
 }

@@ -24,6 +24,8 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO.HasLockedPeriod;
 import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
@@ -444,5 +446,24 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     @Override
     public Collection<String> getPropertyNames() {
         return super.getPropertyNames();
+    }
+
+    public List<PartnerDTO> getAllowablePartners() {
+        Set<PartnerDTO> result = Sets.newHashSet();
+        Optional<PartnerDTO> defaultPartner = getDefaultPartner();
+
+        if (defaultPartner.isPresent()) {
+            result.add(defaultPartner.get());
+        }
+
+        if (isEditAllAllowed()) {
+            result.addAll(getPartners());
+        } else if (hasPartnerId()) {
+            result.add(getMyPartner());
+        } else {
+            // if the user has no specific rights, they may not
+            // have any options to set the partner
+        }
+        return Lists.newArrayList(result);
     }
 }
