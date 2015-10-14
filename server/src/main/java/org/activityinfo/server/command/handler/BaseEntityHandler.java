@@ -38,6 +38,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static org.activityinfo.model.util.StringUtil.truncate;
+
 /**
  * Provides functionality common to CreateEntityHandler and UpdateEntityHandler
  *
@@ -58,7 +60,7 @@ public class BaseEntityHandler {
         PropertyMap changes = new PropertyMap(changeMap);
         
         if (changes.containsKey("name")) {
-            indicator.setName(trim(changes.get("name")));
+            indicator.setName(trimAndTruncate(changes.get("name")));
         }
 
         if (changes.containsKey("type")) {
@@ -70,15 +72,15 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("expression")) {
-            indicator.setExpression(trim(changes.get("expression")));
+            indicator.setExpression(trimAndTruncate(changes.get("expression")));
         }
 
         if (changes.containsKey("skipExpression")) {
-            indicator.setSkipExpression(trim(changes.get("skipExpression")));
+            indicator.setSkipExpression(trimAndTruncate(changes.get("skipExpression")));
         }
 
         if (changes.containsKey("nameInExpression")) {
-            indicator.setNameInExpression(trim(changes.get("nameInExpression")));
+            indicator.setNameInExpression(trimAndTruncate(changes.get("nameInExpression")));
         }
 
         if (changes.containsKey("calculatedAutomatically")) {
@@ -90,19 +92,19 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("category")) {
-            indicator.setCategory(trim(changes.get("category")));
+            indicator.setCategory(trimAndTruncate(changes.get("category")));
         }
 
         if (changes.containsKey("listHeader")) {
-            indicator.setListHeader(trim(changes.get("listHeader")));
+            indicator.setListHeader(trimAndTruncate(changes.get("listHeader")));
         }
 
         if (changes.containsKey("description")) {
-            indicator.setDescription(trim(changes.get("description")));
+            indicator.setDescription(trimAndTruncate(changes.get("description")));
         }
 
         if (changes.containsKey("units")) {
-            indicator.setUnits(trim(changes.get("units")));
+            indicator.setUnits(trimAndTruncate(changes.get("units")));
         }
 
         if (changes.containsKey("sortOrder")) {
@@ -135,7 +137,7 @@ public class BaseEntityHandler {
 
     protected void updateAttributeProperties(Map<String, Object> changes, Attribute attribute) {
         if (changes.containsKey("name")) {
-            attribute.setName(trim(changes.get("name")));
+            attribute.setName(trimAndTruncate(changes.get("name")));
         }
         if (changes.containsKey("sortOrder")) {
             attribute.setSortOrder((Integer) changes.get("sortOrder"));
@@ -145,7 +147,7 @@ public class BaseEntityHandler {
 
     protected void updateAttributeGroupProperties(AttributeGroup group, Map<String, Object> changes) {
         if (changes.containsKey("name")) {
-            group.setName(trim(changes.get("name")));
+            group.setName(trimAndTruncate(changes.get("name")));
         }
 
         if (changes.containsKey("multipleAllowed")) {
@@ -167,7 +169,7 @@ public class BaseEntityHandler {
 
     protected void updateLockedPeriodProperties(LockedPeriod lockedPeriod, Map<String, Object> changes) {
         if (changes.containsKey("name")) {
-            lockedPeriod.setName(trim(changes.get("name")));
+            lockedPeriod.setName(trimAndTruncate(changes.get("name")));
         }
         if (changes.containsKey("toDate")) {
             lockedPeriod.setToDate((LocalDate) changes.get("toDate"));
@@ -183,10 +185,10 @@ public class BaseEntityHandler {
         entityManager().merge(lockedPeriod);
     }
 
-    private String trim(Object value) {
+    private String trimAndTruncate(Object value) {
         if (value instanceof String) {
             String stringValue = (String)value;
-            return Strings.emptyToNull(stringValue.trim());
+            return truncate(Strings.emptyToNull(stringValue.trim()));
         } else {
             return null;
         }
@@ -194,7 +196,7 @@ public class BaseEntityHandler {
 
     protected void updateTargetProperties(Target target, Map<String, Object> changes) {
         if (changes.containsKey("name")) {
-            target.setName(trim(changes.get("name")));
+            target.setName(trimAndTruncate(changes.get("name")));
         }
 
         if (changes.containsKey("date1")) {
