@@ -332,7 +332,10 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         } else if ("AttributeGroup".equals(entityName)) {
             IsActivityDTO activity = findActivityFolder(selected);
 
-            newEntity = new AttributeGroupDTO();
+            AttributeGroupDTO newAttributeGroup = new AttributeGroupDTO();
+            newAttributeGroup.setMultipleAllowed(false);
+
+            newEntity = newAttributeGroup;
             newEntity.set("activityId", activity.getId());
             parent = treeStore.getChild((ModelData) activity, 0);
 
