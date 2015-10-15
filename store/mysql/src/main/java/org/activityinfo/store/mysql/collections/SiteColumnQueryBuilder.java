@@ -80,13 +80,16 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
             Stopwatch stopwatch = Stopwatch.createUnstarted();
             
             if(baseCursor.hasObservers()) {
+                stopwatch.start();
+                
                 // Run base table
                 Cursor cursor = baseCursor.open();
                 while (cursor.next()) {
                 }
+                stopwatch.stop();
+
             }
             
-            stopwatch.stop();
             
             LOGGER.fine("Scanned site table in " + stopwatch);
 

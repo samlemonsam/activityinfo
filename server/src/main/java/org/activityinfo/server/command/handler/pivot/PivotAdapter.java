@@ -14,13 +14,11 @@ import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.command.handler.IndicatorOracle;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -43,7 +41,7 @@ public class PivotAdapter {
     /**
      * Maps indicator ids to form class ids
      */
-    private final Map<Integer, ResourceId> indicatorMap;
+    private final List<ActivityMetadata> activities;
 
     private final Map<ResourceId, FormTree> formTrees;
     
@@ -52,6 +50,8 @@ public class PivotAdapter {
 
     private final Map<Object, Bucket> buckets = Maps.newHashMap();
 
+    private final Stopwatch metadataTime = Stopwatch.createUnstarted();
+    private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryTime = Stopwatch.createUnstarted();
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
     
@@ -63,11 +63,12 @@ public class PivotAdapter {
         this.filter = command.getFilter();
 
         // Mapping from indicator id -> activityId
-        Set<Integer> indicatorIds = filter.getRestrictions(DimensionType.Indicator);
-        indicatorMap = indicatorOracle.indicatorToForm(indicatorIds);
+        metadataTime.start();
+        activities = indicatorOracle.fetch(filter);
+        metadataTime.stop();
         
         // Query form trees: needed to determine attribute mapping
-        formTrees = queryFormTrees(indicatorMap.values());
+        formTrees = queryFormTrees();
 
         // Order the dimensions
         dimensions = new ArrayList<>();
@@ -80,12 +81,19 @@ public class PivotAdapter {
         }
     }
 
-    private Map<ResourceId, FormTree> queryFormTrees(Collection<ResourceId> formClassIds) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        BatchingFormTreeBuilder builder = new BatchingFormTreeBuilder(catalog);
-        Map<ResourceId, FormTree> trees = builder.queryTrees(formClassIds);
+    private Map<ResourceId, FormTree> queryFormTrees() {
         
-        LOGGER.fine("FormTrees loaded in " + stopwatch);
+        treeTime.start();
+        
+        Set<ResourceId> formIds = new HashSet<>();
+        for(ActivityMetadata activity : activities) {
+            formIds.add(activity.getFormClassId());
+        }
+
+        BatchingFormTreeBuilder builder = new BatchingFormTreeBuilder(catalog);
+        Map<ResourceId, FormTree> trees = builder.queryTrees(formIds);
+        
+        treeTime.stop();
         
         return trees;
         
@@ -126,24 +134,26 @@ public class PivotAdapter {
 
 
     public PivotSites.PivotResult execute() {
-        for (FormTree formTree : formTrees.values()) {
-            queryForm(formTree);
+        for (ActivityMetadata activity : activities) {
+            queryForm(activity);            
         }
         
-        LOGGER.info("Query time: " + queryTime + ", aggregate: " + aggregateTime);
+        
+        LOGGER.info(String.format("Pivot timings: metadata %s, trees: %s, query: %s, aggregate: %s",
+                metadataTime, treeTime, queryTime, aggregateTime));
         
         return new PivotSites.PivotResult(Lists.newArrayList(buckets.values()));
     }
 
-    private void queryForm(FormTree formTree) {
-        ResourceId formClassId = formTree.getRootFormClass().getId();
-        int activityId = CuidAdapter.getLegacyIdFromCuid(formClassId);
-        QueryModel queryModel = new QueryModel(formTree.getRootFormClass().getId());
+    private void queryForm(ActivityMetadata activity) {
+        int activityId = activity.getId();
+        ResourceId formClassId = activity.getFormClassId();
+        FormTree formTree = formTrees.get(activity.getFormClassId());
+        QueryModel queryModel = new QueryModel(formClassId);
 
         // Add Indicators
-        Set<Integer> indicatorIds = selectedIndicatorsInForm(formClassId);
-        for (Integer indicatorId : indicatorIds) {
-            queryModel.selectField(CuidAdapter.indicatorField(indicatorId)).as("I" + indicatorId);
+        for (IndicatorMetadata indicator : activity.getIndicators()) {
+            queryModel.selectField(indicator.getFieldId()).as(indicator.getAlias());
         }
 
         // Add dimensions columns as needed
@@ -165,12 +175,12 @@ public class PivotAdapter {
         // Now add the results to the buckets
         DimensionCategory[][] categories = extractCategories(formTree, columnSet);
 
-        for (Integer indicatorId : indicatorIds) {
-            ColumnView measureView = columnSet.getColumnView("I" + indicatorId);
+        for (IndicatorMetadata indicator : activity.getIndicators()) {
+            ColumnView measureView = columnSet.getColumnView(indicator.getAlias());
             DimensionCategory indicatorCategory = null;
 
             if (indicatorDimension.isPresent()) {
-                indicatorCategory = indicatorDimension.get().category(formTree, indicatorId);
+                indicatorCategory = indicatorDimension.get().category(formTree, indicator.getId());
             }
 
             for (int i = 0; i < columnSet.getNumRows(); i++) {
@@ -181,6 +191,7 @@ public class PivotAdapter {
                     Bucket bucket = new Bucket();
                     bucket.setCount(1);
                     bucket.setSum(value);
+                    bucket.setAggregationMethod(indicator.getAggregation());
 
                     if (indicatorDimension.isPresent()) {
                         bucket.setCategory(indicatorDimension.get().getModel(), indicatorCategory);
@@ -217,14 +228,4 @@ public class PivotAdapter {
         }
     }
 
-
-    private Set<Integer> selectedIndicatorsInForm(ResourceId formClassId) {
-        Set<Integer> indicatorIds = new HashSet<>();
-        for (Map.Entry<Integer, ResourceId> entry : indicatorMap.entrySet()) {
-            if(entry.getValue().equals(formClassId)) {
-                indicatorIds.add(entry.getKey());
-            }
-        }
-        return indicatorIds;
-    }
 }
