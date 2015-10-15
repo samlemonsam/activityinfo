@@ -43,7 +43,7 @@ class RenderContext {
             this.locations.put(dto.getId(), dto);
         }
         this.site = site;
-        this.state = baselineState;
+        this.state = baselineState != null ? baselineState : new HashMap<String, Object>();
     }
 
     SchemaDTO getSchema() {

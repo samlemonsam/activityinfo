@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
@@ -91,6 +92,10 @@ public class SiteHistoryRenderer {
 
     private List<ItemDetail> details(RenderContext ctx) {
         List<ItemDetail> details = new ArrayList<>();
+        if (Strings.isNullOrEmpty(ctx.getHistory().getJson())) {
+            return details;
+        }
+
         for (Map.Entry<String, Object> entry : ctx.getHistory().getJsonMap().entrySet()) {
             ItemDetail detail = ItemDetail.create(ctx, entry);
             if(detail != null) {

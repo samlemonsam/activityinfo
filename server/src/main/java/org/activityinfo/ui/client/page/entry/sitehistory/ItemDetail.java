@@ -38,6 +38,10 @@ class ItemDetail {
         ActivityFormDTO form = ctx.getForm();
 
         String key = entry.getKey();
+        if (entry.getKey() == null) {
+            return null;
+        }
+
         final Object oldValue = state.get(key);
         final Object newValue = entry.getValue();
         state.put(key, newValue);
