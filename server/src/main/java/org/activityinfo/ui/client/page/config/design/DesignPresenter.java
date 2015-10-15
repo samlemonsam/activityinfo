@@ -49,6 +49,7 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationEvent;
@@ -348,6 +349,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
             IndicatorDTO newIndicator = new IndicatorDTO();
             newIndicator.setAggregation(IndicatorDTO.AGGREGATE_SUM);
+            newIndicator.setType(FieldTypeClass.QUANTITY);
 
             if (activity instanceof ActivityFormDTO) {
                 newIndicator.set("sortOrder", ((ActivityFormDTO)activity).getIndicators().size() + 1);
