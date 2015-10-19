@@ -37,6 +37,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.promise.Promise;
 
 import java.util.*;
@@ -716,7 +717,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                             final int locationTypeId = results.getRow(0).getInt("id");
 
                                             SqlInsert.insertInto(Tables.LOCATION)
-                                                    .value("LocationId", locationTypeId)
+                                                    .value("LocationId", new KeyGenerator().generateInt())
                                                     .value("Name", country.getName())
                                                     .value("LocationTypeId", locationTypeId)
                                                     .value("x", (country.getBounds().getMinLon() + country.getBounds().getMaxLon()) / 2)

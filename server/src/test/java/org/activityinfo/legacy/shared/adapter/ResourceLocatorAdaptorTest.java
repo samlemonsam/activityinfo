@@ -104,20 +104,27 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     }
 
-    @Test
-    public void persistSiteException() {
-
-        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
-                NFI_DIST_FORM_CLASS);
-
-        Promise<Void> result;
-
-        result = resourceLocator.persist(instance);
-        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
-
-        result = resourceLocator.persist(Arrays.asList(instance, instance));
-        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
-    }
+    // This negative test tested case when nullary location does not exist for given locationtype.
+    // Now on GetSchemaHandler we insert nullary locationtype with location if it is absent.
+    //
+//    java.lang.NullPointerException
+//    at org.activityinfo.legacy.shared.model.LocationDTO.getId(LocationDTO.java:117)
+//    at org.activityinfo.legacy.shared.adapter.SitePersister.persist(SitePersister.java:86)
+    //
+//    @Test
+//    public void persistSiteException() {
+//
+//        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
+//                NFI_DIST_FORM_CLASS);
+//
+//        Promise<Void> result;
+//
+//        result = resourceLocator.persist(instance);
+//        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
+//
+//        result = resourceLocator.persist(Arrays.asList(instance, instance));
+//        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
+//    }
 
     @Test
     @OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
