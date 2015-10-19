@@ -707,16 +707,16 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             SqlQuery.select()
                                     .appendColumn("LocationTypeId", "id")
                                     .from(Tables.LOCATION_TYPE, "t")
-                                    .whereTrue("t.CountryId=" + country.getId() + " AND t.Name=" + LocationTypeDTO.NATIONWIDE_NAME)
+                                    .whereTrue("t.CountryId=" + country.getId() + " AND t.Name='" + LocationTypeDTO.NATIONWIDE_NAME + "'")
                                     .execute(tx, new SingleRowHandler() {
                                         @Override
                                         public void handleRow(SqlResultSetRow row) {
                                             final int locationTypeId = row.getInt("id");
 
                                             SqlInsert.insertInto(Tables.LOCATION)
-                                                    .value("LocationId", result)
+                                                    .value("LocationId", locationTypeId)
                                                     .value("Name", country.getName())
-                                                    .value("LocationTypeId", result)
+                                                    .value("LocationTypeId", locationTypeId)
                                                     .value("x", (country.getBounds().getMinLon() + country.getBounds().getMaxLon()) / 2)
                                                     .value("y", (country.getBounds().getMinLat() + country.getBounds().getMaxLat()) / 2)
                                                     .value("timeEdited", new Date().getTime())
@@ -740,7 +740,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                                     });
                                         }
                                     });
-
                         }
                     });
             return promise;
