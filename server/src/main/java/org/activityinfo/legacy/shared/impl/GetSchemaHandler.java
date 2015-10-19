@@ -661,7 +661,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             schemaDTO.setDatabases(databaseList);
 
             Promise.waitAll(tasks)
-                    .join(new CreateNullaryLocationType(countryList, tx))
+                    .join(new CreateNullaryLocationType(countryList, locationTypes, tx))
                     .then(Functions.constant(schemaDTO))
                     .then(callback);
         }
@@ -670,10 +670,12 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
     private static class CreateNullaryLocationType implements Function<Void, Promise<Void>> {
 
         private List<CountryDTO> countryList;
+        private Map<Integer, LocationTypeDTO> locationTypes;
         private SqlTransaction tx;
 
-        public CreateNullaryLocationType(List<CountryDTO> countryList, SqlTransaction tx) {
+        public CreateNullaryLocationType(List<CountryDTO> countryList, Map<Integer, LocationTypeDTO> locationTypes, SqlTransaction tx) {
             this.countryList = countryList;
+            this.locationTypes = locationTypes;
             this.tx = tx;
         }
 
@@ -732,9 +734,10 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                                             type.setId(locationTypeId);
                                                             type.setName(LocationTypeDTO.NATIONWIDE_NAME);
                                                             type.setWorkflowId("closed");
+                                                            type.setCountryBounds(country.getBounds());
 
                                                             country.getLocationTypes().add(type);
-
+                                                            locationTypes.put(locationTypeId, type);
                                                             promise.resolve(null);
                                                         }
                                                     });
