@@ -29,7 +29,6 @@ import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlInsert;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
-import com.bedatadriven.rebar.sql.client.util.SingleRowHandler;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
@@ -707,11 +706,12 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             SqlQuery.select()
                                     .appendColumn("LocationTypeId", "id")
                                     .from(Tables.LOCATION_TYPE, "t")
-                                    .whereTrue("t.CountryId=" + country.getId() + " AND t.Name='" + LocationTypeDTO.NATIONWIDE_NAME + "'")
-                                    .execute(tx, new SingleRowHandler() {
+                                    .whereTrue("t.CountryId=" + country.getId() + " AND t.Name='" + LocationTypeDTO.NATIONWIDE_NAME + "' " +
+                                            "AND workflowId='closed'")
+                                    .execute(tx, new SqlResultCallback() {
                                         @Override
-                                        public void handleRow(SqlResultSetRow row) {
-                                            final int locationTypeId = row.getInt("id");
+                                        public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+                                            final int locationTypeId = results.getRow(0).getInt("id");
 
                                             SqlInsert.insertInto(Tables.LOCATION)
                                                     .value("LocationId", locationTypeId)
