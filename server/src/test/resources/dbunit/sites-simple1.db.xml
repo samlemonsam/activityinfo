@@ -33,6 +33,9 @@
   <adminLevel countryId="1" adminLevelId="2" name="Territoire"
               ParentId="1" deleted="0"/>
 
+  <locationType locationTypeId="10" countryId="1" version="1" locationVersion="1" workflowId="closed"
+                name="Country" reuse="1"/>
+  <location locationId="11" name="Country" locationTypeId="10" X="1.533" Y="27.324" version="1"/>
 
   <locationType locationTypeId="2" countryId="1" version="1" locationVersion="1"
                 name="Health Center" reuse="1"/>
