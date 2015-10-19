@@ -26,8 +26,11 @@ import com.bedatadriven.rebar.sql.client.SqlResultCallback;
 import com.bedatadriven.rebar.sql.client.SqlResultSet;
 import com.bedatadriven.rebar.sql.client.SqlResultSetRow;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
+import com.bedatadriven.rebar.sql.client.query.SqlInsert;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
+import com.bedatadriven.rebar.sql.client.util.SingleRowHandler;
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,10 +40,7 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.promise.Promise;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDTO> {
 
@@ -68,13 +68,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         public Promise<Void> loadCountries() {
             return execute(SqlQuery.select()
-                    .appendColumn("CountryId", "id")
-                    .appendColumn("Name", "name")
-                    .appendColumn("X1", "x1")
-                    .appendColumn("y1", "y1")
-                    .appendColumn("x2", "x2")
-                    .appendColumn("y2", "y2")
-                    .from("country"),
+                            .appendColumn("CountryId", "id")
+                            .appendColumn("Name", "name")
+                            .appendColumn("X1", "x1")
+                            .appendColumn("y1", "y1")
+                            .appendColumn("x2", "x2")
+                            .appendColumn("y2", "y2")
+                            .from("country"),
                     new RowHandler() {
                         @Override
                         public void handleRow(SqlResultSetRow rs) {
@@ -153,8 +153,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         public Promise<Void> loadAdminLevels() {
             return execute(SqlQuery.select("adminLevelId", "name", "parentId", "countryId")
-                    .from("adminlevel")
-                    .whereTrue("deleted=0"),
+                            .from("adminlevel")
+                            .whereTrue("deleted=0"),
                     new RowHandler() {
 
                         @Override
@@ -176,30 +176,30 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         public Promise<Void> loadDatabases() {
             final Promise<Void> promise = new Promise<>();
             SqlQuery query = SqlQuery.select("d.DatabaseId")
-                                     .appendColumn("d.Name")
-                                     .appendColumn("d.FullName")
-                                     .appendColumn("d.OwnerUserId")
-                                     .appendColumn("d.CountryId")
-                                     .appendColumn("o.Name", "OwnerName")
-                                     .appendColumn("o.Email", "OwnerEmail")
-                                     .appendColumn("p.AllowViewAll", "allowViewAll")
-                                     .appendColumn("p.AllowEdit", "allowEdit")
-                                     .appendColumn("p.AllowEditAll", "allowEditAll")
-                                     .appendColumn("p.AllowManageUsers", "allowManageUsers")
-                                     .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
-                                     .appendColumn("p.AllowDesign", "allowDesign")
-                                     .appendColumn("p.PartnerId", "partnerId")
-                                     .from("userdatabase d")
-                                     .leftJoin(SqlQuery.selectAll()
-                                                       .from("userpermission")
-                                                       .where("userpermission.UserId")
-                                                       .equalTo(context.getUser().getId()), "p")
-                                     .on("p.DatabaseId = d.DatabaseId")
-                                     .leftJoin("userlogin o")
-                                     .on("d.OwnerUserId = o.UserId")
-                                     .where("d.DateDeleted")
-                                     .isNull()
-                                     .orderBy("d.Name");
+                    .appendColumn("d.Name")
+                    .appendColumn("d.FullName")
+                    .appendColumn("d.OwnerUserId")
+                    .appendColumn("d.CountryId")
+                    .appendColumn("o.Name", "OwnerName")
+                    .appendColumn("o.Email", "OwnerEmail")
+                    .appendColumn("p.AllowViewAll", "allowViewAll")
+                    .appendColumn("p.AllowEdit", "allowEdit")
+                    .appendColumn("p.AllowEditAll", "allowEditAll")
+                    .appendColumn("p.AllowManageUsers", "allowManageUsers")
+                    .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
+                    .appendColumn("p.AllowDesign", "allowDesign")
+                    .appendColumn("p.PartnerId", "partnerId")
+                    .from("userdatabase d")
+                    .leftJoin(SqlQuery.selectAll()
+                            .from("userpermission")
+                            .where("userpermission.UserId")
+                            .equalTo(context.getUser().getId()), "p")
+                    .on("p.DatabaseId = d.DatabaseId")
+                    .leftJoin("userlogin o")
+                    .on("d.OwnerUserId = o.UserId")
+                    .where("d.DateDeleted")
+                    .isNull()
+                    .orderBy("d.Name");
 
             // this is quite hackesh. we ultimately need to split up GetSchema()
             // into
@@ -385,10 +385,10 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         private Promise<Void> joinPartnersToDatabases() {
             SqlQuery query = SqlQuery.select("d.databaseId", "d.partnerId", "p.name", "p.fullName")
-                                     .from(Tables.PARTNER_IN_DATABASE, "d")
-                                     .leftJoin(Tables.PARTNER, "p")
-                                     .on("d.PartnerId = p.PartnerId")
-                                     .orderBy("p.name");
+                    .from(Tables.PARTNER_IN_DATABASE, "d")
+                    .leftJoin(Tables.PARTNER, "p")
+                    .on("d.PartnerId = p.PartnerId")
+                    .orderBy("p.name");
 
             // Only allow results that are visible to this user if we are on the
             // server,
@@ -662,8 +662,88 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             schemaDTO.setDatabases(databaseList);
 
             Promise.waitAll(tasks)
-                   .then(Functions.constant(schemaDTO))
-                   .then(callback);
+                    .join(new CreateNullaryLocationType(countryList, tx))
+                    .then(Functions.constant(schemaDTO))
+                    .then(callback);
+        }
+    }
+
+    private static class CreateNullaryLocationType implements Function<Void, Promise<Void>> {
+
+        private List<CountryDTO> countryList;
+        private SqlTransaction tx;
+
+        public CreateNullaryLocationType(List<CountryDTO> countryList, SqlTransaction tx) {
+            this.countryList = countryList;
+            this.tx = tx;
+        }
+
+        @Override
+        public Promise<Void> apply(Void input) {
+            List<Promise<Void>> promises = Lists.newArrayList();
+            for (CountryDTO country : countryList) {
+                if (country.getNullLocationTypeSilently() == null) {
+                    promises.add(createNullLocationType(country));
+                }
+            }
+            return Promise.waitAll(promises);
+        }
+
+        private Promise<Void> createNullLocationType(final CountryDTO country) {
+            final Promise<Void> promise = new Promise<>();
+            SqlInsert.insertInto(Tables.LOCATION_TYPE)
+                    .value("name", LocationTypeDTO.NATIONWIDE_NAME)
+                    .value("Reuse", 0)
+                    .value("CountryId", country.getId())
+                    .value("workflowId", "closed")
+                    .execute(tx, new AsyncCallback<Integer>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            promise.reject(caught);
+                        }
+
+                        @Override
+                        public void onSuccess(final Integer result) {
+                            SqlQuery.select()
+                                    .appendColumn("LocationTypeId", "id")
+                                    .from(Tables.LOCATION_TYPE, "t")
+                                    .whereTrue("t.CountryId=" + country.getId() + " AND t.Name=" + LocationTypeDTO.NATIONWIDE_NAME)
+                                    .execute(tx, new SingleRowHandler() {
+                                        @Override
+                                        public void handleRow(SqlResultSetRow row) {
+                                            final int locationTypeId = row.getInt("id");
+
+                                            SqlInsert.insertInto(Tables.LOCATION)
+                                                    .value("LocationId", result)
+                                                    .value("Name", country.getName())
+                                                    .value("LocationTypeId", result)
+                                                    .value("x", (country.getBounds().getMinLon() + country.getBounds().getMaxLon()) / 2)
+                                                    .value("y", (country.getBounds().getMinLat() + country.getBounds().getMaxLat()) / 2)
+                                                    .value("timeEdited", new Date().getTime())
+                                                    .execute(tx, new AsyncCallback<Integer>() {
+                                                        @Override
+                                                        public void onFailure(Throwable caught) {
+                                                            promise.reject(caught);
+                                                        }
+
+                                                        @Override
+                                                        public void onSuccess(Integer result) {
+                                                            LocationTypeDTO type = new LocationTypeDTO();
+                                                            type.setId(locationTypeId);
+                                                            type.setName(LocationTypeDTO.NATIONWIDE_NAME);
+                                                            type.setWorkflowId("closed");
+
+                                                            country.getLocationTypes().add(type);
+
+                                                            promise.resolve(null);
+                                                        }
+                                                    });
+                                        }
+                                    });
+
+                        }
+                    });
+            return promise;
         }
     }
 }
