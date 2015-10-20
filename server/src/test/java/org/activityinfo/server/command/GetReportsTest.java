@@ -67,12 +67,19 @@ public class GetReportsTest extends CommandTestCase {
     @OnDataSet("/dbunit/get-report-performance-tests.db.xml")
     @Test // AI-1223
     public void performanceTest() {
+        // initial performance: 1838ms - sql fetch, 1962ms - time for client (+serialization/deserialization)
+        // after performance tuning: 229ms - sql fetch, 273 ms - time for client (+serialization/deserialization)
+
         setUser(1);
 
         Stopwatch started = Stopwatch.createStarted();
 
         ReportsResult result = execute(new GetReports());
         assertNotNull(result);
+        assertEquals(1, result.getData().get(0).getId());
+        assertEquals("Report 1", result.getData().get(0).getTitle());
+        assertEquals("Alex", result.getData().get(0).getOwnerName());
+
         long elapsed = started.elapsed(TimeUnit.MILLISECONDS);
         assertTrue("GetReports takes " + elapsed + "ms.", elapsed < 1000); // must be less then one second
     }
