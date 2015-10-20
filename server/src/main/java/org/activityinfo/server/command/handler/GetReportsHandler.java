@@ -70,6 +70,7 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
         private final Map<Integer, ReportMetadataDTO> mySubscriptions = Maps.newHashMap();
         private final Map<Integer, Boolean> visibility = Maps.newHashMap();
         private final Set<Integer> myDatabases = Sets.newHashSet();
+        private final Set<Integer> reportsWithDashboardNull = Sets.newHashSet();
         private final List<ReportMetadataDTO> reports = Lists.newArrayList();
 
         private final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -168,16 +169,19 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
                     LOGGER.finest("Query fetched in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
 
                     for (SqlResultSetRow row : results.getRows()) {
+                        int reportId = row.getInt("reportId");
+
                         ReportMetadataDTO dto = new ReportMetadataDTO();
-                        dto.setId(row.getInt("reportId"));
+                        dto.setId(reportId);
                         dto.setAmOwner(row.getInt("ownerUserId") == context.getUser().getId());
                         dto.setOwnerName(row.getString("ownerName"));
                         dto.setTitle(row.getString("title"));
                         dto.setEditAllowed(dto.getAmOwner());
 
-                        if (row.isNull("dashboard")) { // todo
+                        if (reportsWithDashboardNull.contains(reportId)) {
                             // inherited from database-wide visibility
-                            dto.setDashboard(!row.isNull("defaultDashboard") && row.getBoolean("defaultDashboard"));
+                            Boolean dashboard = visibility.get(reportId);
+                            dto.setDashboard(dashboard != null && dashboard);
                         }
 
                         reports.add(dto);
@@ -256,6 +260,8 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
 
                         if (!row.isNull("dashboard")) {
                             dto.setDashboard(row.getBoolean("dashboard"));
+                        } else {
+                            reportsWithDashboardNull.add(reportId);
                         }
 
                         mySubscriptions.put(reportId, dto);
