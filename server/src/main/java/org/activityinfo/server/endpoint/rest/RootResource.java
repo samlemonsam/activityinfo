@@ -39,6 +39,7 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
+import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.collections.CountryTable;
@@ -193,5 +194,10 @@ public class RootResource {
     @Path("/users")
     public UsersResource getUsers() {
         return new UsersResource(config, entityManager);
+    }
+    
+    @Path("/usage")
+    public UsageResource getUsage() {
+        return new UsageResource(entityManager, config);
     }
 }
