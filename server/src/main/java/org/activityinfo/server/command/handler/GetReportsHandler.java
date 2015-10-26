@@ -88,50 +88,14 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
             tasks.add(loadMySubscriptions());
             tasks.add(loadMyDatabases());
 
-            Promise.waitAll(tasks).join(new Function<Void, Promise<Void>>() {
-                @Override
-                public Promise<Void> apply(Void input) {
-                    final Promise promise = new Promise();
-
-                    if (myDatabases.isEmpty()) {
-                        promise.resolve(null);
-                        return promise;
-                    }
-
-                    SqlQuery.select()
-                            .appendColumn("reportid")
-                            .appendColumn("defaultDashboard")
-                            .from(Tables.REPORT_VISIBILITY, "v")
-                            .where("v.databaseId")
-                            .in(myDatabases)
-                            .execute(context.getTransaction(), new SqlResultCallback() {
-                                @Override
-                                public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                                    for (SqlResultSetRow row : results.getRows()) {
-                                        int reportid = row.getInt("reportid");
-                                        Boolean defaultDashboard = visibility.get(reportid);
-                                        if (defaultDashboard != null && defaultDashboard) {
-                                            continue;
-                                        }
-                                        if (!row.isNull("defaultDashboard")) {
-                                            defaultDashboard = row.getBoolean("defaultDashboard");
-                                        }
-
-                                        visibility.put(reportid, defaultDashboard);
-                                    }
-                                    LOGGER.finest("visibilty map loaded in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
-                                    promise.resolve(null);
-                                }
-                            });
-                    return promise;
-                }
-            }).then(new Function<Void, Object>() {
-                @Override
-                public Object apply(Void input) {
-                    loadReports();
-                    return null;
-                }
-            });
+            Promise.waitAll(tasks)
+                    .join(new LoadVisibility())
+                    .then(new Function<Void, Promise<Void>>() {
+                        @Override
+                        public Promise<Void> apply(Void input) {
+                            return loadReports();
+                        }
+                    });
         }
 
         private String sharedInString() {
@@ -151,7 +115,8 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
             return s;
         }
 
-        private void loadReports() {
+        private Promise<Void> loadReports() {
+            final Promise<Void> promise = new Promise<>();
             SqlQuery query = SqlQuery.select()
                     .appendColumn("r.reportTemplateId", "reportId")
                     .appendColumn("r.title", "title")
@@ -204,8 +169,10 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
 
                     LOGGER.finest("Parsed and result is returned in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
                     callback.onSuccess(new ReportsResult(reports));
+                    promise.resolve(null);
                 }
             });
+            return promise;
         }
 
         private Promise<Void> loadMyDatabases() {
@@ -285,8 +252,46 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
             });
             return promise;
         }
-    }
 
+        private class LoadVisibility implements Function<Void, Promise<Void>> {
+            @Override
+            public Promise<Void> apply(Void input) {
+                final Promise<Void> promise = new Promise<>();
+
+                if (myDatabases.isEmpty()) {
+                    promise.resolve(null);
+                    return promise;
+                }
+
+                SqlQuery.select()
+                        .appendColumn("reportid")
+                        .appendColumn("defaultDashboard")
+                        .from(Tables.REPORT_VISIBILITY, "v")
+                        .where("v.databaseId")
+                        .in(myDatabases)
+                        .execute(context.getTransaction(), new SqlResultCallback() {
+                            @Override
+                            public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+                                for (SqlResultSetRow row : results.getRows()) {
+                                    int reportid = row.getInt("reportid");
+                                    Boolean defaultDashboard = visibility.get(reportid);
+                                    if (defaultDashboard != null && defaultDashboard) {
+                                        continue;
+                                    }
+                                    if (!row.isNull("defaultDashboard")) {
+                                        defaultDashboard = row.getBoolean("defaultDashboard");
+                                    }
+
+                                    visibility.put(reportid, defaultDashboard);
+                                }
+                                LOGGER.finest("visibilty map loaded in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
+                                promise.resolve(null);
+                            }
+                        });
+                return promise;
+            }
+        }
+    }
 
 }
 
