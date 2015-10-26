@@ -70,7 +70,6 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
         private final Map<Integer, ReportMetadataDTO> mySubscriptions = Maps.newHashMap();
         private final Map<Integer, Boolean> visibility = Maps.newHashMap();
         private final Set<Integer> myDatabases = Sets.newHashSet();
-        private final Set<Integer> reportsWithDashboardNull = Sets.newHashSet();
         private final List<ReportMetadataDTO> reports = Lists.newArrayList();
 
         private final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -93,6 +92,12 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
                 @Override
                 public Promise<Void> apply(Void input) {
                     final Promise promise = new Promise();
+
+                    if (myDatabases.isEmpty()) {
+                        promise.resolve(null);
+                        return promise;
+                    }
+
                     SqlQuery.select()
                             .appendColumn("reportid")
                             .appendColumn("defaultDashboard")
@@ -157,9 +162,13 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
                     .on("o.userid=r.ownerUserId");
             // build where clause manually to ensure proper grouping of and/or
 
-            query.whereTrue("r.title is not null AND (r.ownerUserId=" + context.getUser().getId() +
-                    " OR r.reportTemplateId in (" + sharedInString() + "))");
+            String whereTrueExpr = "r.title is not null AND (r.ownerUserId=" + context.getUser().getId();
+            if (!visibility.isEmpty()) {
+                whereTrueExpr += " OR r.reportTemplateId in (" + sharedInString() + ")";
+            }
+            whereTrueExpr += ")";
 
+            query.whereTrue(whereTrueExpr);
 
             LOGGER.info("Reports query: " + query.sql());
 
@@ -177,8 +186,14 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
                         dto.setOwnerName(row.getString("ownerName"));
                         dto.setTitle(row.getString("title"));
                         dto.setEditAllowed(dto.getAmOwner());
+                        dto.setDay(1);
 
-                        if (reportsWithDashboardNull.contains(reportId)) {
+                        ReportMetadataDTO subscription = mySubscriptions.get(reportId);
+                        if (subscription != null) {
+                            dto.setDashboard(subscription.isDashboard());
+                            dto.setDay(subscription.getDay());
+                            dto.setEmailDelivery(subscription.getEmailDelivery());
+                        } else {
                             // inherited from database-wide visibility
                             Boolean dashboard = visibility.get(reportId);
                             dto.setDashboard(dashboard != null && dashboard);
@@ -260,8 +275,6 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
 
                         if (!row.isNull("dashboard")) {
                             dto.setDashboard(row.getBoolean("dashboard"));
-                        } else {
-                            reportsWithDashboardNull.add(reportId);
                         }
 
                         mySubscriptions.put(reportId, dto);
