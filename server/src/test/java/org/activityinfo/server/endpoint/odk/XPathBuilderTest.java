@@ -73,30 +73,72 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
         ResourceId male = formClass.getEnumValueByLabel("Male").getId();
 
-        formClass.getFormClass().getField(GENDER_FIELD_ID).
-                setRelevanceConditionExpression(String.format("{%s}=={%s}", GENDER_FIELD_ID.asString(), male.asString()));
+        formClass.getFormClass().getField(GENDER_FIELD_ID).setRelevanceConditionExpression(
+                        String.format("{%s}=={%s}", GENDER_FIELD_ID.asString(), male.asString()));
 
         XForm xForm = xForm(formClass.getFormClass());
 
-        Bind enumBind = bindByFieldId(GENDER_FIELD_ID, xForm);
+        assertEquals(
+                bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
+                String.format("/data/field_%s = '%s'", GENDER_FIELD_ID.asString(), male.asString()));
+    }
 
-        assertEquals(enumBind.getRelevant(), String.format("/data/field_%s = '%s'", GENDER_FIELD_ID.asString(), male.asString()));
+    @Test
+    public void containsAny() {
+        TFormClass formClass = createFormClass();
+
+        ResourceId male = formClass.getEnumValueByLabel("Male").getId();
+        ResourceId female = formClass.getEnumValueByLabel("Female").getId();
+
+        formClass.getFormClass().getField(GENDER_FIELD_ID).setRelevanceConditionExpression(
+                String.format("containsAny({%s},{%s})", GENDER_FIELD_ID.asString(), male.asString()));
+
+        XForm xForm = xForm(formClass.getFormClass());
+
+        assertEquals(
+                bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
+                String.format("selected(/data/field_%s, '%s')", GENDER_FIELD_ID.asString(), male.asString()));
+
+        formClass.getFormClass().getField(GENDER_FIELD_ID).setRelevanceConditionExpression(
+                String.format("containsAny({%s},{%s},{%s})", GENDER_FIELD_ID.asString(), male.asString(), female.asString()));
+
+        xForm = xForm(formClass.getFormClass());
+
+        assertEquals(
+                bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
+                String.format("selected(/data/field_%s, '%s') or selected(/data/field_%s, '%s')",
+                        GENDER_FIELD_ID.asString(), male.asString(), GENDER_FIELD_ID.asString(), female.asString()));
     }
 
     @Test
     public void containsAll() {
         TFormClass formClass = createFormClass();
 
+        ResourceId male = formClass.getEnumValueByLabel("Male").getId();
+        ResourceId female = formClass.getEnumValueByLabel("Female").getId();
+
+        formClass.getFormClass().getField(GENDER_FIELD_ID).setRelevanceConditionExpression(
+                String.format("containsAll({%s},{%s})", GENDER_FIELD_ID.asString(), male.asString()));
+
         XForm xForm = xForm(formClass.getFormClass());
 
-        Bind enumBind = bindByFieldId(GENDER_FIELD_ID, xForm);
+        assertEquals(
+                bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
+                String.format("selected(/data/field_%s, '%s')", GENDER_FIELD_ID.asString(), male.asString()));
 
-        // todo
-        //assertEquals(enumBind.getRelevant(), "");
+        formClass.getFormClass().getField(GENDER_FIELD_ID).setRelevanceConditionExpression(
+                String.format("containsAll({%s},{%s},{%s})", GENDER_FIELD_ID.asString(), male.asString(), female.asString()));
+
+        xForm = xForm(formClass.getFormClass());
+
+        assertEquals(
+                bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
+                String.format("selected(/data/field_%s, '%s') and selected(/data/field_%s, '%s')",
+                        GENDER_FIELD_ID.asString(), male.asString(), GENDER_FIELD_ID.asString(), female.asString()));
     }
 
     private Bind bindByFieldId(ResourceId fieldId, XForm xForm) {
-        return XFormNavigator.getBind("/data/field_" + GENDER_FIELD_ID.asString(), xForm);
+        return XFormNavigator.getBind("/data/field_" + fieldId.asString(), xForm);
     }
 
     private XForm xForm(FormClass formClass) {
