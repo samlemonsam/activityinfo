@@ -35,7 +35,7 @@ import com.extjs.gxt.ui.client.widget.form.FormPanel;
  *
  * @author Alex Bertram
  */
-abstract class AbstractDesignForm extends FormPanel {
+public abstract class AbstractDesignForm extends FormPanel {
 
     protected AbstractDesignForm() {
         setScrollMode(Style.Scroll.AUTOY);

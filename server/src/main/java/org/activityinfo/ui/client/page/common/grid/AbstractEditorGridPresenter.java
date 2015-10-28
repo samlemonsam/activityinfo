@@ -28,6 +28,7 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
@@ -43,6 +44,8 @@ import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
 import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
+import org.activityinfo.ui.client.page.config.design.AbstractDesignForm;
+import org.activityinfo.ui.client.page.config.design.DesignView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +115,10 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
      */
     public void onSave() {
 
+        if (!isValid()) {
+            return;
+        }
+
         service.execute(createSaveCommand(), view.getSavingMonitor(), new AsyncCallback() {
             @Override
             public void onFailure(Throwable caught) {
@@ -129,6 +136,17 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
                 onSaved();
             }
         });
+    }
+
+    private boolean isValid() {
+        if (view instanceof DesignView) {
+            AbstractDesignForm currentForm = ((DesignView) view).getCurrentForm();
+            if (!currentForm.isValid()) {
+                MessageBox.alert(currentForm.getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
