@@ -76,6 +76,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
     private MenuItem newAttribute;
     private MenuItem newIndicator;
     private Menu newMenu;
+    private AbstractDesignForm currentForm;
 
     private final class DragDropListener extends DNDListener {
         private final TreeStore treeStore;
@@ -364,7 +365,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         // do we have the right form?
         Class formClass = formClassForSelection(model);
 
-        AbstractDesignForm currentForm = null;
+        currentForm = null;
         if (formContainer.getItemCount() != 0) {
             currentForm = (AbstractDesignForm) formContainer.getItem(0);
         }
@@ -428,6 +429,10 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         dlg.show(callback);
 
         return dlg;
+    }
+
+    public AbstractDesignForm getCurrentForm() {
+        return currentForm;
     }
 
     @Override
