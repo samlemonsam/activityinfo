@@ -126,7 +126,7 @@ public class UserDatabase implements java.io.Serializable, Deleteable {
     /**
      * @return The short name of the database (generally an acronym)
      */
-    @Column(name = "Name", length = 16, nullable = false)
+    @Column(name = "Name", length = 255, nullable = false)
     public String getName() {
         return this.name;
     }
