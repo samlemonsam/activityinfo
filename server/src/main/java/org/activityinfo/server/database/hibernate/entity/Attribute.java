@@ -73,7 +73,7 @@ public class Attribute implements Serializable, Deleteable, Orderable {
         this.group = group;
     }
 
-    @Column(name = "Name", nullable = false, length = 50)
+    @Column(name = "Name", nullable = false, length = 255)
     public String getName() {
         return this.name;
     }

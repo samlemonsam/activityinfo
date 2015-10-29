@@ -64,7 +64,7 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         this.id = id;
     }
 
-    @AllowUserUpdate @NotNull @Size(max = 30)
+    @AllowUserUpdate @NotNull @Size(max = 255)
     public String getName() {
         return name;
     }
