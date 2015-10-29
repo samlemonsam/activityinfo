@@ -32,6 +32,16 @@ public class ExprParserTest {
     }
 
     @Test
+    public void parseCompoundOp() {
+        expect("a.b==c", new FunctionCallNode(
+                EqualFunction.INSTANCE,
+                    new CompoundExpr(
+                        new SymbolExpr("a"), 
+                        new SymbolExpr("b")),
+                    new SymbolExpr("c")));
+    }
+    
+    @Test
     public void parseEqualsSign() {
         expect("true==false", new FunctionCallNode(
                 EqualFunction.INSTANCE,
