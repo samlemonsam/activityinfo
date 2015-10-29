@@ -6,6 +6,7 @@ import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import com.google.common.util.concurrent.Futures;
 import com.google.inject.Module;
 import cucumber.runtime.ClassFinder;
@@ -29,12 +30,14 @@ import org.activityinfo.test.webdriver.WebDriverModule;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.LogManager;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
@@ -93,6 +96,8 @@ public class TestMain implements Runnable {
     
     public static void main(String[] args) {
 
+        setupLogging();
+
         TestOutputStream.initialize();
 
         TestMain suite = SingleCommand.singleCommand(TestMain.class).parse(args);
@@ -103,7 +108,17 @@ public class TestMain implements Runnable {
 
         suite.run();
     }
-    
+
+    private static void setupLogging() {
+        try {
+            try(InputStream in = Resources.getResource(TestMain.class, "logging.properties").openStream()) {
+                LogManager.getLogManager().readConfiguration(in);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to setup logging!", e);
+        }
+    }
+
     public void run() {
 
         if(outputDir == null) {
