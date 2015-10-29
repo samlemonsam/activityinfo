@@ -9,11 +9,14 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import java.util.List;
 
 public abstract class AbstractMySqlTest {
 
@@ -70,6 +73,22 @@ public abstract class AbstractMySqlTest {
             System.out.println(field + ": " + column(field));
         }
     }
+
+    protected final void queryWhere(ResourceId formClassId, List<String> fields, String filter) {
+        QueryModel queryModel = new QueryModel(formClassId);
+        queryModel.selectResourceId().as("_id");
+        for(String field : fields) {
+            queryModel.selectExpr(field).setId(field);
+        }
+        queryModel.setFilter(ExprValue.valueOf(filter));
+
+        columnSet = executor.build(queryModel);
+
+        for(String field : fields) {
+            System.out.println(field + ": " + column(field));
+        }
+    }
+
 
 
     protected final ColumnView column(String column) {

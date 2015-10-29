@@ -1,7 +1,6 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.diagnostic.ExprException;
@@ -47,14 +46,7 @@ public class ColumnSetBuilder {
         CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
         QueryEvaluator evaluator = new QueryEvaluator(tree, formClass, batch);
 
-        Function<ColumnView, ColumnView> filter = Functions.identity();
-
-//        Function<ColumnView, ColumnView> filter;
-//        if(table.getFilter() == null) {
-//            filter = Functions.identity();
-//        } else {
-//            filter = new ColumnFilter(evaluator.filter(table.getFilter()));
-//        }
+        Function<ColumnView, ColumnView> filter = evaluator.filter(table.getFilter());
 
         Map<String, Slot<ColumnView>> columnViews = Maps.newHashMap();
         for(ColumnModel column : table.getColumns()) {

@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
@@ -131,7 +132,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testSiteSimple() {
         query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner", 
-                "partner.label", "location.label", "BENE", "cause", "project.name");
+                "partner.label", "location.label", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
         assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
@@ -139,10 +140,20 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
-        assertThat(column("project.name"), hasValues(null, null, "RRMP"));
+        assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));
     }
-    
-    
+
+    @Test
+    public void testSiteFilteredOnPartner() {
+        queryWhere(CuidAdapter.activityFormClass(1),
+                asList("_id", "partner.name", "project.name"), "partner.name == 'NRC'");
+
+        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2)));
+        
+    }
+
+
+
     @Test
     public void testSingleSiteResource() throws IOException {
         ResourceId formClass = CuidAdapter.activityFormClass(1);

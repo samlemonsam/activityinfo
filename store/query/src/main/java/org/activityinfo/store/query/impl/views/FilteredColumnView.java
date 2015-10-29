@@ -55,4 +55,18 @@ public class FilteredColumnView implements ColumnView {
     public int getBoolean(int row) {
         return view.getBoolean(filteredIndices[row]);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("[");
+        for (int i = 0; i < numRows(); i++) {
+            if(i > 0) {
+                s.append(", ");
+            }
+            s.append(get(i));
+        }
+        s.append("]");
+        return s.toString();
+    }
 }

@@ -5,12 +5,27 @@ import org.activityinfo.model.resource.ResourceId;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ColumnSetMatchers {
 
+    private static abstract class ColumnViewMatcher extends TypeSafeMatcher<ColumnView> {
+
+        @Override
+        protected void describeMismatchSafely(ColumnView item, Description mismatchDescription) {
+            mismatchDescription.appendText("was [");
+            List<Object> values = new ArrayList<>();
+            for (int i = 0; i < item.numRows(); i++) {
+                values.add(item.get(i));
+            }
+            mismatchDescription.appendValueList("[", ", ", "]", values);
+        }
+    }
+    
     public static TypeSafeMatcher<ColumnView> hasValues(final String... values) {
-        return new TypeSafeMatcher<ColumnView>() {
+        return new ColumnViewMatcher() {
             @Override
             protected boolean matchesSafely(ColumnView item) {
                 if(item.numRows() != values.length) {
@@ -28,11 +43,16 @@ public class ColumnSetMatchers {
             public void describeTo(Description description) {
                 description.appendText("column with values").appendValueList("[", ", ", "]", values);
             }
+
+            @Override
+            protected void describeMismatchSafely(ColumnView item, Description mismatchDescription) {
+
+            }
         };
     }
     
     public static TypeSafeMatcher<ColumnView> hasAllNullValuesWithLengthOf(final int length) {
-        return new TypeSafeMatcher<ColumnView>() {
+        return new ColumnViewMatcher() {
             @Override
             protected boolean matchesSafely(ColumnView item) {
                 if(item.numRows() != length) {
@@ -61,8 +81,8 @@ public class ColumnSetMatchers {
         return hasValues(strings);
     }
 
-    public static TypeSafeMatcher<ColumnView> hasValues(final Integer... values) {
-        return new TypeSafeMatcher<ColumnView>() {
+    public static ColumnViewMatcher hasValues(final Integer... values) {
+        return new ColumnViewMatcher() {
             @Override
             protected boolean matchesSafely(ColumnView item) {
                 if(item.numRows() != values.length) {

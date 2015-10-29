@@ -164,10 +164,14 @@ public class CollectionScan {
             for (Map.Entry<String, ForeignKeyBuilder> fk : foreignKeyMap.entrySet()) {
                 queryBuilder.addField(ResourceId.valueOf(fk.getKey()), fk.getValue());
             }
-
+            
             // Run the query
             Stopwatch stopwatch = Stopwatch.createStarted();
             queryBuilder.execute();
+            
+            if(rowCount.isPresent()) {
+                rowCount.get().set(columnMap.values().iterator().next().get().numRows());
+            }
             
             LOGGER.info("Collection scan of " + collection.getFormClass().getId() + " completed in " + stopwatch);
 

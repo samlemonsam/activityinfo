@@ -26,7 +26,7 @@ public class ColumnFilter implements Function<ColumnView, ColumnView> {
         if(includeMap == null) {
             ColumnView view = filterColumn.get();
             if (view.getType() != ColumnType.BOOLEAN) {
-                throw new QuerySyntaxException("Filter expression must evaluate to a boolean-valued column");
+                throw new QuerySyntaxException("Filter expression must evaluate to a boolean-valued column, got: " + view.getType());
             }
             int[] filtered = new int[view.numRows()];
             int filteredRowIndex = 0;

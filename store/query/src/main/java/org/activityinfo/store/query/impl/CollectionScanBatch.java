@@ -9,6 +9,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
@@ -167,12 +169,21 @@ public class CollectionScanBatch {
      * @param value
      * @return
      */
-    public Slot<ColumnView> addConstantColumn(FormClass rootFormClass, Object value) {
-        CollectionScan scan = getTable(rootFormClass);
-        Slot<Integer> rows = scan.addCount();
-
-        return new ConstantColumnBuilder(rows, value);
+    public Slot<ColumnView> addConstantColumn(FormClass rootFormClass, FieldValue value) {
+        return new ConstantColumnBuilder(addRowCount(rootFormClass), value);
     }
+
+    /**
+     * Adds a request for a "constant" String column to the query batch. We don't actually need any data from
+     * the collection, but we do need the row count of the base table.
+     * @param rootFormClass
+     * @param value
+     * @return
+     */
+    public Slot<ColumnView> addConstantColumn(FormClass rootFormClass, String value) {
+        return new ConstantColumnBuilder(addRowCount(rootFormClass), TextValue.valueOf(value));
+    }
+
 
     public Slot<ColumnView> addExpression(FormClass formClassId, ExprNode node) {
      //   return getTable(formClassId).addExpression(node);
