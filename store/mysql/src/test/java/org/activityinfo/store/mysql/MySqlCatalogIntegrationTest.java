@@ -63,11 +63,6 @@ public class MySqlCatalogIntegrationTest {
 
         FormClass formClass = catalogProvider.getCollection(activityFormClass(33)).get().getFormClass();
         for(FormField field : formClass.getFields()) {
-//            System.out.println(
-//                    field.getId() + " " +
-//                            Strings.padEnd(field.getType().getClass().getSimpleName(), 25, ' ') +
-//                            field.getLabel());
-
             if(field.getType() instanceof QuantityType) {
                 model.selectField(field.getId()).as("I" + CuidAdapter.getLegacyIdFromCuid(field.getId()));
             }

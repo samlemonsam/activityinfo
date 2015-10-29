@@ -103,6 +103,8 @@ public class PivotAdapter {
         switch (dimension.getType()) {
             case Partner:
                 return new PartnerDimBinding();
+            case Project:
+                return new ProjectDimBinding();
             
             case Activity:
                 return new ActivityDimBinding();
@@ -121,8 +123,6 @@ public class PivotAdapter {
             case Database:
             case Status:
             case Attribute:
-                break;
-            case Project:
                 break;
             case Location:
                 break;

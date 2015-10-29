@@ -63,7 +63,7 @@ public class ActivityTableMappingBuilder {
         }
 
         mapping.addPartnerField();
-    //    mapping.addProjectField();
+        mapping.addProjectField();
 
         if(activity.hasLocationType()) {
             mapping.addLocationField();
@@ -153,13 +153,13 @@ public class ActivityTableMappingBuilder {
     }
 
     public void addProjectField() {
-        FormField partnerField = new FormField(field(classId, PARTNER_FIELD))
+        FormField projectField = new FormField(field(classId, PROJECT_FIELD))
                 .setLabel("Project")
                 .setCode("project")
                 .setType(ReferenceType.single(activity.getProjectFormClassId()))
                 .setRequired(false);
-        formClass.addElement(partnerField);
-        mappings.add(new FieldMapping(partnerField, "projectId", new ReferenceConverter(PROJECT_DOMAIN)));
+        formClass.addElement(projectField);
+        mappings.add(new FieldMapping(projectField, "projectId", new ReferenceConverter(PROJECT_DOMAIN)));
     }
     
     public void addComments(){

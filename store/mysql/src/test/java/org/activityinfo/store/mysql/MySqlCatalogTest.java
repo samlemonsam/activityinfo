@@ -93,6 +93,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FormTreePrettyPrinter.print(formTree);
     }
 
+    @Test
+    public void project() {
+        query(CuidAdapter.projectFormClass(1), "name", "description");
+        
+        assertThat(column("name"), hasValues("RRMP", "USAID", "Kivu water"));
+    }
+
+
     private FormTree queryFormTree(ResourceId classId) {
         FormTreeBuilder builder = new FormTreeBuilder(catalogProvider);
         FormTree formTree = builder.queryTree(classId);
@@ -123,7 +131,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testSiteSimple() {
         query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner", 
-                "partner.label", "location.label", "BENE", "cause");
+                "partner.label", "location.label", "BENE", "cause", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
         assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
@@ -131,8 +139,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
+        assertThat(column("project.name"), hasValues(null, null, "RRMP"));
     }
-
+    
     
     @Test
     public void testSingleSiteResource() throws IOException {
