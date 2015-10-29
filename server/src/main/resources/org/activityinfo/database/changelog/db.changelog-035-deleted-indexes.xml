@@ -42,4 +42,17 @@
             <column name="ActivityId"/>
         </createIndex>
     </changeSet>
+    <changeSet author="alex" id="36-02">
+        <comment>
+            Keep the database in sync even against other application versions without this change
+        </comment>
+        <sql splitStatements="false" endDelimiter="//">
+            CREATE TRIGGER site_delete_sync
+            BEFORE UPDATE
+            ON site FOR EACH ROW
+            BEGIN
+            SET NEW.deleted = (NEW.dateDeleted IS NOT NULL);
+            END
+        </sql>
+    </changeSet>
 </databaseChangeLog>
