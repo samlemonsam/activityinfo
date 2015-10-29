@@ -119,6 +119,8 @@ public class PivotAdapter {
                 return new AdminDimBinding((AdminDimension) dimension);
             
             case Site:
+                return new SiteDimBinding();
+            
             case ActivityCategory:
             case Database:
             case Status:
