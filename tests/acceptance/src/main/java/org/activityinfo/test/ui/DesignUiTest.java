@@ -21,6 +21,8 @@ package org.activityinfo.test.ui;
  * #L%
  */
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
@@ -118,6 +120,34 @@ public class DesignUiTest {
 
         assertFalse(designPage.getToolbarMenu().button("Saved").isEnabled());
 
+    }
+
+    @Test // AI-1081
+    public void longNamesSaving() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE));
+        driver.setup().createForm(name(Strings.padEnd("form1_", 500, 'a')),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        String formName = Strings.padEnd("form2_", 500, 'a');
+        driver.setup().createForm(name(formName),
+                property("database", DATABASE),
+                property("classicView", true));
+
+        driver.setup().createField(
+                property("form", formName),
+                property("name", Strings.padEnd("enum_", 500, 'a')),
+                property("type", "enumerated"),
+                property("multipleAllowed", true),
+                property("items", Lists.newArrayList(Strings.padEnd("enumItem_", 500, 'a'))));
+
+        driver.setup().createField(
+                property("form", formName),
+                property("name", Strings.padEnd("quantity_", 500, 'a')),
+                property("type", "quantity"),
+                property("code", "quantity_code")
+        );
     }
 
     private FluentElement findInputEditor(FluentElement container) {

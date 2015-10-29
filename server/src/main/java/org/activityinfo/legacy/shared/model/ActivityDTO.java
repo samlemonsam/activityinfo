@@ -2,6 +2,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -27,6 +28,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     private UserDatabaseDTO database;
 
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
+    private List<PartnerDTO> partnerRange = Lists.newArrayList();
 
     // to ensure serializer
     private Published _published;
@@ -199,6 +201,14 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         if(locationType != null) {
             set("locationTypeId", locationType.getId());
         }
+    }
+
+    public List<PartnerDTO> getPartnerRange() {
+        return partnerRange;
+    }
+
+    public void setPartnerRange(List<PartnerDTO> partnerRange) {
+        this.partnerRange = partnerRange;
     }
 
     @JsonProperty @JsonView(DTOViews.Schema.class)

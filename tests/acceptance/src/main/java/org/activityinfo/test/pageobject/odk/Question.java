@@ -6,6 +6,8 @@ import org.activityinfo.test.driver.DataEntryDriver;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.Dimension;
 
+import java.util.List;
+
 public class Question implements DataEntryDriver {
     private final AppiumDriver driver;
 
@@ -89,6 +91,16 @@ public class Question implements DataEntryDriver {
 
     @Override
     public void sendKeys(CharSequence keys) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> availableValues() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void close() {
         throw new UnsupportedOperationException();
     }
 }

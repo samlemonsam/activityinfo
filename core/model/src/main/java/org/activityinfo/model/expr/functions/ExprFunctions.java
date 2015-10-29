@@ -30,6 +30,10 @@ public final class ExprFunctions {
             register(ContainsAnyFunction.INSTANCE);
             register(NotContainsAllFunction.INSTANCE);
             register(NotContainsAnyFunction.INSTANCE);
+            register(BooleanFunctions.GREATER);
+            register(BooleanFunctions.GREATER_OR_EQUAL);
+            register(BooleanFunctions.LESS);
+            register(BooleanFunctions.LESS_OR_EQUAL);
         }
 
         ExprFunction exprFunction = lookupMap.get(name);

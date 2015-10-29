@@ -421,4 +421,8 @@ public abstract class ApplicationDriver {
     public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
         throw new PendingException();
     }
+
+    public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
+        throw new PendingException();
+    }
 }

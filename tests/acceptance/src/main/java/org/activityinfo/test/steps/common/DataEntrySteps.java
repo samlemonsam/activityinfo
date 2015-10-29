@@ -1,6 +1,7 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -10,6 +11,7 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.ApplicationDriver;
+import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.TableDataParser;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
@@ -315,5 +317,30 @@ public class DataEntrySteps {
     public void table_has_rows_in_database(String formName, int numberOfExpectedRows, String database) throws Throwable {
         TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
         BsTable.waitUntilRowsLoaded(tablePage, numberOfExpectedRows);
+    }
+
+    @Then("^new form dialog for \"([^\"]*)\" form has following items for partner field$")
+    public void new_form_dialog_for_form_has_following_items_for_partner_field(String formName, List<String> expectedPartnerValues) throws Throwable {
+        DataEntryDriver dataEntryDriver = driver.startNewSubmission(formName);
+        boolean foundPartnerField = false;
+        while(dataEntryDriver.nextField()) {
+            switch(dataEntryDriver.getLabel()) {
+                case "Partner":
+                    foundPartnerField = true;
+                    List<String> items = Lists.newArrayList(dataEntryDriver.availableValues());
+
+                    for (String expected : expectedPartnerValues) {
+                        items.remove(expected);
+                        items.remove(driver.getAliasTable().getAlias(expected));
+                    }
+                    assertTrue(items.isEmpty());
+                    break;
+            }
+        }
+
+        dataEntryDriver.close();
+        if (!foundPartnerField) {
+            throw new RuntimeException("Failed to find partner field.");
+        }
     }
 }

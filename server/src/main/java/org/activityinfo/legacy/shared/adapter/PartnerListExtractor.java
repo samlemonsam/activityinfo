@@ -29,7 +29,7 @@ public class PartnerListExtractor implements Function<SchemaDTO, List<PartnerDTO
         for (UserDatabaseDTO db : input.getDatabases()) {
             ResourceId formClassId = CuidAdapter.partnerFormClass(db.getId());
             if (formClassCriteria.apply(formClassId)) {
-                results.addAll(db.getPartners());
+                results.addAll(db.getAllowablePartners());
             }
         }
         return results;

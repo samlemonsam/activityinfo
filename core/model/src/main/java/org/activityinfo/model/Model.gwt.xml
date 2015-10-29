@@ -35,6 +35,7 @@
   <source path="formTree"/>
   <source path="resource"/>
   <source path="expr"/>
+  <source path="lock"/>
   <source path="client"/>
   <source path="type"/>
   <source path="table"/>

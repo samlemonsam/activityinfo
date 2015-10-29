@@ -22,12 +22,15 @@ package org.activityinfo.server.command;
  * #L%
  */
 
+import com.google.common.base.Stopwatch;
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetReports;
 import org.activityinfo.legacy.shared.command.result.ReportsResult;
-import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
@@ -59,6 +62,26 @@ public class GetReportsTest extends CommandTestCase {
         assertEquals(2, result.getData().get(0).getId());
         assertEquals("Report 1", result.getData().get(0).getTitle());
         assertEquals("Bavon", result.getData().get(0).getOwnerName());
+    }
+
+    @OnDataSet("/dbunit/get-report-performance-tests.db.xml")
+    @Test // AI-1223
+    public void performanceTest() {
+        // initial performance: 1838ms - sql fetch, 1962ms - time for client (+serialization/deserialization)
+        // after performance tuning: 229ms - sql fetch, 273 ms - time for client (+serialization/deserialization)
+
+        setUser(1);
+
+        Stopwatch started = Stopwatch.createStarted();
+
+        ReportsResult result = execute(new GetReports());
+        assertNotNull(result);
+        assertEquals(1, result.getData().get(0).getId());
+        assertEquals("Report 1", result.getData().get(0).getTitle());
+        assertEquals("Alex", result.getData().get(0).getOwnerName());
+
+        long elapsed = started.elapsed(TimeUnit.MILLISECONDS);
+        assertTrue("GetReports takes " + elapsed + "ms.", elapsed < 1000); // must be less then one second
     }
 
 }

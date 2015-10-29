@@ -201,12 +201,19 @@ public final class CountryDTO extends BaseModelData implements DTO {
         return getId();
     }
 
-    public LocationTypeDTO getNullLocationType() {
-
+    public LocationTypeDTO getNullLocationTypeSilently() {
         for(LocationTypeDTO type : locationTypes) {
             if(type.isNationwide()) {
                 return type;
             }
+        }
+        return null;
+    }
+
+    public LocationTypeDTO getNullLocationType() {
+        LocationTypeDTO locationTypeDTO = getNullLocationTypeSilently();
+        if (locationTypeDTO != null) {
+            return locationTypeDTO;
         }
         throw new IllegalStateException("No null LocationType has been defined for " + getName());
     }

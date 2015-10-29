@@ -39,6 +39,8 @@ import java.util.Date;
 
 public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
 
+    public static final String DEFAULT_PARTNER_NAME = "Default";
+
     private final EntityManager em;
     private final UserDatabaseDAO databaseDAO;
     private final CountryDAO countryDAO;
@@ -68,7 +70,7 @@ public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
 
     private void addDefaultPartner(int databaseId, User user) {
         PartnerDTO partner = new PartnerDTO();
-        partner.setName("Default");
+        partner.setName(DEFAULT_PARTNER_NAME);
 
         AddPartner command = new AddPartner(databaseId, partner);
 

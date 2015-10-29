@@ -47,6 +47,7 @@ public class LoginSteps {
     public void I_login_as_with_my_password(String email) throws Throwable {
         UserAccount account = accounts.ensureAccountExists(email);
 
+        logoutIfloggedIn();
         loginPage.navigateTo().loginAs(account);
     }
 
@@ -86,5 +87,13 @@ public class LoginSteps {
     @When("^I logout$")
     public void I_logout() throws Throwable {
         applicationPage.openSettingsMenu().logout();
+    }
+
+    public void logoutIfloggedIn() {
+        try {
+            applicationPage.openSettingsMenu().logout();
+        } catch (Exception e) {
+            // ignore
+        }
     }
 }

@@ -29,20 +29,13 @@ import com.extjs.gxt.ui.client.widget.form.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
-import org.activityinfo.model.expr.ExprLexer;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.ExprSyntaxException;
-import org.activityinfo.model.expr.FunctionCallNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.model.expr.*;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
-import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
@@ -253,7 +246,7 @@ class IndicatorForm extends AbstractDesignForm {
 
     private void setState() {
         if (typeCombo.getValue() != null) {
-            FieldTypeClass selectedType = TypeRegistry.get().get().getTypeClass(typeCombo.getValue().getWrappedValue());
+            FieldTypeClass selectedType = TypeRegistry.get().getTypeClass(typeCombo.getValue().getWrappedValue());
 
             unitsField.setVisible(selectedType == FieldTypeClass.QUANTITY);
             unitsField.setAllowBlank(selectedType != FieldTypeClass.QUANTITY);

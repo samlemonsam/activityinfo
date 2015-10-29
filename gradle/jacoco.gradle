@@ -15,7 +15,7 @@ subprojects {
     tasks.withType(Test) {
         jacoco {
             // Turn off test coverage generation by default
-            enabled = false
+            //enabled = false
         }
     }
 }

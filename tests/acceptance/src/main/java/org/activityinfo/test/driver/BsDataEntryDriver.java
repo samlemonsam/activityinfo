@@ -6,6 +6,8 @@ import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 /**
  * Drives a bootstrap-based form
  */
@@ -65,5 +67,15 @@ public class BsDataEntryDriver implements DataEntryDriver {
     @Override
     public void sendKeys(CharSequence keys) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> availableValues() {
+        return formPanel.current().availableItems();
+    }
+
+    @Override
+    public void close() {
+        modal.cancel();
     }
 }

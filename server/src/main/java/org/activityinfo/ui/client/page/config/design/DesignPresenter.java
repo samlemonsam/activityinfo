@@ -49,6 +49,7 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationEvent;
@@ -331,7 +332,10 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         } else if ("AttributeGroup".equals(entityName)) {
             IsActivityDTO activity = findActivityFolder(selected);
 
-            newEntity = new AttributeGroupDTO();
+            AttributeGroupDTO newAttributeGroup = new AttributeGroupDTO();
+            newAttributeGroup.setMultipleAllowed(false);
+
+            newEntity = newAttributeGroup;
             newEntity.set("activityId", activity.getId());
             parent = treeStore.getChild((ModelData) activity, 0);
 
@@ -348,6 +352,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
             IndicatorDTO newIndicator = new IndicatorDTO();
             newIndicator.setAggregation(IndicatorDTO.AGGREGATE_SUM);
+            newIndicator.setType(FieldTypeClass.QUANTITY);
 
             if (activity instanceof ActivityFormDTO) {
                 newIndicator.set("sortOrder", ((ActivityFormDTO)activity).getIndicators().size() + 1);

@@ -182,8 +182,4 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     public Promise<List<FormInstance>> queryInstances(Set<ResourceId> formClassIds) {
         return queryInstances(ClassCriteria.union(formClassIds));
     }
-
-    public Dispatcher getDispatcher() {
-        return dispatcher;
-    }
 }

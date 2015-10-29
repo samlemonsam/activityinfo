@@ -117,6 +117,24 @@ public class GxtFormPanel extends Form {
         }
 
         @Override
+        public List<String> availableItems() {
+            element.findElement(By.className(ARROW_CLASS)).click();
+
+            FluentElement list = this.element.waitFor(By.className(COMBO_LIST_CLASS));
+
+
+            FluentElements items = list.findElements(By.className(COMBO_ITEM_CLASS));
+            List<String> itemLabels = Lists.newArrayList();
+            for (FluentElement element : items) {
+                String text = element.text();
+                itemLabels.add(text);
+            }
+            element.findElement(By.className(ARROW_CLASS)).click();
+
+            return itemLabels;
+        }
+
+        @Override
         public void select(String itemLabel) {
 
             element.findElement(By.className(ARROW_CLASS)).click();

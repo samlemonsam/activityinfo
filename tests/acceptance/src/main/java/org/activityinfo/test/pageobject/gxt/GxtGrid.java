@@ -26,7 +26,9 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 
 public class GxtGrid {
-    
+
+    public static final String X_GRID3_ROW = "x-grid3-row";
+
     private FluentElement container;
 
     public static FluentIterable<GxtGrid> findGrids(final FluentElement container) {
@@ -123,7 +125,7 @@ public class GxtGrid {
     }
     
     public FluentIterable<GxtRow> rows() {
-        return container.findElements(By.className("x-grid3-row")).as(GxtRow.class);
+        return container.findElements(By.className(X_GRID3_ROW)).as(GxtRow.class);
     }
 
     public DataTable extractData() {
@@ -232,6 +234,10 @@ public class GxtGrid {
         public void select() {
             element.click();
         }
+
+        public FluentElement getElement() {
+            return element;
+        }
     }
     
     public class GxtCell {
@@ -307,6 +313,10 @@ public class GxtGrid {
 
         public void doubleClick() {
             element.doubleClick();
+        }
+
+        public FluentElement getElement() {
+            return element;
         }
     }
     

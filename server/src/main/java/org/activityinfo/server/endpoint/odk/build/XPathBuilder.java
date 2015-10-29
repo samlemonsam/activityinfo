@@ -94,6 +94,10 @@ public class XPathBuilder {
                 case "||":
                     appendBinaryInfixTo("or", arguments, xpath);
                     break;
+                case "containsAny":
+                case "containsAll":
+                    appendFunction(function.getId(), arguments, xpath);
+                    break;
                 default:
                     throw new XPathBuilderException("Unsupported function " + function.getId());
             }
@@ -107,16 +111,54 @@ public class XPathBuilder {
 
         } else if (exprNode instanceof SymbolExpr) {
             SymbolExpr symbolExpr = (SymbolExpr) exprNode;
-            String name = symbolExpr.getName();
 
-            String xpathExpr = symbolMap.get(name);
-            if(xpathExpr == null) {
-                throw new XPathBuilderException("Unknown symbol '" + name + "'");
-            }
+            String xpathExpr = resolveSymbol(symbolExpr);
+
             xpath.append(xpathExpr);
 
         } else {
             throw new XPathBuilderException("Unknown expr node " + exprNode);
+        }
+    }
+
+    private String resolveSymbol(SymbolExpr symbolExpr) {
+        String xpath = symbolMap.get(symbolExpr.getName());
+        if (xpath == null) {
+            throw new XPathBuilderException("Unknown symbol '" + symbolExpr.getName() + "'");
+        }
+        return xpath;
+    }
+
+    private void appendFunction(String functionName, List<ExprNode> arguments, StringBuilder xpath) {
+        Preconditions.checkArgument(!arguments.isEmpty());
+        Preconditions.checkArgument(arguments.get(0) instanceof SymbolExpr);
+
+        switch (functionName) {
+            case "containsAny":
+                appendSelectedFunction("or", arguments, xpath);
+                return;
+            case "containsAll":
+                appendSelectedFunction("and", arguments, xpath);
+                return;
+        }
+        throw new RuntimeException("Function is not supported, function name: " + functionName);
+    }
+
+    private void appendSelectedFunction(String joinOperator, List<ExprNode> arguments, StringBuilder xpath) {
+        Preconditions.checkArgument(arguments.size() >= 2);
+        Preconditions.checkArgument(joinOperator.equals("or") || joinOperator.equals("and"));
+
+        String firstArgXpath = resolveSymbol((SymbolExpr) arguments.get(0));
+
+        for (int i = 1; i < arguments.size(); i++) {
+            ExprNode argument = arguments.get(i);
+            Preconditions.checkState(argument instanceof SymbolExpr, "Only symbol expr nodes are supported.");
+
+            xpath.append(String.format("selected(%s, '%s')", firstArgXpath, ((SymbolExpr)argument).getName()));
+
+            if ((i + 1) != arguments.size()) {
+                xpath.append(" ").append(joinOperator).append(" ");
+            }
         }
     }
 

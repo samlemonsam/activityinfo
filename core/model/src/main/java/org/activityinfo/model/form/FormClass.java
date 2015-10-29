@@ -4,12 +4,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The FormClass defines structure and semantics for {@code Resource}s.
@@ -26,6 +31,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
      */
     public static final ResourceId CLASS_ID = ResourceId.valueOf("_class");
 
+    
     /**
      * Instances of FormClass have one FormField: a label, which has its own
      * FormField id. It is defined at the application level to be a subproperty of
@@ -41,6 +47,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     private String label;
     private String description;
     private final List<FormElement> elements = Lists.newArrayList();
+    private final Set<ResourceLock> locks = Sets.newHashSet();
 
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
@@ -198,6 +205,10 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         return this;
     }
 
+    public Set<ResourceLock> getLocks() {
+        return locks;
+    }
+
     @Override
     public String toString() {
         return "<FormClass: " + getLabel() + ">";
@@ -208,6 +219,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         formClass.setOwnerId(resource.getOwnerId());
         formClass.setLabel(Strings.nullToEmpty(resource.isString(LABEL_FIELD_ID)));
         formClass.elements.addAll(fromRecords(resource.getRecordList("elements")));
+        formClass.locks.addAll(ResourceLock.fromRecords(resource.getRecordList("locks")));
         return formClass;
     }
 
@@ -233,7 +245,8 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         resource.setOwnerId(ownerId);
         resource.set("classId", CLASS_ID);
         resource.set(LABEL_FIELD_ID, label);
-        resource.set("elements", FormElement.asRecordList(elements));
+        resource.set("elements", Resources.asRecordList(elements));
+        resource.set("locks", Resources.asRecordList(locks));
         return resource;
     }
 

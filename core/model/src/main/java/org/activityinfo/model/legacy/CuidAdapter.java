@@ -50,6 +50,8 @@ public class CuidAdapter {
 
     public static final char USER_DOMAIN = 'U';
 
+    public static final char LOCK_DOMAIN = 'k';
+
     public static final int NAME_FIELD = 1;
     public static final int ADMIN_PARENT_FIELD = 2;
     public static final int CODE_FIELD = 3;
@@ -289,5 +291,9 @@ public class CuidAdapter {
 
     public static ResourceId reportingPeriodFormClass(int activityId) {
         return cuid(MONTHLY_REPORT_FORM_CLASS, activityId);
+    }
+
+    public static ResourceId lockId(int id) {
+        return cuid(LOCK_DOMAIN, id);
     }
 }

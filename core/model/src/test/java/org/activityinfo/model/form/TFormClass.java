@@ -22,6 +22,8 @@ package org.activityinfo.model.form;
  */
 
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.hamcrest.Matcher;
 
 import java.util.List;
@@ -48,6 +50,20 @@ public class TFormClass {
 
     public FormField getFieldByLabel(String label) {
         return find(formClass.getFields(), hasProperty("label", equalTo(label)));
+    }
+
+    public EnumItem getEnumValueByLabel(String label) {
+        for (FormField field : formClass.getFields()) {
+            if (field.getType() instanceof EnumType) {
+                EnumType enumType = (EnumType) field.getType();
+                for (EnumItem value : enumType.getValues()) {
+                    if (value.getLabel().equalsIgnoreCase(label)) {
+                        return value;
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("Unable to find enumValue with label: " + label);
     }
 
     public int indexOfField(String fieldLabel) {

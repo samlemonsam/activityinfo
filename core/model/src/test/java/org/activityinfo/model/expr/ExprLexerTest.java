@@ -41,6 +41,31 @@ public class ExprLexerTest {
     }
 
     @Test
+    public void compareOperatorsTokenizing() {
+        expect("2>1",
+                new Token(TokenType.NUMBER, 0, "2"),
+                new Token(TokenType.OPERATOR, 1, ">"),
+                new Token(TokenType.NUMBER, 2, "1")
+        );
+        expect("4<5",
+                new Token(TokenType.NUMBER, 0, "4"),
+                new Token(TokenType.OPERATOR, 1, "<"),
+                new Token(TokenType.NUMBER, 2, "5")
+        );
+
+        expect("6<=7",
+                new Token(TokenType.NUMBER, 0, "6"),
+                new Token(TokenType.OPERATOR, 1, "<="),
+                new Token(TokenType.NUMBER, 3, "7")
+        );
+        expect("5<=5",
+                new Token(TokenType.NUMBER, 0, "5"),
+                new Token(TokenType.OPERATOR, 1, "<="),
+                new Token(TokenType.NUMBER, 3, "5")
+        );
+    }
+
+    @Test
     public void booleanTokenizing() {
         expect("true", new Token(TokenType.BOOLEAN_LITERAL, 0, "true"));
         expect("false", new Token(TokenType.BOOLEAN_LITERAL, 0, "false"));
@@ -98,6 +123,12 @@ public class ExprLexerTest {
                 new Token(TokenType.OPERATOR, 17, "+"),
                 new Token(TokenType.SYMBOL, 19, "s000002_i0009lt")
         );
+
+        expect("s000002_i0009ls>=s000002_i0009lt",
+                new Token(TokenType.SYMBOL, 1, "s000002_i0009ls"),
+                new Token(TokenType.OPERATOR, 17, ">="),
+                new Token(TokenType.SYMBOL, 20, "s000002_i0009lt")
+        );
     }
 
     @Test
@@ -123,6 +154,11 @@ public class ExprLexerTest {
         expect("{s000002_i0009ls}+{s000002_i0009lt}",
                 new Token(TokenType.SYMBOL, 0, "s000002_i0009ls"),
                 new Token(TokenType.OPERATOR, 17, "+"),
+                new Token(TokenType.SYMBOL, 18, "s000002_i0009lt"));
+
+        expect("{s000002_i0009ls}<{s000002_i0009lt}",
+                new Token(TokenType.SYMBOL, 0, "s000002_i0009ls"),
+                new Token(TokenType.OPERATOR, 17, "<"),
                 new Token(TokenType.SYMBOL, 18, "s000002_i0009lt"));
     }
 

@@ -981,6 +981,8 @@ public class UiApplicationDriver extends ApplicationDriver {
         DatabasesPage databasesPage = designTab.showDatabasesGrid();
         databasesPage.rename(aliasTable.getAlias(oldName), newName, newDescription);
 
+        Sleep.sleepSeconds(2);
+
         // validate values are changed in table
         Assert.assertNotNull(databasesPage.grid().findCell(newName));
         Assert.assertNotNull(databasesPage.grid().findCell(newDescription));
@@ -1063,5 +1065,23 @@ public class UiApplicationDriver extends ApplicationDriver {
     @Override
     public void cleanup() throws Exception {
         setup().cleanup();
+    }
+
+    public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
+        UserAccount account = accounts.ensureAccountExists(userEmail);
+        ensureLoggedIn();
+
+        UsersPage usersPage = applicationPage.navigateToDesignTab().selectDatabase(getAliasTable().getAlias(databaseName)).users();
+        GxtModal modal = usersPage.addUser();
+
+        modal.form().fillTextField("Name", account.getEmail());
+        modal.form().fillTextField("Email", account.getEmail());
+        modal.form().select("Partner", getAliasTable().getAlias(partner));
+
+        modal.accept();
+
+        Sleep.sleepSeconds(1);
+
+        usersPage.setPermission(account.getEmail(), permissions);
     }
 }
