@@ -16,10 +16,7 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.query.impl.builders.ColumnViewBuilder;
-import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
-import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
-import org.activityinfo.store.query.impl.builders.ViewBuilderFactory;
+import org.activityinfo.store.query.impl.builders.*;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
@@ -161,6 +158,14 @@ public class CollectionScan {
                 }
             }
 
+            // Only add a row count observer IF it has been requested AND 
+            // we aren't loading any other columns
+            RowCountBuilder rowCountBuilder = null;
+            if (rowCount.isPresent() && columnMap.isEmpty()) {
+                rowCountBuilder = new RowCountBuilder();
+                queryBuilder.addResourceId(rowCountBuilder);
+            }
+
             for (Map.Entry<String, ForeignKeyBuilder> fk : foreignKeyMap.entrySet()) {
                 queryBuilder.addField(ResourceId.valueOf(fk.getKey()), fk.getValue());
             }
@@ -170,7 +175,11 @@ public class CollectionScan {
             queryBuilder.execute();
             
             if(rowCount.isPresent()) {
-                rowCount.get().set(columnMap.values().iterator().next().get().numRows());
+                if(rowCountBuilder != null) {
+                    rowCount.get().set(rowCountBuilder.getCount());
+                } else {
+                    rowCount.get().set(rowCountFromColumn(columnMap));
+                }
             }
             
             LOGGER.info("Collection scan of " + collection.getFormClass().getId() + " completed in " + stopwatch);
@@ -204,6 +213,10 @@ public class CollectionScan {
                 for (String fieldId : foreignKeyMap.keySet()) {
                     toFetch.add(fkCacheKey(fieldId));
                 }
+                
+                if(rowCount.isPresent()) {
+                    toFetch.add(rowCountKey());
+                }
 
                 Map<String, Object> cached = memcacheService.getAll(toFetch);
 
@@ -234,6 +247,14 @@ public class CollectionScan {
                         foreignKeyMap.remove(fieldId);
                     }
                 }
+                
+                // Do we need a row count?
+                if(rowCount.isPresent()) {
+                    Integer count = (Integer)cached.get(rowCountKey());
+                    if(count != null) {
+                        rowCount.get().set(count);
+                    }
+                }
 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Exception while retrieving columns for " + collectionId + " from cache" , e);
@@ -254,6 +275,12 @@ public class CollectionScan {
             for (Map.Entry<String, ForeignKeyBuilder> fk : foreignKeyMap.entrySet()) {
                 toPut.put(fkCacheKey(fk.getKey()), fk.getValue().get());
             }
+            if(!columnMap.isEmpty()) {
+                toPut.put(rowCountKey(), rowCountFromColumn(columnMap));
+            
+            } else if(rowCount.isPresent()) {
+                toPut.put(rowCountKey(), rowCount.get().get());
+            }
             if(!toPut.isEmpty()) {
                 memcacheService.putAll(toPut, Expiration.byDeltaSeconds((int) TimeUnit.HOURS.toSeconds(4)));
             }
@@ -262,10 +289,20 @@ public class CollectionScan {
         }
     }
 
+    private int rowCountFromColumn(Map<String, ColumnViewBuilder> columnMap) {
+        return columnMap.values().iterator().next().get().numRows();
+    }
+
+
+    private String rowCountKey() {
+        return collectionId.asString() + "@" + cacheVersion + "#COUNT";
+    }
+    
     private String fieldCacheKey(String fieldId) {
         return collectionId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 
+    
     private String fkCacheKey(String fieldId) {
         return collectionId.asString() + "@" + cacheVersion + ".fk." + fieldId;
     }
