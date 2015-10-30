@@ -1,6 +1,7 @@
 package org.activityinfo.server.command.handler.pivot;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -45,9 +46,9 @@ public class PivotAdapter {
      */
     private final List<ActivityMetadata> activities;
 
-    private final Map<ResourceId, FormTree> formTrees;
+    private Map<ResourceId, FormTree> formTrees;
     
-    private final List<DimBinding> groupBy;
+    private List<DimBinding> groupBy;
     private Optional<IndicatorDimBinding> indicatorDimension = Optional.absent();
 
     private final Map<Object, Bucket> buckets = Maps.newHashMap();
@@ -63,16 +64,13 @@ public class PivotAdapter {
         this.catalog = catalog;
         this.command = command;
         this.filter = command.getFilter();
-        
-        if(command.getValueType() != PivotSites.ValueType.INDICATOR) {
-            throw new UnsupportedOperationException("ValueType:"  + command.getValueType());
-        }
+
 
         // Mapping from indicator id -> activityId
         metadataTime.start();
         activities = indicatorOracle.fetch(filter);
         metadataTime.stop();
-        
+
         // Query form trees: needed to determine attribute mapping
         formTrees = queryFormTrees();
 
@@ -85,7 +83,6 @@ public class PivotAdapter {
                 groupBy.add(bindingFor(dimension));
             }
         }
-        
     }
 
     private Map<ResourceId, FormTree> queryFormTrees() {
@@ -142,20 +139,29 @@ public class PivotAdapter {
         throw new UnsupportedOperationException("Unsupported dimension " + dimension);
     }
 
-
     public PivotSites.PivotResult execute() {
+
         for (ActivityMetadata activity : activities) {
-            queryForm(activity);            
+            switch (command.getValueType()) {
+                case INDICATOR:
+                    executeIndicatorValuesQuery(activity);
+                    break;
+                case TOTAL_SITES:
+                case DIMENSION:
+                    executeSiteCountQuery(activity);
+                    break;
+            }
         }
-        
-        
+
         LOGGER.info(String.format("Pivot timings: metadata %s, trees: %s, query: %s, aggregate: %s",
                 metadataTime, treeTime, queryTime, aggregateTime));
-        
+
+
         return new PivotSites.PivotResult(Lists.newArrayList(buckets.values()));
     }
 
-    private void queryForm(ActivityMetadata activity) {
+
+    private void executeIndicatorValuesQuery(ActivityMetadata activity) {
         int activityId = activity.getId();
         ResourceId formClassId = activity.getFormClassId();
         FormTree formTree = formTrees.get(activity.getFormClassId());
@@ -217,6 +223,49 @@ public class PivotAdapter {
                     addBucket(bucket);
                 }
             }
+        }
+        aggregateTime.stop();
+    }
+    
+    private void executeSiteCountQuery(ActivityMetadata activity) {
+        Preconditions.checkState(!indicatorDimension.isPresent());
+
+        int activityId = activity.getId();
+        ResourceId formClassId = activity.getFormClassId();
+        FormTree formTree = formTrees.get(activity.getFormClassId());
+        QueryModel queryModel = new QueryModel(activity.getFormClassId());
+
+        
+        // Add dimensions columns as needed
+        for (DimBinding dimension : groupBy) {
+            for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
+                queryModel.addColumn(columnModel);
+            }
+        }
+
+        // Query the table 
+        queryTime.start();
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = builder.build(queryModel);
+        queryTime.stop();
+
+        aggregateTime.start();
+
+        // Now add the results to the buckets
+        DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
+
+        for (int i = 0; i < columnSet.getNumRows(); i++) {
+
+            Bucket bucket = new Bucket();
+            bucket.setCount(1);
+            bucket.setAggregationMethod(2);
+
+
+            for (int j = 0; j < groupBy.size(); j++) {
+                bucket.setCategory(groupBy.get(j).getModel(), categories[j][i]);
+            }
+            
+            addBucket(bucket);
         }
         aggregateTime.stop();
     }

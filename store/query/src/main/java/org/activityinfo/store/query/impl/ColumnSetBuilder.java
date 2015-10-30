@@ -16,6 +16,7 @@ import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -41,7 +42,7 @@ public class ColumnSetBuilder {
         FormClass formClass = tree.getRootFormClass();
         Preconditions.checkNotNull(formClass);
 
-        // We want to make at most one pass over every row set we need to scan,
+        // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
         CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
         QueryEvaluator evaluator = new QueryEvaluator(tree, formClass, batch);
@@ -100,12 +101,24 @@ public class ColumnSetBuilder {
                     throw new IllegalStateException("Columns are of unequal length: " + dataMap);
                 }
             }
-
         }
+        
+        if(table.getGroupBy().isEmpty()) {
+            LOGGER.info("TableBuilder complete");
+            return new ColumnSet(numRows, dataMap);
+        
+        } else {
+            // Need to aggregate!
+            
+            return aggregate(dataMap, table.getGroupBy());
+                
+        }
+    }
 
-        LOGGER.info("TableBuilder complete");
-
-
-        return new ColumnSet(numRows, dataMap);
+    private ColumnSet aggregate(Map<String, ColumnView> dataMap, List<String> groupBy) {
+        
+        ColumnView columnKeys[];
+        
+        return null;
     }
 }

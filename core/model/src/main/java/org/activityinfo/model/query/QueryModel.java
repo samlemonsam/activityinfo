@@ -15,6 +15,7 @@ public class QueryModel {
 
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
+    private final List<String> groupBy = Lists.newArrayList();
 
     private ExprValue filter;
 
@@ -95,6 +96,14 @@ public class QueryModel {
     }
 
     /**
+     * 
+     * @return the list of column ids on which to group
+     */
+    public List<String> getGroupBy() {
+        return groupBy;
+    }
+
+    /**
      * Adds the {@code ResourceId} as a string column to the table model with
      * the given column id
      */
@@ -110,6 +119,11 @@ public class QueryModel {
         columnModel.setExpression(ColumnModel.CLASS_SYMBOL);
         columns.add(columnModel);
         return columnModel;
+    }
+    
+    public QueryModel groupBy(String columnId) {
+        groupBy.add(columnId);
+        return this;
     }
 
     @Override
