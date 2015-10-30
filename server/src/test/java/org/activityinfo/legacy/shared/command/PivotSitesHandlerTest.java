@@ -117,6 +117,17 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     @Test
+    public void filterBySite() {
+        withIndicatorAsDimension();
+        filter.addRestriction(DimensionType.Indicator, 1);
+        filter.addRestriction(DimensionType.Site, 1);
+
+        execute();
+
+        assertThat().forIndicator(1).thereIsOneBucketWithValue(1500);
+    }
+
+    @Test
     public void testBasicWithCalculatedIndicators() {
         withIndicatorAsDimension();
         filter.addRestriction(DimensionType.Indicator, 12451);
@@ -358,7 +369,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         execute();
 
         assertBucketCount(2);
-        assertThat().forProject(1).thereIsOneBucketWithValue(5100);
+        assertThat().forProject(3).thereIsOneBucketWithValue(5100);
         assertThat().forProject(2).thereIsOneBucketWithValue(10000);
 
     }
@@ -370,9 +381,8 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         withProjectAsDimension();
 
         filter.addRestriction(DimensionType.Database, 1);
-        filter.addRestriction(DimensionType.Project, 1);
-        filter
-                .addRestriction(DimensionType.Indicator, asList(1, 2, 103));
+        filter.addRestriction(DimensionType.Project, 3);
+        filter.addRestriction(DimensionType.Indicator, asList(1, 2, 103));
 
         execute();
 

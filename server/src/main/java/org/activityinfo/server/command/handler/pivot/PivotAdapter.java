@@ -14,11 +14,13 @@ import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -45,7 +47,7 @@ public class PivotAdapter {
 
     private final Map<ResourceId, FormTree> formTrees;
     
-    private final List<DimBinding> dimensions;
+    private final List<DimBinding> groupBy;
     private Optional<IndicatorDimBinding> indicatorDimension = Optional.absent();
 
     private final Map<Object, Bucket> buckets = Maps.newHashMap();
@@ -61,6 +63,10 @@ public class PivotAdapter {
         this.catalog = catalog;
         this.command = command;
         this.filter = command.getFilter();
+        
+        if(command.getValueType() != PivotSites.ValueType.INDICATOR) {
+            throw new UnsupportedOperationException("ValueType:"  + command.getValueType());
+        }
 
         // Mapping from indicator id -> activityId
         metadataTime.start();
@@ -70,15 +76,16 @@ public class PivotAdapter {
         // Query form trees: needed to determine attribute mapping
         formTrees = queryFormTrees();
 
-        // Order the dimensions
-        dimensions = new ArrayList<>();
+        // Define the dimensions we're pivoting by
+        groupBy = new ArrayList<>();
         for (Dimension dimension : command.getDimensions()) {
             if(dimension.getType() == DimensionType.Indicator) {
                 indicatorDimension = Optional.of(new IndicatorDimBinding());
             } else {
-                dimensions.add(buildAccessor(dimension));
+                groupBy.add(bindingFor(dimension));
             }
         }
+        
     }
 
     private Map<ResourceId, FormTree> queryFormTrees() {
@@ -99,7 +106,7 @@ public class PivotAdapter {
         
     }
 
-    private DimBinding buildAccessor(Dimension dimension) {
+    private DimBinding bindingFor(Dimension dimension) {
         switch (dimension.getType()) {
             case Partner:
                 return new PartnerDimBinding();
@@ -108,6 +115,8 @@ public class PivotAdapter {
             
             case Activity:
                 return new ActivityDimBinding();
+            case ActivityCategory:
+                return new ActivityCategoryDimBinding();
             
             case Date:
                 return new DateDimBinding((DateDimension) dimension);
@@ -121,7 +130,6 @@ public class PivotAdapter {
             case Site:
                 return new SiteDimBinding();
             
-            case ActivityCategory:
             case Database:
             case Status:
             case Attribute:
@@ -155,15 +163,18 @@ public class PivotAdapter {
 
         // Add Indicators
         for (IndicatorMetadata indicator : activity.getIndicators()) {
-            queryModel.selectField(indicator.getFieldId()).as(indicator.getAlias());
+            queryModel.selectExpr(indicator.getFieldExpression()).as(indicator.getAlias());
         }
 
         // Add dimensions columns as needed
-        for (DimBinding dimension : dimensions) {
+        for (DimBinding dimension : groupBy) {
             for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
                 queryModel.addColumn(columnModel);
             }
         }
+        
+        // declare the filter
+        queryModel.setFilter(composeFilter(activity));
 
         // Query the table 
         queryTime.start();
@@ -175,7 +186,7 @@ public class PivotAdapter {
         aggregateTime.start();
         
         // Now add the results to the buckets
-        DimensionCategory[][] categories = extractCategories(formTree, columnSet);
+        DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
 
         for (IndicatorMetadata indicator : activity.getIndicators()) {
             ColumnView measureView = columnSet.getColumnView(indicator.getAlias());
@@ -199,8 +210,8 @@ public class PivotAdapter {
                         bucket.setCategory(indicatorDimension.get().getModel(), indicatorCategory);
                     }
 
-                    for (int j = 0; j < dimensions.size(); j++) {
-                        bucket.setCategory(dimensions.get(j).getModel(), categories[j][i]);
+                    for (int j = 0; j < groupBy.size(); j++) {
+                        bucket.setCategory(groupBy.get(j).getModel(), categories[j][i]);
                     }
 
                     addBucket(bucket);
@@ -210,12 +221,49 @@ public class PivotAdapter {
         aggregateTime.stop();
     }
 
-    
-    private DimensionCategory[][] extractCategories(FormTree formTree, ColumnSet columnSet) {
-        DimensionCategory[][] array = new DimensionCategory[dimensions.size()][];
+    private ExprValue composeFilter(ActivityMetadata activity) {
+        StringBuilder filter = new StringBuilder();
+        appendFilter("_id", CuidAdapter.SITE_DOMAIN, DimensionType.Site, filter);
+        appendFilter("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner, filter);
+        appendFilter("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project, filter);
+        appendFilter("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location, filter);
+        
+        
+        if(filter.length() > 0) {
+            LOGGER.info("Filter: " + filter);
+            return new ExprValue(filter.toString());
+        } else {
+            return null;
+        }
+    }
 
-        for (int i = 0; i < dimensions.size(); i++) {
-            array[i] = dimensions.get(i).extractCategories(formTree, columnSet);
+
+    private void appendFilter(String fieldName, char domain, DimensionType type, StringBuilder filter) {
+        Set<Integer> ids = this.filter.getRestrictions(type);
+        if(!ids.isEmpty()) {
+            if(filter.length() > 0) {
+                filter.append(" && ");
+            }
+            filter.append("(");
+            boolean needsComma = false;
+            for (Integer id : ids) {
+                if(needsComma) {
+                    filter.append(" || ");
+                } 
+                filter.append(fieldName);
+                filter.append("==");
+                filter.append("'").append(CuidAdapter.cuid(domain, id).asString()).append("'");
+                needsComma = true;
+            }
+            filter.append(")");
+        }
+    }
+    
+    private DimensionCategory[][] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
+        DimensionCategory[][] array = new DimensionCategory[groupBy.size()][];
+
+        for (int i = 0; i < groupBy.size(); i++) {
+            array[i] = groupBy.get(i).extractCategories(activity, formTree, columnSet);
         }
         return array;
     }

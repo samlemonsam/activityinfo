@@ -41,7 +41,7 @@ public class PartnerDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(FormTree formTree, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
         return extractEntityCategories(columnSet, PARTNER_ID_COLUMN, PARTNER_LABEL_COLUMN);
     }
 

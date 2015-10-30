@@ -23,7 +23,7 @@ public abstract class DimBinding {
 
     public abstract Dimension getModel();
     
-    public abstract DimensionCategory[] extractCategories(FormTree formTree, ColumnSet columnSet);
+    public abstract DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet);
     
     protected final int activityIdOf(FormTree formTree) {
         return CuidAdapter.getLegacyIdFromCuid(formTree.getRootFormClass().getId());

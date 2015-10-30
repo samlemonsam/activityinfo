@@ -70,7 +70,7 @@ public class AdminDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(FormTree formTree, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
         DimensionCategory[] c = new DimensionCategory[columnSet.getNumRows()];
         if(columnSet.getColumns().containsKey(idColumn)) {
             ColumnView idView = columnSet.getColumnView(idColumn);

@@ -41,7 +41,7 @@ public class DateDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(FormTree formTree, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
 
         ColumnView column = columnSet.getColumnView(DATE_COLUMN_ID);
 

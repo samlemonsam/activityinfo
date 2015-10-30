@@ -33,7 +33,7 @@ public class SiteDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(FormTree formTree, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
         return extractEntityCategories(columnSet, ID_COLUMN, LABEL_COLUMN);
     }
 }

@@ -33,6 +33,14 @@ public class IndicatorMetadata {
     public ResourceId getFieldId() {
         return CuidAdapter.indicatorField(id);
     }
+    
+    public String getFieldExpression() {
+        if(aggregation == 2) {
+            return "1";
+        } else {
+            return CuidAdapter.indicatorField(id).asString();
+        }
+    }
 
 
     public String getAlias() {

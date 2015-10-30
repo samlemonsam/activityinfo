@@ -29,7 +29,7 @@ public class ProjectDimBinding extends DimBinding {
         projectId.setId(PROJECT_ID_COLUMN);
 
         ColumnModel projectLabel = new ColumnModel();
-        projectLabel.setExpression(CuidAdapter.projectField(activityId).asString() + ".Label");
+        projectLabel.setExpression(CuidAdapter.projectField(activityId).asString() + ".label");
         projectLabel.setId(PROJECT_LABEL_COLUMN);
 
         return Arrays.asList(projectId, projectLabel);
@@ -41,7 +41,7 @@ public class ProjectDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(FormTree formTree, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
         return extractEntityCategories(columnSet, PROJECT_ID_COLUMN, PROJECT_LABEL_COLUMN);
     }
 
