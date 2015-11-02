@@ -129,17 +129,15 @@ public class ColumnModelBuilder {
     }
 
     private void addLockOrLinkColumn(LockedPeriodSet lockSet) {
-        ColumnConfig columnLocked = new ColumnConfig("x", "", 28);
-        columnLocked.setRenderer(new LockedOrLinkColumnRenderer(lockSet));
-        columnLocked.setSortable(false);
-        columnLocked.setMenuDisabled(true);
-        columns.add(columnLocked);
+        ColumnConfig lockedOrLinkColumn = new ColumnConfig("x", "", 28);
+        lockedOrLinkColumn.setRenderer(new LockedOrLinkColumnRenderer(lockSet));
+        lockedOrLinkColumn.setSortable(false);
+        lockedOrLinkColumn.setMenuDisabled(true);
+        columns.add(lockedOrLinkColumn);
     }
 
     public ColumnModelBuilder maybeAddLockColumn(final ActivityFormDTO activity) {
-        if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            addLockOrLinkColumn(activity.getLockedPeriodSet());
-        }
+        addLockOrLinkColumn(activity.getLockedPeriodSet());
         return this;
     }
 
