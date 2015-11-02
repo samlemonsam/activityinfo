@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.Month;
 
 /**
@@ -112,6 +113,24 @@ public final class IndicatorRowDTO extends BaseModelData implements DTO {
      */
     public void setActivityName(String name) {
         set("activityName", name);
+    }
+
+    /**
+     * @return this Indicator's expression
+     */
+    public String getExpression() {
+        return get("expression");
+    }
+
+    /**
+     * Sets this Indicator's expression
+     */
+    public void setExpression(String expression) {
+        set("expression", expression);
+    }
+
+    public boolean isCalculated() {
+        return !Strings.isNullOrEmpty(getExpression());
     }
 
     /**
