@@ -136,17 +136,17 @@ public class ColumnModelBuilder {
         columns.add(lockedOrLinkColumn);
     }
 
-    public ColumnModelBuilder maybeAddLockColumn(final ActivityFormDTO activity) {
+    public ColumnModelBuilder maybeAddLockOrLinkColumn(final ActivityFormDTO activity) {
         addLockOrLinkColumn(activity.getLockedPeriodSet());
         return this;
     }
 
-    public ColumnModelBuilder maybeAddLockColumn(final SchemaDTO schemaDTO) {
+    public ColumnModelBuilder maybeAddLockOrLinkColumn(final SchemaDTO schemaDTO) {
         addLockOrLinkColumn(new LockedPeriodSet(schemaDTO));
         return this;
     }
 
-    public ColumnModelBuilder maybeAddLockColumn(final UserDatabaseDTO userdatabase) {
+    public ColumnModelBuilder maybeAddLockOrLinkColumn(final UserDatabaseDTO userdatabase) {
         addLockOrLinkColumn(new LockedPeriodSet(userdatabase));
         return this;
     }
