@@ -12,17 +12,18 @@ import java.security.Signature;
 import java.util.Collection;
 
 public class TestingIdentityService implements AppIdentityService {
-    public static final String SERVICE_ACCOUNT_EMAIL = "135288259907-k64g5vuv9en1o89on1ru16hrusvimn9t@developer.gserviceaccount.com";
-    public static final String PASSWORD = "notasecret";
+
+    private static final String SERVICE_ACCOUNT_EMAIL = "135288259907-k64g5vuv9en1o89on1ru16hrusvimn9t@developer.gserviceaccount.com";
+    private static final String PASSWORD = "notasecret";
 
     private PrivateKey privateKey;
 
-    public TestingIdentityService() throws Exception {
-        privateKey = loadPrivateKey();
+    public TestingIdentityService(String privateKeyFilePath) throws Exception {
+        privateKey = loadPrivateKey(privateKeyFilePath);
     }
 
-    private PrivateKey loadPrivateKey() throws Exception {
-        File keyFile = new File("C:\\Users\\Jorden\\BeDataDriven Development-7ca1136cac21.p12");
+    private PrivateKey loadPrivateKey(String privateKeyFilePath) throws Exception {
+        File keyFile = new File(privateKeyFilePath);
         if (!keyFile.exists()) {
             throw new AssumptionViolatedException("Key file is not present");
         }

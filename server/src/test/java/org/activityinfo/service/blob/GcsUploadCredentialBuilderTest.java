@@ -13,10 +13,12 @@ import static com.google.common.net.MediaType.PNG;
 
 public class GcsUploadCredentialBuilderTest {
 
+    private static final String PRIVATE_KEY_FILE_PATH = "u:\\own\\github\\repo\\activityinfo\\production2\\BeDataDriven Development-e30eef9283cd.p12";
+
     @Test
     public void test() throws Exception {
 
-        UploadCredentials credentials = new GcsUploadCredentialBuilder(new TestingIdentityService())
+        UploadCredentials credentials = new GcsUploadCredentialBuilder(new TestingIdentityService(PRIVATE_KEY_FILE_PATH))
                 .setBucket("ai-dev-field-blob-test")
                 .setKey(BlobId.generate().asString())
                 .setMaxContentLengthInMegabytes(10)

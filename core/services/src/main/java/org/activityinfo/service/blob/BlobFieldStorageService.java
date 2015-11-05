@@ -18,7 +18,9 @@ import java.net.URI;
  * Provides storage for fields which have blob values, such as images
  * or general attachment fields.
  */
-@Path("/service/blob")
+
+//@Path("/service/blob") commented path to avoid jersey conflict during binding in GcsBlobFieldStorageServiceModule
+//Error : Conflicting URI templates. The URI template /service/blob for root resource class org.activityinfo.service.blob.GcsBlobFieldStorageService and the URI template /service/blob transform to the same regular expression /service/blob(/.*)?
 public interface BlobFieldStorageService {
 
     /**
