@@ -7,5 +7,6 @@ public class GcsBlobFieldStorageServiceModule extends RestApiModule {
     @Override
     protected void configureResources() {
         bind(BlobFieldStorageService.class).to(GcsBlobFieldStorageService.class);
+        bindResource(GcsBlobFieldStorageService.class);
     }
 }

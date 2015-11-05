@@ -161,22 +161,11 @@ public class ImageUploadRow extends Composite {
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    String json = response.getText();
-                    Resource resource = Resources.fromJson(json);
+
+                    Resource resource = Resources.fromJson(response.getText());
                     UploadCredentials uploadCredentials = UploadCredentials.fromRecord(resource);
 
-                    // Remove the old hidden fields before adding the new ones
-                    List<Hidden> hidden = Lists.newArrayListWithCapacity(formFieldsContainer.getWidgetCount());
-                    for (int i = 0; i < formFieldsContainer.getWidgetCount(); i++) {
-                        Widget widget = formFieldsContainer.getWidget(i);
-                        if (widget instanceof Hidden) {
-                            hidden.add((Hidden) widget);
-                        }
-                    }
-                    // We can't just iterate once using the getWidget() method because removing a widget changes indexes
-                    for (Hidden old : hidden) {
-                        formFieldsContainer.remove(old);
-                    }
+                    removeHiddenFieldsFromForm();
 
                     Map<String, String> formFields = uploadCredentials.getFormFields();
                     for (Map.Entry<String, String> field : formFields.entrySet()) {
@@ -195,6 +184,20 @@ public class ImageUploadRow extends Composite {
             });
         } catch (RequestException e) {
             Log.error("Failed to send request", e);
+        }
+    }
+
+    private void removeHiddenFieldsFromForm() {
+        List<Hidden> hidden = Lists.newArrayListWithCapacity(formFieldsContainer.getWidgetCount());
+        for (int i = 0; i < formFieldsContainer.getWidgetCount(); i++) {
+            Widget widget = formFieldsContainer.getWidget(i);
+            if (widget instanceof Hidden) {
+                hidden.add((Hidden) widget);
+            }
+        }
+
+        for (Hidden old : hidden) {
+            formFieldsContainer.remove(old);
         }
     }
 

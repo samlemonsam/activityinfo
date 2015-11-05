@@ -25,7 +25,7 @@
           <span class="{icons.add}"/>
         </g:Button>
         <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton">
-          <span class='{icons.delete}'/>
+          <span class='{icons.remove}'/>
         </g:Button>
       </g:HTMLPanel>
       <g:VerticalPanel ui:field="formFieldsContainer"/>
