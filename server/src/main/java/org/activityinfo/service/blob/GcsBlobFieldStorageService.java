@@ -43,8 +43,11 @@ import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 @Path("/service/blob")
 public class GcsBlobFieldStorageService implements BlobFieldStorageService {
+
     private static final int ONE_MEGABYTE = 1 << 20;
     private static final Logger LOGGER = Logger.getLogger(GcsBlobFieldStorageService.class.getName());
+
+    public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 100;
 
     private final String bucketName;
     private AppIdentityService appIdentityService;
@@ -145,13 +148,15 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     @Override
     public Response getUploadCredentials(@InjectParam AuthenticatedUser user,
                                          @PathParam("blobId") BlobId blobId) {
-        if (user == null || user.isAnonymous()) throw new WebApplicationException(UNAUTHORIZED);
+        if (user == null || user.isAnonymous()) {
+            throw new WebApplicationException(UNAUTHORIZED);
+        }
 
         GcsUploadCredentialBuilder builder = new GcsUploadCredentialBuilder(appIdentityService);
         builder.setBucket(bucketName);
         builder.setKey(blobId.asString());
-        builder.setMaxContentLengthInMegabytes(10);
-        builder.expireAfter(Period.minutes(5));
+        builder.setMaxContentLengthInMegabytes(MAX_BLOB_LENGTH_IN_MEGABYTES);
+        builder.expireAfter(Period.minutes(10));
         return Response.ok(Resources.toJsonObject(builder.build().asRecord())).build();
     }
 
