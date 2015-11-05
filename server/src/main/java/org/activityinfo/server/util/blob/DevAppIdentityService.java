@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessControlException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -73,9 +74,13 @@ public class DevAppIdentityService implements AppIdentityService {
     }
 
     private InputStream readFromFile(String keyPath) throws IOException {
-        File keyFile = new File(keyPath);
-        if (keyFile.exists()) {
-            return new FileInputStream(keyFile);
+        try {
+            File keyFile = new File(keyPath);
+            if (keyFile.exists()) {
+                return new FileInputStream(keyFile);
+            }
+        } catch (AccessControlException e) { // if java has no access to specified directory
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return null;
     }

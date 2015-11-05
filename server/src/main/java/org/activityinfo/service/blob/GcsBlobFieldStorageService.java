@@ -9,21 +9,14 @@ import com.google.appengine.api.images.Image;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.images.Transform;
-import com.google.appengine.tools.cloudstorage.GcsFileOptions;
+import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsInputChannel;
-import com.google.appengine.tools.cloudstorage.GcsOutputChannel;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
-import com.google.appengine.tools.cloudstorage.RetryParams;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
@@ -31,6 +24,7 @@ import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
 import org.joda.time.Period;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,12 +146,16 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
             throw new WebApplicationException(UNAUTHORIZED);
         }
 
-        GcsUploadCredentialBuilder builder = new GcsUploadCredentialBuilder(appIdentityService);
-        builder.setBucket(bucketName);
-        builder.setKey(blobId.asString());
-        builder.setMaxContentLengthInMegabytes(MAX_BLOB_LENGTH_IN_MEGABYTES);
-        builder.expireAfter(Period.minutes(10));
-        return Response.ok(Resources.toJsonObject(builder.build().asRecord())).build();
+        UploadCredentials uploadCredentials = new GcsUploadCredentialBuilder(appIdentityService).
+                setBucket(bucketName).
+                setKey(blobId.asString()).
+                setMaxContentLengthInMegabytes(MAX_BLOB_LENGTH_IN_MEGABYTES).
+                expireAfter(Period.minutes(10)).
+                build();
+
+        return Response.ok(uploadCredentials.asJson()).
+                type(MediaType.APPLICATION_JSON).
+                build();
     }
 
 
