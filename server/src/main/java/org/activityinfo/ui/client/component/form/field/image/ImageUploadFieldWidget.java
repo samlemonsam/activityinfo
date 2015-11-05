@@ -29,7 +29,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
@@ -87,15 +86,20 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
         setButtonsState();
     }
 
+    private List<ImageUploadRow> rowsFromPanel() {
+        List<ImageUploadRow> rows = Lists.newArrayList();
+        for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
+            Widget widget = rootPanel.getWidget(i);
+            if (widget instanceof ImageUploadRow) rows.add((ImageUploadRow) widget);
+        }
+        return rows;
+    }
+
     private void setButtonsState() {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                List<ImageUploadRow> rows = Lists.newArrayListWithCapacity(rootPanel.getWidgetCount());
-                for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
-                    Widget widget = rootPanel.getWidget(i);
-                    if (widget instanceof ImageUploadRow) rows.add((ImageUploadRow) widget);
-                }
+                List<ImageUploadRow> rows = rowsFromPanel();
 
                 // Disable the button if it's the only row, so the user will not be trapped in a widget without any rows
                 if (rows.size() == 1) {
@@ -111,12 +115,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
-            IsWidget widget = rootPanel.getWidget(i);
-            if (widget instanceof ImageUploadRow) {
-                ImageUploadRow row = (ImageUploadRow) widget;
-                row.setReadOnly(readOnly);
-            }
+        for (ImageUploadRow row : rowsFromPanel()) {
+            row.setReadOnly(readOnly);
         }
 
         setButtonsState();
