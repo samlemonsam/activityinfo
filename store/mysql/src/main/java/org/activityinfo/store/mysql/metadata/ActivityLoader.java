@@ -11,6 +11,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -76,7 +77,7 @@ public class ActivityLoader {
                     activity.locationTypeName = rs.getString("locationTypeName");
                     activity.adminLevelId = rs.getInt("boundAdminLevelId");
                     activity.ownerUserId = rs.getInt("ownerUserId");
-                    activity.published = rs.getInt("published") == 1;
+                    activity.published = rs.getInt("published") > 0;
                     activity.version = rs.getLong("version");
 
                     serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
@@ -219,7 +220,7 @@ public class ActivityLoader {
                     formField.setType(TextType.INSTANCE);
                     break;
                 case "NARRATIVE":
-                    formField.setType(TextType.INSTANCE);
+                    formField.setType(NarrativeType.INSTANCE);
                     break;
                 case "ENUM":
                     formField.setType(createEnumType(rs, attributes));
@@ -231,26 +232,7 @@ public class ActivityLoader {
     }
 
     private boolean getMandatory(ResultSet rs) throws SQLException {
-        try {
-            return rs.getBoolean("Mandatory");
-        } catch(Exception e) {
-            LOGGER.log(Level.SEVERE, "Exception while accessing mandatory flag (value = [" +
-                    toDebugString(rs) + "]");
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Object toDebugString(ResultSet rs) throws SQLException {
-        try {
-            Object object = rs.getObject("Mandatory");
-            if(object == null) {
-                return "null";
-            } else {
-                return object.toString() + ", class = " + object.getClass().getName();
-            }
-        } catch(Exception e) {
-            return "Exception: " + e.getMessage();
-        }
+        return rs.getBoolean("Mandatory");
     }
 
     private EnumType createEnumType(ResultSet rs, Map<Integer, List<EnumItem>> attributes) throws SQLException {

@@ -70,7 +70,7 @@ public class SiteCollection implements ResourceCollection {
                         permissions.setEditAllowed(true);
                     } else if(rs.getBoolean("AllowEdit")) {
                         permissions.setEditAllowed(true);
-                        permissions.setVisibilityFilter(partnerFilter);
+                        permissions.setEditFilter(partnerFilter);
                     }
                 }
 
