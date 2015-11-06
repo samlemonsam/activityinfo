@@ -2,6 +2,7 @@ package org.activityinfo.server.util.blob;
 
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.PublicCertificate;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +32,7 @@ public class DevAppIdentityService implements AppIdentityService {
         } catch(Exception e) {
             LOGGER.log(Level.WARNING, "Could not load primary key", e);
         }
+        Preconditions.checkNotNull(privateKey);
     }
 
     private void loadPrivateKey(DeploymentConfiguration config) throws Exception {
