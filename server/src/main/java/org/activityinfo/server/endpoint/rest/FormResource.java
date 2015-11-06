@@ -159,6 +159,7 @@ public class FormResource {
         final QueryModel queryModel = new QueryModel(resourceId);
         if(uriInfo.getQueryParameters().isEmpty()) {
             LOGGER.info("No query fields provided, querying all.");
+            queryModel.selectResourceId().as("id");
             FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
             FormTree tree = treeBuilder.queryTree(resourceId);
             for (FormTree.Node leaf : tree.getLeaves()) {
