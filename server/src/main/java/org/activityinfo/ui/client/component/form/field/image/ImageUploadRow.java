@@ -36,6 +36,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -92,11 +93,11 @@ public class ImageUploadRow extends Composite {
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-//                if (fieldWidgetMode == FieldWidgetMode.NORMAL) { // todo uncomment !!!
+                if (fieldWidgetMode == FieldWidgetMode.NORMAL) { // todo uncomment !!!
                     requestUploadUrl();
-//                } else {
-//                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
-//                }
+                } else {
+                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
+                }
             }
         });
         downloadButton.addClickHandler(new ClickHandler() {
@@ -217,8 +218,11 @@ public class ImageUploadRow extends Composite {
         oldHandler = formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                String responseString = event.getResults(); // what about fail results?
-                Window.alert(responseString); // todo remove !!!
+                // what about fail results?
+                // we are not going to use it right now because in dev mode it is always null. https://code.google.com/p/google-web-toolkit/issues/detail?id=3832
+                //String responseString = event.getResults();
+
+
                 imageContainer.setVisible(false);
                 downloadButton.setVisible(true);
                 thumbnail.setVisible(true);
