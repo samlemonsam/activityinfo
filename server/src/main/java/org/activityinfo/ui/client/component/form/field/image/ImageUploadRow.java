@@ -36,7 +36,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -93,11 +92,11 @@ public class ImageUploadRow extends Composite {
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
+//                if (fieldWidgetMode == FieldWidgetMode.NORMAL) { // todo uncomment !!!
                     requestUploadUrl();
-                } else {
-                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
-                }
+//                } else {
+//                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
+//                }
             }
         });
         downloadButton.addClickHandler(new ClickHandler() {
@@ -219,7 +218,7 @@ public class ImageUploadRow extends Composite {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 String responseString = event.getResults(); // what about fail results?
-
+                Window.alert(responseString); // todo remove !!!
                 imageContainer.setVisible(false);
                 downloadButton.setVisible(true);
                 thumbnail.setVisible(true);
