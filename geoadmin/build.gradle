@@ -1,6 +1,14 @@
 
 description = 'Geographic Data Administrator'
 
+sonarRunner {
+    sonarProperties {
+        // Exclude these geoadmin's sources from the test coverage metrics
+        // This is an internal tool and difficult to test
+        property "sonar.exclusions", "src/main/java/**.java"
+    }
+}
+
 
 dependencies {
     compile group: 'com.sun.jersey', name: 'jersey-client', version:'1.17'
