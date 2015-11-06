@@ -185,6 +185,11 @@ task appengineStartInstrumentedAT(type: RunTask) {
         logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
 
         jvmFlags.add("-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}")
+        
+        // Apparently between the Jacoco instrumentation adds significantly more pressure on
+        // the Permgen space. Set a high maximum to avoid the case that the dev server crashes
+        // during the tests
+        jvmFlags.add("-XX:MaxPermSize=2048m")
     }
 }
 
