@@ -35,6 +35,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.image.ImageRowValue;
 import org.activityinfo.model.type.image.ImageValue;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 
 import java.util.List;
@@ -51,19 +52,23 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
 
     private final HTMLPanel rootPanel;
     private final FormField formField;
+    private final FieldWidgetMode fieldWidgetMode;
+
     private String resourceId;
     private ImageValue value = new ImageValue();
 
-    public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater) {
+    public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.resourceId = resourceId;
         this.formField = formField;
+        this.fieldWidgetMode = fieldWidgetMode;
+
         rootPanel = ourUiBinder.createAndBindUi(this);
 
         addNewRow(new ImageRowValue());
     }
 
     private void addNewRow(final ImageRowValue rowValue) {
-        final ImageUploadRow imageUploadRow = new ImageUploadRow(rowValue, formField.getId().asString(), resourceId);
+        final ImageUploadRow imageUploadRow = new ImageUploadRow(rowValue, formField.getId().asString(), resourceId, fieldWidgetMode);
         imageUploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {

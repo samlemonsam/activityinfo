@@ -36,12 +36,14 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.image.ImageRowValue;
 import org.activityinfo.service.blob.UploadCredentials;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 
 import java.util.List;
 import java.util.Map;
@@ -82,7 +84,7 @@ public class ImageUploadRow extends Composite {
     @UiField
     FormPanel formPanel;
 
-    public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId) {
+    public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId, final FieldWidgetMode fieldWidgetMode) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = value;
         this.fieldId = fieldId;
@@ -91,7 +93,11 @@ public class ImageUploadRow extends Composite {
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                requestUploadUrl();
+                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
+                    requestUploadUrl();
+                } else {
+                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
+                }
             }
         });
         downloadButton.addClickHandler(new ClickHandler() {

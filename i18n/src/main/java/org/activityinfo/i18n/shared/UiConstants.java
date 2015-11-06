@@ -1625,4 +1625,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("To begin, copy your table from Excel and paste in the box below:")
     String importHelpText();
+
+    @DefaultStringValue("Upload is not allowed during form designing.")
+    String uploadIsNotAllowedInDuringDesing();
 }
