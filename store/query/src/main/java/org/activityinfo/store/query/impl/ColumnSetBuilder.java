@@ -115,9 +115,21 @@ public class ColumnSetBuilder {
         }
     }
 
-    private ColumnSet aggregate(Map<String, ColumnView> dataMap, List<String> groupBy) {
+    private ColumnSet aggregate(Map<String, ColumnView> dataMap, List<String> groupColumnNames) {
         
-        ColumnView columnKeys[];
+        ColumnView columnKeys[] = new ColumnView[groupColumnNames.size()];
+        int index = 0;
+        for (String columnName : groupColumnNames) {
+            ColumnView columnView = dataMap.get(columnName);
+            if(columnView == null) {
+                throw new IllegalArgumentException("No such column '" + columnName + "'");
+            }
+            columnKeys[index] = columnView;
+        }
+        
+        
+        
+        
         
         return null;
     }

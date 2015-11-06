@@ -67,11 +67,7 @@ public abstract class AbstractMySqlTest {
         for(String field : fields) {
             queryModel.selectExpr(field).setId(field);
         }
-        columnSet = executor.build(queryModel);
-
-        for(String field : fields) {
-            System.out.println(field + ": " + column(field));
-        }
+        execute(queryModel);
     }
 
     protected final void queryWhere(ResourceId formClassId, List<String> fields, String filter) {
@@ -82,13 +78,35 @@ public abstract class AbstractMySqlTest {
         }
         queryModel.setFilter(ExprValue.valueOf(filter));
 
+        execute(queryModel);
+    }
+    protected final void queryGroupBy(ResourceId formClassId, String... fields) {
+        QueryModel queryModel = new QueryModel(formClassId);
+        queryModel.selectResourceId().as("_id");
+        for(String field : fields) {
+            queryModel.selectExpr(field).setId(field);
+        }
+        execute(queryModel);
+    }
+
+
+    protected final void queryAggregate(ResourceId formClassId, List<String> fields, List<String> groupBy) {
+        QueryModel queryModel = new QueryModel(formClassId);
+        queryModel.selectResourceId().as("_id");
+        for(String field : fields) {
+            queryModel.selectExpr(field).setId(field);
+        }
+        queryModel.getGroupBy().addAll(groupBy);
+        execute(queryModel);
+    }
+
+    private void execute(QueryModel queryModel) {
         columnSet = executor.build(queryModel);
 
-        for(String field : fields) {
+        for(String field : columnSet.getColumns().keySet()) {
             System.out.println(field + ": " + column(field));
         }
     }
-
 
 
     protected final ColumnView column(String column) {

@@ -142,6 +142,12 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
         assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));
     }
+    
+    @Test
+    public void testSiteAggregated() {
+        query(CuidAdapter.activityFormClass(1), "project.name", "sum(BENE)", "project.name");
+        
+    }
 
     @Test
     public void testSiteFilteredOnPartner() {

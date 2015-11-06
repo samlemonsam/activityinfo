@@ -3,6 +3,7 @@ package org.activityinfo.store.query.impl.eval;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.eval.FormTreeSymbolTable;
 import org.activityinfo.model.expr.eval.SymbolBinding;
@@ -18,6 +19,7 @@ import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -35,12 +37,16 @@ public class QueryEvaluator {
     private final ColumnExprVisitor columnVisitor = new ColumnExprVisitor();
 
     private FormTreeSymbolTable resolver;
+    
+    private Map<String, AggregateFunction> aggregateFunctions = Maps.newHashMap();
 
     public QueryEvaluator(FormTree formTree, FormClass rootFormClass, CollectionScanBatch batch) {
         this.tree = formTree;
         this.resolver = new FormTreeSymbolTable(formTree);
         this.rootFormClass = rootFormClass;
         this.batch = batch;
+        
+        aggregateFunctions.put("sum", new SumFunction());
     }
 
     public Slot<ColumnView> evaluateExpression(String expression) {
