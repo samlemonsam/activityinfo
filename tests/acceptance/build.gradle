@@ -38,6 +38,10 @@ dependencies {
     compile libraries.gwt.i18nServer
 }
 
+// we're not using the standard test plug
+// as we have our own test harness
+test.enabled = false
+
 
 task acceptanceTest(type: JavaExec) {
     group = "Verification"
