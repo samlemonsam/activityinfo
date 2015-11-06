@@ -1628,4 +1628,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Upload is not allowed during form designing.")
     String uploadIsNotAllowedInDuringDesing();
+
+    @DefaultStringValue("Upload failed")
+    String uploadFailed();
 }

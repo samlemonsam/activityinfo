@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.form.field.image;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
@@ -35,6 +36,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.XMLParser;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
@@ -83,6 +86,8 @@ public class ImageUploadRow extends Composite {
     Button addButton;
     @UiField
     FormPanel formPanel;
+    @UiField
+    HTMLPanel uploadFailed;
 
     public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId, final FieldWidgetMode fieldWidgetMode) {
         initWidget(ourUiBinder.createAndBindUi(this));
@@ -162,6 +167,7 @@ public class ImageUploadRow extends Composite {
     }
 
     private void requestUploadUrl() {
+        uploadFailed.setVisible(false);
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, URL.encode(createUploadUrl()));
             requestBuilder.sendRequest(null, new RequestCallback() {
@@ -186,10 +192,12 @@ public class ImageUploadRow extends Composite {
                 @Override
                 public void onError(Request request, Throwable exception) {
                     Log.error("Failed to send request", exception);
+                    uploadFailed.setVisible(true);
                 }
             });
         } catch (RequestException e) {
             Log.error("Failed to send request", e);
+            uploadFailed.setVisible(true);
         }
     }
 
@@ -210,6 +218,7 @@ public class ImageUploadRow extends Composite {
     private void upload() {
         imageContainer.setVisible(true);
         downloadButton.setVisible(false);
+        uploadFailed.setVisible(false);
 
         if (oldHandler != null) {
             oldHandler.removeHandler();
@@ -218,18 +227,34 @@ public class ImageUploadRow extends Composite {
         oldHandler = formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                // what about fail results?
-                // we are not going to use it right now because in dev mode it is always null. https://code.google.com/p/google-web-toolkit/issues/detail?id=3832
-                //String responseString = event.getResults();
 
+                // in dev mode it is always null. https://code.google.com/p/google-web-toolkit/issues/detail?id=3832
+                // it's expected to get something like this in prod mode:
+                //<?xml version='1.0' encoding='UTF-8'?><PostResponse><Location>http://commondatastorage.googleapis.com/ai-blob-test/cignpyj1u2</Location><Bucket>ai-blob-test</Bucket><Key>cignpyj1u2</Key><ETag>"c22e1a55397546672130f31761892f55"</ETag></PostResponse>
+                //<StringToSign>eyJjb25kaXRpb25zIjpbeyJzdWNjZXNzX2FjdGlvbl9zdGF0dXMiOiIyMDEifSx7ImJ1Y2tldCI6ImFpLWJsb2ItdGVzdCJ9LHsia2V5IjoiY2lnbm4xcHYwMiJ9LFsiY29udGVudC1sZW5ndGgtcmFuZ2UiLDAsMTA0ODU3NjAwXV0sImV4cGlyYXRpb24iOiIyMDE1LTExLTA2VDE0OjM4OjU2LjI4NyswMjowMCJ9</StringToSign></Error>
 
-                imageContainer.setVisible(false);
-                downloadButton.setVisible(true);
-                thumbnail.setVisible(true);
-                thumbnail.setUrl(buildThumbnailUrl());
+                Optional<String> location = location(event.getResults());
+                if (!GWT.isProdMode() || location.isPresent()) {
+                    imageContainer.setVisible(false);
+                    downloadButton.setVisible(true);
+                    thumbnail.setVisible(true);
+                    thumbnail.setUrl(buildThumbnailUrl());
+                } else {
+                    Log.error("Failed to parse response from server: " + event.getResults());
+                    uploadFailed.setVisible(true);
+                }
             }
         });
         formPanel.submit();
+    }
+
+    private Optional<String> location(String xmlResponse) {
+        try {
+            Document dom = XMLParser.parse(xmlResponse);
+            return Optional.of(dom.getElementsByTagName("Location").item(0).getNodeValue());
+        } catch (Exception e) {
+            return Optional.absent();
+        }
     }
 
     private void download() {
