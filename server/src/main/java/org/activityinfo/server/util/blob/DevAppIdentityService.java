@@ -89,15 +89,15 @@ public class DevAppIdentityService implements AppIdentityService {
 
     @Override
     public SigningResult signForApp(byte[] bytes) {
-        if(privateKey == null) {
+        if (privateKey == null) {
             throw new UnsupportedOperationException("Service account not configured for local development.");
         }
         try {
-            Signature dsa = Signature.getInstance("SHA1withRSA");
+            Signature dsa = Signature.getInstance("SHA256withRSA");
             dsa.initSign(privateKey);
             dsa.update(bytes);
             return new SigningResult(serviceAccountName, dsa.sign());
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
