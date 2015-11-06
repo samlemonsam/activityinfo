@@ -29,13 +29,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.image.ImageRowValue;
 import org.activityinfo.model.type.image.ImageValue;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 
 import java.util.List;
@@ -52,19 +52,23 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
 
     private final HTMLPanel rootPanel;
     private final FormField formField;
+    private final FieldWidgetMode fieldWidgetMode;
+
     private String resourceId;
     private ImageValue value = new ImageValue();
 
-    public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater) {
+    public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.resourceId = resourceId;
         this.formField = formField;
+        this.fieldWidgetMode = fieldWidgetMode;
+
         rootPanel = ourUiBinder.createAndBindUi(this);
 
         addNewRow(new ImageRowValue());
     }
 
     private void addNewRow(final ImageRowValue rowValue) {
-        final ImageUploadRow imageUploadRow = new ImageUploadRow(rowValue, formField.getId().asString(), resourceId);
+        final ImageUploadRow imageUploadRow = new ImageUploadRow(rowValue, formField.getId().asString(), resourceId, fieldWidgetMode);
         imageUploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
@@ -87,15 +91,20 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
         setButtonsState();
     }
 
+    private List<ImageUploadRow> rowsFromPanel() {
+        List<ImageUploadRow> rows = Lists.newArrayList();
+        for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
+            Widget widget = rootPanel.getWidget(i);
+            if (widget instanceof ImageUploadRow) rows.add((ImageUploadRow) widget);
+        }
+        return rows;
+    }
+
     private void setButtonsState() {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                List<ImageUploadRow> rows = Lists.newArrayListWithCapacity(rootPanel.getWidgetCount());
-                for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
-                    Widget widget = rootPanel.getWidget(i);
-                    if (widget instanceof ImageUploadRow) rows.add((ImageUploadRow) widget);
-                }
+                List<ImageUploadRow> rows = rowsFromPanel();
 
                 // Disable the button if it's the only row, so the user will not be trapped in a widget without any rows
                 if (rows.size() == 1) {
@@ -111,12 +120,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
-            IsWidget widget = rootPanel.getWidget(i);
-            if (widget instanceof ImageUploadRow) {
-                ImageUploadRow row = (ImageUploadRow) widget;
-                row.setReadOnly(readOnly);
-            }
+        for (ImageUploadRow row : rowsFromPanel()) {
+            row.setReadOnly(readOnly);
         }
 
         setButtonsState();

@@ -134,7 +134,7 @@ public class FormFieldWidgetFactory {
             return Promise.resolved(new BooleanFieldWidget(valueUpdater));
 
         } else if (type instanceof ImageType) {
-            return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater));
+            return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
 
         } else if (type instanceof ReferenceType) {
             return createReferenceWidget(field, valueUpdater);
