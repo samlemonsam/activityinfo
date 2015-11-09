@@ -55,7 +55,12 @@ import java.util.Map;
  * @author yuriyz on 8/12/14.
  */
 public class ImageUploadRow extends Composite {
+
     private static final int THUMBNAIL_SIZE = 24;
+
+    public static interface ValueChangedCallback {
+        void fireValueChanged();
+    }
 
     interface OurUiBinder extends UiBinder<FormPanel, ImageUploadRow> {
     }
@@ -65,6 +70,8 @@ public class ImageUploadRow extends Composite {
     private final ImageRowValue value;
     private final String fieldId;
     private final String resourceId;
+    private final ImageUploadRow.ValueChangedCallback valueChangedCallback;
+
     private boolean readOnly;
     private HandlerRegistration oldHandler;
 
@@ -89,11 +96,13 @@ public class ImageUploadRow extends Composite {
     @UiField
     HTMLPanel uploadFailed;
 
-    public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId, final FieldWidgetMode fieldWidgetMode) {
+    public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId,
+                          final FieldWidgetMode fieldWidgetMode, ImageUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = value;
         this.fieldId = fieldId;
         this.resourceId = resourceId;
+        this.valueChangedCallback = valueChangedCallback;
 
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
@@ -239,6 +248,8 @@ public class ImageUploadRow extends Composite {
                     downloadButton.setVisible(true);
                     thumbnail.setVisible(true);
                     thumbnail.setUrl(buildThumbnailUrl());
+
+                    valueChangedCallback.fireValueChanged();
                 } else {
                     Log.error("Failed to parse response from server: " + event.getResults());
                     uploadFailed.setVisible(true);

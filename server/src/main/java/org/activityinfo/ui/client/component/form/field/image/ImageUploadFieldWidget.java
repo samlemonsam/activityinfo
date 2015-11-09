@@ -43,7 +43,7 @@ import java.util.List;
 /**
  * @author yuriyz on 8/7/14.
  */
-public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
+public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue>, ImageUploadRow.ValueChangedCallback {
 
     interface OurUiBinder extends UiBinder<HTMLPanel, ImageUploadFieldWidget> {
     }
@@ -53,22 +53,39 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
     private final HTMLPanel rootPanel;
     private final FormField formField;
     private final FieldWidgetMode fieldWidgetMode;
+    private final ValueUpdater valueUpdater;
 
     private String resourceId;
-    private ImageValue value = new ImageValue();
 
     public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.resourceId = resourceId;
         this.formField = formField;
         this.fieldWidgetMode = fieldWidgetMode;
+        this.valueUpdater = valueUpdater;
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
         addNewRow(new ImageRowValue());
     }
 
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
+    }
+
+    private ImageValue getValue() {
+        ImageValue value = new ImageValue();
+
+        for (ImageUploadRow row : rowsFromPanel()) {
+            value.getValues().add(row.getValue());
+        }
+
+        return value;
+    }
+
     private void addNewRow(final ImageRowValue rowValue) {
-        final ImageUploadRow imageUploadRow = new ImageUploadRow(rowValue, formField.getId().asString(), resourceId, fieldWidgetMode);
+        final ImageUploadRow imageUploadRow = new ImageUploadRow(
+                rowValue, formField.getId().asString(), resourceId, fieldWidgetMode, this);
+
         imageUploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
@@ -79,13 +96,12 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
         imageUploadRow.removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                value.getValues().remove(imageUploadRow.getValue());
                 rootPanel.remove(imageUploadRow);
                 setButtonsState();
+                fireValueChanged();
             }
         });
 
-        value.getValues().add(rowValue);
         rootPanel.add(imageUploadRow);
 
         setButtonsState();
@@ -159,7 +175,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue> {
     }
 
     private void clear() {
-        value = new ImageValue();
         rootPanel.clear();
     }
 }

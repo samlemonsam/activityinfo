@@ -27,7 +27,6 @@ import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,7 +34,7 @@ import java.util.List;
  */
 public class ImageValue implements FieldValue, IsRecord {
 
-    final private List<ImageRowValue> values;
+    private final List<ImageRowValue> values = Lists.newArrayList();
 
     @Override
     public FieldTypeClass getTypeClass() {
@@ -43,11 +42,10 @@ public class ImageValue implements FieldValue, IsRecord {
     }
 
     public ImageValue() {
-        values = Lists.newArrayList();
     }
 
     public ImageValue(ImageRowValue imageRowValue) {
-        values = Collections.singletonList(imageRowValue);
+        values.add(imageRowValue);
     }
 
     public List<ImageRowValue> getValues() {
