@@ -56,3 +56,19 @@ Feature: Data entry
     Then old table for "Monthly" form shows:
       |  |  | Partner | Country |
       |  |  | NRC     | RDC     |
+
+  @AI-1122
+  Scenario:Link column in data grid for activities with monthly reporting
+    Given I have created a monthly form named "Monthly"
+    And I have created a quantity field "# with improved water supply"
+    And I have submitted a "Monthly" form with partner NRC with monthly reports:
+      | Month   | # with improved water supply |
+      | 2015-01 | 1000                         |
+    And I have created a monthly form named "AnotherMonthly"
+    And I have created a quantity field "indicator"
+    And I link indicators:
+      | sourceDb | sourceIndicator | destDb   | destIndicator  |
+      | Database | # with improved water supply         | Database | indicator      |
+    Then old table for "AnotherMonthly" form shows:
+      |  |  | Partner | Country |
+      |  |  | NRC     | RDC     |
