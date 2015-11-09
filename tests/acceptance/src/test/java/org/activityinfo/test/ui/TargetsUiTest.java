@@ -33,7 +33,6 @@ import org.activityinfo.test.sut.DevServerAccounts;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.Locale;
 
 import static org.activityinfo.test.driver.Property.name;

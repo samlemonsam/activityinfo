@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.PropertyBag;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.Resources;
 
 import java.util.Map;
 
@@ -66,6 +67,10 @@ public class UploadCredentials implements IsRecord {
                 .set("url", url)
                 .set("method", method)
                 .set("formFields", formFieldsRecord);
+    }
+
+    public String asJson() {
+        return Resources.toJsonObject(asRecord()).toString();
     }
 
     public static UploadCredentials fromRecord(PropertyBag<? extends PropertyBag> record) {

@@ -3,8 +3,6 @@ package org.activityinfo.test.steps.common;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
-import cucumber.api.PendingException;
-import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
@@ -14,17 +12,13 @@ import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.web.Dashboard;
 import org.activityinfo.test.pageobject.web.reports.DashboardPortlet;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
-import org.activityinfo.test.pageobject.web.reports.ReportsTab;
 import org.activityinfo.test.sut.Accounts;
-import org.hamcrest.Matchers;
 
 import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 
 @ScenarioScoped
 public class AnalysisSteps {

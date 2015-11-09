@@ -1,7 +1,6 @@
 package org.activityinfo.test.steps.json;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.client.ClientResponse;
 import org.codehaus.jackson.JsonNode;

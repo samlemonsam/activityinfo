@@ -4,9 +4,10 @@ import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
-import com.google.common.io.BaseEncoding;
+import org.apache.commons.codec.binary.Base64;
 import org.joda.time.Period;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
@@ -35,7 +36,6 @@ public class GcsUploadCredentialBuilder {
     }
 
     /**
-     *
      * @param bucketName The name of the bucket that you want to upload to.
      */
     public GcsUploadCredentialBuilder setBucket(String bucketName) {
@@ -65,17 +65,20 @@ public class GcsUploadCredentialBuilder {
     }
 
     public UploadCredentials build() {
+        try {
+            byte[] policy = policyDocument.toJsonBytes();
+            String encodedPolicy = new String(Base64.encodeBase64(policy, false), "UTF-8");
 
-        byte[] policy = policyDocument.toJsonBytes();
-        String encodedPolicy = BaseEncoding.base64().encode(policy);
+            AppIdentityService.SigningResult signature = identityService.signForApp(encodedPolicy.getBytes(Charsets.UTF_8));
 
-        AppIdentityService.SigningResult signature = identityService.signForApp(encodedPolicy.getBytes(Charsets.UTF_8));
+            formFields.put("GoogleAccessId", identityService.getServiceAccountName());
+            formFields.put("policy", encodedPolicy);
+            formFields.put("signature", new String(Base64.encodeBase64(signature.getSignature(), false), "UTF-8"));
+            formFields.put("success_action_status", STATUS_CODE);
 
-        formFields.put("GoogleAccessId", identityService.getServiceAccountName());
-        formFields.put("policy", encodedPolicy);
-        formFields.put("signature", BaseEncoding.base64().encode(signature.getSignature()));
-        formFields.put("success_action_status", STATUS_CODE);
-
-        return new UploadCredentials(String.format(END_POINT_URL_FORMAT, formFields.get("bucket")), "POST", formFields);
+            return new UploadCredentials(String.format(END_POINT_URL_FORMAT, formFields.get("bucket")), "POST", formFields);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
