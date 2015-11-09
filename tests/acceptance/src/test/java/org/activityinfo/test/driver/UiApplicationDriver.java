@@ -1084,4 +1084,14 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         usersPage.setPermission(account.getEmail(), permissions);
     }
+
+    @Override
+    public DataTable oldTable(String formName) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        GxtGrid grid = dataEntryTab.navigateToForm(aliasTable.getAlias(formName)).grid();
+
+        return grid.extractData();
+    }
 }

@@ -343,4 +343,10 @@ public class DataEntrySteps {
             throw new RuntimeException("Failed to find partner field.");
         }
     }
+
+    @Then("^old table for \"([^\"]*)\" form shows:$")
+    public void old_table_for_form_shows(String formName, DataTable dataTable) throws Throwable {
+        DataTable uiTable = driver.getAliasTable().deAlias(driver.oldTable(formName));
+        dataTable.unorderedDiff(uiTable);
+    }
 }
