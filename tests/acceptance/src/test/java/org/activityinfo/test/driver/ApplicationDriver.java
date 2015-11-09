@@ -425,4 +425,8 @@ public abstract class ApplicationDriver {
     public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
         throw new PendingException();
     }
+
+    public DataTable oldTable(String formName) {
+        throw new PendingException();
+    }
 }

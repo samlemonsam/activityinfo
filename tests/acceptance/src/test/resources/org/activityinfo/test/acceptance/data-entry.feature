@@ -8,7 +8,6 @@ Feature: Data entry
     And I have created a form "Patient Visits" using the new layout
     And I have created a form named "NFI Distribution"
 
-
   @AI-1161
   Scenario: Filter by partner update on site crud
     Given I submit a "NFI Distribution" form with:
@@ -22,7 +21,6 @@ Feature: Data entry
     Then "Filter by partner" filter for "NFI Distribution" form has values:
       | NRC |
       | UPS |
-
 
   @AI-1221
   Scenario: Partners are filtered according to permissions
@@ -43,3 +41,18 @@ Feature: Data entry
       | Default |
       | NRC     |
 
+  Scenario: Monthly sites are shown independent from locks
+    Given I have created a monthly form named "Monthly"
+    And I have created a quantity field "# with improved water supply"
+    And I have submitted a "Monthly" form with partner NRC with monthly reports:
+      | Month   | # with improved water supply |
+      | 2015-01 | 1000                         |
+      | 2015-02 | 500                          |
+      | 2015-03 | 250                          |
+    Then old table for "Monthly" form shows:
+      |  |  | Partner | Country |
+      |  |  | NRC     | RDC     |
+    When I add a lock "monthlyFormLock" on the form "Monthly" from "2015-01-01" to "2015-12-31" in database "Database"
+    Then old table for "Monthly" form shows:
+      |  |  | Partner | Country |
+      |  |  | NRC     | RDC     |
