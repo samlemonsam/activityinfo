@@ -105,6 +105,10 @@ public class LockedPeriodSet {
     }
 
     public boolean isLocked(int activityId, LocalDate endDate, int projectId) {
+        if (endDate == null) { // for monthly sites end date is null
+            return false;
+        }
+
         if (isActivityLocked(activityId, endDate)) {
             return true;
         }
@@ -133,6 +137,9 @@ public class LockedPeriodSet {
     }
 
     private boolean dateRangeLocked(LocalDate date, Collection<LockedPeriodDTO> locks) {
+        if (date == null) { // for monthly sites end date is null
+            return false;
+        }
 
         for (LockedPeriodDTO lock : locks) {
             if (lock.fallsWithinPeriod(date)) {

@@ -19,7 +19,10 @@ import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
-import org.activityinfo.test.pageobject.gxt.*;
+import org.activityinfo.test.pageobject.gxt.GxtGrid;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtPanel;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -156,14 +159,17 @@ public class DataEntryTab {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public GxtGrid grid() {
+        GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
+        grid.waitUntilAtLeastOneRowIsLoaded();
+        return grid;
     }
 
     public void selectSubmission(int rowIndex) {
-        GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
-        grid.waitUntilAtLeastOneRowIsLoaded();
         try {
-            grid.rows().get(rowIndex).select();
+            grid().rows().get(rowIndex).select();
         } catch (StaleElementReferenceException e) {
             GxtGrid.waitForGrids(container).first().get().rows().get(rowIndex).select();
         }
