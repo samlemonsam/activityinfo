@@ -229,16 +229,10 @@ public class GetReportsHandler implements CommandHandlerAsync<GetReports, Report
                         int reportId = row.getInt("reportid");
 
                         ReportMetadataDTO dto = new ReportMetadataDTO();
-                        dto.setId(reportId);
 
-                        if (!row.isNull("emaildelivery")) {
-                            dto.setEmailDelivery(EmailDelivery.valueOf(row.getString("emaildelivery")));
-                        }
-                        if (row.isNull("emailday")) {
-                            dto.setDay(1);
-                        } else {
-                            dto.setDay(row.getInt("emailday"));
-                        }
+                        dto.setId(reportId);
+                        dto.setEmailDelivery(EmailDelivery.valueOf(row.getString("emaildelivery")));
+                        dto.setDay(row.getInt("emailday"));
 
                         if (!row.isNull("dashboard")) {
                             dto.setDashboard(row.getBoolean("dashboard"));
