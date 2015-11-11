@@ -62,6 +62,7 @@ public class PostmarkMailSender extends MailSender {
     public void send(Message message) throws MessagingException {
         try {
             JsonObject json = toJson(message);
+            LOGGER.log(Level.INFO, "TextBody: " + json.get("TextBody"));
             postMessage(json);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to post message to postmark service", e);
