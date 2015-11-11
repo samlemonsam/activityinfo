@@ -168,6 +168,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         return get("fromDate");
     }
     
+    @JsonSetter
     public void setFromDate(LocalDate date) {
         set("fromDate", date);
     }
@@ -178,6 +179,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
         return get("toDate");
     }
     
+    @JsonSetter
     public void setToDate(LocalDate date) {
         set("toDate", date);
     }
