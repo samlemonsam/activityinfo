@@ -44,7 +44,6 @@ import org.activityinfo.server.report.DummyPivotTableData;
 import org.activityinfo.server.report.renderer.Renderer;
 import org.activityinfo.server.report.renderer.excel.ExcelReportRenderer;
 import org.activityinfo.server.report.renderer.image.ImageMapRenderer;
-import org.activityinfo.server.report.renderer.ppt.PPTMapRenderer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -287,7 +286,6 @@ public class ItextReportRendererTest {
         renderToPdf(report, "iconMarker.pdf");
         renderToHtml(report, "iconMarker.html");
         renderToRtf(report, "iconMarker.rtf");
-        renderToPpt(map, "iconMarker.ppt");
         renderToImage(map, "iconMarker.png");
     }
 
@@ -397,7 +395,6 @@ public class ItextReportRendererTest {
         renderToPdf(report, "legend.pdf");
         renderToHtml(report, "legend.html");
         renderToRtf(report, "legend.rtf");
-        renderToPpt(map, "legend.ppt");
     }
 
     @Test
@@ -514,11 +511,6 @@ public class ItextReportRendererTest {
 
     private void renderToRtf(Report report, String name) throws IOException {
         renderTo(report, new RtfReportRenderer(TestGeometry.get(), mapIconPath()), name);
-    }
-
-    private void renderToPpt(MapReportElement map, String name) throws IOException {
-        PPTMapRenderer renderer = new PPTMapRenderer(TestGeometry.get(), mapIconPath());
-        renderer.render(map, new FileOutputStream("target/report-tests/" + name));
     }
 
 }

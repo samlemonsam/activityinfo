@@ -180,6 +180,6 @@ public class MapEditor extends ContentPanel implements ReportElementEditor<MapRe
 
     @Override
     public List<Format> getExportFormats() {
-        return Arrays.asList(Format.PowerPoint, Format.Word, Format.PDF, Format.PNG);
+        return Arrays.asList(Format.Word, Format.PDF, Format.PNG);
     }
 }

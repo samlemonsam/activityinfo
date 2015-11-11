@@ -165,7 +165,7 @@ public class ChartEditor extends LayoutContainer implements ReportElementEditor<
 
     @Override
     public List<Format> getExportFormats() {
-        return Arrays.asList(Format.PowerPoint, Format.Word, Format.PDF);
+        return Arrays.asList(Format.Word, Format.PDF);
     }
 
 }
