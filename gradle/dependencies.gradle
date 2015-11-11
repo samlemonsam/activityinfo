@@ -25,11 +25,11 @@ ext {
             testing:        "com.google.appengine:appengine-testing:${gaeVersion}",
             stubs:          "com.google.appengine:appengine-api-stubs:${gaeVersion}",
             export: [
-                itext:      'com.bedatadriven.appengine.export:appengine-itext:0.1.1',
-                awt:        'com.bedatadriven.appengine.export:appengine-awt:0.1.1',
-                ppt:        'com.bedatadriven.appengine.export:appengine-ppt:0.1.1',
-                jcharts:    'com.bedatadriven.appengine.export:appengine-jcharts:0.1.1',
-                emf:        'com.bedatadriven.appengine.export:appengine-emf:0.1.1',
+                itext:      'com.bedatadriven.appengine.export:appengine-itext:0.1.3',
+                awt:        'com.bedatadriven.appengine.export:appengine-awt:0.1.3',
+                ppt:        'com.bedatadriven.appengine.export:appengine-ppt:0.1.3',
+                jcharts:    'com.bedatadriven.appengine.export:appengine-jcharts:0.1.3',
+                emf:        'com.bedatadriven.appengine.export:appengine-emf:0.1.3',
             ]
         ],
             
