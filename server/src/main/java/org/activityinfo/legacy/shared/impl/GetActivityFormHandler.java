@@ -203,10 +203,10 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     countryId = row.getInt("countryId");
                     databaseId = row.getInt("databaseId");
                     Extents countryBounds = new Extents(
-                            row.getDouble("x1"),
                             row.getDouble("y1"),
-                            row.getDouble("x2"),
-                            row.getDouble("y2"));
+                            row.getDouble("y2"),
+                            row.getDouble("x1"),
+                            row.getDouble("x2"));
 
                     LocationTypeDTO locationType = new LocationTypeDTO();
                     locationType.setId(row.getInt("locationTypeId"));
