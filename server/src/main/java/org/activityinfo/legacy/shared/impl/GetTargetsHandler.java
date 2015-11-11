@@ -81,8 +81,8 @@ public class GetTargetsHandler implements CommandHandlerAsync<GetTargets, Target
                             TargetDTO target = new TargetDTO();
                             target.setName(row.getString("name"));
                             target.setId(row.getInt("targetId"));
-                            target.setDate1(row.getDate("Date1"));
-                            target.setDate2(row.getDate("Date2"));
+                            target.setFromDate(row.getDate("Date1"));
+                            target.setToDate(row.getDate("Date2"));
 
                             if (!row.isNull("PartnerId")) {
                                 PartnerDTO partner = new PartnerDTO();
@@ -97,8 +97,6 @@ public class GetTargetsHandler implements CommandHandlerAsync<GetTargets, Target
                                 project.setName(row.getString("projectName"));
                                 target.setProject(project);
                             }
-
-                            target.setArea(row.getString("area"));
 
                             UserDatabaseDTO database = new UserDatabaseDTO();
                             database.setId(row.getInt("DatabaseId"));

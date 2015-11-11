@@ -78,8 +78,8 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         target.setAdminEntity(adminEntity);
         target.setPartner(partner);
         target.setProject(project);
-        target.setDate1(form.getDate1());
-        target.setDate2(form.getDate2());
+        target.setDate1(form.getFromDate().atMidnightInMyTimezone());
+        target.setDate2(form.getToDate().atMidnightInMyTimezone());
 
         db.setLastSchemaUpdate(new Date());
 

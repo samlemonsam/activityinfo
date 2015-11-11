@@ -271,5 +271,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @Messages.DefaultMessage("Correct value will be imported with {0}% confidence.#013;Matched to: {1}")
     String importValidationCellTooltip(String matchedValue, int confidencePercent);
+    
+    @Messages.DefaultMessage("{0,date,medium} to {1,date,medium}")
+    String dateRange(Date formDate, Date toDate);
 
 }

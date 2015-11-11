@@ -164,61 +164,38 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     
     @Required
     @JsonProperty
-    @SuppressWarnings("deprecation")
     public LocalDate getFromDate() {
-        if(getDate1() == null) {
-            return null;
-        } else {
-            return new LocalDate(getDate1());
-        }
+        return get("fromDate");
     }
     
     public void setFromDate(LocalDate date) {
-        setDate1(date.atMidnightInMyTimezone());
+        set("fromDate", date);
     }
 
     @Required
     @JsonProperty
-    @SuppressWarnings("deprecation")
     public LocalDate getToDate() {
-        if(getDate2() == null) {
-            return null;
+        return get("toDate");
+    }
+    
+    public void setToDate(LocalDate date) {
+        set("toDate", date);
+    }
+
+    public void setFromDate(Date date1) {
+        if(date1 == null) {
+            setFromDate((LocalDate)null);
         } else {
-            return new LocalDate(getDate2());
+            setFromDate(new LocalDate(date1));
         }
     }
-    
-    @SuppressWarnings("deprecation")
-    public void setToDate(LocalDate date) {
-        setDate2(date.atMidnightInMyTimezone());
-    }
-    
-    @Deprecated
-    public Date getDate1() {
-        return get("date1");
-    }
 
-    @Deprecated
-    public void setDate1(Date date1) {
-        set("date1", date1);
-    }
-
-    @Deprecated
-    public void setDate2(Date date2) {
-        set("date2", date2);
-    }
-
-    @Deprecated
-    public Date getDate2() {
-        return get("date2");
-    }
-
-    public void setArea(String area) {
-        set("area", area);
-    }
-
-    public String getArea() {
-        return get("area");
+    public void setToDate(Date date2) {
+        if(date2 == null) {
+            setToDate((LocalDate)null);
+        } else {
+            setToDate(new LocalDate(date2));
+        }
     }
 
     @JsonProperty
