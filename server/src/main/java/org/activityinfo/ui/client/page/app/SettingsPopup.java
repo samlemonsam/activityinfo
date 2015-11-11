@@ -215,6 +215,7 @@ public class SettingsPopup extends PopupPanel {
                             offlineCapabilityProfile.getInstallInstructions(),
                             null);
                 }
+                break;
         }
     }
 
@@ -228,15 +229,17 @@ public class SettingsPopup extends PopupPanel {
         offlineStatusLabel.setText("");
         switch (state) {
             case UNINSTALLED:
+                offlineInstallLabel.setVisible(true);
                 offlineInstallLabel.setText(I18N.CONSTANTS.installOffline());
                 syncRow.getStyle().setDisplay(Display.NONE);
                 break;
             case INSTALLING:
+                offlineInstallLabel.setVisible(true);
                 offlineInstallLabel.setText("");
                 syncRow.getStyle().setDisplay(Display.NONE);
                 break;
             case INSTALLED:
-                offlineInstallLabel.setText(I18N.CONSTANTS.reinstallOfflineMode());
+                offlineInstallLabel.setVisible(false);
                 syncRow.getStyle().setDisplay(Display.BLOCK);
                 lastSyncTime = offlineController.getLastSyncTime();
                 updateLastSyncLabel();
