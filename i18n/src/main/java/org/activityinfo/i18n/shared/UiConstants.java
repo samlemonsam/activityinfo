@@ -1628,4 +1628,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Upload is not allowed during form designing.")
     String uploadIsNotAllowedInDuringDesing();
+    
+    @DefaultStringValue("Project since deleted")
+    String deletedProject();
+
+    @DefaultStringValue("Partner since removed")
+    String deletedPartner();
 }
