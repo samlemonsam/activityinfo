@@ -55,6 +55,7 @@ class GcsGeneratedResource implements GeneratedResource {
             // In the development environment, we need to serve the resource
             // ourselves because the resource is not actually in a real Google Cloud storage bucket
             return UriBuilder.fromUri(domain.getRootUrl())
+                    .port(domain.getPort())
                     .path("generated")
                     .path(metadata.getId())
                     .path(metadata.getFilename())

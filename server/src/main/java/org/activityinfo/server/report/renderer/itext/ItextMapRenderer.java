@@ -83,7 +83,12 @@ public class ItextMapRenderer extends ImageMapRenderer implements ItextRenderer<
         drawBasemap(element, new ItextTileHandler(graphic));
         drawOverlays(element, graphic.getGraphics());
 
-        doc.add(graphic.toItextImage());
+       // Chunk chunk = new Chunk(graphic.toItextImage(), 0f, 0f);
+        
+        Paragraph paragraph = new Paragraph();
+        paragraph.add(graphic.toItextImage());
+        
+        doc.add(paragraph);
     }
 
     @Override
