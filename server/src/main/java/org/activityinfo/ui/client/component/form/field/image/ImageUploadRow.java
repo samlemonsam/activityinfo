@@ -144,19 +144,11 @@ public class ImageUploadRow extends Composite {
     private String createUploadUrl() {
         String blobId = ResourceId.generateId().asString();
         String fileName = fileName();
-        String mimeType = MimeTypeUtil.mimeTypeFromFileExtension(fileExtension(fileName));
+        String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName);
         value.setMimeType(mimeType);
         value.setFilename(fileName);
         value.setBlobId(blobId);
         return "/service/blob/credentials/" + blobId;
-    }
-
-    public static String fileExtension(String filename) {
-        int i = filename.lastIndexOf(".");
-        if (i != -1) {
-            return filename.substring(i + 1);
-        }
-        return filename;
     }
 
     private String fileName() {

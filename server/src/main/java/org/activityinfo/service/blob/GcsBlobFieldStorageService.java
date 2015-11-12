@@ -11,6 +11,8 @@ import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.images.Transform;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
+import com.google.apphosting.api.ApiProxy;
+import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
@@ -43,16 +45,22 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
     public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 100;
 
-    private final String bucketName;
+    private String bucketName;
     private AppIdentityService appIdentityService;
 
     @Inject
     public GcsBlobFieldStorageService(DeploymentConfiguration config) {
         this.bucketName = config.getBlobServiceBucketName();
-        appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
+
+        this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
                 new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
 
-        LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
+
+        try {
+            LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
+        } catch (ApiProxy.CallNotFoundException e) {
+            // ignore: fails in local tests, bug in LocalServiceTestHelper?
+        }
     }
 
     @Override
@@ -70,12 +78,11 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                     ByteSource byteSource) throws IOException {
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
         GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
-        Builder builder = new Builder();
 
-        builder.contentDisposition(contentDisposition);
-        builder.mimeType(mimeType);
-
-        GcsFileOptions gcsFileOptions = builder.build();
+        GcsFileOptions gcsFileOptions = new Builder().
+                contentDisposition(contentDisposition).
+                mimeType(mimeType).
+                build();
         GcsOutputChannel channel = gcsService.createOrReplace(gcsFilename, gcsFileOptions);
 
         try (OutputStream outputStream = Channels.newOutputStream(channel)) {
@@ -96,9 +103,10 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
         GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
         GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
+        GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
 
         try (InputStream inputStream = Channels.newInputStream(gcsInputChannel)) {
-            return Response.ok(ByteStreams.toByteArray(inputStream))/*.type(imageRowValue.getMimeType())*/.build();
+            return Response.ok(ByteStreams.toByteArray(inputStream)).type(metadata.getOptions().getMimeType()).build();
         }
     }
 
@@ -158,5 +166,9 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                 build();
     }
 
+    public void setTestBucketName() {
+        Preconditions.checkState(bucketName == null);
+        bucketName = appIdentityService.getDefaultGcsBucketName();
+    }
 
 }

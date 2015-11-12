@@ -242,4 +242,16 @@ public class MimeTypeUtil {
         }
         return fileExtensionToMimeTypeRegistry.get(fileExtension);
     }
+
+    public static String fileExtension(String filename) {
+        int i = filename.lastIndexOf(".");
+        if (i != -1) {
+            return filename.substring(i + 1);
+        }
+        return filename;
+    }
+
+    public static String mimeTypeFromFileName(String fileName) {
+        return mimeTypeFromFileExtension(fileExtension(fileName));
+    }
 }

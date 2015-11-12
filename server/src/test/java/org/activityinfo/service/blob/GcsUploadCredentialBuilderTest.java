@@ -49,10 +49,11 @@ public class GcsUploadCredentialBuilderTest {
     //@Test // run manually only
     public void identityService() {
         Properties properties = new Properties();
-        properties.setProperty("service.account.p12.classpath.fileName", "BeDataDriven Development-e30eef9283cd.p12");
-        properties.setProperty("service.account.name", "135288259907-k64g5vuv9en1o89on1ru16hrusvimn9t@developer.gserviceaccount.com");
+        properties.setProperty("service.account.p12.classpath.fileName", "ai-staging-e41defb26a88.p12");
+        properties.setProperty("service.account.name", "210521273034-q311jj20r5ep1siksedr9fpmta7k5a6i@developer.gserviceaccount.com");
         properties.setProperty("service.account.p12.key.password", "notasecret");
-        properties.setProperty("service.account.p12.key.path", "c:\\Users\\admin\\BeDataDriven Development-e30eef9283cd.p12");
+//        properties.setProperty("service.account.p12.key.path", "c:\\Users\\admin\\ai-staging-e41defb26a88.p12");
+        properties.setProperty("service.account.p12.key.path", "u:\\own\\github\\repo\\activityinfo\\production2\\server\\build\\exploded-app\\WEB-INF\\classes\\org\\activityinfo\\server\\util\\blob\\ai-staging-e41defb26a88.p12");
 
         AppIdentityService identityService = new DevAppIdentityService(new DeploymentConfiguration(properties));
         Assert.assertNotNull(identityService.getServiceAccountName());

@@ -32,6 +32,7 @@ import java.util.Properties;
  * properties files are located.
  */
 public class DeploymentConfiguration {
+
     public static final String BLOBSERVICE_GCS_BUCKET_NAME = "blobservice.gcs.bucket.name";
     public static final String SERVICE_ACCOUNT_EMAIL = "service.account.email";
 
