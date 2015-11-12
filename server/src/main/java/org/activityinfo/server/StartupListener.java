@@ -71,7 +71,8 @@ public class StartupListener extends GuiceServletContextListener {
     @Override
     protected Injector getInjector() {
 
-        return Guice.createInjector(new HibernateModule(),
+        return Guice.createInjector(
+                new HibernateModule(),
                 new ConfigModule(),
                 new TemplateModule(),
                 new MailModule(),

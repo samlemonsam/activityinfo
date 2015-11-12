@@ -40,7 +40,7 @@ import org.activityinfo.server.endpoint.gwtrpc.CommandServlet;
 public class ServerSideAuthProvider implements Provider<AuthenticatedUser> {
 
     private static ThreadLocal<AuthenticatedUser> currentUser = new ThreadLocal<AuthenticatedUser>();
-
+    
     @Override
     public AuthenticatedUser get() {
         AuthenticatedUser user = currentUser.get();

@@ -25,6 +25,7 @@ package org.activityinfo.server.login;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
+import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.ConfirmInvitePageModel;

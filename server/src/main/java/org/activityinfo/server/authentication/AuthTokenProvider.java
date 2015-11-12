@@ -1,4 +1,4 @@
-package org.activityinfo.server.login;
+package org.activityinfo.server.authentication;
 
 /*
  * #%L
@@ -82,4 +82,5 @@ public class AuthTokenProvider {
         boolean onlySecure = false;
         return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
     }
+    
 }
