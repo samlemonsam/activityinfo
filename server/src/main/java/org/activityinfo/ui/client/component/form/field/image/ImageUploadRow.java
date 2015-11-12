@@ -249,6 +249,7 @@ public class ImageUploadRow extends Composite {
 
     private Optional<String> location(String xmlResponse) {
         try {
+            Log.debug(xmlResponse);
             Document dom = XMLParser.parse(xmlResponse);
             return Optional.of(dom.getElementsByTagName("Location").item(0).getNodeValue());
         } catch (Exception e) {
