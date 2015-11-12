@@ -58,7 +58,7 @@ public class ImageUploadRow extends Composite {
 
     private static final int THUMBNAIL_SIZE = 24;
 
-    public static interface ValueChangedCallback {
+    public interface ValueChangedCallback {
         void fireValueChanged();
     }
 
@@ -68,8 +68,6 @@ public class ImageUploadRow extends Composite {
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
     private final ImageRowValue value;
-    private final String fieldId;
-    private final String resourceId;
     private final ImageUploadRow.ValueChangedCallback valueChangedCallback;
 
     private boolean readOnly;
@@ -100,8 +98,6 @@ public class ImageUploadRow extends Composite {
                           final FieldWidgetMode fieldWidgetMode, ImageUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = value;
-        this.fieldId = fieldId;
-        this.resourceId = resourceId;
         this.valueChangedCallback = valueChangedCallback;
 
         fileUpload.addChangeHandler(new ChangeHandler() {
@@ -261,7 +257,7 @@ public class ImageUploadRow extends Composite {
     }
 
     private void download() {
-        Window.open(buildImageUrl(), "_blank", null);
+        Window.open(buildBaseUrl() + "/image", "_blank", null);
     }
 
     @Override
@@ -273,28 +269,11 @@ public class ImageUploadRow extends Composite {
         return value;
     }
 
-    private StringBuilder buildBaseUrl() {
-        StringBuilder stringBuilder = new StringBuilder("/service/blob/");
-        stringBuilder.append(resourceId);
-        stringBuilder.append("/");
-        stringBuilder.append(fieldId);
-        stringBuilder.append("/");
-        stringBuilder.append(value.getBlobId());
-        return stringBuilder;
+    private String buildBaseUrl() {
+        return "/service/blob/" + value.getBlobId();
     }
 
     private String buildThumbnailUrl() {
-        StringBuilder stringBuilder = buildBaseUrl();
-        stringBuilder.append("/thumbnail?width=");
-        stringBuilder.append(THUMBNAIL_SIZE);
-        stringBuilder.append("&height=");
-        stringBuilder.append(THUMBNAIL_SIZE);
-        return stringBuilder.toString();
-    }
-
-    private String buildImageUrl() {
-        StringBuilder stringBuilder = buildBaseUrl();
-        stringBuilder.append("/image");
-        return stringBuilder.toString();
+        return buildBaseUrl() + "/thumbnail?width=" + THUMBNAIL_SIZE + "&height=" + THUMBNAIL_SIZE;
     }
 }

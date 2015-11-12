@@ -89,7 +89,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{resourceId}/{fieldId}/{blobId}/image")
+    @Path("{blobId}/image")
     @Override
     public Response getImage(@InjectParam AuthenticatedUser user,
                              @PathParam("blobId") BlobId blobId) throws IOException {
@@ -104,7 +104,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{resourceId}/{fieldId}/{blobId}/thumbnail")
+    @Path("{blobId}/thumbnail")
     @Override
     public Response getThumbnail(@InjectParam AuthenticatedUser user,
                                  @PathParam("blobId") BlobId blobId,
