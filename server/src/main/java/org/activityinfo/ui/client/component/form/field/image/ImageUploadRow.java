@@ -21,7 +21,6 @@ package org.activityinfo.ui.client.component.form.field.image;
  * #L%
  */
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
@@ -36,8 +35,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.xml.client.Document;
-import com.google.gwt.xml.client.XMLParser;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
@@ -72,6 +69,7 @@ public class ImageUploadRow extends Composite {
 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
+    private String imageServingUrl = null;
 
     @UiField
     FileUpload fileUpload;
@@ -103,7 +101,7 @@ public class ImageUploadRow extends Composite {
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                if (fieldWidgetMode == FieldWidgetMode.NORMAL) { // todo uncomment !!!
+                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
                     requestUploadUrl();
                 } else {
                     Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
@@ -113,7 +111,7 @@ public class ImageUploadRow extends Composite {
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                download();
+                Window.open(imageServingUrl, "_blank", null);
             }
         });
 
@@ -224,57 +222,48 @@ public class ImageUploadRow extends Composite {
         oldHandler = formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                // event.getResults is always null because of cross-domain upload
+                // we are forced to make additional call to check whether upload is successful
 
-                // in dev mode it is always null. https://code.google.com/p/google-web-toolkit/issues/detail?id=3832
-                // it's expected to get something like this in prod mode:
-                //<?xml version='1.0' encoding='UTF-8'?><PostResponse><Location>http://commondatastorage.googleapis.com/ai-blob-test/cignpyj1u2</Location><Bucket>ai-blob-test</Bucket><Key>cignpyj1u2</Key><ETag>"c22e1a55397546672130f31761892f55"</ETag></PostResponse>
-                //<StringToSign>eyJjb25kaXRpb25zIjpbeyJzdWNjZXNzX2FjdGlvbl9zdGF0dXMiOiIyMDEifSx7ImJ1Y2tldCI6ImFpLWJsb2ItdGVzdCJ9LHsia2V5IjoiY2lnbm4xcHYwMiJ9LFsiY29udGVudC1sZW5ndGgtcmFuZ2UiLDAsMTA0ODU3NjAwXV0sImV4cGlyYXRpb24iOiIyMDE1LTExLTA2VDE0OjM4OjU2LjI4NyswMjowMCJ9</StringToSign></Error>
-
-                Optional<String> location = location(event.getResults());
-                if (!GWT.isProdMode() || location.isPresent()) {
-                    imageContainer.setVisible(false);
-                    downloadButton.setVisible(true);
-                    thumbnail.setVisible(true);
-                    thumbnail.setUrl(buildThumbnailUrl());
-
-                    valueChangedCallback.fireValueChanged();
-                } else {
-                    Log.error("Failed to parse response from server: " + event.getResults());
-                    uploadFailed.setVisible(true);
-                }
+                fetchImageServingUrl();
             }
         });
         formPanel.submit();
     }
 
-    private Optional<String> location(String xmlResponse) {
-        try {
-            Log.debug(xmlResponse);
-            Document dom = XMLParser.parse(xmlResponse);
-            return Optional.of(dom.getElementsByTagName("Location").item(0).getNodeValue());
-        } catch (Exception e) {
-            return Optional.absent();
-        }
-    }
-
-    private void download() {
+    private void fetchImageServingUrl() {
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, buildBaseUrl() + "/image_url");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    String imageServingUrl = response.getText();
-
-                    Window.open(imageServingUrl, "_blank", null);
+                    imageServingUrl = response.getText();
+                    setUploadState();
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    Log.error("Failed to send request", exception);
+                    Log.error("Failed to fetch image serving url. ", exception);
+                    setUploadState();
                 }
             });
         } catch (RequestException e) {
-            Log.error("Failed to send request", e);
+            Log.error("Failed to send request for fetching serving url. ", e);
+            setUploadState();
+        }
+    }
+
+    private void setUploadState() {
+        if (!Strings.isNullOrEmpty(imageServingUrl)) {
+            imageContainer.setVisible(false);
+            downloadButton.setVisible(true);
+            thumbnail.setVisible(true);
+            thumbnail.setUrl(buildThumbnailUrl());
+
+            valueChangedCallback.fireValueChanged();
+        } else {
+            Log.error("Failed to fetch image serving url.");
+            uploadFailed.setVisible(true);
         }
     }
 
