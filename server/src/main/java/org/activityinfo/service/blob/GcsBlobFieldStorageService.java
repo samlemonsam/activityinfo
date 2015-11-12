@@ -5,10 +5,7 @@ import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-import com.google.appengine.api.images.Image;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.images.Transform;
+import com.google.appengine.api.images.*;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
 import com.google.apphosting.api.ApiProxy;
@@ -101,6 +98,16 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         try (InputStream inputStream = Channels.newInputStream(gcsInputChannel)) {
             return Response.ok(ByteStreams.toByteArray(inputStream)).type(metadata.getOptions().getMimeType()).build();
         }
+    }
+
+    @GET
+    @Path("{blobId}/image_url")
+    @Override
+    public Response getImageUrl(@InjectParam AuthenticatedUser user,
+                                @PathParam("blobId") BlobId blobId) throws IOException {
+        ImagesService imagesService = ImagesServiceFactory.getImagesService();
+        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withGoogleStorageFileName(blobId.asString()));
+        return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
     }
 
     @GET

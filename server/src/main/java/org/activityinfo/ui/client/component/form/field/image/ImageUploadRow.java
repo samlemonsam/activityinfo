@@ -257,7 +257,24 @@ public class ImageUploadRow extends Composite {
     }
 
     private void download() {
-        Window.open(buildBaseUrl() + "/image", "_blank", null);
+        try {
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, buildBaseUrl() + "/image_url");
+            requestBuilder.sendRequest(null, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    String imageServingUrl = response.getText();
+
+                    Window.open(imageServingUrl, "_blank", null);
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    Log.error("Failed to send request", exception);
+                }
+            });
+        } catch (RequestException e) {
+            Log.error("Failed to send request", e);
+        }
     }
 
     @Override
