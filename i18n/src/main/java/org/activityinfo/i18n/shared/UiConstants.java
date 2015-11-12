@@ -729,9 +729,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please complete the form correctly before continuing.")
     String pleaseCompleteForm();
 
-    @DefaultStringValue("PowerPoint")
-    String powerPoint();
-
     @DefaultStringValue("Preview")
     String preview();
 
@@ -1631,4 +1628,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Upload failed")
     String uploadFailed();
+    
+    @DefaultStringValue("Project since deleted")
+    String deletedProject();
+
+    @DefaultStringValue("Partner since removed")
+    String deletedPartner();
 }

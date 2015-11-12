@@ -26,8 +26,8 @@ import org.activityinfo.server.util.date.DateFormatter;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -96,9 +96,9 @@ public class GeoDigestModelBuilder implements DigestModelBuilder {
                 reportModel.setContent(content);
 
                 GeneratedResource storage = storageProvider.create("image/png", "map.png");
-                imageMapRenderer.render(reportModel, storage.openOutputStream());
-                storage.openOutputStream().close();
-
+                try(OutputStream outputStream = storage.openOutputStream()) {
+                    imageMapRenderer.render(reportModel, storage.openOutputStream());
+                }
                 databaseModel.setUrl(storage.getDownloadUri());
             }
         }

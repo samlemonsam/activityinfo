@@ -96,8 +96,6 @@ public class ExportMenuButton extends SplitButton {
         switch (format) {
             case Excel:
                 return IconImageBundle.ICONS.excel();
-            case PowerPoint:
-                return IconImageBundle.ICONS.ppt();
             case PDF:
                 return IconImageBundle.ICONS.pdf();
             case Word:
@@ -112,8 +110,6 @@ public class ExportMenuButton extends SplitButton {
         switch (format) {
             case Excel:
                 return I18N.CONSTANTS.excel();
-            case PowerPoint:
-                return I18N.CONSTANTS.powerPoint();
             case PDF:
                 return I18N.CONSTANTS.pdf();
             case Word:

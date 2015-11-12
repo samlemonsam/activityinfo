@@ -121,8 +121,6 @@ public interface IconImageBundle extends ImageBundle {
 
     AbstractImagePrototype unmapped();
 
-    AbstractImagePrototype ppt();
-
     AbstractImagePrototype image();
 
     AbstractImagePrototype msword();

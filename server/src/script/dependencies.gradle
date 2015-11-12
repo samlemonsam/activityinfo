@@ -80,9 +80,9 @@ dependencies {
     
 
     // Report Rendering
+    compile libraries.poi
     compile libraries.appengine.export.itext
     compile libraries.appengine.export.awt
-    compile libraries.appengine.export.ppt
     compile libraries.appengine.export.jcharts
     compile libraries.appengine.export.emf
     compile libraries.prettytime

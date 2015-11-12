@@ -70,29 +70,16 @@ class ItemDetail {
             addValues(sb, I18N.CONSTANTS.location(), oldName, newName);
 
         } else if (key.equals("projectId")) {
-            String oldName = null;
-            if (oldValue != null) {
-                ProjectDTO project = form.getProjectById(toInt(oldValue));
-                if (project != null) {
-                    oldName = project.getName();
-                }
-            }
-            String newName = form.getProjectById(toInt(newValue)).getName();
+            String oldName = projectLabel(form, oldValue);
+            String newName = projectLabel(form, newValue);
+
             addValues(sb, I18N.CONSTANTS.project(), oldName, newName);
 
         } else if (key.equals("partnerId")) {
-            String oldName = null;
-            if (oldValue != null) {
-                PartnerDTO oldPartner = form.getPartnerById(toInt(oldValue));
-                if (oldPartner != null) {
-                    oldName = oldPartner.getName();
-                }
-            }
-            PartnerDTO newPartner = form.getPartnerById(toInt(newValue));
-            if (newPartner != null) {
-                String newName = newPartner.getName();
-                addValues(sb, I18N.CONSTANTS.partner(), oldName, newName);
-            }
+            String oldName = partnerLabel(form, oldValue);
+            String newName = partnerLabel(form, newValue);
+
+            addValues(sb, I18N.CONSTANTS.partner(), oldName, newName);
 
         } else if (key.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
             // custom
@@ -135,6 +122,32 @@ class ItemDetail {
             return d;
         } else {
             return null;
+        }
+    }
+
+    private static String partnerLabel(ActivityFormDTO form, Object partnerId) {
+        if(partnerId == null) {
+            return null;
+        } else {
+            PartnerDTO oldPartner = form.getPartnerById(toInt(partnerId));
+            if(oldPartner == null) {
+                return I18N.CONSTANTS.deletedPartner();
+            } else {
+                return oldPartner.getName();
+            }
+        }
+    }
+
+    private static String projectLabel(ActivityFormDTO form, Object projectId) {
+        if(projectId == null) {
+            return null;
+        } else {
+            ProjectDTO project = form.getProjectById(toInt(projectId));
+            if (project == null) {
+                return I18N.CONSTANTS.deletedProject();
+            } else {
+                return project.getName();
+            }
         }
     }
 
