@@ -18,7 +18,6 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
@@ -54,7 +53,6 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
                 new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
-
 
         try {
             LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
@@ -94,12 +92,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     @Path("{resourceId}/{fieldId}/{blobId}/image")
     @Override
     public Response getImage(@InjectParam AuthenticatedUser user,
-                             @PathParam("resourceId") ResourceId resourceId,
-                             @PathParam("fieldId") ResourceId fieldId,
                              @PathParam("blobId") BlobId blobId) throws IOException {
-        /* TODO: Ensure that users can download images they've just uploaded
-        ImageRowValue imageRowValue = getImageRowValue(user, resourceId, fieldId, blobId);
-        */
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
         GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
         GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
@@ -114,35 +107,22 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     @Path("{resourceId}/{fieldId}/{blobId}/thumbnail")
     @Override
     public Response getThumbnail(@InjectParam AuthenticatedUser user,
-                                 @PathParam("resourceId") ResourceId resourceId,
-                                 @PathParam("fieldId") ResourceId fieldId,
                                  @PathParam("blobId") BlobId blobId,
                                  @QueryParam("width") int width,
                                  @QueryParam("height") int height) {
-        /* TODO: Ensure that users can see thumbnails of images they've just uploaded
-        ImageRowValue imageRowValue = getImageRowValue(user, resourceId, fieldId, blobId);
-        */
 
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
         BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 
         BlobKey blobKey = blobstoreService.createGsBlobKey("/gs/" + bucketName + "/" + blobId.asString());
-
         Image image = ImagesServiceFactory.makeImageFromBlob(blobKey);
 
-        /*
-        if (width != imageRowValue.getWidth() || imageRowValue.getHeight() != height) {
-        */
-            Transform resize = ImagesServiceFactory.makeResize(width, height);
-            Image newImage = imagesService.applyTransform(resize, image);
+        Transform resize = ImagesServiceFactory.makeResize(width, height);
+        Image newImage = imagesService.applyTransform(resize, image);
 
-            byte[] imageData = newImage.getImageData();
-            return Response.ok(imageData)/*.type(imageRowValue.getMimeType())*/.build();
-        /*
-        } else {
-            return Response.ok(image.getImageData()).type(imageRowValue.getMimeType()).build();
-        }
-        */
+        String mimeType = "image/" + newImage.getFormat().name().toLowerCase();
+        return Response.ok(newImage.getImageData()).type(mimeType).build();
+
     }
 
     @POST

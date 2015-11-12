@@ -3,7 +3,6 @@ package org.activityinfo.server.endpoint.odk;
 import com.google.common.io.ByteSource;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.blob.BlobFieldStorageService;
 import org.activityinfo.service.blob.BlobId;
 
@@ -23,12 +22,12 @@ public class TestBlobstoreService implements BlobFieldStorageService {
     }
 
     @Override
-    public Response getImage(@InjectParam AuthenticatedUser user, ResourceId resourceId, ResourceId fieldId, BlobId blobId) throws IOException {
+    public Response getImage(@InjectParam AuthenticatedUser user, BlobId blobId) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Response getThumbnail(@InjectParam AuthenticatedUser user, ResourceId resourceId, ResourceId fieldId, BlobId blobId, int width, int height) {
+    public Response getThumbnail(@InjectParam AuthenticatedUser user, BlobId blobId, int width, int height) {
         throw new UnsupportedOperationException();
     }
 

@@ -33,7 +33,6 @@ import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.junit.After;
@@ -91,7 +90,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     @Test
     public void image() throws IOException {
-        Response response = blobService.getImage(user, ResourceId.generateId(), ResourceId.generateId(), blobId);
+        Response response = blobService.getImage(user, blobId);
         assertEquals(response.getStatus(), 200);
 
         Object entity = response.getEntity();
@@ -111,7 +110,7 @@ public class GcsBlobFieldStorageServiceTest {
         int width = 30;
         int height = 20;
 
-        Response response = blobService.getThumbnail(user, ResourceId.generateId(), ResourceId.generateId(), blobId, width, height);
+        Response response = blobService.getThumbnail(user, blobId, width, height);
         assertEquals(response.getStatus(), 200);
 
         Object entity = response.getEntity();
