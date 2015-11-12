@@ -24,6 +24,7 @@ package org.activityinfo.server.authentication;
 
 import com.google.inject.servlet.ServletModule;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.server.util.jaxrs.AbstractRestModule;
 
 /**
  * Guice Module defining bindings for Authentication interfaces. (The default is
@@ -33,12 +34,14 @@ import org.activityinfo.model.auth.AuthenticatedUser;
  * http://code.google.com/p/google-web-toolkit-incubator/wiki/LoginSecurityFAQ
  * for background
  */
-public class AuthenticationModule extends ServletModule {
+public class AuthenticationModule extends AbstractRestModule {
+
 
     @Override
-    protected void configureServlets() {
+    protected void configureResources() {
         bind(Authenticator.class).to(DatabaseAuthenticator.class);
         bind(AuthenticatedUser.class).toProvider(ServerSideAuthProvider.class);
         filter("/*").through(AuthenticationFilter.class);
+        bindResource(HumanitarianId.class);
     }
 }
