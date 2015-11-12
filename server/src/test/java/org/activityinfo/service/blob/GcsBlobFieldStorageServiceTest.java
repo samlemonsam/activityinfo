@@ -21,6 +21,7 @@ package org.activityinfo.service.blob;
  * #L%
  */
 
+import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.appengine.tools.development.testing.LocalBlobstoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author yuriyz on 11/12/2015.
@@ -103,6 +105,16 @@ public class GcsBlobFieldStorageServiceTest {
         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream((byte[]) entity));
         ImageIO.write(bufferedImage, MimeTypeUtil.fileExtension(FILE_NAME), imageFile);
         System.out.println(imageFile.getAbsolutePath());
+    }
+
+    @Test
+    public void servingImageUrl() throws IOException {
+        Response response = blobService.getImageUrl(new AuthenticatedUser(), blobId);
+
+        assertEquals(response.getStatus(), 200);
+
+        String imageServingUrl = (String) response.getEntity();
+        assertTrue(!Strings.isNullOrEmpty(imageServingUrl));
     }
 
     @Test

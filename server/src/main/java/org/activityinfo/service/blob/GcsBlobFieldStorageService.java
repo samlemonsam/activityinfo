@@ -106,7 +106,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public Response getImageUrl(@InjectParam AuthenticatedUser user,
                                 @PathParam("blobId") BlobId blobId) throws IOException {
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
-        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withGoogleStorageFileName(blobId.asString()));
+        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)));
         return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -119,17 +119,19 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                                  @QueryParam("height") int height) {
 
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
-        BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 
-        BlobKey blobKey = blobstoreService.createGsBlobKey("/gs/" + bucketName + "/" + blobId.asString());
-        Image image = ImagesServiceFactory.makeImageFromBlob(blobKey);
+        Image image = ImagesServiceFactory.makeImageFromBlob(blobKey(blobId));
 
         Transform resize = ImagesServiceFactory.makeResize(width, height);
         Image newImage = imagesService.applyTransform(resize, image);
 
         String mimeType = "image/" + newImage.getFormat().name().toLowerCase();
         return Response.ok(newImage.getImageData()).type(mimeType).build();
+    }
 
+    private BlobKey blobKey(BlobId blobId) {
+        BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+        return blobstoreService.createGsBlobKey("/gs/" + bucketName + "/" + blobId.asString());
     }
 
     @POST
