@@ -27,9 +27,9 @@ import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 
 /**
  * @author yuriyz on 8/6/14.
@@ -85,6 +85,7 @@ public class AttachmentType implements ParametrizedFieldType {
                             .setType(kindType)
                             .setLabel("Type")
                             .setDescription("Determines type of attachment (image or file)")
+                            .setVisible(false)
             );
             return formClass;
         }

@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class AttachmentValue implements FieldValue, IsRecord {
 
-    private final List<AttachmentRowValue> values = Lists.newArrayList();
+    private final List<Attachment> values = Lists.newArrayList();
 
     @Override
     public FieldTypeClass getTypeClass() {
@@ -44,17 +44,17 @@ public class AttachmentValue implements FieldValue, IsRecord {
     public AttachmentValue() {
     }
 
-    public AttachmentValue(AttachmentRowValue imageRowValue) {
+    public AttachmentValue(Attachment imageRowValue) {
         values.add(imageRowValue);
     }
 
-    public List<AttachmentRowValue> getValues() {
+    public List<Attachment> getValues() {
         return values;
     }
 
     public List<Record> getValuesAsRecords() {
         final List<Record> result = Lists.newArrayList();
-        for (AttachmentRowValue value : values) {
+        for (Attachment value : values) {
             result.add(value.asRecord());
         }
         return result;
@@ -71,7 +71,7 @@ public class AttachmentValue implements FieldValue, IsRecord {
         AttachmentValue value = new AttachmentValue();
         List<Record> recordList = record.getRecordList("values");
         for (Record r : recordList) {
-            value.getValues().add(AttachmentRowValue.fromRecord(r));
+            value.getValues().add(Attachment.fromRecord(r));
         }
         return value;
     }

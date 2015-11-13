@@ -41,7 +41,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
-import org.activityinfo.model.type.attachment.AttachmentRowValue;
+import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.service.blob.UploadCredentials;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 
@@ -64,7 +64,7 @@ public class ImageUploadRow extends Composite {
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
-    private final AttachmentRowValue value;
+    private final Attachment value;
     private final ImageUploadRow.ValueChangedCallback valueChangedCallback;
 
     private boolean readOnly;
@@ -92,7 +92,7 @@ public class ImageUploadRow extends Composite {
     @UiField
     HTMLPanel uploadFailed;
 
-    public ImageUploadRow(AttachmentRowValue value, String fieldId, String resourceId,
+    public ImageUploadRow(Attachment value, String fieldId, String resourceId,
                           final FieldWidgetMode fieldWidgetMode, ImageUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = value;
@@ -276,7 +276,7 @@ public class ImageUploadRow extends Composite {
         return this;
     }
 
-    public AttachmentRowValue getValue() {
+    public Attachment getValue() {
         return value;
     }
 

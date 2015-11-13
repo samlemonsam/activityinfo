@@ -27,7 +27,7 @@ import org.activityinfo.model.resource.Record;
 /**
  * @author yuriyz on 8/12/14.
  */
-public class AttachmentRowValue implements IsRecord {
+public class Attachment implements IsRecord {
 
     private String mimeType;
     private String filename;
@@ -36,10 +36,10 @@ public class AttachmentRowValue implements IsRecord {
     private int height;
     private int width;
 
-    public AttachmentRowValue() {
+    public Attachment() {
     }
 
-    public AttachmentRowValue(String mimeType, String filename, String blobId) {
+    public Attachment(String mimeType, String filename, String blobId) {
         this.mimeType = mimeType;
         this.filename = filename;
         this.blobId = blobId;
@@ -95,8 +95,8 @@ public class AttachmentRowValue implements IsRecord {
                 .set("blobId", blobId);
     }
 
-    public static AttachmentRowValue fromRecord(Record record) {
-        AttachmentRowValue rowValue = new AttachmentRowValue(
+    public static Attachment fromRecord(Record record) {
+        Attachment rowValue = new Attachment(
                 record.getString("mimeType"), record.getString("filename"), record.getString("blobId"));
         rowValue.setHeight(record.getInt("height"));
         rowValue.setWidth(record.getInt("width"));

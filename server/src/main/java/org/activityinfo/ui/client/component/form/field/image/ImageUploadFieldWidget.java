@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.attachment.AttachmentRowValue;
+import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -65,7 +65,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
-        addNewRow(new AttachmentRowValue());
+        addNewRow(new Attachment());
     }
 
     public void fireValueChanged() {
@@ -82,14 +82,14 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
         return value;
     }
 
-    private void addNewRow(final AttachmentRowValue rowValue) {
+    private void addNewRow(final Attachment rowValue) {
         final ImageUploadRow imageUploadRow = new ImageUploadRow(
                 rowValue, formField.getId().asString(), resourceId, fieldWidgetMode, this);
 
         imageUploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                addNewRow(new AttachmentRowValue());
+                addNewRow(new Attachment());
             }
         });
 
@@ -148,7 +148,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
             clear();
 
-            for (AttachmentRowValue rowValue : value.getValues()) {
+            for (Attachment rowValue : value.getValues()) {
                 addNewRow(rowValue);
             }
         } else {
@@ -166,7 +166,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
     @Override
     public void clearValue() {
         clear();
-        addNewRow(new AttachmentRowValue());
+        addNewRow(new Attachment());
     }
 
     @Override
