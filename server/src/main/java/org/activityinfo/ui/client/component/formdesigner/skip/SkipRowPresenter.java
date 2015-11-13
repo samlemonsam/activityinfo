@@ -39,7 +39,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.image.ImageType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -127,7 +127,7 @@ public class SkipRowPresenter {
         formFields.remove(fieldWidgetContainer.getFormField()); // remove selected field
 
         for (FormField formField : formFields) {
-            if (formField.getType() instanceof ImageType) {
+            if (formField.getType() instanceof AttachmentType) {
                 continue;
             }
             view.getFormfield().addItem(formField.getLabel(), formField.getId().asString());

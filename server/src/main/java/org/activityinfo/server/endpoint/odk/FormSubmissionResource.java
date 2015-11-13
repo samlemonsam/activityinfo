@@ -21,8 +21,8 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.image.ImageRowValue;
-import org.activityinfo.model.type.image.ImageValue;
+import org.activityinfo.model.type.attachment.AttachmentRowValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
@@ -145,8 +145,8 @@ public class FormSubmissionResource {
 
         if (!instanceIdService.exists(instanceId)) {
             for (FieldValue fieldValue : formInstance.getFieldValueMap().values()) {
-                if (fieldValue instanceof ImageValue) {
-                    persistImageData(user, instance, (ImageValue) fieldValue);
+                if (fieldValue instanceof AttachmentValue) {
+                    persistImageData(user, instance, (AttachmentValue) fieldValue);
                 }
             }
 
@@ -187,8 +187,8 @@ public class FormSubmissionResource {
         }
     }
 
-    private void persistImageData(AuthenticatedUser user, XFormInstance instance, ImageValue fieldValue) {
-        ImageRowValue imageRowValue = fieldValue.getValues().get(0);
+    private void persistImageData(AuthenticatedUser user, XFormInstance instance, AttachmentValue fieldValue) {
+        AttachmentRowValue imageRowValue = fieldValue.getValues().get(0);
         if (imageRowValue.getFilename() != null) {
             try {
                 BodyPart bodyPart = ((XFormInstanceImpl) instance).findBodyPartByFilename(imageRowValue.getFilename());

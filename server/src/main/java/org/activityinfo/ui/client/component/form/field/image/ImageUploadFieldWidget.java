@@ -32,8 +32,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.image.ImageRowValue;
-import org.activityinfo.model.type.image.ImageValue;
+import org.activityinfo.model.type.attachment.AttachmentRowValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -43,7 +43,7 @@ import java.util.List;
 /**
  * @author yuriyz on 8/7/14.
  */
-public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue>, ImageUploadRow.ValueChangedCallback {
+public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>, ImageUploadRow.ValueChangedCallback {
 
     interface OurUiBinder extends UiBinder<HTMLPanel, ImageUploadFieldWidget> {
     }
@@ -65,15 +65,15 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue>, Imag
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
-        addNewRow(new ImageRowValue());
+        addNewRow(new AttachmentRowValue());
     }
 
     public void fireValueChanged() {
         valueUpdater.update(getValue());
     }
 
-    private ImageValue getValue() {
-        ImageValue value = new ImageValue();
+    private AttachmentValue getValue() {
+        AttachmentValue value = new AttachmentValue();
 
         for (ImageUploadRow row : rowsFromPanel()) {
             value.getValues().add(row.getValue());
@@ -82,14 +82,14 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue>, Imag
         return value;
     }
 
-    private void addNewRow(final ImageRowValue rowValue) {
+    private void addNewRow(final AttachmentRowValue rowValue) {
         final ImageUploadRow imageUploadRow = new ImageUploadRow(
                 rowValue, formField.getId().asString(), resourceId, fieldWidgetMode, this);
 
         imageUploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                addNewRow(new ImageRowValue());
+                addNewRow(new AttachmentRowValue());
             }
         });
 
@@ -144,11 +144,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue>, Imag
     }
 
     @Override
-    public Promise<Void> setValue(ImageValue value) {
+    public Promise<Void> setValue(AttachmentValue value) {
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
             clear();
 
-            for (ImageRowValue rowValue : value.getValues()) {
+            for (AttachmentRowValue rowValue : value.getValues()) {
                 addNewRow(rowValue);
             }
         } else {
@@ -166,7 +166,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<ImageValue>, Imag
     @Override
     public void clearValue() {
         clear();
-        addNewRow(new ImageRowValue());
+        addNewRow(new AttachmentRowValue());
     }
 
     @Override

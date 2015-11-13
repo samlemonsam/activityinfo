@@ -42,7 +42,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.image.ImageType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -133,7 +133,7 @@ public class FormFieldWidgetFactory {
         } else if (type instanceof BooleanType) {
             return Promise.resolved(new BooleanFieldWidget(valueUpdater));
 
-        } else if (type instanceof ImageType) {
+        } else if (type instanceof AttachmentType) {
             return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
 
         } else if (type instanceof ReferenceType) {

@@ -1,4 +1,4 @@
-package org.activityinfo.model.type.image;
+package org.activityinfo.model.type.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -34,7 +34,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 /**
  * @author yuriyz on 8/6/14.
  */
-public class ImageType implements ParametrizedFieldType {
+public class AttachmentType implements ParametrizedFieldType {
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
@@ -43,23 +43,23 @@ public class ImageType implements ParametrizedFieldType {
 
         @Override
         public String getId() {
-            return "IMAGE";
+            return "ATTACHMENT";
         }
 
         @Override
         public FieldType createType() {
-            return new ImageType(Cardinality.SINGLE);
+            return new AttachmentType(Cardinality.SINGLE);
         }
 
         @Override
         public FieldValue deserialize(Record record) {
-            return ImageValue.fromRecord(record);
+            return AttachmentValue.fromRecord(record);
         }
 
         @Override
-        public ImageType deserializeType(Record typeParameters) {
+        public AttachmentType deserializeType(Record typeParameters) {
             EnumValue enumFieldValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("cardinality"));
-            return new ImageType(Cardinality.valueOf(enumFieldValue.getValueId().asString()));
+            return new AttachmentType(Cardinality.valueOf(enumFieldValue.getValueId().asString()));
         }
 
         @Override
@@ -82,7 +82,7 @@ public class ImageType implements ParametrizedFieldType {
 
     private Cardinality cardinality;
 
-    public ImageType(Cardinality cardinality) {
+    public AttachmentType(Cardinality cardinality) {
         this.cardinality = cardinality;
     }
 

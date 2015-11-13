@@ -1,4 +1,4 @@
-package org.activityinfo.model.type.image;
+package org.activityinfo.model.type.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -32,29 +32,29 @@ import java.util.List;
 /**
  * @author yuriyz on 8/6/14.
  */
-public class ImageValue implements FieldValue, IsRecord {
+public class AttachmentValue implements FieldValue, IsRecord {
 
-    private final List<ImageRowValue> values = Lists.newArrayList();
+    private final List<AttachmentRowValue> values = Lists.newArrayList();
 
     @Override
     public FieldTypeClass getTypeClass() {
-        return ImageType.TYPE_CLASS;
+        return AttachmentType.TYPE_CLASS;
     }
 
-    public ImageValue() {
+    public AttachmentValue() {
     }
 
-    public ImageValue(ImageRowValue imageRowValue) {
+    public AttachmentValue(AttachmentRowValue imageRowValue) {
         values.add(imageRowValue);
     }
 
-    public List<ImageRowValue> getValues() {
+    public List<AttachmentRowValue> getValues() {
         return values;
     }
 
     public List<Record> getValuesAsRecords() {
         final List<Record> result = Lists.newArrayList();
-        for (ImageRowValue value : values) {
+        for (AttachmentRowValue value : values) {
             result.add(value.asRecord());
         }
         return result;
@@ -68,10 +68,10 @@ public class ImageValue implements FieldValue, IsRecord {
     }
 
     public static FieldValue fromRecord(Record record) {
-        ImageValue value = new ImageValue();
+        AttachmentValue value = new AttachmentValue();
         List<Record> recordList = record.getRecordList("values");
         for (Record r : recordList) {
-            value.getValues().add(ImageRowValue.fromRecord(r));
+            value.getValues().add(AttachmentRowValue.fromRecord(r));
         }
         return value;
     }

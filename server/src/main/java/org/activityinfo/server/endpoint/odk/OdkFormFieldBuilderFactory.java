@@ -10,7 +10,7 @@ import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.image.ImageType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -60,7 +60,7 @@ public class OdkFormFieldBuilderFactory {
         if (fieldType instanceof GeoPointType) {
             return new SimpleInputBuilder(BindingType.GEOPOINT);
         }
-        if (fieldType instanceof ImageType) {
+        if (fieldType instanceof AttachmentType) {
             return new UploadBuilder("image/*");
         }
         if (fieldType instanceof LocalDateType) {
