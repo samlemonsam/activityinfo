@@ -5,6 +5,7 @@ import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.model.type.image.ImageType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -45,6 +46,8 @@ public class FormFieldType {
                 return BooleanType.TYPE_CLASS;
             case "BARCODE":
                 return BarcodeType.TYPE_CLASS;
+            case "IMAGE":
+                return ImageType.TYPE_CLASS;
         }
         throw new IllegalArgumentException("name: " + name);
     }

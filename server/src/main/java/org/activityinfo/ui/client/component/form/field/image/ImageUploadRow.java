@@ -253,8 +253,12 @@ public class ImageUploadRow extends Composite {
         }
     }
 
+    public boolean isValid() {
+        return !Strings.isNullOrEmpty(imageServingUrl);
+    }
+
     private void setUploadState() {
-        if (!Strings.isNullOrEmpty(imageServingUrl)) {
+        if (isValid()) {
             imageContainer.setVisible(false);
             downloadButton.setVisible(true);
             thumbnail.setVisible(true);
