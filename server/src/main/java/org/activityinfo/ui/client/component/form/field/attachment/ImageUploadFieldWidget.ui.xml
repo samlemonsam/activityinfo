@@ -9,33 +9,39 @@
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
   <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
-    <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+    <g:HTMLPanel>
 
-    <g:HTMLPanel addStyleNames="form-group">
-      <g:HTMLPanel addStyleNames="col-xs-11" height="200px">
-        <g:HTMLPanel ui:field="imageContainer" visible="false">
-          <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
-               ui:field="loadingImage"/>
+      <g:HTMLPanel addStyleNames="form-group">
+        <g:HTMLPanel addStyleNames="col-xs-11">
+          <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+          <g:HTMLPanel ui:field="imageContainer" visible="false">
+            <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
+                 ui:field="loadingImage"/>
+          </g:HTMLPanel>
+          <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
+            <div class="help-block">
+              <ui:text from="{i18n.uploadFailed}"/>
+            </div>
+          </g:HTMLPanel>
+
+          <g:Image ui:field="image" visible="true" height="200px" addStyleNames="img-thumbnail"/>
+
         </g:HTMLPanel>
-        <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
-          <div class="help-block">
-            <ui:text from="{i18n.uploadFailed}"/>
-          </div>
-        </g:HTMLPanel>
+        <div class="col-xs-1">
+          <g:Button addStyleNames="close pull-right btn-link" ui:field="closeButton" text="×"/>
+        </div>
       </g:HTMLPanel>
-      <div class="col-xs-1">
-        <g:Button addStyleNames="close pull-right btn-link" ui:field="closeButton" text="×"/>
-      </div>
-    </g:HTMLPanel>
 
-    <g:HTMLPanel addStyleNames="form-group">
-      <div class="col-xs-12 center-block">
-        <a:Button style="LINK" ui:field="browseButton">
-          <ui:text from="{i18n.browseForImage}"/>
-        </a:Button>
-      </div>
-    </g:HTMLPanel>
+      <g:HTMLPanel addStyleNames="form-group">
+        <div class="col-xs-12 center-block">
+          <a:Button style="LINK" ui:field="browseButton">
+            <ui:text from="{i18n.browse}"/>
+          </a:Button>
+          <ui:text from="{i18n.forImage}"/>
+        </div>
+      </g:HTMLPanel>
 
-    <g:VerticalPanel ui:field="formFieldsContainer"/>
+      <g:VerticalPanel ui:field="formFieldsContainer"/>
+    </g:HTMLPanel>
   </g:FormPanel>
 </ui:UiBinder>

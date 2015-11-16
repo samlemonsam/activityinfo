@@ -23,9 +23,15 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
@@ -41,12 +47,12 @@ import org.activityinfo.ui.client.widget.Button;
  */
 public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> {
 
-    interface OurUiBinder extends UiBinder<HTMLPanel, ImageUploadFieldWidget> {
+    interface OurUiBinder extends UiBinder<FormPanel, ImageUploadFieldWidget> {
     }
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
-    private final HTMLPanel rootPanel;
+    private final FormPanel rootPanel;
     private final FormField formField;
     private final FieldWidgetMode fieldWidgetMode;
     private final ValueUpdater valueUpdater;
@@ -55,13 +61,24 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     @UiField
     Button browseButton;
+    @UiField
+    FileUpload fileUpload;
+    @UiField
+    Image image;
 
-    public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
+    public ImageUploadFieldWidget(FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.formField = formField;
         this.fieldWidgetMode = fieldWidgetMode;
         this.valueUpdater = valueUpdater;
 
         rootPanel = ourUiBinder.createAndBindUi(this);
+
+        browseButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                triggerUpload(fileUpload.getElement());
+            }
+        });
     }
 
     public void fireValueChanged() {
@@ -104,4 +121,44 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     public Widget asWidget() {
         return rootPanel;
     }
+
+    private void onLoadImageFailure() {
+    }
+
+    private static native void triggerUpload(Element element) /*-{
+        element.click();
+    }-*/;
+
+    private void loadImage(JavaScriptObject event) {
+        loadImage(event, image.getElement());
+    }
+
+    /**
+     * Uses either URL.createObjectURL or the Files API to load the selected file
+     * into the image element.
+     */
+    private native void loadImage(JavaScriptObject event, Element imageElement) /*-{
+        var files = event.target.files;
+        if (files && files.length > 0) {
+            var file = files[0];
+            try {
+                var URL = $wnd.URL || $wnd.webkitURL;
+                var imgURL = URL.createObjectURL(file);
+                imageElement.src = imgURL;
+                URL.revokeObjectURL(imgURL);
+            }
+            catch (e) {
+                try {
+                    var fileReader = new FileReader();
+                    fileReader.onload = function (event) {
+                        imageElement.src = event.target.result;
+                    };
+                    fileReader.readAsDataURL(file);
+                }
+                catch (e) {
+                    this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::onLoadImageFailure()();
+                }
+            }
+        }
+    }-*/;
 }
