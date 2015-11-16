@@ -50,7 +50,7 @@ import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
-import org.activityinfo.ui.client.component.form.field.image.ImageUploadFieldWidget;
+import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUploadFieldWidget;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -134,7 +134,7 @@ public class FormFieldWidgetFactory {
             return Promise.resolved(new BooleanFieldWidget(valueUpdater));
 
         } else if (type instanceof AttachmentType) {
-            return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
+            return Promise.resolved(new AttachmentUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
 
         } else if (type instanceof ReferenceType) {
             return createReferenceWidget(field, valueUpdater);

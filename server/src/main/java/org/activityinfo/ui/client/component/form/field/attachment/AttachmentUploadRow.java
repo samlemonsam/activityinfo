@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.form.field.image;
+package org.activityinfo.ui.client.component.form.field.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  * @author yuriyz on 8/12/14.
  */
-public class ImageUploadRow extends Composite {
+public class AttachmentUploadRow extends Composite {
 
     private static final int THUMBNAIL_SIZE = 24;
 
@@ -59,13 +59,13 @@ public class ImageUploadRow extends Composite {
         void fireValueChanged();
     }
 
-    interface OurUiBinder extends UiBinder<FormPanel, ImageUploadRow> {
+    interface OurUiBinder extends UiBinder<FormPanel, AttachmentUploadRow> {
     }
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
     private final Attachment value;
-    private final ImageUploadRow.ValueChangedCallback valueChangedCallback;
+    private final AttachmentUploadRow.ValueChangedCallback valueChangedCallback;
 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
@@ -92,8 +92,8 @@ public class ImageUploadRow extends Composite {
     @UiField
     HTMLPanel uploadFailed;
 
-    public ImageUploadRow(Attachment value, String fieldId, String resourceId,
-                          final FieldWidgetMode fieldWidgetMode, ImageUploadRow.ValueChangedCallback valueChangedCallback) {
+    public AttachmentUploadRow(Attachment value, String fieldId, String resourceId,
+                               final FieldWidgetMode fieldWidgetMode, AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = value;
         this.valueChangedCallback = valueChangedCallback;

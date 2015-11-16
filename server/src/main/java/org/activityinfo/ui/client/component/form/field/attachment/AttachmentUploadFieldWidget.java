@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.form.field.image;
+package org.activityinfo.ui.client.component.form.field.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -43,9 +43,9 @@ import java.util.List;
 /**
  * @author yuriyz on 8/7/14.
  */
-public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>, ImageUploadRow.ValueChangedCallback {
+public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentValue>, AttachmentUploadRow.ValueChangedCallback {
 
-    interface OurUiBinder extends UiBinder<HTMLPanel, ImageUploadFieldWidget> {
+    interface OurUiBinder extends UiBinder<HTMLPanel, AttachmentUploadFieldWidget> {
     }
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
@@ -57,7 +57,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
 
     private String resourceId;
 
-    public ImageUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
+    public AttachmentUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.resourceId = resourceId;
         this.formField = formField;
         this.fieldWidgetMode = fieldWidgetMode;
@@ -75,7 +75,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
     private AttachmentValue getValue() {
         AttachmentValue value = new AttachmentValue();
 
-        for (ImageUploadRow row : rowsFromPanel()) {
+        for (AttachmentUploadRow row : rowsFromPanel()) {
             value.getValues().add(row.getValue());
         }
 
@@ -83,35 +83,35 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
     }
 
     private void addNewRow(final Attachment rowValue) {
-        final ImageUploadRow imageUploadRow = new ImageUploadRow(
+        final AttachmentUploadRow uploadRow = new AttachmentUploadRow(
                 rowValue, formField.getId().asString(), resourceId, fieldWidgetMode, this);
 
-        imageUploadRow.addButton.addClickHandler(new ClickHandler() {
+        uploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
                 addNewRow(new Attachment());
             }
         });
 
-        imageUploadRow.removeButton.addClickHandler(new ClickHandler() {
+        uploadRow.removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                rootPanel.remove(imageUploadRow);
+                rootPanel.remove(uploadRow);
                 setButtonsState();
                 fireValueChanged();
             }
         });
 
-        rootPanel.add(imageUploadRow);
+        rootPanel.add(uploadRow);
 
         setButtonsState();
     }
 
-    private List<ImageUploadRow> rowsFromPanel() {
-        List<ImageUploadRow> rows = Lists.newArrayList();
+    private List<AttachmentUploadRow> rowsFromPanel() {
+        List<AttachmentUploadRow> rows = Lists.newArrayList();
         for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
             Widget widget = rootPanel.getWidget(i);
-            if (widget instanceof ImageUploadRow) rows.add((ImageUploadRow) widget);
+            if (widget instanceof AttachmentUploadRow) rows.add((AttachmentUploadRow) widget);
         }
         return rows;
     }
@@ -120,13 +120,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                List<ImageUploadRow> rows = rowsFromPanel();
+                List<AttachmentUploadRow> rows = rowsFromPanel();
 
                 // Disable the button if it's the only row, so the user will not be trapped in a widget without any rows
                 if (rows.size() == 1) {
                     rows.get(0).removeButton.setEnabled(false);
                 } else if (rows.size() > 1) {
-                    for (ImageUploadRow row : rows) {
+                    for (AttachmentUploadRow row : rows) {
                         row.removeButton.setEnabled(!row.isReadOnly());
                     }
                 }
@@ -136,7 +136,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue>,
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        for (ImageUploadRow row : rowsFromPanel()) {
+        for (AttachmentUploadRow row : rowsFromPanel()) {
             row.setReadOnly(readOnly);
         }
 
