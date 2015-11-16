@@ -25,14 +25,18 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
@@ -66,7 +70,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @UiField
     Image image;
 
-    public ImageUploadFieldWidget(FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
+    public ImageUploadFieldWidget(FormField formField, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.formField = formField;
         this.fieldWidgetMode = fieldWidgetMode;
         this.valueUpdater = valueUpdater;
@@ -77,6 +81,16 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             @Override
             public void onClick(ClickEvent event) {
                 triggerUpload(fileUpload.getElement());
+            }
+        });
+        fileUpload.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
+                    // todo requestUploadUrl();
+                } else {
+                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
+                }
             }
         });
     }

@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.component.form.field.attachment;
  */
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -35,18 +34,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.resource.Resource;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.service.blob.UploadCredentials;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * @author yuriyz on 8/12/14.
@@ -66,6 +59,7 @@ public class AttachmentUploadRow extends Composite {
 
     private final Attachment value;
     private final AttachmentUploadRow.ValueChangedCallback valueChangedCallback;
+    private final Uploader uploader;
 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
@@ -84,7 +78,7 @@ public class AttachmentUploadRow extends Composite {
     @UiField
     Button removeButton;
     @UiField
-    VerticalPanel formFieldsContainer;
+    VerticalPanel hiddenFieldsContainer;
     @UiField
     Button addButton;
     @UiField
@@ -98,11 +92,23 @@ public class AttachmentUploadRow extends Composite {
         this.value = value;
         this.valueChangedCallback = valueChangedCallback;
 
+        this.uploader = new Uploader(formPanel, fileUpload, value, hiddenFieldsContainer, new Uploader.UploadCallback() {
+            @Override
+            public void onFailure(@Nullable Throwable exception) {
+                uploadFailed.setVisible(true);
+            }
+
+            @Override
+            public void upload() {
+                AttachmentUploadRow.this.upload();
+            }
+        });
+
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
-                    requestUploadUrl();
+                    uploader.requestUploadUrl();
                 } else {
                     Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
                 }
@@ -133,81 +139,6 @@ public class AttachmentUploadRow extends Composite {
         downloadButton.setEnabled(!readOnly);
         removeButton.setEnabled(!readOnly);
         addButton.setEnabled(!readOnly);
-    }
-
-    private String createUploadUrl() {
-        String blobId = ResourceId.generateId().asString();
-        String fileName = fileName();
-        String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName);
-        value.setMimeType(mimeType);
-        value.setFilename(fileName);
-        value.setBlobId(blobId);
-        return "/service/blob/credentials/" + blobId;
-    }
-
-    private String fileName() {
-        final String filename = fileUpload.getFilename();
-        if (Strings.isNullOrEmpty(filename)) {
-            return "unknown";
-        }
-
-        int i = filename.lastIndexOf("/");
-        if (i == -1) {
-            i = filename.lastIndexOf("\\");
-        }
-        if (i != -1 && (i + 1) < filename.length()) {
-            return filename.substring(i + 1);
-        }
-        return filename;
-    }
-
-    private void requestUploadUrl() {
-        uploadFailed.setVisible(false);
-        try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, URL.encode(createUploadUrl()));
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-
-                    Resource resource = Resources.fromJson(response.getText());
-                    UploadCredentials uploadCredentials = UploadCredentials.fromRecord(resource);
-
-                    removeHiddenFieldsFromForm();
-
-                    Map<String, String> formFields = uploadCredentials.getFormFields();
-                    for (Map.Entry<String, String> field : formFields.entrySet()) {
-                        formFieldsContainer.add(new Hidden(field.getKey(), field.getValue()));
-                    }
-
-                    formPanel.setAction(uploadCredentials.getUrl());
-                    formPanel.setMethod(uploadCredentials.getMethod());
-                    upload();
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    Log.error("Failed to send request", exception);
-                    uploadFailed.setVisible(true);
-                }
-            });
-        } catch (RequestException e) {
-            Log.error("Failed to send request", e);
-            uploadFailed.setVisible(true);
-        }
-    }
-
-    private void removeHiddenFieldsFromForm() {
-        List<Hidden> hidden = Lists.newArrayListWithCapacity(formFieldsContainer.getWidgetCount());
-        for (int i = 0; i < formFieldsContainer.getWidgetCount(); i++) {
-            Widget widget = formFieldsContainer.getWidget(i);
-            if (widget instanceof Hidden) {
-                hidden.add((Hidden) widget);
-            }
-        }
-
-        for (Hidden old : hidden) {
-            formFieldsContainer.remove(old);
-        }
     }
 
     private void upload() {

@@ -33,7 +33,7 @@
           <span class='{icons.remove}'/>
         </g:Button>
       </g:HTMLPanel>
-      <g:VerticalPanel ui:field="formFieldsContainer"/>
+      <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
     </g:HTMLPanel>
   </g:FormPanel>
 </ui:UiBinder>
