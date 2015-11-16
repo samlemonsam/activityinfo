@@ -37,20 +37,21 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
 import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUploadFieldWidget;
+import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget;
+import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -134,7 +135,12 @@ public class FormFieldWidgetFactory {
             return Promise.resolved(new BooleanFieldWidget(valueUpdater));
 
         } else if (type instanceof AttachmentType) {
-            return Promise.resolved(new AttachmentUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
+            AttachmentType attachmentType = (AttachmentType) type;
+            if (attachmentType.getKind() == AttachmentType.Kind.IMAGE) {
+                return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
+            } else {
+                return Promise.resolved(new AttachmentUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
+            }
 
         } else if (type instanceof ReferenceType) {
             return createReferenceWidget(field, valueUpdater);

@@ -1634,4 +1634,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Partner since removed")
     String deletedPartner();
+
+    @DefaultStringValue("Browse for image")
+    String browseForImage();
 }
