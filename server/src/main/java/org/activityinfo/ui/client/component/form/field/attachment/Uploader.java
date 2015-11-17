@@ -33,6 +33,7 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.util.Holder;
 import org.activityinfo.service.blob.UploadCredentials;
 import org.activityinfo.ui.client.util.GwtUtil;
 
@@ -51,12 +52,13 @@ public class Uploader {
     }
 
     private final FileUpload fileUpload;
-    private final Attachment attachment;
     private final FormPanel formPanel;
     private final VerticalPanel hiddenFieldsContainer;
     private final UploadCallback uploadCallback;
 
-    public Uploader(FormPanel formPanel, FileUpload fileUpload, Attachment attachment,
+    private final Holder<Attachment> attachment;
+
+    public Uploader(FormPanel formPanel, FileUpload fileUpload, Holder<Attachment> attachment,
                     VerticalPanel hiddenFieldsContainer, UploadCallback uploadCallback) {
         this.formPanel = formPanel;
         this.fileUpload = fileUpload;
@@ -104,14 +106,14 @@ public class Uploader {
         String fileName = fileName();
         String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName);
 
-        attachment.setMimeType(mimeType);
-        attachment.setFilename(fileName);
-        attachment.setBlobId(blobId);
+        attachment.get().setMimeType(mimeType);
+        attachment.get().setFilename(fileName);
+        attachment.get().setBlobId(blobId);
         return "/service/blob/credentials/" + blobId;
     }
 
     public String getBaseUrl() {
-        return "/service/blob/" + attachment.getBlobId();
+        return "/service/blob/" + attachment.get().getBlobId();
     }
 
     private String fileName() {

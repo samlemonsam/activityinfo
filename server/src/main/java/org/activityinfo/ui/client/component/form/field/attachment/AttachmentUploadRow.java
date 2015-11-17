@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.util.Holder;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.util.GwtUtil;
 
@@ -47,8 +48,6 @@ import javax.annotation.Nullable;
  */
 public class AttachmentUploadRow extends Composite {
 
-    private static final int THUMBNAIL_SIZE = 24;
-
     public interface ValueChangedCallback {
         void fireValueChanged();
     }
@@ -58,7 +57,7 @@ public class AttachmentUploadRow extends Composite {
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
-    private final Attachment value;
+    private final Holder<Attachment> value;
     private final AttachmentUploadRow.ValueChangedCallback valueChangedCallback;
     private final Uploader uploader;
 
@@ -90,10 +89,10 @@ public class AttachmentUploadRow extends Composite {
     public AttachmentUploadRow(Attachment value, String fieldId, String resourceId,
                                final FieldWidgetMode fieldWidgetMode, AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
-        this.value = value;
+        this.value = Holder.of(value);
         this.valueChangedCallback = valueChangedCallback;
 
-        this.uploader = new Uploader(formPanel, fileUpload, value, hiddenFieldsContainer, new Uploader.UploadCallback() {
+        this.uploader = new Uploader(formPanel, fileUpload, this.value, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
             public void onFailure(@Nullable Throwable exception) {
                 uploadFailed.setVisible(true);
@@ -131,6 +130,10 @@ public class AttachmentUploadRow extends Composite {
 
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    public Holder<Attachment> getValue() {
+        return value;
     }
 
     public void setReadOnly(boolean readOnly) {
@@ -207,20 +210,16 @@ public class AttachmentUploadRow extends Composite {
         return this;
     }
 
-    public Attachment getValue() {
-        return value;
-    }
-
     private void setThumbnail() {
         thumbnailContainer.setVisible(false);
         GwtUtil.removeChildren(thumbnailContainer);
-        if (Strings.isNullOrEmpty(value.getMimeType())) {
+        if (Strings.isNullOrEmpty(value.get().getMimeType())) {
             return;
         }
 
-        if (value.getMimeType().contains("pdf")) {
+        if (value.get().getMimeType().contains("pdf")) {
             appendTumbnailImage("icons.filePdf");
-        } else if (value.getMimeType().startsWith("text")) {
+        } else if (value.get().getMimeType().startsWith("text")) {
             appendTumbnailImage("icons.file");
         }
     }

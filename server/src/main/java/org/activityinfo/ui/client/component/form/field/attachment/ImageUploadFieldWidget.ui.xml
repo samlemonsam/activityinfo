@@ -14,7 +14,7 @@
       <g:HTMLPanel addStyleNames="form-group">
         <g:HTMLPanel addStyleNames="col-xs-11">
           <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
-          <g:HTMLPanel ui:field="imageContainer" visible="false">
+          <g:HTMLPanel ui:field="loadingContainer" visible="false" height="200px">
             <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
                  ui:field="loadingImage"/>
           </g:HTMLPanel>
@@ -24,12 +24,12 @@
             </div>
           </g:HTMLPanel>
 
-          <g:Image ui:field="image" visible="true" height="200px" addStyleNames="img-thumbnail"/>
+          <g:Image ui:field="image" visible="true" height="200px" width="100%" addStyleNames="img-thumbnail"/>
 
         </g:HTMLPanel>
         <div class="col-xs-1">
           <g:VerticalPanel>
-            <g:Button addStyleNames="close btn-link" ui:field="closeButton" text="×"/>
+            <g:Button addStyleNames="close btn-link" ui:field="closeButton" text="x"/>
             <g:Button addStyleNames="btn btn-default btn-xs" ui:field="downloadButton" visible="false">
               <span class='{icons.arrowDown}'/>
             </g:Button>
@@ -38,11 +38,15 @@
       </g:HTMLPanel>
 
       <g:HTMLPanel addStyleNames="form-group">
-        <div class="col-xs-12 center-block">
-          <a:Button style="LINK" ui:field="browseButton">
-            <ui:text from="{i18n.browse}"/>
-          </a:Button>
-          <ui:text from="{i18n.forImage}"/>
+        <div class="col-xs-12">
+          <div class="center-block" style="width: 200px;">
+            <a:Button style="LINK" ui:field="browseButton">
+              <ui:text from="{i18n.browse}"/>
+            </a:Button>
+            <span style="margin-top: 3px;">
+              <ui:text from="{i18n.orDropForFile}"/>
+            </span>
+          </div>
         </div>
       </g:HTMLPanel>
 

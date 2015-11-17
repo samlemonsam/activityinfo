@@ -76,7 +76,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         AttachmentValue value = new AttachmentValue();
 
         for (AttachmentUploadRow row : rowsFromPanel()) {
-            value.getValues().add(row.getValue());
+            value.getValues().add(row.getValue().get());
         }
 
         return value;
