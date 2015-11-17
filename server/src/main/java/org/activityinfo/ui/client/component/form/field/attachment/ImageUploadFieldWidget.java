@@ -38,7 +38,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -59,6 +58,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
+
+    private static final int IMAGE_HEIGHT = 200;
 
     private final FormPanel rootPanel;
     private final ValueUpdater valueUpdater;
@@ -83,11 +84,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @UiField
     com.google.gwt.user.client.ui.Button downloadButton;
     @UiField
-    com.google.gwt.user.client.ui.Button closeButton;
+    com.google.gwt.user.client.ui.Button clearButton;
     @UiField
     HTMLPanel loadingContainer;
 
-    public ImageUploadFieldWidget(FormField formField, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
+    public ImageUploadFieldWidget(final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
 
         rootPanel = ourUiBinder.createAndBindUi(this);
@@ -98,7 +99,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 triggerUpload(fileUpload.getElement());
             }
         });
-        closeButton.addClickHandler(new ClickHandler() {
+        clearButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 clearValue();
@@ -150,7 +151,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     public void fetchImageServingUrl() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/image_url");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() +
+                    "/image_url?image_size=" + IMAGE_HEIGHT);
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
@@ -177,14 +179,16 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private void setUploadState() {
         setLoadingState(false);
 
-        if (isValid()) {
-            downloadButton.setVisible(true);
-            image.setUrl(servingUrl);
+        boolean valid = isValid();
+        downloadButton.setVisible(valid);
+        clearButton.setVisible(valid);
+        image.setUrl(valid ? servingUrl : "");
+        uploadFailed.setVisible(!valid);
 
+        if (valid) {
             fireValueChanged();
         } else {
             Log.error("Failed to fetch image serving url.");
-            uploadFailed.setVisible(true);
         }
     }
 

@@ -3,13 +3,8 @@ package org.activityinfo.service.blob;
 import com.google.common.io.ByteSource;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.model.resource.ResourceId;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
@@ -46,17 +41,18 @@ public interface BlobFieldStorageService {
 
     @GET
     @Path("{blobId}/image")
-    public Response getImage(@InjectParam AuthenticatedUser user,
+    Response getImage(@InjectParam AuthenticatedUser user,
                              @PathParam("blobId") BlobId blobId) throws IOException;
 
     @GET
     @Path("{blobId}/image_url")
-    public Response getImageUrl(@InjectParam AuthenticatedUser user,
-                                @PathParam("blobId") BlobId blobId) throws IOException;
+    Response getImageUrl(@InjectParam AuthenticatedUser user,
+                                @PathParam("blobId") BlobId blobId,
+                                @QueryParam("image_size") int imageSize) throws IOException;
 
     @GET
     @Path("{blobId}/thumbnail")
-    public Response getThumbnail(@InjectParam AuthenticatedUser user,
+    Response getThumbnail(@InjectParam AuthenticatedUser user,
                                  @PathParam("blobId") BlobId blobId,
                                  @QueryParam("width") int width,
                                  @QueryParam("height") int height);

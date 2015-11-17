@@ -29,7 +29,7 @@
         </g:HTMLPanel>
         <div class="col-xs-1">
           <g:VerticalPanel>
-            <g:Button addStyleNames="close btn-link" ui:field="closeButton" text="x"/>
+            <g:Button addStyleNames="close btn-link" ui:field="clearButton" text="x" visible="false"/>
             <g:Button addStyleNames="btn btn-default btn-xs" ui:field="downloadButton" visible="false">
               <span class='{icons.arrowDown}'/>
             </g:Button>
