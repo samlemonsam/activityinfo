@@ -59,8 +59,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
-    private static final int IMAGE_HEIGHT = 200;
-
     private final FormPanel rootPanel;
     private final ValueUpdater valueUpdater;
     private final Uploader uploader;
@@ -103,6 +101,12 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             @Override
             public void onClick(ClickEvent event) {
                 clearValue();
+            }
+        });
+        downloadButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open(servingUrl, "_blank", null);
             }
         });
         uploader = new Uploader(formPanel, fileUpload, attachment, hiddenFieldsContainer, new Uploader.UploadCallback() {
@@ -152,7 +156,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     public void fetchImageServingUrl() {
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() +
-                    "/image_url?image_size=" + IMAGE_HEIGHT);
+                    "/image_url?image_size=" + formPanel.getOffsetWidth());
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
