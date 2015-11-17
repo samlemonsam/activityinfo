@@ -40,7 +40,7 @@
       <g:HTMLPanel addStyleNames="form-group">
         <div class="col-xs-12">
           <div class="center-block" style="width: 200px;">
-            <span ui:field="browseButton" style="text-decoration: underline;">
+            <span ui:field="browseButton" style="text-decoration: underline;cursor: pointer">
               <ui:text from="{i18n.browse}"/>
             </span>
             <span>

@@ -35,6 +35,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
@@ -92,9 +94,10 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
-        Label.wrap(browseButton).addClickHandler(new ClickHandler() {
+        Event.sinkEvents(browseButton, Event.ONCLICK);
+        Event.setEventListener(browseButton, new EventListener() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void onBrowserEvent(Event event) {
                 if (readOnly) {
                     Window.alert(I18N.CONSTANTS.controlIsReadOnly());
                     return;
