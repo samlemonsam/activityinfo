@@ -38,6 +38,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
+import org.activityinfo.ui.client.util.GwtUtil;
 
 import javax.annotation.Nullable;
 
@@ -68,11 +69,9 @@ public class AttachmentUploadRow extends Composite {
     @UiField
     FileUpload fileUpload;
     @UiField
-    HTMLPanel imageContainer;
+    HTMLPanel loadingContainer;
     @UiField
     ImageElement loadingImage;
-    @UiField
-    Image thumbnail;
     @UiField
     Button downloadButton;
     @UiField
@@ -85,6 +84,8 @@ public class AttachmentUploadRow extends Composite {
     FormPanel formPanel;
     @UiField
     HTMLPanel uploadFailed;
+    @UiField
+    HTMLPanel thumbnailContainer;
 
     public AttachmentUploadRow(Attachment value, String fieldId, String resourceId,
                                final FieldWidgetMode fieldWidgetMode, AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
@@ -122,10 +123,9 @@ public class AttachmentUploadRow extends Composite {
         });
 
         if (value.getBlobId() != null) {
-            imageContainer.setVisible(false);
+            loadingContainer.setVisible(false);
             downloadButton.setVisible(true);
-            thumbnail.setVisible(true);
-            thumbnail.setUrl(buildThumbnailUrl());
+            setThumbnail();
         }
     }
 
@@ -142,7 +142,7 @@ public class AttachmentUploadRow extends Composite {
     }
 
     private void upload() {
-        imageContainer.setVisible(true);
+        loadingContainer.setVisible(true);
         downloadButton.setVisible(false);
         uploadFailed.setVisible(false);
 
@@ -191,10 +191,9 @@ public class AttachmentUploadRow extends Composite {
 
     private void setUploadState() {
         if (isValid()) {
-            imageContainer.setVisible(false);
+            loadingContainer.setVisible(false);
             downloadButton.setVisible(true);
-            thumbnail.setVisible(true);
-            thumbnail.setUrl(buildThumbnailUrl());
+            setThumbnail();
 
             valueChangedCallback.fireValueChanged();
         } else {
@@ -212,7 +211,22 @@ public class AttachmentUploadRow extends Composite {
         return value;
     }
 
-    private String buildThumbnailUrl() {
-        return uploader.getBaseUrl() + "/thumbnail?width=" + THUMBNAIL_SIZE + "&height=" + THUMBNAIL_SIZE;
+    private void setThumbnail() {
+        thumbnailContainer.setVisible(false);
+        GwtUtil.removeChildren(thumbnailContainer);
+        if (Strings.isNullOrEmpty(value.getMimeType())) {
+            return;
+        }
+
+        if (value.getMimeType().contains("pdf")) {
+            appendTumbnailImage("icons.filePdf");
+        } else if (value.getMimeType().startsWith("text")) {
+            appendTumbnailImage("icons.file");
+        }
+    }
+
+    private void appendTumbnailImage(String iconClassName) {
+        thumbnailContainer.setVisible(true);
+        thumbnailContainer.add(new HTML("<span class=\"{" + iconClassName + "}\"/>"));
     }
 }

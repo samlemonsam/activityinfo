@@ -13,11 +13,13 @@
         <g:FileUpload ui:field="fileUpload" name="file"/>
       </div>
       <g:HTMLPanel addStyleNames="col-xs-3">
-        <g:HTMLPanel ui:field="imageContainer" visible="false">
+        <g:HTMLPanel ui:field="loadingContainer" visible="false">
           <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
                ui:field="loadingImage"/>
         </g:HTMLPanel>
-        <g:Image ui:field="thumbnail" visible="false"/>
+        <g:HTMLPanel ui:field="thumbnailContainer" visible="false">
+
+        </g:HTMLPanel>
         <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
           <div class="help-block">
             <ui:text from="{i18n.uploadFailed}"/>

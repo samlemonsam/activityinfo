@@ -21,10 +21,14 @@ package org.activityinfo.ui.client.util;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 1/27/14.
@@ -134,5 +138,16 @@ public class GwtUtil {
             return descendant;
         }
         return null;
+    }
+
+    public static void removeChildren(ComplexPanel panel) {
+        List<Widget> widgets = Lists.newArrayListWithCapacity(panel.getWidgetCount());
+        for (int i = 0; i < panel.getWidgetCount(); i++) {
+            widgets.add(panel.getWidget(i));
+        }
+
+        for (Widget widget : widgets) {
+            panel.remove(widget);
+        }
     }
 }

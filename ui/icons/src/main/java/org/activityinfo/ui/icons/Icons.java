@@ -41,6 +41,11 @@ public class Icons  {
         return "icon icon_filter";
     }
 
+    //@Source(value = "icons/icomoon/file.svg")
+    public String file() {
+        return "icon icon_file";
+    }
+
     //@Source(value = "icons/icomoon/wrench.svg")
     public String wrench() {
         return "icon icon_wrench";
@@ -79,6 +84,16 @@ public class Icons  {
     //@Source("icons/icomoon/file-excel.svg")
     public String excelFile() {
         return "icon icon_file-excel";
+    }
+
+    //@Source("icons/icomoon/file-pdf.svg")
+    public String filePdf() {
+        return "icon icon_file-pdf";
+    }
+
+    //@Source("icons/icomoon/file-word.svg")
+    public String fileWord() {
+        return "icon icon_file-word";
     }
 
     //@Source("icons/icomoon/cloud-upload.svg")

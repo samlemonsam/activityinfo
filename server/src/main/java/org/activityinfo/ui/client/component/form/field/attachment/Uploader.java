@@ -22,9 +22,11 @@ package org.activityinfo.ui.client.component.form.field.attachment;
  */
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
@@ -32,9 +34,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.service.blob.UploadCredentials;
+import org.activityinfo.ui.client.util.GwtUtil;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -129,16 +131,6 @@ public class Uploader {
     }
 
     private void removeHiddenFieldsFromForm() {
-        List<Hidden> hidden = Lists.newArrayListWithCapacity(hiddenFieldsContainer.getWidgetCount());
-        for (int i = 0; i < hiddenFieldsContainer.getWidgetCount(); i++) {
-            Widget widget = hiddenFieldsContainer.getWidget(i);
-            if (widget instanceof Hidden) {
-                hidden.add((Hidden) widget);
-            }
-        }
-
-        for (Hidden old : hidden) {
-            hiddenFieldsContainer.remove(old);
-        }
+        GwtUtil.removeChildren(hiddenFieldsContainer);
     }
 }
