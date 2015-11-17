@@ -108,6 +108,10 @@ public class Uploader {
         return "/service/blob/credentials/" + blobId;
     }
 
+    public String getBaseUrl() {
+        return "/service/blob/" + attachment.getBlobId();
+    }
+
     private String fileName() {
         final String filename = fileUpload.getFilename();
         if (Strings.isNullOrEmpty(filename)) {

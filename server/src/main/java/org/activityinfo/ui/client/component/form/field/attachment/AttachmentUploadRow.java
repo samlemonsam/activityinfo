@@ -63,7 +63,7 @@ public class AttachmentUploadRow extends Composite {
 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
-    private String imageServingUrl = null;
+    private String servingUrl = null;
 
     @UiField
     FileUpload fileUpload;
@@ -117,7 +117,7 @@ public class AttachmentUploadRow extends Composite {
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open(imageServingUrl, "_blank", null);
+                Window.open(servingUrl, "_blank", null);
             }
         });
 
@@ -162,13 +162,14 @@ public class AttachmentUploadRow extends Composite {
         formPanel.submit();
     }
 
-    private void fetchImageServingUrl() {
+    @Deprecated
+    private void fetchImageServingUrl() { // todo attachment serving url
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, buildBaseUrl() + "/image_url");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/image_url");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    imageServingUrl = response.getText();
+                    servingUrl = response.getText();
                     setUploadState();
                 }
 
@@ -185,7 +186,7 @@ public class AttachmentUploadRow extends Composite {
     }
 
     public boolean isValid() {
-        return !Strings.isNullOrEmpty(imageServingUrl);
+        return !Strings.isNullOrEmpty(servingUrl);
     }
 
     private void setUploadState() {
@@ -211,11 +212,7 @@ public class AttachmentUploadRow extends Composite {
         return value;
     }
 
-    private String buildBaseUrl() {
-        return "/service/blob/" + value.getBlobId();
-    }
-
     private String buildThumbnailUrl() {
-        return buildBaseUrl() + "/thumbnail?width=" + THUMBNAIL_SIZE + "&height=" + THUMBNAIL_SIZE;
+        return uploader.getBaseUrl() + "/thumbnail?width=" + THUMBNAIL_SIZE + "&height=" + THUMBNAIL_SIZE;
     }
 }

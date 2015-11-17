@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.form.field.attachment;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -29,14 +30,14 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.http.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
@@ -45,6 +46,8 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.widget.Button;
+
+import javax.annotation.Nullable;
 
 /**
  * @author yuriyz on 11/16/2015.
@@ -60,8 +63,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private final FormField formField;
     private final FieldWidgetMode fieldWidgetMode;
     private final ValueUpdater valueUpdater;
+    private final Uploader uploader;
 
     private Attachment attachment = new Attachment();
+    private HandlerRegistration oldHandler;
+    private String servingUrl = null;
 
     @UiField
     Button browseButton;
@@ -69,6 +75,14 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     FileUpload fileUpload;
     @UiField
     Image image;
+    @UiField
+    FormPanel formPanel;
+    @UiField
+    VerticalPanel hiddenFieldsContainer;
+    @UiField
+    HTMLPanel uploadFailed;
+    @UiField
+    com.google.gwt.user.client.ui.Button downloadButton;
 
     public ImageUploadFieldWidget(FormField formField, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.formField = formField;
@@ -83,16 +97,85 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 triggerUpload(fileUpload.getElement());
             }
         });
+        this.uploader = new Uploader(formPanel, fileUpload, attachment, hiddenFieldsContainer, new Uploader.UploadCallback() {
+            @Override
+            public void onFailure(@Nullable Throwable exception) {
+                uploadFailed.setVisible(true);
+            }
+
+            @Override
+            public void upload() {
+                ImageUploadFieldWidget.this.upload();
+            }
+        });
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
-                    // todo requestUploadUrl();
+                    uploader.requestUploadUrl();
                 } else {
                     Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
                 }
             }
         });
+    }
+
+    private void upload() {
+        downloadButton.setVisible(false);
+        uploadFailed.setVisible(false);
+
+        if (oldHandler != null) {
+            oldHandler.removeHandler();
+        }
+
+        oldHandler = formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                // event.getResults is always null because of cross-domain upload
+                // we are forced to make additional call to check whether upload is successful
+
+                fetchImageServingUrl();
+            }
+        });
+        formPanel.submit();
+    }
+
+    public void fetchImageServingUrl() {
+        try {
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/image_url");
+            requestBuilder.sendRequest(null, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    servingUrl = response.getText();
+                    setUploadState();
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    Log.error("Failed to fetch image serving url. ", exception);
+                    setUploadState();
+                }
+            });
+        } catch (RequestException e) {
+            Log.error("Failed to send request for fetching serving url. ", e);
+            setUploadState();
+        }
+    }
+
+    public boolean isValid() {
+        return !Strings.isNullOrEmpty(servingUrl);
+    }
+
+    private void setUploadState() {
+        if (isValid()) {
+            downloadButton.setVisible(true);
+            image.setUrl(servingUrl);
+
+            fireValueChanged();
+        } else {
+            Log.error("Failed to fetch image serving url.");
+            uploadFailed.setVisible(true);
+        }
     }
 
     public void fireValueChanged() {
@@ -128,7 +211,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     @Override
     public void clearValue() {
-        // todo
+        image.setUrl("");
+        this.attachment = new Attachment();
     }
 
     @Override
@@ -137,6 +221,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     private void onLoadImageFailure() {
+        uploadFailed.setVisible(true);
+        clearValue();
     }
 
     private static native void triggerUpload(Element element) /*-{

@@ -28,7 +28,12 @@
 
         </g:HTMLPanel>
         <div class="col-xs-1">
-          <g:Button addStyleNames="close pull-right btn-link" ui:field="closeButton" text="×"/>
+          <g:VerticalPanel>
+            <g:Button addStyleNames="close btn-link" ui:field="closeButton" text="×"/>
+            <g:Button addStyleNames="btn btn-default btn-xs" ui:field="downloadButton" visible="false">
+              <span class='{icons.arrowDown}'/>
+            </g:Button>
+          </g:VerticalPanel>
         </div>
       </g:HTMLPanel>
 
@@ -41,7 +46,7 @@
         </div>
       </g:HTMLPanel>
 
-      <g:VerticalPanel ui:field="formFieldsContainer"/>
+      <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
     </g:HTMLPanel>
   </g:FormPanel>
 </ui:UiBinder>
