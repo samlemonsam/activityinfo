@@ -1640,4 +1640,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("or Drop file ")
     String orDropForFile();
+
+    @DefaultStringValue("Control is read only.")
+    String controlIsReadOnly();
+
 }

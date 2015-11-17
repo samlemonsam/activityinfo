@@ -40,10 +40,10 @@
       <g:HTMLPanel addStyleNames="form-group">
         <div class="col-xs-12">
           <div class="center-block" style="width: 200px;">
-            <a:Button style="LINK" ui:field="browseButton">
+            <span ui:field="browseButton" style="text-decoration: underline;">
               <ui:text from="{i18n.browse}"/>
-            </a:Button>
-            <span style="margin-top: 3px;">
+            </span>
+            <span>
               <ui:text from="{i18n.orDropForFile}"/>
             </span>
           </div>

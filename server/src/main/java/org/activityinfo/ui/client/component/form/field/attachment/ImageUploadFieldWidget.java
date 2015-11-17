@@ -26,6 +26,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -45,7 +46,6 @@ import org.activityinfo.model.util.Holder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
-import org.activityinfo.ui.client.widget.Button;
 
 import javax.annotation.Nullable;
 
@@ -63,12 +63,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private final ValueUpdater valueUpdater;
     private final Uploader uploader;
 
+    private boolean readOnly;
     private Holder<Attachment> attachment = Holder.of(new Attachment());
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
 
     @UiField
-    Button browseButton;
+    SpanElement browseButton;
     @UiField
     FileUpload fileUpload;
     @UiField
@@ -91,9 +92,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
-        browseButton.addClickHandler(new ClickHandler() {
+        Label.wrap(browseButton).addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                if (readOnly) {
+                    Window.alert(I18N.CONSTANTS.controlIsReadOnly());
+                    return;
+                }
                 triggerUpload(fileUpload.getElement());
             }
         });
@@ -208,7 +213,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        browseButton.setEnabled(!readOnly);
+        this.readOnly = readOnly;
     }
 
     @Override

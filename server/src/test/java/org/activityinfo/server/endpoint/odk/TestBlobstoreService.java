@@ -27,7 +27,7 @@ public class TestBlobstoreService implements BlobFieldStorageService {
     }
 
     @Override
-    public Response getImageUrl(@InjectParam AuthenticatedUser user, BlobId blobId) throws IOException {
+    public Response getImageUrl(@InjectParam AuthenticatedUser user, BlobId blobId, int imageSize) throws IOException {
         throw new UnsupportedOperationException();
     }
 
