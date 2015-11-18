@@ -15,8 +15,6 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
@@ -108,18 +106,10 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public Response getImageUrl(@InjectParam AuthenticatedUser user,
                                 @PathParam("blobId") BlobId blobId,
                                 @QueryParam("image_size") int imageSize) throws IOException {
-
-        BlobKey blobKey = blobKey(blobId);
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
+        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)).imageSize(imageSize));
 
-        String scaledUrl = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey).imageSize(imageSize));
-        String originalUrl = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey));
-
-        Record record = new Record();
-        record.set("scaled_url", scaledUrl);
-        record.set("original_url", originalUrl);
-
-        return Response.ok(Resources.toJsonObject(record).toString()).type(MediaType.APPLICATION_JSON).build();
+        return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
     }
 
     @GET

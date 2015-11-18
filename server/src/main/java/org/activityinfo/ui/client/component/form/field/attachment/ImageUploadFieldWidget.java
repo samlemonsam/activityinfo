@@ -41,8 +41,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.resource.Resource;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -71,7 +69,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private Holder<Attachment> attachment = Holder.of(new Attachment());
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
-    private String downloadUrl = null;
+    private int lastImageSize = -1;
 
     @UiField
     SpanElement browseButton;
@@ -117,6 +115,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                int sizeIndex = servingUrl.indexOf("=s" + lastImageSize);
+                String downloadUrl = sizeIndex == -1 ? servingUrl : servingUrl.substring(0, sizeIndex);
                 Window.open(downloadUrl, "_blank", null);
             }
         });
@@ -166,14 +166,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     public void fetchImageServingUrl() {
         try {
+            lastImageSize = formPanel.getOffsetWidth();
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() +
-                    "/image_url?image_size=" + formPanel.getOffsetWidth());
+                    "/image_url?image_size=" + lastImageSize);
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    Resource resource = Resources.fromJson(response.getText());
-                    servingUrl = resource.getString("scaled_url");
-                    downloadUrl = resource.getString("original_url");
+                    servingUrl = response.getText();
                     setStateAfterUpload();
                 }
 
