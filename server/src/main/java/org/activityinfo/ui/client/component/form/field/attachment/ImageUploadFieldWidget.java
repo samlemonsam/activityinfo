@@ -174,18 +174,18 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                     Resource resource = Resources.fromJson(response.getText());
                     servingUrl = resource.getString("scaled_url");
                     downloadUrl = resource.getString("original_url");
-                    setUploadState();
+                    setStateAfterUpload();
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
                     Log.error("Failed to fetch image serving url. ", exception);
-                    setUploadState();
+                    setStateAfterUpload();
                 }
             });
         } catch (RequestException e) {
             Log.error("Failed to send request for fetching serving url. ", e);
-            setUploadState();
+            setStateAfterUpload();
         }
     }
 
@@ -193,7 +193,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         return !Strings.isNullOrEmpty(servingUrl);
     }
 
-    private void setUploadState() {
+    private void setStateAfterUpload() {
         setLoadingState(false);
 
         boolean valid = isValid();
@@ -230,6 +230,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
             attachment.set(value.getValues().iterator().next());
+            fetchImageServingUrl();
         }
 
         return Promise.done();
@@ -247,6 +248,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         attachment.set(new Attachment());
         uploadFailed.setVisible(false);
         downloadButton.setVisible(false);
+        clearButton.setVisible(false);
     }
 
     @Override
