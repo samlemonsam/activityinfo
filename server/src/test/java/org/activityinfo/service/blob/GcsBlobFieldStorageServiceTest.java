@@ -34,6 +34,8 @@ import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.junit.After;
@@ -113,8 +115,10 @@ public class GcsBlobFieldStorageServiceTest {
 
         assertEquals(response.getStatus(), 200);
 
-        String imageServingUrl = (String) response.getEntity();
-        assertTrue(!Strings.isNullOrEmpty(imageServingUrl));
+        Resource resource = Resources.fromJson((String) response.getEntity());
+
+        assertTrue(!Strings.isNullOrEmpty(resource.getString("scaled_url")));
+        assertTrue(!Strings.isNullOrEmpty(resource.getString("original_url")));
     }
 
     @Test

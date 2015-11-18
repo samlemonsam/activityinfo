@@ -41,6 +41,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -69,6 +71,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private Holder<Attachment> attachment = Holder.of(new Attachment());
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
+    private String downloadUrl = null;
 
     @UiField
     SpanElement browseButton;
@@ -114,7 +117,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open(servingUrl, "_blank", null);
+                Window.open(downloadUrl, "_blank", null);
             }
         });
         uploader = new Uploader(formPanel, fileUpload, attachment, hiddenFieldsContainer, new Uploader.UploadCallback() {
@@ -168,7 +171,9 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    servingUrl = response.getText();
+                    Resource resource = Resources.fromJson(response.getText());
+                    servingUrl = resource.getString("scaled_url");
+                    downloadUrl = resource.getString("original_url");
                     setUploadState();
                 }
 
