@@ -109,7 +109,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     @Test
     public void servingImageUrl() throws IOException {
-        Response response = blobService.getImageUrl(new AuthenticatedUser(), blobId, 40);
+        Response response = blobService.getImageUrl(new AuthenticatedUser(), blobId);
 
         assertEquals(response.getStatus(), 200);
         assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));

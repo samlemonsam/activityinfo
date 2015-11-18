@@ -47,8 +47,7 @@ public interface BlobFieldStorageService {
     @GET
     @Path("{blobId}/image_url")
     Response getImageUrl(@InjectParam AuthenticatedUser user,
-                                @PathParam("blobId") BlobId blobId,
-                                @QueryParam("image_size") int imageSize) throws IOException;
+                                @PathParam("blobId") BlobId blobId) throws IOException;
 
     @GET
     @Path("{blobId}/thumbnail")

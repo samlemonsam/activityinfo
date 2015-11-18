@@ -69,7 +69,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private Holder<Attachment> attachment = Holder.of(new Attachment());
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
-    private int lastImageSize = -1;
 
     @UiField
     SpanElement browseButton;
@@ -115,9 +114,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                int sizeIndex = servingUrl.indexOf("=s" + lastImageSize);
-                String downloadUrl = sizeIndex == -1 ? servingUrl : servingUrl.substring(0, sizeIndex);
-                Window.open(downloadUrl, "_blank", null);
+                Window.open(servingUrl + "=s" + formPanel.getOffsetWidth(), "_blank", null);
             }
         });
         uploader = new Uploader(formPanel, fileUpload, attachment, hiddenFieldsContainer, new Uploader.UploadCallback() {
@@ -166,9 +163,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     public void fetchImageServingUrl() {
         try {
-            lastImageSize = formPanel.getOffsetWidth();
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() +
-                    "/image_url?image_size=" + lastImageSize);
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/image_url");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {

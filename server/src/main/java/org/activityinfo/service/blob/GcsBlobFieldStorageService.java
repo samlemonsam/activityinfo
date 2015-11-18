@@ -104,10 +104,9 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     @Path("{blobId}/image_url")
     @Override
     public Response getImageUrl(@InjectParam AuthenticatedUser user,
-                                @PathParam("blobId") BlobId blobId,
-                                @QueryParam("image_size") int imageSize) throws IOException {
+                                @PathParam("blobId") BlobId blobId) throws IOException {
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
-        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)).imageSize(imageSize));
+        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)));
 
         return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
     }
