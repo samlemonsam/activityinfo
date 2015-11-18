@@ -116,6 +116,14 @@ public class GcsBlobFieldStorageServiceTest {
     }
 
     @Test
+    public void blobUrl() {
+        Response response = blobService.getBlobUrl(blobId);
+
+        assertEquals(response.getStatus(), 200);
+        assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
+    }
+
+    @Test
     public void thumbnail() throws IOException {
         int width = 30;
         int height = 20;

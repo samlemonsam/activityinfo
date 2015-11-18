@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.channels.Channels;
 import java.util.logging.Logger;
 
@@ -58,11 +57,14 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         }
     }
 
+    @GET
+    @Path("{blobId}/blob_url")
     @Override
-    public URI getBlobUrl(BlobId blobId) {
+    public Response getBlobUrl(@PathParam("blobId") BlobId blobId) {
         GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
         try {
-            return new URI(signer.getSignedUrl("GET", bucketName + "/" + blobId.asString()));
+            String url = signer.getSignedUrl("GET", bucketName + "/" + blobId.asString());
+            return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -24,7 +24,9 @@ public interface BlobFieldStorageService {
      * @param blobId
      * @return
      */
-    URI getBlobUrl(BlobId blobId);
+    @GET
+    @Path("{blobId}/blob_url")
+    Response getBlobUrl(@PathParam("blobId") BlobId blobId);
 
     /**
      * Uploads a blob with the specified id to GCS

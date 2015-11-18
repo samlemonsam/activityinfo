@@ -8,11 +8,10 @@ import org.activityinfo.service.blob.BlobId;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URI;
 
 public class TestBlobstoreService implements BlobFieldStorageService {
     @Override
-    public URI getBlobUrl(BlobId blobId) {
+    public Response getBlobUrl(BlobId blobId) {
         throw new UnsupportedOperationException();
     }
 

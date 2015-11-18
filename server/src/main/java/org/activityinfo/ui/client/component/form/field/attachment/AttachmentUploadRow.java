@@ -159,16 +159,15 @@ public class AttachmentUploadRow extends Composite {
                 // event.getResults is always null because of cross-domain upload
                 // we are forced to make additional call to check whether upload is successful
 
-                fetchImageServingUrl();
+                fetchServingUrl();
             }
         });
         formPanel.submit();
     }
 
-    @Deprecated
-    private void fetchImageServingUrl() { // todo attachment serving url
+    private void fetchServingUrl() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/image_url");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blob_url");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
@@ -178,7 +177,7 @@ public class AttachmentUploadRow extends Composite {
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    Log.error("Failed to fetch image serving url. ", exception);
+                    Log.error("Failed to fetch attachment serving url. ", exception);
                     setUploadState();
                 }
             });
