@@ -1644,4 +1644,12 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Control is read only.")
     String controlIsReadOnly();
 
+    @DefaultStringValue("Download")
+    String download();
+
+    @DefaultStringValue("Present")
+    String present();
+
+    @DefaultStringValue("Filter is not supported.")
+    String filterIsNotSupported();
 }

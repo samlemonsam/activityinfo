@@ -52,6 +52,10 @@ public class AttachmentValue implements FieldValue, IsRecord {
         return values;
     }
 
+    public boolean hasValues() {
+        return !values.isEmpty();
+    }
+
     public List<Record> getValuesAsRecords() {
         final List<Record> result = Lists.newArrayList();
         for (Attachment value : values) {

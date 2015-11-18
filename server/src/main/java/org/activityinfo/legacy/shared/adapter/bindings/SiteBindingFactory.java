@@ -7,6 +7,8 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.Map;
@@ -47,7 +49,12 @@ public class SiteBindingFactory implements Function<ActivityFormDTO, SiteBinding
         }
 
         for (IndicatorDTO indicator : activity.getIndicators()) {
-            binding.addField(indicatorField(indicator.getId()), IndicatorDTO.getPropertyName(indicator.getId()));
+            FieldTypeClass type = indicator.getType();
+            if (type == AttachmentType.TYPE_CLASS) {
+                binding.addField(new AttachmentBinding(indicatorField(indicator.getId()), IndicatorDTO.getPropertyName(indicator.getId())));
+            } else {
+                binding.addField(indicatorField(indicator.getId()), IndicatorDTO.getPropertyName(indicator.getId()));
+            }
         }
 
         binding.addField(field(formClassId, COMMENT_FIELD), "comments");

@@ -60,6 +60,13 @@ public class Resources {
         return fromJson(resourceObject);
     }
 
+    public static Record fromJson_(String json) {
+        JsonParser parser = new JsonParser();
+        JsonObject resourceObject = parser.parse(json).getAsJsonObject();
+
+        return recordFromJson(resourceObject);
+    }
+
     public static Resource fromJson(JsonObject resourceObject) {
         Resource resource = Resources.createResource();
         for(Map.Entry<String, JsonElement> property : resourceObject.entrySet()) {
