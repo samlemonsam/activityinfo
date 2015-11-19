@@ -1655,4 +1655,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Failed to create upload url.")
     String failedToCreateUploadUrl();
+
+    @DefaultStringValue("No file selected")
+    String noFileSelected();
 }

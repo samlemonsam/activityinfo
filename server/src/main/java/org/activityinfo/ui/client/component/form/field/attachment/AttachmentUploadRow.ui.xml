@@ -10,7 +10,12 @@
   <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
     <g:HTMLPanel addStyleNames="form-group">
       <div class="col-xs-9">
-        <g:FileUpload ui:field="fileUpload" name="file"/>
+        <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+        <span ui:field="browseButton" style="text-decoration: underline;cursor: pointer">
+          <ui:text from="{i18n.browse}"/>
+        </span>
+        &nbsp;
+        <span ui:field="fileName"/>
       </div>
       <g:HTMLPanel addStyleNames="col-xs-3">
         <g:HTMLPanel ui:field="loadingContainer" visible="false">

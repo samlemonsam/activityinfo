@@ -82,9 +82,8 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         return value;
     }
 
-    private void addNewRow(final Attachment rowValue) {
-        final AttachmentUploadRow uploadRow = new AttachmentUploadRow(
-                rowValue, formField.getId().asString(), resourceId, fieldWidgetMode, this);
+    private void addNewRow(final Attachment attachment) {
+        final AttachmentUploadRow uploadRow = new AttachmentUploadRow(attachment, fieldWidgetMode, this);
 
         uploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override

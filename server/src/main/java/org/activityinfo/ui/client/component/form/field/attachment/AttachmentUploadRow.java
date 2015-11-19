@@ -23,15 +23,20 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.*;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
@@ -85,9 +90,13 @@ public class AttachmentUploadRow extends Composite {
     HTMLPanel uploadFailed;
     @UiField
     HTMLPanel thumbnailContainer;
+    @UiField
+    SpanElement browseButton;
+    @UiField
+    SpanElement fileName;
 
-    public AttachmentUploadRow(Attachment value, String fieldId, String resourceId,
-                               final FieldWidgetMode fieldWidgetMode, AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
+    public AttachmentUploadRow(Attachment value, final FieldWidgetMode fieldWidgetMode,
+                               AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = Holder.of(value);
         this.valueChangedCallback = valueChangedCallback;
@@ -121,12 +130,34 @@ public class AttachmentUploadRow extends Composite {
             }
         });
 
-        if (value.getBlobId() != null) {
+        Event.sinkEvents(browseButton, Event.ONCLICK);
+        Event.setEventListener(browseButton, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if (readOnly) {
+                    Window.alert(I18N.CONSTANTS.controlIsReadOnly());
+                    return;
+                }
+                triggerUpload(fileUpload.getElement());
+            }
+        });
+
+        if (!Strings.isNullOrEmpty(value.getBlobId())) {
             loadingContainer.setVisible(false);
             downloadButton.setVisible(true);
             setThumbnail();
         }
+        setFileName();
     }
+
+    private void setFileName() {
+        fileName.setInnerSafeHtml(SafeHtmlUtils.fromString(
+                !Strings.isNullOrEmpty(value.get().getBlobId()) ? " " + value.get().getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
+    }
+
+    private static native void triggerUpload(Element element) /*-{
+        element.click();
+    }-*/;
 
     public boolean isReadOnly() {
         return readOnly;
@@ -202,6 +233,7 @@ public class AttachmentUploadRow extends Composite {
             Log.error("Failed to fetch image serving url.");
             uploadFailed.setVisible(true);
         }
+        setFileName();
     }
 
     @Override
