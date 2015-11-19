@@ -27,12 +27,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.*;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
@@ -46,6 +46,7 @@ import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.util.Holder;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.util.GwtUtil;
@@ -89,9 +90,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     com.google.gwt.user.client.ui.Button clearButton;
     @UiField
     HTMLPanel loadingContainer;
+    @UiField
+    SimplePanel imageContainer;
 
     public ImageUploadFieldWidget(final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
+
+        FormPanelStyles.INSTANCE.ensureInjected();
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
@@ -141,7 +146,53 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 }
             }
         });
+
+        addFileDnDSupport();
     }
+
+    private void addFileDnDSupport() {
+        if (!isFileDragAndDropSupported()) {
+            return;
+        }
+
+        imageContainer.addDomHandler(new DragEnterHandler() {
+            @Override
+            public void onDragEnter(DragEnterEvent event) {
+                highlight(true);
+            }
+        }, DragEnterEvent.getType());
+
+        imageContainer.addDomHandler(new DragLeaveHandler() {
+            @Override
+            public void onDragLeave(DragLeaveEvent event) {
+                highlight(false);
+            }
+        }, DragLeaveEvent.getType());
+
+        imageContainer.addDomHandler(new DropHandler() {
+            @Override
+            public void onDrop(DropEvent event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                highlight(false);
+
+                loadImage(event.getDataTransfer());
+            }
+        }, DropEvent.getType());
+    }
+
+    private void highlight(boolean enter) {
+        if (enter) {
+            imageContainer.addStyleName(FormPanelStyles.INSTANCE.dropFile());
+        } else {
+            imageContainer.removeStyleName(FormPanelStyles.INSTANCE.dropFile());
+        }
+    }
+
+    private static native boolean isFileDragAndDropSupported() /*-{
+        return !!(("files" in DataTransfer.prototype) && $wnd.File && $wnd.FileReader);
+    }-*/;
 
     private void upload() {
         GwtUtil.setVisible(false, downloadButton);
@@ -268,6 +319,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }-*/;
 
     private void loadImage(JavaScriptObject event) {
+        setLoadingState(true);
         loadImage(event, image.getElement());
     }
 
@@ -284,6 +336,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 var imgURL = URL.createObjectURL(file);
                 imageElement.src = imgURL;
                 URL.revokeObjectURL(imgURL);
+                this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::setLoadingState(*)(false)
             }
             catch (e) {
                 try {
@@ -292,6 +345,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                         imageElement.src = event.target.result;
                     };
                     fileReader.readAsDataURL(file);
+                    this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::setLoadingState(*)(false)
                 }
                 catch (e) {
                     this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::onLoadImageFailure()();

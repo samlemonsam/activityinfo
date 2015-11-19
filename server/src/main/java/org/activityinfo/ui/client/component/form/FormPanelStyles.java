@@ -42,4 +42,6 @@ public interface FormPanelStyles extends Stylesheet {
     String fieldElement();
 
     String clearButton();
+
+    String dropFile();
 }

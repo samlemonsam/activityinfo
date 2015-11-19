@@ -24,7 +24,9 @@
 
         <g:Button addStyleNames="close btn-link pull-right" ui:field="clearButton" text="×" visible="false"/>
 
-        <g:Image ui:field="image" visible="true" height="220px" width="100%" addStyleNames="img-thumbnail"/>
+        <g:SimplePanel ui:field="imageContainer">
+          <g:Image ui:field="image" visible="true" height="220px" width="100%" addStyleNames="img-thumbnail"/>
+        </g:SimplePanel>
 
       </g:HTMLPanel>
 
