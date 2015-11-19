@@ -1652,4 +1652,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter is not supported.")
     String filterIsNotSupported();
+
+    @DefaultStringValue("Failed to create upload url.")
+    String failedToCreateUploadUrl();
 }

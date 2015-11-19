@@ -180,7 +180,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                     setStateAfterUpload();
                 }
             });
-        } catch (RequestException e) {
+        } catch (Exception e) {
             Log.error("Failed to send request for fetching serving url. ", e);
             setStateAfterUpload();
         }
