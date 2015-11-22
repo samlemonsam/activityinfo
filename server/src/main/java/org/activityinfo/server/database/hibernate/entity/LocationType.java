@@ -30,6 +30,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -180,5 +181,24 @@ public class LocationType implements Serializable, Deleteable {
     public long incrementVersion() {
         version++;
         return version;
+    }
+
+    public static LocationType queryNullLocationType(EntityManager em, Activity activity) {
+        return queryNullLocationType(em, activity.getDatabase().getCountry().getId());
+    }
+
+    public static LocationType queryNullLocationType(EntityManager em, int countryId) {
+        List<LocationType> nullTypes = em.createQuery("select t from LocationType t " +
+                        "where t.country.id = :countryId and t.name = 'Country' and t.database is null",
+                LocationType.class)
+                .setParameter("countryId", countryId)
+                .getResultList();
+        if(nullTypes.isEmpty()) {
+            throw new IllegalStateException("Cannot find null location type for country " + countryId);
+        } else if(nullTypes.size() > 1) {
+            throw new IllegalStateException("Found multiple null location type for country " + countryId);
+        } else {
+            return nullTypes.get(0);
+        }
     }
 }

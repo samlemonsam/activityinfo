@@ -98,12 +98,15 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         return get("name");
     }
 
+    /**
+     * 
+     * @return true if this location type represents the nationwide or "nullary" location type 
+     * used by activities that actually have no geography.
+     */
     public boolean isNationwide() { // hack!!
-        return isNullObject(getName(), getId());
-    }
-
-    public static boolean isNullObject(String name, int id) { // hack!!
-        return NATIONWIDE_NAME.equals(name) && id != NOT_NATIONWIDE_LOCATION_TYPE_ID;
+        return NATIONWIDE_NAME.equals(getName()) &&
+               getId() != NOT_NATIONWIDE_LOCATION_TYPE_ID &&
+                getDatabaseId() == null;
     }
 
     @JsonProperty("adminLevelId") @JsonView(DTOViews.Schema.class)

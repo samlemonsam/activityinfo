@@ -135,21 +135,7 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
             formClass.addElement(ActivityFormClassBuilder.createProjectField(formClass.getId(), activityDTO));
         }
         if (!hasLocation && !activityDTO.getLocationType().isNationwide()) {
-            boolean hasNullLocationType = false;
-            final UserDatabase database = activity.getDatabase();
-            for (LocationType locationType : database.getCountry().getLocationTypes()) {
-                if (LocationTypeDTO.isNullObject(locationType.getName(), locationType.getId())) {
-                    activity.setLocationType(locationType);
-                    hasNullLocationType = true;
-                }
-            }
-
-            if (hasNullLocationType) {
-                entityManager.get().persist(activity);
-            } else {
-                throw new RuntimeException("Failed to find nationwide location type, db:" + database.getName() +
-                        ", country:" + database.getCountry().getName());
-            }
+            activity.setLocationType(LocationType.queryNullLocationType(entityManager.get(), activity));
         }
 
         return Resources.toJson(formClass.asResource());
