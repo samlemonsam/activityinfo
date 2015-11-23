@@ -142,12 +142,12 @@ public class AttachmentUploadRow extends Composite {
             }
         });
 
+
         if (!Strings.isNullOrEmpty(value.getBlobId())) {
-            loadingContainer.setVisible(false);
-            downloadButton.setVisible(true);
-            setThumbnail();
+            fetchServingUrl();
+        } else {
+            setFileName(); // if no value than just set message
         }
-        setFileName();
     }
 
     private void setFileName() {
