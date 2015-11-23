@@ -24,9 +24,7 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.*;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Request;
@@ -91,7 +89,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @UiField
     HTMLPanel loadingContainer;
     @UiField
-    SimplePanel imageContainer;
+    HTMLPanel imageContainer;
 
     public ImageUploadFieldWidget(final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
@@ -141,6 +139,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             public void onChange(ChangeEvent event) {
                 if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
                     uploader.requestUploadUrl();
+                    highlight(false);
                 } else {
                     Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
                 }
@@ -162,6 +161,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             }
         }, DragEnterEvent.getType());
 
+        imageContainer.addDomHandler(new DragOverHandler() {
+            @Override
+            public void onDragOver(DragOverEvent event) {
+                highlight(true);
+            }
+        }, DragOverEvent.getType());
+
         imageContainer.addDomHandler(new DragLeaveHandler() {
             @Override
             public void onDragLeave(DragLeaveEvent event) {
@@ -172,12 +178,9 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         imageContainer.addDomHandler(new DropHandler() {
             @Override
             public void onDrop(DropEvent event) {
-                event.preventDefault();
-                event.stopPropagation();
+                //event.preventDefault();
 
-                highlight(false);
-
-                loadImage(event.getDataTransfer());
+                // we are following the mouse with fileUpload which leads to dropping directly to input type=file
             }
         }, DropEvent.getType());
     }
@@ -188,6 +191,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         } else {
             imageContainer.removeStyleName(FormPanelStyles.INSTANCE.dropFile());
         }
+
+        fileUpload.setVisible(enter);
+        setLoadingState(false);
+        image.setVisible(!enter);
+        clearButton.setVisible(false);
     }
 
     private static native boolean isFileDragAndDropSupported() /*-{
@@ -316,41 +324,5 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     private static native void triggerUpload(Element element) /*-{
         element.click();
-    }-*/;
-
-    private void loadImage(JavaScriptObject event) {
-        setLoadingState(true);
-        loadImage(event, image.getElement());
-    }
-
-    /**
-     * Uses either URL.createObjectURL or the Files API to load the selected file
-     * into the image element.
-     */
-    private native void loadImage(JavaScriptObject event, Element imageElement) /*-{
-        var files = event.target.files;
-        if (files && files.length > 0) {
-            var file = files[0];
-            try {
-                var URL = $wnd.URL || $wnd.webkitURL;
-                var imgURL = URL.createObjectURL(file);
-                imageElement.src = imgURL;
-                URL.revokeObjectURL(imgURL);
-                this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::setLoadingState(*)(false)
-            }
-            catch (e) {
-                try {
-                    var fileReader = new FileReader();
-                    fileReader.onload = function (event) {
-                        imageElement.src = event.target.result;
-                    };
-                    fileReader.readAsDataURL(file);
-                    this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::setLoadingState(*)(false)
-                }
-                catch (e) {
-                    this.@org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget::onLoadImageFailure()();
-                }
-            }
-        }
     }-*/;
 }
