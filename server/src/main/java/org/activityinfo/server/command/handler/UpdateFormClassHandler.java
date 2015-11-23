@@ -164,22 +164,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         }
         if (!hasLocationTypeField) {
             // if there is no location type field then we have to stick to "Nationwide" location type (null location type) - AI-1216
-
-            boolean hasNullLocationType = false;
-            final UserDatabase database = activity.getDatabase();
-            for (LocationType locationType : database.getCountry().getLocationTypes()) {
-                if (LocationTypeDTO.isNullObject(locationType.getName(), locationType.getId())) {
-                    activity.setLocationType(locationType);
-                    hasNullLocationType = true;
-                }
-            }
-
-            if (hasNullLocationType) {
-                entityManager.get().persist(activity);
-            } else {
-                throw new RuntimeException("Failed to find nationwide location type, db:" + database.getName() +
-                        ", country:" + database.getCountry().getName());
-            }
+            activity.setLocationType(LocationType.queryNullLocationType(entityManager.get(), activity));
         }
     }
 
