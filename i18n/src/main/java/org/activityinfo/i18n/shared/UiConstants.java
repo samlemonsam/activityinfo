@@ -1638,9 +1638,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Browse")
     String browse();
 
-    @DefaultStringValue("or Drop file ")
-    String orDropForFile();
-
     @DefaultStringValue("Control is read only.")
     String controlIsReadOnly();
 

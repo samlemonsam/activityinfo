@@ -32,12 +32,9 @@
       </g:HTMLPanel>
 
       <g:HTMLPanel addStyleNames="form-group">
-        <div class="center-block" style="width: 250px;">
+        <div class="center-block" style="width: 70px;">
           <span ui:field="browseButton" style="text-decoration: underline;cursor: pointer">
             <ui:text from="{i18n.browse}"/>
-          </span>
-          <span>
-            <ui:text from="{i18n.orDropForFile}"/>
           </span>
           <span ui:field="downloadButton" class="pull-right hide" style="text-decoration: underline;cursor: pointer">
             <ui:text from="{i18n.download}"/>
