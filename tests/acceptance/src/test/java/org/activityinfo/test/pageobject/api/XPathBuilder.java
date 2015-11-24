@@ -119,6 +119,10 @@ public class XPathBuilder {
         return tagName("input", conditions);
     }
 
+    public XPathBuilder form(String... conditions) {
+        return tagName("form", conditions);
+    }
+
     public XPathBuilder textArea(String... conditions) {
         return tagName("textArea", conditions);
     }

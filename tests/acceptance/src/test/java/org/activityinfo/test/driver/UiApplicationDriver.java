@@ -179,7 +179,7 @@ public class UiApplicationDriver extends ApplicationDriver {
                     if (valueMap.containsKey(testHandle)) {
                         unsubmittedValues.remove(testHandle);
                         String value = valueMap.get(testHandle).getValue();
-                        if (value.matches("^\\d+$")) {
+                        if (value.matches("^\\d+$") || value.endsWith(".png") /*tricked images*/) {
                             driver.fill(value);
                         } else {
                             driver.fill(aliasTable.getAlias(value));

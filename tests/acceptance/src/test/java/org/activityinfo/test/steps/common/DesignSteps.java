@@ -22,17 +22,21 @@ package org.activityinfo.test.steps.common;
  */
 
 import com.google.common.base.Optional;
+import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.openqa.selenium.support.ui.Select;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -174,5 +178,19 @@ public class DesignSteps {
     @And("^I add \"([^\"]*)\" to database \"([^\"]*)\" with partner \"([^\"]*)\" and permissions$")
     public void I_add_to_database_with_partner_and_permissions(String userEmail, String databaseName, String partner, List<FieldValue> permissions) throws Throwable {
         driver.addUserToDatabase(userEmail, databaseName, partner, permissions);
+    }
+
+    @And("^drop field:$")
+    public void drop_field(DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+        Map<String, String> fieldProperties = TableDataParser.asMap(dataTable);
+
+        page.fields().dropNewField(fieldProperties.get("type"));
+        page.selectFieldByLabel(I18N.CONSTANTS.image());
+
+        String label = driver.getAliasTable().createAlias(fieldProperties.get("label"));
+        page.properties().form().findFieldByLabel(I18N.CONSTANTS.fieldLabel()).fill(label);
+        page.save();
+
     }
 }

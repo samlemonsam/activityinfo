@@ -58,6 +58,12 @@ public class FormDesignerPage {
                 .waitForFirst());
     }
 
+    public DesignerField selectFieldByLabel(String label) {
+        DesignerField designerField = dropTarget().fieldByLabel(label);
+        designerField.element().clickWhenReady();
+        return designerField;
+    }
+
     public void save() {
         container.find().button(withText(I18N.CONSTANTS.save())).clickWhenReady();
         container.waitUntil(new Predicate<WebDriver>() {

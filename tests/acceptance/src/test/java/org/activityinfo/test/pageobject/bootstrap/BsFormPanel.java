@@ -31,6 +31,7 @@ import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
 import org.activityinfo.test.pageobject.web.components.Form;
+import org.activityinfo.test.ui.ImagePathProvider;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Select;
@@ -145,8 +146,14 @@ public class BsFormPanel extends Form {
         @Override
         public void fill(String value) {
             FluentElement input = input();
-            input.element().clear();
-            input.sendKeys(value);
+
+            if (input.element().getAttribute("type").equals("file")) { // file upload
+                input.sendKeys(ImagePathProvider.path(value));
+                input.element().submit();
+            } else {
+                input.element().clear();
+                input.sendKeys(value);
+            }
         }
 
         private FluentElement input() {

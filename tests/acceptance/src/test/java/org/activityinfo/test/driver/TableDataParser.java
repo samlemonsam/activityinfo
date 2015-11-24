@@ -21,7 +21,9 @@ package org.activityinfo.test.driver;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import cucumber.api.DataTable;
 import gherkin.formatter.model.DataTableRow;
 import org.apache.commons.csv.CSVFormat;
@@ -36,6 +38,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 07/14/2015.
@@ -123,6 +126,17 @@ public class TableDataParser {
             }
         }
         return columnCells;
+    }
+
+    public static Map<String, String> asMap(DataTable table) {
+        Map<String, String> map = Maps.newHashMap();
+        for (DataTableRow row : table.getGherkinRows()) {
+            List<String> cells = row.getCells();
+            Preconditions.checkState(cells.size() == 2, "It's expected to have exactly 2 columns (key, value)");
+
+            map.put(cells.get(0), cells.get(1));
+        }
+        return map;
     }
 }
 
