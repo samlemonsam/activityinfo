@@ -30,7 +30,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -51,15 +50,10 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
     private final HTMLPanel rootPanel;
-    private final FormField formField;
     private final FieldWidgetMode fieldWidgetMode;
     private final ValueUpdater valueUpdater;
 
-    private String resourceId;
-
-    public AttachmentUploadFieldWidget(String resourceId, FormField formField, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
-        this.resourceId = resourceId;
-        this.formField = formField;
+    public AttachmentUploadFieldWidget(final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.fieldWidgetMode = fieldWidgetMode;
         this.valueUpdater = valueUpdater;
 

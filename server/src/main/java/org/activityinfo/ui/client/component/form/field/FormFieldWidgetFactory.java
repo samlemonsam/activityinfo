@@ -139,7 +139,7 @@ public class FormFieldWidgetFactory {
             if (attachmentType.getKind() == AttachmentType.Kind.IMAGE) {
                 return Promise.resolved(new ImageUploadFieldWidget(valueUpdater, fieldWidgetMode));
             } else {
-                return Promise.resolved(new AttachmentUploadFieldWidget(resourceId, field, valueUpdater, fieldWidgetMode));
+                return Promise.resolved(new AttachmentUploadFieldWidget(valueUpdater, fieldWidgetMode));
             }
 
         } else if (type instanceof ReferenceType) {

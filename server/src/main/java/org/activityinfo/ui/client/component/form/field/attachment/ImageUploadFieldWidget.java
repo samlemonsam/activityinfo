@@ -150,10 +150,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     private void addFileDnDSupport() {
-        if (!isFileDragAndDropSupported()) {
-            return;
-        }
-
         imageContainer.addDomHandler(new DragEnterHandler() {
             @Override
             public void onDragEnter(DragEnterEvent event) {
@@ -197,10 +193,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         image.setVisible(!enter);
         clearButton.setVisible(false);
     }
-
-    private static native boolean isFileDragAndDropSupported() /*-{
-        return !!(("files" in DataTransfer.prototype) && $wnd.File && $wnd.FileReader);
-    }-*/;
 
     private void upload() {
         GwtUtil.setVisible(false, downloadButton);
@@ -259,14 +251,10 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         uploadFailed.setVisible(!valid);
 
         if (valid) {
-            fireValueChanged();
+            valueUpdater.update(getValue());
         } else {
             Log.error("Failed to fetch image serving url.");
         }
-    }
-
-    public void fireValueChanged() {
-        valueUpdater.update(getValue());
     }
 
     private AttachmentValue getValue() {
@@ -310,11 +298,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @Override
     public Widget asWidget() {
         return rootPanel;
-    }
-
-    private void onLoadImageFailure() {
-        uploadFailed.setVisible(true);
-        clearValue();
     }
 
     public void setLoadingState(boolean loadingState) {
