@@ -78,3 +78,18 @@ task pullTranslations(type: JavaExec) {
         systemProperty 'poApiKey', project.property('poApiKey')
     }
 }
+
+task pushTranslations(type: JavaExec) {
+    group = "I18N"
+    description = 'Pushes new translation keys to PoEditor.com'
+
+    dependsOn 'toolClasses'
+
+    main = 'org.activityinfo.i18n.tools.Push'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
+
+    doFirst {
+        systemProperty 'poApiKey', project.property('poApiKey')
+    }
+}
