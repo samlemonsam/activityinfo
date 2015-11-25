@@ -48,7 +48,7 @@ public class AttachmentBinding implements FieldBinding<SiteDTO> {
         Object value = model.get(propertyName);
         if (value instanceof String) {
             try {
-                instance.set(fieldId, AttachmentValue.fromRecord(Resources.fromJson_((String) value)));
+                instance.set(fieldId, AttachmentValue.fromRecord(Resources.recordFromJson((String) value)));
             } catch (Exception e) {
                 Log.error(e.getMessage(), e);
             }

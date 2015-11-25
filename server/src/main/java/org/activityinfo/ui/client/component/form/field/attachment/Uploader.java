@@ -73,7 +73,7 @@ public class Uploader {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
 
-                    Resource resource = Resources.fromJson(response.getText());
+                    Resource resource = Resources.resourceFromJson(response.getText());
                     UploadCredentials uploadCredentials = UploadCredentials.fromRecord(resource);
 
                     hiddenFieldsContainer.clear();

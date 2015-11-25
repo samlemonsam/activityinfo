@@ -9,7 +9,6 @@ import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -100,7 +99,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
     private FormClass validateFormClass(String json) {
         try {
-            Resource resource = Resources.fromJson(json);
+            Resource resource = Resources.resourceFromJson(json);
             return FormClass.fromResource(resource);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormClass json: " + e.getMessage(), e);

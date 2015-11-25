@@ -25,6 +25,6 @@ public class FormClassResult implements CommandResult {
     }
 
     public FormClass getFormClass() {
-        return FormClass.fromResource(Resources.fromJson(json));
+        return FormClass.fromResource(Resources.resourceFromJson(json));
     }
 }

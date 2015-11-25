@@ -53,7 +53,7 @@ public class IndicatorProjectionUpdater implements ProjectionUpdater<Object> {
             projection.setValue(path, new Quantity(((Number) value).doubleValue()));
         } else if(value instanceof String) {
             if (indicator.getType() == AttachmentType.TYPE_CLASS) {
-                projection.setValue(path, AttachmentValue.fromRecord(Resources.fromJson_((String) value)));
+                projection.setValue(path, AttachmentValue.fromRecord(Resources.recordFromJson((String) value)));
             } else {
                 projection.setValue(path, TextValue.valueOf(((String) value)));
             }
