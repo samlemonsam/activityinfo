@@ -248,13 +248,13 @@ public class AttachmentUploadRow extends Composite {
         }
 
         if (value.get().getMimeType().contains("pdf")) {
-            appendTumbnailImage("icons.filePdf");
+            appendThumbnailImage("icons.filePdf");
         } else if (value.get().getMimeType().startsWith("text")) {
-            appendTumbnailImage("icons.file");
+            appendThumbnailImage("icons.file");
         }
     }
 
-    private void appendTumbnailImage(String iconClassName) {
+    private void appendThumbnailImage(String iconClassName) {
         thumbnailContainer.setVisible(true);
         thumbnailContainer.add(new HTML("<span class=\"{" + iconClassName + "}\"/>"));
     }
