@@ -35,7 +35,6 @@ import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.util.Holder;
 import org.activityinfo.service.blob.UploadCredentials;
-import org.activityinfo.ui.client.util.GwtUtil;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -77,7 +76,7 @@ public class Uploader {
                     Resource resource = Resources.fromJson(response.getText());
                     UploadCredentials uploadCredentials = UploadCredentials.fromRecord(resource);
 
-                    removeHiddenFieldsFromForm();
+                    hiddenFieldsContainer.clear();
 
                     Map<String, String> formFields = uploadCredentials.getFormFields();
                     for (Map.Entry<String, String> field : formFields.entrySet()) {
@@ -130,9 +129,5 @@ public class Uploader {
             return filename.substring(i + 1);
         }
         return filename;
-    }
-
-    private void removeHiddenFieldsFromForm() {
-        GwtUtil.removeChildren(hiddenFieldsContainer);
     }
 }

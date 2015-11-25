@@ -36,6 +36,16 @@ public class Icons  {
         return "icon icon_edit";
     }
 
+    //@Source(value = "icons/icomoon/close.svg")
+    public String close() {
+        return "icon icon_close";
+    }
+
+    //@Source(value = "icons/icomoon/cloud-download.svg")
+    public String cloudDownload() {
+        return "icon icon_cloud_download";
+    }
+
     //@Source(value = "icons/icomoon/filter.svg")
     public String filter() {
         return "icon icon_filter";

@@ -24,7 +24,8 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.*;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Request;
@@ -47,7 +48,6 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
-import org.activityinfo.ui.client.util.GwtUtil;
 
 import javax.annotation.Nullable;
 
@@ -83,7 +83,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @UiField
     HTMLPanel uploadFailed;
     @UiField
-    SpanElement downloadButton;
+    Button downloadButton;
     @UiField
     com.google.gwt.user.client.ui.Button clearButton;
     @UiField
@@ -109,10 +109,9 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 triggerUpload(fileUpload.getElement());
             }
         });
-        Event.sinkEvents(downloadButton, Event.ONCLICK);
-        Event.setEventListener(downloadButton, new EventListener() {
+        downloadButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onBrowserEvent(Event event) {
+            public void onClick(ClickEvent event) {
                 Window.open(servingUrl, "_blank", null);
             }
         });
@@ -195,7 +194,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     private void upload() {
-        GwtUtil.setVisible(false, downloadButton);
+        downloadButton.setVisible(false);
         uploadFailed.setVisible(false);
         setLoadingState(true);
 
@@ -245,7 +244,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         setLoadingState(false);
 
         boolean valid = isValid();
-        GwtUtil.setVisible(valid, downloadButton);
+        downloadButton.setVisible(valid);
         clearButton.setVisible(valid);
         image.setUrl(valid ? servingUrl + "=s" + formPanel.getOffsetWidth() : "");
         uploadFailed.setVisible(!valid);
@@ -291,7 +290,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         servingUrl = null;
         attachment.set(new Attachment());
         uploadFailed.setVisible(false);
-        GwtUtil.setVisible(false, downloadButton);
+        downloadButton.setVisible(false);
         clearButton.setVisible(false);
     }
 

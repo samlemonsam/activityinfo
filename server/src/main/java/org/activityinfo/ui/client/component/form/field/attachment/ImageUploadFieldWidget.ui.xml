@@ -24,6 +24,13 @@
 
         <g:Button addStyleNames="close btn-link pull-right" ui:field="clearButton" text="×" visible="false"/>
 
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="addButton">
+          <span class="{icons.close}"/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton">
+          <span class="{icons.cloudDownload}"/>
+        </g:Button>
+
         <g:HTMLPanel ui:field="imageContainer">
           <g:FileUpload ui:field="fileUpload" name="file" addStyleNames="dropFileUpload" visible="false" width="100%" height="210px"/>
           <g:Image ui:field="image" visible="true" height="220px" width="100%" addStyleNames="img-thumbnail"/>
@@ -35,9 +42,6 @@
         <div class="center-block" style="width: 70px;">
           <span ui:field="browseButton" style="text-decoration: underline;cursor: pointer">
             <ui:text from="{i18n.browse}"/>
-          </span>
-          <span ui:field="downloadButton" class="pull-right hide" style="text-decoration: underline;cursor: pointer">
-            <ui:text from="{i18n.download}"/>
           </span>
         </div>
       </g:HTMLPanel>

@@ -44,7 +44,6 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.util.Holder;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
-import org.activityinfo.ui.client.util.GwtUtil;
 
 import javax.annotation.Nullable;
 
@@ -243,7 +242,7 @@ public class AttachmentUploadRow extends Composite {
 
     private void setThumbnail() {
         thumbnailContainer.setVisible(false);
-        GwtUtil.removeChildren(thumbnailContainer);
+        thumbnailContainer.clear();
         if (Strings.isNullOrEmpty(value.get().getMimeType())) {
             return;
         }
