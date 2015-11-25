@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
@@ -41,9 +42,9 @@
 
       <g:HTMLPanel addStyleNames="form-group">
         <div class="center-block" style="width: 70px;">
-          <span ui:field="browseButton" style="text-decoration: underline;cursor: pointer">
+          <a:Button style="LINK" ui:field="browseButton">
             <ui:text from="{i18n.browse}"/>
-          </span>
+          </a:Button>
         </div>
       </g:HTMLPanel>
 

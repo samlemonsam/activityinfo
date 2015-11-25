@@ -25,7 +25,6 @@ import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Request;
@@ -34,8 +33,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
@@ -71,7 +68,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private String servingUrl = null;
 
     @UiField
-    SpanElement browseButton;
+    org.activityinfo.ui.client.widget.Button browseButton;
     @UiField
     FileUpload fileUpload;
     @UiField
@@ -98,10 +95,9 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
-        Event.sinkEvents(browseButton, Event.ONCLICK);
-        Event.setEventListener(browseButton, new EventListener() {
+        browseButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onBrowserEvent(Event event) {
+            public void onClick(ClickEvent event) {
                 if (readOnly) {
                     Window.alert(I18N.CONSTANTS.controlIsReadOnly());
                     return;

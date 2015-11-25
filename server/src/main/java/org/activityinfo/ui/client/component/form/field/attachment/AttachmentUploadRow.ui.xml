@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
@@ -12,9 +13,9 @@
     <g:HTMLPanel addStyleNames="form-group">
       <div class="col-xs-9">
         <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
-        <span ui:field="browseButton" style="text-decoration: underline;cursor: pointer">
+        <a href="#" ui:field="browseButton">
           <ui:text from="{i18n.browse}"/>
-        </span>
+        </a>
         &nbsp;
         <span ui:field="fileName"/>
       </div>

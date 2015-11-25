@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
@@ -90,7 +91,7 @@ public class AttachmentUploadRow extends Composite {
     @UiField
     HTMLPanel thumbnailContainer;
     @UiField
-    SpanElement browseButton;
+    AnchorElement browseButton;
     @UiField
     SpanElement fileName;
 
