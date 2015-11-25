@@ -76,7 +76,9 @@ public class GcsUploadCredentialBuilder {
             formFields.put("signature", new String(Base64.encodeBase64(signature.getSignature(), false), "UTF-8"));
             formFields.put("success_action_status", STATUS_CODE);
 
-            return new UploadCredentials(String.format(END_POINT_URL_FORMAT, formFields.get("bucket")), "POST", formFields);
+            String url = String.format(END_POINT_URL_FORMAT, formFields.get("bucket"));
+            url = url + "&response-content-disposition=attachment%3B%20filename%3D%22file%22";
+            return new UploadCredentials(url, "POST", formFields);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
