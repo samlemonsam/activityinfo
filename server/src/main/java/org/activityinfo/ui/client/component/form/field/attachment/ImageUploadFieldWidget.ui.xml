@@ -23,7 +23,7 @@
           </div>
         </g:HTMLPanel>
 
-        <g:Button addStyleNames="btn btn-default pull-right" ui:field="clearButton" visible="false">
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="clearButton" visible="false">
           <span class="{icons.remove}"/>
         </g:Button>
         <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton" visible="false">

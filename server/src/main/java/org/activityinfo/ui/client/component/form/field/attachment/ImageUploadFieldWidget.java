@@ -300,6 +300,9 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     public void setLoadingState(boolean loadingState) {
         loadingContainer.setVisible(loadingState);
         imageContainer.setVisible(!loadingState);
+        if (loadingState) {
+            image.setUrl("");
+        }
     }
 
     private static native void triggerUpload(Element element) /*-{
