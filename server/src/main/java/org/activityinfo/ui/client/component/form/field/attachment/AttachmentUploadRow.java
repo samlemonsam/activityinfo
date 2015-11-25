@@ -208,11 +208,13 @@ public class AttachmentUploadRow extends Composite {
 
                 @Override
                 public void onError(Request request, Throwable exception) {
+                    servingUrl = null;
                     Log.error("Failed to fetch attachment serving url. ", exception);
                     setUploadState();
                 }
             });
         } catch (RequestException e) {
+            servingUrl = null;
             Log.error("Failed to send request for fetching serving url. ", e);
             setUploadState();
         }

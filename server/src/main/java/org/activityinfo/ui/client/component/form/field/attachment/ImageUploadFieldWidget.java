@@ -222,11 +222,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
                 @Override
                 public void onError(Request request, Throwable exception) {
+                    servingUrl = null;
                     Log.error("Failed to fetch image serving url. ", exception);
                     setStateAfterUpload();
                 }
             });
         } catch (Exception e) {
+            servingUrl = null;
             Log.error("Failed to send request for fetching serving url. ", e);
             setStateAfterUpload();
         }
