@@ -1655,4 +1655,13 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("No file selected")
     String noFileSelected();
+
+    @DefaultStringValue("Single")
+    String single();
+
+    @DefaultStringValue("Multiple")
+    String multiple();
+
+    @DefaultStringValue("Determines type of attachment (image or file)")
+    String attachmentTypeDescription();
 }

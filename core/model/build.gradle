@@ -5,6 +5,7 @@ apply plugin: 'gwt-base'
 
 dependencies {
     compile project(':core:promises')
+    compile project(':i18n')
 
     gwt     libraries.gwt.user
     runtime libraries.gwt.servlet
