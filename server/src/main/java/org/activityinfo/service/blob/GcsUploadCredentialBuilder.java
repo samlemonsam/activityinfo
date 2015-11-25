@@ -77,7 +77,6 @@ public class GcsUploadCredentialBuilder {
             formFields.put("success_action_status", STATUS_CODE);
 
             String url = String.format(END_POINT_URL_FORMAT, formFields.get("bucket"));
-            url = url + "?response-content-disposition=attachment%3B%20filename%3D%22file%22";
             return new UploadCredentials(url, "POST", formFields);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
