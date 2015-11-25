@@ -23,13 +23,11 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 
 import com.google.common.base.Strings;
 import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -104,20 +102,14 @@ public class Uploader {
     }
 
     private String createUploadUrl() {
-        try {
-            String blobId = ResourceId.generateId().asString();
-            String fileName = fileName();
-            String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName);
+        String blobId = ResourceId.generateId().asString();
+        String fileName = fileName();
+        String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName, "application/octet-stream");
 
-            attachment.get().setMimeType(mimeType);
-            attachment.get().setFilename(fileName);
-            attachment.get().setBlobId(blobId);
-            return "/service/blob/credentials/" + blobId;
-        } catch (Exception e) {
-            Log.error(e.getMessage(), e);
-            Window.alert(I18N.CONSTANTS.failedToCreateUploadUrl());
-            throw e;
-        }
+        attachment.get().setMimeType(mimeType);
+        attachment.get().setFilename(fileName);
+        attachment.get().setBlobId(blobId);
+        return "/service/blob/credentials/" + blobId;
     }
 
     public String getBaseUrl() {

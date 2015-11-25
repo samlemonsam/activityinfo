@@ -22,6 +22,7 @@ package org.activityinfo.core.shared.util;
  */
 
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -238,10 +239,14 @@ public class MimeTypeUtil {
         fileExtensionToMimeTypeRegistry.put("zip", "application/zip");
     }
 
-    public static String mimeTypeFromFileExtension(String fileExtension) {
+    public static String mimeTypeFromExtension(String fileExtension) {
         if (!fileExtensionToMimeTypeRegistry.containsKey(fileExtension)) {
             throw new UnsupportedOperationException("Unknown file extension: " + fileExtension);
         }
+        return fileExtensionToMimeTypeRegistry.get(fileExtension);
+    }
+
+    public static String mimeTypeFromFileExtension(String fileExtension) {
         return fileExtensionToMimeTypeRegistry.get(fileExtension);
     }
 
@@ -255,5 +260,13 @@ public class MimeTypeUtil {
 
     public static String mimeTypeFromFileName(String fileName) {
         return mimeTypeFromFileExtension(fileExtension(fileName));
+    }
+
+    public static String mimeTypeFromFileName(String fileName, String defaultValue) {
+        String mimeType = mimeTypeFromFileExtension(fileExtension(fileName));
+        if (Strings.isNullOrEmpty(mimeType)) {
+            mimeType = defaultValue;
+        }
+        return mimeType;
     }
 }
