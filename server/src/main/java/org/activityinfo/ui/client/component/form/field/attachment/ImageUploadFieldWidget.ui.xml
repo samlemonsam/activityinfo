@@ -23,13 +23,10 @@
           </div>
         </g:HTMLPanel>
 
-        <g:Button addStyleNames="close btn-link pull-right" ui:field="clearButton" text="×" visible="false"/>
-
-
-        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="addButton">
+        <g:Button addStyleNames="btn btn-link pull-right" ui:field="clearButton" visible="false">
           <span class="{icons.remove}"/>
         </g:Button>
-        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton" visible="true">
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton">
           <span class="{icons.arrowDown}"/>
         </g:Button>
 
