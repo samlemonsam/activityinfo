@@ -11,17 +11,15 @@ import org.joda.time.format.ISODateTimeFormat;
 /**
  * Constructs the policy document that governs what the user may upload
  *
- * @see <a href="https://developers.google.com/storage/docs/reference-methods?csw=1#policydocument">Policy Document</a>
+ * @see <a href="https://cloud.google.com/storage/docs/xml-api/post-object#policydocument">Policy Document</a>
  */
 public class GcsPolicyBuilder {
-
 
     private final JsonArray conditions;
     private final JsonObject document;
     private DateTime expiration;
 
     public GcsPolicyBuilder() {
-
         conditions = new JsonArray();
         document = new JsonObject();
         document.add("conditions", conditions);
@@ -35,7 +33,6 @@ public class GcsPolicyBuilder {
 
     /**
      * Defines a condition that the key of the object to be uploaded is equal to {@code name}
-     *
      */
     public GcsPolicyBuilder keyMustEqual(String name) {
         return addExactCondition("key", name);
@@ -53,8 +50,12 @@ public class GcsPolicyBuilder {
         return addExactCondition("success_action_status", successActionStatus);
     }
 
+    public GcsPolicyBuilder contentDisposition(String contentDispositionValue) {
+        return addExactCondition("content-disposition", contentDispositionValue);
+    }
+
     public GcsPolicyBuilder contentLengthMustBeBetween(long min, long max) {
-       // ["content-length-range", <min_range>, <max_range>].
+        // ["content-length-range", <min_range>, <max_range>].
         JsonArray condition = new JsonArray();
         condition.add(new JsonPrimitive("content-length-range"));
         condition.add(new JsonPrimitive(min));
@@ -85,7 +86,7 @@ public class GcsPolicyBuilder {
     }
 
     public String toJson() {
-        if(expiration == null) {
+        if (expiration == null) {
             throw new IllegalStateException("Expiration date must be set");
         }
         document.addProperty("expiration", expiration.toString(ISODateTimeFormat.dateTime()));

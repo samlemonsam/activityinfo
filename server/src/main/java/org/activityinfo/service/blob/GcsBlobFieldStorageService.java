@@ -138,15 +138,16 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @POST
-    @Path("credentials/{blobId}")
+    @Path("credentials/{blobId}/{fileName}")
     @Override
     public Response getUploadCredentials(@InjectParam AuthenticatedUser user,
-                                         @PathParam("blobId") BlobId blobId) {
+                                         @PathParam("blobId") BlobId blobId,
+                                         @PathParam("fileName") String fileName) {
         if (user == null || user.isAnonymous()) {
             throw new WebApplicationException(UNAUTHORIZED);
         }
 
-        UploadCredentials uploadCredentials = new GcsUploadCredentialBuilder(appIdentityService).
+        UploadCredentials uploadCredentials = new GcsUploadCredentialBuilder(appIdentityService, fileName).
                 setBucket(bucketName).
                 setKey(blobId.asString()).
                 setMaxContentLengthInMegabytes(MAX_BLOB_LENGTH_IN_MEGABYTES).

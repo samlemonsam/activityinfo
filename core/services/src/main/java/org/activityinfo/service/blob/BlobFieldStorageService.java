@@ -59,7 +59,8 @@ public interface BlobFieldStorageService {
                                  @QueryParam("height") int height);
 
     @POST
-    @Path("credentials/{blobId}")
+    @Path("credentials/{blobId}/{fileName}")
     Response getUploadCredentials(@InjectParam AuthenticatedUser user,
-                                  @PathParam("blobId") BlobId blobId);
+                                  @PathParam("blobId") BlobId blobId,
+                                  @PathParam("fileName") String fileName);
 }

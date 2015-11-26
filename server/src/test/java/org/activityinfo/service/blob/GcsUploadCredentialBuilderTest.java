@@ -18,12 +18,12 @@ import static com.google.common.net.MediaType.PNG;
 
 public class GcsUploadCredentialBuilderTest {
 
-    private static final String PRIVATE_KEY_FILE_PATH = "u:\\own\\github\\repo\\activityinfo\\production2\\BeDataDriven Development-e30eef9283cd.p12";
+    private static final String PRIVATE_KEY_FILE_PATH = "U:\\own\\github\\repo\\activityinfo\\production2\\server\\src\\main\\resources\\org\\activityinfo\\server\\util\\blob\\ai-staging-e41defb26a88.p12";
 
     @Test
     public void test() throws Exception {
 
-        UploadCredentials credentials = new GcsUploadCredentialBuilder(new TestingIdentityService(PRIVATE_KEY_FILE_PATH))
+        UploadCredentials credentials = new GcsUploadCredentialBuilder(new TestingIdentityService(PRIVATE_KEY_FILE_PATH), "file.png")
                 .setBucket("ai-dev-field-blob-test")
                 .setKey(BlobId.generate().asString())
                 .setMaxContentLengthInMegabytes(10)
@@ -46,14 +46,14 @@ public class GcsUploadCredentialBuilderTest {
 
     }
 
-    //@Test // run manually only
+    @Test // run manually only
     public void identityService() {
         Properties properties = new Properties();
         properties.setProperty("service.account.p12.classpath.fileName", "ai-staging-e41defb26a88.p12");
         properties.setProperty("service.account.name", "210521273034-q311jj20r5ep1siksedr9fpmta7k5a6i@developer.gserviceaccount.com");
         properties.setProperty("service.account.p12.key.password", "notasecret");
 //        properties.setProperty("service.account.p12.key.path", "c:\\Users\\admin\\ai-staging-e41defb26a88.p12");
-        properties.setProperty("service.account.p12.key.path", "u:\\own\\github\\repo\\activityinfo\\production2\\server\\build\\exploded-app\\WEB-INF\\classes\\org\\activityinfo\\server\\util\\blob\\ai-staging-e41defb26a88.p12");
+        properties.setProperty("service.account.p12.key.path", "U:\\own\\github\\repo\\activityinfo\\production2\\server\\src\\main\\resources\\org\\activityinfo\\server\\util\\blob\\ai-staging-e41defb26a88.p12");
 
         AppIdentityService identityService = new DevAppIdentityService(new DeploymentConfiguration(properties));
         Assert.assertNotNull(identityService.getServiceAccountName());

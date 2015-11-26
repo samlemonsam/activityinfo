@@ -108,7 +108,7 @@ public class Uploader {
         attachment.get().setMimeType(mimeType);
         attachment.get().setFilename(fileName);
         attachment.get().setBlobId(blobId);
-        return "/service/blob/credentials/" + blobId;
+        return "/service/blob/credentials/" + blobId + "/" + fileName;
     }
 
     public String getBaseUrl() {

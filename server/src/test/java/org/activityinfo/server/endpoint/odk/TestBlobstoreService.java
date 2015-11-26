@@ -36,7 +36,7 @@ public class TestBlobstoreService implements BlobFieldStorageService {
     }
 
     @Override
-    public Response getUploadCredentials(@InjectParam AuthenticatedUser user, BlobId blobId) {
+    public Response getUploadCredentials(@InjectParam AuthenticatedUser user, BlobId blobId, String fileName) {
         throw new UnsupportedOperationException();
     }
 }

@@ -1,7 +1,6 @@
 package org.activityinfo.service.blob;
 
 import com.google.appengine.api.appidentity.AppIdentityService;
-import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import org.apache.commons.codec.binary.Base64;
@@ -14,6 +13,7 @@ import java.util.Map;
  * @see <a href="https://developers.google.com/storage/docs/reference-methods?csw=1#postobject">GCS Docs</a>
  */
 public class GcsUploadCredentialBuilder {
+
     private static final String STATUS_CODE = "201";
     private static final String END_POINT_URL_FORMAT = "https://%s.storage.googleapis.com";
 
@@ -22,17 +22,16 @@ public class GcsUploadCredentialBuilder {
     private final GcsPolicyBuilder policyDocument;
     private final Map<String, String> formFields;
     private final AppIdentityService identityService;
+    private final String contentDispositionValue;
 
-
-    public GcsUploadCredentialBuilder() {
-        this(AppIdentityServiceFactory.getAppIdentityService());
-    }
-
-    public GcsUploadCredentialBuilder(AppIdentityService identityService) {
-        this.policyDocument = new GcsPolicyBuilder();
+    public GcsUploadCredentialBuilder(AppIdentityService identityService, String fileName) {
         this.formFields = Maps.newHashMap();
         this.identityService = identityService;
-        policyDocument.successActionStatusMustBe(STATUS_CODE);
+
+        this.contentDispositionValue = "attachment; filename=\"" + fileName + "\"";
+        this.policyDocument = new GcsPolicyBuilder();
+        this.policyDocument.successActionStatusMustBe(STATUS_CODE);
+        this.policyDocument.contentDisposition(contentDispositionValue);
     }
 
     /**
@@ -75,7 +74,7 @@ public class GcsUploadCredentialBuilder {
             formFields.put("policy", encodedPolicy);
             formFields.put("signature", new String(Base64.encodeBase64(signature.getSignature(), false), "UTF-8"));
             formFields.put("success_action_status", STATUS_CODE);
-            formFields.put("response-content-disposition", "attachment%3B%20filename%3D%22file%22");
+            formFields.put("content-disposition", contentDispositionValue);
 
             String url = String.format(END_POINT_URL_FORMAT, formFields.get("bucket"));
             return new UploadCredentials(url, "POST", formFields);

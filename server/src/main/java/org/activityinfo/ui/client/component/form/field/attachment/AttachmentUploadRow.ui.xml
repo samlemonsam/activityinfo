@@ -24,22 +24,23 @@
           <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
                ui:field="loadingImage"/>
         </g:HTMLPanel>
-        <g:HTMLPanel ui:field="thumbnailContainer" visible="false">
 
-        </g:HTMLPanel>
+        <g:HTMLPanel ui:field="thumbnailContainer" visible="false"/>
+
         <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
           <div class="help-block">
             <ui:text from="{i18n.uploadFailed}"/>
           </div>
         </g:HTMLPanel>
-        <g:Button addStyleNames="btn btn-default btn-xs" ui:field="downloadButton" visible="false">
-          <span class='{icons.arrowDown}'/>
-        </g:Button>
+
         <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="addButton">
           <span class="{icons.add}"/>
         </g:Button>
         <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton">
           <span class='{icons.remove}'/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton" visible="false">
+          <span class='{icons.arrowDown}'/>
         </g:Button>
       </g:HTMLPanel>
       <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
