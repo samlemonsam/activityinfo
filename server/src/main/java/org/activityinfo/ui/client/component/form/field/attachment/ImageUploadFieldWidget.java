@@ -27,10 +27,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
@@ -108,7 +105,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open(servingUrl, "_blank", null);
+                download();
             }
         });
         clearButton.addClickHandler(new ClickHandler() {
@@ -142,6 +139,25 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         });
 
         addFileDnDSupport();
+    }
+
+    private void download() {
+        try {
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blob_url");
+            requestBuilder.sendRequest(null, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    Window.open(response.getText(), "_blank", null);
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    Log.error("Failed to fetch image blob serving url. ", exception);
+                }
+            });
+        } catch (RequestException e) {
+            Log.error("Failed to send request for fetching image blob serving url. ", e);
+        }
     }
 
     private void addFileDnDSupport() {
