@@ -101,6 +101,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         GcsFileOptions gcsFileOptions = new Builder().
                 contentDisposition(contentDisposition).
                 mimeType(mimeType).
+                addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR, CuidAdapter.userId(user.getUserId()).asString()).
+                addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_OWNER, resourceId.asString()).
                 build();
         GcsOutputChannel channel = gcsService.createOrReplace(gcsFilename, gcsFileOptions);
 
@@ -206,8 +208,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                 }
 
                 GcsFileMetadata metadata = gcsService.getMetadata(new GcsFilename(bucketName, blobId.asString()));
-                ResourceId creatorId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR));
-                if (creatorId.equals(CuidAdapter.userId(user.getUserId()))) { // owner
+                String creatorId = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR);
+                if (CuidAdapter.userId(user.getUserId()).asString().equals(creatorId)) { // owner
                     return;
                 }
             } catch (IOException e) {

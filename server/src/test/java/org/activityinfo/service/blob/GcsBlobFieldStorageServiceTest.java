@@ -30,18 +30,26 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
+import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -56,29 +64,41 @@ import static org.junit.Assert.assertTrue;
 @Modules({
         GcsBlobFieldStorageServiceModule.class,
         AuthenticationModuleStub.class,
-        ConfigModuleStub.class
+        ConfigModuleStub.class,
+        TestHibernateModule.class,
+        TemplateModule.class,
+        GwtRpcModule.class,
 })
 @RunWith(InjectionSupport.class)
+@OnDataSet("/dbunit/schema1.db.xml")
 public class GcsBlobFieldStorageServiceTest {
 
     private static final String FILE_NAME = "goabout.png";
 
-    private LocalServiceTestHelper localServiceTestHelper = new LocalServiceTestHelper(
+    private final LocalServiceTestHelper localServiceTestHelper = new LocalServiceTestHelper(
             new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig());
 
     @Inject
     GcsBlobFieldStorageService blobService;
 
     private AuthenticatedUser user;
+    private AuthenticatedUser noAccessUser;
     private BlobId blobId;
-    private ResourceId resourceId = ResourceId.generateId();
+    private ResourceId resourceId = CuidAdapter.activityFormClass(1);
+
+    @BeforeClass
+    public static void setupI18N() {
+        LocaleProxy.initialize();
+        AuthenticationModuleStub.setUserId(1);
+    }
 
     @Before
     public final void uploadBlob() throws IOException {
         localServiceTestHelper.setUp();
         blobService.setTestBucketName();
 
-        user = new AuthenticatedUser();
+        user = new AuthenticatedUser("x", 1, "user1@user.com");
+        noAccessUser = new AuthenticatedUser("x", 3, "stefan@user.com");
         blobId = BlobId.generate();
         blobService.put(user,
                 "attachment;filename=" + FILE_NAME,
@@ -109,20 +129,35 @@ public class GcsBlobFieldStorageServiceTest {
         System.out.println(imageFile.getAbsolutePath());
     }
 
+    @Test(expected = WebApplicationException.class)
+    public void imageNoPermission() throws IOException {
+        blobService.getImage(noAccessUser, blobId, resourceId);
+    }
+
     @Test
     public void servingImageUrl() throws IOException {
-        Response response = blobService.getImageUrl(new AuthenticatedUser(), blobId, resourceId);
+        Response response = blobService.getImageUrl(user, blobId, resourceId);
 
         assertEquals(response.getStatus(), 200);
         assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
     }
 
+    @Test(expected = WebApplicationException.class)
+    public void servingImageUrlNoPermission() throws IOException {
+        blobService.getImageUrl(noAccessUser, blobId, resourceId);
+    }
+
     @Test
     public void blobUrl() {
-        Response response = blobService.getBlobUrl(new AuthenticatedUser(), blobId, resourceId);
+        Response response = blobService.getBlobUrl(user, blobId, resourceId);
 
         assertEquals(response.getStatus(), 200);
         assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
+    }
+
+    @Test(expected = WebApplicationException.class)
+    public void blobUrlNoPermission() throws IOException {
+        blobService.getBlobUrl(noAccessUser, blobId, resourceId);
     }
 
     @Test
@@ -148,6 +183,11 @@ public class GcsBlobFieldStorageServiceTest {
 
         // we don't check height because image scales depending on width
         //assertEquals(bufferedImage.getHeight(), height);
+    }
+
+    @Test(expected = WebApplicationException.class)
+    public void thumbnailNoPermission() throws IOException {
+        blobService.getThumbnail(noAccessUser, blobId, resourceId, 20, 20);
     }
 
     public static String createDirectory(String directory) {
