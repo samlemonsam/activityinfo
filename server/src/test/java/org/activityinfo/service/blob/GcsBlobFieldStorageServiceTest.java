@@ -34,6 +34,7 @@ import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.junit.After;
@@ -70,6 +71,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     private AuthenticatedUser user;
     private BlobId blobId;
+    private ResourceId resourceId = ResourceId.generateId();
 
     @Before
     public final void uploadBlob() throws IOException {
@@ -81,7 +83,7 @@ public class GcsBlobFieldStorageServiceTest {
         blobService.put(user,
                 "attachment;filename=" + FILE_NAME,
                 MimeTypeUtil.mimeTypeFromFileName(FILE_NAME),
-                blobId,
+                blobId, resourceId,
                 ByteSource.wrap(ByteStreams.toByteArray(GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"))));
     }
 
@@ -92,7 +94,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     @Test
     public void image() throws IOException {
-        Response response = blobService.getImage(user, blobId);
+        Response response = blobService.getImage(user, blobId, resourceId);
         assertEquals(response.getStatus(), 200);
 
         Object entity = response.getEntity();
@@ -109,7 +111,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     @Test
     public void servingImageUrl() throws IOException {
-        Response response = blobService.getImageUrl(new AuthenticatedUser(), blobId);
+        Response response = blobService.getImageUrl(new AuthenticatedUser(), blobId, resourceId);
 
         assertEquals(response.getStatus(), 200);
         assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
@@ -117,7 +119,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     @Test
     public void blobUrl() {
-        Response response = blobService.getBlobUrl(blobId);
+        Response response = blobService.getBlobUrl(new AuthenticatedUser(), blobId, resourceId);
 
         assertEquals(response.getStatus(), 200);
         assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
@@ -128,7 +130,7 @@ public class GcsBlobFieldStorageServiceTest {
         int width = 30;
         int height = 20;
 
-        Response response = blobService.getThumbnail(user, blobId, width, height);
+        Response response = blobService.getThumbnail(user, blobId, resourceId, width, height);
         assertEquals(response.getStatus(), 200);
 
         Object entity = response.getEntity();

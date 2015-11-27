@@ -30,6 +30,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -52,8 +53,10 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
     private final HTMLPanel rootPanel;
     private final FieldWidgetMode fieldWidgetMode;
     private final ValueUpdater valueUpdater;
+    private final ResourceId resourceId;
 
-    public AttachmentUploadFieldWidget(final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
+    public AttachmentUploadFieldWidget(ResourceId resourceId, final ValueUpdater valueUpdater, FieldWidgetMode fieldWidgetMode) {
+        this.resourceId = resourceId;
         this.fieldWidgetMode = fieldWidgetMode;
         this.valueUpdater = valueUpdater;
 
@@ -77,7 +80,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
     }
 
     private void addNewRow(final Attachment attachment) {
-        final AttachmentUploadRow uploadRow = new AttachmentUploadRow(attachment, fieldWidgetMode, this);
+        final AttachmentUploadRow uploadRow = new AttachmentUploadRow(resourceId, attachment, fieldWidgetMode, this);
 
         uploadRow.addButton.addClickHandler(new ClickHandler() {
             @Override

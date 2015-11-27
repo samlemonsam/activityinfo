@@ -203,7 +203,7 @@ public class FormSubmissionResource {
 
 
                 blobFieldStorageService.put(user, contentDisposition, mimeType,
-                        new BlobId(imageRowValue.getBlobId()), byteSource);
+                        new BlobId(imageRowValue.getBlobId()), instance.getFormClassId(), byteSource);
 
             } catch (MessagingException messagingException) {
                 LOGGER.log(Level.SEVERE, "Unable to parse input", messagingException);

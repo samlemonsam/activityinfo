@@ -56,12 +56,14 @@ public class Uploader {
     private final UploadCallback uploadCallback;
 
     private final Holder<Attachment> attachment;
+    private final ResourceId resourceId;
 
-    public Uploader(FormPanel formPanel, FileUpload fileUpload, Holder<Attachment> attachment,
+    public Uploader(FormPanel formPanel, FileUpload fileUpload, Holder<Attachment> attachment, ResourceId resourceId,
                     VerticalPanel hiddenFieldsContainer, UploadCallback uploadCallback) {
         this.formPanel = formPanel;
         this.fileUpload = fileUpload;
         this.attachment = attachment;
+        this.resourceId = resourceId;
         this.hiddenFieldsContainer = hiddenFieldsContainer;
         this.uploadCallback = uploadCallback;
     }
@@ -108,11 +110,11 @@ public class Uploader {
         attachment.get().setMimeType(mimeType);
         attachment.get().setFilename(fileName);
         attachment.get().setBlobId(blobId);
-        return "/service/blob/credentials/" + blobId + "/" + fileName;
+        return "/service/blob/credentials/" + blobId + "/" + resourceId.asString() + "/" + fileName;
     }
 
     public String getBaseUrl() {
-        return "/service/blob/" + attachment.get().getBlobId();
+        return "/service/blob/" + attachment.get().getBlobId() + "/" + resourceId.asString();
     }
 
     private String fileName() {

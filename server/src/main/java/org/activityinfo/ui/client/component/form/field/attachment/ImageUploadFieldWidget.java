@@ -34,6 +34,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -85,7 +86,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @UiField
     HTMLPanel imageContainer;
 
-    public ImageUploadFieldWidget(final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
+    public ImageUploadFieldWidget(ResourceId resourceId, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
 
         FormPanelStyles.INSTANCE.ensureInjected();
@@ -115,7 +116,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             }
         });
 
-        uploader = new Uploader(formPanel, fileUpload, attachment, hiddenFieldsContainer, new Uploader.UploadCallback() {
+        uploader = new Uploader(formPanel, fileUpload, attachment, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
             public void onFailure(@Nullable Throwable exception) {
                 uploadFailed.setVisible(true);

@@ -42,6 +42,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.util.Holder;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -95,13 +96,13 @@ public class AttachmentUploadRow extends Composite {
     @UiField
     SpanElement fileName;
 
-    public AttachmentUploadRow(Attachment value, final FieldWidgetMode fieldWidgetMode,
+    public AttachmentUploadRow(ResourceId resourceId, Attachment value, final FieldWidgetMode fieldWidgetMode,
                                AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = Holder.of(value);
         this.valueChangedCallback = valueChangedCallback;
 
-        this.uploader = new Uploader(formPanel, fileUpload, this.value, hiddenFieldsContainer, new Uploader.UploadCallback() {
+        this.uploader = new Uploader(formPanel, fileUpload, this.value, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
             public void onFailure(@Nullable Throwable exception) {
                 uploadFailed.setVisible(true);

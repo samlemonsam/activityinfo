@@ -2,10 +2,13 @@ package org.activityinfo.service.blob;
 
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.activityinfo.model.resource.ResourceId;
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.Period;
 
+import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
@@ -18,13 +21,20 @@ public class GcsUploadCredentialBuilder {
     private static final String END_POINT_URL_FORMAT = "https://%s.storage.googleapis.com";
 
     public static final int BYTES_IN_MEGA_BYTE = 1024 * 1024;
+    public static final String X_GOOG_META_OWNER = "x-goog-meta-owner";
+    public static final String X_GOOG_META_CREATOR = "x-goog-meta-creator";
 
     private final GcsPolicyBuilder policyDocument;
     private final Map<String, String> formFields;
     private final AppIdentityService identityService;
     private final String contentDispositionValue;
 
-    public GcsUploadCredentialBuilder(AppIdentityService identityService, String fileName) {
+    public GcsUploadCredentialBuilder(@Nonnull AppIdentityService identityService,
+                                      @Nonnull String fileName) {
+
+        Preconditions.checkNotNull(identityService);
+        Preconditions.checkNotNull(fileName);
+
         this.formFields = Maps.newHashMap();
         this.identityService = identityService;
 
@@ -32,6 +42,20 @@ public class GcsUploadCredentialBuilder {
         this.policyDocument = new GcsPolicyBuilder();
         this.policyDocument.successActionStatusMustBe(STATUS_CODE);
         this.policyDocument.contentDisposition(contentDispositionValue);
+    }
+
+    public GcsUploadCredentialBuilder setOwnerId(ResourceId ownerId) {
+        return setXGoogMeta(X_GOOG_META_OWNER, ownerId.asString());
+    }
+
+    public GcsUploadCredentialBuilder setCreatorId(ResourceId creatorId) {
+        return setXGoogMeta(X_GOOG_META_CREATOR, creatorId.asString());
+    }
+
+    public GcsUploadCredentialBuilder setXGoogMeta(String key, String value) {
+        this.policyDocument.xGoogMeta(key, value);
+        this.formFields.put(key, value);
+        return this;
     }
 
     /**
@@ -65,6 +89,10 @@ public class GcsUploadCredentialBuilder {
 
     public UploadCredentials build() {
         try {
+
+            Preconditions.checkState(formFields.containsKey(X_GOOG_META_CREATOR), "Creator is not set.");
+            Preconditions.checkState(formFields.containsKey(X_GOOG_META_OWNER), "Owner is not set.");
+
             byte[] policy = policyDocument.toJsonBytes();
             String encodedPolicy = new String(Base64.encodeBase64(policy, false), "UTF-8");
 

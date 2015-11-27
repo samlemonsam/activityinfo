@@ -54,6 +54,10 @@ public class GcsPolicyBuilder {
         return addExactCondition("content-disposition", contentDispositionValue);
     }
 
+    public GcsPolicyBuilder xGoogMeta(String xGoogMeta, String value) {
+        return addExactCondition(xGoogMeta, value);
+    }
+
     public GcsPolicyBuilder contentLengthMustBeBetween(long min, long max) {
         // ["content-length-range", <min_range>, <max_range>].
         JsonArray condition = new JsonArray();

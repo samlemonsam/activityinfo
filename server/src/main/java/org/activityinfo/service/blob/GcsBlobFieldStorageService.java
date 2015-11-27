@@ -15,12 +15,18 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.database.hibernate.entity.Activity;
+import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
 import org.joda.time.Period;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
@@ -40,16 +47,21 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
     public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 100;
 
+    private final AppIdentityService appIdentityService;
+    private final GcsService gcsService;
+    private final EntityManager em;
+
     private String bucketName;
-    private AppIdentityService appIdentityService;
 
     @Inject
-    public GcsBlobFieldStorageService(DeploymentConfiguration config) {
+    public GcsBlobFieldStorageService(DeploymentConfiguration config, EntityManager em) {
         this.bucketName = config.getBlobServiceBucketName();
+        this.em = em;
 
         this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
                 new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
 
+        this.gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
         try {
             LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
         } catch (ApiProxy.CallNotFoundException e) {
@@ -58,11 +70,17 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{blobId}/blob_url")
+    @Path("{blobId}/{resourceId}/blob_url")
     @Override
-    public Response getBlobUrl(@PathParam("blobId") BlobId blobId) {
-        GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
+    public Response getBlobUrl(@InjectParam AuthenticatedUser user,
+                               @PathParam("blobId") BlobId blobId,
+                               @PathParam("resourceId") ResourceId resourceId) {
+
+        assertNotAnonymousUser(user);
+        assertHasAccess(user, blobId, resourceId);
+
         try {
+            GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
             String url = signer.getSignedUrl("GET", bucketName + "/" + blobId.asString());
             return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
         } catch (Exception e) {
@@ -71,10 +89,14 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @Override
-    public void put(AuthenticatedUser authenticatedUser, String contentDisposition, String mimeType, BlobId blobId,
+    public void put(AuthenticatedUser user, String contentDisposition, String mimeType, BlobId blobId,
+                    ResourceId resourceId,
                     ByteSource byteSource) throws IOException {
+
+        assertNotAnonymousUser(user);
+        assertHasAccess(user, blobId, resourceId);
+
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
-        GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
 
         GcsFileOptions gcsFileOptions = new Builder().
                 contentDisposition(contentDisposition).
@@ -88,12 +110,17 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{blobId}/image")
+    @Path("{blobId}/{resourceId}/image")
     @Override
     public Response getImage(@InjectParam AuthenticatedUser user,
-                             @PathParam("blobId") BlobId blobId) throws IOException {
+                             @PathParam("blobId") BlobId blobId,
+                             @PathParam("resourceId") ResourceId resourceId) throws IOException {
+
+        assertNotAnonymousUser(user);
+        assertHasAccess(user, blobId, resourceId);
+
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
-        GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
+
         GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
         GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
 
@@ -103,10 +130,15 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{blobId}/image_url")
+    @Path("{blobId}/{resourceId}/image_url")
     @Override
     public Response getImageUrl(@InjectParam AuthenticatedUser user,
-                                @PathParam("blobId") BlobId blobId) throws IOException {
+                                @PathParam("blobId") BlobId blobId,
+                                @PathParam("resourceId") ResourceId resourceId) throws IOException {
+
+        assertNotAnonymousUser(user);
+        assertHasAccess(user, blobId, resourceId);
+
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
         String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)));
 
@@ -114,12 +146,16 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{blobId}/thumbnail")
+    @Path("{blobId}/{resourceId}/thumbnail")
     @Override
     public Response getThumbnail(@InjectParam AuthenticatedUser user,
                                  @PathParam("blobId") BlobId blobId,
+                                 @PathParam("resourceId") ResourceId resourceId,
                                  @QueryParam("width") int width,
                                  @QueryParam("height") int height) {
+
+        assertNotAnonymousUser(user);
+        assertHasAccess(user, blobId, resourceId);
 
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
 
@@ -138,16 +174,17 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @POST
-    @Path("credentials/{blobId}/{fileName}")
+    @Path("credentials/{blobId}/{resourceId}/{fileName}")
     @Override
     public Response getUploadCredentials(@InjectParam AuthenticatedUser user,
                                          @PathParam("blobId") BlobId blobId,
+                                         @PathParam("resourceId") ResourceId resourceId,
                                          @PathParam("fileName") String fileName) {
-        if (user == null || user.isAnonymous()) {
-            throw new WebApplicationException(UNAUTHORIZED);
-        }
+        assertNotAnonymousUser(user);
 
         UploadCredentials uploadCredentials = new GcsUploadCredentialBuilder(appIdentityService, fileName).
+                setCreatorId(CuidAdapter.userId(user.getUserId())).
+                setOwnerId(resourceId).
                 setBucket(bucketName).
                 setKey(blobId.asString()).
                 setMaxContentLengthInMegabytes(MAX_BLOB_LENGTH_IN_MEGABYTES).
@@ -157,6 +194,33 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         return Response.ok(uploadCredentials.asJson()).
                 type(MediaType.APPLICATION_JSON).
                 build();
+    }
+
+    private void assertHasAccess(AuthenticatedUser user, BlobId blobId, ResourceId resourceId) {
+        if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            try {
+                Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
+
+                if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, user.getId()))) {
+                    return;
+                }
+
+                GcsFileMetadata metadata = gcsService.getMetadata(new GcsFilename(bucketName, blobId.asString()));
+                ResourceId creatorId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR));
+                if (creatorId.equals(CuidAdapter.userId(user.getUserId()))) { // owner
+                    return;
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        throw new WebApplicationException(UNAUTHORIZED);
+    }
+
+    private static void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
+        if (user == null || user.isAnonymous()) {
+            throw new WebApplicationException(UNAUTHORIZED);
+        }
     }
 
     public void setTestBucketName() {

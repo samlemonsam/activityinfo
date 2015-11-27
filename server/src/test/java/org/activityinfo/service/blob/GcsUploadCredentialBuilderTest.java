@@ -4,6 +4,8 @@ import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.joda.time.Period;
@@ -23,12 +25,14 @@ public class GcsUploadCredentialBuilderTest {
     @Test
     public void test() throws Exception {
 
-        UploadCredentials credentials = new GcsUploadCredentialBuilder(new TestingIdentityService(PRIVATE_KEY_FILE_PATH), "file.png")
-                .setBucket("ai-dev-field-blob-test")
-                .setKey(BlobId.generate().asString())
-                .setMaxContentLengthInMegabytes(10)
-                .expireAfter(Period.minutes(5))
-                .build();
+        UploadCredentials credentials = new GcsUploadCredentialBuilder(new TestingIdentityService(PRIVATE_KEY_FILE_PATH), "file.png").
+                setCreatorId(CuidAdapter.userId(1)).
+                setOwnerId(ResourceId.generateId()).
+                setBucket("ai-dev-field-blob-test").
+                setKey(BlobId.generate().asString()).
+                setMaxContentLengthInMegabytes(10).
+                expireAfter(Period.minutes(5)).
+                build();
 
         FormDataMultiPart form = new FormDataMultiPart();
 

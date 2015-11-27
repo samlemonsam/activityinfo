@@ -3,11 +3,11 @@ package org.activityinfo.service.blob;
 import com.google.common.io.ByteSource;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URI;
 
 /**
  * Provides storage for fields which have blob values, such as images
@@ -21,15 +21,19 @@ public interface BlobFieldStorageService {
     /**
      * Provides a temporary, signed URL via which the user can access a blob
      * associated with a field value.
+     *
      * @param blobId
-     * @return
+     * @return blob uri
      */
     @GET
-    @Path("{blobId}/blob_url")
-    Response getBlobUrl(@PathParam("blobId") BlobId blobId);
+    @Path("{blobId}/{resourceId}/blob_url")
+    Response getBlobUrl(@InjectParam AuthenticatedUser user,
+                        @PathParam("blobId") BlobId blobId,
+                        @PathParam("resourceId") ResourceId resourceId);
 
     /**
      * Uploads a blob with the specified id to GCS
+     *
      * @param authenticatedUser
      * @param contentDisposition
      * @param mimeType
@@ -38,29 +42,34 @@ public interface BlobFieldStorageService {
      * @throws IOException
      */
     void put(AuthenticatedUser authenticatedUser, String contentDisposition, String mimeType, BlobId blobId,
+             ResourceId resourceId,
              ByteSource byteSource) throws IOException;
 
 
     @GET
-    @Path("{blobId}/image")
+    @Path("{blobId}/{resourceId}/image")
     Response getImage(@InjectParam AuthenticatedUser user,
-                             @PathParam("blobId") BlobId blobId) throws IOException;
+                      @PathParam("blobId") BlobId blobId,
+                      @PathParam("resourceId") ResourceId resourceId) throws IOException;
 
     @GET
-    @Path("{blobId}/image_url")
+    @Path("{blobId}/{resourceId}/image_url")
     Response getImageUrl(@InjectParam AuthenticatedUser user,
-                                @PathParam("blobId") BlobId blobId) throws IOException;
+                         @PathParam("blobId") BlobId blobId,
+                         @PathParam("resourceId") ResourceId resourceId) throws IOException;
 
     @GET
-    @Path("{blobId}/thumbnail")
+    @Path("{blobId}/{resourceId}/thumbnail")
     Response getThumbnail(@InjectParam AuthenticatedUser user,
-                                 @PathParam("blobId") BlobId blobId,
-                                 @QueryParam("width") int width,
-                                 @QueryParam("height") int height);
+                          @PathParam("blobId") BlobId blobId,
+                          @PathParam("resourceId") ResourceId resourceId,
+                          @QueryParam("width") int width,
+                          @QueryParam("height") int height);
 
     @POST
-    @Path("credentials/{blobId}/{fileName}")
+    @Path("credentials/{blobId}/{resourceId}/{fileName}")
     Response getUploadCredentials(@InjectParam AuthenticatedUser user,
                                   @PathParam("blobId") BlobId blobId,
+                                  @PathParam("resourceId") ResourceId resourceId,
                                   @PathParam("fileName") String fileName);
 }
