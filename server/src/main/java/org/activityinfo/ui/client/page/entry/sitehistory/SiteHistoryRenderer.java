@@ -62,6 +62,11 @@ public class SiteHistoryRenderer {
 
         boolean first = true;
         for (SiteHistoryDTO history : histories) {
+
+            if (isAttachmentHistoryEntry(history.getEntityName())) {
+                 continue; // skip history entries for attachments
+            }
+
             ctx.setHistory(history);
 
             Item item = new Item();
@@ -88,6 +93,14 @@ public class SiteHistoryRenderer {
         Collections.reverse(items);
 
         return items;
+    }
+
+    private static boolean isAttachmentHistoryEntry(String historyDetailsJson) {
+        return historyDetailsJson.contains("blobId") &&
+                historyDetailsJson.contains("mimeType") &&
+                historyDetailsJson.contains("width") &&
+                historyDetailsJson.contains("height") &&
+                historyDetailsJson.contains("filename");
     }
 
     private List<ItemDetail> details(RenderContext ctx) {
