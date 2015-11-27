@@ -24,11 +24,7 @@ package org.activityinfo.ui.client.component.filter;
 
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.*;
-import com.extjs.gxt.ui.client.event.BaseEvent;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.LoadListener;
-import com.extjs.gxt.ui.client.event.TreePanelEvent;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.store.StoreListener;
@@ -53,10 +49,10 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +72,7 @@ public class IndicatorTreePanel extends ContentPanel {
     private ToolBar toolBar;
     private StoreFilterField filter;
     private boolean multipleSelection;
+    private boolean loadOnlyQuantityIndicators = false;
 
     /**
      * Keep our own copy of our selection state that is independent of the
@@ -84,7 +81,12 @@ public class IndicatorTreePanel extends ContentPanel {
     private Set<Integer> selection = Sets.newHashSet();
 
     public IndicatorTreePanel(Dispatcher dispatcher, final boolean multipleSelection) {
+        this(dispatcher, multipleSelection, false);
+    }
+
+    public IndicatorTreePanel(Dispatcher dispatcher, final boolean multipleSelection, boolean loadOnlyQuantityIndicators) {
         this.dispatcher = dispatcher;
+        this.loadOnlyQuantityIndicators = loadOnlyQuantityIndicators;
 
         this.setHeadingText(I18N.CONSTANTS.indicators());
         this.setIcon(IconImageBundle.ICONS.indicator());
@@ -286,14 +288,16 @@ public class IndicatorTreePanel extends ContentPanel {
 
     private Promise<List<ModelData>> loadActivityChildren(ActivityDTO activity) {
         return dispatcher.execute(new GetActivityForm(activity.getId())).then(new Function<ActivityFormDTO, List<ModelData>>() {
-            @Nullable
+
             @Override
-            public List<ModelData> apply(@Nullable ActivityFormDTO form) {
-                List<IndicatorGroup> groupIndicators = form.groupIndicators();
+            public List<ModelData> apply(ActivityFormDTO form) {
                 List<ModelData> children = new ArrayList<ModelData>();
-                for (IndicatorGroup group : groupIndicators) {
+                for (IndicatorGroup group : form.groupIndicators()) {
                     if (group.getName() == null) {
                         for (IndicatorDTO indicator : group.getIndicators()) {
+                            if (loadOnlyQuantityIndicators && indicator.getType() != FieldTypeClass.QUANTITY) {
+                                continue;
+                            }
                             children.add(indicator);
                         }
                     } else {
@@ -308,6 +312,9 @@ public class IndicatorTreePanel extends ContentPanel {
     private List<ModelData> createIndicatorList(IndicatorGroup group) {
         ArrayList<ModelData> list = new ArrayList<ModelData>();
         for (IndicatorDTO indicator : group.getIndicators()) {
+            if (loadOnlyQuantityIndicators && indicator.getType() != FieldTypeClass.QUANTITY) {
+                continue;
+            }
             list.add(indicator);
         }
 

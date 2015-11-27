@@ -40,7 +40,7 @@ public class IndicatorFilterPanel extends IndicatorTreePanel implements FilterPa
 
 
     public IndicatorFilterPanel(Dispatcher service, boolean multipleSelection) {
-        super(service, multipleSelection);
+        super(service, multipleSelection, true);
 
 
         addCheckChangedListener(new Listener<TreePanelEvent>() {
