@@ -199,7 +199,7 @@ public class AttachmentUploadRow extends Composite {
 
     private void fetchServingUrl() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blob_url");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blobUrl");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {

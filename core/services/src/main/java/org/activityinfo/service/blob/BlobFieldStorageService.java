@@ -26,7 +26,7 @@ public interface BlobFieldStorageService {
      * @return blob uri
      */
     @GET
-    @Path("{blobId}/{resourceId}/blob_url")
+    @Path("{blobId}/{resourceId}/blobUrl")
     Response getBlobUrl(@InjectParam AuthenticatedUser user,
                         @PathParam("blobId") BlobId blobId,
                         @PathParam("resourceId") ResourceId resourceId);
@@ -53,7 +53,7 @@ public interface BlobFieldStorageService {
                       @PathParam("resourceId") ResourceId resourceId) throws IOException;
 
     @GET
-    @Path("{blobId}/{resourceId}/image_url")
+    @Path("{blobId}/{resourceId}/imageUrl")
     Response getImageUrl(@InjectParam AuthenticatedUser user,
                          @PathParam("blobId") BlobId blobId,
                          @PathParam("resourceId") ResourceId resourceId) throws IOException;

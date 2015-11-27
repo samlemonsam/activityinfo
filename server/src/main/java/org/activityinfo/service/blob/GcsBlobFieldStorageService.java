@@ -70,7 +70,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{blobId}/{resourceId}/blob_url")
+    @Path("{blobId}/{resourceId}/blobUrl")
     @Override
     public Response getBlobUrl(@InjectParam AuthenticatedUser user,
                                @PathParam("blobId") BlobId blobId,
@@ -132,7 +132,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     @GET
-    @Path("{blobId}/{resourceId}/image_url")
+    @Path("{blobId}/{resourceId}/imageUrl")
     @Override
     public Response getImageUrl(@InjectParam AuthenticatedUser user,
                                 @PathParam("blobId") BlobId blobId,

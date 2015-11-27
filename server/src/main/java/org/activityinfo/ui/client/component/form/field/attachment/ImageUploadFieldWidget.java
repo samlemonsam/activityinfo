@@ -144,7 +144,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     private void download() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blob_url");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blobUrl");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
@@ -229,7 +229,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     public void fetchImageServingUrl() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/image_url");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/imageUrl");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
