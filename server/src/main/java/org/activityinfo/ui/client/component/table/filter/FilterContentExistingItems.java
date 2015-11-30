@@ -214,7 +214,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         final List<Projection> toShow = Lists.newArrayList();
         for (Projection projection : allItems) {
             final String value = column.getValue(projection);
-            if (Strings.isNullOrEmpty(stringFilter) || value.contains(stringFilter)) {
+            if (Strings.isNullOrEmpty(stringFilter) || value.toUpperCase().contains(stringFilter.toUpperCase())) {
                 toShow.add(projection);
             }
         }
