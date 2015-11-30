@@ -72,7 +72,6 @@ public class IndicatorTreePanel extends ContentPanel {
     private ToolBar toolBar;
     private StoreFilterField filter;
     private boolean multipleSelection;
-    private boolean loadOnlyQuantityIndicators = false;
 
     /**
      * Keep our own copy of our selection state that is independent of the
@@ -81,12 +80,7 @@ public class IndicatorTreePanel extends ContentPanel {
     private Set<Integer> selection = Sets.newHashSet();
 
     public IndicatorTreePanel(Dispatcher dispatcher, final boolean multipleSelection) {
-        this(dispatcher, multipleSelection, false);
-    }
-
-    public IndicatorTreePanel(Dispatcher dispatcher, final boolean multipleSelection, boolean loadOnlyQuantityIndicators) {
         this.dispatcher = dispatcher;
-        this.loadOnlyQuantityIndicators = loadOnlyQuantityIndicators;
 
         this.setHeadingText(I18N.CONSTANTS.indicators());
         this.setIcon(IconImageBundle.ICONS.indicator());
@@ -295,10 +289,9 @@ public class IndicatorTreePanel extends ContentPanel {
                 for (IndicatorGroup group : form.groupIndicators()) {
                     if (group.getName() == null) {
                         for (IndicatorDTO indicator : group.getIndicators()) {
-                            if (loadOnlyQuantityIndicators && indicator.getType() != FieldTypeClass.QUANTITY) {
-                                continue;
+                            if (indicator.getType() == FieldTypeClass.QUANTITY) {
+                                children.add(indicator);
                             }
-                            children.add(indicator);
                         }
                     } else {
                         children.add(group);
@@ -312,10 +305,9 @@ public class IndicatorTreePanel extends ContentPanel {
     private List<ModelData> createIndicatorList(IndicatorGroup group) {
         ArrayList<ModelData> list = new ArrayList<ModelData>();
         for (IndicatorDTO indicator : group.getIndicators()) {
-            if (loadOnlyQuantityIndicators && indicator.getType() != FieldTypeClass.QUANTITY) {
-                continue;
+            if (indicator.getType() == FieldTypeClass.QUANTITY) {
+                list.add(indicator);
             }
-            list.add(indicator);
         }
 
         return list;
