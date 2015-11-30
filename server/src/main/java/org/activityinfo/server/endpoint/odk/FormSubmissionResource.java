@@ -145,7 +145,7 @@ public class FormSubmissionResource {
         if (!instanceIdService.exists(instanceId)) {
             for (FieldValue fieldValue : formInstance.getFieldValueMap().values()) {
                 if (fieldValue instanceof AttachmentValue) {
-                    persistImageData(user, instance, (AttachmentValue) fieldValue);
+                    persist(user, instance, (AttachmentValue) fieldValue);
                 }
             }
 
@@ -186,7 +186,7 @@ public class FormSubmissionResource {
         }
     }
 
-    private void persistImageData(AuthenticatedUser user, XFormInstance instance, AttachmentValue fieldValue) {
+    private void persist(AuthenticatedUser user, XFormInstance instance, AttachmentValue fieldValue) {
         Attachment attachment = fieldValue.getValues().get(0);
         if (attachment.getFilename() != null) {
             try {
