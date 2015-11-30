@@ -50,6 +50,7 @@ public class CountryTable implements SimpleTable {
         // TODO: polygons
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
+        mapping.setFormLabel("Country");
         mapping.setPrimaryKeyMapping(CuidAdapter.COUNTRY_DOMAIN, "countryId");
         mapping.setOwnerId(ResourceId.ROOT_ID);
         mapping.addTextField(nameField, "name");

@@ -8,10 +8,10 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
-import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.SQLException;
 
@@ -60,6 +60,7 @@ public class DatabaseTable implements SimpleTable {
         mapping.addTextField(descriptionField, "fullName");
         mapping.addReferenceField(ownerField, CuidAdapter.USER_DOMAIN, "ownerUserId");
         mapping.addReferenceField(countryField, CuidAdapter.COUNTRY_DOMAIN, "countryId");
+        mapping.setFormLabel("UserDatabases");
         this.mapping = mapping.build();
     }
 

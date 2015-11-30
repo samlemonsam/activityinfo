@@ -1,17 +1,19 @@
 package org.activityinfo.model.expr.eval;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.diagnostic.AmbiguousSymbolException;
-import org.activityinfo.model.expr.diagnostic.SymbolNotFoundException;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ReferenceType;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -28,112 +30,186 @@ public class FormTreeSymbolTable {
         this.tree = formTree;
     }
 
-    public SymbolBinding resolveSymbol(SymbolExpr symbol) {
-        return match(symbol.getName(), tree.getRootFields());
+    public Collection<FormTree.Node> resolveSymbol(SymbolExpr symbol) {
+
+        LinkedList<String> queryPath = new LinkedList<>();
+        queryPath.push(symbol.getName());
+
+        return matchNodes(queryPath, tree.getRootFields());
     }
-
-    public SymbolBinding resolveCompoundExpr(List<FormTree.Node> fields, CompoundExpr expr) {
-        if (expr.getValue() instanceof SymbolExpr) {
-            SymbolBinding parentField = match(((SymbolExpr) expr.getValue()).getName(), fields);
-            Iterable<FormTree.Node> children = Iterables.filter(parentField.getField().getChildren(), parentField.getChildPredicate());
-
-            return match(expr.getField().getName(), children);
-
-        } else if (expr.getValue() instanceof CompoundExpr) {
-            return resolveCompoundExpr(fields, (CompoundExpr) expr.getValue());
-
-        } else {
-            throw new UnsupportedOperationException("Unexpected value of compound expr: " + expr.getValue());
-        }
-    }
-
 
     /**
-     * Matches a symbol against the fields that are present.
+     * Resolves a compound expression like "province.name" to one or more {@code FormTree.Nodes}
      *
-     * @param name   the symbol name to resolve
-     * @param fields the fields that are present at this level in the tree
+     * @return a binding to the corresponding {@code FormTree.Node}
+     *
+     * @throws AmbiguousSymbolException if the expression could match multiple nodes in the tree
      */
-    private SymbolBinding match(String name, Iterable<FormTree.Node> fields) {
+    public Collection<FormTree.Node> resolveCompoundExpr(CompoundExpr expr) {
 
-        // first try to resolve by id.
-        for (FormTree.Node rootField : fields) {
-            if (rootField.getFieldId().asString().equals(name)) {
-                return new SymbolBinding(rootField);
-            }
-        }
+        LinkedList<String> queryPath = toQueryPath(expr);
 
-        // then try to resolve the field by the code or label
-        List<SymbolBinding> matching = Lists.newArrayList();
-        collectMatching(name, fields, matching);
+        Collection<FormTree.Node> results = matchNodes(queryPath, tree.getRootFields());
 
-        if (matching.size() == 1) {
-            return matching.get(0);
-
-        } else if (matching.isEmpty()) {
-            throw new SymbolNotFoundException(name);
-
-        } else {
-            throw new AmbiguousSymbolException(name, "Could refer to : " +
-                    Joiner.on(", ").join(matching));
-        }
+        return results;
     }
+
 
     /**
-     * Collect all the possible matches against this symbol within the tree
+     * Converts a tree of {@code CompoundExpr}s and {@code SymbolExpr}s to a {@code LinkedList} of 
+     * names to follow.
      */
-    private void collectMatching(String symbolName, Iterable<FormTree.Node> fields, List<SymbolBinding> matching) {
-        boolean matched = false;
-        for (FormTree.Node fieldNode : fields) {
-            SymbolBinding match = matches(symbolName, fieldNode);
-            if (match != null) {
-                matching.add(match);
-                matched = true;
+    @VisibleForTesting
+    static LinkedList<String> toQueryPath(CompoundExpr expr) {
+
+        // Recursively convert the compound expr to a linked list of symbols
+
+        LinkedList<String> queryPath = new LinkedList<>();
+        while(true) {
+            queryPath.push(expr.getField().getName());
+            if(expr.getValue() instanceof CompoundExpr) {
+                expr = (CompoundExpr) expr.getValue();
+            } else if(expr.getValue() instanceof SymbolExpr) {
+                queryPath.push(((SymbolExpr) expr.getValue()).getName());
+                break;
             }
         }
-        // if we do not have a direct match, consider descendants
-        if (!matched) {
-            for (FormTree.Node field : fields) {
-                collectMatching(symbolName, field.getChildren(), matching);
-            }
+        return queryPath;
+    }
+
+
+    private Collection<FormTree.Node> matchNodes(List<String> queryPath, Iterable<FormTree.Node> fields) {
+        if(queryPath.size() == 1) {
+            return matchTerminal(head(queryPath), fields);
+        } else {
+            return matchReferenceField(queryPath, fields);
         }
     }
 
-    private SymbolBinding matches(String symbolName, FormTree.Node fieldNode) {
+    private List<String> next(List<String> queryPath) {
+        return queryPath.subList(1, queryPath.size());
+    }
+
+    private String head(List<String> queryPath) {
+        return queryPath.get(0);
+    }
+
+    private Collection<FormTree.Node> matchReferenceField(List<String> queryPath, Iterable<FormTree.Node> fields) {
+
+        List<Collection<FormTree.Node>> results = Lists.newArrayList();
+
+        for (FormTree.Node field : fields) {
+            Collection<FormTree.Node> result = unionMatches(queryPath, field);
+            if (!result.isEmpty()) {
+                results.add(result);
+            }
+        }
+        if(results.size() > 1) {
+            throw new AmbiguousSymbolException(Joiner.on('.').join(queryPath));
+        } else if(results.size() == 1) {
+            return results.get(0);
+        }
+
+        // If no results, check search at the next level
+        List<FormTree.Node> children = childrenOf(fields);
+        if(children.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return matchReferenceField(queryPath, children);
+        }
+    }
+
+    private Collection<FormTree.Node> unionMatches(List<String> queryPath, FormTree.Node referenceField) {
+        List<FormTree.Node> results = Lists.newArrayList();
+        for (ResourceId formClassId : referenceField.getRange()) {
+            FormClass childForm = tree.getFormClass(formClassId);
+            Iterable<FormTree.Node> childFields = referenceField.getChildren(formClassId);
+
+            if(matches(head(queryPath), referenceField) || matches(head(queryPath), childForm)) {
+                results.addAll(matchNodes(next(queryPath), childFields));
+            } else {
+                results.addAll(matchNodes(queryPath, childFields));
+            }
+        }
+        return results;
+    }
+
+
+    /**
+     * Matches a terminal symbol in a query path.
+     * @param symbolName the symbol name
+     * @param fields the fields against which to match
+     */
+    private Collection<FormTree.Node> matchTerminal(String symbolName, Iterable<FormTree.Node> fields) {
+
+        List<FormTree.Node> matches = Lists.newLinkedList();
+
+        // Check for a match of the query Path head to the set of fields
+        for (FormTree.Node field : fields) {
+            if(matches(symbolName, field)) {
+                matches.add(field);
+            }
+        }
+
+        // If there is exactly one matching field, then we consider it a good match
+        // and we return 
+        if(matches.size() == 1) {
+            return matches;
+        }
+
+        // If there is MORE than one match, we consider the expression to be ambiguous
+        if(matches.size() > 1) {
+            throw new AmbiguousSymbolException(symbolName, "Could refer to " + Joiner.on(", ").join(matches));
+        }
+
+        // If we found absolutely nothing, then continue to the next level
+        List<FormTree.Node> children = childrenOf(fields);
+        if(children.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return matchTerminal(symbolName, children);
+        }
+    }
+
+
+    private List<FormTree.Node> childrenOf(Iterable<FormTree.Node> fields) {
+        List<FormTree.Node> children = Lists.newArrayList();
+        for (FormTree.Node field : fields) {
+            children.addAll(field.getChildren());
+        }
+        return children;
+    }
+
+    private boolean matches(String symbolName, FormTree.Node fieldNode) {
 
         // Match against label and code case insensitively
         if (symbolName.equalsIgnoreCase(fieldNode.getField().getCode()) ||
                 symbolName.equalsIgnoreCase(fieldNode.getField().getLabel())) {
-            return new SymbolBinding(fieldNode);
+            return true;
         }
         // Require exact match with the field id
         if (symbolName.equals(fieldNode.getFieldId().asString())) {
-            return new SymbolBinding(fieldNode);
+            return true;
         }
 
         // Check for super properties defined on the FormClass
         for (ResourceId superProperty : fieldNode.getField().getSuperProperties()) {
             if (symbolName.equals(superProperty.asString())) {
-                return new SymbolBinding(fieldNode);
+                return true;
             }
         }
+
+        return false;
+    }
+
+    private boolean matches(String symbolName, FormClass formClass) {
 
         // The field can also be matched against the _range_ of a field: for example,
         // we might be interested in "Province.Name", where "Province" is a form class.
         // In this event, match any reference field which includes in its range a form class with
         // the id or label of "Province"
-        if (fieldNode.getType() instanceof ReferenceType) {
-            ReferenceType fieldType = (ReferenceType) fieldNode.getType();
-            for (ResourceId formClassId : fieldType.getRange()) {
-                if (formClassId.asString().equals(symbolName)) {
-                    return new SymbolBinding(fieldNode, formClassId);
-                }
-//                String formLabel = tree.getFormClass(formClassId).getLabel();
-//                if(formLabel.equalsIgnoreCase(symbolName)) {
-//                    return new SymbolBinding(fieldNode, formClassId);
-//                }
-            }
-        }
-        return null;
+        return formClass.getLabel().equalsIgnoreCase(symbolName) ||
+                formClass.getId().equals(symbolName);
     }
+
 }

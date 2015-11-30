@@ -53,7 +53,7 @@
                code="40" x1="0" y1="0" x2="0" y2="0"/>
 
   <adminEntity adminLevelId="2" adminEntityId="10"
-               adminEntityParentId="4" name="Bukavu" code="203" x1="0" y1="0" x2="0"
+               adminEntityParentId="2" name="Bukavu" code="203" x1="0" y1="0" x2="0"
                y2="0"/>
   <adminEntity adminLevelId="2" adminEntityId="11"
                adminEntityParentId="2" name="Walungu" code="201" x1="0" y1="0" x2="0"
@@ -353,8 +353,7 @@
 
   <location locationId="2" name="Ngshwe" axe="Bunia-Wakombe" locationTypeId="1" X="1.323"
             Y="28.232" timeEdited="2"/>
-  <locationAdminLink locationId="2" adminEntityId="2"/>
-  <locationAdminLink locationId="2" adminEntityId="11"/>
+  <locationAdminLink locationId="2" adminEntityId="1"/>
 
   <site siteId="2" activityId="1" locationId="2" partnerId="1"
         Date1="2009-01-15" Date2="2009-01-16" DateCreated="2009-02-01"

@@ -26,7 +26,7 @@ public class ProjectTable implements SimpleTable {
         int databaseId = CuidAdapter.getLegacyIdFromCuid(classId);
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(classId, "partner");
-        mapping.setFormLabel("Partner");
+        mapping.setFormLabel("Project");
         mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.PROJECT_DOMAIN, "projectId");
         mapping.setFromClause("project base");

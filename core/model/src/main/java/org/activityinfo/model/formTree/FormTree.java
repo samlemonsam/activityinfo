@@ -72,6 +72,19 @@ public class FormTree {
             return children;
         }
 
+        /**
+         * @return the fields that are defined one of the classes in this field's range
+         */
+        public Iterable<Node> getChildren(ResourceId formClassId) {
+            List<Node> matching = Lists.newArrayList();
+            for (Node child : children) {
+                if(child.getDefiningFormClass().getId().equals(formClassId)) {
+                    matching.add(child);
+                }
+            }
+            return matching;
+        }
+
         public FieldPath getPath() {
             return path;
         }
@@ -204,6 +217,8 @@ public class FormTree {
         public boolean isCalculated() {
             return getType() instanceof ExprFieldType || getType() instanceof CalculatedFieldType;
         }
+
+
     }
 
     public enum SearchOrder {

@@ -44,10 +44,6 @@ public class ColumnSetMatchers {
                 description.appendText("column with values").appendValueList("[", ", ", "]", values);
             }
 
-            @Override
-            protected void describeMismatchSafely(ColumnView item, Description mismatchDescription) {
-
-            }
         };
     }
     

@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.eval.FormTreeSymbolTable;
-import org.activityinfo.model.expr.eval.SymbolBinding;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -16,8 +15,10 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.store.query.impl.CollectionScanBatch;
 import org.activityinfo.store.query.impl.Slot;
+import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -66,6 +67,8 @@ public class QueryEvaluator {
         return batch.addColumn(tree.getRootField(field.getId()));
     }
 
+ 
+    
     private class ColumnExprVisitor implements ExprVisitor<Slot<ColumnView>> {
 
         @Override
@@ -82,13 +85,7 @@ public class QueryEvaluator {
                 return batch.addConstantColumn(rootFormClass, rootFormClass.getId().asString());
             }
 
-            SymbolBinding fieldMatch = resolver.resolveSymbol(symbolExpr);
-            if(fieldMatch.getField().isCalculated()) {
-                CalculatedFieldType type = (CalculatedFieldType) fieldMatch.getField().getType();
-                return evaluateExpression(type.getExpressionAsString());
-            } else {
-                return batch.addColumn(fieldMatch.getField());
-            }
+            return addColumn(resolver.resolveSymbol(symbolExpr));
         }
 
         @Override
@@ -98,9 +95,7 @@ public class QueryEvaluator {
 
         @Override
         public Slot<ColumnView> visitCompoundExpr(CompoundExpr compoundExpr) {
-            SymbolBinding binding = resolver.resolveCompoundExpr(tree.getRootFields(), compoundExpr);
-            LOGGER.info("Resolved expr '" + compoundExpr + "' to " + binding.getField().debugPath());
-            return batch.addColumn(binding.getField());
+            return addColumn(resolver.resolveCompoundExpr(compoundExpr));
         }
 
         @Override
@@ -122,6 +117,26 @@ public class QueryEvaluator {
                 };
             } else {
                 return batch.addExpression(rootFormClass, call);
+            }
+        }
+
+        private Slot<ColumnView> addColumn(Collection<FormTree.Node> nodes) {
+            // Recursively expand any calculated fields
+            List<Slot<ColumnView>> expandedNodes = Lists.newArrayList();
+            for (FormTree.Node node : nodes) {
+                if(node.isCalculated()) {
+                    CalculatedFieldType type = (CalculatedFieldType) node.getField().getType();
+                    expandedNodes.add(evaluateExpression(type.getExpressionAsString()));
+                } else {
+                    expandedNodes.add(batch.addColumn(node));
+                }
+            }
+            if(expandedNodes.isEmpty()) {
+                return batch.addEmptyColumn(rootFormClass);
+            } else if(expandedNodes.size() == 1) {
+                return expandedNodes.get(0);
+            } else {
+                return new ColumnCombiner(expandedNodes);
             }
         }
     }

@@ -5,10 +5,10 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
-import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.SQLException;
 
@@ -30,6 +30,7 @@ public class UserTable implements SimpleTable {
         nameField.setRequired(true);
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
+        mapping.setFormLabel("Users");
         mapping.setOwnerId(ResourceId.ROOT_ID);
         
         mapping.setPrimaryKeyMapping(CuidAdapter.USER_DOMAIN, "UserId");

@@ -3,9 +3,9 @@ package org.activityinfo.store.query.impl.builders;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.views.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.views.StringArrayColumnView;
-import org.activityinfo.store.query.impl.Slot;
 
 import java.util.List;
 
@@ -61,7 +61,7 @@ public class ColumnCombiner implements ColumnViewBuilder {
 
         for(int i=0;i!=numRows;++i) {
             for(int j=0;j!=numCols;++j) {
-                String value = cols[j].getString(j);
+                String value = cols[j].getString(i);
                 if(value != null) {
                     values[i] = value;
                     break;

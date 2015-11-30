@@ -32,20 +32,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 
 public class MySqlCatalogTest extends AbstractMySqlTest {
@@ -76,18 +76,21 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void testLocation() {
-        
+
         FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
         
-        query(CuidAdapter.locationFormClass(1), "label", "axe", "province.name" /* "Territoire.name" */);
+        query(CuidAdapter.locationFormClass(1), "label", "axe", "territoire.province.name", "territoire.name",
+                "province.name");
         assertThat(column("label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga", "Boga"));
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
-        assertThat(column("province.name"), hasValues("Sud Kivu", "Sud Kivu", "Ituri", "Ituri"));
-       // assertThat(column("territoire.name"), hasValues("Shabunda", "Walungu", "Irumu", "Irumu"));
+        assertThat(column("territoire.name"), hasValues("Shabunda", null, "Irumu", "Bukavu"));
+        assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
+        assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
     }
     
     @Test
     public void testAdmin() {
+
         query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");
         assertThat(column("province.name"), hasValues("Ituri", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
         assertThat(column("name"), hasValues("Bukavu", "Walungu", "Shabunda", "Kalehe", "Irumu"));
@@ -96,7 +99,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void testAdminTree() {
-        FormTree formTree = queryFormTree(adminLevelFormClass(2));
+        FormTree formTree = queryFormTree(activityFormClass(1));
 
         FormTreePrettyPrinter.print(formTree);
     }
