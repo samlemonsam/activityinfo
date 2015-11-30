@@ -31,7 +31,7 @@ public class InstanceSuggestOracle extends SuggestOracle {
         if (suggestions.isEmpty()) {
             for(FormInstance instance : instances) {
                 String label = FormInstanceLabeler.getLabel(instance);
-                if (label.contains(request.getQuery())) {
+                if (request.getQuery() != null && label.toUpperCase().contains(request.getQuery().toUpperCase())) {
                     suggestions.add(new org.activityinfo.ui.client.component.form.field.suggest.Suggestion(instance));
                 }
             }
