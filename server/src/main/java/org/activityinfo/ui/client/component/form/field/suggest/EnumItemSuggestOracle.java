@@ -52,7 +52,7 @@ public class EnumItemSuggestOracle extends SuggestOracle {
         // if scorer didn't give any results try to iterate with "contains"
         if (suggestions.isEmpty()) {
             for (EnumItem enumItem : enumItems) {
-                if (enumItem.getLabel().contains(request.getQuery())) {
+                if (request.getQuery() != null && enumItem.getLabel().toUpperCase().contains(request.getQuery().toUpperCase())) {
                     suggestions.add(new org.activityinfo.ui.client.component.form.field.suggest.Suggestion(enumItem));
                 }
             }

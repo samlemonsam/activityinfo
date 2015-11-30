@@ -6,9 +6,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 
@@ -81,6 +79,15 @@ public class LatinPlaceNameScorerTest {
         double score = scorer.score("Jubbada Hoose (Lower Juba)", "Lower Juba");
         System.out.println(score);
         assertThat(score, greaterThan(InstanceScorer.MINIMUM_SCORE));
+    }
+
+    @Test
+    public void caseInsensitive() {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+
+        double score = scorer.score("q1", "Q1");
+        System.out.println(score);
+        assertThat(score, equalTo(1.0));
     }
 //
 //    @Test
