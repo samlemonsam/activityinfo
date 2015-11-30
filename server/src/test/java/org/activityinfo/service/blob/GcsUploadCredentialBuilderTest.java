@@ -50,7 +50,7 @@ public class GcsUploadCredentialBuilderTest {
 
     }
 
-    @Test // run manually only
+    //@Test // run manually only
     public void identityService() {
         Properties properties = new Properties();
         properties.setProperty("service.account.p12.classpath.fileName", "ai-staging-e41defb26a88.p12");
