@@ -28,7 +28,7 @@ public class FieldValueParserFactory {
             }
         }
         if (fieldType instanceof GeoPointType) return new GeoPointFieldValueParser();
-        if (fieldType instanceof AttachmentType) return new ImageFieldValueParser();
+        if (fieldType instanceof AttachmentType) return new AttachmentFieldValueParser();
         if (fieldType instanceof LocalDateType) return new LocalDateFieldValueParser();
         if (fieldType instanceof NarrativeType) {
             if (legacy) {

@@ -203,7 +203,7 @@ public class FormSubmissionResource {
                 LOGGER.log(Level.SEVERE, "Unable to parse input", messagingException);
                 throw new WebApplicationException(Response.status(BAD_REQUEST).build());
             } catch (IOException ioException) {
-                LOGGER.log(Level.SEVERE, "Could not write image to GCS", ioException);
+                LOGGER.log(Level.SEVERE, "Could not write attachment to GCS", ioException);
                 throw new WebApplicationException(Response.status(SERVICE_UNAVAILABLE).build());
             }
         }

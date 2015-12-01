@@ -2,22 +2,23 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.net.MediaType;
 import com.google.inject.Inject;
+import org.activityinfo.io.xform.form.BindingType;
+import org.activityinfo.io.xform.form.Item;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.ResourceLocatorSync;
-import org.activityinfo.io.xform.form.BindingType;
-import org.activityinfo.io.xform.form.Item;
 import org.activityinfo.service.lookup.ReferenceChoice;
 
 import java.util.ArrayList;
@@ -61,7 +62,10 @@ public class OdkFormFieldBuilderFactory {
             return new SimpleInputBuilder(BindingType.GEOPOINT);
         }
         if (fieldType instanceof AttachmentType) {
-            return new UploadBuilder("image/*");
+            AttachmentType attachmentType = (AttachmentType) fieldType;
+            String mimeType = attachmentType.getKind() == AttachmentType.Kind.IMAGE ?
+                    MediaType.ANY_IMAGE_TYPE.toString() : MediaType.ANY_TYPE.toString();
+            return new UploadBuilder(mimeType);
         }
         if (fieldType instanceof LocalDateType) {
             return new SimpleInputBuilder(BindingType.DATE);
