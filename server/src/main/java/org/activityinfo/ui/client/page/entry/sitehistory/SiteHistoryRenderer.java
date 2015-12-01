@@ -63,7 +63,7 @@ public class SiteHistoryRenderer {
         boolean first = true;
         for (SiteHistoryDTO history : histories) {
 
-            if (isAttachmentHistoryEntry(history.getEntityName())) {
+            if (isAttachmentHistoryEntry(history.getJson())) {
                  continue; // skip history entries for attachments
             }
 
