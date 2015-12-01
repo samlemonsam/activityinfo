@@ -64,7 +64,7 @@ public class OdkFormFieldBuilderFactory {
         if (fieldType instanceof AttachmentType) {
             AttachmentType attachmentType = (AttachmentType) fieldType;
             String mimeType = attachmentType.getKind() == AttachmentType.Kind.IMAGE ?
-                    MediaType.ANY_IMAGE_TYPE.toString() : MediaType.ANY_TYPE.toString();
+                    MediaType.ANY_IMAGE_TYPE.toString() : "application/octet-stream";
             return new UploadBuilder(mimeType);
         }
         if (fieldType instanceof LocalDateType) {
