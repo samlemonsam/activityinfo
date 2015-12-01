@@ -2,7 +2,6 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.Item;
@@ -62,10 +61,7 @@ public class OdkFormFieldBuilderFactory {
             return new SimpleInputBuilder(BindingType.GEOPOINT);
         }
         if (fieldType instanceof AttachmentType) {
-            AttachmentType attachmentType = (AttachmentType) fieldType;
-            String mimeType = attachmentType.getKind() == AttachmentType.Kind.IMAGE ?
-                    MediaType.ANY_IMAGE_TYPE.toString() : "application/octet-stream";
-            return new UploadBuilder(mimeType);
+            return new UploadBuilder("image/*");
         }
         if (fieldType instanceof LocalDateType) {
             return new SimpleInputBuilder(BindingType.DATE);

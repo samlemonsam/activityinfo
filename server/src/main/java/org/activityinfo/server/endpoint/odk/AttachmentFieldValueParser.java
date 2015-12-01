@@ -10,6 +10,6 @@ class AttachmentFieldValueParser implements FieldValueParser {
     public FieldValue parse(String text) {
         if (text == null) throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
 
-        return new AttachmentValue(new Attachment("application/octet-stream", text, ResourceId.generateId().asString()));
+        return new AttachmentValue(new Attachment("image/*", text, ResourceId.generateId().asString()));
     }
 }
