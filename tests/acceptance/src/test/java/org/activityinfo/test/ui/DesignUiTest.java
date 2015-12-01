@@ -29,6 +29,7 @@ import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.design.DesignPage;
 import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -148,6 +149,18 @@ public class DesignUiTest {
                 property("type", "quantity"),
                 property("code", "quantity_code")
         );
+    }
+    
+    @Test
+    public void globalDatabase() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE), property("country", "Global"));
+        driver.createForm(name(FORM),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        FormDesignerPage formDesignerPage = driver.openFormDesigner(DATABASE, FORM);
+        formDesignerPage.save();
     }
 
     private FluentElement findInputEditor(FluentElement container) {

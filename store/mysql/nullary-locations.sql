@@ -4,7 +4,7 @@
 
 insert into locationtype (name,reuse, countryid, workflowid)
   select "Country", 0, countryid, "closed" from country
-    where countryid not in (select lt.countryid from locationtype lt where lt.name ='Country');
+    where countryid not in (select lt.countryid from locationtype lt where lt.name ='Country' and boundAdminLevelId is null);
 
 insert location (locationid, name, locationtypeid, x, y, timeEdited)
   select lt.locationtypeid, c.name, lt.locationtypeid, (c.x1+c.x2)/2, (c.y1+c.y2)/2,

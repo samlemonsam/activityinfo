@@ -201,11 +201,21 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         JSONObject properties = new JSONObject();
         properties.put("name", map.getAlias());
-        properties.put("countryId", 1);
+        properties.put("countryId", findCountryId(map.getString("country", "RDC")));
 
         createEntityAndBindId("UserDatabase", properties);
 
         createdDatabases.add(map.getName());
+    }
+
+    private int findCountryId(String countryName) {
+        if("RDC".equals(countryName)) {
+            return 1;
+        } else if("Global".equals(countryName)) {
+            return 3;
+        } else {
+            throw new UnsupportedOperationException("Country: " + countryName);
+        }
     }
 
     @Override
