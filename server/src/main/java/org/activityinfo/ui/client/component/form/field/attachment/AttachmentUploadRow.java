@@ -44,7 +44,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.model.util.Holder;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 
 import javax.annotation.Nullable;
@@ -63,7 +62,6 @@ public class AttachmentUploadRow extends Composite {
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
-    private final Holder<Attachment> value;
     private final AttachmentUploadRow.ValueChangedCallback valueChangedCallback;
     private final Uploader uploader;
 
@@ -99,10 +97,9 @@ public class AttachmentUploadRow extends Composite {
     public AttachmentUploadRow(ResourceId resourceId, Attachment value, final FieldWidgetMode fieldWidgetMode,
                                AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
         initWidget(ourUiBinder.createAndBindUi(this));
-        this.value = Holder.of(value);
         this.valueChangedCallback = valueChangedCallback;
 
-        this.uploader = new Uploader(formPanel, fileUpload, this.value, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
+        this.uploader = new Uploader(formPanel, fileUpload, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
             public void onFailure(@Nullable Throwable exception) {
                 uploadFailed.setVisible(true);
@@ -113,6 +110,7 @@ public class AttachmentUploadRow extends Composite {
                 AttachmentUploadRow.this.upload();
             }
         });
+        this.uploader.setAttachment(value);
 
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
@@ -153,7 +151,8 @@ public class AttachmentUploadRow extends Composite {
 
     private void setFileName() {
         fileName.setInnerSafeHtml(SafeHtmlUtils.fromString(
-                !Strings.isNullOrEmpty(value.get().getBlobId()) ? " " + value.get().getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
+                !Strings.isNullOrEmpty(uploader.getAttachment().getBlobId()) ?
+                        " " + uploader.getAttachment().getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
     }
 
     private static native void triggerUpload(Element element) /*-{
@@ -164,8 +163,8 @@ public class AttachmentUploadRow extends Composite {
         return readOnly;
     }
 
-    public Holder<Attachment> getValue() {
-        return value;
+    public Attachment getValue() {
+        return uploader.getAttachment();
     }
 
     public void setReadOnly(boolean readOnly) {
@@ -247,13 +246,13 @@ public class AttachmentUploadRow extends Composite {
     private void setThumbnail() {
         thumbnailContainer.setVisible(false);
         thumbnailContainer.clear();
-        if (Strings.isNullOrEmpty(value.get().getMimeType())) {
+        if (Strings.isNullOrEmpty(uploader.getAttachment().getMimeType())) {
             return;
         }
 
-        if (value.get().getMimeType().contains("pdf")) {
+        if (uploader.getAttachment().getMimeType().contains("pdf")) {
             appendThumbnailImage("icons.filePdf");
-        } else if (value.get().getMimeType().startsWith("text")) {
+        } else if (uploader.getAttachment().getMimeType().startsWith("text")) {
             appendThumbnailImage("icons.file");
         }
     }

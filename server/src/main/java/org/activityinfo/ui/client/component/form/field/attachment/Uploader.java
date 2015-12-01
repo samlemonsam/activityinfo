@@ -33,7 +33,6 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.model.util.Holder;
 import org.activityinfo.service.blob.UploadCredentials;
 
 import javax.annotation.Nullable;
@@ -55,14 +54,13 @@ public class Uploader {
     private final VerticalPanel hiddenFieldsContainer;
     private final UploadCallback uploadCallback;
 
-    private final Holder<Attachment> attachment;
+    private Attachment attachment = new Attachment();
     private final ResourceId resourceId;
 
-    public Uploader(FormPanel formPanel, FileUpload fileUpload, Holder<Attachment> attachment, ResourceId resourceId,
+    public Uploader(FormPanel formPanel, FileUpload fileUpload, ResourceId resourceId,
                     VerticalPanel hiddenFieldsContainer, UploadCallback uploadCallback) {
         this.formPanel = formPanel;
         this.fileUpload = fileUpload;
-        this.attachment = attachment;
         this.resourceId = resourceId;
         this.hiddenFieldsContainer = hiddenFieldsContainer;
         this.uploadCallback = uploadCallback;
@@ -107,14 +105,22 @@ public class Uploader {
         String fileName = fileName();
         String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName, "application/octet-stream");
 
-        attachment.get().setMimeType(mimeType);
-        attachment.get().setFilename(fileName);
-        attachment.get().setBlobId(blobId);
+        attachment.setMimeType(mimeType);
+        attachment.setFilename(fileName);
+        attachment.setBlobId(blobId);
         return "/service/blob/credentials/" + blobId + "/" + resourceId.asString() + "/" + fileName;
     }
 
+    public Attachment getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
     public String getBaseUrl() {
-        return "/service/blob/" + attachment.get().getBlobId() + "/" + resourceId.asString();
+        return "/service/blob/" + attachment.getBlobId() + "/" + resourceId.asString();
     }
 
     private String fileName() {

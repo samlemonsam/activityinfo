@@ -38,7 +38,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.util.Holder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -61,7 +60,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private final Uploader uploader;
 
     private boolean readOnly;
-    private Holder<Attachment> attachment = Holder.of(new Attachment());
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
 
@@ -116,7 +114,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             }
         });
 
-        uploader = new Uploader(formPanel, fileUpload, attachment, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
+        uploader = new Uploader(formPanel, fileUpload, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
             public void onFailure(@Nullable Throwable exception) {
                 uploadFailed.setVisible(true);
@@ -273,7 +271,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     private AttachmentValue getValue() {
         AttachmentValue value = new AttachmentValue();
-        value.getValues().add(attachment.get());
+        value.getValues().add(uploader.getAttachment());
         return value;
     }
 
@@ -287,7 +285,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         clearValue();
 
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
-            attachment.set(value.getValues().iterator().next());
+            uploader.setAttachment(value.getValues().iterator().next());
             fetchImageServingUrl();
         }
 
@@ -303,7 +301,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     public void clearValue() {
         image.setUrl("");
         servingUrl = null;
-        attachment.set(new Attachment());
+        uploader.setAttachment(new Attachment());
         uploadFailed.setVisible(false);
         downloadButton.setVisible(false);
         clearButton.setVisible(false);
