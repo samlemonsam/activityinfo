@@ -209,7 +209,7 @@ public class FormTreeSymbolTable {
         // In this event, match any reference field which includes in its range a form class with
         // the id or label of "Province"
         return formClass.getLabel().equalsIgnoreCase(symbolName) ||
-                formClass.getId().equals(symbolName);
+                formClass.getId().asString().equals(symbolName);
     }
 
 }

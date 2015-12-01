@@ -278,6 +278,8 @@ public class PivotAdapter {
         appendFilter("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location, filter);
         
         
+        
+        
         if(filter.length() > 0) {
             LOGGER.info("Filter: " + filter);
             return new ExprValue(filter.toString());

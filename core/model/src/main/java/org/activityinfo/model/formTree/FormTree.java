@@ -1,5 +1,6 @@
 package org.activityinfo.model.formTree;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
@@ -270,11 +271,15 @@ public class FormTree {
     }
 
     public FormClass getFormClass(ResourceId formClassId) {
-        FormClass formClass = formClassMap.get(formClassId);
-        if(formClass == null) {
+        Optional<FormClass> formClass = getFormClassIfPresent(formClassId);
+        if(!formClass.isPresent()) {
             throw new IllegalArgumentException("No such FormClass: " + formClassId);
         }
-        return formClass;
+        return formClass.get();
+    }
+
+    public Optional<FormClass> getFormClassIfPresent(ResourceId formClassId) {
+        return Optional.fromNullable(formClassMap.get(formClassId));
     }
 
     public Node getNodeByPath(FieldPath path) {
