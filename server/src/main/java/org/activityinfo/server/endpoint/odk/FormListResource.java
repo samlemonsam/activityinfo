@@ -58,17 +58,6 @@ public class FormListResource {
                             .path("xform")
                             .build());
 
-                    // skip itemset for LCCA form: earlier versions triggered
-                    // a bug in ODK and have corrupted the sqlite database on those
-                    // devices.
-                    if (activity.getId() != 11218) {
-                        form.setManifestUrl(uri.getBaseUriBuilder()
-                                .path(FormResource.class)
-                                .path(Integer.toString(activity.getId()))
-                                .path("manifest")
-                                .build());
-                    }
-
                     formList.getItems().add(form);
                 }
             }
