@@ -45,7 +45,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     private static final int ONE_MEGABYTE = 1 << 20;
     private static final Logger LOGGER = Logger.getLogger(GcsBlobFieldStorageService.class.getName());
 
-    public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 100;
+    public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 10;
 
     private final AppIdentityService appIdentityService;
     private final GcsService gcsService;
