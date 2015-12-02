@@ -34,11 +34,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Imported {0} rows from {1}. Retry import of {2} failed  rows?")
     String imported(int completed, int total, int failed);
 
-    /**
-     * Translated "{0,number,integer}Q{1,number,integer}".
-     *
-     * @return translated "{0,number,integer}Q{1,number,integer}"
-     */
     @DefaultMessage("{0,number,#}Q{1}")
     @Key("quarterName")
     String quarter(int year, int quarter);
@@ -268,8 +263,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @Messages.DefaultMessage("Correct value will be imported with {0}% confidence.#013;Matched to: {1}")
     String importValidationCellTooltip(String matchedValue, int confidencePercent);
-    
+
     @Messages.DefaultMessage("{0,date,medium} to {1,date,medium}")
     String dateRange(Date formDate, Date toDate);
-
 }
