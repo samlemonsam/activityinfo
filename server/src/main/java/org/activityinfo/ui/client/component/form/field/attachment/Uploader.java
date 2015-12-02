@@ -54,8 +54,8 @@ public class Uploader {
     private final VerticalPanel hiddenFieldsContainer;
     private final UploadCallback uploadCallback;
 
-    private Attachment attachment = new Attachment();
     private final ResourceId resourceId;
+    private Attachment attachment = new Attachment();
 
     public Uploader(FormPanel formPanel, FileUpload fileUpload, ResourceId resourceId,
                     VerticalPanel hiddenFieldsContainer, UploadCallback uploadCallback) {
@@ -66,7 +66,15 @@ public class Uploader {
         this.uploadCallback = uploadCallback;
     }
 
-    public void requestUploadUrl() {
+    public Attachment getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
+    public void upload() {
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, URL.encode(createUploadUrl()));
             requestBuilder.sendRequest(null, new RequestCallback() {
@@ -108,19 +116,16 @@ public class Uploader {
         attachment.setMimeType(mimeType);
         attachment.setFilename(fileName);
         attachment.setBlobId(blobId);
+
         return "/service/blob/credentials/" + blobId + "/" + resourceId.asString() + "/" + fileName;
     }
 
-    public Attachment getAttachment() {
-        return attachment;
-    }
-
-    public void setAttachment(Attachment attachment) {
-        this.attachment = attachment;
-    }
-
     public String getBaseUrl() {
-        return "/service/blob/" + attachment.getBlobId() + "/" + resourceId.asString();
+        return getBaseUrl(attachment.getBlobId(), resourceId);
+    }
+
+    public static String getBaseUrl(String blobId, ResourceId resourceId) {
+        return "/service/blob/" + blobId + "/" + resourceId.asString();
     }
 
     private String fileName() {

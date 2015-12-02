@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
@@ -9,41 +8,19 @@
   <ui:with field="style" type="org.activityinfo.ui.client.widget.loading.LoadingStylesheet"/>
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
-  <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
-    <g:HTMLPanel addStyleNames="form-group">
-      <div class="col-xs-9">
-        <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
-        <a href="#" ui:field="browseButton">
-          <ui:text from="{i18n.browse}"/>
-        </a>
-        &nbsp;
-        <span ui:field="fileName"/>
-      </div>
-      <g:HTMLPanel addStyleNames="col-xs-3">
-        <g:HTMLPanel ui:field="loadingContainer" visible="false">
-          <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
-               ui:field="loadingImage"/>
-        </g:HTMLPanel>
-
-        <g:HTMLPanel ui:field="thumbnailContainer" visible="false"/>
-
-        <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
-          <div class="help-block">
-            <ui:text from="{i18n.uploadFailed}"/>
-          </div>
-        </g:HTMLPanel>
-
-        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="addButton">
-          <span class="{icons.add}"/>
-        </g:Button>
-        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton">
-          <span class='{icons.remove}'/>
-        </g:Button>
-        <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton" visible="false">
-          <span class='{icons.arrowDown}'/>
-        </g:Button>
+  <g:HTMLPanel addStyleNames="form-group">
+    <div class="col-xs-11">
+      <g:HTMLPanel ui:field="thumbnailContainer">
+        <span class="{icons.file}" />
       </g:HTMLPanel>
-      <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
+      &nbsp;
+      <a href="#" name="_blank" ui:field="fileName"/>
+    </div>
+    <g:HTMLPanel addStyleNames="col-xs-1">
+      <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton" visible="false">
+        <span class='{icons.remove}'/>
+      </g:Button>
     </g:HTMLPanel>
-  </g:FormPanel>
+  </g:HTMLPanel>
+
 </ui:UiBinder>

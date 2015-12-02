@@ -129,10 +129,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             @Override
             public void onChange(ChangeEvent event) {
                 if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
-                    uploader.requestUploadUrl();
+                    uploader.upload();
                     highlight(false);
-                } else {
-                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
                 }
             }
         });
@@ -261,18 +259,15 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         clearButton.setVisible(valid);
         image.setUrl(valid ? servingUrl + "=s" + formPanel.getOffsetWidth() : "");
         uploadFailed.setVisible(!valid);
+        browseButton.setLabel(valid ? I18N.CONSTANTS.replace() : I18N.CONSTANTS.browse());
 
         if (valid) {
-            valueUpdater.update(getValue());
+            AttachmentValue attachmentValue = new AttachmentValue();
+            attachmentValue.getValues().add(uploader.getAttachment());
+            valueUpdater.update(attachmentValue);
         } else {
             Log.error("Failed to fetch image serving url.");
         }
-    }
-
-    private AttachmentValue getValue() {
-        AttachmentValue value = new AttachmentValue();
-        value.getValues().add(uploader.getAttachment());
-        return value;
     }
 
     @Override

@@ -24,29 +24,15 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
-
-import javax.annotation.Nullable;
 
 /**
  * @author yuriyz on 8/12/14.
@@ -62,161 +48,73 @@ public class AttachmentUploadRow extends Composite {
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
-    private final AttachmentUploadRow.ValueChangedCallback valueChangedCallback;
-    private final Uploader uploader;
-
     private boolean readOnly;
-    private HandlerRegistration oldHandler;
     private String servingUrl = null;
+    private final Attachment attachment;
+    private final ResourceId resourceId;
 
-    @UiField
-    FileUpload fileUpload;
-    @UiField
-    HTMLPanel loadingContainer;
-    @UiField
-    ImageElement loadingImage;
-    @UiField
-    Button downloadButton;
     @UiField
     Button removeButton;
     @UiField
-    VerticalPanel hiddenFieldsContainer;
-    @UiField
-    Button addButton;
-    @UiField
-    FormPanel formPanel;
-    @UiField
-    HTMLPanel uploadFailed;
+    AnchorElement fileName;
     @UiField
     HTMLPanel thumbnailContainer;
-    @UiField
-    AnchorElement browseButton;
-    @UiField
-    SpanElement fileName;
 
-    public AttachmentUploadRow(ResourceId resourceId, Attachment value, final FieldWidgetMode fieldWidgetMode,
-                               AttachmentUploadRow.ValueChangedCallback valueChangedCallback) {
+    public AttachmentUploadRow(Attachment attachment, ResourceId resourceId) {
         initWidget(ourUiBinder.createAndBindUi(this));
-        this.valueChangedCallback = valueChangedCallback;
 
-        this.uploader = new Uploader(formPanel, fileUpload, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
-            @Override
-            public void onFailure(@Nullable Throwable exception) {
-                uploadFailed.setVisible(true);
-            }
+        this.attachment = attachment;
+        this.resourceId = resourceId;
 
-            @Override
-            public void upload() {
-                AttachmentUploadRow.this.upload();
-            }
-        });
-        this.uploader.setAttachment(value);
-
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
-                    uploader.requestUploadUrl();
-                } else {
-                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
-                }
-            }
-        });
-        downloadButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.open(servingUrl, "_blank", null);
-            }
-        });
-
-        Event.sinkEvents(browseButton, Event.ONCLICK);
-        Event.setEventListener(browseButton, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                if (readOnly) {
-                    Window.alert(I18N.CONSTANTS.controlIsReadOnly());
-                    return;
-                }
-                triggerUpload(fileUpload.getElement());
-            }
-        });
-
-
-        if (!Strings.isNullOrEmpty(value.getBlobId())) {
-            fetchServingUrl();
-        } else {
-            setFileName(); // if no value than just set message
-        }
+        fetchServingUrl();
     }
 
     private void setFileName() {
+        boolean hasFile = !Strings.isNullOrEmpty(servingUrl);
+
+        fileName.setHref(hasFile ? servingUrl : "#");
         fileName.setInnerSafeHtml(SafeHtmlUtils.fromString(
-                !Strings.isNullOrEmpty(uploader.getAttachment().getBlobId()) ?
-                        " " + uploader.getAttachment().getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
+                hasFile ? " " + attachment.getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
     }
 
-    private static native void triggerUpload(Element element) /*-{
-        element.click();
-    }-*/;
+    public Button getRemoveButton() {
+        return removeButton;
+    }
 
     public boolean isReadOnly() {
         return readOnly;
     }
 
     public Attachment getValue() {
-        return uploader.getAttachment();
+        return attachment;
     }
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
-        fileUpload.setEnabled(!readOnly);
-        downloadButton.setEnabled(!readOnly);
-        removeButton.setEnabled(!readOnly);
-        addButton.setEnabled(!readOnly);
-    }
-
-    private void upload() {
-        loadingContainer.setVisible(true);
-        downloadButton.setVisible(false);
-        uploadFailed.setVisible(false);
-
-        if (oldHandler != null) {
-            oldHandler.removeHandler();
-        }
-
-        oldHandler = formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                // event.getResults is always null because of cross-domain upload
-                // we are forced to make additional call to check whether upload is successful
-
-                fetchServingUrl();
-            }
-        });
-        formPanel.submit();
+        this.removeButton.setEnabled(!readOnly);
     }
 
     private void fetchServingUrl() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blobUrl");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, Uploader.getBaseUrl(attachment.getBlobId(), resourceId) + "/blobUrl");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     servingUrl = response.getText();
-                    setUploadState();
+                    setState();
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
                     servingUrl = null;
                     Log.error("Failed to fetch attachment serving url. ", exception);
-                    setUploadState();
+                    setState();
                 }
             });
         } catch (RequestException e) {
             servingUrl = null;
             Log.error("Failed to send request for fetching serving url. ", e);
-            setUploadState();
+            setState();
         }
     }
 
@@ -224,17 +122,8 @@ public class AttachmentUploadRow extends Composite {
         return !Strings.isNullOrEmpty(servingUrl);
     }
 
-    private void setUploadState() {
-        if (isValid()) {
-            loadingContainer.setVisible(false);
-            downloadButton.setVisible(true);
-            setThumbnail();
-
-            valueChangedCallback.fireValueChanged();
-        } else {
-            Log.error("Failed to fetch image serving url.");
-            uploadFailed.setVisible(true);
-        }
+    private void setState() {
+        setThumbnail();
         setFileName();
     }
 
@@ -244,21 +133,16 @@ public class AttachmentUploadRow extends Composite {
     }
 
     private void setThumbnail() {
-        thumbnailContainer.setVisible(false);
         thumbnailContainer.clear();
-        if (Strings.isNullOrEmpty(uploader.getAttachment().getMimeType())) {
-            return;
-        }
 
-        if (uploader.getAttachment().getMimeType().contains("pdf")) {
+        if (attachment.getMimeType().contains("pdf")) {
             appendThumbnailImage("icons.filePdf");
-        } else if (uploader.getAttachment().getMimeType().startsWith("text")) {
+        } else {
             appendThumbnailImage("icons.file");
         }
     }
 
     private void appendThumbnailImage(String iconClassName) {
-        thumbnailContainer.setVisible(true);
         thumbnailContainer.add(new HTML("<span class=\"{" + iconClassName + "}\"/>"));
     }
 }

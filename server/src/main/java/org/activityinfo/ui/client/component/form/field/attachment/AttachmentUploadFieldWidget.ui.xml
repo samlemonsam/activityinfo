@@ -1,3 +1,4 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
         >
@@ -7,6 +8,42 @@
   <ui:with field="style" type="org.activityinfo.ui.client.widget.loading.LoadingStylesheet"/>
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
-  <g:HTMLPanel>
+  <g:HTMLPanel ui:field="rootPanel">
+    <g:HTMLPanel addStyleNames="form-group" ui:field="noAttachments" visible="true">
+      <div class="col-xs-12">
+        <ui:text from="{i18n.noAttachments}"/>
+      </div>
+    </g:HTMLPanel>
+
+    <g:HTMLPanel addStyleNames="form-group" ui:field="rows"/>
+
+    <g:HTMLPanel addStyleNames="form-group">
+      <g:HTMLPanel ui:field="loadingContainer" visible="false">
+        <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
+             ui:field="loadingImage"/>
+      </g:HTMLPanel>
+
+      <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
+        <div class="help-block">
+          <ui:text from="{i18n.uploadFailed}"/>
+        </div>
+      </g:HTMLPanel>
+    </g:HTMLPanel>
+
+    <g:HTMLPanel addStyleNames="form-group">
+      <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
+        <g:HTMLPanel addStyleNames="form-group">
+          <div class="col-xs-12">
+            <a href="#" ui:field="browseButton">
+              <ui:text from="{i18n.browse}"/>
+            </a>
+          </div>
+
+          <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
+          <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+        </g:HTMLPanel>
+      </g:FormPanel>
+    </g:HTMLPanel>
   </g:HTMLPanel>
+
 </ui:UiBinder>

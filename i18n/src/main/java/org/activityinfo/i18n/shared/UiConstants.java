@@ -1623,9 +1623,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("To begin, copy your table from Excel and paste in the box below:")
     String importHelpText();
 
-    @DefaultStringValue("Upload is not allowed during form designing.")
-    String uploadIsNotAllowedInDuringDesing();
-
     @DefaultStringValue("Upload failed")
     String uploadFailed();
     
@@ -1664,4 +1661,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Determines type of attachment (image or file)")
     String attachmentTypeDescription();
+
+    @DefaultStringValue("Replace")
+    String replace();
+
+    @DefaultStringValue("No attachments")
+    String noAttachments();
 }

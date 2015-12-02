@@ -28,6 +28,7 @@ public class GcsUploadCredentialBuilder {
     private final Map<String, String> formFields;
     private final AppIdentityService identityService;
     private final String contentDispositionValue;
+    private String bucketName;
 
     public GcsUploadCredentialBuilder(@Nonnull AppIdentityService identityService,
                                       @Nonnull String fileName) {
@@ -62,8 +63,11 @@ public class GcsUploadCredentialBuilder {
      * @param bucketName The name of the bucket that you want to upload to.
      */
     public GcsUploadCredentialBuilder setBucket(String bucketName) {
-        policyDocument.bucketNameMustEqual(bucketName);
-        formFields.put("bucket", bucketName);
+        // Ignore it for now. Bucket hidden field has to be skipped if it is already included into url to avoid
+        // "bucket can not be created" error.
+        //policyDocument.bucketNameMustEqual(bucketName);
+        //formFields.put("bucket", bucketName);
+        this.bucketName = bucketName;
         return this;
     }
 
@@ -104,7 +108,7 @@ public class GcsUploadCredentialBuilder {
             formFields.put("success_action_status", STATUS_CODE);
             formFields.put("content-disposition", contentDispositionValue);
 
-            String url = String.format(END_POINT_URL_FORMAT, formFields.get("bucket"));
+            String url = String.format(END_POINT_URL_FORMAT, bucketName);
             return new UploadCredentials(url, "POST", formFields);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
