@@ -187,12 +187,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Choose Site")
     String chooseLocation();
 
-    /**
-     * Translated "Here you can choose the site where your intervention takes place. Use the filters below to find sites where interventions have already been added. This will make it possible to to link your activities results to other interventions inside and outside of your organization.".
-     *
-     * @return translated "Here you can choose the site where your intervention takes place. Use the filters below to find sites where interventions have already been added. This will make it possible to to link your activities results to other interventions inside and outside of your organization."
-     */
-    @DefaultStringValue("Here you can choose the location of your form submission. " + "Use the filters below to find locations linked to existing form submissions. " + "This will make it possible to to link your form submissions to other " + "forms inside and outside of your organization.")
+    @DefaultStringValue("Here you can choose the location of your form submission. Use the filters below to find locations linked to existing form submissions. This will make it possible to to link your form submissions to other forms inside and outside of your organization.")
     String chooseLocationDescription();
 
     @DefaultStringValue("Please choose a title for your report before saving")
@@ -803,9 +798,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Retry")
     String retry();
-
-    @Constants.DefaultStringValue("Back to safety")
-    String backToSafety();
 
     @DefaultStringValue("Retrying...")
     String retrying();
@@ -1625,7 +1617,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Upload failed")
     String uploadFailed();
-    
+
     @DefaultStringValue("Project since deleted")
     String deletedProject();
 
@@ -1646,9 +1638,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter is not supported.")
     String filterIsNotSupported();
-
-    @DefaultStringValue("Failed to create upload url.")
-    String failedToCreateUploadUrl();
 
     @DefaultStringValue("No file selected")
     String noFileSelected();

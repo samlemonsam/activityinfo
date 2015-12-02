@@ -29,7 +29,6 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
-import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.common.base.Function;
@@ -38,7 +37,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -414,8 +412,6 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                 return dto;
             }
         }
-
-        MessageBox.info(I18N.CONSTANTS.alert(), I18N.MESSAGES.noNationWideLocationType(db.getName(), db.getCountry().getName()), null);
         throw new RuntimeException("Failed to find nationwide location type, db:" + db.getName() + ", country:" + db.getCountry().getName());
     }
 
