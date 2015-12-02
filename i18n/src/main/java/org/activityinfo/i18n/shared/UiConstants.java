@@ -804,9 +804,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Retry")
     String retry();
 
-    @Constants.DefaultStringValue("Back to safety")
-    String backToSafety();
-
     @DefaultStringValue("Retrying...")
     String retrying();
 
@@ -1649,9 +1646,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter is not supported.")
     String filterIsNotSupported();
-
-    @DefaultStringValue("Failed to create upload url.")
-    String failedToCreateUploadUrl();
 
     @DefaultStringValue("No file selected")
     String noFileSelected();
