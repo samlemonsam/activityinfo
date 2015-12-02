@@ -216,8 +216,8 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
 
     private List<AttachmentUploadRow> rowsFromPanel() {
         List<AttachmentUploadRow> rows = Lists.newArrayList();
-        for (int i = 0; i < rootPanel.getWidgetCount(); i++) {
-            Widget widget = rootPanel.getWidget(i);
+        for (int i = 0; i < this.rows.getWidgetCount(); i++) {
+            Widget widget = this.rows.getWidget(i);
             if (widget instanceof AttachmentUploadRow) {
                 rows.add((AttachmentUploadRow) widget);
             }

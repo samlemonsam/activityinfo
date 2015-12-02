@@ -300,6 +300,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         uploadFailed.setVisible(false);
         downloadButton.setVisible(false);
         clearButton.setVisible(false);
+        browseButton.setLabel(I18N.CONSTANTS.browse());
     }
 
     @Override
