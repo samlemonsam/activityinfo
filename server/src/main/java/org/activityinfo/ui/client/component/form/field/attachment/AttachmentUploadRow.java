@@ -24,15 +24,24 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.ui.icons.Icons;
 
 /**
  * @author yuriyz on 8/12/14.
@@ -43,7 +52,7 @@ public class AttachmentUploadRow extends Composite {
         void fireValueChanged();
     }
 
-    interface OurUiBinder extends UiBinder<FormPanel, AttachmentUploadRow> {
+    interface OurUiBinder extends UiBinder<HTMLPanel, AttachmentUploadRow> {
     }
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
@@ -58,7 +67,9 @@ public class AttachmentUploadRow extends Composite {
     @UiField
     AnchorElement fileName;
     @UiField
-    HTMLPanel thumbnailContainer;
+    SpanElement thumbnailContainer;
+    @UiField
+    HTMLPanel rootPanel;
 
     public AttachmentUploadRow(Attachment attachment, ResourceId resourceId) {
         initWidget(ourUiBinder.createAndBindUi(this));
@@ -67,6 +78,20 @@ public class AttachmentUploadRow extends Composite {
         this.resourceId = resourceId;
 
         fetchServingUrl();
+
+        rootPanel.addDomHandler(new MouseOverHandler() {
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+                removeButton.setVisible(true);
+            }
+        }, MouseOverEvent.getType());
+        rootPanel.addDomHandler(new MouseOutHandler() {
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                removeButton.setVisible(false);
+            }
+        }, MouseOutEvent.getType());
+
     }
 
     private void setFileName() {
@@ -133,16 +158,10 @@ public class AttachmentUploadRow extends Composite {
     }
 
     private void setThumbnail() {
-        thumbnailContainer.clear();
-
         if (attachment.getMimeType().contains("pdf")) {
-            appendThumbnailImage("icons.filePdf");
+            thumbnailContainer.setClassName(Icons.INSTANCE.filePdf());
         } else {
-            appendThumbnailImage("icons.file");
+            thumbnailContainer.setClassName(Icons.INSTANCE.file());
         }
-    }
-
-    private void appendThumbnailImage(String iconClassName) {
-        thumbnailContainer.add(new HTML("<span class=\"{" + iconClassName + "}\"/>"));
     }
 }

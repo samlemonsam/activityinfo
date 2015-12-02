@@ -9,15 +9,15 @@
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
   <g:HTMLPanel ui:field="rootPanel">
-    <g:HTMLPanel addStyleNames="form-group" ui:field="noAttachments" visible="true">
+    <g:HTMLPanel addStyleNames="row" ui:field="noAttachments" visible="true">
       <div class="col-xs-12">
         <ui:text from="{i18n.noAttachments}"/>
       </div>
     </g:HTMLPanel>
 
-    <g:HTMLPanel addStyleNames="form-group" ui:field="rows"/>
+    <g:HTMLPanel ui:field="rows" width="100%"/>
 
-    <g:HTMLPanel addStyleNames="form-group">
+    <g:HTMLPanel width="100%">
       <g:HTMLPanel ui:field="loadingContainer" visible="false">
         <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
              ui:field="loadingImage"/>
@@ -30,20 +30,18 @@
       </g:HTMLPanel>
     </g:HTMLPanel>
 
-    <g:HTMLPanel addStyleNames="form-group">
-      <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
-        <g:HTMLPanel addStyleNames="form-group">
-          <div class="col-xs-12">
-            <a href="#" ui:field="browseButton">
-              <ui:text from="{i18n.browse}"/>
-            </a>
-          </div>
+    <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
+      <g:HTMLPanel addStyleNames="form-group">
+        <div class="col-xs-12">
+          <a href="#" ui:field="browseButton">
+            <ui:text from="{i18n.browse}"/>
+          </a>
+        </div>
 
-          <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
-          <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
-        </g:HTMLPanel>
-      </g:FormPanel>
-    </g:HTMLPanel>
+        <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
+        <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+      </g:HTMLPanel>
+    </g:FormPanel>
   </g:HTMLPanel>
 
 </ui:UiBinder>

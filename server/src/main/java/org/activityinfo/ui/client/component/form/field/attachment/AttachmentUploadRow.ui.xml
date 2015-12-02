@@ -8,18 +8,14 @@
   <ui:with field="style" type="org.activityinfo.ui.client.widget.loading.LoadingStylesheet"/>
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
-  <g:HTMLPanel addStyleNames="form-group">
+  <g:HTMLPanel addStyleNames="row" width="100%" height="26px" ui:field="rootPanel">
     <div class="col-xs-11">
-      <g:HTMLPanel ui:field="thumbnailContainer">
-        <span class="{icons.file}" />
-      </g:HTMLPanel>
+      <span class="{icons.file}" ui:field="thumbnailContainer"/>
       &nbsp;
       <a href="#" name="_blank" ui:field="fileName"/>
     </div>
     <g:HTMLPanel addStyleNames="col-xs-1">
-      <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="removeButton" visible="false">
-        <span class='{icons.remove}'/>
-      </g:Button>
+      <g:Button text="x" addStyleNames="btn-xs btn-link pull-right" ui:field="removeButton" visible="false"/>
     </g:HTMLPanel>
   </g:HTMLPanel>
 
