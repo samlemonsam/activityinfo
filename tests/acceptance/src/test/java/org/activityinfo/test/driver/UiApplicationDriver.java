@@ -215,7 +215,26 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         return applicationPage.getOfflineMode();
     }
-    
+
+    @Override
+    protected void createForm(TestObject form) throws Exception {
+        ensureLoggedIn();
+        
+        String database = aliasTable.getAlias(form.getString("database"));
+        String name = aliasTable.createAlias(form.getString("name"));
+        
+        DesignPage design = applicationPage
+                .navigateToDesignTab()
+                .selectDatabase(database)
+                .design();
+
+        GxtModal modal = design.newBetaForm();
+        Form modalForm = modal.form();
+        modalForm.fillTextField(I18N.CONSTANTS.name(), name);
+        modalForm.select(I18N.CONSTANTS.published(), I18N.CONSTANTS.notPublished());
+        modal.accept(I18N.CONSTANTS.save());
+    }
+
     @Override
     public void synchronize() {
         ensureLoggedIn();

@@ -1267,9 +1267,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Rows validation result")
     String rowsValidationResult();
 
-    @DefaultStringValue("There was an error matching references.")
-    String errorMatchingReferences();
-
     @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns. Please mouse over on particular cell to see detail explanation.")
     String correctProblems();
 

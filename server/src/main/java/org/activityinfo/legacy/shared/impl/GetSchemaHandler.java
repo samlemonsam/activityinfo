@@ -26,10 +26,8 @@ import com.bedatadriven.rebar.sql.client.SqlResultCallback;
 import com.bedatadriven.rebar.sql.client.SqlResultSet;
 import com.bedatadriven.rebar.sql.client.SqlResultSetRow;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
-import com.bedatadriven.rebar.sql.client.query.SqlInsert;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
-import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,10 +35,12 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
-import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.promise.Promise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDTO> {
 
@@ -662,91 +662,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             schemaDTO.setDatabases(databaseList);
 
             Promise.waitAll(tasks)
-                    .join(new CreateNullaryLocationType(countryList, locationTypes, tx))
                     .then(Functions.constant(schemaDTO))
                     .then(callback);
-        }
-    }
-
-    private static class CreateNullaryLocationType implements Function<Void, Promise<Void>> {
-
-        private List<CountryDTO> countryList;
-        private Map<Integer, LocationTypeDTO> locationTypes;
-        private SqlTransaction tx;
-
-        public CreateNullaryLocationType(List<CountryDTO> countryList, Map<Integer, LocationTypeDTO> locationTypes, SqlTransaction tx) {
-            this.countryList = countryList;
-            this.locationTypes = locationTypes;
-            this.tx = tx;
-        }
-
-        @Override
-        public Promise<Void> apply(Void input) {
-            List<Promise<Void>> promises = Lists.newArrayList();
-            for (CountryDTO country : countryList) {
-                if (country.getNullLocationTypeSilently() == null) {
-                    promises.add(createNullLocationType(country));
-                }
-            }
-            return Promise.waitAll(promises);
-        }
-
-        private Promise<Void> createNullLocationType(final CountryDTO country) {
-            final Promise<Void> promise = new Promise<>();
-            SqlInsert.insertInto(Tables.LOCATION_TYPE)
-                    .value("name", LocationTypeDTO.NATIONWIDE_NAME)
-                    .value("Reuse", 0)
-                    .value("CountryId", country.getId())
-                    .value("workflowId", "closed")
-                    .execute(tx, new AsyncCallback<Integer>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            promise.reject(caught);
-                        }
-
-                        @Override
-                        public void onSuccess(final Integer result) {
-                            SqlQuery.select()
-                                    .appendColumn("LocationTypeId", "id")
-                                    .from(Tables.LOCATION_TYPE, "t")
-                                    .whereTrue("t.CountryId=" + country.getId() + " AND t.Name='" + LocationTypeDTO.NATIONWIDE_NAME + "' " +
-                                            "AND workflowId='closed'")
-                                    .execute(tx, new SqlResultCallback() {
-                                        @Override
-                                        public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                                            final int locationTypeId = results.getRow(0).getInt("id");
-
-                                            SqlInsert.insertInto(Tables.LOCATION)
-                                                    .value("LocationId", new KeyGenerator().generateInt())
-                                                    .value("Name", country.getName())
-                                                    .value("LocationTypeId", locationTypeId)
-                                                    .value("x", (country.getBounds().getMinLon() + country.getBounds().getMaxLon()) / 2)
-                                                    .value("y", (country.getBounds().getMinLat() + country.getBounds().getMaxLat()) / 2)
-                                                    .value("timeEdited", new Date().getTime())
-                                                    .execute(tx, new AsyncCallback<Integer>() {
-                                                        @Override
-                                                        public void onFailure(Throwable caught) {
-                                                            promise.reject(caught);
-                                                        }
-
-                                                        @Override
-                                                        public void onSuccess(Integer result) {
-                                                            LocationTypeDTO type = new LocationTypeDTO();
-                                                            type.setId(locationTypeId);
-                                                            type.setName(LocationTypeDTO.NATIONWIDE_NAME);
-                                                            type.setWorkflowId("closed");
-                                                            type.setCountryBounds(country.getBounds());
-
-                                                            country.getLocationTypes().add(type);
-                                                            locationTypes.put(locationTypeId, type);
-                                                            promise.resolve(null);
-                                                        }
-                                                    });
-                                        }
-                                    });
-                        }
-                    });
-            return promise;
         }
     }
 }
