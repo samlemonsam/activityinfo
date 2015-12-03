@@ -9,12 +9,11 @@
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
   <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
-    <g:HTMLPanel addStyleNames="{style.imageContainer}">
-
-      <g:HTMLPanel addStyleNames="form-group">
+    <g:HTMLPanel>
+      <g:HTMLPanel addStyleNames="form-group form-img-control">
 
         <g:HTMLPanel ui:field="loadingContainer" visible="false" height="200px">
-          <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="Loading..."
+          <img class="{style.indicator} {style.loading}" src="{bundle.loadingIcon.getSafeUri}" alt="{i18n.loading}"
                ui:field="loadingImage"/>
         </g:HTMLPanel>
         <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
@@ -34,15 +33,11 @@
 
           <g:Image ui:field="image" visible="true" width="100%" addStyleNames="img-thumbnail"/>
         </g:HTMLPanel>
-
-      </g:HTMLPanel>
-
-      <g:HTMLPanel addStyleNames="form-group">
-        <div class="center-block" style="width: 70px;">
-          <a:Button style="LINK" ui:field="browseButton" title="{i18n.uploadFileSizeLimit}">
-            <ui:text from="{i18n.browse}"/>
-          </a:Button>
-        </div>
+        
+        <g:HTMLPanel ui:field="placeholder" addStyleNames="form-img-placeholder">
+          <ui:text from="{i18n.noImage}"/> 
+          <g:Anchor ui:field="browseLink" title="{i18n.uploadFileSizeLimit}" text="{i18n.browse}"/>
+        </g:HTMLPanel>
       </g:HTMLPanel>
 
       <g:VerticalPanel ui:field="hiddenFieldsContainer"/>

@@ -64,7 +64,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private String servingUrl = null;
 
     @UiField
-    org.activityinfo.ui.client.widget.Button browseButton;
+    Anchor browseLink;
     @UiField
     FileUpload fileUpload;
     @UiField
@@ -83,6 +83,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     HTMLPanel loadingContainer;
     @UiField
     HTMLPanel imageContainer;
+    @UiField
+    HTMLPanel placeholder;
 
     public ImageUploadFieldWidget(ResourceId resourceId, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
@@ -91,14 +93,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         rootPanel = ourUiBinder.createAndBindUi(this);
 
-        browseButton.addClickHandler(new ClickHandler() {
+        browseLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (readOnly) {
-                    Window.alert(I18N.CONSTANTS.controlIsReadOnly());
-                    return;
+                event.preventDefault();
+                if (!readOnly) {
+                    triggerUpload(fileUpload.getElement());
                 }
-                triggerUpload(fileUpload.getElement());
             }
         });
         downloadButton.addClickHandler(new ClickHandler() {
@@ -263,7 +264,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         clearButton.setVisible(valid);
         image.setUrl(valid ? servingUrl + "=s" + formPanel.getOffsetWidth() : "");
         uploadFailed.setVisible(!valid);
-        browseButton.setLabel(valid ? I18N.CONSTANTS.replace() : I18N.CONSTANTS.browse());
+        browseLink.setText(valid ? I18N.CONSTANTS.replace() : I18N.CONSTANTS.browse());
 
         if (valid) {
             AttachmentValue attachmentValue = new AttachmentValue();
@@ -304,7 +305,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         uploadFailed.setVisible(false);
         downloadButton.setVisible(false);
         clearButton.setVisible(false);
-        browseButton.setLabel(I18N.CONSTANTS.browse());
+        placeholder.setVisible(true);
+        browseLink.setText(I18N.CONSTANTS.browse());
     }
 
     @Override
@@ -318,6 +320,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         if (loadingState) {
             image.setUrl("");
         }
+        placeholder.setVisible(!loadingState && !isValid());
     }
 
     private static native void triggerUpload(Element element) /*-{
