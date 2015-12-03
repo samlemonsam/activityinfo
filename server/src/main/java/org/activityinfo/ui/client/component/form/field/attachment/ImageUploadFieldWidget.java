@@ -229,9 +229,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    String url = response.getText();
-                    if (url != null && url.startsWith("http")) {
-                        servingUrl = url;
+                    if (response.getStatusCode() == 200) {
+                        servingUrl = response.getText();
                     } else {
                         servingUrl = null;
                     }
