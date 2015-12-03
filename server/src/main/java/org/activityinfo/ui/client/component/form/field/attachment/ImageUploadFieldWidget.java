@@ -21,10 +21,10 @@ package org.activityinfo.ui.client.component.form.field.attachment;
  * #L%
  */
 
-import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.*;
@@ -53,6 +53,10 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
+    private enum State {
+        NONE, FAILED, LOADING, LOADED
+    }
+
     private final FormPanel rootPanel;
     private final ValueUpdater valueUpdater;
     private final Uploader uploader;
@@ -60,6 +64,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
+    private State state = State.NONE;
 
     @UiField
     Anchor browseLink;
@@ -72,17 +77,15 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @UiField
     VerticalPanel hiddenFieldsContainer;
     @UiField
-    HTMLPanel uploadFailed;
-    @UiField
     Button downloadButton;
     @UiField
     com.google.gwt.user.client.ui.Button clearButton;
     @UiField
-    HTMLPanel loadingContainer;
+    HTMLPanel placeholder;
+    @UiField
+    SpanElement message;
     @UiField
     HTMLPanel imageContainer;
-    @UiField
-    HTMLPanel placeholder;
 
     public ImageUploadFieldWidget(ResourceId resourceId, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
@@ -116,7 +119,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         uploader = new Uploader(formPanel, fileUpload, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
             public void onFailure(Throwable exception) {
-                uploadFailed.setVisible(true);
+                setState(State.FAILED);
             }
 
             @Override
@@ -128,13 +131,25 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             @Override
             public void onChange(ChangeEvent event) {
                 if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
+                    setState(State.LOADING);
                     uploader.upload();
-                    highlight(false);
                 }
             }
         });
-
-        addFileDnDSupport();
+        formPanel.addDomHandler(new MouseOverHandler() {
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+                downloadButton.setVisible(state == State.LOADED);
+                clearButton.setVisible(state == State.LOADED);
+            }
+        }, MouseOverEvent.getType());
+        formPanel.addDomHandler(new MouseOutHandler() {
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                downloadButton.setVisible(false);
+                clearButton.setVisible(false);
+            }
+        }, MouseOutEvent.getType());
     }
 
     private void download() {
@@ -156,56 +171,52 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         }
     }
 
-    private void addFileDnDSupport() {
-        imageContainer.addDomHandler(new DragEnterHandler() {
-            @Override
-            public void onDragEnter(DragEnterEvent event) {
-                highlight(true);
-            }
-        }, DragEnterEvent.getType());
+//    private void addFileDnDSupport() {
+//        imageContainer.addDomHandler(new DragEnterHandler() {
+//            @Override
+//            public void onDragEnter(DragEnterEvent event) {
+//                highlight(true);
+//            }
+//        }, DragEnterEvent.getType());
+//
+//        imageContainer.addDomHandler(new DragOverHandler() {
+//            @Override
+//            public void onDragOver(DragOverEvent event) {
+//                highlight(true);
+//            }
+//        }, DragOverEvent.getType());
+//
+//        imageContainer.addDomHandler(new DragLeaveHandler() {
+//            @Override
+//            public void onDragLeave(DragLeaveEvent event) {
+//                highlight(false);
+//            }
+//        }, DragLeaveEvent.getType());
+//
+//        imageContainer.addDomHandler(new DropHandler() {
+//            @Override
+//            public void onDrop(DropEvent event) {
+//                //event.preventDefault();
+//
+//                // we are following the mouse with fileUpload which leads to dropping directly to input type=file
+//            }
+//        }, DropEvent.getType());
+//    }
 
-        imageContainer.addDomHandler(new DragOverHandler() {
-            @Override
-            public void onDragOver(DragOverEvent event) {
-                highlight(true);
-            }
-        }, DragOverEvent.getType());
-
-        imageContainer.addDomHandler(new DragLeaveHandler() {
-            @Override
-            public void onDragLeave(DragLeaveEvent event) {
-                highlight(false);
-            }
-        }, DragLeaveEvent.getType());
-
-        imageContainer.addDomHandler(new DropHandler() {
-            @Override
-            public void onDrop(DropEvent event) {
-                //event.preventDefault();
-
-                // we are following the mouse with fileUpload which leads to dropping directly to input type=file
-            }
-        }, DropEvent.getType());
-    }
-
-    private void highlight(boolean enter) {
-        if (enter) {
-            imageContainer.addStyleName(FormPanelStyles.INSTANCE.dropFile());
-        } else {
-            imageContainer.removeStyleName(FormPanelStyles.INSTANCE.dropFile());
-        }
-
-        fileUpload.setVisible(enter);
-        setLoadingState(false);
-        image.setVisible(!enter);
-        clearButton.setVisible(false);
-    }
+//    private void highlight(boolean enter) {
+//        if (enter) {
+//            imageContainer.addStyleName(FormPanelStyles.INSTANCE.dropFile());
+//        } else {
+//            imageContainer.removeStyleName(FormPanelStyles.INSTANCE.dropFile());
+//        }
+//
+//        fileUpload.setVisible(enter);
+//        setLoadingState(false);
+//        image.setVisible(!enter);
+//        clearButton.setVisible(false);
+//    }
 
     private void upload() {
-        downloadButton.setVisible(false);
-        uploadFailed.setVisible(false);
-        setLoadingState(true);
-
         if (oldHandler != null) {
             oldHandler.removeHandler();
         }
@@ -216,13 +227,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 // event.getResults is always null because of cross-domain upload
                 // we are forced to make additional call to check whether upload is successful
 
-                fetchImageServingUrl(true);
+                fetchImageServingUrl();
             }
         });
         formPanel.submit();
     }
 
-    public void fetchImageServingUrl(final boolean upload) {
+    public void fetchImageServingUrl() {
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/imageUrl");
             requestBuilder.sendRequest(null, new RequestCallback() {
@@ -230,47 +241,57 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 public void onResponseReceived(Request request, Response response) {
                     if (response.getStatusCode() == 200) {
                         servingUrl = response.getText();
+                        setState(State.LOADED);
                     } else {
-                        servingUrl = null;
+                        setState(State.FAILED);
                     }
-                    setStateAfterUpload(upload);
+
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    servingUrl = null;
                     Log.error("Failed to fetch image serving url. ", exception);
-                    setStateAfterUpload(upload);
+                    setState(State.FAILED);
                 }
             });
         } catch (Exception e) {
-            servingUrl = null;
             Log.error("Failed to send request for fetching serving url. ", e);
-            setStateAfterUpload(upload);
+            setState(State.FAILED);
         }
     }
 
-    public boolean isValid() {
-        return !Strings.isNullOrEmpty(servingUrl);
-    }
+    private void setState(State state) {
+        this.state = state;
 
-    private void setStateAfterUpload(boolean afterUpload) {
-        setLoadingState(false);
+        String imageUrl = "";
+        String message = "";
 
-        boolean valid = isValid();
-        downloadButton.setVisible(valid);
-        clearButton.setVisible(valid);
-        image.setUrl(valid ? servingUrl + "=s" + formPanel.getOffsetWidth() : "");
-        uploadFailed.setVisible(!valid && afterUpload);
-        browseLink.setText(valid ? I18N.CONSTANTS.replace() : I18N.CONSTANTS.browse());
+        switch (state) {
+            case FAILED:
+                message = I18N.CONSTANTS.uploadFailed();
+                servingUrl = null;
+                break;
+            case LOADED:
+                imageUrl = servingUrl + "=s" + formPanel.getOffsetWidth();
 
-        if (valid) {
-            AttachmentValue attachmentValue = new AttachmentValue();
-            attachmentValue.getValues().add(uploader.getAttachment());
-            valueUpdater.update(attachmentValue);
-        } else {
-            Log.error("Failed to fetch image serving url.");
+                AttachmentValue attachmentValue = new AttachmentValue();
+                attachmentValue.getValues().add(uploader.getAttachment());
+                valueUpdater.update(attachmentValue);
+                break;
+            case LOADING:
+                message = I18N.CONSTANTS.loading();
+                servingUrl = null;
+                break;
+            case NONE:
+                message = I18N.CONSTANTS.noImage();
+                servingUrl = null;
+                break;
         }
+
+        image.setUrl(imageUrl);
+        placeholder.setVisible(state != State.LOADING && state != State.LOADED);
+        this.message.setInnerText(message);
+        browseLink.setText(state == State.FAILED ? I18N.CONSTANTS.retry() : I18N.CONSTANTS.browse());
     }
 
     @Override
@@ -284,7 +305,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
             uploader.setAttachment(value.getValues().iterator().next());
-            fetchImageServingUrl(false);
+            fetchImageServingUrl();
         }
 
         return Promise.done();
@@ -297,28 +318,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     @Override
     public void clearValue() {
-        image.setUrl("");
-        servingUrl = null;
         uploader.setAttachment(new Attachment());
-        uploadFailed.setVisible(false);
-        downloadButton.setVisible(false);
-        clearButton.setVisible(false);
-        placeholder.setVisible(true);
-        browseLink.setText(I18N.CONSTANTS.browse());
+        setState(State.NONE);
     }
 
     @Override
     public Widget asWidget() {
         return rootPanel;
-    }
-
-    public void setLoadingState(boolean loadingState) {
-        loadingContainer.setVisible(loadingState);
-        imageContainer.setVisible(!loadingState);
-        if (loadingState) {
-            image.setUrl("");
-        }
-        placeholder.setVisible(!loadingState && !isValid());
     }
 
     private static native void triggerUpload(Element element) /*-{
