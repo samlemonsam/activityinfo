@@ -17,7 +17,7 @@
         <ui:text from='{i18n.matchingReferences}'/>
       </p>
       <p ui:field="loadingErrorElement">
-        <ui:text from='{i18n.errorMatchingReferences}'/>
+        <ui:text from='{i18n.unexpectedException}'/>
         <g:Anchor ui:field="retryLink" href="#">
           <ui:text from='{i18n.retry}'/>
         </g:Anchor>
