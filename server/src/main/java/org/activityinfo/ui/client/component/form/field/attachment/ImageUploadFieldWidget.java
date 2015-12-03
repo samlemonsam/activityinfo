@@ -229,7 +229,10 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    servingUrl = response.getText();
+                    String url = response.getText();
+                    if (url != null && url.startsWith("http")) {
+                        servingUrl = url;
+                    }
                     setStateAfterUpload();
                 }
 

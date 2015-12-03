@@ -126,7 +126,7 @@ public class AttachmentUploadRow extends Composite {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     String url = response.getText();
-                    if (url.startsWith("http")) {
+                    if (url != null && url.startsWith("http")) {
                         servingUrl = url;
                     }
                     setState();

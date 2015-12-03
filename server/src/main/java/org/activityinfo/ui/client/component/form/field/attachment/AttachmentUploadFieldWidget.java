@@ -207,6 +207,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
             @Override
             public void onClick(ClickEvent clickEvent) {
                 rows.remove(uploadRow);
+                setState(true);
                 fireValueChanged();
             }
         });
