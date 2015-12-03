@@ -85,15 +85,15 @@ public class GcsPolicyBuilder {
     }
 
     public byte[] toJsonBytes() {
-        String json = toJson();
-        return json.getBytes(Charsets.UTF_8);
+        return toJson().getBytes(Charsets.UTF_8);
     }
 
     public String toJson() {
         if (expiration == null) {
             throw new IllegalStateException("Expiration date must be set");
         }
-        document.addProperty("expiration", expiration.toString(ISODateTimeFormat.dateTime()));
+
+        document.addProperty("expiration", expiration.toString(ISODateTimeFormat.dateTime().withZoneUTC()));
 
         return document.toString();
     }

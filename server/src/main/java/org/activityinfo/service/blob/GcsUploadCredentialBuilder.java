@@ -6,7 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.ResourceId;
 import org.apache.commons.codec.binary.Base64;
-import org.joda.time.Period;
+import org.joda.time.Duration;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
@@ -86,8 +86,8 @@ public class GcsUploadCredentialBuilder {
         return setMaxContentLength(megabytes * BYTES_IN_MEGA_BYTE);
     }
 
-    public GcsUploadCredentialBuilder expireAfter(Period period) {
-        policyDocument.expiresAfter(period.toStandardDuration());
+    public GcsUploadCredentialBuilder expireAfter(Duration duration) {
+        policyDocument.expiresAfter(duration);
         return this;
     }
 

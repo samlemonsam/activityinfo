@@ -8,7 +8,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
-import org.joda.time.Period;
+import org.joda.time.Duration;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class GcsUploadCredentialBuilderTest {
                 setBucket("ai-dev-field-blob-test").
                 setKey(BlobId.generate().asString()).
                 setMaxContentLengthInMegabytes(10).
-                expireAfter(Period.minutes(5)).
+                expireAfter(Duration.standardMinutes(5)).
                 build();
 
         FormDataMultiPart form = new FormDataMultiPart();
@@ -49,6 +49,13 @@ public class GcsUploadCredentialBuilderTest {
                 .entity(form, MediaType.MULTIPART_FORM_DATA_TYPE)
                 .post();
 
+    }
+
+    @Test
+    @Ignore
+    public void policyDocument() {
+        GcsPolicyBuilder gcsPolicyBuilder = new GcsPolicyBuilder().expiresAfter(Duration.standardMinutes(10));
+        System.out.println(gcsPolicyBuilder.toJson());
     }
 
     @Test

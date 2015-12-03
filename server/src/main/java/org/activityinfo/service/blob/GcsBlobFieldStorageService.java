@@ -14,6 +14,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.InjectParam;
+import org.joda.time.Duration;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -24,7 +25,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
-import org.joda.time.Period;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
@@ -190,7 +190,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                 setBucket(bucketName).
                 setKey(blobId.asString()).
                 setMaxContentLengthInMegabytes(MAX_BLOB_LENGTH_IN_MEGABYTES).
-                expireAfter(Period.minutes(10)).
+                expireAfter(Duration.standardMinutes(10)).
                 build();
 
         return Response.ok(uploadCredentials.asJson()).
