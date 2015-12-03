@@ -37,6 +37,7 @@ import java.nio.channels.Channels;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 @Path("/service/blob")
@@ -78,6 +79,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         assertNotAnonymousUser(user);
         assertHasAccess(user, blobId, resourceId);
+        assertBlobExists(blobId);
 
         try {
             GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
@@ -95,6 +97,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         assertNotAnonymousUser(user);
         assertHasAccess(user, blobId, resourceId);
+        assertBlobExists(blobId);
 
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
 
@@ -120,6 +123,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         assertNotAnonymousUser(user);
         assertHasAccess(user, blobId, resourceId);
+        assertBlobExists(blobId);
 
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
 
@@ -140,6 +144,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         assertNotAnonymousUser(user);
         assertHasAccess(user, blobId, resourceId);
+        assertBlobExists(blobId);
 
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
         String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)));
@@ -158,6 +163,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         assertNotAnonymousUser(user);
         assertHasAccess(user, blobId, resourceId);
+        assertBlobExists(blobId);
 
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
 
@@ -228,6 +234,15 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public void setTestBucketName() {
         Preconditions.checkState(bucketName == null);
         bucketName = appIdentityService.getDefaultGcsBucketName();
+    }
+
+    private void assertBlobExists(BlobId blobId) {
+        try {
+            // fetch just one byte of blob to make sure it exists
+            BlobstoreServiceFactory.getBlobstoreService().fetchData(blobKey(blobId), 0, 1);
+        } catch (Exception e) {
+            throw new WebApplicationException(NOT_FOUND);
+        }
     }
 
 }
