@@ -147,7 +147,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         assertBlobExists(blobId);
 
         ImagesService imagesService = ImagesServiceFactory.getImagesService();
-        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)));
+        String url = imagesService.getServingUrl(ServingUrlOptions.Builder.withBlobKey(blobKey(blobId)).secureUrl(true));
 
         return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
     }
