@@ -18,9 +18,9 @@
       </p>
       <p ui:field="loadingErrorElement">
         <ui:text from='{i18n.errorMatchingReferences}'/>
-        <g:InlineHyperlink ui:field="retryLink">
+        <g:Anchor ui:field="retryLink" href="#">
           <ui:text from='{i18n.retry}'/>
-        </g:InlineHyperlink>
+        </g:Anchor>
       </p>
     </g:HTMLPanel>
     <validation:ValidationGrid ui:field="dataGrid" width="100%" height="100%"/>
