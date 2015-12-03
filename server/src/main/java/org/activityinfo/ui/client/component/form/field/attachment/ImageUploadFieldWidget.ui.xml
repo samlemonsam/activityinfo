@@ -31,7 +31,7 @@
         </g:Button>
 
         <g:HTMLPanel ui:field="imageContainer">
-          <g:FileUpload ui:field="fileUpload" name="file" addStyleNames="dropFileUpload" visible="false" width="100%" height="210px"/>
+
           <g:Image ui:field="image" visible="true" width="100%" addStyleNames="img-thumbnail"/>
         </g:HTMLPanel>
 
@@ -46,6 +46,7 @@
       </g:HTMLPanel>
 
       <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
+      <g:FileUpload ui:field="fileUpload" name="file" addStyleNames="dropFileUpload" visible="false"/>
     </g:HTMLPanel>
   </g:FormPanel>
 </ui:UiBinder>
