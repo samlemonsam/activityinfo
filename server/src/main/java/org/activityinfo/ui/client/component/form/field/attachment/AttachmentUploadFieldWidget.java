@@ -206,7 +206,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         uploadRow.removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                rootPanel.remove(uploadRow);
+                rows.remove(uploadRow);
                 fireValueChanged();
             }
         });
