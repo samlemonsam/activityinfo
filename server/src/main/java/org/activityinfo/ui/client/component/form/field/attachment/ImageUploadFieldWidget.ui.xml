@@ -39,7 +39,7 @@
 
       <g:HTMLPanel addStyleNames="form-group">
         <div class="center-block" style="width: 70px;">
-          <a:Button style="LINK" ui:field="browseButton">
+          <a:Button style="LINK" ui:field="browseButton" title="{i18n.uploadFileSizeLimit}">
             <ui:text from="{i18n.browse}"/>
           </a:Button>
         </div>
