@@ -155,10 +155,16 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    addNewRow(uploader.getAttachment());
+                    String url = response.getText();
+                    if (url != null && url.startsWith("http")) {
+                        addNewRow(uploader.getAttachment());
 
-                    setState(true);
-                    fireValueChanged();
+                        setState(true);
+                        fireValueChanged();
+                    } else {
+                        Log.error("Failed to fetch attachment serving url. ");
+                        setState(false);
+                    }
                 }
 
                 @Override

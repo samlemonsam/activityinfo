@@ -128,6 +128,8 @@ public class AttachmentUploadRow extends Composite {
                     String url = response.getText();
                     if (url != null && url.startsWith("http")) {
                         servingUrl = url;
+                    } else {
+                        servingUrl = null;
                     }
                     setState();
                 }
