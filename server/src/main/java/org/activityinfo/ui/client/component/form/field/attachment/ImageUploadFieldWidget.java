@@ -43,8 +43,6 @@ import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 
-import javax.annotation.Nullable;
-
 /**
  * @author yuriyz on 11/16/2015.
  */
@@ -117,7 +115,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         uploader = new Uploader(formPanel, fileUpload, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
             @Override
-            public void onFailure(@Nullable Throwable exception) {
+            public void onFailure(Throwable exception) {
                 uploadFailed.setVisible(true);
             }
 
@@ -218,13 +216,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 // event.getResults is always null because of cross-domain upload
                 // we are forced to make additional call to check whether upload is successful
 
-                fetchImageServingUrl();
+                fetchImageServingUrl(true);
             }
         });
         formPanel.submit();
     }
 
-    public void fetchImageServingUrl() {
+    public void fetchImageServingUrl(final boolean upload) {
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/imageUrl");
             requestBuilder.sendRequest(null, new RequestCallback() {
@@ -235,20 +233,20 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                     } else {
                         servingUrl = null;
                     }
-                    setStateAfterUpload();
+                    setStateAfterUpload(upload);
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
                     servingUrl = null;
                     Log.error("Failed to fetch image serving url. ", exception);
-                    setStateAfterUpload();
+                    setStateAfterUpload(upload);
                 }
             });
         } catch (Exception e) {
             servingUrl = null;
             Log.error("Failed to send request for fetching serving url. ", e);
-            setStateAfterUpload();
+            setStateAfterUpload(upload);
         }
     }
 
@@ -256,14 +254,14 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         return !Strings.isNullOrEmpty(servingUrl);
     }
 
-    private void setStateAfterUpload() {
+    private void setStateAfterUpload(boolean afterUpload) {
         setLoadingState(false);
 
         boolean valid = isValid();
         downloadButton.setVisible(valid);
         clearButton.setVisible(valid);
         image.setUrl(valid ? servingUrl + "=s" + formPanel.getOffsetWidth() : "");
-        uploadFailed.setVisible(!valid);
+        uploadFailed.setVisible(!valid && afterUpload);
         browseLink.setText(valid ? I18N.CONSTANTS.replace() : I18N.CONSTANTS.browse());
 
         if (valid) {
@@ -286,7 +284,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
             uploader.setAttachment(value.getValues().iterator().next());
-            fetchImageServingUrl();
+            fetchImageServingUrl(false);
         }
 
         return Promise.done();
