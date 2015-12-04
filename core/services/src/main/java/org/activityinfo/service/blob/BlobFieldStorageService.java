@@ -72,4 +72,6 @@ public interface BlobFieldStorageService {
                                   @PathParam("blobId") BlobId blobId,
                                   @PathParam("resourceId") ResourceId resourceId,
                                   @PathParam("fileName") String fileName);
+
+    boolean hasAccess(ResourceId userId, BlobId blobId);
 }

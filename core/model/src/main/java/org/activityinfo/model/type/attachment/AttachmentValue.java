@@ -24,6 +24,7 @@ package org.activityinfo.model.type.attachment;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -71,12 +72,16 @@ public class AttachmentValue implements FieldValue, IsRecord {
                 .set("values", getValuesAsRecords());
     }
 
-    public static FieldValue fromRecord(Record record) {
+    public static AttachmentValue fromRecord(Record record) {
         AttachmentValue value = new AttachmentValue();
         List<Record> recordList = record.getRecordList("values");
         for (Record r : recordList) {
             value.getValues().add(Attachment.fromRecord(r));
         }
         return value;
+    }
+
+    public static AttachmentValue fromJson(String json) {
+        return fromRecord(Resources.recordFromJson(json));
     }
 }

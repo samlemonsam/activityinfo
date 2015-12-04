@@ -1,16 +1,18 @@
 package org.activityinfo.server.command.handler;
 
+import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.Published;
-import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.server.database.hibernate.entity.Site;
-import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
-import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.service.blob.BlobFieldStorageService;
+import org.activityinfo.service.blob.BlobId;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -21,16 +23,18 @@ import java.util.logging.Logger;
 public class PermissionOracle {
 
     private final Provider<EntityManager> em;
+    private BlobFieldStorageService blobService;
 
     private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
 
     @Inject
-    public PermissionOracle(Provider<EntityManager> em) {
+    public PermissionOracle(Provider<EntityManager> em, BlobFieldStorageService blobService) {
         this.em = em;
+        this.blobService = blobService;
     }
 
     public PermissionOracle(EntityManager em) {
-        this(Providers.of(em));
+        this(Providers.of(em), null);
     }
 
     /**
@@ -111,6 +115,30 @@ public class PermissionOracle {
             throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
                     " site %d", user.getId(), site.getId()));
         }
+    }
+
+    public void assertEditAllowed(AttachmentValue value, User user) {
+        if(!isEditAllowed(value, user)) {
+            throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
+                    " attachment %s", user.getId(), value.asRecord().toString()));
+        }
+    }
+
+    public boolean isEditAllowed(AttachmentValue value, User user) {
+        Preconditions.checkNotNull(blobService);
+
+        for (Attachment attachment : value.getValues()) {
+            if (!isEditAllowed(attachment.getBlobId(), user)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isEditAllowed(String blobId, User user) {
+        Preconditions.checkNotNull(blobService);
+
+        return blobService.hasAccess(CuidAdapter.userId(user.getId()), new BlobId(blobId));
     }
 
     public boolean isEditSiteAllowed(User user, Activity activity, Partner partner) {
@@ -267,7 +295,12 @@ public class PermissionOracle {
 
 
     public static PermissionOracle using(EntityManager em) {
-        return new PermissionOracle(Providers.of(em));
+        return new PermissionOracle(em);
+    }
+
+    public PermissionOracle using(BlobFieldStorageService blobService) {
+        this.blobService = blobService;
+        return this;
     }
 
     

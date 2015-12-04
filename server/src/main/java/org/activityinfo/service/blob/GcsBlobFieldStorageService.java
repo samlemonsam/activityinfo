@@ -14,7 +14,6 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.api.core.InjectParam;
-import org.joda.time.Duration;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -25,6 +24,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
+import org.joda.time.Duration;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
@@ -223,6 +223,26 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
             }
         }
         throw new WebApplicationException(UNAUTHORIZED);
+    }
+
+    public boolean hasAccess(ResourceId userId, BlobId blobId) {
+        try {
+            GcsFileMetadata metadata = gcsService.getMetadata(new GcsFilename(bucketName, blobId.asString()));
+            ResourceId ownerId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER));
+
+            if (ownerId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+                Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
+
+                if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
+                    return true;
+                }
+            } else {
+                throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + ownerId);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        }
+        return false;
     }
 
     private static void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
