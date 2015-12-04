@@ -276,6 +276,8 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         this.message.setInnerText(message);
         browseLink.setVisible(state != State.LOADING && state != State.LOADED);
         browseLink.setText(state == State.FAILED ? I18N.CONSTANTS.retry() : I18N.CONSTANTS.browse());
+        downloadButton.setVisible(state == State.LOADED);
+        clearButton.setVisible(state == State.LOADED);
     }
 
     @Override
