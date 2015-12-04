@@ -97,9 +97,9 @@ public class AttachmentUploadRow extends Composite {
     private void setFileName() {
         boolean hasFile = !Strings.isNullOrEmpty(servingUrl);
 
-        fileName.setHref(hasFile ? servingUrl : "#");
         fileName.setInnerSafeHtml(SafeHtmlUtils.fromString(
                 hasFile ? " " + attachment.getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
+        fileName.setHref(hasFile ? servingUrl : "#");
     }
 
     public Button getRemoveButton() {
@@ -153,8 +153,8 @@ public class AttachmentUploadRow extends Composite {
     }
 
     private void setState() {
-        setThumbnail();
         setFileName();
+        setThumbnail();
     }
 
     @Override
