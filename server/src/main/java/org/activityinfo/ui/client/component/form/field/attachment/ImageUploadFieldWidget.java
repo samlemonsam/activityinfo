@@ -64,7 +64,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
     private String servingUrl = null;
-    private State state = State.NONE;
 
     @UiField
     Anchor browseLink;
@@ -247,8 +246,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     private void setState(State state) {
-        this.state = state;
-
         String imageUrl = "";
         String message = "";
 
@@ -273,9 +270,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 servingUrl = null;
                 break;
         }
-
-        imageUrl = "https://bedatadriven.atlassian.net/secure/attachment/17512/2015-11-13%2013.39.png"; // todo remove
-        this.state = State.LOADED;
 
         image.setUrl(imageUrl);
         placeholder.setVisible(state != State.LOADED);
