@@ -136,20 +136,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 }
             }
         });
-        formPanel.addDomHandler(new MouseOverHandler() {
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                downloadButton.setVisible(state == State.LOADED);
-                clearButton.setVisible(state == State.LOADED);
-            }
-        }, MouseOverEvent.getType());
-        formPanel.addDomHandler(new MouseOutHandler() {
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                downloadButton.setVisible(false);
-                clearButton.setVisible(false);
-            }
-        }, MouseOutEvent.getType());
     }
 
     private void download() {
@@ -288,9 +274,13 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 break;
         }
 
+        imageUrl = "https://bedatadriven.atlassian.net/secure/attachment/17512/2015-11-13%2013.39.png"; // todo remove
+        this.state = State.LOADED;
+
         image.setUrl(imageUrl);
-        placeholder.setVisible(state != State.LOADING && state != State.LOADED);
+        placeholder.setVisible(state != State.LOADED);
         this.message.setInnerText(message);
+        browseLink.setVisible(state != State.LOADING && state != State.LOADED);
         browseLink.setText(state == State.FAILED ? I18N.CONSTANTS.retry() : I18N.CONSTANTS.browse());
     }
 

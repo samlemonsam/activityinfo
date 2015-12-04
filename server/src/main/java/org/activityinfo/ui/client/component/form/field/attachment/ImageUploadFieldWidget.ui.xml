@@ -10,10 +10,10 @@
   <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
     <g:HTMLPanel addStyleNames="form-group form-img-control">
 
-      <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="clearButton" visible="false">
+      <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="clearButton">
         <span class="{icons.remove}"/>
       </g:Button>
-      <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton" visible="false">
+      <g:Button addStyleNames="btn btn-default btn-xs pull-right" ui:field="downloadButton">
         <span class="{icons.arrowDown}"/>
       </g:Button>
 
