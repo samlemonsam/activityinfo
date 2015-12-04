@@ -9,10 +9,8 @@
   <ui:with field="bundle" type="org.activityinfo.ui.client.widget.loading.LoadingClientBundle"/>
 
   <g:HTMLPanel ui:field="rootPanel">
-    <g:HTMLPanel addStyleNames="row" ui:field="noAttachments" visible="true">
-      <div class="col-xs-12">
-        <ui:text from="{i18n.noAttachments}"/>
-      </div>
+    <g:HTMLPanel ui:field="noAttachments" visible="true" width="100%">
+      <ui:text from="{i18n.noAttachments}"/>
     </g:HTMLPanel>
 
     <g:HTMLPanel ui:field="rows" width="100%"/>
@@ -31,12 +29,10 @@
     </g:HTMLPanel>
 
     <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
-      <g:HTMLPanel addStyleNames="form-group">
-        <div class="col-xs-12">
-          <a href="#" ui:field="browseButton">
-            <ui:text from="{i18n.browse}"/>
-          </a>
-        </div>
+      <g:HTMLPanel width="100%">
+        <a href="#" ui:field="browseButton">
+          <ui:text from="{i18n.browse}"/>
+        </a>
 
         <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
         <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
