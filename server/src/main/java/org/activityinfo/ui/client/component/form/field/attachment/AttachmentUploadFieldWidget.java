@@ -119,6 +119,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         Event.setEventListener(browseButton, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
+                event.preventDefault();
                 if (readOnly) {
                     return;
                 }
