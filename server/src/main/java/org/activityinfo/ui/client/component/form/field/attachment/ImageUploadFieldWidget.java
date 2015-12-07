@@ -253,6 +253,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             case NONE:
                 message = I18N.CONSTANTS.noImage();
                 servingUrl = null;
+                formPanel.reset(); // forced to clear file input state
                 break;
         }
 

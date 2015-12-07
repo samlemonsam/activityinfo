@@ -269,6 +269,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
     @Override
     public void clearValue() {
         rows.clear();
+        formPanel.reset();
         setState(true);
     }
 
