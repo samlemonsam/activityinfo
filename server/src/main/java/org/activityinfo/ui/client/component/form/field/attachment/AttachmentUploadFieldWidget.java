@@ -165,6 +165,7 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
 
                         setState(true);
                         fireValueChanged();
+                        formPanel.reset();
                     } else {
                         Log.error("Failed to fetch attachment serving url. ");
                         setState(false);
