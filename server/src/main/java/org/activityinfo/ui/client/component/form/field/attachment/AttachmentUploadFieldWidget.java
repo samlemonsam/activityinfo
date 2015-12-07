@@ -148,26 +148,26 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
                 // event.getResults is always null because of cross-domain upload
                 // we are forced to make additional call to check whether upload is successful
 
-                fetchServingUrl();
+                checkBlobExistance();
+                formPanel.reset();
             }
         });
         formPanel.submit();
     }
 
-    public void fetchServingUrl() {
+    public void checkBlobExistance() {
         try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blobUrl");
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/exists");
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == Http.Status.SEE_OTHER.getCode()) {
+                    if (response.getStatusCode() == Http.Status.OK.getCode()) {
                         addNewRow(uploader.getAttachment());
 
                         setState(true);
                         fireValueChanged();
-                        formPanel.reset();
                     } else {
-                        Log.error("Failed to fetch attachment serving url. ");
+                        Log.error("Failed to fetch attachment serving url. Status code is not ok. ");
                         setState(false);
                     }
                 }

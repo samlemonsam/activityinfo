@@ -177,6 +177,17 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         return Response.ok(newImage.getImageData()).type(mimeType).build();
     }
 
+    @GET
+    @Path("{blobId}/{resourceId}/exists")
+    public Response exists(@InjectParam AuthenticatedUser user,
+                           @PathParam("blobId") BlobId blobId,
+                           @PathParam("resourceId") ResourceId resourceId) {
+        assertNotAnonymousUser(user);
+        assertHasAccess(user, blobId, resourceId);
+        assertBlobExists(blobId);
+        return Response.ok().build();
+    }
+
     private BlobKey blobKey(BlobId blobId) {
         BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
         return blobstoreService.createGsBlobKey("/gs/" + bucketName + "/" + blobId.asString());
