@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.field.attachment;
  */
 
 import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -126,6 +127,14 @@ public class Uploader {
 
     public static String getBaseUrl(String blobId, ResourceId resourceId) {
         return "/service/blob/" + blobId + "/" + resourceId.asString();
+    }
+
+    public String getPermanentLink() {
+        return getPermanentLink(attachment.getBlobId(), resourceId);
+    }
+
+    public static String getPermanentLink(String blobId, ResourceId resourceId) {
+        return GWT.getHostPageBaseURL() + "/" + getBaseUrl(blobId, resourceId) + "/blobUrl";
     }
 
     private String fileName() {

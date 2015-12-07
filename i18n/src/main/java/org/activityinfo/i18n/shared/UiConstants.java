@@ -1659,4 +1659,8 @@ public interface UiConstants extends Constants {
     
     @DefaultStringValue("Upload file size limit is set to 10 MB.")
     String uploadFileSizeLimit();
+
+    @DefaultStringValue("Unknown")
+    String unknown();
+
 }

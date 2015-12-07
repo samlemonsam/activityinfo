@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.channels.Channels;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -84,7 +85,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         try {
             GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
             String url = signer.getSignedUrl("GET", bucketName + "/" + blobId.asString());
-            return Response.ok(url).type(MediaType.TEXT_PLAIN).build();
+            return Response.seeOther(new URI(url)).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

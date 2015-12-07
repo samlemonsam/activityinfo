@@ -29,7 +29,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -38,7 +37,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.ui.icons.Icons;
@@ -58,7 +56,6 @@ public class AttachmentUploadRow extends Composite {
     private static OurUiBinder ourUiBinder = GWT.create(OurUiBinder.class);
 
     private boolean readOnly;
-    private String servingUrl = null;
     private final Attachment attachment;
     private final ResourceId resourceId;
 
@@ -77,7 +74,8 @@ public class AttachmentUploadRow extends Composite {
         this.attachment = attachment;
         this.resourceId = resourceId;
 
-        fetchServingUrl();
+        setFileName();
+        setThumbnail();
 
         rootPanel.addDomHandler(new MouseOverHandler() {
             @Override
@@ -95,11 +93,9 @@ public class AttachmentUploadRow extends Composite {
     }
 
     private void setFileName() {
-        boolean hasFile = !Strings.isNullOrEmpty(servingUrl);
-
         fileName.setInnerSafeHtml(SafeHtmlUtils.fromString(
-                hasFile ? " " + attachment.getFilename() : " " + I18N.CONSTANTS.noFileSelected()));
-        fileName.setHref(hasFile ? servingUrl : "#");
+                !Strings.isNullOrEmpty(attachment.getFilename()) ? " " + attachment.getFilename() : " " + I18N.CONSTANTS.unknown()));
+        fileName.setHref(Uploader.getPermanentLink(attachment.getBlobId(), resourceId));
     }
 
     public Button getRemoveButton() {
@@ -117,44 +113,6 @@ public class AttachmentUploadRow extends Composite {
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
         this.removeButton.setEnabled(!readOnly);
-    }
-
-    private void fetchServingUrl() {
-        try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, Uploader.getBaseUrl(attachment.getBlobId(), resourceId) + "/blobUrl");
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    String url = response.getText();
-                    if (url != null && url.startsWith("http")) {
-                        servingUrl = url;
-                    } else {
-                        servingUrl = null;
-                    }
-                    setState();
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    servingUrl = null;
-                    Log.error("Failed to fetch attachment serving url. ", exception);
-                    setState();
-                }
-            });
-        } catch (RequestException e) {
-            servingUrl = null;
-            Log.error("Failed to send request for fetching serving url. ", e);
-            setState();
-        }
-    }
-
-    public boolean isValid() {
-        return !Strings.isNullOrEmpty(servingUrl);
-    }
-
-    private void setState() {
-        setFileName();
-        setThumbnail();
     }
 
     @Override

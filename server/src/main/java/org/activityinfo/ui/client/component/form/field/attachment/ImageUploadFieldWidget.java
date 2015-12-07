@@ -25,7 +25,10 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -38,6 +41,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.model.util.Http;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -105,7 +109,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                download();
+                Window.open(uploader.getPermanentLink(), "_blank", null);
             }
         });
         clearButton.addClickHandler(new ClickHandler() {
@@ -135,25 +139,6 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 }
             }
         });
-    }
-
-    private void download() {
-        try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/blobUrl");
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    Window.open(response.getText(), "_blank", null);
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    Log.error("Failed to fetch image blob serving url. ", exception);
-                }
-            });
-        } catch (RequestException e) {
-            Log.error("Failed to send request for fetching image blob serving url. ", e);
-        }
     }
 
 //    private void addFileDnDSupport() {
@@ -224,7 +209,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) {
+                    if (response.getStatusCode() == Http.Status.OK.getCode()) {
                         servingUrl = response.getText();
                         setState(State.LOADED);
                     } else {
