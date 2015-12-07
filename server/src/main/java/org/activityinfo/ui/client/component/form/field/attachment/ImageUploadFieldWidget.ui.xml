@@ -23,7 +23,7 @@
 
       <g:HTMLPanel ui:field="placeholder" addStyleNames="form-img-placeholder">
         <span ui:field="message"/>
-        <g:Anchor ui:field="browseLink" title="{i18n.uploadFileSizeLimit}" text="{i18n.browse}"/>
+        <g:Anchor ui:field="browseLink" title="{i18n.uploadFileSizeLimit}" text="{i18n.browse}" href="#"/>
       </g:HTMLPanel>
 
       <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
