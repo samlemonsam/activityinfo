@@ -15,7 +15,9 @@
       <a href="#" target="_blank" ui:field="fileName"><ui:text from="{i18n.loading}"/></a>
     </div>
     <g:HTMLPanel addStyleNames="col-xs-1">
-      <g:Button text="x" addStyleNames="btn-xs btn-link pull-right" ui:field="removeButton" visible="false" title="{i18n.uploadFileSizeLimit}"/>
+      <g:Button addStyleNames="btn-xs btn-link pull-right" ui:field="removeButton" visible="false" title="{i18n.uploadFileSizeLimit}">
+        <span class="{icons.remove}"/>
+      </g:Button>
     </g:HTMLPanel>
   </g:HTMLPanel>
 
