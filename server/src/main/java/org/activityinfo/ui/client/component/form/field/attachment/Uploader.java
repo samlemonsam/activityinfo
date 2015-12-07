@@ -134,7 +134,7 @@ public class Uploader {
     }
 
     public static String getPermanentLink(String blobId, ResourceId resourceId) {
-        return GWT.getHostPageBaseURL() + "/" + getBaseUrl(blobId, resourceId) + "/blobUrl";
+        return GWT.getHostPageBaseURL() + getBaseUrl(blobId, resourceId) + "/blobUrl";
     }
 
     private String fileName() {
