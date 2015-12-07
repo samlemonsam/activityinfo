@@ -116,6 +116,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             @Override
             public void onClick(ClickEvent event) {
                 clearValue();
+                fireValueChanged();
             }
         });
 
@@ -242,9 +243,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             case LOADED:
                 imageUrl = servingUrl + "=s" + formPanel.getOffsetWidth();
 
-                AttachmentValue attachmentValue = new AttachmentValue();
-                attachmentValue.getValues().add(uploader.getAttachment());
-                valueUpdater.update(attachmentValue);
+                fireValueChanged();
                 break;
             case LOADING:
                 message = I18N.CONSTANTS.loading();
@@ -264,6 +263,12 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         browseLink.setText(state == State.FAILED ? I18N.CONSTANTS.retry() : I18N.CONSTANTS.browse());
         downloadButton.setVisible(state == State.LOADED);
         clearButton.setVisible(state == State.LOADED);
+    }
+
+    private void fireValueChanged() {
+        AttachmentValue attachmentValue = new AttachmentValue();
+        attachmentValue.getValues().add(uploader.getAttachment());
+        valueUpdater.update(attachmentValue);
     }
 
     @Override
