@@ -98,7 +98,6 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         assertNotAnonymousUser(user);
         assertHasAccess(user, blobId, resourceId);
-        assertBlobExists(blobId);
 
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
 
