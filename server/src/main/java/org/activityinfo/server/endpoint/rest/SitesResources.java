@@ -155,9 +155,9 @@ public class SitesResources {
 
                         String stringValue = (String) indicatorValue;
 
-                        if (Strings.isNullOrEmpty(stringValue)) {
+                        if (!Strings.isNullOrEmpty(stringValue)) {
                             ActivityFormDTO form = forms.get(site.getActivityId());
-                            if(form == null) {
+                            if (form == null) {
                                 form = dispatcher.execute(new GetActivityForm(site.getActivityId()));
                                 forms.put(form.getId(), form);
                             }
