@@ -21,7 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class SitesResources {
 
@@ -54,6 +57,7 @@ public class SitesResources {
 
         StringWriter writer = new StringWriter();
         JsonGenerator json = Jackson.createJsonFactory(writer);
+        json.setCodec(Jackson.createJsonMapper());
 
         writeJson(sites, json);
 
@@ -158,7 +162,7 @@ public class SitesResources {
                                 forms.put(form.getId(), form);
                             }
                             if (form.getIndicatorById(indicatorId).getType() == AttachmentType.TYPE_CLASS) {
-                                json.writeObjectField(Integer.toString(indicatorId), AttachmentValue.fromJson(stringValue).asRecord());
+                                json.writeObjectField(Integer.toString(indicatorId), AttachmentValue.fromJson(stringValue).getValues());
                             } else {
                                 json.writeStringField(Integer.toString(indicatorId), stringValue);
                             }
