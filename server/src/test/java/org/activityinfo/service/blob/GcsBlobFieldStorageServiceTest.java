@@ -60,6 +60,7 @@ import java.io.IOException;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -151,7 +152,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         Response response = blobService.getBlobUrl(user, blobId, resourceId);
 
         assertEquals(response.getStatus(), 303);
-        assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
+        assertNotNull(response.getMetadata().getFirst("Location"));
     }
 
     @Test(expected = WebApplicationException.class)
