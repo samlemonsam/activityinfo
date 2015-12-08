@@ -240,9 +240,16 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public boolean hasAccess(ResourceId userId, BlobId blobId) {
         try {
             GcsFileMetadata metadata = gcsService.getMetadata(new GcsFilename(bucketName, blobId.asString()));
-            ResourceId ownerId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER));
 
-            if (ownerId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            String ownerId = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER);
+            String creatorId = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR);
+
+            LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerId, creatorId));
+
+            Preconditions.checkNotNull(ownerId, "Owner of blob is null.");
+            Preconditions.checkNotNull(creatorId, "Creator of blob is null.");
+
+            if (ResourceId.valueOf(ownerId).getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
                 Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
 
                 if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
