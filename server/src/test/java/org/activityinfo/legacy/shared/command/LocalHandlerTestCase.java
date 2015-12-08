@@ -40,6 +40,7 @@ import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.util.Collector;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet;
+import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 import org.activityinfo.ui.client.local.LocalModuleStub;
 import org.activityinfo.ui.client.local.command.CommandQueue;
 import org.activityinfo.ui.client.local.command.LocalDispatcher;
@@ -59,7 +60,7 @@ import java.util.List;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.replay;
 
-@Modules({AuthenticationModuleStub.class})
+@Modules({AuthenticationModuleStub.class, GcsBlobFieldStorageServiceModule.class})
 public abstract class LocalHandlerTestCase {
     @Inject
     protected CommandServlet servlet;

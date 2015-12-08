@@ -35,6 +35,7 @@ import org.activityinfo.server.endpoint.gwtrpc.CommandServlet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.locale.LocaleModule;
+import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 import org.junit.Before;
 
 import javax.persistence.EntityManager;
@@ -47,7 +48,8 @@ import java.util.Locale;
         TemplateModule.class,
         GwtRpcModule.class,
         AuthenticationModuleStub.class,
-        LocaleModule.class
+        LocaleModule.class,
+        GcsBlobFieldStorageServiceModule.class
 })
 public abstract class CommandTestCase {
 
