@@ -21,8 +21,13 @@ public class GcsUploadCredentialBuilder {
     private static final String END_POINT_URL_FORMAT = "https://%s.storage.googleapis.com";
 
     public static final int BYTES_IN_MEGA_BYTE = 1024 * 1024;
-    public static final String X_GOOG_META_OWNER = "x-goog-meta-owner";
-    public static final String X_GOOG_META_CREATOR = "x-goog-meta-creator";
+
+    public static final String X_OWNER = "owner";
+    public static final String X_CREATOR = "creator";
+
+    public static final String X_GOOG_META_PREFIX = "x-goog-meta-";
+    private static final String X_GOOG_META_OWNER = X_GOOG_META_PREFIX + X_OWNER;
+    private static final String X_GOOG_META_CREATOR = X_GOOG_META_PREFIX + X_CREATOR;
 
     private final GcsPolicyBuilder policyDocument;
     private final Map<String, String> formFields;

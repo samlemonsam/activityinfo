@@ -104,8 +104,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         GcsFileOptions gcsFileOptions = new Builder().
                 contentDisposition(contentDisposition).
                 mimeType(mimeType).
-                addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR, userId.asString()).
-                addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_OWNER, resourceId.asString()).
+                addUserMetadata(GcsUploadCredentialBuilder.X_CREATOR, userId.asString()).
+                addUserMetadata(GcsUploadCredentialBuilder.X_OWNER, resourceId.asString()).
                 build();
         GcsOutputChannel channel = GcsServiceFactory.createGcsService().createOrReplace(new GcsFilename(bucketName, blobId.asString()), gcsFileOptions);
 
@@ -127,8 +127,9 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
 
-        GcsInputChannel gcsInputChannel = GcsServiceFactory.createGcsService().openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
-        GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(gcsFilename);
+        GcsService gcsService = GcsServiceFactory.createGcsService();
+        GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
+        GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
 
         try (InputStream inputStream = Channels.newInputStream(gcsInputChannel)) {
             return Response.ok(ByteStreams.toByteArray(inputStream)).type(metadata.getOptions().getMimeType()).build();
@@ -230,7 +231,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public boolean hasAccess(ResourceId userId, BlobId blobId) {
         try {
             GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId.asString()));
-            ResourceId resourceId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER));
+            ResourceId resourceId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER));
             return hasAccess(userId, resourceId, blobId, metadata);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
@@ -239,8 +240,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     public boolean hasAccess(ResourceId userId, ResourceId resourceId, BlobId blobId, GcsFileMetadata metadata) {
-        String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER);
-        String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR);
+        String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER);
+        String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_CREATOR);
 
         LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerIdStr, creatorIdStr));
 
