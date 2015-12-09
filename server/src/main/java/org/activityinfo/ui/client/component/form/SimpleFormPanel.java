@@ -22,6 +22,7 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
@@ -281,7 +282,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     private boolean isEmpty(FieldValue value) {
         return value == null ||
                 (value instanceof EnumValue && ((EnumValue) value).getResourceIds().isEmpty()) ||
-                (value instanceof ReferenceValue && ((ReferenceValue) value).getResourceIds().isEmpty());
+                (value instanceof ReferenceValue && ((ReferenceValue) value).getResourceIds().isEmpty()) ||
+                (value instanceof AttachmentValue && ((AttachmentValue) value).getValues().isEmpty());
     }
 
     public boolean validate() {
