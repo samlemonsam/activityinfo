@@ -50,7 +50,6 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 10;
 
     private final AppIdentityService appIdentityService;
-    private final GcsService gcsService;
     private final EntityManager em;
 
     private String bucketName;
@@ -63,7 +62,6 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
                 new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
 
-        this.gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
         try {
             LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
         } catch (ApiProxy.CallNotFoundException e) {
@@ -96,18 +94,20 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                     ResourceId resourceId,
                     ByteSource byteSource) throws IOException {
 
-        assertNotAnonymousUser(user);
-        assertHasAccess(user, blobId, resourceId);
+        ResourceId userId = CuidAdapter.userId(user.getUserId());
 
-        GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
+        assertNotAnonymousUser(user);
+        if (!hasAccessToResource(userId, resourceId)) {
+            throw new WebApplicationException(UNAUTHORIZED);
+        }
 
         GcsFileOptions gcsFileOptions = new Builder().
                 contentDisposition(contentDisposition).
                 mimeType(mimeType).
-                addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR, CuidAdapter.userId(user.getUserId()).asString()).
+                addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR, userId.asString()).
                 addUserMetadata(GcsUploadCredentialBuilder.X_GOOG_META_OWNER, resourceId.asString()).
                 build();
-        GcsOutputChannel channel = gcsService.createOrReplace(gcsFilename, gcsFileOptions);
+        GcsOutputChannel channel = GcsServiceFactory.createGcsService().createOrReplace(new GcsFilename(bucketName, blobId.asString()), gcsFileOptions);
 
         try (OutputStream outputStream = Channels.newOutputStream(channel)) {
             byteSource.copyTo(outputStream);
@@ -127,8 +127,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
 
-        GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
-        GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
+        GcsInputChannel gcsInputChannel = GcsServiceFactory.createGcsService().openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
+        GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(gcsFilename);
 
         try (InputStream inputStream = Channels.newInputStream(gcsInputChannel)) {
             return Response.ok(ByteStreams.toByteArray(inputStream)).type(metadata.getOptions().getMimeType()).build();
@@ -216,49 +216,52 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     private void assertHasAccess(AuthenticatedUser user, BlobId blobId, ResourceId resourceId) {
-        if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            try {
-                Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
-
-                if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, user.getId()))) {
-                    return;
-                }
-
-                GcsFileMetadata metadata = gcsService.getMetadata(new GcsFilename(bucketName, blobId.asString()));
-                String creatorId = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR);
-                if (CuidAdapter.userId(user.getUserId()).asString().equals(creatorId)) { // owner
-                    return;
-                }
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        try {
+            GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId.asString()));
+            if (hasAccess(CuidAdapter.userId(user.getUserId()), resourceId, blobId, metadata)) {
+                return;
             }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         throw new WebApplicationException(UNAUTHORIZED);
     }
 
     public boolean hasAccess(ResourceId userId, BlobId blobId) {
         try {
-            GcsFileMetadata metadata = gcsService.getMetadata(new GcsFilename(bucketName, blobId.asString()));
-
-            String ownerId = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER);
-            String creatorId = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR);
-
-            LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerId, creatorId));
-
-            Preconditions.checkNotNull(ownerId, "Owner of blob is null.");
-            Preconditions.checkNotNull(creatorId, "Creator of blob is null.");
-
-            if (ResourceId.valueOf(ownerId).getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-                Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
-
-                if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
-                    return true;
-                }
-            } else {
-                throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + ownerId);
-            }
+            GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId.asString()));
+            ResourceId resourceId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER));
+            return hasAccess(userId, resourceId, blobId, metadata);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public boolean hasAccess(ResourceId userId, ResourceId resourceId, BlobId blobId, GcsFileMetadata metadata) {
+        String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_OWNER);
+        String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_GOOG_META_CREATOR);
+
+        LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerIdStr, creatorIdStr));
+
+        Preconditions.checkNotNull(ownerIdStr, "Owner of blob is null.");
+        Preconditions.checkNotNull(creatorIdStr, "Creator of blob is null.");
+
+        if (userId.equals(ResourceId.valueOf(creatorIdStr))) { // owner
+            return true;
+        }
+        return hasAccessToResource(userId, resourceId);
+    }
+
+    private boolean hasAccessToResource(ResourceId userId, ResourceId resourceId) {
+        if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
+
+            if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
+                return true;
+            }
+        } else {
+            throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + resourceId);
         }
         return false;
     }
@@ -270,8 +273,9 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     public void setTestBucketName() {
-        Preconditions.checkState(bucketName == null);
-        bucketName = appIdentityService.getDefaultGcsBucketName();
+        if (bucketName == null) {
+            bucketName = appIdentityService.getDefaultGcsBucketName();
+        }
     }
 
     private void assertBlobExists(BlobId blobId) {

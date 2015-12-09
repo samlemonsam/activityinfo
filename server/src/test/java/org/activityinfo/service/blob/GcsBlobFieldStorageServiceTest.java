@@ -27,28 +27,33 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.code.appengine.awt.image.BufferedImage;
 import com.google.code.appengine.imageio.ImageIO;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.form.tree.AsyncFormTreeBuilder;
-import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.TFormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.ws.rs.WebApplicationException;
@@ -59,9 +64,7 @@ import java.io.IOException;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author yuriyz on 11/12/2015.
@@ -72,6 +75,7 @@ import static org.junit.Assert.assertTrue;
 public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
     private static final String FILE_NAME = "goabout.png";
+    public static final int USER_WITHOUT_ACCESS_TO_DB_1 = 22;
 
     private final LocalServiceTestHelper localServiceTestHelper = new LocalServiceTestHelper(
             new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig());
@@ -83,19 +87,21 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     private AuthenticatedUser noAccessUser;
     private BlobId blobId;
     private ResourceId resourceId = CuidAdapter.activityFormClass(1);
-    private ResourceLocatorAdaptor resourceLocator;
+    private ResourceLocatorAdaptor locator;
 
     @BeforeClass
     public static void setupI18N() {
         LocaleProxy.initialize();
-        AuthenticationModuleStub.setUserId(1);
     }
 
     @Before
     public final void uploadBlob() throws IOException {
+
+        AuthenticationModuleStub.setUserId(1);
+
         localServiceTestHelper.setUp();
         blobService.setTestBucketName();
-        resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
+        locator = new ResourceLocatorAdaptor(getDispatcher());
 
         user = new AuthenticatedUser("x", 1, "user1@user.com");
         noAccessUser = new AuthenticatedUser("x", 3, "stefan@user.com");
@@ -195,59 +201,90 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         return directory;
     }
 
+    /**
+     * 1. user1 : persist blob with FormInstance1 (FormClass1) user1
+     * 2. user2 : persist the same blob with FormInstance2 (FormClass2) -> try to steal blob access
+     */
     @Test
-    @Ignore
-    @OnDataSet("/dbunit/sites-simple1.db.xml")
+    @OnDataSet("/dbunit/sites-simple-blob-security.db.xml")
     public void blobPermissionAttack() throws IOException {
 
+        blobService.setTestBucketName();
+
         int activityId = 1;
-        ResourceId formId = CuidAdapter.activityFormClass(activityId);
+
+        ResourceId attachmentFieldId = ResourceId.generateFieldId(BarcodeType.TYPE_CLASS);
+        FormClass formClass = addAttachmentField(activityId, attachmentFieldId);
 
         blobId = BlobId.generate();
         blobService.put(user,
                 "attachment;filename=" + FILE_NAME,
                 MimeTypeUtil.mimeTypeFromFileName(FILE_NAME),
-                blobId, formId,
+                blobId, formClass.getId(),
                 ByteSource.wrap(ByteStreams.toByteArray(GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"))));
 
-
         FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
-                formId);
+                formClass.getId());
+
+        Attachment attachment = new Attachment();
+        attachment.setMimeType(MimeTypeUtil.mimeTypeFromFileName(FILE_NAME));
+        attachment.setBlobId(blobId.asString());
+        attachment.setFilename(FILE_NAME);
+
+        AttachmentValue attachmentValue = new AttachmentValue();
+        attachmentValue.getValues().add(attachment);
 
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
+        instance.set(attachmentFieldId, attachmentValue);
         instance.set(locationField(activityId), locationInstanceId(1));
         instance.set(partnerField(activityId), partnerInstanceId(1));
         instance.set(projectField(activityId), projectInstanceId(1));
-        instance.set(field(formId, START_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(field(formId, END_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(field(formId, COMMENT_FIELD), "My comment");
+        instance.set(field(formClass.getId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(formClass.getId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(formClass.getId(), COMMENT_FIELD), "My comment");
 
-        assertResolves(resourceLocator.persist(instance));
+        assertResolves(locator.persist(instance));
 
-        TFormTree formTree = new TFormTree(assertResolves(new AsyncFormTreeBuilder(resourceLocator).apply(formId)));
-        InstanceQuery query = new InstanceQuery(Lists.newArrayList(formTree.getRootPaths()), new IdCriteria(instance.getId()));
+        assertInstanceExists(instance.getId());
 
-//        Projection firstRead = singleSiteProjection(query);
-//
-//        assertEquals(new Quantity(1), firstRead.getValue(path(indicatorField(1))));
-//        assertEquals(new Quantity(2), firstRead.getValue(path(indicatorField(2))));
-//        assertEquals(new Quantity(3), firstRead.getValue(path(indicatorField(11))));
-//        assertEquals(new Quantity(0.5), firstRead.getValue(path(indicatorField(12))));
-//
-//        // set indicators to null
-//        instance.set(indicatorField(1).asString(), null);
-//        instance.set(indicatorField(2).asString(), null);
-//
-//        // persist it
-//        assertResolves(resourceLocator.persist(instance));
-//
-//        // read from server
-//        Projection secondRead = singleSiteProjection(query);
-//
-//        assertEquals(null, secondRead.getValue(path(indicatorField(1))));
-//        assertEquals(null, secondRead.getValue(path(indicatorField(2))));
-//        assertEquals(new Quantity(0), secondRead.getValue(path(indicatorField(11))));
-//        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
+        AuthenticationModuleStub.setUserId(USER_WITHOUT_ACCESS_TO_DB_1);
+
+        int anotherActivityId = 32;
+        ResourceId newAttachmentFieldId = ResourceId.generateFieldId(BarcodeType.TYPE_CLASS);
+        addAttachmentField(anotherActivityId, newAttachmentFieldId);
+
+        instance.setId(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()));
+        instance.setClassId(CuidAdapter.activityFormClass(anotherActivityId));
+        instance.set(newAttachmentFieldId, attachmentValue);
+
+        boolean persisted = true;
+        try {
+            assertResolves(locator.persist(instance)); // this must fail because of blob permission check
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            if (e.getCause() instanceof IllegalAccessCommandException) {
+                persisted = false;
+            }
+        }
+
+        assertFalse("Access to blob is stolen! Permissions check for blobs is broken.", persisted);
+
+    }
+
+    private FormClass addAttachmentField(int activityId, ResourceId attachmentFieldId) {
+        FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(activityId)));
+
+        formClass.addElement(new FormField(attachmentFieldId)
+                .setLabel("Attachment")
+                .setType(AttachmentType.TYPE_CLASS.createType())
+                .setVisible(true));
+
+        assertResolves(locator.persist(formClass));
+        return formClass;
+    }
+
+    private FormInstance assertInstanceExists(ResourceId instanceId) {
+        return assertResolves(locator.getFormInstance(instanceId));
     }
 }
