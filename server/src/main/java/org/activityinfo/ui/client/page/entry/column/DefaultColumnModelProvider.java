@@ -96,7 +96,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     private ColumnModel forSingleActivity(GroupingModel grouping, ActivityFormDTO activity) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
-                                           .maybeAddLockColumn(activity)
+                                           .maybeAddLockOrLinkColumn(activity)
                                            .maybeAddDateColumn(activity)
                                            .maybeAddPartnerColumn(activity)
                                            .maybeAddProjectColumn(activity)
@@ -106,7 +106,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                            .build();
         } else if (grouping instanceof AdminGroupingModel) {
 
-            return new ColumnModelBuilder().maybeAddLockColumn(activity)
+            return new ColumnModelBuilder().maybeAddLockOrLinkColumn(activity)
                                            .addTreeNameColumn()
                                            .maybeAddDateColumn(activity)
                                            .maybeAddPartnerColumn(activity)
@@ -114,7 +114,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                            .build();
         } else if (grouping instanceof TimeGroupingModel) {
 
-            return new ColumnModelBuilder().maybeAddLockColumn(activity)
+            return new ColumnModelBuilder().maybeAddLockOrLinkColumn(activity)
                                            .addTreeNameColumn()
                                            .maybeAddDateColumn(activity)
                                            .maybeAddPartnerColumn(activity)
@@ -130,7 +130,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     private ColumnModel forSingleDatabase(GroupingModel grouping, UserDatabaseDTO database) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
-                                           .maybeAddLockColumn(database)
+                                           .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
                                            .addLocationColumn()
                                            .maybeAddPartnerColumn(database)
@@ -141,7 +141,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
         } else if (grouping instanceof AdminGroupingModel) {
 
             return new ColumnModelBuilder().addTreeNameColumn()
-                                           .maybeAddLockColumn(database)
+                                           .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
                                            .maybeAddPartnerColumn(database)
                                            .maybeAddProjectColumn(database)
@@ -150,7 +150,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
         } else if (grouping instanceof TimeGroupingModel) {
 
             return new ColumnModelBuilder().addTreeNameColumn()
-                                           .maybeAddLockColumn(database)
+                                           .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
                                            .maybeAddPartnerColumn(database)
                                            .maybeAddProjectColumn(database)

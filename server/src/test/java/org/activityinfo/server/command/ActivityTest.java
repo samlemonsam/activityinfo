@@ -40,6 +40,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.database.OnDataSet;
@@ -108,6 +109,12 @@ public class ActivityTest extends CommandTestCase2 {
         assertEquals("public", Published.NOT_PUBLISHED.getIndex(), act.getPublished());
         assertEquals("classicView", false, act.getClassicView());
 
+        Extents countryBounds = act.getLocationType().getCountryBounds();
+        assertThat(countryBounds.getMinLat(), Matchers.equalTo(-13.0));
+        assertThat(countryBounds.getMaxLat(), Matchers.equalTo(5.0));
+
+        assertThat(countryBounds.getMinLon(), Matchers.equalTo(12.0));
+        assertThat(countryBounds.getMaxLon(), Matchers.equalTo(31.0));
     }
 
 

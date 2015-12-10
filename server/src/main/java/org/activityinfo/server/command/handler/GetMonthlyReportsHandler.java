@@ -88,6 +88,7 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
             dto.setIndicatorName(indicator.getName());
             dto.setCategory(indicator.getCategory());
             dto.setActivityName(indicator.getActivity().getName());
+            dto.setExpression(indicator.getExpression());
 
             for (ReportingPeriod period : periods) {
 

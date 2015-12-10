@@ -74,7 +74,6 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
     private final KeyGenerator generator = new KeyGenerator();
 
     // Mappings old id (source db) -> new id (target/newly created db)
-    private final Map<Integer, Partner> partnerMapping = Maps.newHashMap();
     private final Map<Integer, Activity> activityMapping = Maps.newHashMap();
     private final Map<FormElement, FormElement> sourceIdToTargetFormElementMapping = Maps.newHashMap();
     private final Map<ResourceId, ResourceId> typeIdMapping = Maps.newHashMap();
@@ -149,12 +148,7 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
             UserPermission newPermission = new UserPermission(sourcePermission);
             newPermission.setDatabase(targetDb);
             newPermission.setLastSchemaUpdate(new Date());
-
-            // set newly created partner
-            if (sourcePermission.getPartner() != null) {
-                Partner targetPartner = partnerMapping.get(sourcePermission.getPartner().getId());
-                newPermission.setPartner(targetPartner != null ? targetPartner : null);
-            }
+            newPermission.setPartner(sourcePermission.getPartner());
 
             em.persist(newPermission);
 
@@ -163,19 +157,9 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
 
     private void copyPartners() {
         for (Partner partner : sourceDb.getPartners()) {
-
-            if (partner.getName().equals("Default")) { // skip source "Default" partner
-                continue;
+            if (!partner.getName().equals("Default")) {
+                targetDb.getPartners().add(partner);
             }
-
-            Partner newPartner = new Partner();
-            newPartner.setName(partner.getName());
-            newPartner.setFullName(partner.getFullName());
-
-            em.persist(newPartner);
-
-            partnerMapping.put(partner.getId(), newPartner);
-            targetDb.getPartners().add(newPartner);
         }
 
         targetDb.setLastSchemaUpdate(new Date());

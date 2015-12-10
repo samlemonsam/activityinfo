@@ -30,31 +30,20 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+import com.google.gwt.http.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.image.ImageRowValue;
 import org.activityinfo.service.blob.UploadCredentials;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 
 import java.util.List;
 import java.util.Map;
@@ -95,7 +84,7 @@ public class ImageUploadRow extends Composite {
     @UiField
     FormPanel formPanel;
 
-    public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId) {
+    public ImageUploadRow(ImageRowValue value, String fieldId, String resourceId, final FieldWidgetMode fieldWidgetMode) {
         initWidget(ourUiBinder.createAndBindUi(this));
         this.value = value;
         this.fieldId = fieldId;
@@ -104,7 +93,11 @@ public class ImageUploadRow extends Composite {
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                requestUploadUrl();
+                if (fieldWidgetMode == FieldWidgetMode.NORMAL) { // todo uncomment !!!
+                    requestUploadUrl();
+                } else {
+                    Window.alert(I18N.CONSTANTS.uploadIsNotAllowedInDuringDesing());
+                }
             }
         });
         downloadButton.addClickHandler(new ClickHandler() {
@@ -174,22 +167,11 @@ public class ImageUploadRow extends Composite {
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    String json = response.getText();
-                    Resource resource = Resources.fromJson(json);
+
+                    Resource resource = Resources.fromJson(response.getText());
                     UploadCredentials uploadCredentials = UploadCredentials.fromRecord(resource);
 
-                    // Remove the old hidden fields before adding the new ones
-                    List<Hidden> hidden = Lists.newArrayListWithCapacity(formFieldsContainer.getWidgetCount());
-                    for (int i = 0; i < formFieldsContainer.getWidgetCount(); i++) {
-                        Widget widget = formFieldsContainer.getWidget(i);
-                        if (widget instanceof Hidden) {
-                            hidden.add((Hidden) widget);
-                        }
-                    }
-                    // We can't just iterate once using the getWidget() method because removing a widget changes indexes
-                    for (Hidden old : hidden) {
-                        formFieldsContainer.remove(old);
-                    }
+                    removeHiddenFieldsFromForm();
 
                     Map<String, String> formFields = uploadCredentials.getFormFields();
                     for (Map.Entry<String, String> field : formFields.entrySet()) {
@@ -211,15 +193,35 @@ public class ImageUploadRow extends Composite {
         }
     }
 
+    private void removeHiddenFieldsFromForm() {
+        List<Hidden> hidden = Lists.newArrayListWithCapacity(formFieldsContainer.getWidgetCount());
+        for (int i = 0; i < formFieldsContainer.getWidgetCount(); i++) {
+            Widget widget = formFieldsContainer.getWidget(i);
+            if (widget instanceof Hidden) {
+                hidden.add((Hidden) widget);
+            }
+        }
+
+        for (Hidden old : hidden) {
+            formFieldsContainer.remove(old);
+        }
+    }
+
     private void upload() {
         imageContainer.setVisible(true);
         downloadButton.setVisible(false);
 
-        if (oldHandler != null) oldHandler.removeHandler();
+        if (oldHandler != null) {
+            oldHandler.removeHandler();
+        }
+
         oldHandler = formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                String responseString = event.getResults(); // what about fail results?
+                // what about fail results?
+                // we are not going to use it right now because in dev mode it is always null. https://code.google.com/p/google-web-toolkit/issues/detail?id=3832
+                //String responseString = event.getResults();
+
 
                 imageContainer.setVisible(false);
                 downloadButton.setVisible(true);

@@ -28,14 +28,9 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import org.activityinfo.ui.client.util.GwtUtil;
-
-import java.util.Date;
+import org.activityinfo.i18n.shared.I18N;
 
 public class TimePeriodColumn extends ReadTextColumn {
-
-    protected static final DateTimeFormat FORMAT = DateTimeFormat.getFormat("yyyy-MMM-dd");
 
     public TimePeriodColumn(String property, String header, int width) {
         super(property, header, width);
@@ -56,35 +51,11 @@ public class TimePeriodColumn extends ReadTextColumn {
                                  ListStore<ModelData> store,
                                  Grid<ModelData> grid) {
 
-                Object value = model.get("date1");
-                if (value == null) {
-                    return "";
-                }
-                Date date1;
-                if (value instanceof Date) {
-                    date1 = (Date) value;
-                } else if (value instanceof LocalDate) {
-                    date1 = ((LocalDate) value).atMidnightInMyTimezone();
-                } else {
-                    throw new RuntimeException("Don't know how to handle date as class " + value.getClass().getName());
-                }
+                LocalDate fromDate = model.get("fromDate");
+                LocalDate toDate = model.get("toDate");
 
-                Object value2 = model.get("date2");
-                if (value2 == null) {
-                    return "";
-                }
-                Date date2;
-                if (value2 instanceof Date) {
-                    date2 = (Date) value2;
-                } else if (value2 instanceof LocalDate) {
-                    date2 = ((LocalDate) value2).atMidnightInMyTimezone();
-                } else {
-                    throw new RuntimeException("Don't know how to handle date as class " + value2.getClass().getName());
-                }
-
-                return GwtUtil.valueWithTooltip(FORMAT.format(date1) + " to " + FORMAT.format(date2));
+                return I18N.MESSAGES.dateRange(fromDate.atMidnightInMyTimezone(), toDate.atMidnightInMyTimezone());
             }
-
         });
     }
 }

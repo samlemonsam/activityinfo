@@ -23,13 +23,13 @@ package org.activityinfo.server.command;
  */
 
 import junit.framework.Assert;
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Before;
 import org.junit.Test;
@@ -144,8 +144,8 @@ public class TargetTest extends CommandTestCase {
 
         TargetDTO target = new TargetDTO();
         target.setName("Target0071");
-        target.setDate1(date1);
-        target.setDate2(date2);
+        target.setFromDate(date1);
+        target.setToDate(date2);
 
         return target;
     }

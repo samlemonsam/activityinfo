@@ -26,6 +26,10 @@ class ProjectCoverage {
         def paths = pathMap(project)
         if(!paths.isEmpty()) {
 
+            if(!project.buildDir.exists()) {
+                project.buildDir.mkdirs();
+            }
+            
             // Write out the XML Summary for files that belong
             // to this module
             project.file("${project.buildDir}/coverage-at.xml").withWriter { writer ->

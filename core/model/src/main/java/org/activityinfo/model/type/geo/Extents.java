@@ -192,7 +192,7 @@ public class Extents implements Serializable, IsRecord {
      * @return the x (longitude) coordinate of the Extents's centroid, (x1+x2)/2
      */
     public double getCenterX() {
-        return (minLon + maxLon) / 2;
+        return (minLon + maxLon) / 2d;
     }
 
     /**
@@ -200,7 +200,7 @@ public class Extents implements Serializable, IsRecord {
      * (y1+y2)/2
      */
     public double getCenterY() {
-        return (minLat + maxLat) / 2;
+        return (minLat + maxLat) / 2d;
     }
 
     public boolean isEmpty() {

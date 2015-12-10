@@ -26,6 +26,7 @@ import com.google.common.base.Stopwatch;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetReports;
 import org.activityinfo.legacy.shared.command.result.ReportsResult;
+import org.activityinfo.legacy.shared.reports.model.EmailDelivery;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,8 @@ public class GetReportsTest extends CommandTestCase {
         assertEquals(3, result.getData().get(1).getId());
         assertEquals("Report 3", result.getData().get(1).getTitle());
         assertEquals("Alex", result.getData().get(1).getOwnerName());
+        assertEquals(Integer.valueOf(1), result.getData().get(1).getDay());
+        assertEquals(EmailDelivery.NONE, result.getData().get(1).getEmailDelivery());
     }
 
     @Test

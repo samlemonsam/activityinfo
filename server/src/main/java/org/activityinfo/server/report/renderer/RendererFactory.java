@@ -31,7 +31,6 @@ import org.activityinfo.server.report.renderer.image.ImageReportRenderer;
 import org.activityinfo.server.report.renderer.itext.HtmlReportRenderer;
 import org.activityinfo.server.report.renderer.itext.PdfReportRenderer;
 import org.activityinfo.server.report.renderer.itext.RtfReportRenderer;
-import org.activityinfo.server.report.renderer.ppt.PPTRenderer;
 
 /**
  * Creates a {@code Renderer} for a given file format
@@ -48,8 +47,6 @@ public class RendererFactory {
     public Renderer get(RenderElement.Format format) {
 
         switch (format) {
-            case PowerPoint:
-                return injector.getInstance(PPTRenderer.class);
             case Word:
                 return injector.getInstance(RtfReportRenderer.class);
             case Excel:

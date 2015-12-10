@@ -732,9 +732,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please complete the form correctly before continuing.")
     String pleaseCompleteForm();
 
-    @DefaultStringValue("PowerPoint")
-    String powerPoint();
-
     @DefaultStringValue("Preview")
     String preview();
 
@@ -1281,9 +1278,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Rows validation result")
     String rowsValidationResult();
 
-    @DefaultStringValue("There was an error matching references.")
-    String errorMatchingReferences();
-
     @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns. Please mouse over on particular cell to see detail explanation.")
     String correctProblems();
 
@@ -1628,4 +1622,13 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("To begin, copy your table from Excel and paste in the box below:")
     String importHelpText();
+
+    @DefaultStringValue("Upload is not allowed during form designing.")
+    String uploadIsNotAllowedInDuringDesing();
+    
+    @DefaultStringValue("Project since deleted")
+    String deletedProject();
+
+    @DefaultStringValue("Partner since removed")
+    String deletedPartner();
 }

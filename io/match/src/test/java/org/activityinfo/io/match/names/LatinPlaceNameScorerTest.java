@@ -2,6 +2,7 @@ package org.activityinfo.io.match.names;
 
 import com.google.common.collect.Lists;
 import org.junit.Ignore;
+import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.junit.Test;
 
 import java.util.List;
@@ -93,6 +94,15 @@ public class LatinPlaceNameScorerTest {
         LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
 
         double score = scorer.score("Jubbada Hoose (Lower Juba)", "Lower Juba");
+        System.out.println(score);
+        assertThat(score, greaterThan(MINIMUM_SCORE));
+    }
+
+    @Test
+    public void caseInsensitive() {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+
+        double score = scorer.score("q1", "Q1");
         System.out.println(score);
         assertThat(score, greaterThan(MINIMUM_SCORE));
     }

@@ -65,6 +65,7 @@ public class InstanceScorer {
     private final LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
 
     public InstanceScorer(InstanceScoreSource source) {
+        assert source != null;
         this.source = source;
     }
 

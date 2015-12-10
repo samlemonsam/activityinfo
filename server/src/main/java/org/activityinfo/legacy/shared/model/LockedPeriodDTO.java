@@ -24,6 +24,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.google.common.base.Preconditions;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonMethod;
@@ -177,6 +178,8 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
     }
 
     public boolean fallsWithinPeriod(LocalDate date) {
+        Preconditions.checkNotNull(date);
+
         LocalDate from = getFromDate();
         LocalDate to = getToDate();
 

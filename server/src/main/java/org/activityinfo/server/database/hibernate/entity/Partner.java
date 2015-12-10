@@ -52,7 +52,7 @@ public class Partner implements java.io.Serializable {
         this.id = id;
     }
 
-    @Column(name = "Name", nullable = false, length = 16)
+    @Column(name = "Name", nullable = false, length = 255)
     public String getName() {
         return this.name;
     }
