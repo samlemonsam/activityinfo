@@ -80,12 +80,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
         
         query(CuidAdapter.locationFormClass(1), "label", "axe", "territoire.province.name", "territoire.name",
-                "province.name");
+                "province.name", "province");
         assertThat(column("label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga", "Boga"));
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
         assertThat(column("territoire.name"), hasValues("Shabunda", null, "Irumu", "Bukavu"));
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
+        assertThat(column("province"), hasValues("z2", "z1", "z4", "z2"));
+
     }
     
     @Test
@@ -168,8 +170,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2)));
         
     }
-
-
 
     @Test
     public void testSingleSiteResource() throws IOException {

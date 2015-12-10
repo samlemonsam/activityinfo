@@ -94,6 +94,24 @@ public class FormTreeSymbolTableTest {
         assertThat(resolve("Location.Name"), containsInAnyOrder(path("B", "VA"), path("B", "HA")));
         assertThat(resolve("Location.Population"), contains(path("B", "VB")));
     }
+
+    @Test
+    public void descendantUnionResourceId() {
+        given(formClass("Province", field("PN", "Name")));
+        given(formClass("Territoire", field("TN", "Name"), referenceField("TP", "Province", "Province")));
+        
+        givenRootForm("Project Site",
+                field("A", "Name"),
+                referenceField("B", "Location", "Province", "Territoire"));
+        
+        prettyPrintTree();
+        
+        assertThat(resolve("Province"), contains(path("Province")));
+//
+//        assertThat(resolve("Name"), contains(path("A")));
+//        assertThat(resolve("Location.Name"), containsInAnyOrder(path("B", "VA"), path("B", "HA")));
+//        assertThat(resolve("Location.Population"), contains(path("B", "VB")));
+    }
     
     @Test
     public void descendantFormClass() {
