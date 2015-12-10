@@ -69,7 +69,12 @@ public class AdminColumnBuilder {
                 if(!rs.wasNull()) {
                     int levelId = rs.getInt(3);
                     int levelIndex = Arrays.binarySearch(adminLevels, levelId);
-                    adminEntity[levelIndex] = entityId;
+                    if(levelIndex >= 0) {
+                        adminEntity[levelIndex] = entityId;
+                    } else {
+//                        throw new RuntimeException(String.format("AdminEntity %d has invalid adminLevelId %d." +
+//                                "Expected range: %s", entityId, levelId, Arrays.toString(adminLevels)));
+                    }
                 }
             }
             if(currentLocationId != -1) {
