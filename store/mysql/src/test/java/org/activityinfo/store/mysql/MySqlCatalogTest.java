@@ -92,8 +92,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void testAdmin() {
 
         query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");
-        assertThat(column("province.name"), hasValues("Ituri", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
-        assertThat(column("name"), hasValues("Bukavu", "Walungu", "Shabunda", "Kalehe", "Irumu"));
+        assertThat(column("name"),          hasValues("Bukavu",   "Walungu",  "Shabunda", "Kalehe",   "Irumu"));
+        assertThat(column("province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
         assertThat(column("code"), hasValues( "203", "201", "202", "203", "203"));
     }
     
