@@ -287,6 +287,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         clearValue();
 
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
+            message.setInnerText(I18N.CONSTANTS.loading());
             uploader.setAttachment(value.getValues().iterator().next());
             fetchImageServingUrl();
         }
