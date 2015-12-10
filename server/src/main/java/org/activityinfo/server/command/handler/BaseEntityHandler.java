@@ -82,6 +82,11 @@ public class BaseEntityHandler {
         if (changes.containsKey("nameInExpression")) {
             indicator.setNameInExpression(trimAndTruncate(changes.get("nameInExpression")));
         }
+        
+        // Allow "code" as an alias from the JSON API
+        if (changes.containsKey("code")) {
+            indicator.setNameInExpression(trimAndTruncate(changes.get("code")));
+        }
 
         if (changes.containsKey("calculatedAutomatically")) {
             indicator.setCalculatedAutomatically((Boolean) changes.get("calculatedAutomatically"));
