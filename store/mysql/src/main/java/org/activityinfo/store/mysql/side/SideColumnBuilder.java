@@ -10,6 +10,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -60,7 +61,8 @@ public class SideColumnBuilder {
         if(type instanceof QuantityType) {
             return new QuantityBuffer((QuantityType) type, observer);
 
-        } else if(type instanceof TextType) {
+        } else if(type instanceof TextType || 
+                  type instanceof BarcodeType) {
             return new TextBuffer(observer);
 
         } else if(type instanceof EnumType) {
