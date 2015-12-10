@@ -9,9 +9,12 @@ Feature: Attachment
   Scenario: Image presence
     Given I open the form designer for "NFI Distribution" in database "Attachment"
     And drop field:
-      | label | MyImage |
-      | type  | Image   |
+      | label        | type        |
+      | MyImage      | Image       |
+      | MyAttachment | Attachments |
     And I submit a "NFI Distribution" form with:
-      | field   | value       |
-      | partner | NRC         |
-      | MyImage | ai-test.png |
+      | field        | value       |
+      | partner      | NRC         |
+      | MyImage      | ai-test.png |
+      | MyAttachment | ai-1262.png |
+    Then "MyImage" field contains image.

@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
@@ -149,7 +150,7 @@ public class BsFormPanel extends Form {
 
             if (input.element().getAttribute("type").equals("file")) { // file upload
                 input.sendKeys(ImagePathProvider.path(value));
-                input.element().submit();
+                Sleep.sleepSeconds(10); // make sure file is uploaded
             } else {
                 input.element().clear();
                 input.sendKeys(value);
@@ -300,6 +301,16 @@ public class BsFormPanel extends Form {
                 return ControlType.SUGGEST_BOX;
             }
             return null;
+        }
+
+        public boolean isBlobImageLoaded() {
+            return isBlobImageLoaded("googleusercontent.com");
+        }
+
+        public boolean isBlobImageLoaded(String expectedSrcContains) {
+            FluentElement img = element.find().img().first();
+            String src = img.attribute("src");
+            return !Strings.isNullOrEmpty(src) && src.contains(expectedSrcContains);
         }
     }
 }

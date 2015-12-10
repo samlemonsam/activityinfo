@@ -118,7 +118,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         Map<String, FieldValue> valueMap = FieldValue.toMap(values);
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
         DataEntryDriver driver = dataEntryTab.newSubmission();
 
@@ -132,7 +132,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         ensureLoggedIn();
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
         return dataEntryTab.newSubmission();
     }

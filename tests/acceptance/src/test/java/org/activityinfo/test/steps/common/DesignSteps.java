@@ -183,13 +183,17 @@ public class DesignSteps {
     @And("^drop field:$")
     public void drop_field(DataTable dataTable) throws Throwable {
         FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
         Map<String, String> fieldProperties = TableDataParser.asMap(dataTable);
 
-        page.fields().dropNewField(fieldProperties.get("type"));
-        page.selectFieldByLabel(I18N.CONSTANTS.image());
+        for (Map.Entry<String, String> entry : fieldProperties.entrySet()) {
+            page.fields().dropNewField(entry.getValue());
+            page.selectFieldByLabel(entry.getValue());
 
-        String label = driver.getAliasTable().createAlias(fieldProperties.get("label"));
-        page.properties().form().findFieldByLabel(I18N.CONSTANTS.fieldLabel()).fill(label);
+            String label = driver.getAliasTable().createAlias(entry.getKey());
+            page.properties().form().findFieldByLabel(I18N.CONSTANTS.fieldLabel()).fill(label);
+        }
+
         page.save();
 
     }

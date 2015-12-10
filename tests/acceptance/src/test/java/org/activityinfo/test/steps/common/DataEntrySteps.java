@@ -10,6 +10,7 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
@@ -17,6 +18,7 @@ import org.activityinfo.test.driver.TableDataParser;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.hamcrest.CoreMatchers;
@@ -348,5 +350,17 @@ public class DataEntrySteps {
     public void old_table_for_form_shows(String formName, DataTable dataTable) throws Throwable {
         DataTable uiTable = driver.getAliasTable().deAlias(driver.oldTable(formName));
         dataTable.unorderedDiff(uiTable);
+    }
+
+    @Then("^\"([^\"]*)\" field contains image.$")
+    public void field_contains_image(String imageFieldName) throws Throwable {
+        DataEntryTab dataEntryTab = (DataEntryTab) driver.getCurrentPage();
+
+        dataEntryTab.selectSubmission(0);
+        BsModal modal = dataEntryTab.editBetaSubmission();
+
+        Sleep.sleepSeconds(5); // give it a time fetach image serving url and put it to img.src
+        assertTrue(modal.form().findFieldByLabel(driver.getAliasTable().getAlias(imageFieldName)).isBlobImageLoaded());
+
     }
 }

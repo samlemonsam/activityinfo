@@ -19,6 +19,7 @@ import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -307,5 +308,14 @@ public class DataEntryTab {
         return mapping;
     }
 
-
+    public BsModal editBetaSubmission() {
+        buttonClick(I18N.CONSTANTS.edit());
+        container.root().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().find().div(withClass("formPanel")).firstIfPresent().isPresent();
+            }
+        });
+        return BsModal.find(container.root());
+    }
 }

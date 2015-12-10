@@ -130,8 +130,8 @@ public class TableDataParser {
 
     public static Map<String, String> asMap(DataTable table) {
         Map<String, String> map = Maps.newHashMap();
-        for (DataTableRow row : table.getGherkinRows()) {
-            List<String> cells = row.getCells();
+        for (int i = 1; i < table.getGherkinRows().size(); i++) {
+            List<String> cells = table.getGherkinRows().get(i).getCells();
             Preconditions.checkState(cells.size() == 2, "It's expected to have exactly 2 columns (key, value)");
 
             map.put(cells.get(0), cells.get(1));
