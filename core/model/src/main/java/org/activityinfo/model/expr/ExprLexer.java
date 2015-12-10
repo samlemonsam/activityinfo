@@ -129,7 +129,7 @@ public class ExprLexer extends UnmodifiableIterator<Token> {
     }
 
     private boolean isSymbolStart(char c) {
-        return c == '_' || Character.isLetter(c);
+        return c == '@' ||  c == '_' || Character.isLetter(c);
     }
 
     private boolean isSymbolChar(char c) {

@@ -182,7 +182,7 @@ public class ActivityTableMappingBuilder {
                     return Collections.singleton(((NarrativeValue) value).asString());
                 } else {
                     return Collections.singleton(null);
-                }
+                }   
             }
         }));
     }

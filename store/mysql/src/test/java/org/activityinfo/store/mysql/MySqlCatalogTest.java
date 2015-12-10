@@ -87,7 +87,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province"), hasValues("z2", "z1", "z4", "z2"));
-
     }
     
     @Test

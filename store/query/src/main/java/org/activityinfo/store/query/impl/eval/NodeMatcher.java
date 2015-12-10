@@ -1,7 +1,6 @@
-package org.activityinfo.model.expr.eval;
+package org.activityinfo.store.query.impl.eval;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.CompoundExpr;
@@ -9,33 +8,29 @@ import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.diagnostic.AmbiguousSymbolException;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Resolves symbols in queries to the fields on the base FormClass
  * or on related tables.
  *
- * TODO: Harmonize with FormSymbolTable. Can we use only FormTreeSymbolTable?
+ * TODO: Harmonize with FormSymbolTable. Do we need both?
  */
-public class FormTreeSymbolTable {
+public class NodeMatcher {
 
     private final FormTree tree;
 
-    public FormTreeSymbolTable(FormTree formTree) {
+    public NodeMatcher(FormTree formTree) {
         this.tree = formTree;
     }
 
-    public Collection<FormTree.Node> resolveSymbol(SymbolExpr symbol) {
-
-        LinkedList<String> queryPath = new LinkedList<>();
-        queryPath.push(symbol.getName());
-
-        return matchNodes(queryPath, tree.getRootFields());
+    public Collection<NodeMatch> resolveSymbol(SymbolExpr symbol) {
+        return matchNodes(new QueryPath(symbol), tree.getRootFields());
     }
 
     /**
@@ -45,42 +40,13 @@ public class FormTreeSymbolTable {
      *
      * @throws AmbiguousSymbolException if the expression could match multiple nodes in the tree
      */
-    public Collection<FormTree.Node> resolveCompoundExpr(CompoundExpr expr) {
-
-        LinkedList<String> queryPath = toQueryPath(expr);
-
-        Collection<FormTree.Node> results = matchNodes(queryPath, tree.getRootFields());
-
-        return results;
+    public Collection<NodeMatch> resolveCompoundExpr(CompoundExpr expr) {
+        return matchNodes(new QueryPath(expr), tree.getRootFields());
     }
 
-
-    /**
-     * Converts a tree of {@code CompoundExpr}s and {@code SymbolExpr}s to a {@code LinkedList} of 
-     * names to follow.
-     */
-    @VisibleForTesting
-    static LinkedList<String> toQueryPath(CompoundExpr expr) {
-
-        // Recursively convert the compound expr to a linked list of symbols
-
-        LinkedList<String> queryPath = new LinkedList<>();
-        while(true) {
-            queryPath.push(expr.getField().getName());
-            if(expr.getValue() instanceof CompoundExpr) {
-                expr = (CompoundExpr) expr.getValue();
-            } else if(expr.getValue() instanceof SymbolExpr) {
-                queryPath.push(((SymbolExpr) expr.getValue()).getName());
-                break;
-            }
-        }
-        return queryPath;
-    }
-
-
-    private Collection<FormTree.Node> matchNodes(List<String> queryPath, Iterable<FormTree.Node> fields) {
-        if(queryPath.size() == 1) {
-            return matchTerminal(head(queryPath), fields);
+    private Collection<NodeMatch> matchNodes(QueryPath queryPath, Iterable<FormTree.Node> fields) {
+        if(queryPath.isLeaf()) {
+            return matchTerminal(queryPath, fields);
         } else {
             return matchReferenceField(queryPath, fields);
         }
@@ -94,20 +60,20 @@ public class FormTreeSymbolTable {
         return queryPath.get(0);
     }
 
-    private Collection<FormTree.Node> matchReferenceField(List<String> queryPath, Iterable<FormTree.Node> fields) {
+    private Collection<NodeMatch> matchReferenceField(QueryPath queryPath, Iterable<FormTree.Node> fields) {
 
-        List<Collection<FormTree.Node>> results = Lists.newArrayList();
+        List<Collection<NodeMatch>> matches = Lists.newArrayList();
 
         for (FormTree.Node field : fields) {
-            Collection<FormTree.Node> result = unionMatches(queryPath, field);
+            Collection<NodeMatch> result = unionMatches(queryPath, field);
             if (!result.isEmpty()) {
-                results.add(result);
+                matches.add(result);
             }
         }
-        if(results.size() > 1) {
-            throw new AmbiguousSymbolException(Joiner.on('.').join(queryPath));
-        } else if(results.size() == 1) {
-            return results.get(0);
+        if(matches.size() > 1) {
+            throw new AmbiguousSymbolException(queryPath.toString());
+        } else if(matches.size() == 1) {
+            return matches.get(0);
         }
 
         // If no results, check search at the next level
@@ -119,35 +85,20 @@ public class FormTreeSymbolTable {
         }
     }
 
-    private Collection<FormTree.Node> unionMatches(List<String> queryPath, FormTree.Node referenceField) {
-        List<FormTree.Node> results = Lists.newArrayList();
-        for (ResourceId formClassId : referenceField.getRange()) {
-            FormClass childForm = tree.getFormClass(formClassId);
-            Iterable<FormTree.Node> childFields = referenceField.getChildren(formClassId);
-
-            if(matches(head(queryPath), referenceField) || matches(head(queryPath), childForm)) {
-                results.addAll(matchNodes(next(queryPath), childFields));
-            } else {
-                results.addAll(matchNodes(queryPath, childFields));
-            }
-        }
-        return results;
-    }
-
 
     /**
      * Matches a terminal symbol in a query path.
      * @param symbolName the symbol name
      * @param fields the fields against which to match
      */
-    private Collection<FormTree.Node> matchTerminal(String symbolName, Iterable<FormTree.Node> fields) {
+    private Collection<NodeMatch> matchTerminal(QueryPath path, Iterable<FormTree.Node> fields) {
 
-        List<FormTree.Node> matches = Lists.newLinkedList();
+        List<NodeMatch> matches = Lists.newLinkedList();
 
         // Check for a match of the query Path head to the set of fields
         for (FormTree.Node field : fields) {
-            if(matches(symbolName, field)) {
-                matches.add(field);
+            if(path.matches(field)) {
+                matches.add(new NodeMatch(field));
             }
         }
 
@@ -159,7 +110,7 @@ public class FormTreeSymbolTable {
 
         // If there is MORE than one match, we consider the expression to be ambiguous
         if(matches.size() > 1) {
-            throw new AmbiguousSymbolException(symbolName, "Could refer to " + Joiner.on(", ").join(matches));
+            throw new AmbiguousSymbolException(path.head(), "Could refer to " + Joiner.on(", ").join(matches));
         }
 
         // If we found absolutely nothing, then continue to the next level
@@ -167,8 +118,28 @@ public class FormTreeSymbolTable {
         if(children.isEmpty()) {
             return Collections.emptyList();
         } else {
-            return matchTerminal(symbolName, children);
+            return matchTerminal(path, children);
         }
+    }
+
+    private Collection<NodeMatch> unionMatches(QueryPath path, FormTree.Node referenceField) {
+        List<NodeMatch> results = Lists.newArrayList();
+        for (ResourceId formClassId : referenceField.getRange()) {
+            FormClass childForm = tree.getFormClass(formClassId);
+            Iterable<FormTree.Node> childFields = referenceField.getChildren(formClassId);
+
+            if(path.matches(childForm) && path.peek().equals(ColumnModel.ID_SYMBOL)) {
+                results.add(NodeMatch.id(referenceField, childForm));
+
+            } else if(path.matches(childForm) || path.matches(referenceField)) {
+                results.addAll(matchNodes(path.next(), childFields));
+                
+            } else {
+                // Descend the next level
+                results.addAll(matchNodes(path, childFields));
+            }
+        }
+        return results;
     }
 
 
@@ -180,7 +151,7 @@ public class FormTreeSymbolTable {
         return children;
     }
 
-    private boolean matches(String symbolName, FormTree.Node fieldNode) {
+    private boolean matches(FormTree.Node fieldNode, String symbolName) {
 
         // Match against label and code case insensitively
         if (symbolName.equalsIgnoreCase(fieldNode.getField().getCode()) ||
@@ -202,7 +173,7 @@ public class FormTreeSymbolTable {
         return false;
     }
 
-    private boolean matches(String symbolName, FormClass formClass) {
+    private boolean matches(FormClass formClass, String symbolName) {
 
         // The field can also be matched against the _range_ of a field: for example,
         // we might be interested in "Province.Name", where "Province" is a form class.

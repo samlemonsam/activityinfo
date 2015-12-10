@@ -5,13 +5,11 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.eval.FormTreeSymbolTable;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.store.query.impl.CollectionScanBatch;
 import org.activityinfo.store.query.impl.Slot;
@@ -37,16 +35,16 @@ public class QueryEvaluator {
 
     private final ColumnExprVisitor columnVisitor = new ColumnExprVisitor();
 
-    private FormTreeSymbolTable resolver;
-    
+    private NodeMatcher resolver;
+
     private Map<String, AggregateFunction> aggregateFunctions = Maps.newHashMap();
 
     public QueryEvaluator(FormTree formTree, FormClass rootFormClass, CollectionScanBatch batch) {
         this.tree = formTree;
-        this.resolver = new FormTreeSymbolTable(formTree);
+        this.resolver = new NodeMatcher(formTree);
         this.rootFormClass = rootFormClass;
         this.batch = batch;
-        
+
         aggregateFunctions.put("sum", new SumFunction());
     }
 
@@ -67,8 +65,6 @@ public class QueryEvaluator {
         return batch.addColumn(tree.getRootField(field.getId()));
     }
 
- 
-    
     private class ColumnExprVisitor implements ExprVisitor<Slot<ColumnView>> {
 
         @Override
@@ -120,15 +116,20 @@ public class QueryEvaluator {
             }
         }
 
-        private Slot<ColumnView> addColumn(Collection<FormTree.Node> nodes) {
+        private Slot<ColumnView> addColumn(Collection<NodeMatch> nodes) {
             // Recursively expand any calculated fields
             List<Slot<ColumnView>> expandedNodes = Lists.newArrayList();
-            for (FormTree.Node node : nodes) {
-                if(node.isCalculated()) {
-                    CalculatedFieldType type = (CalculatedFieldType) node.getField().getType();
-                    expandedNodes.add(evaluateExpression(type.getExpressionAsString()));
-                } else {
-                    expandedNodes.add(batch.addColumn(node));
+            for (NodeMatch node : nodes) {
+                switch (node.getType()) {
+                    case ID:
+                    case CLASS:
+                        throw new UnsupportedOperationException();
+                    case FIELD:
+                        if (node.isCalculated()) {
+                            expandedNodes.add(evaluateExpression(node.getCalculation()));
+                        } else {
+                            expandedNodes.add(batch.addColumn(node.getNode()));
+                        }
                 }
             }
             if(expandedNodes.isEmpty()) {
