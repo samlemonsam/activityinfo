@@ -4,12 +4,11 @@ import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.Extents;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
@@ -154,6 +153,8 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         set("classicView", value);
     }
 
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean getClassicView() {
         return get("classicView");
     }
