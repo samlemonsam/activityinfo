@@ -101,7 +101,11 @@ public class QueryEvaluator {
                     public ColumnView get() {
                         List<ColumnView> columns = Lists.newArrayList();
                         for (Slot<ColumnView> argument : arguments) {
-                            columns.add(argument.get());
+                            ColumnView view = argument.get();
+                            if(view == null) {
+                                throw new IllegalStateException();
+                            }
+                            columns.add(view);
                         }
                         return ColumnFunctions.create(call.getFunction(), columns);
                     }

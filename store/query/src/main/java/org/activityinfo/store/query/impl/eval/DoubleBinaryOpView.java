@@ -8,12 +8,34 @@ import java.util.Date;
 
 public class DoubleBinaryOpView implements ColumnView {
 
+    public enum Op {
+        ADD,
+        SUB,
+        MUL,
+        DIV;
+    }
+    
     private ColumnView x;
     private ColumnView y;
+    private Op op;
 
-    public DoubleBinaryOpView(ColumnView x, ColumnView y) {
+    public DoubleBinaryOpView(String functionName, ColumnView x, ColumnView y) {
         this.x = x;
         this.y = y;
+        switch (functionName) {
+            case "+":
+                op = Op.ADD;
+                break;
+            case "-":
+                op = Op.SUB;
+                break;
+            case "*":
+                op = Op.MUL;
+                break;
+            case "/":
+                op = Op.DIV;
+                break;                
+        }
     }
 
     @Override
@@ -33,7 +55,20 @@ public class DoubleBinaryOpView implements ColumnView {
 
     @Override
     public double getDouble(int row) {
-        return x.getDouble(row) + y.getDouble(row);
+        double dx = x.getDouble(row);
+        double dy = y.getDouble(row);
+        switch (op) {
+            case ADD:
+                return dx + dy;
+            case SUB:
+                return dx - dy;
+            case MUL:
+                return dx * dy;
+            case DIV:
+                return dx / dy;
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     @Override

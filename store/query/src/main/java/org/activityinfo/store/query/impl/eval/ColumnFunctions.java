@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class ColumnFunctions {
 
-    private static final Set<String> supportedFunctions = Sets.newHashSet("==", "!=", "+", "&&", "||");
+    private static final Set<String> supportedFunctions = Sets.newHashSet("==", "!=", "+", "-", "&&", "||", "*", "/");
 
     public static boolean isSupported(ExprFunction fn) {
         return supportedFunctions.contains(fn.getId());
@@ -18,28 +18,33 @@ public class ColumnFunctions {
 
 
     public static ColumnView create(ExprFunction fn, List<ColumnView> arguments) {
-        if(fn.getId().equals("==")) {
+        String fnId = fn.getId();
+                
+        if(fnId.equals("+") ||
+           fnId.equals("-") ||
+           fnId.equals("*") ||
+           fnId.equals("/")) {
+           
+            return new DoubleBinaryOpView(fnId, arguments.get(0), arguments.get(1));
+            
+        }  else if(fnId.equals("==")) {
             if (argsMatch(arguments, ColumnType.STRING, ColumnType.STRING)) {
                 return new StringComparisonView(arguments.get(0), arguments.get(1), ComparisonOp.EQUALS);
             }
-        }else if(fn.getId().equals("!=")) {
+        } else if(fnId.equals("!=")) {
             if(argsMatch(arguments, ColumnType.STRING, ColumnType.STRING)) {
                 return new StringComparisonView(arguments.get(0), arguments.get(1), ComparisonOp.NOT_EQUALS);
             }
-        } else if(fn.getId().equals("+")) {
-            if(argsMatch(arguments, ColumnType.NUMBER, ColumnType.NUMBER)) {
-                return new DoubleBinaryOpView(arguments.get(0), arguments.get(1));
-            }
-        } else if(fn.getId().equals("&&")) {
+        } else if(fnId.equals("&&")) {
             if (argsMatch(arguments, ColumnType.BOOLEAN, ColumnType.BOOLEAN)) {
                 return new BooleanBinaryOp(BooleanBinaryOp.Operator.AND, arguments.get(0), arguments.get(1));
             }
-        } else if(fn.getId().equals("||")) {
+        } else if(fnId.equals("||")) {
             if (argsMatch(arguments, ColumnType.BOOLEAN, ColumnType.BOOLEAN)) {
                 return new BooleanBinaryOp(BooleanBinaryOp.Operator.OR, arguments.get(0), arguments.get(1));
             }
         }
-        return null;
+        throw new UnsupportedOperationException("fn" + fn.getId());
     }
 
     private static boolean argsMatch(List<ColumnView> arguments, ColumnType... argumentTypes) {
