@@ -21,6 +21,8 @@ package org.activityinfo.test.ui;
  * #L%
  */
 
+import org.apache.commons.lang3.SystemUtils;
+
 /**
  * @author yuriyz on 11/24/2015.
  */
@@ -29,7 +31,10 @@ public class ImagePathProvider {
     public static String path(String imageName) {
         String path = ImagePathProvider.class.getResource(imageName).toString();
         if (path.startsWith("file:/")) {
-            return path.substring("file:/".length());
+            path = path.substring("file:/".length());
+        }
+        if (SystemUtils.IS_OS_UNIX && !path.startsWith("/")) {
+            path = "/" + path;
         }
         return path;
     }
