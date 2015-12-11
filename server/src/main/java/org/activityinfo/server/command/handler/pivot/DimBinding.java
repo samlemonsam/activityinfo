@@ -38,8 +38,12 @@ public abstract class DimBinding {
         DimensionCategory categories[] = new DimensionCategory[numRows];
 
         for (int i = 0; i < numRows; i++) {
-            String partnerId = id.getString(i);
-            categories[i] = new EntityCategory(CuidAdapter.getLegacyIdFromCuid(partnerId), label.getString(i));
+            String idString = id.getString(i);
+            String labelString = label.getString(i);
+            
+            if(idString != null && labelString != null) {
+                categories[i] = new EntityCategory(CuidAdapter.getLegacyIdFromCuid(idString), label.getString(i));
+            }
         }
 
         return categories;
