@@ -3,53 +3,88 @@ package org.activityinfo.store.query.impl.eval;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Defines a sequence of joins from the base form to the data column
  */
 public class NodeMatch {
 
-
-
+    
     public enum Type {
         ID,
         CLASS,
         FIELD
     }
 
-    private final FormTree.Node node;
-    private final ResourceId formClassId;
-    private final Type type;
+    private List<JoinNode> joins;
+    private FormClass formClass;
+    private FormTree.Node field;
+    private Type type;
 
-
-    public NodeMatch(FormTree.Node node) {
-        Preconditions.checkNotNull(node, "node");
-        
-        this.node = node;
-        this.formClassId = null;
-        this.type = Type.FIELD;
-    }
-
-    private NodeMatch(FormTree.Node node, FormClass formClass, Type type) {
-        Preconditions.checkNotNull(node, "node");
-
-        this.node = node;
-        this.type = type;
-        this.formClassId = formClass.getId();
-    }
+    private NodeMatch() {}
     
-    public static NodeMatch id(FormTree.Node node, FormClass formClass) {
-        return new NodeMatch(node, formClass, Type.ID);
+
+    /**
+     * Creates a NodeMatch for the given field.
+     */
+    public static NodeMatch forField(FormTree.Node fieldNode) {
+        Preconditions.checkNotNull(fieldNode, "fieldNode");
+        
+        NodeMatch match = new NodeMatch();
+        match.joins = joinsTo(fieldNode);
+        match.type = Type.FIELD;
+        match.formClass = fieldNode.getDefiningFormClass();
+        match.field = fieldNode;
+        return match;
+    }
+
+    public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
+        NodeMatch match = new NodeMatch();
+        match.joins = joinsTo(parent);
+        match.joins.add(new JoinNode(parent, formClass.getId()));
+        match.formClass = formClass;
+        match.type = Type.ID;
+        return match;
+    }
+
+    private static List<JoinNode> joinsTo(FormTree.Node node) {
+        /*
+         *  Given a parent: "Site.Location.Territoire.District"
+         *  This is represented as a tree of nodes:
+         *      District -> Territoire -> Location -> Site
+         *      
+         *  We want to turn into a list of joins: 
+         *      (site field -> form site), 
+         *      (location field -> form school),
+         *      (field territoire -> form Territoire)
+         *      (field district -> form District)
+         */
+        
+        LinkedList<JoinNode> joins = new LinkedList<>();
+        while(node.getParent() != null) {
+            joins.addFirst(new JoinNode(
+                    node.getParent(),                         // Parent Field ->
+                    node.getDefiningFormClass().getId()));     // This Field's FormClass
+            node = node.getParent();
+        }
+        return joins;
+    }
+
+    public List<JoinNode> getJoins() {
+        return joins;
     }
 
     public boolean isRoot() {
-        return node.isRoot();
+        return field.isRoot();
     }
 
-    public FormTree.Node getNode() {
-        return node;
+    public FormTree.Node getField() {
+        Preconditions.checkArgument(type == Type.FIELD);
+        return field;
     }
 
     public Type getType() {
@@ -57,26 +92,53 @@ public class NodeMatch {
     }
 
     public boolean isCalculated() {
-        return type == Type.FIELD && node.isCalculated();
+        return type == Type.FIELD && field.isCalculated();
     }
 
     public String getCalculation() {
         if(!isCalculated()) {
-            throw new UnsupportedOperationException(node + " is not a calculated field");
+            throw new UnsupportedOperationException(field + " is not a calculated field");
         }
-        CalculatedFieldType type = (CalculatedFieldType) node.getField().getType();
+        CalculatedFieldType type = (CalculatedFieldType) field.getField().getType();
         return type.getExpressionAsString();
     }
-    
-    public ResourceId getFormClassId() {
-        return formClassId;
+
+    public FormClass getFormClass() {
+        return formClass;
+    }
+
+
+    public boolean isJoined() {
+        return !joins.isEmpty();
+    }
+
+    public String toDebugString() {
+        StringBuilder s = new StringBuilder();
+        for (JoinNode join : joins) {
+            s.append(join.getReferenceField().getFieldId());
+            s.append('.');
+        }
+        switch (type) {
+            case ID:
+                s.append(formClass.getId());
+                s.append("@id");
+                break;
+            case CLASS:
+                s.append(formClass.getId());
+                s.append("@class");
+                break;
+            case FIELD:
+                s.append(field.getField().getId());
+                break;
+        }
+        return s.toString();
     }
     
     @Override
     public String toString() {
-        String s = node.debugPath();
+        String s = field.debugPath();
         if(type == Type.ID) {
-            s += "." + formClassId + ":" + "@id";
+            s += "." + formClass.getId() + ":" + "@id";
         }
         return s;
     }

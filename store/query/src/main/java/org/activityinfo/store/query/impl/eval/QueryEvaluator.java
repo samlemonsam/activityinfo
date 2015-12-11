@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
@@ -59,10 +58,6 @@ public class QueryEvaluator {
         } else {
             return new ColumnFilter(evaluateExpression(filter.getExpression()));
         }
-    }
-
-    public Slot<ColumnView> addField(FormField field) {
-        return batch.addColumn(tree.getRootField(field.getId()));
     }
 
     private class ColumnExprVisitor implements ExprVisitor<Slot<ColumnView>> {
@@ -122,14 +117,17 @@ public class QueryEvaluator {
             for (NodeMatch node : nodes) {
                 switch (node.getType()) {
                     case ID:
+                        expandedNodes.add(batch.addColumn(node));
+                        break;
                     case CLASS:
                         throw new UnsupportedOperationException();
                     case FIELD:
                         if (node.isCalculated()) {
                             expandedNodes.add(evaluateExpression(node.getCalculation()));
                         } else {
-                            expandedNodes.add(batch.addColumn(node.getNode()));
+                            expandedNodes.add(batch.addColumn(node));
                         }
+                        break;
                 }
             }
             if(expandedNodes.isEmpty()) {

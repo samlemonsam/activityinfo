@@ -98,7 +98,7 @@ public class NodeMatcher {
         // Check for a match of the query Path head to the set of fields
         for (FormTree.Node field : fields) {
             if(path.matches(field)) {
-                matches.add(new NodeMatch(field));
+                matches.add(NodeMatch.forField(field));
             }
         }
 
@@ -129,7 +129,7 @@ public class NodeMatcher {
             Iterable<FormTree.Node> childFields = referenceField.getChildren(formClassId);
 
             if(path.matches(childForm) && path.peek().equals(ColumnModel.ID_SYMBOL)) {
-                results.add(NodeMatch.id(referenceField, childForm));
+                results.add(NodeMatch.forId(referenceField, childForm));
 
             } else if(path.matches(childForm) || path.matches(referenceField)) {
                 results.addAll(matchNodes(path.next(), childFields));

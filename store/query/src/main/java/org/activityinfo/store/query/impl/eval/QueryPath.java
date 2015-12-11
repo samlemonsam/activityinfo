@@ -13,6 +13,9 @@ import org.activityinfo.model.resource.ResourceId;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Dotted query path, for example "Province.Name.@id"
+ */
 public class QueryPath {
     
     @VisibleForTesting
@@ -62,7 +65,11 @@ public class QueryPath {
             return "";
         }
     }
-    
+
+    /**
+     * 
+     * @return a new {@code QueryPath} with the next element as the new head.
+     */
     public QueryPath next() {
         return new QueryPath(path.subList(1, path.size()));
     }
@@ -112,6 +119,10 @@ public class QueryPath {
                 formClass.getId().asString().equals(symbolName);
     }
 
+    /**
+     * 
+     * @return true if the head of this query path is the last element in the path.
+     */
     public boolean isLeaf() {
         return path.size() == 1;
     }

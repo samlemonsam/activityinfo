@@ -71,7 +71,7 @@ public class NodeMatcherTest {
     
     @Test
     public void childUnionMatch() {
-        givenRootForm("Project Site",
+        givenRootForm("Site",
                 field("A", "Name"),
                 referenceField("B", "Location",
                         formClass("Village",
@@ -97,7 +97,7 @@ public class NodeMatcherTest {
         
         prettyPrintTree();
         
-        assertThat(resolve("Province._id"), contains("B.Province@id", "B.TP.Province@id"));;
+        assertThat(resolve("Province._id"), contains("B.Province@id", "B.TP.Province@id"));
     }
     
     @Test
@@ -128,7 +128,7 @@ public class NodeMatcherTest {
             throw new IllegalStateException("Root Form Class already set");
         }
         
-        rootFormClass = new FormClass(ResourceId.generateId());
+        rootFormClass = new FormClass(ResourceId.valueOf(label));
         rootFormClass.getElements().addAll(Arrays.asList(fields));
     }
     
@@ -203,11 +203,7 @@ public class NodeMatcherTest {
         // Create a string that we can match against easily
         List<String> strings = Lists.newArrayList();
         for (NodeMatch match : matches) {
-            String s = match.getNode().getPath().toString();
-            if(match.getType() == NodeMatch.Type.ID) {
-                s += "." + match.getFormClassId() + "@id";
-            }
-            strings.add(s);
+            strings.add(match.toDebugString());
         }
         
         System.out.println("Resolved " + exprString + " => " + strings);

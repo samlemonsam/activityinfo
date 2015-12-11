@@ -1,7 +1,5 @@
 package org.activityinfo.store.query.impl;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
@@ -12,10 +10,11 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
+import org.activityinfo.store.query.impl.eval.JoinNode;
+import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
-import org.activityinfo.store.query.impl.join.Join;
+import org.activityinfo.store.query.impl.join.JoinColumnViewSlot;
 import org.activityinfo.store.query.impl.join.JoinLink;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
 
@@ -45,14 +44,18 @@ public class CollectionScanBatch {
 
 
     private CollectionScan getTable(FormTree.Node node) {
-        return getTable(node.getDefiningFormClass());
+        return getTable(node.getDefiningFormClass().getId());
     }
 
     private CollectionScan getTable(FormClass formClass) {
-        CollectionScan scan = tableMap.get(formClass.getId());
+        return getTable(formClass.getId());
+    }
+
+    private CollectionScan getTable(ResourceId formClassId) {
+        CollectionScan scan = tableMap.get(formClassId);
         if(scan == null) {
-            scan = new CollectionScan(store.getCollection(formClass.getId()).get());
-            tableMap.put(formClass.getId(), scan);
+            scan = new CollectionScan(store.getCollection(formClassId).get());
+            tableMap.put(formClassId, scan);
         }
         return scan;
     }
@@ -62,30 +65,9 @@ public class CollectionScanBatch {
      * Adds a ResourceId to the batch
      */
     public Slot<ColumnView> addResourceIdColumn(FormClass classId) {
-        return getTable(classId).addResourceId();
+        return getTable(classId.getId()).addResourceId();
     }
 
-
-    /**
-     * Adds a query to the batch for a column composed of a several possible nodes within
-     * the FormTree.
-     *
-     * @return a ColumnView Slot that can be used to retrieve the result after the batch
-     * has finished executing.
-     */
-    public Slot<ColumnView> addColumn(List<FormTree.Node> nodes) {
-        Preconditions.checkArgument(!nodes.isEmpty(), "nodes cannot be empty");
-
-        if(nodes.size() == 1) {
-            return addColumn(Iterables.getOnlyElement(nodes));
-        } else {
-            List<Slot<ColumnView>> sources = Lists.newArrayList();
-            for(FormTree.Node node : nodes) {
-                sources.add(addColumn(node));
-            }
-            return new ColumnCombiner(sources);
-        }
-    }
 
     /**
      * Adds a query to the batch for a column derived from a single node within the FormTree, along
@@ -95,15 +77,15 @@ public class CollectionScanBatch {
      * @return a ColumnView Slot that can be used to retrieve the result after the batch
      * has finished executing.
      */
-    public Slot<ColumnView> addColumn(FormTree.Node node) {
+    public Slot<ColumnView> addColumn(NodeMatch match) {
 
-        if (node.isLinked()) {
+        if (match.isJoined()) {
             // requires join
-            return addNestedColumn(node);
+            return addJoinedColumn(match);
 
         } else {
             // simple root column or embedded form
-            return getDataColumn(node.getRootFormClass(), node);
+            return getDataColumn(match.getField().getRootFormClass(), match.getField());
         }
     }
 
@@ -112,47 +94,55 @@ public class CollectionScanBatch {
      * to find the number of rows.
      */
     public Slot<ColumnView> addEmptyColumn(FormClass formClass) {
-        Slot<Integer> rowCount = getTable(formClass).addCount();
+        Slot<Integer> rowCount = getTable(formClass.getId()).addCount();
         return new ConstantColumnBuilder(rowCount, null);
     }
 
     /**
-     * Adds a query to the batch for a nested column, which will be joined based on the structure
+     * Adds a query to the batch for a joined column, which will be joined based on the structure
      * of the FormTree
      *
      * @return a ColumnView Slot that can be used to retrieve the result after the batch
      * has finished executing.
      */
-    private Slot<ColumnView> addNestedColumn(FormTree.Node node) {
+    private Slot<ColumnView> addJoinedColumn(NodeMatch match) {
 
         // Schedule the links we need to join the node to the base form
-        List<FormTree.Node> path = node.getSelfAndAncestors();
         List<JoinLink> links = Lists.newArrayList();
-        for(int i=1;i<path.size();++i) {
-            FormTree.Node left = path.get(i-1);
-            FormTree.Node right = path.get(i);
-            links.add(addJoinLink(left, right.getDefiningFormClass()));
+        for (JoinNode joinNode : match.getJoins()) {
+            links.add(addJoinLink(joinNode));
         }
 
         // Schedule the actual column to be joined
-        Slot<ColumnView> column = getDataColumn(node.getDefiningFormClass(), node);
+        Slot<ColumnView> column;
+        switch (match.getType()) {
+            case FIELD:
+                column = getDataColumn(match.getFormClass(), match.getField());
+                break;
+            case ID:
+                column = getTable(match.getFormClass()).addResourceId();
+                break;
+            default:
+                throw new UnsupportedOperationException("type: " + match.getType());
+        }
 
-        return new Join(links, column);
+        return new JoinColumnViewSlot(links, column);
     }
 
-    private JoinLink addJoinLink(FormTree.Node leftField, FormClass rightForm) {
-        CollectionScan left = getTable(leftField);
-        CollectionScan right = getTable(rightForm);
+    private JoinLink addJoinLink(JoinNode node) {
+        CollectionScan left = getTable(node.getReferenceField());
+        CollectionScan right = getTable(node.getFormClassId());
 
-        Slot<ForeignKeyMap> foreignKey = left.addForeignKey(leftField.getFieldId().asString());
+        Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField().getFieldId().asString());
         Slot<PrimaryKeyMap> primaryKey = right.addPrimaryKey();
 
         return new JoinLink(foreignKey, primaryKey);
     }
 
     public Slot<ColumnView> getDataColumn(FormClass formClass, FormTree.Node node) {
-        return getTable(formClass).addField(node.getField());
+        return getTable(formClass.getId()).addField(node.getField());
     }
+
     /**
      * Executes the batch
      */
@@ -186,11 +176,12 @@ public class CollectionScanBatch {
 
 
     public Slot<ColumnView> addExpression(FormClass formClassId, ExprNode node) {
-     //   return getTable(formClassId).addExpression(node);
+        //   return getTable(formClassId).addExpression(node);
         throw new UnsupportedOperationException();
     }
 
     public Slot<Integer> addRowCount(FormClass formClass) {
-        return getTable(formClass).addCount();
+        return getTable(formClass.getId()).addCount();
     }
+
 }

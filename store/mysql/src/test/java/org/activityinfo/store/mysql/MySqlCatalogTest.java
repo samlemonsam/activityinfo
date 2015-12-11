@@ -80,13 +80,13 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
         
         query(CuidAdapter.locationFormClass(1), "label", "axe", "territoire.province.name", "territoire.name",
-                "province.name", "province");
+                "province.name", "province._id");
         assertThat(column("label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga", "Boga"));
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
         assertThat(column("territoire.name"), hasValues("Shabunda", null, "Irumu", "Bukavu"));
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
-        assertThat(column("province"), hasValues("z2", "z1", "z4", "z2"));
+        assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
     }
     
     @Test

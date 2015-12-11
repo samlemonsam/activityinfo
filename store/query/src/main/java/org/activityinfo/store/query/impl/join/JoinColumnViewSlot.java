@@ -9,14 +9,14 @@ import java.util.List;
 /**
 * Created by alex on 1/13/15.
 */
-public class Join implements Slot<ColumnView> {
+public class JoinColumnViewSlot implements Slot<ColumnView> {
 
     private List<JoinLink> links;
     private Slot<ColumnView> nestedColumn;
 
     private ColumnView result;
 
-    public Join(List<JoinLink> links, Slot<ColumnView> nestedColumn) {
+    public JoinColumnViewSlot(List<JoinLink> links, Slot<ColumnView> nestedColumn) {
         this.links = links;
         this.nestedColumn = nestedColumn;
     }
