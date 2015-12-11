@@ -698,6 +698,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     @Test
     @OnDataSet("/dbunit/attrib-merge.db.xml")
     public void testAttributesAreMergedAcrossDbByName() {
+        filteringOnDatabases(1, 2);
         withIndicatorAsDimension();
         withAttributeGroupDim(1);
         execute();
