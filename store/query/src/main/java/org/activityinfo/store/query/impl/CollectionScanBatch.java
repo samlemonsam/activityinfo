@@ -14,8 +14,8 @@ import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
 import org.activityinfo.store.query.impl.eval.JoinNode;
 import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
-import org.activityinfo.store.query.impl.join.JoinColumnViewSlot;
 import org.activityinfo.store.query.impl.join.JoinLink;
+import org.activityinfo.store.query.impl.join.JoinedColumnViewSlot;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
 
 import java.util.List;
@@ -126,7 +126,7 @@ public class CollectionScanBatch {
                 throw new UnsupportedOperationException("type: " + match.getType());
         }
 
-        return new JoinColumnViewSlot(links, column);
+        return new JoinedColumnViewSlot(links, column);
     }
 
     private JoinLink addJoinLink(JoinNode node) {

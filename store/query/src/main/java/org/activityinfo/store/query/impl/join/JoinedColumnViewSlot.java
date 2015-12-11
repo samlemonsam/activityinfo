@@ -6,17 +6,15 @@ import org.activityinfo.store.query.impl.views.JoinedColumnView;
 
 import java.util.List;
 
-/**
-* Created by alex on 1/13/15.
-*/
-public class JoinColumnViewSlot implements Slot<ColumnView> {
+
+public class JoinedColumnViewSlot implements Slot<ColumnView> {
 
     private List<JoinLink> links;
     private Slot<ColumnView> nestedColumn;
 
     private ColumnView result;
 
-    public JoinColumnViewSlot(List<JoinLink> links, Slot<ColumnView> nestedColumn) {
+    public JoinedColumnViewSlot(List<JoinLink> links, Slot<ColumnView> nestedColumn) {
         this.links = links;
         this.nestedColumn = nestedColumn;
     }
