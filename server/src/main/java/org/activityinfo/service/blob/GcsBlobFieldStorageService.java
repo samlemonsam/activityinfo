@@ -6,6 +6,7 @@ import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.images.*;
+import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
 import com.google.common.base.Preconditions;
@@ -60,9 +61,13 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         this.em = em;
 
         try {
+            if (Strings.isNullOrEmpty(bucketName)) {
+                LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property " + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
+                return;
+            }
             this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
                     new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
-            LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
+            LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
         } catch (Exception e) {
             // ignore: fails in local tests, bug in LocalServiceTestHelper?
 
