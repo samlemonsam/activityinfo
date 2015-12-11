@@ -17,8 +17,8 @@ public class FieldPalette {
         this.panel = panel;
     }
 
-    public void add(String name) {
-        panel.find().div(withText(name)).waitForFirst().doubleClick();
+    public void dropNewField(String name) {
+        panel.find().div(withText(name)).waitForFirst().clickWhenReady();
     }
     
     public List<String> getFieldTypes() {

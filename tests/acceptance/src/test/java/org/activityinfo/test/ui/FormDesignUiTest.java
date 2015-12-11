@@ -42,10 +42,10 @@ public class FormDesignUiTest {
         }
 
         for (String type : types) {
-            designer.fields().add(type);
+            designer.fields().dropNewField(type);
             designer.save();
         }
         
-        designer.fields().add(I18N.CONSTANTS.fieldTypeCalculated());
+        designer.fields().dropNewField(I18N.CONSTANTS.fieldTypeCalculated());
     }
 }

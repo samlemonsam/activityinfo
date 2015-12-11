@@ -41,6 +41,7 @@ import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
+import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -56,7 +57,8 @@ import javax.persistence.EntityManager;
         TemplateModule.class,
         GwtRpcModule.class,
         AuthenticationModuleStub.class,
-        ConfigModuleStub.class
+        ConfigModuleStub.class,
+        GcsBlobFieldStorageServiceModule.class
 })
 public class CommandTestCase2 {
 

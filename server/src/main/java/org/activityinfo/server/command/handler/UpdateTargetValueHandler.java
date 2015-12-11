@@ -23,6 +23,7 @@ package org.activityinfo.server.command.handler;
  */
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.command.UpdateTargetValue;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
@@ -37,8 +38,8 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
     private final static Logger LOG = Logger.getLogger(UpdateTargetValueHandler.class.getName());
 
     @Inject
-    public UpdateTargetValueHandler(EntityManager em) {
-        super(em);
+    public UpdateTargetValueHandler(EntityManager em, Injector injector) {
+        super(em, injector);
     }
 
     @Override

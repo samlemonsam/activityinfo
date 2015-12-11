@@ -6,7 +6,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.image.ImageType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -28,7 +28,7 @@ public class FieldValueParserFactory {
             }
         }
         if (fieldType instanceof GeoPointType) return new GeoPointFieldValueParser();
-        if (fieldType instanceof ImageType) return new ImageFieldValueParser();
+        if (fieldType instanceof AttachmentType) return new AttachmentFieldValueParser();
         if (fieldType instanceof LocalDateType) return new LocalDateFieldValueParser();
         if (fieldType instanceof NarrativeType) {
             if (legacy) {

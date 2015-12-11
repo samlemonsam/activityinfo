@@ -5,6 +5,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 
@@ -41,7 +42,8 @@ public class FieldTemplates {
 
     //    items.add(new TypeClassTemplate(GeoPointType.TYPE_CLASS));
         items.add(new TypeClassTemplate(BarcodeType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeBarcode()));
-//        items.add(new TypeClassTemplate(ImageType.TYPE_CLASS, I18N.CONSTANTS.image()));
+        items.add(new AttachmentFieldTemplate(AttachmentType.Kind.IMAGE, I18N.CONSTANTS.image()));
+        items.add(new AttachmentFieldTemplate(AttachmentType.Kind.ATTACHMENT, I18N.CONSTANTS.attachment()));
         items.add(new TypeClassTemplate(CalculatedFieldType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeCalculated()));
 
         return items;

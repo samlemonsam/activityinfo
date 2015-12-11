@@ -52,7 +52,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
     @Inject
     public CreateEntityHandler(EntityManager em, Injector injector) {
-        super(em);
+        super(em, injector);
         this.injector = injector;
     }
 

@@ -29,6 +29,9 @@ import java.util.Set;
  * @author yuriyz on 06/19/2015.
  */
 public enum DesignerFieldPropertyType {
+    CODE("code"),
+    LABEL("label"),
+    DESCRIPTION("description"),
     RELEVANCE("relevance"),
     REQUIRED("required"),
     VISIBLE("visible");

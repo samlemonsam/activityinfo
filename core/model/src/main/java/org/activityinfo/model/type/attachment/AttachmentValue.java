@@ -1,4 +1,4 @@
-package org.activityinfo.model.type.image;
+package org.activityinfo.model.type.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -24,39 +24,42 @@ package org.activityinfo.model.type.image;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author yuriyz on 8/6/14.
  */
-public class ImageValue implements FieldValue, IsRecord {
+public class AttachmentValue implements FieldValue, IsRecord {
 
-    final private List<ImageRowValue> values;
+    private final List<Attachment> values = Lists.newArrayList();
 
     @Override
     public FieldTypeClass getTypeClass() {
-        return ImageType.TYPE_CLASS;
+        return AttachmentType.TYPE_CLASS;
     }
 
-    public ImageValue() {
-        values = Lists.newArrayList();
+    public AttachmentValue() {
     }
 
-    public ImageValue(ImageRowValue imageRowValue) {
-        values = Collections.singletonList(imageRowValue);
+    public AttachmentValue(Attachment imageRowValue) {
+        values.add(imageRowValue);
     }
 
-    public List<ImageRowValue> getValues() {
+    public List<Attachment> getValues() {
         return values;
+    }
+
+    public boolean hasValues() {
+        return !values.isEmpty();
     }
 
     public List<Record> getValuesAsRecords() {
         final List<Record> result = Lists.newArrayList();
-        for (ImageRowValue value : values) {
+        for (Attachment value : values) {
             result.add(value.asRecord());
         }
         return result;
@@ -69,12 +72,16 @@ public class ImageValue implements FieldValue, IsRecord {
                 .set("values", getValuesAsRecords());
     }
 
-    public static FieldValue fromRecord(Record record) {
-        ImageValue value = new ImageValue();
+    public static AttachmentValue fromRecord(Record record) {
+        AttachmentValue value = new AttachmentValue();
         List<Record> recordList = record.getRecordList("values");
         for (Record r : recordList) {
-            value.getValues().add(ImageRowValue.fromRecord(r));
+            value.getValues().add(Attachment.fromRecord(r));
         }
         return value;
+    }
+
+    public static AttachmentValue fromJson(String json) {
+        return fromRecord(Resources.recordFromJson(json));
     }
 }

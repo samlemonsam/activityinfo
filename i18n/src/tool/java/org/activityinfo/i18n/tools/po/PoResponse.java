@@ -1,19 +1,21 @@
 package org.activityinfo.i18n.tools.po;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import java.util.List;
+public class PoResponse {
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class PoResponse<T extends PoTerm> {
-    
-    private List<T> list;
+    private String status;
+    private int code;
+    private String message;
 
-    public List<T> getList() {
-        return list;
+    public String getStatus() {
+        return status;
     }
 
-    public void setList(List<T> list) {
-        this.list = list;
+    public int getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

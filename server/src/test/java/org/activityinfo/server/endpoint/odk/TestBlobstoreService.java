@@ -9,31 +9,47 @@ import org.activityinfo.service.blob.BlobId;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URI;
 
 public class TestBlobstoreService implements BlobFieldStorageService {
+
     @Override
-    public URI getBlobUrl(BlobId blobId) {
+    public Response getBlobUrl(@InjectParam AuthenticatedUser user, BlobId blobId, ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void put(AuthenticatedUser authenticatedUser, String contentDisposition, String mimeType, BlobId blobId, ByteSource byteSource) throws IOException {
+    public void put(AuthenticatedUser user, String contentDisposition, String mimeType,
+                    BlobId blobId, ResourceId resourceId, ByteSource byteSource) throws IOException {
 
     }
 
     @Override
-    public Response getImage(@InjectParam AuthenticatedUser user, ResourceId resourceId, ResourceId fieldId, BlobId blobId) throws IOException {
+    public Response getImage(@InjectParam AuthenticatedUser user, BlobId blobId, ResourceId resourceId) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Response getThumbnail(@InjectParam AuthenticatedUser user, ResourceId resourceId, ResourceId fieldId, BlobId blobId, int width, int height) {
+    public Response getImageUrl(@InjectParam AuthenticatedUser user, BlobId blobId, ResourceId resourceId) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Response getUploadCredentials(@InjectParam AuthenticatedUser user, BlobId blobId) {
+    public Response getThumbnail(@InjectParam AuthenticatedUser user, BlobId blobId, ResourceId resourceId, int width, int height) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Response exists(@InjectParam AuthenticatedUser user, BlobId blobId, ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Response getUploadCredentials(@InjectParam AuthenticatedUser user, BlobId blobId, ResourceId resourceId, String fileName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasAccess(ResourceId userId, BlobId blobId) {
+        return false;
     }
 }
