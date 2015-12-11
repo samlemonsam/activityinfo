@@ -1,7 +1,6 @@
 package org.activityinfo.i18n.tools;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.i18n.tools.model.TranslationSource;
 
 import java.io.File;
 import java.util.List;
@@ -19,7 +18,7 @@ public class Project {
     private File sourceDirectory;
     private String defaultLanguage;
     private List<String> languages;
-    private TranslationSource translationSource;
+    private PoEditorSource translationSource;
 
     private Project() {
         sourceDirectory = new File("src/main/java");
@@ -46,7 +45,7 @@ public class Project {
         return languages;
     }
 
-    public TranslationSource getTranslationSource() {
+    public PoEditorSource getTranslationSource() {
         return translationSource;
     }
 }

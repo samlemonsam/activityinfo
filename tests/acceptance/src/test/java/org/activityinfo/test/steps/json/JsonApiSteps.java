@@ -10,7 +10,6 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
@@ -31,10 +30,7 @@ public class JsonApiSteps {
     
     @Inject
     private Server server;
-    
-    @Inject
-    private AliasTable aliasTable;
-    
+
     private Scenario scenario;
     
     private ObjectMapper objectMapper;

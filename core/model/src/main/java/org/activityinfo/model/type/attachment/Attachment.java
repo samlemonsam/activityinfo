@@ -1,4 +1,4 @@
-package org.activityinfo.model.type.image;
+package org.activityinfo.model.type.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -27,7 +27,7 @@ import org.activityinfo.model.resource.Record;
 /**
  * @author yuriyz on 8/12/14.
  */
-public class ImageRowValue implements IsRecord {
+public class Attachment implements IsRecord {
 
     private String mimeType;
     private String filename;
@@ -36,10 +36,10 @@ public class ImageRowValue implements IsRecord {
     private int height;
     private int width;
 
-    public ImageRowValue() {
+    public Attachment() {
     }
 
-    public ImageRowValue(String mimeType, String filename, String blobId) {
+    public Attachment(String mimeType, String filename, String blobId) {
         this.mimeType = mimeType;
         this.filename = filename;
         this.blobId = blobId;
@@ -95,8 +95,9 @@ public class ImageRowValue implements IsRecord {
                 .set("blobId", blobId);
     }
 
-    public static ImageRowValue fromRecord(Record record) {
-        ImageRowValue rowValue = new ImageRowValue(record.getString("mimeType"), record.getString("filename"), record.getString("blobId"));
+    public static Attachment fromRecord(Record record) {
+        Attachment rowValue = new Attachment(
+                record.getString("mimeType"), record.getString("filename"), record.getString("blobId"));
         rowValue.setHeight(record.getInt("height"));
         rowValue.setWidth(record.getInt("width"));
         return rowValue;

@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.test.ui;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,23 +21,16 @@ package org.activityinfo.service.blob;
  * #L%
  */
 
-import com.google.inject.Singleton;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 /**
- * @author yuriyz on 8/8/14.
+ * @author yuriyz on 11/24/2015.
  */
-@Singleton
-public class ThumbnailDownloadServlet extends HttpServlet {
+public class ImagePathProvider {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
-        // todo
+    public static String path(String imageName) {
+        String path = ImagePathProvider.class.getResource(imageName).toString();
+        if (path.startsWith("file:/")) {
+            return path.substring("file:/".length());
+        }
+        return path;
     }
 }

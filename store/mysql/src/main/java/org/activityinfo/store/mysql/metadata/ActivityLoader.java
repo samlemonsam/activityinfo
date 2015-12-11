@@ -23,7 +23,6 @@ import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
@@ -117,7 +116,7 @@ public class ActivityLoader {
 
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(reader, JsonObject.class);
-            return FormClass.fromResource(Resources.fromJson(object));
+            return FormClass.fromResource(Resources.resourceFromJson(object));
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }

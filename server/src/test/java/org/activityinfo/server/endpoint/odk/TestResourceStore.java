@@ -17,7 +17,6 @@ import org.activityinfo.service.lookup.ReferenceChoice;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Ref;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +72,7 @@ public class TestResourceStore implements ResourceLocatorSync {
         String json = com.google.common.io.Resources.toString(url, Charsets.UTF_8);
         JsonArray array = parser.parse(json).getAsJsonArray();
         for(int i=0;i!=array.size();++i) {
-            Resource resource = Resources.fromJson(array.get(i).getAsJsonObject());
+            Resource resource = Resources.resourceFromJson(array.get(i).getAsJsonObject());
             resources.put(resource.getId(), resource);
             System.out.println("Loaded " + resource.getId());
         }

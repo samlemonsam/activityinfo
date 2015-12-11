@@ -293,7 +293,7 @@ public class ActivityInfoClient implements FormClassProvider {
         String json = formResource(CuidAdapter.adminLevelFormClass(adminLevelId)).path("class").get(String.class);
 
 
-        return FormClass.fromResource(Resources.fromJson(json));
+        return FormClass.fromResource(Resources.resourceFromJson(json));
     }
 
     public FormTree getFormTree(ResourceId resourceId) {

@@ -1,12 +1,12 @@
 package org.activityinfo.store.query.impl.builders;
 
 import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoAreaType;
-import org.activityinfo.model.type.image.ImageType;
-import org.activityinfo.model.type.image.ImageValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
@@ -44,8 +44,8 @@ public class ViewBuilderFactory {
             return new BooleanColumnBuilder();
         } else if(type instanceof LocalDateType) {
             return new DateColumnBuilder(new LocalDateReader());
-        } else if(type instanceof ImageType) {
-            return new StringColumnBuilder(new ImageBlobIdReader());
+        } else if(type instanceof AttachmentType) {
+            return new StringColumnBuilder(new AttachmentBlobIdReader());
         } else if(type instanceof GeoAreaType) {
             return new GeoColumnBuilder();
         } else {
@@ -142,11 +142,11 @@ public class ViewBuilderFactory {
 //        }
 //    }
 
-    private static class ImageBlobIdReader implements StringReader {
+    private static class AttachmentBlobIdReader implements StringReader {
         @Override
         public String readString(FieldValue value) {
-            if(value instanceof ImageValue) {
-                ImageValue imageValue = (ImageValue) value;
+            if(value instanceof AttachmentValue) {
+                AttachmentValue imageValue = (AttachmentValue) value;
                 if(imageValue.getValues().size() >= 1) {
                     return imageValue.getValues().get(0).getBlobId();
                 }

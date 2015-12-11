@@ -1,4 +1,4 @@
-package org.activityinfo.model.type.image;
+package org.activityinfo.model.type.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,20 +21,21 @@ package org.activityinfo.model.type.image;
  * #L%
  */
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 
 /**
  * @author yuriyz on 8/6/14.
  */
-public class ImageType implements ParametrizedFieldType {
+public class AttachmentType implements ParametrizedFieldType {
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
@@ -43,36 +44,44 @@ public class ImageType implements ParametrizedFieldType {
 
         @Override
         public String getId() {
-            return "IMAGE";
+            return "ATTACHMENT";
         }
 
         @Override
         public FieldType createType() {
-            return new ImageType(Cardinality.SINGLE);
+            return new AttachmentType(Cardinality.SINGLE, Kind.ATTACHMENT);
         }
 
         @Override
         public FieldValue deserialize(Record record) {
-            return ImageValue.fromRecord(record);
+            return AttachmentValue.fromRecord(record);
         }
 
         @Override
-        public ImageType deserializeType(Record typeParameters) {
-            EnumValue enumFieldValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("cardinality"));
-            return new ImageType(Cardinality.valueOf(enumFieldValue.getValueId().asString()));
+        public AttachmentType deserializeType(Record typeParameters) {
+            EnumValue cardinalityValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("cardinality"));
+            EnumValue kindValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("kind"));
+            return new AttachmentType(
+                    Cardinality.valueOf(cardinalityValue.getValueId().asString()),
+                    Kind.valueOf(kindValue.getValueId().asString()));
         }
 
         @Override
         public FormClass getParameterFormClass() {
             EnumType cardinalityType = (EnumType) EnumType.TYPE_CLASS.createType();
-            cardinalityType.getValues().add(new EnumItem(ResourceId.valueOf("single"), "Single"));
-            cardinalityType.getValues().add(new EnumItem(ResourceId.valueOf("multiple"), "Multiple"));
+            cardinalityType.getValues().add(new EnumItem(ResourceId.valueOf("single"), I18N.CONSTANTS.single()));
+            cardinalityType.getValues().add(new EnumItem(ResourceId.valueOf("multiple"), I18N.CONSTANTS.multiple()));
+
+            EnumType kindType = (EnumType) EnumType.TYPE_CLASS.createType();
+            kindType.getValues().add(new EnumItem(ResourceId.valueOf(Kind.ATTACHMENT.name()), I18N.CONSTANTS.attachment()));
+            kindType.getValues().add(new EnumItem(ResourceId.valueOf(Kind.IMAGE.name()), I18N.CONSTANTS.image()));
 
             FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("image"));
-            formClass.addElement(new FormField(ResourceId.valueOf("cardinality"))
-                    .setType(cardinalityType)
-                    .setLabel("Cardinality")
-                    .setDescription("Determines whether users can add a single image, or multiple images")
+            formClass.addElement(new FormField(ResourceId.valueOf("kind"))
+                            .setType(kindType)
+                            .setLabel(I18N.CONSTANTS.type())
+                            .setDescription(I18N.CONSTANTS.attachmentTypeDescription())
+                            .setVisible(false)
             );
             return formClass;
         }
@@ -80,10 +89,16 @@ public class ImageType implements ParametrizedFieldType {
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
-    private Cardinality cardinality;
+    public enum Kind {
+        ATTACHMENT, IMAGE
+    }
 
-    public ImageType(Cardinality cardinality) {
+    private Cardinality cardinality;
+    private Kind kind;
+
+    public AttachmentType(Cardinality cardinality, Kind kind) {
         this.cardinality = cardinality;
+        this.kind = kind;
     }
 
     @Override
@@ -95,11 +110,20 @@ public class ImageType implements ParametrizedFieldType {
         return cardinality;
     }
 
+    public Kind getKind() {
+        return kind;
+    }
+
+    public void setKind(Kind kind) {
+        this.kind = kind;
+    }
+
     @Override
     public Record getParameters() {
         return new Record()
                 .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("cardinality", new EnumValue(ResourceId.valueOf(cardinality.name())).asRecord());
+                .set("cardinality", new EnumValue(ResourceId.valueOf(cardinality.name())).asRecord())
+                .set("kind", new EnumValue(ResourceId.valueOf(kind.name())).asRecord());
     }
 
     @Override
@@ -109,6 +133,6 @@ public class ImageType implements ParametrizedFieldType {
 
     @Override
     public String toString() {
-        return "ImageType";
+        return "AttachmentType";
     }
 }

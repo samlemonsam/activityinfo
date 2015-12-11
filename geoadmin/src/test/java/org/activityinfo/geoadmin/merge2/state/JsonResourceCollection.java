@@ -49,7 +49,7 @@ public class JsonResourceCollection implements ResourceCollection {
 
     private FormClass loadFormClass(String resourceName) throws IOException {
         String json = getJson(resourceName + "/form.json").read();
-        Resource resource = org.activityinfo.model.resource.Resources.fromJson(json);
+        Resource resource = org.activityinfo.model.resource.Resources.resourceFromJson(json);
         return FormClass.fromResource(resource);
     }
 

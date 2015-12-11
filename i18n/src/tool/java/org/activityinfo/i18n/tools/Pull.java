@@ -15,7 +15,6 @@ import org.activityinfo.i18n.tools.parser.ValidatingVisitor;
 import java.io.File;
 import java.io.IOException;
 
-;
 
 /**
  * Retrieves translations from PoEditor

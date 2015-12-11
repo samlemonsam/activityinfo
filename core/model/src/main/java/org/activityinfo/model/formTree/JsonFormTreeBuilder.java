@@ -37,7 +37,7 @@ public class JsonFormTreeBuilder {
         JsonObject forms = object.getAsJsonObject("forms");
         final Map<ResourceId, FormClass> formMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> entry : forms.entrySet()) {
-            FormClass formClass = FormClass.fromResource(Resources.fromJson(entry.getValue().getAsJsonObject()));
+            FormClass formClass = FormClass.fromResource(Resources.resourceFromJson(entry.getValue().getAsJsonObject()));
             formMap.put(formClass.getId(), formClass);
         }
 

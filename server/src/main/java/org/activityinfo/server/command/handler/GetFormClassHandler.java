@@ -12,7 +12,6 @@ import org.activityinfo.legacy.shared.command.result.FormClassResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -22,7 +21,6 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -85,7 +83,7 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
     // AI-1057 - Fix forms corrupted during cloning, partner and project range must reference to db id instead of partner id.
     private String fixIfNeeded(String json, Activity activity, ActivityFormDTO activityDTO) {
 
-        FormClass formClass = FormClass.fromResource(Resources.fromJson(json));
+        FormClass formClass = FormClass.fromResource(Resources.resourceFromJson(json));
 
         injectLocks(formClass, activityDTO);
 

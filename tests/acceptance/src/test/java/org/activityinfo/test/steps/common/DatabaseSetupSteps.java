@@ -284,7 +284,7 @@ public class DatabaseSetupSteps {
         createEnumField(fieldName, false, createEnumItems(numberOfItems));
     }
 
-    @Given("^I have created a (text|quantity) field \"([^\"]*)\"$")
+    @Given("^I have created a (text|quantity|attachment|image) field \"([^\"]*)\"$")
     public void I_have_created_a_field_in(String fieldType, String fieldName) throws Throwable {
         Preconditions.checkState(currentForm != null, "Create a form first");
 
