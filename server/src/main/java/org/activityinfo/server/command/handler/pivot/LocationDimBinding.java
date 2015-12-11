@@ -1,6 +1,5 @@
 package org.activityinfo.server.command.handler.pivot;
 
-
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
@@ -8,23 +7,28 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class SiteDimBinding extends DimBinding {
 
-    private static final String ID_COLUMN = "SiteId";
-    
-    private static final String LABEL_COLUMN = "SiteName";
-    
-    private final Dimension model = new Dimension(DimensionType.Site);
-    
+public class LocationDimBinding extends DimBinding {
+
+    private static final String ID_COLUMN = "LocationId";
+    private static final String LABEL_COLUMN = "LocationName";
+   
+    private final Dimension model = new Dimension(DimensionType.Location);
+
+    public LocationDimBinding() {
+    }
+
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
+        ResourceId locationFieldId = CuidAdapter.locationField(activityIdOf(formTree));
         return Arrays.asList(
-                new ColumnModel().setExpression(ColumnModel.ID_SYMBOL).as(ID_COLUMN),
-                new ColumnModel().setExpression(CuidAdapter.locationField(activityIdOf(formTree)) + ".label").as(LABEL_COLUMN));
+                new ColumnModel().setExpression(locationFieldId).as(ID_COLUMN),
+                new ColumnModel().setExpression(locationFieldId + ".label").as(LABEL_COLUMN));
     }
 
     @Override

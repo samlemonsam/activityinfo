@@ -125,14 +125,15 @@ public class PivotAdapter {
             case AdminLevel:
                 return new AdminDimBinding((AdminDimension) dimension);
             
+            case Location:
+                return new LocationDimBinding();
+            
             case Site:
                 return new SiteDimBinding();
             
             case Database:
             case Status:
             case Attribute:
-                break;
-            case Location:
                 break;
             case Target:
                 break;
