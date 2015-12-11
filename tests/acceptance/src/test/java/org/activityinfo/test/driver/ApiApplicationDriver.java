@@ -62,7 +62,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
         return currentUser;
     }
 
-
     private class Command {
         private final JSONObject request;
         private final ResponseHandler handler;

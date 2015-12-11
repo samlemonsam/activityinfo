@@ -43,6 +43,10 @@ public abstract class ApplicationDriver {
     
     public abstract void login(UserAccount account);
 
+    public UserAccount getCurrentUser() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @return an implementation of ApplicationDriver suitable for setting up a test scenario
      */

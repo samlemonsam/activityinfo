@@ -312,5 +312,20 @@ public class BsFormPanel extends Form {
             String src = img.attribute("src");
             return !Strings.isNullOrEmpty(src) && src.contains(expectedSrcContains);
         }
+
+        public List<String> getBlobLinks() {
+            List<String> result = Lists.newArrayList();
+            for (FluentElement elem : element.find().a().waitForList().list()) {
+                String href = elem.attribute("href");
+                if (!Strings.isNullOrEmpty(href) && !href.endsWith("#")) {
+                    result.add(href);
+                }
+            }
+            return result;
+        }
+
+        public String getFirstBlobLink() {
+            return getBlobLinks().get(0);
+        }
     }
 }

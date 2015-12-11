@@ -310,12 +310,7 @@ public class DataEntryTab {
 
     public BsModal editBetaSubmission() {
         buttonClick(I18N.CONSTANTS.edit());
-        container.root().waitUntil(new Predicate<WebDriver>() {
-            @Override
-            public boolean apply(WebDriver input) {
-                return container.root().find().div(withClass("formPanel")).firstIfPresent().isPresent();
-            }
-        });
-        return BsModal.find(container.root());
+        Sleep.sleepSeconds(1);
+        return BsModal.waitForNewFormModal(container.root());
     }
 }

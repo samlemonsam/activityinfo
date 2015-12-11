@@ -14,7 +14,6 @@ import javax.annotation.Nullable;
 
 public class XPathBuilder {
 
-
     public enum Axis {
         CHILD,
         DESCENDANT,
@@ -129,6 +128,10 @@ public class XPathBuilder {
 
     public XPathBuilder b(String... conditions) {
         return tagName("b", conditions);
+    }
+
+    public XPathBuilder a(String... conditions) {
+        return tagName("a", conditions);
     }
 
     public XPathBuilder anyElement(String... conditions) {
