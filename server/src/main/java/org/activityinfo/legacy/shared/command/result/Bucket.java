@@ -22,10 +22,10 @@ package org.activityinfo.legacy.shared.command.result;
  * #L%
  */
 
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.type.geo.AiLatLng;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -63,7 +63,9 @@ public class Bucket implements Serializable {
     }
 
     public void setCategory(Dimension dimension, DimensionCategory category) {
-        this.categories.put(dimension, category);
+        if(category != null) {
+            this.categories.put(dimension, category);
+        }
     }
 
     public DimensionCategory getCategory(Dimension dimension) {
