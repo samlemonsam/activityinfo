@@ -37,6 +37,7 @@ public class LocationCollection implements ResourceCollection {
     private final int locationTypeId;
     private final TableMapping mapping;
     private final CountryStructure country;
+    private long version;
 
     public LocationCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
 
@@ -56,6 +57,7 @@ public class LocationCollection implements ResourceCollection {
             Preconditions.checkState(!rs.wasNull());
 
             name = rs.getString("name");
+            version = rs.getLong("version");
         }
 
         this.country = CountryStructure.query(executor, countryId);
@@ -131,7 +133,7 @@ public class LocationCollection implements ResourceCollection {
 
     @Override
     public long cacheVersion() {
-        return 0;
+        return version;
     }
 
 }

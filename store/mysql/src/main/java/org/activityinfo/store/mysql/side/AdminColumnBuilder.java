@@ -11,12 +11,15 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Scans the location / adminlink values for a given location type and emits
  * a ReferenceValue for each location.
  */
 public class AdminColumnBuilder {
+    
+    private static final Logger LOGGER = Logger.getLogger(AdminColumnBuilder.class.getName());
 
     private static final String NEW_LINE = "\n";
 
@@ -52,6 +55,8 @@ public class AdminColumnBuilder {
         sql.append("WHERE location.locationTypeId=").append(locationTypeId).append(NEW_LINE);
         sql.append("ORDER BY location.locationId");
 
+        LOGGER.info("Querying admin table: " + sql.toString());
+        
         int currentLocationId = -1;
         int[] adminEntity = new int[adminLevels.length];
 
