@@ -14,6 +14,7 @@ import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -276,9 +277,7 @@ public class PivotAdapter {
         appendFilter("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner, filter);
         appendFilter("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project, filter);
         appendFilter("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location, filter);
-        
-        
-        
+        appendAdminFilter(activity, filter);
         
         if(filter.length() > 0) {
             LOGGER.info("Filter: " + filter);
@@ -286,6 +285,41 @@ public class PivotAdapter {
         } else {
             return null;
         }
+    }
+
+    private void appendAdminFilter(ActivityMetadata activity, StringBuilder filterExpr) {
+        if (this.filter.isRestricted(DimensionType.AdminLevel)) {
+
+            // we don't know which adminlevel this belongs to so we have construct a giant OR statement
+            List<String> adminIdExprs = findAdminIdExprs(formTrees.get(activity.getFormClassId()));
+
+            filterExpr.append("(");
+            boolean needsOr = false;
+            for(String adminIdExpr : adminIdExprs) {
+                for (Integer adminEntityId : this.filter.getRestrictions(DimensionType.AdminLevel)) {
+                    if(needsOr) {
+                        filterExpr.append(" || ");
+                    } 
+                    filterExpr.append("(");
+                    filterExpr.append(adminIdExpr);
+                    filterExpr.append("==");
+                    filterExpr.append("'").append(CuidAdapter.entity(adminEntityId)).append("'");
+                    filterExpr.append(")");
+                    needsOr = true;
+                }
+            }
+            filterExpr.append(")");
+        }
+    }
+
+    private List<String> findAdminIdExprs(FormTree formTree) {
+        List<String> expressions = Lists.newArrayList();
+        for (FormClass formClass : formTree.getFormClasses()) {
+            if(formClass.getId().getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
+                expressions.add(formClass.getId() + "." + ColumnModel.ID_SYMBOL);
+            }
+        }
+        return expressions;
     }
 
 

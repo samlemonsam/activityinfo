@@ -277,6 +277,10 @@ public class FormTree {
         }
         return formClass.get();
     }
+    
+    public Collection<FormClass> getFormClasses() {
+        return formClassMap.values();
+    }
 
     public Optional<FormClass> getFormClassIfPresent(ResourceId formClassId) {
         return Optional.fromNullable(formClassMap.get(formClassId));
