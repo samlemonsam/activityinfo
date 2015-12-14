@@ -300,12 +300,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     }
 
     private Widget createHeader(int depth, FormSection section) {
-        StringBuilder html = new StringBuilder();
         String hn = "h" + (3 + depth);
-        html.append("<").append(hn).append(">")
-                .append(SafeHtmlUtils.htmlEscape(section.getLabel()))
-                .append("</").append(hn).append(">");
-        return new HTML(html.toString());
+        return new HTML("<" + hn + ">" + SafeHtmlUtils.htmlEscape(section.getLabel()) + "</" + hn + ">");
     }
 
     @Override
