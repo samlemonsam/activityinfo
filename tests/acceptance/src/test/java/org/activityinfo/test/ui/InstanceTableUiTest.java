@@ -21,6 +21,9 @@ package org.activityinfo.test.ui;
  * #L%
  */
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.UiApplicationDriver;
@@ -69,7 +72,7 @@ public class InstanceTableUiTest {
                 property("form", FORM_NAME),
                 property("name", "enum"),
                 property("type", "enum"),
-                property("items", "item1, item2, item3"),
+                property("items", Lists.newArrayList("item1", "item2", "item3")),
                 property("code", "2")
         );
         api.createField(
@@ -103,11 +106,11 @@ public class InstanceTableUiTest {
                 api.submitForm(FORM_NAME, Arrays.asList(
                         new FieldValue("Partner", "NRC"),
                         new FieldValue("quantity", i),
-                        new FieldValue("enum", i % 2 == 0 ? "item1" : "item1, item2"),
+                        new FieldValue("enum", i % 2 == 0 ? "item1" : "item1, item2").setType(Optional.of(EnumType.TYPE_CLASS)),
                         new FieldValue("text", "text" + i),
                         new FieldValue("multi-line", "line1\nline2"),
                         new FieldValue("barcode", "barcode")
-                ));
+                ), Arrays.asList("Partner", "quantity", "enum", "text", "multi-line", "barcode"));
             }
             api.submitBatch();
         }
