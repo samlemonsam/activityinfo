@@ -45,11 +45,11 @@ public class RelevanceHandler {
 
     public void onValueChange() {
         for (FormField formField : fieldsWithSkipExpression) {
-            applySkipLogic(formField);
+            applyRelevanceLogic(formField);
         }
     }
 
-    private void applySkipLogic(final FormField field) {
+    private void applyRelevanceLogic(final FormField field) {
         if (field.hasRelevanceConditionExpression()) {
             try {
                 ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
@@ -59,10 +59,11 @@ public class RelevanceHandler {
                 if (fieldContainer != null) {
                     fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
                 } else {
-                    Log.error("Can't find container for fieldId: " + field.getId() + ", fieldName: " + field.getName());
+                    Log.error("Can't find container for fieldId: " + field.getId() + ", fieldName: " + field.getLabel() + ", expression: " + field.getRelevanceConditionExpression());
                 }
             } catch (Exception e) {
-                Log.error("fieldId: " + field.getId() + ", fieldName: " + field.getName() + " " + e.getMessage(), e);
+                Log.error("Error: Unable to apply relevance logic. FieldId: " + field.getId() +
+                        ", fieldName: " + field.getLabel() + ", expression: " + field.getRelevanceConditionExpression(), e);
             }
         }
     }
