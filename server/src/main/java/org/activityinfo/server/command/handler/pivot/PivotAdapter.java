@@ -201,7 +201,7 @@ public class PivotAdapter {
             DimensionCategory indicatorCategory = null;
 
             if (indicatorDimension.isPresent()) {
-                indicatorCategory = indicatorDimension.get().category(formTree, indicator.getId());
+                indicatorCategory = indicatorDimension.get().category(formTree, indicator);
             }
 
             for (int i = 0; i < columnSet.getNumRows(); i++) {

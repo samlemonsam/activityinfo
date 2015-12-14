@@ -60,7 +60,8 @@ public class IndicatorOracle {
                         " a.category, " +            // (5)
                         " a.reportingFrequency," +  // (6)
                         " a.databaseId, " +         // (7)
-                        " d.name " +               // (8)
+                        " d.name, " +               // (8)
+                        " i.sortOrder " +          // (9)
                         "FROM indicator i " +
                         "LEFT JOIN activity a ON (a.activityId=i.activityId) " +
                         "LEFT JOIN userdatabase d ON (a.databaseId=d.databaseId) " +
@@ -93,7 +94,7 @@ public class IndicatorOracle {
                             indicator.id = rs.getInt(1);
                             indicator.activityId = activityId;
                             indicator.aggregation = rs.getInt(2);
-                            
+                            indicator.sortOrder = rs.getInt(9);
                             activity.indicators.add(indicator);
                         }
                     }

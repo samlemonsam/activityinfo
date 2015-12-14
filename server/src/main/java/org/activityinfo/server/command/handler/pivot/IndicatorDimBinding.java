@@ -5,7 +5,6 @@ import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.legacy.CuidAdapter;
 
 public class IndicatorDimBinding {
     
@@ -15,12 +14,12 @@ public class IndicatorDimBinding {
         return model;
     }
     
-    public DimensionCategory category(FormTree formTree, int indicatorId) {
-        FormTree.Node fieldNode = formTree.getRootField(CuidAdapter.indicatorField(indicatorId));
+    public DimensionCategory category(FormTree formTree, IndicatorMetadata indicator) {
+        FormTree.Node fieldNode = formTree.getRootField(indicator.getFieldId());
         String label = fieldNode.getField().getLabel();
-        int sortOrder = findSortOrder(formTree, fieldNode);
+        int sortOrder = indicator.sortOrder;
         
-        return new EntityCategory(indicatorId, label, sortOrder);
+        return new EntityCategory(indicator.getId(), label, sortOrder);
     }
 
     private int findSortOrder(FormTree formTree, FormTree.Node fieldNode) {

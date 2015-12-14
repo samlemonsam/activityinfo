@@ -11,6 +11,7 @@ public class IndicatorMetadata {
     int activityId;
     String activityCategory;
     int aggregation;
+    int sortOrder;
 
 
     public int getId() {
