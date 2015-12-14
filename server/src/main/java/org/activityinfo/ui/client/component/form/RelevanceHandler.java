@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.collect.Lists;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -50,12 +51,19 @@ public class RelevanceHandler {
 
     private void applySkipLogic(final FormField field) {
         if (field.hasRelevanceConditionExpression()) {
-
-            ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
-            ExprParser parser = new ExprParser(lexer);
-            ExprNode expr = parser.parse();
-            FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
-            fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
+            try {
+                ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
+                ExprParser parser = new ExprParser(lexer);
+                ExprNode expr = parser.parse();
+                FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
+                if (fieldContainer != null) {
+                    fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
+                } else {
+                    Log.error("Can't find container for fieldId: " + field.getId() + ", fieldName: " + field.getName());
+                }
+            } catch (Exception e) {
+                Log.error("fieldId: " + field.getId() + ", fieldName: " + field.getName() + " " + e.getMessage(), e);
+            }
         }
     }
 
