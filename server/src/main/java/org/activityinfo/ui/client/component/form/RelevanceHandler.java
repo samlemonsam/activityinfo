@@ -56,10 +56,13 @@ public class RelevanceHandler {
                 ExprParser parser = new ExprParser(lexer);
                 ExprNode expr = parser.parse();
                 FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
-                Log.debug((fieldContainer != null) + " ");
-                fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
+                if (fieldContainer != null) {
+                    fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
+                } else {
+                    Log.error("Can't find container for fieldId: " + field.getId() + ", fieldName: " + field.getName());
+                }
             } catch (Exception e) {
-                Log.error(e.getMessage(), e);
+                Log.error("fieldId: " + field.getId() + ", fieldName: " + field.getName() + " " + e.getMessage(), e);
             }
         }
     }
