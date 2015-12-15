@@ -23,6 +23,7 @@ package org.activityinfo.server.report;
  */
 
 import com.google.inject.Inject;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
@@ -42,6 +43,7 @@ import org.activityinfo.server.report.generator.ReportGenerator;
 import org.activityinfo.server.report.renderer.Renderer;
 import org.activityinfo.server.report.renderer.RendererFactory;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,6 +74,11 @@ public class ReportsTest {
     @Inject
     private User user;
 
+    @BeforeClass
+    public static void setupLocale() {
+        LocaleProxy.initialize();
+    }
+    
     @Before
     public void setup() {
         user = createUser();
