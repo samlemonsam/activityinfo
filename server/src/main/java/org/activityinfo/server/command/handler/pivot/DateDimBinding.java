@@ -9,7 +9,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.time.LocalDate;
+import org.joda.time.LocalDate;
 
 import java.util.Collections;
 import java.util.Date;
@@ -55,13 +55,14 @@ public class DateDimBinding extends DimBinding {
                     c[i] = new YearCategory(localDate.getYear());
                     break;
                 case QUARTER:
-                    c[i] = new QuarterCategory(localDate.getYear(), localDate.getQuarter());
+                    c[i] = new QuarterCategory(localDate.getYear(), quarterOf(localDate.getMonthOfYear()));
                     break;
                 case MONTH:
                     c[i] = new MonthCategory(localDate.getYear(), localDate.getMonthOfYear());
                     break;
                 case WEEK_MON:
-                    throw new UnsupportedOperationException();
+                    c[i] = new WeekCategory(localDate.getYear(), localDate.getWeekOfWeekyear());
+                    break;
                 case DAY:
                     c[i] = new DayCategory(date);
                     break;
@@ -70,4 +71,8 @@ public class DateDimBinding extends DimBinding {
         return c;
     }
 
+    private int quarterOf(int monthOfYear) {
+        int quarter0 = (monthOfYear - 1) / 3;
+        return quarter0 + 1;
+    }
 }
