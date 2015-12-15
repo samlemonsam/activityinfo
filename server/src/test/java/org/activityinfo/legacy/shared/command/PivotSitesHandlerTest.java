@@ -532,12 +532,9 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         execute();
 
         assertEquals(3, buckets.size());
-        assertEquals(1500, (int) findBucketByQuarter(buckets, 2009, 1)
-            .doubleValue());
-        assertEquals(3600, (int) findBucketByQuarter(buckets, 2009, 2)
-            .doubleValue());
-        assertEquals(10000, (int) findBucketByQuarter(buckets, 2008, 4)
-            .doubleValue());
+        assertThat().forQuarter(2009, 1).thereIsOneBucketWithValue(1500);
+        assertThat().forQuarter(2009, 2).thereIsOneBucketWithValue(3600);
+        assertThat().forQuarter(2008, 4).thereIsOneBucketWithValue(10000);
     }
 
     @Test
