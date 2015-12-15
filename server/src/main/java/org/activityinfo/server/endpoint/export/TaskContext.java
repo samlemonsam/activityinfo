@@ -13,11 +13,21 @@ public class TaskContext implements DispatcherSync {
     private final DispatcherSync dispatcherSync;
     private final StorageProvider storageProvider;
     private final String taskId;
+    private final String rootUri;
 
     public TaskContext(DispatcherSync dispatcherSync, StorageProvider storageProvider, String taskId) {
+       this(dispatcherSync, storageProvider, taskId, "https://www.activityinfo.org");
+    }
+
+    public TaskContext(DispatcherSync dispatcherSync, StorageProvider storageProvider, String taskId, String rootUri) {
         this.dispatcherSync = dispatcherSync;
         this.storageProvider = storageProvider;
         this.taskId = taskId;
+        this.rootUri = rootUri;
+    }
+
+    public String getRootUri() {
+        return rootUri;
     }
 
     public void updateProgress(double percentComplete) {
