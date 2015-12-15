@@ -135,6 +135,8 @@ public class PivotAdapter {
                 return new SiteDimBinding();
             
             case Database:
+                return new DatabaseDimBinding();
+            
             case Status:
             case Attribute:
                 break;
