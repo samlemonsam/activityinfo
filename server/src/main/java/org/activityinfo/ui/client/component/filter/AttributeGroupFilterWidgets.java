@@ -14,12 +14,9 @@ import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForms;
-import org.activityinfo.legacy.shared.command.GetAttributeGroupsDimension;
-import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.AttributeGroupResult;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.util.CollectionUtil;
 
 import java.util.ArrayList;
@@ -69,83 +66,50 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
 
             Log.debug("AttributeGroupFilterWidgets called for filter " + filter);
 
-            // retrieve all attribute groups for the current filter
-            service.execute(new GetAttributeGroupsDimension(value), new AsyncCallback<AttributeGroupResult>() {
+            service.execute(new GetActivityForms(filter), new AsyncCallback<ActivityFormResults>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    GWT.log("Failed to load attributes", caught);
+                    GWT.log("Failed to load schema", caught);
                 }
 
                 @Override
-                public void onSuccess(final AttributeGroupResult attributeGroupResult) {
-                    // result should be different from the last time, we checked the filter earlier, but we could have
-                    // an exceptional case of the same result with a different filter, so check for equality again.
-                    // if the result is indeed different from the last time, (re)draw the widgets
-                    if (prevResult == null || !prevResult.equals(attributeGroupResult)) {
-                        prevResult = attributeGroupResult;
+                public void onSuccess(final ActivityFormResults schema) {
+                    // clean up old widgets
+                    for (AttributeGroupFilterWidget widget : widgets) {
+                        panel.remove(widget);
+                    }
+                    duplicates.clear();
 
-                        Log.debug("AttributeGroupFilterWidgets drawing widgets for result: " + attributeGroupResult);
+                    // create new widgets, one for each attributegroup.
+                    // remember the old selection
+                    List<Integer> selection = getSelectedIds();
 
-                        service.execute(new GetActivityForms(filter), new AsyncCallback<ActivityFormResults>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                GWT.log("Failed to load schema", caught);
-                            }
+                    widgets = new ArrayList<AttributeGroupFilterWidget>();
+                    for (AttributeGroupDTO group : groups) {
+                        // create
+                        AttributeGroupFilterWidget widget = new AttributeGroupFilterWidget(group);
 
-                            @Override
-                            public void onSuccess(final ActivityFormResults schema) {
-                                // clean up old widgets
-                                for (AttributeGroupFilterWidget widget : widgets) {
-                                    panel.remove(widget);
-                                }
-                                duplicates.clear();
+                        // set old selection
+                        widget.setSelection(selection);
 
-                                // decorate result list from schema
-                                List<AttributeGroupDTO> pivotData = attributeGroupResult.getData();
-                                groups = new ArrayList<AttributeGroupDTO>();
-                                if (CollectionUtil.isNotEmpty(pivotData)) {
-                                    for (AttributeGroupDTO pivotGroup : pivotData) {
-                                        AttributeGroupDTO schemaGroup = schema.getAttributeGroupById(pivotGroup.getId
-                                                ());
-                                        if (schemaGroup != null) {
-                                            groups.add(schemaGroup);
-                                        }
-                                    }
-                                }
+                        // what to do when value changes
+                        if (valueChangeHandler != null) {
+                            widget.addValueChangeHandler(valueChangeHandler);
+                        }
 
-                                // create new widgets, one for each attributegroup.
-                                // remember the old selection
-                                List<Integer> selection = getSelectedIds();
+                        // add widget to panel if a widget with the same name (ignoring case) hasn't
+                        // already been added
+                        if (isNoDuplicate(widget)) {
+                            widgets.add(widget);
+                            panel.add(widget);
+                        } else {
+                            // otherwise add to collection of duplicates
+                            duplicates.put(group.getName().toLowerCase(), widget);
+                        }
+                    }
 
-                                widgets = new ArrayList<AttributeGroupFilterWidget>();
-                                for (AttributeGroupDTO group : groups) {
-                                    // create
-                                    AttributeGroupFilterWidget widget = new AttributeGroupFilterWidget(group);
-
-                                    // set old selection
-                                    widget.setSelection(selection);
-
-                                    // what to do when value changes
-                                    if (valueChangeHandler != null) {
-                                        widget.addValueChangeHandler(valueChangeHandler);
-                                    }
-
-                                    // add widget to panel if a widget with the same name (ignoring case) hasn't
-                                    // already been added
-                                    if (isNoDuplicate(widget)) {
-                                        widgets.add(widget);
-                                        panel.add(widget);
-                                    } else {
-                                        // otherwise add to collection of duplicates
-                                        duplicates.put(group.getName().toLowerCase(), widget);
-                                    }
-                                }
-
-                                if (drawCallback != null) {
-                                    drawCallback.onSuccess(null);
-                                }
-                            }
-                        });
+                    if (drawCallback != null) {
+                        drawCallback.onSuccess(null);
                     }
                 }
             });

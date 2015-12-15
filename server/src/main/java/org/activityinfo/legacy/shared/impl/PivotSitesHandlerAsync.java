@@ -56,8 +56,6 @@ public class PivotSitesHandlerAsync implements CommandHandlerAsync<PivotSites, P
         baseTables.add(new Targets());
         baseTables.add(new SiteCounts());
         baseTables.add(new LinkedSiteCounts());
-        baseTables.add(new DimensionValues());
-        baseTables.add(new LinkedDimensionValues());
     }
 
     @Override

@@ -105,10 +105,7 @@ public class PivotQuery implements WorkItem {
             command.isPointRequested()) {
             query.leftJoin(Tables.LOCATION, "Location")
                  .on("Location.LocationId=" + baseTable.getDimensionIdColumn(DimensionType.Location));
-
-            if(command.getValueType() == PivotSites.ValueType.DIMENSION) {
-                query.orderBy("Location.Name");
-            }
+            
         }
         if (command.isPivotedBy(DimensionType.Partner)) {
             query.leftJoin(Tables.PARTNER, "Partner")

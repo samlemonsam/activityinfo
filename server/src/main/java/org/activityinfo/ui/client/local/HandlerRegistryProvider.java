@@ -38,7 +38,6 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
                                    GetMonthlyReportsHandlerAsync getMonthlyReportsHandler,
                                    GetAdminEntitiesHandler adminHandler,
                                    GetPartnersDimensionHandler partnersDimensionHandler,
-                                   GetAttributeGroupsDimensionHandler attributeGroupsDimensionHandler,
                                    CreateSiteHandlerAsync createSiteHandler,
                                    UpdateSiteHandlerAsync updateSiteHandlerAsync,
                                    UpdateMonthlyReportsAsync updateMonthly,
@@ -58,7 +57,6 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
         registry.registerHandler(GetSites.class, sitesHandler);
         registry.registerHandler(GetAdminEntities.class, adminHandler);
         registry.registerHandler(GetPartnersDimension.class, partnersDimensionHandler);
-        registry.registerHandler(GetAttributeGroupsDimension.class, attributeGroupsDimensionHandler);
         registry.registerHandler(CreateSite.class, createSiteHandler);
         registry.registerHandler(UpdateSite.class, updateSiteHandlerAsync);
         registry.registerHandler(CreateLocation.class, createLocationHandler);

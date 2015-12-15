@@ -155,7 +155,6 @@ public class PivotAdapter {
                     }
                     break;
                 case TOTAL_SITES:
-                case DIMENSION:
                     executeSiteCountQuery(activity);
                     for (ActivityMetadata linkedActivity : activity.getLinkedActivities()) {
                         executeSiteCountQuery(linkedActivity);

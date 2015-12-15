@@ -140,7 +140,10 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
         if (type != null) {
             filter.addRestriction(type, Arrays.asList(params));
         }
-        return execute(filter);
+        PartnerResult results = execute(filter);
+        System.out.println(results.getData());
+
+        return results;
     }
 
     private PartnerResult execute(Filter filter) {

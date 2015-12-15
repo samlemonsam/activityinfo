@@ -39,21 +39,15 @@ import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.extjs.gxt.ui.client.widget.layout.FormData;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayoutData;
 import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.command.*;
-import org.activityinfo.legacy.shared.command.result.BatchResult;
-import org.activityinfo.legacy.shared.command.result.Bucket;
-import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.command.GetIndicators;
+import org.activityinfo.legacy.shared.command.result.IndicatorResult;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.reports.content.EntityCategory;
-import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer.Slice;
 import org.activityinfo.promise.Promise;
@@ -192,43 +186,18 @@ public class PiechartLayerOptions extends LayoutContainer implements LayerOption
             return Promise.done();
         }
 
-        Filter filter = new Filter();
-        filter.addRestriction(DimensionType.Indicator, piechartMapLayer.getIndicatorIds());
-
-        PivotSites query = new PivotSites();
-        query.setFilter(filter);
-        final Dimension formDimension = new Dimension(DimensionType.Activity);
-        query.setDimensions(formDimension);
-        query.setValueType(PivotSites.ValueType.DIMENSION);
-
-        Promise<BatchResult> promise = service.execute(query)
-                .join(new Function<PivotSites.PivotResult, Promise<BatchResult>>() {
-                    @Override
-                    public Promise<BatchResult> apply(PivotSites.PivotResult input) {
-                        BatchCommand batchFetch = new BatchCommand();
-                        for (Bucket bucket : input.getBuckets()) {
-                            EntityCategory activity = (EntityCategory) bucket.getCategory(formDimension);
-                            batchFetch.add(new GetActivityForm(activity.getId()));
-                        }
-                        return service.execute(batchFetch);
-                    }
-                });
-        promise.then(new Function<BatchResult, Void>() {
+        GetIndicators query = new GetIndicators(piechartMapLayer.getIndicatorIds());
+        return service.execute(query).then(new Function<IndicatorResult, Void>() {
             @Nullable
             @Override
-            public Void apply(@Nullable BatchResult input) {
-                indicatorLabels = Maps.newHashMap();
-                for (CommandResult result : input.getResults()) {
-                    ActivityFormDTO form = (ActivityFormDTO) result;
-                    for (IndicatorDTO indicator : form.getIndicators()) {
-                        indicatorLabels.put(indicator.getId(), indicator.getName());
-                    }
+            public Void apply(@Nullable IndicatorResult indicatorResult) {
+                for (IndicatorDTO indicatorDTO : indicatorResult.getIndicators()) {
+                    indicatorLabels.put(indicatorDTO.getId(), indicatorDTO.getName());
                 }
                 populateColorPickerWidget();
                 return null;
             }
         });
-        return promise;
     }
 
     private void populateColorPickerWidget() {
