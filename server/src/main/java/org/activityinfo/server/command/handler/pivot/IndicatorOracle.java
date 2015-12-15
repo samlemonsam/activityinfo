@@ -51,58 +51,108 @@ public class IndicatorOracle {
         entityManager.getSession().doWork(new AbstractWork() {
             @Override
             public void execute(Connection connection) throws SQLException {
-                StringBuilder sql = new StringBuilder();
-                sql.append("SELECT" +
-                        " i.indicatorId, " +        // (1)    
-                        " i.aggregation, " +        // (2)    
-                        " i.activityId," +          // (3)
-                        " a.name, " +               // (4)
-                        " a.category, " +            // (5)
-                        " a.reportingFrequency," +  // (6)
-                        " a.databaseId, " +         // (7)
-                        " d.name, " +               // (8)
-                        " i.sortOrder " +          // (9)
-                        "FROM indicator i " +
-                        "LEFT JOIN activity a ON (a.activityId=i.activityId) " +
-                        "LEFT JOIN userdatabase d ON (a.databaseId=d.databaseId) " +
-                        "WHERE i.type = 'QUANTITY' ");
-                
-                
-                appendFilter(filter, DimensionType.Indicator, "i.indicatorId", sql);
-                appendFilter(filter, DimensionType.Activity, "a.activityId", sql);
-                appendFilter(filter, DimensionType.Database, "a.databaseId", sql);
-    
-    
+
                 try (Statement s = connection.createStatement()) {
-                    try (ResultSet rs = s.executeQuery(sql.toString())) {
-                        while (rs.next()) {
-                            int activityId = rs.getInt(3);
-                            
-                            ActivityMetadata activity = activityMap.get(activityId);
-                            if(activity == null) {
-                                activity = new ActivityMetadata();
-                                activity.id = activityId;
-                                activity.name = rs.getString(4);
-                                activity.categoryName = rs.getString(5);
-                                activity.reportingFrequency = rs.getInt(6);
-                                activity.databaseId = rs.getInt(7);
-                                activity.databaseName = rs.getString(8);
-                                activityMap.put(activityId, activity);
-                            }
-                            
-                            IndicatorMetadata indicator = new IndicatorMetadata();
-                            indicator.id = rs.getInt(1);
-                            indicator.activityId = activityId;
-                            indicator.aggregation = rs.getInt(2);
-                            indicator.sortOrder = rs.getInt(9);
-                            activity.indicators.add(indicator);
-                        }
-                    }
+                    fetchIndicators(s, filter, activityMap);
                 }
             }
         });
         
         return Lists.newArrayList(activityMap.values());
+    }
+
+    private void fetchIndicators(Statement s, Filter filter, Map<Integer, ActivityMetadata> activityMap) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT" +
+                " i.indicatorId, " +        // (1)    
+                " i.aggregation, " +        // (2)    
+                " i.activityId," +          // (3)
+                " a.name, " +               // (4)
+                " a.category, " +            // (5)
+                " a.reportingFrequency," +  // (6)
+                " a.databaseId, " +         // (7)
+                " d.name, " +               // (8)
+                " i.sortOrder, " +          // (9)
+                " i.name, " +               // (10)
+                " k.sourceIndicatorId, " +       // (11)
+                " si.activityId, " +        // (12)
+                " sa.reportingFrequency " + // (13)
+                "FROM indicator i " +
+                "LEFT JOIN activity a ON (a.activityId=i.activityId) " +
+                "LEFT JOIN userdatabase d ON (a.databaseId=d.databaseId) " +
+                "LEFT JOIN indicatorlink k ON (i.indicatorId = k.destinationIndicatorId) " +
+                "LEFT JOIN indicator si ON (k.sourceIndicatorId = si.indicatorId) " +
+                "LEFT JOIN activity sa ON (si.activityId = a.activityId) " +
+                "WHERE i.type = 'QUANTITY' ");
+
+
+        appendFilter(filter, DimensionType.Indicator, "i.indicatorId", sql);
+        appendFilter(filter, DimensionType.Activity, "a.activityId", sql);
+        appendFilter(filter, DimensionType.Database, "a.databaseId", sql);
+        try (ResultSet rs = s.executeQuery(sql.toString())) {
+
+            while (rs.next()) {
+                int activityId = rs.getInt(3);
+
+                ActivityMetadata activity = activityMap.get(activityId);
+                if (activity == null) {
+                    activity = new ActivityMetadata();
+                    activity.id = activityId;
+                    activity.name = rs.getString(4);
+                    activity.categoryName = rs.getString(5);
+                    activity.reportingFrequency = rs.getInt(6);
+                    activity.databaseId = rs.getInt(7);
+                    activity.databaseName = rs.getString(8);
+                    activityMap.put(activityId, activity);
+                }
+
+                int indicatorId = rs.getInt(1);
+                IndicatorMetadata indicator = activity.indicators.get(indicatorId);
+                if(indicator == null) {
+                    indicator = new IndicatorMetadata();
+                    indicator.sourceId = indicatorId;
+                    indicator.destinationId = indicatorId;
+                    indicator.name = rs.getString(10);
+                    indicator.aggregation = rs.getInt(2);
+                    indicator.sortOrder = rs.getInt(9);
+                    activity.indicators.put(indicatorId, indicator);
+                }
+                
+                int linkedIndicatorId = rs.getInt(11);
+                if(!rs.wasNull()) {
+
+                    ActivityMetadata linkedActivity;
+                    int linkedActivityId = rs.getInt(12);
+                    if (linkedActivityId == activityId) {
+                        linkedActivity = activity;
+                    } else {
+                        linkedActivity = activity.linkedActivities.get(linkedActivityId);
+                        if (linkedActivity == null) {
+                            linkedActivity = new ActivityMetadata();
+                            linkedActivity.id = linkedActivityId;
+                            linkedActivity.reportingFrequency = rs.getInt(13);
+                            // in the context of being linked, the activity is treated as if 
+                            // it the same as the destination activity
+                            linkedActivity.name = activity.getName();
+                            linkedActivity.databaseId = activity.getDatabaseId();
+                            linkedActivity.databaseName = activity.getDatabaseName();
+                            activity.linkedActivities.put(linkedActivityId, linkedActivity);
+                        }
+                    }
+
+                    IndicatorMetadata linkedIndicator = new IndicatorMetadata();
+                    linkedIndicator.sourceId = linkedIndicatorId;
+                    linkedIndicator.destinationId = indicatorId;
+                    
+                    // in the context of being linked, this indicator is treated as 
+                    // if it were the same as the destination indicator
+                    linkedIndicator.name = indicator.getName();
+                    linkedIndicator.sortOrder = indicator.sortOrder;
+                    linkedIndicator.aggregation = indicator.aggregation;
+                    linkedActivity.linkedIndicators.add(linkedIndicator);
+                }
+            }
+        }
     }
 
     private boolean tooBroad(Filter filter) {

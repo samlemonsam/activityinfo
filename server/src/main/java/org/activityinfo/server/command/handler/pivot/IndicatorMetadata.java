@@ -1,50 +1,56 @@
 package org.activityinfo.server.command.handler.pivot;
 
+import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+
+import java.util.Set;
 
 /**
  * Legacy indicator metadata required to construct the pivot query
  */
 public class IndicatorMetadata {
-    int id;
-    int activityId;
-    String activityCategory;
+    String name;
+    int sourceId;
+    int destinationId;
     int aggregation;
     int sortOrder;
+    Set<Integer> destinationIndicatorIds = Sets.newHashSet();
 
-
-    public int getId() {
-        return id;
+    public int getSourceId() {
+        return sourceId;
     }
 
-    public int getActivityId() {
-        return activityId;
-    }
-
-    public String getActivityCategory() {
-        return activityCategory;
+    public int getDestinationId() {
+        return destinationId;
     }
 
     public int getAggregation() {
         return aggregation;
     }
 
-
     public ResourceId getFieldId() {
-        return CuidAdapter.indicatorField(id);
+        return CuidAdapter.indicatorField(sourceId);
     }
     
     public String getFieldExpression() {
         if(aggregation == 2) {
             return "1";
         } else {
-            return CuidAdapter.indicatorField(id).asString();
+            return CuidAdapter.indicatorField(sourceId).asString();
         }
     }
 
 
     public String getAlias() {
-        return "I" + id;
+        return "I" + sourceId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getSortOrder() {
+        return sortOrder;
     }
 }

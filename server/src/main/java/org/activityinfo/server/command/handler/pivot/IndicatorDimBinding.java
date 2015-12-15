@@ -14,12 +14,11 @@ public class IndicatorDimBinding {
         return model;
     }
     
-    public DimensionCategory category(FormTree formTree, IndicatorMetadata indicator) {
-        FormTree.Node fieldNode = formTree.getRootField(indicator.getFieldId());
-        String label = fieldNode.getField().getLabel();
-        int sortOrder = indicator.sortOrder;
-        
-        return new EntityCategory(indicator.getId(), label, sortOrder);
+    public DimensionCategory category(IndicatorMetadata indicator) {
+        return new EntityCategory(
+                indicator.getDestinationId(), 
+                indicator.getName(), 
+                indicator.getSortOrder());
     }
 
     private int findSortOrder(FormTree formTree, FormTree.Node fieldNode) {

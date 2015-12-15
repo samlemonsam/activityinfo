@@ -93,6 +93,9 @@ public class PivotAdapter {
         Set<ResourceId> formIds = new HashSet<>();
         for(ActivityMetadata activity : activities) {
             formIds.add(activity.getFormClassId());
+            for (ActivityMetadata linkedActivity : activity.getLinkedActivities()) {
+                formIds.add(linkedActivity.getFormClassId());
+            }
         }
 
         BatchingFormTreeBuilder builder = new BatchingFormTreeBuilder(catalog);
@@ -147,10 +150,16 @@ public class PivotAdapter {
             switch (command.getValueType()) {
                 case INDICATOR:
                     executeIndicatorValuesQuery(activity);
+                    for (ActivityMetadata linkedActivity : activity.getLinkedActivities()) {
+                        executeIndicatorValuesQuery(linkedActivity);
+                    }
                     break;
                 case TOTAL_SITES:
                 case DIMENSION:
                     executeSiteCountQuery(activity);
+                    for (ActivityMetadata linkedActivity : activity.getLinkedActivities()) {
+                        executeSiteCountQuery(linkedActivity);
+                    }
                     break;
             }
         }
@@ -201,7 +210,7 @@ public class PivotAdapter {
             DimensionCategory indicatorCategory = null;
 
             if (indicatorDimension.isPresent()) {
-                indicatorCategory = indicatorDimension.get().category(formTree, indicator);
+                indicatorCategory = indicatorDimension.get().category(indicator);
             }
 
             for (int i = 0; i < columnSet.getNumRows(); i++) {
@@ -259,9 +268,10 @@ public class PivotAdapter {
         for (int i = 0; i < columnSet.getNumRows(); i++) {
 
             Bucket bucket = new Bucket();
-            bucket.setCount(1);
-            bucket.setAggregationMethod(2);
-
+            if(command.getValueType() == PivotSites.ValueType.TOTAL_SITES) {
+                bucket.setCount(1);
+                bucket.setAggregationMethod(2);
+            }
 
             for (int j = 0; j < groupBy.size(); j++) {
                 bucket.setCategory(groupBy.get(j).getModel(), categories[j][i]);

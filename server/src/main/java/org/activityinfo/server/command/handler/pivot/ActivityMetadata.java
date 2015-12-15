@@ -1,11 +1,14 @@
 package org.activityinfo.server.command.handler.pivot;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class ActivityMetadata {
     int id;
@@ -15,8 +18,10 @@ public class ActivityMetadata {
     int databaseId;
     String categoryName;
     
-    List<IndicatorMetadata> indicators = new ArrayList<>();
-
+    final Map<Integer, IndicatorMetadata> indicators = Maps.newHashMap();
+    final Map<Integer, ActivityMetadata> linkedActivities = Maps.newHashMap();
+    final List<IndicatorMetadata> linkedIndicators = Lists.newArrayList();
+    
     public int getId() {
         return id;
     }
@@ -42,6 +47,9 @@ public class ActivityMetadata {
     }
 
     public List<IndicatorMetadata> getIndicators() {
+        List<IndicatorMetadata> indicators =  Lists.newArrayList();
+        indicators.addAll(this.indicators.values());
+        indicators.addAll(linkedIndicators);
         return indicators;
     }
 
@@ -51,5 +59,9 @@ public class ActivityMetadata {
         } else {
             return CuidAdapter.activityFormClass(id);
         }
+    }
+
+    public Collection<ActivityMetadata> getLinkedActivities() {
+        return linkedActivities.values();
     }
 }
