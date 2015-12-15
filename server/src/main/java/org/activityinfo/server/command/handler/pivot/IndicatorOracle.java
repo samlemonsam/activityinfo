@@ -76,7 +76,9 @@ public class IndicatorOracle {
                 " i.name, " +               // (10)
                 " k.sourceIndicatorId, " +       // (11)
                 " si.activityId, " +        // (12)
-                " sa.reportingFrequency " + // (13)
+                " sa.reportingFrequency, " + // (13)
+                " (si.dateDeleted IS NOT NULL AND " + // (14) 
+                  "sa.datedeleted IS NOT NULL)  " +
                 "FROM indicator i " +
                 "LEFT JOIN activity a ON (a.activityId=i.activityId) " +
                 "LEFT JOIN userdatabase d ON (a.databaseId=d.databaseId) " +
@@ -120,36 +122,39 @@ public class IndicatorOracle {
                 
                 int linkedIndicatorId = rs.getInt(11);
                 if(!rs.wasNull()) {
+                    boolean deleted = rs.getBoolean(14);
+                    if (!deleted) {
 
-                    ActivityMetadata linkedActivity;
-                    int linkedActivityId = rs.getInt(12);
-                    if (linkedActivityId == activityId) {
-                        linkedActivity = activity;
-                    } else {
-                        linkedActivity = activity.linkedActivities.get(linkedActivityId);
-                        if (linkedActivity == null) {
-                            linkedActivity = new ActivityMetadata();
-                            linkedActivity.id = linkedActivityId;
-                            linkedActivity.reportingFrequency = rs.getInt(13);
-                            // in the context of being linked, the activity is treated as if 
-                            // it the same as the destination activity
-                            linkedActivity.name = activity.getName();
-                            linkedActivity.databaseId = activity.getDatabaseId();
-                            linkedActivity.databaseName = activity.getDatabaseName();
-                            activity.linkedActivities.put(linkedActivityId, linkedActivity);
+                        ActivityMetadata linkedActivity;
+                        int linkedActivityId = rs.getInt(12);
+                        if (linkedActivityId == activityId) {
+                            linkedActivity = activity;
+                        } else {
+                            linkedActivity = activity.linkedActivities.get(linkedActivityId);
+                            if (linkedActivity == null) {
+                                linkedActivity = new ActivityMetadata();
+                                linkedActivity.id = linkedActivityId;
+                                linkedActivity.reportingFrequency = rs.getInt(13);
+                                // in the context of being linked, the activity is treated as if 
+                                // it the same as the destination activity
+                                linkedActivity.name = activity.getName();
+                                linkedActivity.databaseId = activity.getDatabaseId();
+                                linkedActivity.databaseName = activity.getDatabaseName();
+                                activity.linkedActivities.put(linkedActivityId, linkedActivity);
+                            }
                         }
-                    }
 
-                    IndicatorMetadata linkedIndicator = new IndicatorMetadata();
-                    linkedIndicator.sourceId = linkedIndicatorId;
-                    linkedIndicator.destinationId = indicatorId;
-                    
-                    // in the context of being linked, this indicator is treated as 
-                    // if it were the same as the destination indicator
-                    linkedIndicator.name = indicator.getName();
-                    linkedIndicator.sortOrder = indicator.sortOrder;
-                    linkedIndicator.aggregation = indicator.aggregation;
-                    linkedActivity.linkedIndicators.add(linkedIndicator);
+                        IndicatorMetadata linkedIndicator = new IndicatorMetadata();
+                        linkedIndicator.sourceId = linkedIndicatorId;
+                        linkedIndicator.destinationId = indicatorId;
+
+                        // in the context of being linked, this indicator is treated as 
+                        // if it were the same as the destination indicator
+                        linkedIndicator.name = indicator.getName();
+                        linkedIndicator.sortOrder = indicator.sortOrder;
+                        linkedIndicator.aggregation = indicator.aggregation;
+                        linkedActivity.linkedIndicators.add(linkedIndicator);
+                    }
                 }
             }
         }
