@@ -264,6 +264,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 break;
         }
 
+        imageContainer.setVisible(state == State.LOADED && fieldWidgetMode == FieldWidgetMode.NORMAL);
         image.setUrl(imageUrl);
         placeholder.setVisible(state != State.LOADED);
         this.message.setInnerText(message);
