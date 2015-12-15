@@ -1,10 +1,10 @@
 package org.activityinfo.ui.client.component.filter;
 
 import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -16,13 +16,10 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForms;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.AttributeGroupResult;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
-import org.activityinfo.legacy.shared.util.CollectionUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.activityinfo.ui.client.component.filter.AttributeGroupFilterWidget.DIMENSION_TYPE;
 
@@ -36,9 +33,7 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
     ;
     private AttributeGroupResult prevResult;
 
-    private List<AttributeGroupDTO> groups;
     private List<AttributeGroupFilterWidget> widgets;
-    private Multimap<String, AttributeGroupFilterWidget> duplicates;
 
     public AttributeGroupFilterWidgets(ContentPanel panel,
                                        Dispatcher service,
@@ -48,9 +43,7 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
         this.service = service;
         this.panel = panel;
 
-        this.groups = Lists.newArrayList();
         this.widgets = Lists.newArrayList();
-        this.duplicates = ArrayListMultimap.create();
 
         this.valueChangeHandler = valueChangeHandler;
         this.drawCallback = drawCallback;
@@ -73,38 +66,34 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
                 }
 
                 @Override
-                public void onSuccess(final ActivityFormResults schema) {
+                public void onSuccess(final ActivityFormResults forms) {
                     // clean up old widgets
                     for (AttributeGroupFilterWidget widget : widgets) {
                         panel.remove(widget);
                     }
-                    duplicates.clear();
 
                     // create new widgets, one for each attributegroup.
                     // remember the old selection
-                    List<Integer> selection = getSelectedIds();
+                    Set<Integer> selection = getSelectedIds();
 
                     widgets = new ArrayList<AttributeGroupFilterWidget>();
-                    for (AttributeGroupDTO group : groups) {
-                        // create
-                        AttributeGroupFilterWidget widget = new AttributeGroupFilterWidget(group);
+                    Set<String> attributesByName = Sets.newHashSet();
+                    for (ActivityFormDTO form : forms.getData()) {
+                        for (AttributeGroupDTO group : form.getAttributeGroups()) {
+                            
+                            String key = group.getName().toLowerCase();
+                            if(!attributesByName.contains(key)) {
 
-                        // set old selection
-                        widget.setSelection(selection);
+                                AttributeGroupFilterWidget widget = new AttributeGroupFilterWidget(group);
+                                widget.setSelection(selection);
+                                if(valueChangeHandler != null) {
+                                    widget.addValueChangeHandler(valueChangeHandler);
+                                }
 
-                        // what to do when value changes
-                        if (valueChangeHandler != null) {
-                            widget.addValueChangeHandler(valueChangeHandler);
-                        }
-
-                        // add widget to panel if a widget with the same name (ignoring case) hasn't
-                        // already been added
-                        if (isNoDuplicate(widget)) {
-                            widgets.add(widget);
-                            panel.add(widget);
-                        } else {
-                            // otherwise add to collection of duplicates
-                            duplicates.put(group.getName().toLowerCase(), widget);
+                                panel.add(widget);
+                                widgets.add(widget);
+                                attributesByName.add(key);
+                            }
                         }
                     }
 
@@ -116,41 +105,12 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
         }
     }
 
-    private boolean isNoDuplicate(AttributeGroupFilterWidget widget) {
-        for (AttributeGroupFilterWidget alreadyAdded : widgets) {
-            if (alreadyAdded.getGroup().getName().toLowerCase().equals(widget.getGroup().getName().toLowerCase())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private List<Integer> getSelectedIds() {
-        List<Integer> list = new ArrayList<Integer>();
+    private Set<Integer> getSelectedIds() {
+        Set<Integer> set = new HashSet<>();
         for (AttributeGroupFilterWidget widget : widgets) {
-            Set<Integer> selection = widget.getValue().getRestrictions(DIMENSION_TYPE);
-            if (CollectionUtil.isNotEmpty(selection)) {
-
-                // if the widget has at least one selection, check the duplicates if we need to add some more ids
-                Collection<AttributeGroupFilterWidget> hiddenWidgets = duplicates.get(widget.getGroup()
-                                                                                            .getName()
-                                                                                            .toLowerCase());
-                if (CollectionUtil.isNotEmpty(hiddenWidgets)) {
-                    // has duplicates, so collect the attribute-ids from the hidden widgets by the
-                    // selected attribute-names of the visible widget
-                    List<String> selectedAttributeNames = widget.getSelectedAttributeNames();
-                    for (AttributeGroupFilterWidget hiddenWidget : hiddenWidgets) {
-                        List<Integer> hiddenIds = hiddenWidget.getAttributeIdsByName(selectedAttributeNames);
-                        if (CollectionUtil.isNotEmpty(hiddenIds)) {
-                            selection.addAll(hiddenIds);
-                        }
-                    }
-                }
-
-                list.addAll(selection);
-            }
+            set.addAll(widget.getValue().getRestrictions(DIMENSION_TYPE));
         }
-        return list;
+        return set;
     }
 
     public void clearFilter() {
@@ -162,13 +122,17 @@ public class AttributeGroupFilterWidgets implements FilterPanel {
     @Override
     public Filter getValue() {
         Filter filter = new Filter();
-
-        List<Integer> selectedIds = getSelectedIds();
+        Set<Integer> selectedIds = getSelectedIds();
         if (selectedIds.size() > 0) {
             filter.addRestriction(DIMENSION_TYPE, selectedIds);
         }
-
         return filter;
+    }
+    
+    private void fireChange() {
+        if(valueChangeHandler != null) {
+            ValueChangeEvent.fire(this, getValue());
+        }
     }
 
     @Override

@@ -37,4 +37,8 @@ public class GetActivityForms implements Command<ActivityFormResults> {
     public Collection<Integer> getIndicators() {
         return filter.getRestrictions(DimensionType.Indicator);
     }
+    
+    public Collection<Integer> getActivities() {
+        return filter.getRestrictions(DimensionType.Activity);
+    }
 }

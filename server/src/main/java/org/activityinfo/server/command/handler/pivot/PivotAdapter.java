@@ -3,8 +3,10 @@ package org.activityinfo.server.command.handler.pivot;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.PivotSites;
@@ -22,6 +24,8 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
 import org.activityinfo.service.store.CollectionCatalog;
@@ -51,6 +55,8 @@ public class PivotAdapter {
     
     private List<DimBinding> groupBy;
     private Optional<IndicatorDimBinding> indicatorDimension = Optional.absent();
+    
+    private Multimap<String, String> attributeFilters = HashMultimap.create();
 
     private final Map<Object, Bucket> buckets = Maps.newHashMap();
 
@@ -74,6 +80,8 @@ public class PivotAdapter {
 
         // Query form trees: needed to determine attribute mapping
         formTrees = queryFormTrees();
+        
+        findAttributeFilterNames();
 
         // Define the dimensions we're pivoting by
         groupBy = new ArrayList<>();
@@ -85,6 +93,7 @@ public class PivotAdapter {
             }
         }
     }
+
 
     private Map<ResourceId, FormTree> queryFormTrees() {
         
@@ -106,6 +115,40 @@ public class PivotAdapter {
         return trees;
         
     }
+
+    /**
+     * Maps attribute filter ids to their attribute group id and name.
+     * 
+     * Attribute filters are _SERIALIZED_ as only the integer ids of the required attributes,
+     * but they are actually applied by _NAME_ to all forms in the query.
+     * 
+     */
+    private void findAttributeFilterNames() {
+       
+        Set<Integer> attributeIds = filter.getRestrictions(DimensionType.Attribute);
+        if(attributeIds.isEmpty()) {
+            return;
+        }
+        
+        for (FormTree formTree : formTrees.values()) {
+            for (FormTree.Node node : formTree.getLeaves()) {
+                if(node.isEnum()) {
+                    EnumType type = (EnumType) node.getType();
+                    for (EnumItem enumItem : type.getValues()) {
+                        int attributeId = CuidAdapter.getLegacyIdFromCuid(enumItem.getId());
+                        if(attributeIds.contains(attributeId)) {
+                            attributeFilters.put(node.getField().getLabel(), enumItem.getLabel());
+                            attributeIds.remove(attributeId);
+                            if(attributeIds.isEmpty()) {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
 
     private DimBinding bindingFor(Dimension dimension) {
         switch (dimension.getType()) {
@@ -290,6 +333,7 @@ public class PivotAdapter {
         appendFilter("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project, filter);
         appendFilter("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location, filter);
         appendAdminFilter(activity, filter);
+        appendAttributeFilter(filter);
         
         if(filter.length() > 0) {
             LOGGER.info("Filter: " + filter);
@@ -301,6 +345,10 @@ public class PivotAdapter {
 
     private void appendAdminFilter(ActivityMetadata activity, StringBuilder filterExpr) {
         if (this.filter.isRestricted(DimensionType.AdminLevel)) {
+
+            if(filterExpr.length() > 0) {
+                filterExpr.append(" && ");
+            }
 
             // we don't know which adminlevel this belongs to so we have construct a giant OR statement
             List<String> adminIdExprs = findAdminIdExprs(formTrees.get(activity.getFormClassId()));
@@ -323,6 +371,7 @@ public class PivotAdapter {
             filterExpr.append(")");
         }
     }
+    
 
     private List<String> findAdminIdExprs(FormTree formTree) {
         List<String> expressions = Lists.newArrayList();
@@ -332,6 +381,41 @@ public class PivotAdapter {
             }
         }
         return expressions;
+    }
+
+    private void appendAttributeFilter(StringBuilder filter) {
+        // TODO: ESCAPING
+                
+        for (String field : attributeFilters.keySet()) {
+
+            if (field.contains("]")) {
+                throw new UnsupportedOperationException("TODO: escaping for '" + field + "'");
+            }
+
+            if (filter.length() > 0) {
+                filter.append(" && ");
+            }
+            Collection<String> values = attributeFilters.get(field);
+
+            filter.append("(");
+            boolean needsComma = false;
+            for (String value : values) {
+                if (value.contains("'")) {
+                    throw new UnsupportedOperationException("TODO: escaping for '" + value + "'");
+                }
+                if (needsComma) {
+                    filter.append(" || ");
+                }
+                filter.append("(");
+                filter.append("[" + field + "]");
+                filter.append("==");
+                filter.append("'").append(value).append("'");
+                filter.append(")");
+                needsComma = true;
+            }
+            filter.append(")");
+        }
+        
     }
 
 
@@ -347,9 +431,11 @@ public class PivotAdapter {
                 if(needsComma) {
                     filter.append(" || ");
                 } 
+                filter.append("(");
                 filter.append(fieldName);
                 filter.append("==");
                 filter.append("'").append(CuidAdapter.cuid(domain, id).asString()).append("'");
+                filter.append(")");
                 needsComma = true;
             }
             filter.append(")");

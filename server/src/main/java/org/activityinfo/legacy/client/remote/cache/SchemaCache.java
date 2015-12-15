@@ -177,21 +177,22 @@ public class SchemaCache implements DispatchListener {
 
         @Override
         public CacheResult maybeExecute(GetActivityForms command) {
-            Map<Integer, ActivityFormDTO> forms = new HashMap<>();
+            Set<Integer> activities = Sets.newHashSet(command.getActivities());
             for (Integer indicatorId : command.getIndicators()) {
                 // First... do we know to which activity this indicator belongs??
                 Integer activityId = indicatorToActivityMap.get(indicatorId);
                 if(activityId == null) {
                     return CacheResult.couldNotExecute();
                 }
-                // Second.. do we have the activity cached? 
-                if(!forms.containsKey(activityId)) {
-                    ActivityFormDTO form = activityFormCache.get(activityId);
-                    if(form == null) {
-                        return CacheResult.couldNotExecute();
-                    }
-                    forms.put(activityId, form);
+                activities.add(activityId);
+            }
+            Map<Integer, ActivityFormDTO> forms = new HashMap<>();
+            for (Integer activityId :activities) {
+                ActivityFormDTO form = activityFormCache.get(activityId);
+                if(form == null) {
+                    return CacheResult.couldNotExecute();
                 }
+                forms.put(activityId, form);
             }
             return new CacheResult(new ActivityFormResults(Lists.newArrayList(forms.values())));
         }

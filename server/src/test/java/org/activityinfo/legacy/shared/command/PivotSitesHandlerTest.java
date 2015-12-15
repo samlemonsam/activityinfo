@@ -99,7 +99,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     @Test
     public void testNoIndicator() {
         withIndicatorAsDimension();
-        filteringOnDatabases(1,2);
+        filteringOnDatabases(1, 2);
 
         execute();
 
@@ -152,7 +152,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     public void testTargetsWithCalculatedIndicators() {
         withIndicatorAsDimension();
         dimensions.add(new Dimension(DimensionType.Target));
-        filter.addRestriction(DimensionType.Indicator, Arrays.asList(1,111));
+        filter.addRestriction(DimensionType.Indicator, Arrays.asList(1, 111));
 
         execute();
         assertThat().forIndicatorTarget(1).thereIsOneBucketWithValue(20000);
@@ -406,7 +406,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         withPartnerAsDimension();
         forTotalSiteCounts();
         filter.addRestriction(DimensionType.Indicator,
-            Lists.newArrayList(1, 2, 3));
+                Lists.newArrayList(1, 2, 3));
 
         execute();
     }
@@ -588,8 +588,32 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         withIndicatorAsDimension();
         withAttributeGroupDim(1);
         execute();
+        assertThat().forAttributeGroupLabeled(1, "Planned").forIndicator(1).thereIsOneBucketWithValue(1500);
+        assertThat().forAttributeGroupLabeled(1, "Planned").forIndicator(2).thereIsOneBucketWithValue(3600);
+        assertThat().forAttributeGroupLabeled(1, "Completed").forIndicator(2).thereIsOneBucketWithValue(9200);
     }
 
+    @Test
+    @OnDataSet("/dbunit/attrib-merge.db.xml")
+    public void testAttributeFilter() {
+        filteringOnDatabases(1, 2);
+        filter.addRestriction(DimensionType.Attribute, 1); // = Planned
+        withAttributeGroupDim(1);
+        withIndicatorAsDimension();
+        execute();
+    }
+
+    @Test
+    @OnDataSet("/dbunit/attrib-merge.db.xml")
+    public void testAttributeFilterMultiple() {
+        filteringOnDatabases(1, 2);
+        filter.addRestriction(DimensionType.Attribute, 1); // = Planned
+        filter.addRestriction(DimensionType.Attribute, 3); // = Completed
+        withAttributeGroupDim(1);
+        withIndicatorAsDimension();
+        execute();
+    }
+    
     @Test
     @OnDataSet("/dbunit/monthly-calc-indicators.db.xml")
     public void testMonthlyCalculatedIndicators() {
