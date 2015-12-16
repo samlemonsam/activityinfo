@@ -94,7 +94,7 @@ public class SiteExporter {
     private CellStyle attribValueStyle;
 
     private ActivityFormDTO activity;
-    private Map<Integer, IndicatorDTO> indicators;
+    private LinkedHashMap<Integer, IndicatorDTO> indicators;
     private List<Integer> levels;
     private HSSFCellStyle dateTimeStyle;
 
@@ -235,7 +235,7 @@ public class SiteExporter {
 
         createHeaderCell(headerRow2, column++, "Axe");
 
-        indicators = Maps.newHashMap();
+        indicators = Maps.newLinkedHashMap();
         for (IndicatorGroup group : activity.groupIndicators()) {
             if (group.getName() != null) {
                 // create a merged cell on the top row spanning all members
