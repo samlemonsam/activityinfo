@@ -159,22 +159,18 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         return Promise.forEach(formClass.getFields(), new Function<FormField, Promise<Void>>() {
             @Override
             public Promise<Void> apply(final FormField field) {
-                if (!field.isVisible()) {
-                    return Promise.resolved(null); // we have join inside forEach, must return promise
-                } else {
-                    return widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
-                        @Override
-                        public void update(FieldValue value) {
-                            onFieldUpdated(field, value);
-                        }
-                    }, validationFormClass, eventBus).then(new Function<FormFieldWidget, Void>() {
-                        @Override
-                        public Void apply(@Nullable FormFieldWidget widget) {
-                            containers.put(field.getId(), containerFactory.createContainer(field, widget, 4));
-                            return null;
-                        }
-                    });
-                }
+                return widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
+                    @Override
+                    public void update(FieldValue value) {
+                        onFieldUpdated(field, value);
+                    }
+                }, validationFormClass, eventBus).then(new Function<FormFieldWidget, Void>() {
+                    @Override
+                    public Void apply(@Nullable FormFieldWidget widget) {
+                        containers.put(field.getId(), containerFactory.createContainer(field, widget, 4));
+                        return null;
+                    }
+                });
             }
         });
     }
