@@ -22,6 +22,7 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
@@ -141,8 +142,9 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
 
         try {
             return createWidgets().then(new Function<Void, Void>() {
+                @Nullable
                 @Override
-                public Void apply(Void input) {
+                public Void apply(@Nullable Void input) {
                     addFormElements(formClass, 0);
                     return null;
                 }
@@ -154,11 +156,10 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     }
 
     private Promise<Void> createWidgets() {
-        final String resourceId = instance.getId().asString();
         return Promise.forEach(formClass.getFields(), new Function<FormField, Promise<Void>>() {
             @Override
             public Promise<Void> apply(final FormField field) {
-                return widgetFactory.createWidget(resourceId, formClass, field, new ValueUpdater<FieldValue>() {
+                return widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
                     @Override
                     public void update(FieldValue value) {
                         onFieldUpdated(field, value);
@@ -277,7 +278,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     private boolean isEmpty(FieldValue value) {
         return value == null ||
                 (value instanceof EnumValue && ((EnumValue) value).getResourceIds().isEmpty()) ||
-                (value instanceof ReferenceValue && ((ReferenceValue) value).getResourceIds().isEmpty());
+                (value instanceof ReferenceValue && ((ReferenceValue) value).getResourceIds().isEmpty()) ||
+                (value instanceof AttachmentValue && ((AttachmentValue) value).getValues().isEmpty());
     }
 
     public boolean validate() {

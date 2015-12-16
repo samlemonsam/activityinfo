@@ -40,6 +40,9 @@
     <Compile Include="KeyGenerator.cs" />
     <Compile Include="LocationBuilder.cs" />
     <Compile Include="SiteBuilder.cs" />
+    <Compile Include="Site.cs" />
+    <Compile Include="Location.cs" />
+    <Compile Include="Partner.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

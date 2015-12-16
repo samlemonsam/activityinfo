@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 //using ActivityInfo.Client;
 
 namespace ActivityInfo.Client.Test
@@ -29,6 +30,14 @@ namespace ActivityInfo.Client.Test
 //			ActivityInfoClient client = new ActivityInfoClient ();
 //			client.CreateSite (site); 
 //		}
+
+		[Test()]
+		public void QuerySitesTest() 
+		{
+			ActivityInfoClient client = new ActivityInfoClient ();
+			var sites = client.QuerySitesByActivity (33);
+			Console.WriteLine ("count = " + sites.Count);
+		}
 	}
 }
 

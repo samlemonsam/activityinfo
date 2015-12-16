@@ -1,7 +1,6 @@
 package org.activityinfo.server.endpoint.odk;
 
 import com.google.api.client.util.Maps;
-import com.google.appengine.api.images.Image;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
@@ -19,10 +18,10 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.image.ImageRowValue;
-import org.activityinfo.model.type.image.ImageValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
@@ -48,7 +47,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.google.appengine.api.images.ImagesServiceFactory.makeImage;
 import static javax.ws.rs.core.Response.Status.*;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.server.endpoint.odk.OdkFieldValueParserFactory.fromFieldType;
@@ -56,6 +54,7 @@ import static org.activityinfo.server.endpoint.odk.OdkHelper.isLocation;
 
 @Path("/submission")
 public class FormSubmissionResource {
+
     private static final Logger LOGGER = Logger.getLogger(FormSubmissionResource.class.getName());
 
     final private DispatcherSync dispatcher;
@@ -145,8 +144,8 @@ public class FormSubmissionResource {
 
         if (!instanceIdService.exists(instanceId)) {
             for (FieldValue fieldValue : formInstance.getFieldValueMap().values()) {
-                if (fieldValue instanceof ImageValue) {
-                    persistImageData(user, instance, (ImageValue) fieldValue);
+                if (fieldValue instanceof AttachmentValue) {
+                    persist(user, instance, (AttachmentValue) fieldValue);
                 }
             }
 
@@ -187,29 +186,24 @@ public class FormSubmissionResource {
         }
     }
 
-    private void persistImageData(AuthenticatedUser user, XFormInstance instance, ImageValue fieldValue) {
-        ImageRowValue imageRowValue = fieldValue.getValues().get(0);
-        if (imageRowValue.getFilename() != null) {
+    private void persist(AuthenticatedUser user, XFormInstance instance, AttachmentValue fieldValue) {
+        Attachment attachment = fieldValue.getValues().get(0);
+        if (attachment.getFilename() != null) {
             try {
-                BodyPart bodyPart = ((XFormInstanceImpl) instance).findBodyPartByFilename(imageRowValue.getFilename());
-                Image image = makeImage(ByteStreams.toByteArray(bodyPart.getInputStream()));
+                BodyPart bodyPart = ((XFormInstanceImpl) instance).findBodyPartByFilename(attachment.getFilename());
 
-                String contentDisposition = bodyPart.getDisposition();
                 String mimeType = bodyPart.getContentType();
-                ByteSource byteSource = ByteSource.wrap(image.getImageData());
-                imageRowValue.setMimeType(mimeType);
-                imageRowValue.setHeight(image.getHeight());
-                imageRowValue.setWidth(image.getWidth());
+                attachment.setMimeType(mimeType);
 
-
-                blobFieldStorageService.put(user, contentDisposition, mimeType,
-                        new BlobId(imageRowValue.getBlobId()), byteSource);
+                blobFieldStorageService.put(user, bodyPart.getDisposition(), mimeType,
+                        new BlobId(attachment.getBlobId()), instance.getFormClassId(),
+                        ByteSource.wrap(ByteStreams.toByteArray(bodyPart.getInputStream())));
 
             } catch (MessagingException messagingException) {
                 LOGGER.log(Level.SEVERE, "Unable to parse input", messagingException);
                 throw new WebApplicationException(Response.status(BAD_REQUEST).build());
             } catch (IOException ioException) {
-                LOGGER.log(Level.SEVERE, "Could not write image to GCS", ioException);
+                LOGGER.log(Level.SEVERE, "Could not write attachment to GCS", ioException);
                 throw new WebApplicationException(Response.status(SERVICE_UNAVAILABLE).build());
             }
         }

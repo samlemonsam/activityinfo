@@ -26,6 +26,7 @@ import com.google.common.base.Objects;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.attachment.AttachmentType;
 
 import java.util.Map;
 
@@ -85,7 +86,7 @@ class ItemDetail {
             // custom
             int id = IndicatorDTO.indicatorIdForPropertyName(key);
             IndicatorDTO dto = form.getIndicatorById(id);
-            if (dto != null) {
+            if (dto != null && dto.getType() != AttachmentType.TYPE_CLASS) {
                 String name = dto.getName();
 
                 Month m = IndicatorDTO.monthForPropertyName(key);

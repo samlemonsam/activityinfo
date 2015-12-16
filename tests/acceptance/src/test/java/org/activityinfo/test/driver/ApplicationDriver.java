@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -42,6 +43,10 @@ public abstract class ApplicationDriver {
     
     public abstract void login(UserAccount account);
 
+    public UserAccount getCurrentUser() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @return an implementation of ApplicationDriver suitable for setting up a test scenario
      */
@@ -56,6 +61,8 @@ public abstract class ApplicationDriver {
             type = TextType.TYPE_CLASS.getId();
         } else if (type.equalsIgnoreCase("date")) {
             type = LocalDateType.TYPE_CLASS.getId();
+        } else if (type.equalsIgnoreCase("image")) {
+            type = AttachmentType.TYPE_CLASS.getId();
         }
         return type;
     }

@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.ui.client.component.form.field.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,23 +21,27 @@ package org.activityinfo.service.blob;
  * #L%
  */
 
-import com.google.inject.Singleton;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import com.google.common.base.Preconditions;
+import org.activityinfo.model.resource.ResourceId;
 
 /**
- * @author yuriyz on 8/8/14.
+ * @author yuriyz on 12/15/2015.
  */
-@Singleton
-public class ThumbnailDownloadServlet extends HttpServlet {
+public class UploadUrls {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
-        // todo
+    private UploadUrls() {
+    }
+
+    public static String getBaseUrl(String blobId, ResourceId resourceId) {
+        return "/service/blob/" + blobId + "/" + resourceId.asString();
+    }
+
+    public static String getPermanentLink(String appUrl, String blobId, ResourceId resourceId) {
+        Preconditions.checkNotNull(appUrl);
+
+        if (appUrl.endsWith("/")) {
+            appUrl = appUrl.substring(0, appUrl.length() - 1);
+        }
+        return appUrl + UploadUrls.getBaseUrl(blobId, resourceId) + "/blobUrl";
     }
 }

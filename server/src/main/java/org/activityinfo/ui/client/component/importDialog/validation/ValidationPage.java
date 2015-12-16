@@ -1,15 +1,19 @@
 package org.activityinfo.ui.client.component.importDialog.validation;
 
-import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromiseMonitor;
 import org.activityinfo.ui.client.component.importDialog.ImportPage;
@@ -39,6 +43,8 @@ public class ValidationPage extends Composite implements PromiseMonitor, ImportP
     Element loadingElement;
     @UiField
     Element loadingErrorElement;
+    @UiField
+    Anchor retryLink;
 
     public ValidationPage(ImportModel model, Importer importer) {
         this.model = model;
@@ -49,17 +55,29 @@ public class ValidationPage extends Composite implements PromiseMonitor, ImportP
         dataGrid = new ValidationGrid();
 
         initWidget(uiBinder.createAndBindUi(this));
+        
+        retryLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                clickEvent.preventDefault();
+                start();
+            }
+        });
     }
 
     @Override
     public void start() {
         importer.validateRows(model)
                 .withMonitor(this)
-                .then(new Function<ValidatedRowTable, Void>() {
+                .then(new AsyncCallback<ValidatedRowTable>() {
                     @Override
-                    public Void apply(ValidatedRowTable input) {
+                    public void onFailure(Throwable throwable) {
+                        Log.error("Validate rows failed", throwable);
+                    }
+
+                    @Override
+                    public void onSuccess(ValidatedRowTable input) {
                         dataGrid.refresh(input);
-                        return null;
                     }
                 });
     }

@@ -4217,7 +4217,6 @@ INSERT INTO adminentity (AdminEntityId, x1, x2, y1, y2, Code, Name, AdminLevelId
 /*!40000 ALTER TABLE adminentity ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 LOCK TABLES locationtype WRITE;
 
 INSERT INTO locationtype (locationtypeId, name, reuse, boundAdminLevelId, countryId) values (99999, "Province", false, 1, 1);

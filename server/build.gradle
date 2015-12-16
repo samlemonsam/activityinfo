@@ -157,12 +157,12 @@ task downloadBuild {
 task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     description = "Deploys a build to the staging environment"
     
-    if(project.buildNumber != 'dev') {
-        dependsOn downloadBuild
-        explodedAppDirectory = project.file(downloadBuild.warDir)
-    } else {
+//    if(project.buildNumber != 'dev') {
+//        dependsOn downloadBuild
+//        explodedAppDirectory = project.file(downloadBuild.warDir)
+//    } else {
         dependsOn 'appengineExplodeApp'
-    }
+//    }
     
     dependsOn appengineDownloadSdk
 

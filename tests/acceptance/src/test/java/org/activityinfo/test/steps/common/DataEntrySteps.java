@@ -1,7 +1,11 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -10,6 +14,7 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
@@ -17,8 +22,12 @@ import org.activityinfo.test.driver.TableDataParser;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
+import org.activityinfo.test.sut.Accounts;
+import org.activityinfo.test.sut.UserAccount;
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -26,20 +35,24 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ScenarioScoped
 public class DataEntrySteps {
 
-
     @Inject
     private ApplicationDriver driver;
+
+    @Inject
+    private Accounts accounts;
 
     private File exportedFile = null;
 
@@ -80,7 +93,7 @@ public class DataEntrySteps {
 
         assertThat(entries, contains(createdToday()));
     }
-    
+
     @Then("^I can submit a \"([^\"]*)\" form with:$")
     public void I_can_submit_a_form_with(String formName, List<FieldValue> values) throws Throwable {
         driver.submitForm(formName, values);
@@ -99,7 +112,7 @@ public class DataEntrySteps {
 
     }
 
-    
+
 
     private void dumpChanges(List<HistoryEntry> entries) {
         StringBuilder s = new StringBuilder();
@@ -153,7 +166,7 @@ public class DataEntrySteps {
     }
 
     private static DataTable subsetColumns(DataTable table, List<String> expectedColumns) {
-        
+
         List<String> columns = table.getGherkinRows().get(0).getCells();
         List<Integer> columnIndexes = new ArrayList<>();
         List<String> missingColumns = new ArrayList<>();
@@ -165,11 +178,11 @@ public class DataEntrySteps {
                 columnIndexes.add(index);
             }
         }
-        
+
         if(!missingColumns.isEmpty()) {
             throw new AssertionError("Missing expected columns " + missingColumns + " in table:\n" + table.toString());
         }
-        
+
         List<List<String>> rows = new ArrayList<>();
         for (DataTableRow dataTableRow : table.getGherkinRows()) {
             List<String> row = new ArrayList<>();
@@ -178,7 +191,7 @@ public class DataEntrySteps {
             }
             rows.add(row);
         }
-        
+
         return DataTable.create(rows);
     }
 
@@ -348,5 +361,81 @@ public class DataEntrySteps {
     public void old_table_for_form_shows(String formName, DataTable dataTable) throws Throwable {
         DataTable uiTable = driver.getAliasTable().deAlias(driver.oldTable(formName));
         dataTable.unorderedDiff(uiTable);
+    }
+
+    @Then("^\"([^\"]*)\" field contains image.$")
+    public void field_contains_image(String imageFieldName) throws Throwable {
+        DataEntryTab dataEntryTab = (DataEntryTab) driver.getCurrentPage();
+
+        dataEntryTab.selectSubmission(0);
+        BsModal modal = dataEntryTab.editBetaSubmission();
+
+        Sleep.sleepSeconds(5); // give it a time fetch image serving url and put it to img.src
+        assertTrue(modal.form().findFieldByLabel(driver.getAliasTable().getAlias(imageFieldName)).isBlobImageLoaded());
+
+        modal.cancel();
+    }
+
+    private String firstDownloadableLinkOfFirstSubmission(String attachmentFieldName) {
+        DataEntryTab dataEntryTab = (DataEntryTab) driver.getCurrentPage();
+
+        dataEntryTab.selectSubmission(0);
+        BsModal modal = dataEntryTab.editBetaSubmission();
+
+        String blobLink = modal.form().findFieldByLabel(driver.getAliasTable().getAlias(attachmentFieldName)).getFirstBlobLink();
+
+        assertTrue(blobLink.startsWith("https")); // all links must start from https
+
+        modal.cancel();
+
+        return blobLink;
+    }
+
+    @Then("^\"([^\"]*)\" field has downloadable link.$")
+    public void field_has_downloadable_link(String attachmentFieldName) throws Throwable {
+        String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
+
+        UserAccount currentUser = driver.setup().getCurrentUser();
+
+        Client client = new Client();
+        client.addFilter(new HTTPBasicAuthFilter(currentUser.getEmail(), currentUser.getPassword()));
+        client.setFollowRedirects(false);
+
+        ClientResponse clientResponse = client.resource(blobLink).get(ClientResponse.class);
+
+        assertEquals(Response.Status.SEE_OTHER.getStatusCode(), clientResponse.getStatus());
+
+        String signedUrl = clientResponse.getHeaders().getFirst("Location");
+        assertTrue(!Strings.isNullOrEmpty(signedUrl));
+
+        byte[] bytes = IOUtils.toByteArray(new URL(signedUrl));
+        assertTrue(bytes.length > 100);
+    }
+
+    @Then("^\"([^\"]*)\" field's downloadable link is forbidden for anonymous access.$")
+    public void field_downloadable_link_is_forbidden_for_anonymous_access(String attachmentFieldName) throws Throwable {
+        String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
+
+        URL url = new URL(blobLink);
+        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), connection.getResponseCode());
+    }
+
+    @Then("^\"([^\"]*)\" field's downloadable link is forbidden for \"([^\"]*)\"$")
+    public void field_s_downloadable_link_is_forbidden_for(String attachmentFieldName, String userEmail) throws Throwable {
+
+        UserAccount account = accounts.ensureAccountExists(userEmail);
+        String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
+
+        Client client = new Client();
+        client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
+        client.setFollowRedirects(false);
+
+        ClientResponse clientResponse = client.resource(blobLink).get(ClientResponse.class);
+
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), clientResponse.getStatus());
     }
 }

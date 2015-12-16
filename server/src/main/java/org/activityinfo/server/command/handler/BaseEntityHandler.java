@@ -25,6 +25,7 @@ package org.activityinfo.server.command.handler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.inject.Injector;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
@@ -32,6 +33,7 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.service.blob.BlobFieldStorageService;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -51,9 +53,9 @@ public class BaseEntityHandler {
     private final PermissionOracle permissionsOracle;
 
 
-    public BaseEntityHandler(EntityManager em) {
+    public BaseEntityHandler(EntityManager em, Injector injector) {
         this.em = em;
-        this.permissionsOracle = new PermissionOracle(Providers.of(em));
+        this.permissionsOracle = new PermissionOracle(Providers.of(em), injector.getInstance(BlobFieldStorageService.class));
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {
@@ -81,6 +83,11 @@ public class BaseEntityHandler {
 
         if (changes.containsKey("nameInExpression")) {
             indicator.setNameInExpression(trimAndTruncate(changes.get("nameInExpression")));
+        }
+        
+        // Allow "code" as an alias from the JSON API
+        if (changes.containsKey("code")) {
+            indicator.setNameInExpression(trimAndTruncate(changes.get("code")));
         }
 
         if (changes.containsKey("calculatedAutomatically")) {

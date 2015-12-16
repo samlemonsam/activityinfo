@@ -8,6 +8,8 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.DispatcherSync;
@@ -19,7 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class SitesResources {
 
@@ -52,6 +57,7 @@ public class SitesResources {
 
         StringWriter writer = new StringWriter();
         JsonGenerator json = Jackson.createJsonFactory(writer);
+        json.setCodec(Jackson.createJsonMapper());
 
         writeJson(sites, json);
 
@@ -88,6 +94,8 @@ public class SitesResources {
 
     private void writeJson(List<SiteDTO> sites, JsonGenerator json) throws IOException {
         json.writeStartArray();
+
+        Map<Integer, ActivityFormDTO> forms = Maps.newHashMap();
 
         for (SiteDTO site : sites) {
             json.writeStartObject();
@@ -144,11 +152,28 @@ public class SitesResources {
                     if (indicatorValue instanceof Double) {
                         json.writeNumberField(Integer.toString(indicatorId), (Double) indicatorValue);
                     } else if (indicatorValue instanceof String) {
-                        json.writeStringField(Integer.toString(indicatorId), (String) indicatorValue);
+
+                        String stringValue = (String) indicatorValue;
+
+                        if (!Strings.isNullOrEmpty(stringValue)) {
+                            ActivityFormDTO form = forms.get(site.getActivityId());
+                            if (form == null) {
+                                form = dispatcher.execute(new GetActivityForm(site.getActivityId()));
+                                forms.put(form.getId(), form);
+                            }
+                            if (form.getIndicatorById(indicatorId).getType() == AttachmentType.TYPE_CLASS) {
+                                json.writeObjectField(Integer.toString(indicatorId), AttachmentValue.fromJson(stringValue).getValues());
+                            } else {
+                                json.writeStringField(Integer.toString(indicatorId), stringValue);
+                            }
+                        } else {
+                            json.writeStringField(Integer.toString(indicatorId), stringValue);
+                        }
+
                     } else if (indicatorValue instanceof LocalDate) {
-                        json.writeStringField(Integer.toString(indicatorId), ((LocalDate) indicatorValue).toString());
+                        json.writeStringField(Integer.toString(indicatorId), indicatorValue.toString());
                     } else if (indicatorValue instanceof Boolean) {
-                        json.writeStringField(Integer.toString(indicatorId), ((Boolean) indicatorValue).toString());
+                        json.writeStringField(Integer.toString(indicatorId), indicatorValue.toString());
                     }
                 }
                 json.writeEndObject();

@@ -57,6 +57,26 @@ public class BsModal extends ModalDialog {
         this.windowElement = windowElement;
     }
 
+    public static BsModal waitForModal(final FluentElement container) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().exists(By.className(CLASS_NAME));
+            }
+        });
+        return find(container.root());
+    }
+
+    public static BsModal waitForNewFormModal(final FluentElement container) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().find().div(withClass("formPanel")).firstIfPresent().isPresent();
+            }
+        });
+        return waitForModal(container.root());
+    }
+
     public static BsModal find(FluentElement parent) {
         return find(parent, CLASS_NAME);
     }

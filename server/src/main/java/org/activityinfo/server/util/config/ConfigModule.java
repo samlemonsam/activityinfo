@@ -30,15 +30,16 @@ import com.google.common.base.Strings;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.util.jaxrs.JaxRsContainer;
 import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.servlet.ServletContext;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.channels.Channels;
-import java.security.AccessControlException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -97,7 +98,7 @@ public class ConfigModule extends ServletModule {
                 logger.log(Level.INFO, "Read config from GCS.");
             }
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.log(Level.INFO, "Could not read configuration properties from GCS: " + e.getMessage());
         }
     }
@@ -110,9 +111,7 @@ public class ConfigModule extends ServletModule {
                 properties.load(new FileInputStream(file));
                 return true;
             }
-        } catch (IOException e) {
-            return false;
-        } catch (AccessControlException e) {
+        } catch (Exception e) {
             return false;
         }
         return false;

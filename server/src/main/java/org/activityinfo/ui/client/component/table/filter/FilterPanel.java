@@ -96,7 +96,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
                     @Override
                     public Widget asWidget() {
-                        return (Widget) filterContent;
+                        return filterContent.asWidget();
                     }
                 });
 

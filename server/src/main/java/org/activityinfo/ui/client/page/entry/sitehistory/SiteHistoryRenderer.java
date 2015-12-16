@@ -62,6 +62,7 @@ public class SiteHistoryRenderer {
 
         boolean first = true;
         for (SiteHistoryDTO history : histories) {
+
             ctx.setHistory(history);
 
             Item item = new Item();

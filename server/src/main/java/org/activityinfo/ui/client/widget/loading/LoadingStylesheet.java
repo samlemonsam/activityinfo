@@ -16,4 +16,5 @@ public interface LoadingStylesheet extends Stylesheet {
     String failed();
     String loaded();
 
+    String imageContainer();
 }
