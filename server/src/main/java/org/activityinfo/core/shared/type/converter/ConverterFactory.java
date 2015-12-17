@@ -3,7 +3,6 @@ package org.activityinfo.core.shared.type.converter;
 import org.activityinfo.core.shared.type.formatter.DateFormatter;
 import org.activityinfo.core.shared.type.formatter.QuantityFormatterFactory;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.logging.Logger;
@@ -71,8 +70,6 @@ public class ConverterFactory {
         } else if (fieldType == FieldTypeClass.FREE_TEXT || fieldType == FieldTypeClass.NARRATIVE) {
             return NullConverter.INSTANCE;
         } else if (fieldType == EnumType.TYPE_CLASS) {
-            return NullConverter.INSTANCE;
-        } else if (fieldType == AttachmentType.TYPE_CLASS) {
             return NullConverter.INSTANCE;
         }
         throw new UnsupportedOperationException(fieldType.getId());
