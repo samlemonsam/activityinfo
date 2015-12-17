@@ -4,6 +4,7 @@ import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.type.converter.Converter;
 import org.activityinfo.core.shared.type.converter.ConverterFactory;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.attachment.AttachmentType;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,9 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
 
     @Override
     public List<ImportTarget> getImportSites(FormTree.Node node) {
+        if (node.getType() instanceof AttachmentType) { // we are not ready for attachment import yet
+            return Collections.emptyList();
+        }
         return Collections.singletonList(target(node));
     }
 
