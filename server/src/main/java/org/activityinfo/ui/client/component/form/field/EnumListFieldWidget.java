@@ -83,25 +83,25 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     private final FlowPanel boxPanel;
     private final List<CheckBox> controls;
     private final FieldWidgetMode fieldWidgetMode;
+    private final ValueUpdater<EnumValue> valueUpdater;
 
     public EnumListFieldWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.enumType = enumType;
         this.groupName = "group" + (nextId++);
         this.fieldWidgetMode = fieldWidgetMode;
+        this.valueUpdater = valueUpdater;
 
         boxPanel = new FlowPanel();
         controls = new ArrayList<>();
 
-        ValueChangeHandler<Boolean> changeHandler = new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                valueUpdater.update(updatedValue());
-            }
-        };
-
         for (final EnumItem instance : enumType.getValues()) {
             CheckBox checkBox = createControl(instance);
-            checkBox.addValueChangeHandler(changeHandler);
+            checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    fireValueChanged();
+                }
+            });
             boxPanel.add(checkBox);
         }
 
@@ -120,6 +120,10 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
                 }
             }
         }, MouseUpEvent.getType());
+    }
+
+    private void fireValueChanged() {
+        valueUpdater.update(updatedValue());
     }
 
     private void onClick(MouseUpEvent event) {
