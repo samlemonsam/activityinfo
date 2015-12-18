@@ -18,14 +18,12 @@ import java.sql.SQLException;
 public class LocationQueryBuilder implements ColumnQueryBuilder {
 
     private QueryExecutor executor;
-    private CountryStructure country;
     private int locationTypeId;
     private MySqlCursorBuilder baseTableBuilder;
     private AdminColumnBuilder adminColumnBuilder;
     
     public LocationQueryBuilder(QueryExecutor executor, TableMapping tableMapping, CountryStructure country) {
         this.executor = executor;
-        this.country = country;
         this.locationTypeId = CuidAdapter.getLegacyIdFromCuid(tableMapping.getFormClass().getId());
         baseTableBuilder = new MySqlCursorBuilder(tableMapping, executor);
         adminColumnBuilder = new AdminColumnBuilder(locationTypeId, country);

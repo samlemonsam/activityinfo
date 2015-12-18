@@ -1,30 +1,32 @@
 package org.activityinfo.store.mysql.metadata;
 
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Set;
 
 public class Activity implements Serializable {
 
     public static final int REPORT_ONCE = 0;
     public static final int REPORT_MONTHLY = 1;
 
-    private static final Logger LOGGER = Logger.getLogger(Activity.class.getName());
-
-    private static final MemcacheService MEMCACHE = MemcacheServiceFactory.getMemcacheService();
-
     int activityId;
     int databaseId;
     int reportingFrequency;
     int locationTypeId;
+
+    /**
+     * Because it currently possible to change location type, it's possible that a single
+     * activity references *multiple* location types
+     */
+    Set<Integer> locationTypeIds = Sets.newHashSet();
     String category;
     String locationTypeName;
     int adminLevelId;
@@ -34,7 +36,6 @@ public class Activity implements Serializable {
     long version;
     
     List<ActivityField> fields = Lists.newArrayList();
-
     
     public int getId() {
         return activityId;
@@ -118,6 +119,7 @@ public class Activity implements Serializable {
     public ResourceId getProjectFormClassId() {
         return CuidAdapter.projectFormClass(databaseId);
     }
+    
     public ResourceId getPartnerFormClassId() {
         return CuidAdapter.partnerFormClass(databaseId);
     }
@@ -133,5 +135,13 @@ public class Activity implements Serializable {
 
     public boolean isPublished() {
         return published;
+    }
+
+    public Collection<ResourceId> getLocationFormClassIds() {
+        Set<ResourceId> locationFormClassIds = Sets.newHashSet();
+        for (Integer typeId : locationTypeIds) {
+            locationFormClassIds.add(CuidAdapter.locationFormClass(typeId));
+        }
+        return locationFormClassIds;
     }
 }

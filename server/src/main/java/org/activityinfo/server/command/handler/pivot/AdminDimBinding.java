@@ -1,8 +1,6 @@
 package org.activityinfo.server.command.handler.pivot;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
@@ -58,20 +56,6 @@ public class AdminDimBinding extends DimBinding {
         } else {
             return Collections.emptyList();
         }
-    }
-
-    private FormClass findFormClass(FormTree tree) {
-        return tree.getFormClass(adminLevelFormClass(model.getLevelId()));
-    }
-    
-    private List<FieldPath> findAdminField(FormTree formTree) {
-        final ResourceId levelClassId = adminLevelFormClass(model.getLevelId());
-        return formTree.search(FormTree.SearchOrder.BREADTH_FIRST, Predicates.alwaysTrue(), new Predicate<FormTree.Node>() {
-            @Override
-            public boolean apply(FormTree.Node input) {
-                return input.isReference() && input.getRange().contains(levelClassId);
-            }
-        });
     }
 
     @Override

@@ -25,6 +25,7 @@ public class TableMappingBuilder {
     private DeleteMethod deleteMethod = DeleteMethod.SOFT_BY_DATE;
     
     private Map<String, Object> insertDefaults = new HashMap<>();
+    private long version = 0L;
 
     private TableMappingBuilder(ResourceId formClassId, String tableName) {
         this.tableName = tableName;
@@ -144,13 +145,17 @@ public class TableMappingBuilder {
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod);
     }
 
+    public void setVersion(long version) {
+        this.version = version;
+    }
 
     public TableMapping build() {
+        Preconditions.checkState(formClass != null, fromClause + ": FormClass is not set");
         Preconditions.checkState(formClass.getLabel() != null, fromClause + ": formClass.label is null");
         Preconditions.checkState(primaryKeyMapping != null, fromClause + ": Primary key is not set");
-        Preconditions.checkState(formClass != null, fromClause + ": FormClass is not set");
         Preconditions.checkState(formClass.getOwnerId() != null, fromClause + ": ownerId is not set");
         return new TableMapping(tableName, fromClause, baseFilter, primaryKeyMapping, mappings, formClass,
-                deleteMethod, insertDefaults);
+                deleteMethod, insertDefaults, version);
     }
+
 }

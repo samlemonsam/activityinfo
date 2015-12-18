@@ -89,6 +89,7 @@ public class AdminEntityTable implements SimpleTable {
         mapping.addTextField(code, "code");
         mapping.addGeoAreaField(bounds);
         mapping.setDeleteMethod(DeleteMethod.SOFT_BY_BOOLEAN);
+        mapping.setVersion(level.getVersion());
         
         if(parent != null) {
             mapping.add(new FieldMapping(parent, "adminEntityParentId", new ReferenceConverter(ADMIN_ENTITY_DOMAIN)));

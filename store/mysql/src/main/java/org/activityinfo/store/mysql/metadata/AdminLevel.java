@@ -14,6 +14,7 @@ public class AdminLevel {
     private int parentId;
     private String parentName;
     private int countryId;
+    private long version;
 
     public static AdminLevel fetch(QueryExecutor executor, int levelId) throws SQLException {
 
@@ -24,7 +25,8 @@ public class AdminLevel {
                         "L.Name, " +
                         "L.parentId ParentId, " +
                         "P.Name ParentLevelName, " +
-                        "L.CountryId " +
+                        "L.CountryId, " +
+                        "L.Version " +
                         "FROM adminlevel L " +
                         "LEFT JOIN adminlevel P ON (L.parentId = P.AdminLevelId) " +
                         "WHERE L.AdminLevelId = " + levelId)) {
@@ -41,6 +43,7 @@ public class AdminLevel {
             }
             level.parentName = rs.getString(3);
             level.countryId = rs.getInt(4);
+            level.version = rs.getLong(5);
             return level;
         }
     }
@@ -67,5 +70,9 @@ public class AdminLevel {
 
     public boolean hasParent() {
         return parentId != 0;
+    }
+
+    public long getVersion() {
+        return version;
     }
 }

@@ -134,7 +134,7 @@ public class ActivityTableMappingBuilder {
         FormField locationField = new FormField(field(classId, LOCATION_FIELD));
         locationField.setLabel(activity.getLocationTypeName());
         locationField.setCode("location");
-        locationField.setType(ReferenceType.single(activity.getLocationFormClassId()));
+        locationField.setType(ReferenceType.single(activity.getLocationFormClassIds()));
         locationField.setRequired(true);
         
         formClass.addElement(locationField);
@@ -146,7 +146,7 @@ public class ActivityTableMappingBuilder {
         FormField partnerField = new FormField(field(classId, PARTNER_FIELD))
                 .setLabel("Partner")
                 .setCode("partner")
-                .setType(ReferenceType.single(CuidAdapter.partnerFormClass(activity.getDatabaseId())))
+                .setType(ReferenceType.single(activity.getPartnerFormClassId()))
                 .setRequired(true);
         formClass.addElement(partnerField);
         mappings.add(new FieldMapping(partnerField, "partnerId", new ReferenceConverter(PARTNER_DOMAIN)));
@@ -189,7 +189,7 @@ public class ActivityTableMappingBuilder {
 
     public TableMapping build() {
         return new TableMapping("site", baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass,
-                DeleteMethod.SOFT_BY_DATE, Collections.<String, Object>emptyMap());
+                DeleteMethod.SOFT_BY_DATE, Collections.<String, Object>emptyMap(), 0L);
     }
 
     public void addIndicatorOrAttributeField(ActivityField field) {

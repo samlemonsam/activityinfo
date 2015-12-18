@@ -65,7 +65,6 @@ public class SimpleTableCollection implements ResourceCollection {
 
     @Override
     public void add(ResourceUpdate update) {
-        ResourceId formClassId = getFormClass().getId();
         BaseTableInserter inserter = new BaseTableInserter(mapping, update.getResourceId());
         inserter.insert(executor, update);
     }
@@ -77,6 +76,6 @@ public class SimpleTableCollection implements ResourceCollection {
 
     @Override
     public long cacheVersion() {
-        return 0;
+        return mapping.getVersion();
     }
 }

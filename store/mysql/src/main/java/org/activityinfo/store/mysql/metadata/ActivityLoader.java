@@ -73,6 +73,7 @@ public class ActivityLoader {
                     activity.name = rs.getString("name");
                     activity.reportingFrequency = rs.getInt("reportingFrequency");
                     activity.locationTypeId = rs.getInt("locationTypeId");
+                    activity.locationTypeIds.add(activity.locationTypeId);
                     activity.locationTypeName = rs.getString("locationTypeName");
                     activity.adminLevelId = rs.getInt("boundAdminLevelId");
                     activity.ownerUserId = rs.getInt("ownerUserId");
@@ -91,9 +92,32 @@ public class ActivityLoader {
                 }
             }
 
+            /*
+             * Because we allow users to change location types,
+             * a location field might actually reference several different location types.
+             * These need to be included in the range so that queries can be correctly run
+             */
+            try (ResultSet rs = executor.query(
+                    "SELECT DISTINCT S.ActivityId, L.LocationTypeId " +
+                            "FROM site S " +
+                            "LEFT JOIN location L on (S.locationId=L.locationId) " +
+                            "WHERE S.ActivityId IN " + idList(activityIds))) {
+
+                while(rs.next()) {
+                    int activityId = rs.getInt(1);
+                    int locationTypeId =  rs.getInt(2);
+                    
+                    activityMap.get(activityId).locationTypeIds.add(locationTypeId);
+                }
+            }
+
+            /*
+             * For those activities which are not serialized as json, load the list of indicators/attributes now
+             */
             if (!classicActivityIds.isEmpty()) {
                 loadFields(activityMap, classicActivityIds);
             }
+            
         }
         return activityMap;
     }

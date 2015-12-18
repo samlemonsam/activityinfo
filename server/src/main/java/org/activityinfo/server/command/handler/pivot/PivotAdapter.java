@@ -217,7 +217,6 @@ public class PivotAdapter {
 
 
     private void executeIndicatorValuesQuery(ActivityMetadata activity) {
-        int activityId = activity.getId();
         ResourceId formClassId = activity.getFormClassId();
         FormTree formTree = formTrees.get(activity.getFormClassId());
         QueryModel queryModel = new QueryModel(formClassId);

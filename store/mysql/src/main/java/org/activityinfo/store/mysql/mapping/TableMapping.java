@@ -24,13 +24,13 @@ public class TableMapping implements Serializable {
     private FormClass formClass;
     private Map<String, Object> insertDefaults;
     private PrimaryKeyMapping primaryKey;
-    private Map<String, String> joins = Maps.newHashMap();
+    private long version;
 
     private Map<ResourceId, FieldMapping> fieldMappings = Maps.newHashMap();
 
     TableMapping(String baseTable, String baseFromClause, String baseFilter, PrimaryKeyMapping primaryKey,
-                 List<FieldMapping> mappings, FormClass formClass, DeleteMethod deleteMethod, 
-                 Map<String, Object> insertDefaults) {
+                 List<FieldMapping> mappings, FormClass formClass, DeleteMethod deleteMethod,
+                 Map<String, Object> insertDefaults, long version) {
         this.baseTable = baseTable;
         this.baseFromClause = baseFromClause;
         this.primaryKey = primaryKey;
@@ -41,6 +41,7 @@ public class TableMapping implements Serializable {
         for(FieldMapping mapping : mappings) {
             fieldMappings.put(mapping.getFieldId(), mapping);
         }
+        this.version = version;
     }
 
     public PrimaryKeyMapping getPrimaryKey() {
@@ -120,5 +121,9 @@ public class TableMapping implements Serializable {
 
     public DeleteMethod getDeleteMethod() {
         return deleteMethod;
+    }
+
+    public long getVersion() {
+        return version;
     }
 }
