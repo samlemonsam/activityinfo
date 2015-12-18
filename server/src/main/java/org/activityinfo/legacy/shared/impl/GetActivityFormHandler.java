@@ -503,6 +503,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     .appendColumn("defaultValue")
                     .appendColumn("workflow")
                     .appendColumn("sortOrder")
+                    .appendColumn("relevanceExpression")
                     .from("attributegroup")
                     .whereTrue("dateDeleted is NULL")
                     .where("attributeGroupId").in(attributeGroupIds)
@@ -519,6 +520,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     group.setMultipleAllowed(rs.getBoolean("multipleAllowed"));
                     group.setMandatory(rs.getBoolean("mandatory"));
                     group.setSortOrder(rs.getInt("sortOrder"));
+                    group.setRelevanceExpression(rs.getString("relevanceExpression"));
                     if (!rs.isNull("defaultValue")) { // if null it throws NPE
                         group.setDefaultValue(rs.getInt("defaultValue"));
                     }
