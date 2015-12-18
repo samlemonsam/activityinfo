@@ -15,14 +15,15 @@ public class BarcodeFieldWidget implements FormFieldWidget<BarcodeValue> {
 
     private final TextBox box;
 
-    private static final String PLACEHOLDER_TEXT = "ABCDEF0123456";
+    private final ValueUpdater<BarcodeValue> valueUpdater;
 
     public BarcodeFieldWidget(final ValueUpdater<BarcodeValue> valueUpdater) {
+        this.valueUpdater = valueUpdater;
         this.box = new TextBox();
         this.box.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                valueUpdater.update(BarcodeValue.valueOf(event.getValue()));
+                fireValueChanged();
             }
 
         });
@@ -32,6 +33,11 @@ public class BarcodeFieldWidget implements FormFieldWidget<BarcodeValue> {
                 valueUpdater.update(getValue());
             }
         });
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
     }
 
     private BarcodeValue getValue() {

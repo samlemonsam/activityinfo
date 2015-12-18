@@ -63,7 +63,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
 
     private FormClass formClass;
     private ResourceLocator locator;
-    private RelevanceHandler relevanceHandler;
+    private final RelevanceHandler relevanceHandler;
 
     // validation form class is used to refer to "top-level" form class.
     // For example "Properties panel" renders current type-formClass but in order to validate expression we need
@@ -330,4 +330,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         return validationFormClass;
     }
 
+    public RelevanceHandler getRelevanceHandler() {
+        return relevanceHandler;
+    }
 }

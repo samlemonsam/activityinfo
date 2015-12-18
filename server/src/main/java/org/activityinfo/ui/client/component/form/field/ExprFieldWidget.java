@@ -56,6 +56,7 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
     }
 
     private final FormClass validationFormClass;
+    private final ValueUpdater<ExprValue> valueUpdater;
 
     @UiField
     HTMLPanel boxWrapper;
@@ -68,20 +69,26 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
         uiBinder.createAndBindUi(this);
 
         this.validationFormClass = validationFormClass;
+        this.valueUpdater = valueUpdater;
 
         this.box.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                valueUpdater.update(ExprValue.valueOf(event.getValue()));
+                fireValueChanged();
             }
         });
         this.box.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                valueUpdater.update(getValue());
+                fireValueChanged();
                 validate();
             }
         });
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
     }
 
     private void validate() {

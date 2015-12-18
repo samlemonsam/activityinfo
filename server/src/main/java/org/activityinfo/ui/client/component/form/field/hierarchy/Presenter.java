@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
@@ -19,21 +18,25 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Models the selection of hierarchy
  */
 class Presenter {
+
     private Map<ResourceId, LevelView> widgetMap = new HashMap<>();
     private Map<ResourceId, Projection> selection = new HashMap<>();
-    private List<HandlerRegistration> registrations = new ArrayList<>();
+//    private List<HandlerRegistration> registrations = new ArrayList<>();
     private ResourceLocator locator;
     private Hierarchy tree;
-    private ValueUpdater valueUpdater;
+    private ValueUpdater<ReferenceValue> valueUpdater;
 
     Presenter(ResourceLocator locator, final Hierarchy tree, Map<ResourceId, ? extends LevelView> widgets,
-              ValueUpdater valueUpdater) {
+              ValueUpdater<ReferenceValue> valueUpdater) {
         this.locator = locator;
         this.tree = tree;
         this.valueUpdater = valueUpdater;
@@ -48,6 +51,11 @@ class Presenter {
         }
     }
 
+
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
+    }
+
     public Promise<Void> setInitialSelection(Iterable<ResourceId> resourceIds) {
         return setInitialSelection(new ReferenceValue(resourceIds));
     }
@@ -60,15 +68,15 @@ class Presenter {
             @Override
             public Void apply(@Nullable Void input) {
                 selection.putAll(initialSelection.getSelection());
-                for(Level level : tree.getLevels()) {
+                for (Level level : tree.getLevels()) {
                     LevelView view = widgetMap.get(level.getClassId());
-                    if(level.isRoot() || hasSelection(level.getParent())) {
+                    if (level.isRoot() || hasSelection(level.getParent())) {
                         view.setEnabled(true);
                         view.setChoices(choices(level));
                     } else {
                         view.setEnabled(false);
                     }
-                    if(hasSelection(level)) {
+                    if (hasSelection(level)) {
                         view.setSelection(getSelection(level));
                     }
                 }
@@ -85,7 +93,7 @@ class Presenter {
             this.selection.put(level.getClassId(), selectedItem);
         }
         clearChildren(level);
-        valueUpdater.update(getValue());
+        fireValueChanged();
     }
 
     private ReferenceValue getValue() {
