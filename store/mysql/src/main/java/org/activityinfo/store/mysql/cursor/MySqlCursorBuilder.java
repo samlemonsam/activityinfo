@@ -115,7 +115,11 @@ public class MySqlCursorBuilder implements CursorBuilder {
 
         return new ResultSetFieldReader(startIndex, mapping.getConverter(), mapping.getFormField().getType());
     }
-
+    
+    public SqlBuilder getQuery() {
+        return query;
+    }
+    
     @Override
     public Cursor open() {
         String sql = query.buildSQL();

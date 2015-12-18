@@ -24,6 +24,8 @@ public class TableMappingBuilder {
     private FormClass formClass;
     private DeleteMethod deleteMethod = DeleteMethod.SOFT_BY_DATE;
     
+    private Set<ResourceId> fieldIds = new HashSet<>();
+    
     private Map<String, Object> insertDefaults = new HashMap<>();
     private long version = 0L;
 
@@ -58,11 +60,19 @@ public class TableMappingBuilder {
     }
 
     public void add(FieldMapping fieldMapping) {
+        if(fieldIds.contains(fieldMapping.getFieldId())) {
+            throw new IllegalArgumentException("Duplicate field id " + fieldMapping.getFieldId());
+        }
+        fieldIds.add(fieldMapping.getFieldId());
         formClass.addElement(fieldMapping.getFormField());
         mappings.add(fieldMapping);
     }
     
     public void addUnmappedField(FormField field) {
+        if(fieldIds.contains(field.getId())) {
+            throw new IllegalArgumentException("Duplicate field id " + field.getId());
+        }
+        fieldIds.add(field.getId());
         formClass.addElement(field);
     }
     

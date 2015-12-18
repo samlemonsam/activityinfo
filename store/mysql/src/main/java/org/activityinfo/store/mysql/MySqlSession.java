@@ -38,7 +38,7 @@ class MySqlSession implements CollectionCatalog {
         providers.add(new SimpleTableCollectionProvider(new AdminEntityTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new PartnerTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new ProjectTable(), CollectionPermissions.readonly()));
-
+        providers.add(new TargetCollectionProvider());
         providers.add(new ActivityCollectionProvider(new ActivityLoader(executor)));
         providers.add(new LocationCollectionProvider());
 

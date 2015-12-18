@@ -362,7 +362,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void batchOpenAdminLevels() {
 
         Map<ResourceId, FormClass> formClasses = catalogProvider.getFormClasses(asList(
-                adminLevelFormClass(1), 
+                adminLevelFormClass(1),
                 adminLevelFormClass(2)));
 
         FormClass provinceClass = formClasses.get(adminLevelFormClass(1));
@@ -372,6 +372,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(territoryClass.getLabel(), equalTo("Territoire"));
     }
     
+    
     @Test
     public void nonExistingSite() {
 
@@ -379,6 +380,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
         assertFalse(collection.isPresent());
     }
-    
-    
+
+
+    @Test
+    public void targets() {
+        query(CuidAdapter.cuid(CuidAdapter.TARGET_FORM_CLASS_DOMAIN, 1), "_id", "name");
+
+        assertThat(column("_id"), hasValues(cuid(TARGET_INSTANCE_DOMAIN, 6001)));
+        assertThat(column("name"), hasValues("Long term goals"));
+    }
+
 }
