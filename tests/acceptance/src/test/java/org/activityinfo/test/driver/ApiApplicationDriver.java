@@ -266,6 +266,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("activityId", field.getId("form"));
             properties.put("multipleAllowed", field.getBoolean("multipleAllowed", false));
             properties.put("mandatory", field.getBoolean("mandatory", false));
+            properties.put("relevanceExpression", field.getString("relevanceExpression", ""));
 
             PendingId groupId = createEntityAndBindId("AttributeGroup", properties);
 
@@ -299,7 +300,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 properties.put("expression", field.getString("expression"));
             }
 
-            properties.put("skipExpression", field.getString("skipExpression", ""));
+            properties.put("relevanceExpression", field.getString("relevanceExpression", ""));
 
             createEntityAndBindId("Indicator", properties);
         }

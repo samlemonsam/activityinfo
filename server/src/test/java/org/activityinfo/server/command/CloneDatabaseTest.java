@@ -185,7 +185,7 @@ public class CloneDatabaseTest extends CommandTestCase2 {
 
         // indicators
         assertPropertyForEach(sourceActivity.getIndicators(), targetActivity.getIndicators(),
-                "name", "units", "expression", "skipExpression", "nameInExpression", "calculatedAutomatically");
+                "name", "units", "expression", "relevanceExpression", "nameInExpression", "calculatedAutomatically");
 
         // attributes groups
         for (AttributeGroupDTO sourceAttributeGroup : sourceActivity.getAttributeGroups()) {

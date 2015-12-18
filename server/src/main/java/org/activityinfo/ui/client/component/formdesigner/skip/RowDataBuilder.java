@@ -57,9 +57,9 @@ public class RowDataBuilder {
         this.formClass = formClass;
     }
 
-    public List<RowData> build(String skipExpression) {
+    public List<RowData> build(String relevanceExpression) {
         try {
-            ExprLexer lexer = new ExprLexer(skipExpression);
+            ExprLexer lexer = new ExprLexer(relevanceExpression);
             ExprParser parser = new ExprParser(lexer);
             ExprNode node = parser.parse();
             parse(node, DEFAULT_JOIN_FUNCTION);

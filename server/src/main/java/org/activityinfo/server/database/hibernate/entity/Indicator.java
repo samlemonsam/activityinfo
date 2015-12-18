@@ -57,7 +57,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
     private String listHeader;
     private String type = FieldTypeClass.QUANTITY.getId();
     private String expression;
-    private String skipExpression;
+    private String relevanceExpression;
     private String nameInExpression;
     private boolean calculatedAutomatically;
 
@@ -80,7 +80,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
         this.listHeader = indicator.listHeader;
         this.type = indicator.type;
         this.expression = indicator.expression;
-        this.skipExpression = indicator.skipExpression;
+        this.relevanceExpression = indicator.relevanceExpression;
         this.nameInExpression = indicator.nameInExpression;
         this.calculatedAutomatically = indicator.calculatedAutomatically;
     }
@@ -116,13 +116,13 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
         this.expression = expression;
     }
 
-    @Column(name = "skipExpression", nullable = true, length = 999)
-    public String getSkipExpression() {
-        return skipExpression;
+    @Column(name = "relevanceExpression", nullable = true, length = 999)
+    public String getRelevanceExpression() {
+        return relevanceExpression;
     }
 
-    public void setSkipExpression(String skipExpression) {
-        this.skipExpression = skipExpression;
+    public void setRelevanceExpression(String relevanceExpression) {
+        this.relevanceExpression = relevanceExpression;
     }
 
     @Column(name = "nameInExpression", nullable = true, length = 999)

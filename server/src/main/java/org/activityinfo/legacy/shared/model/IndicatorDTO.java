@@ -28,11 +28,9 @@ import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -186,12 +184,12 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("expression", expression);
     }
 
-    public String getSkipExpression() {
-        return get("skipExpression");
+    public String getRelevanceExpression() {
+        return get("relevanceExpression");
     }
 
-    public void setSkipExpression(String skipExpression) {
-        set("skipExpression", skipExpression);
+    public void setRelevanceExpression(String relevanceExpression) {
+        set("relevanceExpression", relevanceExpression);
     }
 
     @JsonProperty("code") @JsonView(DTOViews.Schema.class)
@@ -368,7 +366,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         FormField field = new FormField(CuidAdapter.indicatorField(getId()));
         field.setLabel(getName());
         field.setDescription(getDescription());
-        field.setRelevanceConditionExpression(getSkipExpression());
+        field.setRelevanceConditionExpression(getRelevanceExpression());
 
         String code = getNameInExpression();
         if(!Strings.isNullOrEmpty(code)) {
