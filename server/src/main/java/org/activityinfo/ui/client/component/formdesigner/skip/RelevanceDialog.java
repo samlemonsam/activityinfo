@@ -40,19 +40,19 @@ public class RelevanceDialog {
 
     private final FormField formField;
     private final ModalDialog dialog;
-    private final RelevancePanelPresenter skipPanelPresenter;
+    private final RelevancePanelPresenter presenter;
 
     public RelevanceDialog(final FieldWidgetContainer fieldWidgetContainer, final PropertiesPresenter propertiesPresenter) {
         this.formField = fieldWidgetContainer.getFormField();
-        this.skipPanelPresenter = new RelevancePanelPresenter(fieldWidgetContainer);
-        this.dialog = new ModalDialog(skipPanelPresenter.getView());
+        this.presenter = new RelevancePanelPresenter(fieldWidgetContainer);
+        this.dialog = new ModalDialog(presenter.getView());
         this.dialog.setDialogTitle(I18N.CONSTANTS.defineRelevanceLogic());
         this.dialog.getDialogDiv().getStyle().setWidth(DIALOG_WIDTH, Style.Unit.PX);
 //        this.dialog.getDialogDiv().getStyle().setHeight(DIALOG_HEIGHT, Style.Unit.PX);
         this.dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                skipPanelPresenter.updateFormField();
+                presenter.updateFormField();
                 propertiesPresenter.setRelevanceState(formField, false);
                 dialog.hide();
             }

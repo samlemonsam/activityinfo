@@ -95,15 +95,6 @@ public final class AttributeGroupDTO extends BaseModelData implements EntityDTO,
         return get("name");
     }
 
-    public String getRelevanceExpression() {
-        return get("relevanceExpression");
-    }
-
-    public void setRelevanceExpression(String relevanceExpression) {
-        set("relevanceExpression", relevanceExpression);
-    }
-
-
     public void setMandatory(boolean mandatory) {
         set("mandatory", mandatory);
     }

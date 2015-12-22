@@ -48,8 +48,8 @@ public class RelevancePanelPresenter {
         if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {
             List<RowData> build = rowDataBuilder.build(fieldWidgetContainer.getFormField().getRelevanceConditionExpression());
             for (RowData rowData : build) {
-                RelevanceRowPresenter skipRowPresenter = addRow(fieldWidgetContainer);
-                skipRowPresenter.updateWith(rowData);
+                RelevanceRowPresenter rowPresenter = addRow(fieldWidgetContainer);
+                rowPresenter.updateWith(rowData);
             }
         }
 
@@ -60,33 +60,33 @@ public class RelevancePanelPresenter {
     }
 
     private RelevanceRowPresenter addRow(final FieldWidgetContainer fieldWidgetContainer) {
-        final RelevanceRowPresenter skipRowPresenter = new RelevanceRowPresenter(fieldWidgetContainer);
-        view.getRootPanel().add(skipRowPresenter.getView());
-        map.put(skipRowPresenter.getView(), skipRowPresenter);
+        final RelevanceRowPresenter rowPresenter = new RelevanceRowPresenter(fieldWidgetContainer);
+        view.getRootPanel().add(rowPresenter.getView());
+        map.put(rowPresenter.getView(), rowPresenter);
 
-        skipRowPresenter.getView().getAddButton().addClickHandler(new ClickHandler() {
+        rowPresenter.getView().getAddButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 addRow(fieldWidgetContainer);
             }
         });
-        skipRowPresenter.getView().getRemoveButton().addClickHandler(new ClickHandler() {
+        rowPresenter.getView().getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                view.getRootPanel().remove(skipRowPresenter.getView());
-                map.remove(skipRowPresenter.getView());
+                view.getRootPanel().remove(rowPresenter.getView());
+                map.remove(rowPresenter.getView());
                 setFirstRowJoinFunctionVisible();
             }
         });
 
         setFirstRowJoinFunctionVisible();
-        return skipRowPresenter;
+        return rowPresenter;
     }
 
     private void setFirstRowJoinFunctionVisible() {
         if (view.getRootPanel().getWidgetCount() > 0) { // disable join function for first row
-            RelevanceRow firstSkipRow = (RelevanceRow) view.getRootPanel().getWidget(0);
-            firstSkipRow.getJoinFunction().setVisible(false);
+            RelevanceRow firstRow = (RelevanceRow) view.getRootPanel().getWidget(0);
+            firstRow.getJoinFunction().setVisible(false);
         }
     }
 
@@ -108,8 +108,8 @@ public class RelevancePanelPresenter {
         final FormClass formClass = fieldWidgetContainer.getFormDesigner().getFormClass();
 
         for (int i = 0; i < widgetCount; i++) {
-            RelevanceRow skipRow = (RelevanceRow) view.getRootPanel().getWidget(i);
-            result.add(RowDataFactory.create(skipRow, map.get(skipRow).getValue(), formClass));
+            RelevanceRow row = (RelevanceRow) view.getRootPanel().getWidget(i);
+            result.add(RowDataFactory.create(row, map.get(row).getValue(), formClass));
         }
         return result;
     }

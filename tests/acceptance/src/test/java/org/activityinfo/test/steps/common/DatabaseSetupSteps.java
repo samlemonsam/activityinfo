@@ -243,7 +243,7 @@ public class DatabaseSetupSteps {
                 property("form", formName),
                 property("name", fieldName),
                 property("type", "quantity"),
-                property("skipExpression", relevanceCondition),
+                property("relevanceExpression", relevanceCondition),
                 property("code", fieldCode)
         );
 
@@ -301,7 +301,16 @@ public class DatabaseSetupSteps {
         createEnumField(fieldName, false, items);
     }
 
+    @Given("^I have created a single-valued enumerated field \"([^\"]*)\" with relevance \"([^\"]*)\" and items:$")
+    public void I_have_created_a_enumerated_field_with_options(String fieldName, String relevanceExpression, List<String> items) throws Exception {
+        createEnumField(fieldName, false, items, relevanceExpression);
+    }
+
     private void createEnumField(String fieldName, boolean multipleAllowed, List<String> items) throws Exception {
+        createEnumField(fieldName, multipleAllowed, items, "");
+    }
+
+    private void createEnumField(String fieldName, boolean multipleAllowed, List<String> items, String relevanceExpression) throws Exception {
         Preconditions.checkState(currentForm != null, "No current form");
 
         driver.setup().createField(
@@ -309,6 +318,7 @@ public class DatabaseSetupSteps {
                 property("name", fieldName),
                 property("type", "enumerated"),
                 property("multipleAllowed", multipleAllowed),
+                property("relevanceExpression", relevanceExpression),
                 property("items", items));
     }
 

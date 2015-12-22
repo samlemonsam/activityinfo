@@ -53,7 +53,6 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable, Form
     private Integer defaultValue;
 
     private boolean workflow;
-    private String relevanceExpression;
 
     public AttributeGroup() {
 
@@ -68,7 +67,6 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable, Form
         this.mandatory = group.mandatory;
         this.defaultValue = group.defaultValue;
         this.workflow = group.workflow;
-        this.relevanceExpression = group.relevanceExpression;
     }
 
     @Id
@@ -166,15 +164,6 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable, Form
 
     public void setWorkflow(boolean workflow) {
         this.workflow = workflow;
-    }
-
-    @Column(name = "relevanceExpression")
-    public String getRelevanceExpression() {
-        return relevanceExpression;
-    }
-
-    public void setRelevanceExpression(String relevanceExpression) {
-        this.relevanceExpression = relevanceExpression;
     }
 
     /**

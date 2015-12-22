@@ -474,7 +474,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 //                    "name",
 //                    "type",
 //                    "expression",
-//                    "relevanceExpression",
+//                    "skipExpression",
 //                    "nameInExpression",
 //                    "calculatedAutomatically",
 //                    "category",
@@ -502,7 +502,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 //                    indicator.setName(rs.getString("name"));
 //                    indicator.setTypeId(rs.getString("type"));
 //                    indicator.setExpression(rs.getString("expression"));
-//                    indicator.setRelevanceExpression(rs.getString("relevanceExpression"));
+//                    indicator.setRelevanceExpression(rs.getString("skipExpression"));
 //                    indicator.setNameInExpression(rs.getString("nameInExpression"));
 //                    indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
 //                    indicator.setCategory(rs.getString("category"));

@@ -116,7 +116,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
         this.expression = expression;
     }
 
-    @Column(name = "relevanceExpression", nullable = true, length = 999)
+    @Column(name = "skipExpression", nullable = true, length = 999)
     public String getRelevanceExpression() {
         return relevanceExpression;
     }

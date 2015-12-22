@@ -22,7 +22,7 @@ public class GetIndicatorsHandler implements CommandHandlerAsync<GetIndicators, 
                 "i.name",
                 "i.type",
                 "i.expression",
-                "i.relevanceExpression",
+                "i.skipExpression",
                 "i.nameInExpression",
                 "i.calculatedAutomatically",
                 "i.category",
@@ -63,7 +63,7 @@ public class GetIndicatorsHandler implements CommandHandlerAsync<GetIndicators, 
         indicator.setName(rs.getString("name"));
         indicator.setTypeId(rs.getString("type"));
         indicator.setExpression(rs.getString("expression"));
-        indicator.setRelevanceExpression(rs.getString("relevanceExpression"));
+        indicator.setRelevanceExpression(rs.getString("skipExpression"));
         indicator.setNameInExpression(rs.getString("nameInExpression"));
         indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
         indicator.setCategory(rs.getString("category"));

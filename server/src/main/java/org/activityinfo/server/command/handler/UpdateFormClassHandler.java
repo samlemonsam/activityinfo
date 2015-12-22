@@ -253,7 +253,6 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         group.setMandatory(field.isRequired());
         group.setMultipleAllowed(((EnumType) field.getType()).getCardinality() == Cardinality.MULTIPLE);
         group.setSortOrder(sortOrder);
-        group.setRelevanceExpression(field.getRelevanceConditionExpression());
     }
 
     private void updateAttributes(AttributeGroup group, EnumType type) {

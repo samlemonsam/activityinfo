@@ -260,13 +260,14 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         String type = resolveFieldTypeName(field.getString("type"));
 
+        transformRelevanceExpression(field);
+
         if(type.equals("enumerated")) {
             JSONObject properties = new JSONObject();
             properties.put("name", aliases.createAliasIfNotExists(field.getName()));
             properties.put("activityId", field.getId("form"));
             properties.put("multipleAllowed", field.getBoolean("multipleAllowed", false));
             properties.put("mandatory", field.getBoolean("mandatory", false));
-            properties.put("relevanceExpression", field.getString("relevanceExpression", ""));
 
             PendingId groupId = createEntityAndBindId("AttributeGroup", properties);
 
@@ -303,6 +304,13 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("relevanceExpression", field.getString("relevanceExpression", ""));
 
             createEntityAndBindId("Indicator", properties);
+        }
+    }
+
+    private void transformRelevanceExpression(TestObject field) {
+        String relevanceExpression = field.getString("relevanceExpression");
+        if (!Strings.isNullOrEmpty(relevanceExpression)) {
+            field.set(new Property("relevanceExpression", new RelevanceTransformator(aliases).transform(relevanceExpression)));
         }
     }
 
