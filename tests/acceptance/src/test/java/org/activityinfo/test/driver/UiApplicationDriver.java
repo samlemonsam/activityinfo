@@ -883,22 +883,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
         formDesigner().dropTarget().fieldByLabel(fieldLabel).element().clickWhenReady();
-        BsFormPanel form = formDesigner().properties().form();
-        for (FieldValue value : values) {
-            switch(value.getField()) {
-                case "code":
-                    form.findFieldByLabel(I18N.CONSTANTS.codeFieldLabel()).fill(value.getValue());
-                    break;
-                case "label":
-                    form.findFieldByLabel(I18N.CONSTANTS.labelFieldLabel()).fill(value.getValue());
-                    break;
-                case "description":
-                    form.findFieldByLabel(I18N.CONSTANTS.description()).fill(value.getValue());
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unknown designer field property: " + value.getField());
-            }
-        }
+        formDesigner().properties().setValues(values);
     }
 
     public void assertDesignerFieldReorder(String fieldLabel, int positionOnPanel) {

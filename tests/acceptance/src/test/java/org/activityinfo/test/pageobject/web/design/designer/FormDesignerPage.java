@@ -22,6 +22,7 @@ package org.activityinfo.test.pageobject.web.design.designer;
  */
 
 import com.google.common.base.Predicate;
+import cucumber.api.DataTable;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.WebDriver;
@@ -78,5 +79,11 @@ public class FormDesignerPage {
                 return false;
             }
         });
+    }
+
+    public void setRelevance(String fieldLabel, DataTable dataTable) {
+        selectFieldByLabel(fieldLabel);
+
+        properties().relevanceDialog().set(dataTable);
     }
 }

@@ -27,7 +27,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
@@ -191,10 +190,17 @@ public class DesignSteps {
             page.selectFieldByLabel(entry.getValue());
 
             String label = driver.getAliasTable().createAlias(entry.getKey());
-            page.properties().form().findFieldByLabel(I18N.CONSTANTS.fieldLabel()).fill(label);
+            page.properties().setLabel(label);
         }
 
         page.save();
 
+    }
+
+    @And("^set relevance for \"([^\"]*)\" field:$")
+    public void set_relevance_for_field(String fieldName, DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+        page.setRelevance(driver.getAliasTable().getAlias(fieldName), dataTable);
+        page.save();
     }
 }

@@ -8,14 +8,15 @@ Feature: Relevance
     And I have created a single-valued enumerated field "Gender" with items:
       | Male   |
       | Female |
-    And I have created a single-valued enumerated field "Pregnant" with relevance "Gender==Male" and items:
+    And I have created a single-valued enumerated field "Pregnant" with items:
       | Yes |
       | No  |
 
   @AI-1307
   Scenario: Clear values for skipped fields
-    Given I have created a form "Household Survey" using the new layout
-    When open table for the "Medical Activities" form in the database "Patient Registration"
+    Given I open the form designer for "Household Survey" in database "Relevance"
+    And set relevance for "Pregnant" field:
+    | Gender | Equals | Male | radio |
     When I begin a new submission for "Household Survey"
     And I select "Female" for the Gender field
     Then the Pregnacy field should be enabled

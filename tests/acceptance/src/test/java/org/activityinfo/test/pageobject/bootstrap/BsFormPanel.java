@@ -96,7 +96,7 @@ public class BsFormPanel extends Form {
         return current;
     }
 
-    public class BsField implements Form.FormItem {
+    public static class BsField implements Form.FormItem {
 
         private final FluentElement element;
 
