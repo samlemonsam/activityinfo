@@ -24,6 +24,7 @@ package org.activityinfo.test.pageobject.web.design.designer;
 import com.google.common.base.Predicate;
 import cucumber.api.DataTable;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.WebDriver;
 
@@ -81,9 +82,9 @@ public class FormDesignerPage {
         });
     }
 
-    public void setRelevance(String fieldLabel, DataTable dataTable) {
+    public void setRelevance(String fieldLabel, DataTable dataTable, AliasTable alias) {
         selectFieldByLabel(fieldLabel);
 
-        properties().relevanceDialog().set(dataTable);
+        properties().relevanceDialog().set(dataTable, alias);
     }
 }

@@ -1,6 +1,7 @@
 package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.Client;
@@ -32,7 +33,6 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
-import org.junit.Assert;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -220,7 +220,7 @@ public class DataEntrySteps {
 
         for (String fieldLabel : fieldLabels) {
             Optional<BsFormPanel.BsField> formItem = driver.getFormFieldFromNewSubmission(formName, fieldLabel);
-            Assert.assertTrue(!formItem.isPresent());
+            assertTrue(!formItem.isPresent());
         }
     }
 
@@ -437,5 +437,57 @@ public class DataEntrySteps {
         ClientResponse clientResponse = client.resource(blobLink).get(ClientResponse.class);
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), clientResponse.getStatus());
+    }
+
+    @When("^I begin a new submission for \"([^\"]*)\"$")
+    public void I_begin_a_new_submission_for(String formName) throws Throwable {
+        driver.beginNewFormSubmission(formName);
+    }
+
+    @And("^I enter:$")
+    public void I_enter(List<FieldValue> fieldValues) throws Throwable {
+        Preconditions.checkNotNull(driver.getCurrentModal());
+
+        BsModal modal = driver.getCurrentModal();
+        driver.getAliasTable().alias(fieldValues);
+
+        for (FieldValue fieldValue : fieldValues) {
+            modal.form().findFieldByLabel(fieldValue.getField()).fill(fieldValue.getValue(), fieldValue.getControlType());
+        }
+    }
+
+    @Then("^the \"([^\"]*)\" field should be enabled$")
+    public void the_field_should_be_enabled(String fieldLabel) throws Throwable {
+        assertTrue(getField(driver.getAliasTable().getAlias(fieldLabel)).isEnabled());
+    }
+
+    @Then("^the \"([^\"]*)\" field should be disabled$")
+    public void the_field_should_be_disabled(String fieldLabel) throws Throwable {
+        assertFalse(getField(driver.getAliasTable().getAlias(fieldLabel)).isEnabled());
+    }
+
+    private BsFormPanel.BsField getField(String fieldLabel) {
+        BsFormPanel.BsField field = driver.getCurrentModal().form().findFieldByLabel(fieldLabel);
+        assertNotNull(field);
+        return field;
+    }
+
+    @When("^I save the submission$")
+    public void I_save_the_submission() throws Throwable {
+        BsModal modal = driver.getCurrentModal();
+        modal.click(I18N.CONSTANTS.save());
+        modal.waitUntilClosed();
+    }
+
+    @And("^I edit first row$")
+    public void I_edit_first_row() throws Throwable {
+        TablePage tablePage = (TablePage) driver.getCurrentPage();
+        BsModal modal = tablePage.table().waitUntilAtLeastOneRowIsLoaded().selectFirstRow().editSubmission();
+        driver.setCurrentModal(modal);
+    }
+
+    @Then("^\"([^\"]*)\" field should be with an empty value$")
+    public void field_should_be_with_an_empty_value(String fieldLabel) throws Throwable {
+        assertTrue(driver.getCurrentModal().form().findFieldByLabel(driver.getAliasTable().getAlias(fieldLabel)).isEmpty());
     }
 }

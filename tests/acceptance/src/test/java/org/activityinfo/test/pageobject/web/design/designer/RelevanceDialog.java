@@ -24,10 +24,11 @@ package org.activityinfo.test.pageobject.web.design.designer;
 import com.google.common.base.Preconditions;
 import cucumber.api.DataTable;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
-import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.openqa.selenium.support.ui.Select;
 
 import java.util.List;
 
@@ -46,36 +47,45 @@ public class RelevanceDialog {
         return modal;
     }
 
-    public void set(DataTable dataTable) {
+    public RelevanceDialog set(DataTable dataTable, AliasTable alias) {
         for (int i = 0; i < dataTable.getGherkinRows().size(); i++) {
             DataTableRow row = dataTable.getGherkinRows().get(i);
             List<String> cells = row.getCells();
             Preconditions.checkState(cells.size() == 4);
 
-            String fieldLabel = cells.get(0);
+            String fieldLabel = alias.getAlias(cells.get(0));
             String operation = cells.get(1);
             String value = cells.get(2);
             String controlType = cells.get(3);
+
+            if ("radio".equals(controlType)) {
+                value = alias.getAlias(value);
+            }
 
             FluentElement lastRow = lastRow();
 
             List<FluentElement> select = lastRow.find().select().waitForList().list();
 
-            BsFormPanel.BsField fieldSelector = new BsFormPanel.BsField(select.get(0));
-            fieldSelector.select(fieldLabel);
+            Select fieldSelector = new Select(select.get(1).element());
+            fieldSelector.selectByVisibleText(fieldLabel);
 
-            BsFormPanel.BsField operationSelector = new BsFormPanel.BsField(select.get(1));
-            operationSelector.select(operation);
+            Select operationSelector = new Select(select.get(2).element());
+            operationSelector.selectByVisibleText(operation);
 
             switch(controlType) {
                 case "radio":
                     FluentElement radioLabel = lastRow().find().label(XPathBuilder.withText(value)).first();
-                    radioLabel.find().ancestor().span(XPathBuilder.withClass("radio")).waitForFirst().clickWhenReady();
+                    radioLabel.clickWhenReady();
                     break;
             }
-
-
         }
+
+        return save();
+    }
+
+    private RelevanceDialog save() {
+        modal.accept();
+        return this;
     }
 
     private FluentElement lastRow() {

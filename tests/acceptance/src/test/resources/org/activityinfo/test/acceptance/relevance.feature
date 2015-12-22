@@ -16,12 +16,25 @@ Feature: Relevance
   Scenario: Clear values for skipped fields
     Given I open the form designer for "Household Survey" in database "Relevance"
     And set relevance for "Pregnant" field:
-    | Gender | Equals | Male | radio |
+      | Gender | Equal | Female | radio |
     When I begin a new submission for "Household Survey"
-    And I select "Female" for the Gender field
-    Then the Pregnacy field should be enabled
-    When I select "Yes" for the Pregancy field
-    And I change "Gender" to Male
-    Then the Pregnancy field should be disabled
+    And I enter:
+      | field  | value  | controlType |
+      | Gender | Female | radio       |
+    Then the "Pregnant" field should be enabled
+    And I enter:
+      | field    | value | controlType |
+      | Pregnant | Yes   | radio       |
+    And I enter:
+      | field  | value | controlType |
+      | Gender | Male  | radio       |
+    Then the "Pregnant" field should be disabled
+    And I enter:
+      | field      | value      | controlType |
+      | Partner    | NRC        | radio       |
+      | Start Date | 22-12-2015 | date        |
+      | End Date   | 22-12-2015 | date        |
     When I save the submission
-    Then Pregnancy field should be saved with an empty value
+    And I open the table for "Household Survey" in database "Relevance"
+    And I edit first row
+    Then "Pregnant" field should be with an empty value

@@ -84,7 +84,7 @@ public class DesignSteps {
 
     @When("^I open the table for \"([^\"]*)\" in database \"([^\"]*)\"$")
     public void I_open_the_table_for_in_database(String formName, String database) throws Throwable {
-        driver.openFormTable(database, formName);
+        driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
     }
 
     @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\"$")
@@ -200,7 +200,7 @@ public class DesignSteps {
     @And("^set relevance for \"([^\"]*)\" field:$")
     public void set_relevance_for_field(String fieldName, DataTable dataTable) throws Throwable {
         FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
-        page.setRelevance(driver.getAliasTable().getAlias(fieldName), dataTable);
+        page.setRelevance(driver.getAliasTable().getAlias(fieldName), dataTable, driver.getAliasTable());
         page.save();
     }
 }

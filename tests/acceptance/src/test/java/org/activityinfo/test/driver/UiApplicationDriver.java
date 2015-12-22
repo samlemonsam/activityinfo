@@ -1098,4 +1098,23 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         return grid.extractData();
     }
+
+    @Override
+    public void beginNewFormSubmission(String formName) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+        dataEntryTab.buttonClick(I18N.CONSTANTS.newSite());
+
+        currentModal = FormModal.find(dataEntryTab.getContainer());
+    }
+
+    public BsModal getCurrentModal() {
+        return currentModal;
+    }
+
+    @Override
+    public void setCurrentModal(BsModal currentModal) {
+        this.currentModal = currentModal;
+    }
 }

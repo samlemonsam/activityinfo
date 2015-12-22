@@ -11,6 +11,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
@@ -434,6 +435,18 @@ public abstract class ApplicationDriver {
     }
 
     public DataTable oldTable(String formName) {
+        throw new PendingException();
+    }
+
+    public void beginNewFormSubmission(String formName) {
+        throw new PendingException();
+    }
+
+    public BsModal getCurrentModal() {
+        throw new PendingException();
+    }
+
+    public void setCurrentModal(BsModal modal) {
         throw new PendingException();
     }
 }
