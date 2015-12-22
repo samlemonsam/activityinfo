@@ -77,8 +77,8 @@ public class BaseEntityHandler {
             indicator.setExpression(trimAndTruncate(changes.get("expression")));
         }
 
-        if (changes.containsKey("skipExpression")) {
-            indicator.setSkipExpression(trimAndTruncate(changes.get("skipExpression")));
+        if (changes.containsKey("relevanceExpression")) {
+            indicator.setRelevanceExpression(trimAndTruncate(changes.get("relevanceExpression")));
         }
 
         if (changes.containsKey("nameInExpression")) {

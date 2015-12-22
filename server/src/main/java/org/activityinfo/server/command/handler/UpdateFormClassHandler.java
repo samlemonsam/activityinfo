@@ -202,7 +202,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         indicator.setDescription(field.getDescription());
         indicator.setSortOrder(sortOrder);
         indicator.setNameInExpression(field.getCode());
-        indicator.setSkipExpression(field.getRelevanceConditionExpression());
+        indicator.setRelevanceExpression(field.getRelevanceConditionExpression());
         indicator.setCalculatedAutomatically(field.getType() instanceof CalculatedFieldType);
 
         if (field.getType() instanceof QuantityType) {

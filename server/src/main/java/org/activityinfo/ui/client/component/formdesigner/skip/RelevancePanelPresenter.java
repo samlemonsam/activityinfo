@@ -34,22 +34,22 @@ import java.util.Map;
 /**
  * @author yuriyz on 7/24/14.
  */
-public class SkipPanelPresenter {
+public class RelevancePanelPresenter {
 
     private final FieldWidgetContainer fieldWidgetContainer;
-    private final SkipPanel view = new SkipPanel();
-    private final Map<SkipRow, SkipRowPresenter> map = Maps.newHashMap();
+    private final RelevancePanel view = new RelevancePanel();
+    private final Map<RelevanceRow, RelevanceRowPresenter> map = Maps.newHashMap();
     private final RowDataBuilder rowDataBuilder;
 
-    public SkipPanelPresenter(final FieldWidgetContainer fieldWidgetContainer) {
+    public RelevancePanelPresenter(final FieldWidgetContainer fieldWidgetContainer) {
         this.fieldWidgetContainer = fieldWidgetContainer;
         this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getFormClass());
 
         if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {
             List<RowData> build = rowDataBuilder.build(fieldWidgetContainer.getFormField().getRelevanceConditionExpression());
             for (RowData rowData : build) {
-                SkipRowPresenter skipRowPresenter = addRow(fieldWidgetContainer);
-                skipRowPresenter.updateWith(rowData);
+                RelevanceRowPresenter rowPresenter = addRow(fieldWidgetContainer);
+                rowPresenter.updateWith(rowData);
             }
         }
 
@@ -59,38 +59,38 @@ public class SkipPanelPresenter {
         }
     }
 
-    private SkipRowPresenter addRow(final FieldWidgetContainer fieldWidgetContainer) {
-        final SkipRowPresenter skipRowPresenter = new SkipRowPresenter(fieldWidgetContainer);
-        view.getRootPanel().add(skipRowPresenter.getView());
-        map.put(skipRowPresenter.getView(), skipRowPresenter);
+    private RelevanceRowPresenter addRow(final FieldWidgetContainer fieldWidgetContainer) {
+        final RelevanceRowPresenter rowPresenter = new RelevanceRowPresenter(fieldWidgetContainer);
+        view.getRootPanel().add(rowPresenter.getView());
+        map.put(rowPresenter.getView(), rowPresenter);
 
-        skipRowPresenter.getView().getAddButton().addClickHandler(new ClickHandler() {
+        rowPresenter.getView().getAddButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 addRow(fieldWidgetContainer);
             }
         });
-        skipRowPresenter.getView().getRemoveButton().addClickHandler(new ClickHandler() {
+        rowPresenter.getView().getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                view.getRootPanel().remove(skipRowPresenter.getView());
-                map.remove(skipRowPresenter.getView());
+                view.getRootPanel().remove(rowPresenter.getView());
+                map.remove(rowPresenter.getView());
                 setFirstRowJoinFunctionVisible();
             }
         });
 
         setFirstRowJoinFunctionVisible();
-        return skipRowPresenter;
+        return rowPresenter;
     }
 
     private void setFirstRowJoinFunctionVisible() {
         if (view.getRootPanel().getWidgetCount() > 0) { // disable join function for first row
-            SkipRow firstSkipRow = (SkipRow) view.getRootPanel().getWidget(0);
-            firstSkipRow.getJoinFunction().setVisible(false);
+            RelevanceRow firstRow = (RelevanceRow) view.getRootPanel().getWidget(0);
+            firstRow.getJoinFunction().setVisible(false);
         }
     }
 
-    public SkipPanel getView() {
+    public RelevancePanel getView() {
         return view;
     }
 
@@ -108,8 +108,8 @@ public class SkipPanelPresenter {
         final FormClass formClass = fieldWidgetContainer.getFormDesigner().getFormClass();
 
         for (int i = 0; i < widgetCount; i++) {
-            SkipRow skipRow = (SkipRow) view.getRootPanel().getWidget(i);
-            result.add(RowDataFactory.create(skipRow, map.get(skipRow).getValue(), formClass));
+            RelevanceRow row = (RelevanceRow) view.getRootPanel().getWidget(i);
+            result.add(RowDataFactory.create(row, map.get(row).getValue(), formClass));
         }
         return result;
     }

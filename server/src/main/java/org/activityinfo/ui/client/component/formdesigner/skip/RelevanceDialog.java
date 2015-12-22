@@ -33,28 +33,26 @@ import org.activityinfo.ui.client.widget.ModalDialog;
 /**
  * @author yuriyz on 7/23/14.
  */
-public class SkipDialog {
+public class RelevanceDialog {
 
     public static final int DIALOG_WIDTH = 900;
 //    public static final int DIALOG_HEIGHT = 800;
 
-    private final FieldWidgetContainer fieldWidgetContainer;
     private final FormField formField;
     private final ModalDialog dialog;
-    private final SkipPanelPresenter skipPanelPresenter;
+    private final RelevancePanelPresenter presenter;
 
-    public SkipDialog(final FieldWidgetContainer fieldWidgetContainer, final PropertiesPresenter propertiesPresenter) {
-        this.fieldWidgetContainer = fieldWidgetContainer;
+    public RelevanceDialog(final FieldWidgetContainer fieldWidgetContainer, final PropertiesPresenter propertiesPresenter) {
         this.formField = fieldWidgetContainer.getFormField();
-        this.skipPanelPresenter = new SkipPanelPresenter(fieldWidgetContainer);
-        this.dialog = new ModalDialog(skipPanelPresenter.getView());
+        this.presenter = new RelevancePanelPresenter(fieldWidgetContainer);
+        this.dialog = new ModalDialog(presenter.getView());
         this.dialog.setDialogTitle(I18N.CONSTANTS.defineRelevanceLogic());
         this.dialog.getDialogDiv().getStyle().setWidth(DIALOG_WIDTH, Style.Unit.PX);
 //        this.dialog.getDialogDiv().getStyle().setHeight(DIALOG_HEIGHT, Style.Unit.PX);
         this.dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                skipPanelPresenter.updateFormField();
+                presenter.updateFormField();
                 propertiesPresenter.setRelevanceState(formField, false);
                 dialog.hide();
             }

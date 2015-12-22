@@ -53,7 +53,7 @@ import org.activityinfo.ui.client.component.formdesigner.container.WidgetContain
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
-import org.activityinfo.ui.client.component.formdesigner.skip.SkipDialog;
+import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
 
 import java.util.List;
 
@@ -169,7 +169,7 @@ public class PropertiesPresenter {
         relevanceButtonClickHandler = view.getRelevanceButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                SkipDialog dialog = new SkipDialog(fieldWidgetContainer, PropertiesPresenter.this);
+                RelevanceDialog dialog = new RelevanceDialog(fieldWidgetContainer, PropertiesPresenter.this);
                 dialog.show();
             }
         });

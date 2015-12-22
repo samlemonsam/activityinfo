@@ -274,7 +274,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         clearButton.setVisible(state == State.LOADED && fieldWidgetMode == FieldWidgetMode.NORMAL);
     }
 
-    private void fireValueChanged() {
+    public void fireValueChanged() {
         AttachmentValue attachmentValue = new AttachmentValue();
         if (uploader.getAttachment() != null && !Strings.isNullOrEmpty(uploader.getAttachment().getBlobId())) {
             attachmentValue.getValues().add(uploader.getAttachment());

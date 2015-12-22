@@ -38,6 +38,10 @@ public class NullFieldWidget implements FormFieldWidget {
     }
 
     @Override
+    public void fireValueChanged() {
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
     }
 

@@ -122,7 +122,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
         }, MouseUpEvent.getType());
     }
 
-    private void fireValueChanged() {
+    public void fireValueChanged() {
         valueUpdater.update(updatedValue());
     }
 

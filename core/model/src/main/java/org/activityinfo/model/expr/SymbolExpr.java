@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
 public class SymbolExpr extends ExprNode {
 
     @Nonnull
-    private final String name;
+    private String name;
 
     public SymbolExpr(@Nonnull String name) {
         this.name = name;
@@ -56,6 +56,10 @@ public class SymbolExpr extends ExprNode {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(@Nonnull String name) {
+        this.name = name;
     }
 
     @Override

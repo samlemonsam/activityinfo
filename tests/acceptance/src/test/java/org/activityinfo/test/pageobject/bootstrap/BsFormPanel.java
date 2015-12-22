@@ -96,7 +96,7 @@ public class BsFormPanel extends Form {
         return current;
     }
 
-    public class BsField implements Form.FormItem {
+    public static class BsField implements Form.FormItem {
 
         private final FluentElement element;
 
@@ -142,6 +142,14 @@ public class BsFormPanel extends Form {
 
         public boolean isCheckBox() {
             return element.exists(By.className("checkbox"));
+        }
+
+        public void fill(String value, String controlType) {
+            if ("radio".equals(controlType)) {
+                select(value);
+            } else {
+                fill(value);
+            }
         }
 
         @Override
@@ -243,6 +251,9 @@ public class BsFormPanel extends Form {
             if (isCheckBox()) {
                 return !element.exists(By.className("checkbox-disabled"));
             }
+            if (isRadio()) {
+                return !element.exists(By.className("radio-disabled"));
+            }
             throw new UnsupportedOperationException();
         }
 
@@ -301,6 +312,18 @@ public class BsFormPanel extends Form {
                 return ControlType.SUGGEST_BOX;
             }
             return null;
+        }
+
+        public boolean isEmpty() {
+            if (isRadio()) {
+                for (String item : availableItems()) {
+                    if (isRadioSelected(item)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            throw new UnsupportedOperationException();
         }
 
         public boolean isBlobImageLoaded() {

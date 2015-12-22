@@ -299,7 +299,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 properties.put("expression", field.getString("expression"));
             }
 
-            properties.put("skipExpression", field.getString("skipExpression", ""));
+            properties.put("relevanceExpression", field.getString("relevanceExpression", ""));
 
             createEntityAndBindId("Indicator", properties);
         }

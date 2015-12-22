@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
@@ -30,6 +31,7 @@ import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yuriyz on 7/30/14.
@@ -38,6 +40,7 @@ public class RelevanceHandler {
 
     private final SimpleFormPanel simpleFormPanel;
     private List<FormField> fieldsWithSkipExpression = Lists.newArrayList();
+    private Set<FieldContainer> fieldsWithAppliedRelevance = Sets.newHashSet();
 
     public RelevanceHandler(SimpleFormPanel simpleFormPanel) {
         this.simpleFormPanel = simpleFormPanel;
@@ -57,7 +60,18 @@ public class RelevanceHandler {
                 ExprNode expr = parser.parse();
                 FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
                 if (fieldContainer != null) {
-                    fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance())));
+                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance()));
+                    fieldContainer.getFieldWidget().setReadOnly(!relevant);
+
+                    if (!relevant) {
+                        if (resettingValues) { // we are in resetting state -> handle nested relevance
+                            fieldContainer.getFieldWidget().clearValue();
+                            fieldContainer.getFieldWidget().fireValueChanged();
+                        }
+                        fieldsWithAppliedRelevance.add(fieldContainer);
+                    } else {
+                        fieldsWithAppliedRelevance.remove(fieldContainer);
+                    }
                 } else {
                     Log.error("Can't find container for fieldId: " + field.getId() + ", fieldName: " + field.getLabel() + ", expression: " + field.getRelevanceConditionExpression());
                 }
@@ -65,6 +79,20 @@ public class RelevanceHandler {
                 Log.error("Error: Unable to apply relevance logic. FieldId: " + field.getId() +
                         ", fieldName: " + field.getLabel() + ", expression: " + field.getRelevanceConditionExpression(), e);
             }
+        }
+    }
+
+    private boolean resettingValues = false;
+
+    public void resetValuesForFieldsWithAppliedRelevance() {
+        try {
+            resettingValues = true;
+            for (FieldContainer container : fieldsWithAppliedRelevance) {
+                container.getFieldWidget().clearValue();
+                container.getFieldWidget().fireValueChanged();
+            }
+        } finally {
+            resettingValues = false;
         }
     }
 

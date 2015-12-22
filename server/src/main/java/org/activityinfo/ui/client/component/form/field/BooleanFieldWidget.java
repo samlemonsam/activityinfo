@@ -36,15 +36,22 @@ import org.activityinfo.promise.Promise;
 public class BooleanFieldWidget implements FormFieldWidget<BooleanFieldValue> {
 
     private final CheckBox checkBox;
+    private final ValueUpdater valueUpdater;
 
     public BooleanFieldWidget(final ValueUpdater valueUpdater) {
+        this.valueUpdater = valueUpdater;
         this.checkBox = new CheckBox();
         this.checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                valueUpdater.update(event.getValue());
+                fireValueChanged();
             }
         });
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(checkBox.getValue());
     }
 
     @Override

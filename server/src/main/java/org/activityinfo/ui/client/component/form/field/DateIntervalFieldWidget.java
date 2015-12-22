@@ -39,15 +39,20 @@ public class DateIntervalFieldWidget implements FormFieldWidget<LocalDateInterva
         rootElement = ourUiBinder.createAndBindUi(this);
     }
 
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
+    }
+
     @UiHandler("startDateBox")
     public void onStartDateChanged(ValueChangeEvent<Date> event) {
-        valueUpdater.update(getValue());
+        fireValueChanged();
     }
 
 
     @UiHandler("endDateBox")
     public void onEndDateChanged(ValueChangeEvent<Date> event) {
-
+        fireValueChanged();
     }
 
     private LocalDateInterval getValue() {

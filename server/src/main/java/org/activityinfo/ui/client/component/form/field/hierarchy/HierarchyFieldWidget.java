@@ -42,6 +42,11 @@ public class HierarchyFieldWidget implements ReferenceFieldWidget {
     }
 
     @Override
+    public void fireValueChanged() {
+        this.presenter.fireValueChanged();
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         for(LevelView widget : widgets.values()) {
             widget.setReadOnly(readOnly);

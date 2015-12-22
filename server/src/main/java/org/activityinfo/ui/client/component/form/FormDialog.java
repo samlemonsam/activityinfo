@@ -122,6 +122,7 @@ public class FormDialog {
 
         dialog.getStatusLabel().setText(I18N.CONSTANTS.saving());
         dialog.getPrimaryButton().setEnabled(false);
+        formPanel.getRelevanceHandler().resetValuesForFieldsWithAppliedRelevance();
         resourceLocator.persist(formPanel.getInstance()).then(new AsyncCallback<Void>() {
 
             @Override

@@ -45,23 +45,32 @@ import java.util.Objects;
  */
 public class EnumSuggestBoxWidget implements FormFieldWidget<EnumValue> {
 
-    private ResourceId value;
     private final EnumType enumType;
     private final SuggestBox suggestBox;
+    private final ValueUpdater<EnumValue> valueUpdater;
+
+    private Suggestion selectedSuggestion = null;
+    private ResourceId value;
 
     public EnumSuggestBoxWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater) {
         this.enumType = enumType;
+        this.valueUpdater = valueUpdater;
         this.suggestBox = new SuggestBox(new EnumItemSuggestOracle(enumType.getValues()));
         this.suggestBox.setPlaceholder(I18N.CONSTANTS.suggestBoxPlaceholder());
         this.suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                Suggestion suggestion = (Suggestion) event.getSelectedItem();
-                if (!Objects.equals(suggestion.getId(), value)) {
-                    valueUpdater.update(new EnumValue(suggestion.getId()));
+                selectedSuggestion = (Suggestion) event.getSelectedItem();
+                if (!Objects.equals(selectedSuggestion.getId(), value)) {
+                    fireValueChanged();
                 }
             }
         });
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(selectedSuggestion != null ? new EnumValue(selectedSuggestion.getId()) : new EnumValue());
     }
 
     @Override

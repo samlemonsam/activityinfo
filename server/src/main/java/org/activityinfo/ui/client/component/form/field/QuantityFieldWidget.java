@@ -32,17 +32,21 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     private final FlowPanel panel;
     private final DoubleBox box;
     private final InlineLabel unitsLabel;
+    private final ValueUpdater<Quantity> valueUpdater;
+    private final QuantityType type;
 
     public QuantityFieldWidget(final QuantityType type, final ValueUpdater<Quantity> valueUpdater,
                                @Nullable EventBus eventBus, ResourceId fieldId) {
+        this.type = type;
         this.eventBus = eventBus;
         this.fieldId = fieldId;
+        this.valueUpdater = valueUpdater;
 
         box = new DoubleBox();
         box.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> event) {
-                valueUpdater.update(new Quantity(event.getValue(), type.getUnits()));
+                fireValueChanged();
             }
         });
         box.addKeyUpHandler(new KeyUpHandler() {
@@ -59,6 +63,11 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
         panel.setStyleName("input-group");
         panel.add(box);
         panel.add(unitsLabel);
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(new Quantity(box.getValue(), type.getUnits()));
     }
 
     @Override

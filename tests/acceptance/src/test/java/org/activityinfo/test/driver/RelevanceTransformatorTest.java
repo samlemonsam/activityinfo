@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.form.field;
+package org.activityinfo.test.driver;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,23 +21,24 @@ package org.activityinfo.ui.client.component.form.field;
  * #L%
  */
 
-import com.google.gwt.user.client.ui.IsWidget;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.promise.Promise;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- * @author yuriyz on 2/6/14.
+ * @author yuriyz on 12/22/2015.
  */
-public interface FormFieldWidget<T extends FieldValue> extends IsWidget {
+public class RelevanceTransformatorTest {
 
-    void setReadOnly(boolean readOnly);
+    @Test
+    public void test() {
+        AliasTable aliases = new AliasTable();
+        String genderAlias = aliases.createAlias("Gender");
+        String maleAlias = aliases.createAlias("Male");
 
-    Promise<Void> setValue(T value);
+        RelevanceTransformator transformator = new RelevanceTransformator(aliases);
+        String transformed = transformator.transform("Gender==Male");
 
-    void setType(FieldType type);
-
-    void clearValue();
-
-    void fireValueChanged();
+        System.out.println("Transformed expression: " + transformed);
+        Assert.assertEquals(String.format("{%s}=={%s}", genderAlias, maleAlias), transformed);
+    }
 }

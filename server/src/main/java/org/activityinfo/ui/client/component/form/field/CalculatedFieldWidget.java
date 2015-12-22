@@ -61,6 +61,10 @@ public class CalculatedFieldWidget implements FormFieldWidget<CalculatedValue> {
     }
 
     @Override
+    public void fireValueChanged() {
+    }
+
+    @Override
     public void setType(FieldType type) {
     }
 
