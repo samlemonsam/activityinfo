@@ -284,11 +284,11 @@ public class DataEntryTab {
                 .enterExcelData(dataTable);
 
         int size = dataTable.getGherkinRows().size();
-        Sleep.sleepMillis(100);
+        Sleep.sleepSeconds(3);
 
         importDialog.clickNextButton();
         //importDialog.enterMapping(createMapping(dataTable))
-        Sleep.sleepMillis(size * 10);
+        Sleep.sleepMillis(size * 10 + 3000);
 
         importDialog.clickNextButton();
         Sleep.sleepMillis(size * 10);
