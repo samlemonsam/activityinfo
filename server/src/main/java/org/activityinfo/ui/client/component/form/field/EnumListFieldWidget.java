@@ -27,6 +27,8 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -35,10 +37,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
@@ -46,7 +45,8 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.widget.RadioButton;
+import org.activityinfo.ui.client.widget.ButtonWithIcon;
+import org.activityinfo.ui.icons.Icons;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +106,9 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
         }
 
         panel = new FlowPanel();
+        if (enumType.getCardinality() == Cardinality.SINGLE) {
+            panel.add(createClearButton());
+        }
         panel.add(boxPanel);
         if (this.fieldWidgetMode == FieldWidgetMode.DESIGN) {
             panel.add(new HTML(TEMPLATES.addChoice("Add option")));
@@ -120,6 +123,27 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
                 }
             }
         }, MouseUpEvent.getType());
+    }
+
+    private Button createClearButton() {
+        final Button clearButton = new Button();
+        clearButton.setHTML(ButtonWithIcon.TEMPLATES.withIcon(Icons.INSTANCE.remove()));
+        clearButton.setStyleName("btn btn-default btn-xs pull-right");
+        clearButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                for (int i = 0; i < boxPanel.getWidgetCount(); i++) {
+                    Widget widget = boxPanel.getWidget(i);
+                    if (widget instanceof CheckBox) {
+                        CheckBox checkBox = (CheckBox) widget;
+                        if (checkBox.getValue() != null && checkBox.getValue()) {
+                            checkBox.setValue(false, true);
+                        }
+                    }
+                }
+            }
+        });
+        return clearButton;
     }
 
     public void fireValueChanged() {
@@ -195,7 +219,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     private CheckBox createControl(EnumItem instance) {
         CheckBox checkBox;
         if (enumType.getCardinality() == Cardinality.SINGLE) {
-            checkBox = new RadioButton(groupName, label(instance.getLabel()));
+            checkBox = new org.activityinfo.ui.client.widget.RadioButton(groupName, label(instance.getLabel()));
         } else {
             checkBox = new org.activityinfo.ui.client.widget.CheckBox(label(instance.getLabel()));
         }
