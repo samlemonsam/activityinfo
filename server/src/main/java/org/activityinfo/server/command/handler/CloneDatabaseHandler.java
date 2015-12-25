@@ -46,6 +46,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -319,7 +320,8 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
 
         if (fieldType instanceof QuantityType ||
                 fieldType instanceof CalculatedFieldType ||
-                fieldType instanceof LocalDateType) {
+                fieldType instanceof LocalDateType ||
+                fieldType instanceof AttachmentType) {
             return fieldType;
         }
 
