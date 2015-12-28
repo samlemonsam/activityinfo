@@ -31,7 +31,7 @@ import com.google.gwt.core.client.GWT;
 @Source("ValidationPage.less")
 public interface ValidationPageStyles extends Stylesheet {
 
-    public static final ValidationPageStyles INSTANCE = GWT.create(ValidationPageStyles.class);
+    ValidationPageStyles INSTANCE = GWT.create(ValidationPageStyles.class);
 
     @ClassName("state-ok")
     String stateOk();

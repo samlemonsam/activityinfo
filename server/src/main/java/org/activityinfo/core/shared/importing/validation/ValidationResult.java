@@ -1,16 +1,17 @@
 package org.activityinfo.core.shared.importing.validation;
 
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Pair;
-import org.activityinfo.core.shared.importing.strategy.InstanceScorer;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 
 public class ValidationResult {
 
-    public static enum State {
+    public enum State {
         OK, MISSING, ERROR, CONFIDENCE
     }
+
+    public static final double MINIMUM_PERSISTENCE_SCORE = 0.5;
 
     public static final ValidationResult MISSING = new ValidationResult(State.MISSING) {
     };
@@ -72,7 +73,7 @@ public class ValidationResult {
     }
 
     public boolean isPersistable() {
-        return state == State.OK || (state == State.CONFIDENCE && confidence >= InstanceScorer.MINIMUM_SCORE);
+        return state == State.OK || (state == State.CONFIDENCE && confidence >= MINIMUM_PERSISTENCE_SCORE);
     }
 
     public ResourceId getInstanceId() {
