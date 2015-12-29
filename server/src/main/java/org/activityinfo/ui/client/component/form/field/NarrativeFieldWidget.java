@@ -44,6 +44,11 @@ public class NarrativeFieldWidget implements FormFieldWidget<NarrativeValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return textArea.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(NarrativeValue value) {
         textArea.setValue(value.getText());
         return Promise.done();

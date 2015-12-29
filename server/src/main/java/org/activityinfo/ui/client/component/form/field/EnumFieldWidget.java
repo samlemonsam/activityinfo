@@ -44,6 +44,11 @@ public class EnumFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return widget.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(EnumValue value) {
         return widget.setValue(value);
     }

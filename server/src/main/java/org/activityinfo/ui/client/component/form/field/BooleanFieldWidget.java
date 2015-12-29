@@ -60,6 +60,11 @@ public class BooleanFieldWidget implements FormFieldWidget<BooleanFieldValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return !checkBox.isEnabled();
+    }
+
+    @Override
     public Promise<Void> setValue(BooleanFieldValue value) {
         checkBox.setValue(value.asBoolean());
         return Promise.done();

@@ -79,6 +79,11 @@ public class EnumSuggestBoxWidget implements FormFieldWidget<EnumValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return !suggestBox.isEnabled();
+    }
+
+    @Override
     public Promise<Void> setValue(EnumValue value) {
         ResourceId newValue = Iterables.getFirst(value.getResourceIds(), null);
         if (!Objects.equals(newValue, this.value)) {

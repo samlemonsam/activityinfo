@@ -288,6 +288,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     @Override
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    @Override
     public Promise<Void> setValue(AttachmentValue value) {
         clearValue();
 

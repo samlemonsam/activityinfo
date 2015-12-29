@@ -80,6 +80,11 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return !suggestBox.isEnabled();
+    }
+
+    @Override
     public Promise<Void> setValue(ReferenceValue value) {
         ResourceId newValue = Iterables.getFirst(value.getResourceIds(), null);
         if(!Objects.equals(newValue, this.value)) {

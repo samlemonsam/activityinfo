@@ -109,6 +109,11 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return dateBox.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(LocalDate value) {
         dateBox.setValue(value.atMidnightInMyTimezone());
         return Promise.done();

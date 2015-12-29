@@ -33,6 +33,8 @@ public interface FormFieldWidget<T extends FieldValue> extends IsWidget {
 
     void setReadOnly(boolean readOnly);
 
+    boolean isReadOnly();
+
     Promise<Void> setValue(T value);
 
     void setType(FieldType type);

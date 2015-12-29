@@ -71,6 +71,11 @@ public class EnumComboboxWidget implements FormFieldWidget<EnumValue> {
         dropBox.setEnabled(!readOnly);
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return !dropBox.isEnabled();
+    }
+
     private EnumValue updatedValue() {
         Set<ResourceId> value = Sets.newHashSet();
         for (int i = 0; i < dropBox.getItemCount(); i++) {

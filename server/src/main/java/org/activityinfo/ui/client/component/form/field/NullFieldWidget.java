@@ -46,6 +46,11 @@ public class NullFieldWidget implements FormFieldWidget {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
+    @Override
     public Promise<Void> setValue(FieldValue value) {
         return null;
     }

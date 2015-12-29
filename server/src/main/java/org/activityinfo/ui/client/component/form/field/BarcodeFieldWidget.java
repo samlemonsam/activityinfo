@@ -50,6 +50,11 @@ public class BarcodeFieldWidget implements FormFieldWidget<BarcodeValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return box.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(BarcodeValue value) {
         box.setValue(value.getCode());
         return Promise.done();
