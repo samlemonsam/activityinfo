@@ -240,7 +240,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             return validatedBuiltInDates.get();
         }
 
-        if (field.isRequired() && isEmpty(value) && field.isVisible()) { // if field is not visible user doesn't have chance to fix it
+        if (field.isRequired() && isEmpty(value) && field.isVisible() && !container.getFieldWidget().isReadOnly()) { // if field is not visible user doesn't have chance to fix it
             container.setInvalid(I18N.CONSTANTS.requiredFieldMessage());
             return false;
         } else {

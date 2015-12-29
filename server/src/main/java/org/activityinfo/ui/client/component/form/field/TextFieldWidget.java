@@ -48,6 +48,11 @@ public class TextFieldWidget implements FormFieldWidget<TextValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return box.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(TextValue value) {
         box.setValue(value.toString());
         return Promise.done();

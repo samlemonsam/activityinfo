@@ -89,6 +89,11 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return latitudeBox.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(GeoPoint value) {
         latitudeBox.setValue(value.getLatitude());
         longitudeBox.setValue(value.getLongitude());

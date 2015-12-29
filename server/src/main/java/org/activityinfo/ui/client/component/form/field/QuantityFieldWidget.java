@@ -76,6 +76,11 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return box.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(Quantity value) {
         box.setValue(value != null ? value.getValue() : null);
         return Promise.done();

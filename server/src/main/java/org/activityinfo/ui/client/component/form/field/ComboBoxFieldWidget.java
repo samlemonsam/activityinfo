@@ -73,6 +73,11 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
         dropBox.setEnabled(!readOnly);
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return !dropBox.isEnabled();
+    }
+
     private ReferenceValue updatedValue() {
         Set<ResourceId> value = Sets.newHashSet();
         int selectedIndex = dropBox.getSelectedIndex();

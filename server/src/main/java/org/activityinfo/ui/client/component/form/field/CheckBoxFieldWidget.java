@@ -54,6 +54,7 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
     private final FlowPanel panel;
     private final List<CheckBox> controls;
     private final ValueUpdater valueUpdater;
+    private boolean readOnly;
 
     public CheckBoxFieldWidget(ReferenceType type, List<FormInstance> range, final ValueUpdater valueUpdater) {
         this.valueUpdater = valueUpdater;
@@ -105,10 +106,18 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
 
     @Override
     public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+
         for (CheckBox control : controls) {
             control.setEnabled(!readOnly);
         }
     }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
 
     private ReferenceValue updatedValue() {
         final Set<ResourceId> value = Sets.newHashSet();

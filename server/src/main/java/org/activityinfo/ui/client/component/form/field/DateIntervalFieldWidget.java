@@ -76,6 +76,11 @@ public class DateIntervalFieldWidget implements FormFieldWidget<LocalDateInterva
     }
 
     @Override
+    public boolean isReadOnly() {
+        return startDateBox.isReadOnly();
+    }
+
+    @Override
     public Promise<Void> setValue(LocalDateInterval value) {
         startDateBox.setValue(value.getStartDate().atMidnightInMyTimezone());
         endDateBox.setValue(value.getEndDate().atMidnightInMyTimezone());

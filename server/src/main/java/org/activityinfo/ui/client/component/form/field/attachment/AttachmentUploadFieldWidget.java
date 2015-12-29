@@ -246,6 +246,11 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
     }
 
     @Override
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    @Override
     public Promise<Void> setValue(AttachmentValue value) {
         if (value != null && value.getValues() != null && value.getValues().size() > 0) {
             rows.clear();

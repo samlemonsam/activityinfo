@@ -78,6 +78,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     private EnumType enumType;
 
     private String groupName;
+    private boolean readOnly;
 
     private final FlowPanel panel;
     private final FlowPanel boxPanel;
@@ -231,9 +232,16 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
 
     @Override
     public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+
         for (CheckBox control : controls) {
             control.setEnabled(!readOnly);
         }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     private EnumValue updatedValue() {
