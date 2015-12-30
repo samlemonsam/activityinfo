@@ -22,7 +22,9 @@ package org.activityinfo.ui.client.util;
  */
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -134,5 +136,17 @@ public class GwtUtil {
             return descendant;
         }
         return null;
+    }
+
+    public static void addTooltipToOptions(ListBox listbox) {
+        addTooltip(listbox.getElement(), "option");
+    }
+
+    public static void addTooltip(Element containerElement, String tagToSearch) {
+        NodeList<Element> elements = containerElement.getElementsByTagName(tagToSearch);
+        for (int i = 0; i < elements.getLength(); i++) {
+            Element item = elements.getItem(i);
+            item.setTitle(item.getInnerText());
+        }
     }
 }
