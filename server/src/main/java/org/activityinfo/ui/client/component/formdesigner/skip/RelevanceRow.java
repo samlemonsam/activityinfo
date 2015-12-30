@@ -25,6 +25,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.ui.client.widget.ChosenListBox;
 
 /**
  * @author yuriyz on 7/24/14.
@@ -45,7 +46,7 @@ public class RelevanceRow extends Composite {
     @UiField
     ListBox function;
     @UiField
-    ListBox formfield;
+    ChosenListBox formfield;
     @UiField
     HTMLPanel skipGroup;
     @UiField
@@ -71,7 +72,7 @@ public class RelevanceRow extends Composite {
         return function;
     }
 
-    public ListBox getFormfield() {
+    public ChosenListBox getFormfield() {
         return formfield;
     }
 
