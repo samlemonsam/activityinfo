@@ -44,6 +44,7 @@ import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.util.GwtUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -133,9 +134,7 @@ public class RelevanceRowPresenter {
             view.getFormfield().addItem(formField.getLabel(), formField.getId().asString());
         }
 
-        if (!formFields.isEmpty()) {
-            view.getFormfield().setSelectedIndex(0);
-        }
+        GwtUtil.addTooltipToOptions(view.getFormfield().getElement(), 100, formFields);
 
         view.getFormfield().addChangeHandler(new ChangeHandler() {
             @Override

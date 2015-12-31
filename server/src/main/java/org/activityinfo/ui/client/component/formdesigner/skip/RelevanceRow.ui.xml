@@ -13,8 +13,7 @@
         <g:ListBox addStyleNames="form-control" ui:field="joinFunction"/>
       </div>
       <div class="col-xs-4">
-        <a:ChosenListBox ui:field="formfield" visibleItemCount="10" multipleSelect="false"
-                            allowSingleDeselect="true"/>
+        <g:ListBox addStyleNames="form-control" ui:field="formfield"/>
       </div>
       <div class="col-xs-2">
         <g:ListBox addStyleNames="form-control" ui:field="function"/>
