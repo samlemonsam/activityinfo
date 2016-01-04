@@ -58,6 +58,11 @@ public class SiteProjector implements Function<ListResult<SiteDTO>, List<Project
     public List<Projection> apply(ListResult<SiteDTO> input) {
         List<Projection> projections = Lists.newArrayList();
         for (SiteDTO site : input.getData()) {
+
+            if (site.isLinked()) {
+                continue; // we do not support linked sites right now on new UI
+            }
+
             Projection projection = new Projection(site.getInstanceId(), site.getFormClassId());
             for (ProjectionUpdater<PartnerDTO> projector : partnerProjectors) {
                 projector.update(projection, site.getPartner());
