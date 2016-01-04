@@ -81,17 +81,18 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 fireValueChanged();
-                validate();
             }
         });
     }
 
     @Override
     public void fireValueChanged() {
-        valueUpdater.update(getValue());
+        if (validate()) {
+            valueUpdater.update(getValue());
+        }
     }
 
-    private void validate() {
+    private boolean validate() {
         // reset first
         boxWrapper.removeStyleName("has-error");
         errorMessages.addClassName("hide");
@@ -109,7 +110,7 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
             for (SymbolExpr placeholderExpr : symbolExprList) {
                 if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
                     showError(I18N.MESSAGES.doesNotExist(placeholderExpr.getName()));
-                    return;
+                    return false;
                 }
             }
         } catch (Exception e) {
@@ -117,7 +118,9 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
 
             // expression is invalid
             showError(I18N.CONSTANTS.calculationExpressionIsInvalid());
+            return false;
         }
+        return true;
     }
 
     private void showError(String errorMessage) {
