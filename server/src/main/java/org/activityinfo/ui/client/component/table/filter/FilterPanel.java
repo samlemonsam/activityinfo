@@ -87,7 +87,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
                 forcePopupToBeVisible();
 
-                filterContent = FilterContentFactory.create(column, table);
+                filterContent = FilterContentFactory.create(column, table, FilterPanel.this);
                 loadingPanel.setDisplayWidget(new DisplayWidget() {
                     @Override
                     public Promise<Void> show(Object value) {
@@ -113,8 +113,17 @@ public class FilterPanel extends Composite implements HasCriteria {
         });
     }
 
-    private void forcePopupToBeVisible() {
-        final Rectangle bsContainerRectangle = GwtUtil.getBsContainerRectangle(okButton.getElement());
+    public void forcePopupToBeVisibleLater() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                forcePopupToBeVisible();
+            }
+        });
+    }
+
+    public void forcePopupToBeVisible() {
+        final Rectangle bsContainerRectangle = GwtUtil.getBsContainerRectangle(table.getTable().getElement());
         final Rectangle elementRectangle = GwtUtil.getRectangle(okButton.getElement());
 
         //GWT.log("element: " + elementRectangle + ", bs container: " + bsContainerRectangle);

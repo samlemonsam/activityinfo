@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -71,7 +72,7 @@ import java.util.SortedMap;
  */
 public class FilterContentExistingItems extends Composite implements FilterContent {
 
-    public static final String FILTER_GRID_HEIGHT = "250px";
+    public static final int FILTER_GRID_HEIGHT = 250;
     public static final int CHECKBOX_COLUMN_WIDTH = 20;
 
     /**
@@ -90,6 +91,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
     private final FieldColumn column;
     private final DataGrid<Projection> filterGrid;
+
     private List<Projection> allItems;
     private ValueChangeHandler changeHandler;
 
@@ -104,7 +106,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     @UiField
     SpanElement messageSpan;
 
-    public FilterContentExistingItems(final FieldColumn column, final InstanceTable table) {
+    public FilterContentExistingItems(final FieldColumn column, final InstanceTable table, final FilterPanel popup) {
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -130,7 +132,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         filterGrid.addColumn(checkColumn);
         filterGrid.addColumn(column);
         filterGrid.setColumnWidth(checkColumn, CHECKBOX_COLUMN_WIDTH, Style.Unit.PX);
-        filterGrid.setHeight(FILTER_GRID_HEIGHT);
+        filterGrid.setHeight(FILTER_GRID_HEIGHT + "px");
         filterGrid.setAutoHeaderRefreshDisabled(true);
         filterGrid.setAutoFooterRefreshDisabled(true);
 
@@ -155,6 +157,15 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
                 filterData();
                 initByCriteriaVisit();
+
+                Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        popup.forcePopupToBeVisibleLater();
+                        return false;
+                    }
+                }, 1000);
+
                 return Promise.done();
             }
 
