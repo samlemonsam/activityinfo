@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.component.table;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 import org.activityinfo.core.client.InstanceQuery;
@@ -189,6 +190,17 @@ public class InstanceTableDataLoader {
         tableDataProvider.getList().addAll(result.getProjections());
 
         InstanceTableDataLoader.this.instanceTotalCount = result.getTotalCount();
+
+        refreshTableActionsState();
+    }
+
+    private void refreshTableActionsState() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                table.getTable().redrawHeaders();
+            }
+        });
     }
 
     private void prefetch() {

@@ -90,6 +90,7 @@ public class DeleteAction implements ConfirmDialog.Action {
 
     @Override
     public void onComplete() {
+        tableView.getTable().getSelectionModel().clear();
         tableView.getTable().reload();
     }
 }
