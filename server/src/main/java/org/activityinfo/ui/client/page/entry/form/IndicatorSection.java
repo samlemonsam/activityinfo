@@ -32,6 +32,7 @@ import com.extjs.gxt.ui.client.widget.form.*;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.extjs.gxt.ui.client.widget.layout.TableLayout;
 import com.extjs.gxt.ui.client.widget.tips.ToolTipConfig;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
@@ -121,6 +122,19 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
     }
 
     private Field addIndicatorField(IndicatorDTO indicator, FieldTypeClass type) {
+        NumberField numberField = new NumberField() {
+            @Override
+            public String getRawValue() {
+                String rawValue = super.getRawValue();
+                if (Strings.isNullOrEmpty(rawValue)) {
+                    if (value != null) {
+                        return propertyEditor.getStringValue(value);
+                    }
+                }
+                return rawValue;
+            }
+        };
+
         if (type == FieldTypeClass.NARRATIVE) {
 
             TextArea textArea = new TextArea();
@@ -135,8 +149,6 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
             add(new Text()); // avoid layout shift
             return textArea;
         } else if (type == FieldTypeClass.QUANTITY) {
-            NumberField numberField = new NumberField();
-
             numberField.setFormat(IndicatorNumberFormat.INSTANCE);
             numberField.setWidth(NUMBER_FIELD_WIDTH);
             numberField.setStyleAttribute("textAlign", "right");
@@ -169,7 +181,7 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
             add(new Text()); // avoid layout shift
             return checkBox;
         }
-        return new NumberField();
+        return numberField;
     }
 
     @Override

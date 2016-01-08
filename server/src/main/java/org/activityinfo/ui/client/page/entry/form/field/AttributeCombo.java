@@ -60,7 +60,6 @@ public class AttributeCombo extends ComboBox<AttributeDTO> implements AttributeF
     public String getRawValue() {
         String rawValue = super.getRawValue();
         if (Strings.isNullOrEmpty(rawValue)) {
-            AttributeDTO value = getValue();
             if (value != null) {
                 setRawValue(value.getName());
                 return value.getName();
