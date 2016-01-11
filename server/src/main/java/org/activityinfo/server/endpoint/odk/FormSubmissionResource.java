@@ -1,6 +1,7 @@
 package org.activityinfo.server.endpoint.odk;
 
 import com.google.api.client.util.Maps;
+import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
@@ -128,12 +129,21 @@ public class FormSubmissionResource {
                 Optional<Element> nameField = instance.getFieldContent(field(formClass.getId(), LOCATION_NAME_FIELD));
 
                 if (fieldType instanceof ReferenceType && gpsField.isPresent() && nameField.isPresent()) {
+
                     ResourceId locationFieldId = field(formClass.getId(), LOCATION_FIELD);
                     int newLocationId = new KeyGenerator().generateInt();
                     ResourceId locationFormClassId = Iterables.getOnlyElement(((ReferenceType) fieldType).getRange());
                     int locationTypeId = getLegacyIdFromCuid(locationFormClassId);
                     FieldValue fieldValue = new ReferenceValue(locationInstanceId(newLocationId));
                     String name = OdkHelper.extractText(nameField.get());
+
+                    if (Strings.isNullOrEmpty(name)) {
+                        throw new WebApplicationException(
+                                Response.status(BAD_REQUEST).
+                                        entity("Name value for location field is blank. ").
+                                        build());
+                    }
+
                     GeoPoint geoPoint = parseLocation(gpsField.get(), legacy);
 
                     formInstance.set(locationFieldId, fieldValue);

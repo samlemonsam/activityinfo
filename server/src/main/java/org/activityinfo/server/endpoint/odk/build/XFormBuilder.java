@@ -213,6 +213,7 @@ public class XFormBuilder {
         Bind bind = new Bind();
         bind.setNodeSet("/data/field_" + locationNameFieldId.asString());
         bind.setType(BindingType.STRING);
+        bind.setRequired(XPathBuilder.TRUE);
         return bind;
     }
 
@@ -227,6 +228,7 @@ public class XFormBuilder {
         FormField formField = new FormField(locationNameFieldId);
         formField.setType(TextType.INSTANCE);
         formField.setLabel(original.getLabel());
+        formField.setRequired(original.isRequired());
         return new OdkField(formField, factory.get(formField.getType()));
     }
 
