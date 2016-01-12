@@ -67,7 +67,7 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
 
     @Override
     public void fireValueChanged() {
-        valueUpdater.update(new Quantity(box.getValue(), type.getUnits()));
+        valueUpdater.update(box.getValue() != null ? new Quantity(box.getValue(), type.getUnits()) : null);
     }
 
     @Override

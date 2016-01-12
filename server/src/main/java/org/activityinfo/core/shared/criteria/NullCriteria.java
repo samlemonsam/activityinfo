@@ -30,4 +30,9 @@ public class NullCriteria implements Criteria {
     public boolean apply(@Nonnull Projection projection) {
         return true;
     }
+
+    @Override
+    public Criteria copy() {
+        return INSTANCE;
+    }
 }

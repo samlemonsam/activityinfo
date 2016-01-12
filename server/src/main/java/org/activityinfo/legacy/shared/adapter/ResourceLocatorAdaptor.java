@@ -154,6 +154,8 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<List<Projection>> query(final InstanceQuery query) {
+        query.setCriteria(query.getCriteria().copy()); // we don't want to modify original criteria to preserve data
+
         Joiner joiner = new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria());
         if (query.isFilterQuery()) {
             // table filter : fetching unique values for given column

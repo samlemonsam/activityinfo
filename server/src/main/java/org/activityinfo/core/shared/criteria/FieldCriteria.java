@@ -53,6 +53,11 @@ public class FieldCriteria implements Criteria {
         return Objects.equals(input.getValue(fieldPath), value);
     }
 
+    @Override
+    public Criteria copy() {
+        return new FieldCriteria(fieldPath, value);
+    }
+
     public ResourceId getFieldId() {
         return fieldPath.getRoot();
     }

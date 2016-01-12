@@ -91,6 +91,8 @@ public class RelevanceHandler {
                 container.getFieldWidget().clearValue();
                 container.getFieldWidget().fireValueChanged();
             }
+        } catch (Exception e) {
+            Log.error("Failed to reset values for fields with applied relevance");
         } finally {
             resettingValues = false;
         }
