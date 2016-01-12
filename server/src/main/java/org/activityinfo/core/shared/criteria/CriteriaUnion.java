@@ -55,7 +55,7 @@ public class CriteriaUnion implements Criteria, Iterable<Criteria>  {
         for (Criteria criteria : elements) {
             copy.add(criteria.copy());
         }
-        return new CriteriaIntersection(copy);
+        return new CriteriaUnion(copy);
     }
 
     public Collection<Criteria> getElements() {
