@@ -30,13 +30,18 @@ public class ClassCriteria implements Criteria {
 
 
     @Override
-    public boolean apply(FormInstance input) {
+    public boolean apply(@Nonnull FormInstance input) {
         return classId.equals(input.getClassId());
     }
 
     @Override
     public boolean apply(@Nonnull Projection projection) {
         return classId.equals(projection.getRootClassId());
+    }
+
+    @Override
+    public Criteria copy() {
+        return new ClassCriteria(classId);
     }
 
     public static Criteria union(Set<ResourceId> range) {

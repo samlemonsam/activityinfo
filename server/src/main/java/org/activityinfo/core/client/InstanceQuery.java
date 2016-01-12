@@ -16,7 +16,7 @@ public class InstanceQuery {
     private final static int FALLBACK_MAX_COUNT = 100;
 
     private final List<FieldPath> fieldPaths;
-    private final Criteria criteria;
+    private Criteria criteria;
     private final int offset;
     private final int maxCount;
 
@@ -54,6 +54,10 @@ public class InstanceQuery {
 
     public Criteria getCriteria() {
         return criteria;
+    }
+
+    public void setCriteria(Criteria criteria) {
+        this.criteria = criteria;
     }
 
     public FieldPath getFilterFieldPath() {

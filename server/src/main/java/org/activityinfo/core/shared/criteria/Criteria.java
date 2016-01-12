@@ -18,5 +18,6 @@ public interface Criteria {
 
     boolean apply(@Nonnull Projection projection);
 
+    Criteria copy();
 
 }

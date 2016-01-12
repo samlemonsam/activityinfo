@@ -42,6 +42,11 @@ public class ParentCriteria implements Criteria {
         return true;
     }
 
+    @Override
+    public Criteria copy() {
+        return new ParentCriteria(parentId);
+    }
+
     public static ParentCriteria isRoot() {
         return new ParentCriteria(null);
     }
