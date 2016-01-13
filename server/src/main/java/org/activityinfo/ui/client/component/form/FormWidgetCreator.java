@@ -44,8 +44,8 @@ import java.util.Map;
  */
 public class FormWidgetCreator {
 
-    public static interface FieldUpdated {
-        public void onFieldUpdated(FormField field, FieldValue newValue);
+    public interface FieldUpdated {
+        void onFieldUpdated(FormField field, FieldValue newValue);
     }
 
     private final FieldContainerFactory containerFactory;
@@ -73,7 +73,6 @@ public class FormWidgetCreator {
     }
 
     public Promise<Void> createWidgets(final FormClass formClass, final FieldUpdated fieldUpdated) {
-        final String resourceId = model.getWorkingRootInstance().getId().asString();
         List<Promise<Void>> promises = Lists.newArrayList();
         for (final FormField field : formClass.getFields()) {
             if (field.isVisible()) {
@@ -82,7 +81,7 @@ public class FormWidgetCreator {
                     promises.add(subFormWidgetsPromise);
                 } else {
 
-                    Promise<Void> promise = widgetFactory.createWidget(resourceId, formClass, field, new ValueUpdater<FieldValue>() {
+                    Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
                         @Override
                         public void update(FieldValue value) {
                             fieldUpdated.onFieldUpdated(field, value);

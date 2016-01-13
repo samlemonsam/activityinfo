@@ -58,9 +58,9 @@ public class RelevanceHandler {
                 ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
                 ExprParser parser = new ExprParser(lexer);
                 ExprNode expr = parser.parse();
-                FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
+                FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
                 if (fieldContainer != null) {
-                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance()));
+                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getModel().getRootFormClass(), simpleFormPanel.getModel().getWorkingRootInstance()));
                     fieldContainer.getFieldWidget().setReadOnly(!relevant);
 
                     if (!relevant) {
