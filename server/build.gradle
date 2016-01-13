@@ -1,4 +1,6 @@
 
+evaluationDependsOn ":ui:app"
+
 apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'appengine'
@@ -32,7 +34,17 @@ gwt {
         }
     } else {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
+                'org.activityinfo.ui.ActivityInfoReleaseLogging',
                 'org.activityinfo.ui.Embed'
+//        compiler {
+//            style = de.richsource.gradle.plugins.gwt.Style.DETAILED;
+//        }
+    }
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.gwt ]
     }
 }
 
@@ -54,6 +66,7 @@ war {
         return !file.name.startsWith('guava-gwt') &&
                 !file.name.startsWith('gwt-user')
     }
+    from project(':ui:app').tasks.getByName('compileGwt').outputs
     exclude("**/*.symbolMap")
 }
 
@@ -95,6 +108,7 @@ compileJava {
 }
 
 processResources {
+    inputs.property "project.version", project.version.toString()
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
             .replace('$[git.commit.id]', commitId)
@@ -109,6 +123,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     appCacheDownloadSizeLimit "2000kb"
 }
 
+tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
@@ -142,12 +157,12 @@ task downloadBuild {
 task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     description = "Deploys a build to the staging environment"
     
-    if(project.buildNumber != 'dev') {
-        dependsOn downloadBuild
-        explodedAppDirectory = project.file(downloadBuild.warDir)
-    } else {
+//    if(project.buildNumber != 'dev') {
+//        dependsOn downloadBuild
+//        explodedAppDirectory = project.file(downloadBuild.warDir)
+//    } else {
         dependsOn 'appengineExplodeApp'
-    }
+//    }
     
     dependsOn appengineDownloadSdk
 
@@ -163,32 +178,22 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
 }
 
 
+
+appengineUpdateQueues {
+    extraOptions = ["--application=${environment.projectId}" ]
+    oauth2 = true
+
+    doFirst {
+        if(environment.local) {
+            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
+        }
+    }
+}
+
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"
     dependsOn appengineDownloadSdk
 
     extraOptions = ["--application=${environment.projectId}", '--version=1']
     oauth2 = true
-}
-
-// Define an i18n jar containing only the localized strings
-// so they can be used by the acceptance tests.
-// Only necessary until we've merged with the beta branch
-// where we have this is as a seperate module
-configurations {
-    i18n
-}
-
-task i18nJar(type: Jar, dependsOn: compileJava) {
-    classifier 'i18n'
-    from(sourceSets.main.output.classesDir) {
-        include 'org/activityinfo/i18n/**/*'
-    }
-    from(sourceSets.main.resources) {
-        include 'org/activityinfo/i18n/**/*'
-    }
-}
-
-artifacts {
-    i18n i18nJar
 }

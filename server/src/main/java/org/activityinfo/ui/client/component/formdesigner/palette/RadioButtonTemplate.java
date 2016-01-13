@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.component.formdesigner.palette;
 
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -13,7 +14,7 @@ public class RadioButtonTemplate implements FieldTemplate {
 
     @Override
     public String getLabel() {
-        return "Dropdown/Radio";
+        return I18N.CONSTANTS.singleSelection();
     }
 
     @Override

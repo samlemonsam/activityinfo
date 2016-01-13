@@ -55,4 +55,9 @@ public class IdCriteria implements Criteria {
         this.mappedToLegacyModel = mappedToLegacyModel;
         return this;
     }
+
+    @Override
+    public Criteria copy() {
+        return new IdCriteria(instanceIds);
+    }
 }

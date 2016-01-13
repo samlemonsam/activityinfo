@@ -27,6 +27,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.promise.Promise;
 
@@ -80,6 +81,7 @@ public class FormDesignerActions {
 
             @Override
             public void onSuccess(Void result) {
+                formDesignerPanel.getSaveButton().setText(I18N.CONSTANTS.save());
                 formDesignerPanel.getSaveButton().setEnabled(true);
                 formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saved());
                 formDesigner.getSavedGuard().setSaved(true);
@@ -94,6 +96,8 @@ public class FormDesignerActions {
     }
 
     private void showFailureDelayed(final Throwable caught) {
+        Log.error(caught.getMessage(), caught);
+
         // Show failure message only after a short fixed delay to ensure that
         // the progress stage is displayed. Otherwise if we have a synchronous error, clicking
         // the retry button will look like it's not working.

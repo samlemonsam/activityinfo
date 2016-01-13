@@ -36,7 +36,7 @@ Feature: Indicator Targets API
         indicatorId: ${Advocacy conducted USD}
         changes:
           value: 11996
-      """
+      """ 
     Then the response should be 204 No Content
     When I execute the command:
       """

@@ -22,14 +22,14 @@ package org.activityinfo.server.command;
  * #L%
  */
 
-import junit.framework.Assert;
+import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static junit.framework.Assert.*;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
@@ -50,9 +52,6 @@ public class TargetTest extends CommandTestCase {
     @Before
     public void setUser() {
         setUser(DATABASE_OWNER);
-        /*
-         * Initial data load
-         */
 
         SchemaDTO schema = execute(new GetSchema());
         db = schema.getDatabaseById(1);
@@ -61,41 +60,40 @@ public class TargetTest extends CommandTestCase {
     @Test
     public void testTarget() throws CommandException {
 
-        /*
-         * Create a new Target
-         */
-
         TargetDTO target = createTarget();
 
         CreateResult cresult = execute(new AddTarget(db.getId(), target));
 
         int newId = cresult.getNewId();
 
-        /*
-         * Load Targets to verify the changes have stuck
-         */
-
         List<TargetDTO> targets = execute(new GetTargets(db.getId())).getData();
 
         TargetDTO dto = getTargetById(targets, newId);
 
-        Assert.assertNotNull(dto);
-        Assert.assertEquals("name", "Target0071", dto.getName());
+        assertNotNull(dto);
+        assertEquals("name", "Target0071", dto.getName());
     }
 
     @Test
-    public void updateTargetNameTest() throws Throwable {
+    public void updateTarget() throws Throwable {
 
-        Map<String, Object> changes1 = new HashMap<String, Object>();
-        changes1.put("name", "newNameOfTarget");
+        LocalDate toDate = new LocalDate(2015, 3, 3);
+        LocalDate fromDate = new LocalDate(2015, 3, 4);
 
-        execute(new BatchCommand(new UpdateEntity("Target", 1, changes1)));
+        Map<String, Object> changes = new HashMap<String, Object>();
+        changes.put("name", "newNameOfTarget");
+        changes.put("toDate", toDate);
+        changes.put("fromDate", fromDate);
+
+        execute(new BatchCommand(new UpdateEntity("Target", 1, changes)));
 
         List<TargetDTO> targets = execute(new GetTargets(db.getId())).getData();
 
         TargetDTO dto = getTargetById(targets, 1);
 
-        Assert.assertEquals("newNameOfTarget", dto.getName());
+        assertEquals("newNameOfTarget", dto.getName());
+        assertEquals(fromDate, dto.getFromDate());
+        assertEquals(toDate, dto.getToDate());
     }
 
     @Test
@@ -107,45 +105,29 @@ public class TargetTest extends CommandTestCase {
 
         int newId = cresult.getNewId();
 
-        /*
-         * Load Targets to verify the changes have stuck
-         */
-
         List<TargetDTO> targets = execute(new GetTargets(db.getId())).getData();
 
         TargetDTO dto = getTargetById(targets, newId);
 
-        Assert.assertEquals("name", "Target0071", dto.getName());
-
-        /*
-         * Delete new target now
-         */
+        assertEquals("name", "Target0071", dto.getName());
 
         execute(new Delete(dto));
-
-        /*
-         * Verify if target is deleted.
-         */
 
         targets = execute(new GetTargets()).getData();
 
         TargetDTO deleted = getTargetById(targets, newId);
 
-        Assert.assertNull(deleted);
-
+        assertNull(deleted);
     }
 
     private TargetDTO createTarget() {
         Date date1 = new Date();
         Date date2 = new Date();
-        /*
-         * Create a new Target
-         */
 
         TargetDTO target = new TargetDTO();
         target.setName("Target0071");
-        target.setDate1(date1);
-        target.setDate2(date2);
+        target.setFromDate(date1);
+        target.setToDate(date2);
 
         return target;
     }

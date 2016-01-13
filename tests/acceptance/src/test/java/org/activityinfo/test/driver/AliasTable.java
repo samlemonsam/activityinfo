@@ -6,17 +6,25 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mysql.jdbc.StringUtils;
+import com.google.common.collect.Sets;
 import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.util.Pair;
+import org.activityinfo.test.pageobject.bootstrap.ChooseColumnsDialog;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static java.util.Arrays.asList;
 
 /**
  * Maintains a mapping between human-readable "test handles" and their unique aliases
@@ -190,8 +198,8 @@ public class AliasTable {
         return text.contains("_") ? text.substring(0, text.indexOf("_")).trim() : text;
     }
 
-    public static List<String> deAliasEnumValueSplittedByComma(String text) {
-        List<String> split = Lists.newArrayList(StringUtils.split(text, ",", true));
+    public static List<String> deAliasEnumValueSplitByComma(String text) {
+        List<String> split = Lists.newArrayList(text.split("\\s*,\\s*"));
         for (int i = 0; i < split.size(); i++) {
             split.set(i, AliasTable.deAlias(split.get(i)));
         }
@@ -205,10 +213,22 @@ public class AliasTable {
         return values;
     }
 
+    public List<String> deAlias(Iterable<String> values) {
+        List<String> testHandles = Lists.newArrayList();
+        for (String value : values) {
+            if(isAlias(value)) {
+                testHandles.add(getTestHandleForAlias(value));
+            } else {
+                testHandles.add(value);
+            }
+        }
+        return testHandles;
+    }
+    
     public FieldValue deAlias(FieldValue value) {
         value.setField(getTestHandleForAlias(value.getField()));
 
-        List<String> rowValuesWithAlias = StringUtils.split(value.getValue(), ",", true);
+        List<String> rowValuesWithAlias = asList(value.getValue().split("\\s*,\\s*"));
         List<String> rowValues = Lists.newArrayListWithCapacity(rowValuesWithAlias.size());
         for (String row : rowValuesWithAlias) {
             try {
@@ -253,12 +273,64 @@ public class AliasTable {
 
     public List<FieldValue> alias(List<FieldValue> fieldValues) {
         for (FieldValue value : fieldValues) {
-            value.setField(getAlias(value.getField()));
-            if ("radio".equalsIgnoreCase(value.getControlType())) {
+            if (!ChooseColumnsDialog.BUILT_IN_COLUMNS.contains(value.getField())) {
+                value.setField(getAlias(value.getField()));
+            }
+            if ("radio".equalsIgnoreCase(value.getControlType()) ||
+                    "dropdown".equalsIgnoreCase(value.getControlType())) {
                 value.setValue(getAlias(value.getValue()));
             }
         }
         return fieldValues;
+    }
+
+    public DataTable alias(DataTable dataTable) {
+        Set<Integer> columnsToAlias = Sets.newHashSet();
+        Map<Pair<Integer, Integer>, String> aliasMatrix = Maps.newHashMap();
+
+        for (int i = 0; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+            for (int j = 0; j < row.getCells().size(); j++) {
+
+                String cell = row.getCells().get(j);
+
+                if (i != 0 && columnsToAlias.contains(j) && !isNumber(cell) && !isBoolean(cell)) { // not header
+                    aliasMatrix.put(Pair.newPair(i, j), getAlias(cell));
+                }
+
+                if (i == 0) { // only for header
+
+                    boolean isPartnerField = cell.equalsIgnoreCase(I18N.CONSTANTS.partner() + " " + I18N.CONSTANTS.name());
+                    if (!ChooseColumnsDialog.BUILT_IN_COLUMNS.contains(cell) || isPartnerField) {
+                        columnsToAlias.add(j);
+                    }
+
+                    if (!ChooseColumnsDialog.BUILT_IN_COLUMNS.contains(cell)) {
+                        aliasMatrix.put(Pair.newPair(i, j), getAlias(cell));
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Pair<Integer, Integer>, String> entry : aliasMatrix.entrySet()) {
+            Integer row = entry.getKey().getFirst();
+            Integer column = entry.getKey().getSecond();
+            dataTable.getGherkinRows().get(row).getCells().set(column, entry.getValue());
+        }
+        return dataTable;
+    }
+
+    public static boolean isNumber(String cell) {
+        try {
+            NumberFormat.getNumberInstance().parse(cell);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    public static boolean isBoolean(String value) {
+        return value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false");
     }
 
     public static class TestHandle {

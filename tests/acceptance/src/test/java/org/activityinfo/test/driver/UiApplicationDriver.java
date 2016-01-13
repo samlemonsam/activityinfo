@@ -10,15 +10,18 @@ import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.bootstrap.BsTable;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
+import org.activityinfo.test.pageobject.web.Dashboard;
 import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.*;
@@ -26,20 +29,18 @@ import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.activityinfo.test.pageobject.web.entry.*;
 import org.activityinfo.test.pageobject.web.reports.DrillDownDialog;
 import org.activityinfo.test.pageobject.web.reports.PivotTableEditor;
+import org.activityinfo.test.pageobject.web.reports.ReportsTab;
+import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -53,6 +54,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     private AliasTable aliasTable;
 
+    private Accounts accounts;
+    
     private UserAccount currentUser = null;
 
     private ApplicationPage applicationPage;
@@ -60,20 +63,23 @@ public class UiApplicationDriver extends ApplicationDriver {
     
     private String currentDatabase;
     private String currentForm;
+    private BsModal currentModal;
     
     @Inject
     public UiApplicationDriver(ApiApplicationDriver apiDriver,
                                LoginPage loginPage,
-                               AliasTable aliasTable) {
+                               AliasTable aliasTable,
+                               Accounts accounts) {
         super(aliasTable);
         this.apiDriver = apiDriver;
         this.loginPage = loginPage;
         this.aliasTable = aliasTable;
+        this.accounts = accounts;
     }
 
     @Override
     public void login() {
-        throw new UnsupportedOperationException();
+        login(accounts.any());
     }
 
     @Override
@@ -102,13 +108,6 @@ public class UiApplicationDriver extends ApplicationDriver {
         return apiDriver;
     }
 
-
-    // todo ask Alex?
-//    @Override
-//    public void submitForm(String formName, List<FieldValue> values) throws Exception {
-//        currentForm = formName;
-//        super.submitForm(formName, values);
-//    }
     
     @Override
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
@@ -119,7 +118,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         Map<String, FieldValue> valueMap = FieldValue.toMap(values);
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
         DataEntryDriver driver = dataEntryTab.newSubmission();
 
@@ -129,29 +128,34 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    protected DataEntryDriver startNewSubmission(String formName) {
+    public DataEntryDriver startNewSubmission(String formName) {
         ensureLoggedIn();
 
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
 
-        DataEntryDriver driver = dataEntryTab.newSubmission();
-
-        return driver;
+        return dataEntryTab.newSubmission();
     }
 
     private void fillForm(Map<String, FieldValue> valueMap, DataEntryDriver driver) throws InterruptedException {
+        
+        Set<String> unsubmittedValues = new HashSet<>(valueMap.keySet());
+        Set<String> presentFields = new HashSet<>();
+        
         while (driver.nextField()) {
+            presentFields.add(driver.getLabel());
             System.out.println("label = " + driver.getLabel());
             switch (driver.getLabel()) {
                 case "Partner":
                     if (valueMap.containsKey("partner")) {
                         driver.select(aliasTable.getAlias(valueMap.get("partner").getValue()));
+                        unsubmittedValues.remove("partner");
                     }
                     break;
                 case "Start Date":
                     if (valueMap.containsKey("Start Date")) {
                         driver.fill(LocalDate.parse(valueMap.get("Start Date").getValue()));
+                        unsubmittedValues.remove("Start Date");
                     } else {
                         driver.fill(new LocalDate(2014, 1, 1));
                     }
@@ -159,20 +163,23 @@ public class UiApplicationDriver extends ApplicationDriver {
                 case "End Date":
                     if (valueMap.containsKey("End Date")) {
                         driver.fill(LocalDate.parse(valueMap.get("End Date").getValue()));
+                        unsubmittedValues.remove("End Date");
                     } else {
                         driver.fill(new LocalDate(2014, 1, 1));
                     }
                     break;
                 case "Comments":
                     if (valueMap.containsKey("comments")) {
+                        unsubmittedValues.add("comments");
                         driver.fill(valueMap.get("comments").getValue());
                     }
                     break;
                 default:
                     String testHandle = aliasTable.getTestHandleForAlias(driver.getLabel());
                     if (valueMap.containsKey(testHandle)) {
+                        unsubmittedValues.remove(testHandle);
                         String value = valueMap.get(testHandle).getValue();
-                        if (value.matches("^\\d+$")) {
+                        if (value.matches("^\\d+$") || value.endsWith(".png") /*tricked images*/) {
                             driver.fill(value);
                         } else {
                             driver.fill(aliasTable.getAlias(value));
@@ -181,8 +188,16 @@ public class UiApplicationDriver extends ApplicationDriver {
                     break;
             }
         }
+        
+        if(!unsubmittedValues.isEmpty()) {
+            throw new AssertionError(String.format("Could not complete fields %s, they were not present or enabled" +
+                    " on the form. The following fields were present: %s", 
+                    unsubmittedValues.toString(), 
+                    presentFields.toString()));
+        }
+        
     }
-
+    
     @Override
     public void enableOfflineMode() {
         ensureLoggedIn();
@@ -199,6 +214,25 @@ public class UiApplicationDriver extends ApplicationDriver {
         ensureLoggedIn();
 
         return applicationPage.getOfflineMode();
+    }
+
+    @Override
+    protected void createForm(TestObject form) throws Exception {
+        ensureLoggedIn();
+        
+        String database = aliasTable.getAlias(form.getString("database"));
+        String name = aliasTable.createAlias(form.getString("name"));
+        
+        DesignPage design = applicationPage
+                .navigateToDesignTab()
+                .selectDatabase(database)
+                .design();
+
+        GxtModal modal = design.newBetaForm();
+        Form modalForm = modal.form();
+        modalForm.fillTextField(I18N.CONSTANTS.name(), name);
+        modalForm.select(I18N.CONSTANTS.published(), I18N.CONSTANTS.notPublished());
+        modal.accept(I18N.CONSTANTS.save());
     }
 
     @Override
@@ -356,25 +390,6 @@ public class UiApplicationDriver extends ApplicationDriver {
         return pivotTable.extractData();
     }
 
-    public void shareReportIsEmpty(boolean expectedEmpty) {
-        Preconditions.checkState(currentPage instanceof PivotTableEditor);
-
-        PivotTableEditor pivotTable = (PivotTableEditor) currentPage;
-        GxtModal modal = pivotTable.clickButton("Share");
-
-        GxtGrid grid = GxtGrid.findGrids(modal.getWindowElement()).first().get().waitUntilReloadedSilently();
-        try {
-            grid.waitUntilAtLeastOneRowIsLoaded();
-            if (expectedEmpty) {
-                throw new AssertionError("Share report grid is not empty");
-            }
-        } catch (TimeoutException e) {
-            if (!expectedEmpty) {
-                throw new AssertionError("Share report grid is empty or selenium is timeout.");
-            }
-        }
-    }
-
     @Override
     public DataTable drillDown(String cellValue) {
         Preconditions.checkState(currentPage instanceof PivotTableEditor, "No pivot results. Please pivot data first before using drill down.");
@@ -500,15 +515,24 @@ public class UiApplicationDriver extends ApplicationDriver {
         return (TablePage) currentPage;
     }
 
-    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
-        TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
-        BsModal modal = tablePage.table().newSubmission();
-        Form.FormItem fieldByLabel = modal.form().findFieldByLabel(fieldName);
+    public TablePage tablePage() {
+        Preconditions.checkState(getCurrentPage() instanceof TablePage);
+        return (TablePage) getCurrentPage();
+    }
 
-        assertNotNull(fieldByLabel);
-        if (ControlType.fromValue(controlType) == ControlType.SUGGEST_BOX) {
-            assertEquals(fieldByLabel.getPlaceholder(), I18N.CONSTANTS.suggestBoxPlaceholder());
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName, Optional<String> selectedValue) {
+        TablePage tablePage = openFormTable(aliasTable.getAlias(databaseName), aliasTable.getAlias(formName));
+        final BsModal modal;
+        if (selectedValue.isPresent()) {
+            tablePage.table().waitForCellByText(selectedValue.get()).getContainer().clickWhenReady();
+            modal = tablePage.table().editSubmission();
+        } else {
+            modal = tablePage.table().newSubmission();
         }
+        Sleep.sleepSeconds(2); // there is wait in edit submission to make sure progress disappear but it looks like it does not work always well
+        BsFormPanel.BsField fieldByLabel = modal.form().findFieldByLabel(fieldName);
+        modal.cancel();
+        return fieldByLabel;
     }
 
     @Override
@@ -563,7 +587,7 @@ public class UiApplicationDriver extends ApplicationDriver {
      */
     public void assertSubmissionIsNotAllowedBecauseOfLock(String formName, String endDate) {
         final DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
-        GxtDataEntryDriver dataEntryDriver = dataEntryTab.newSubmission();
+        GxtDataEntryDriver dataEntryDriver = (GxtDataEntryDriver) dataEntryTab.newSubmission();
 
         // we have to fill all required fields first in order to make sure that submission is not allowed because
         // of locking (and not because of some missed required field)
@@ -594,6 +618,7 @@ public class UiApplicationDriver extends ApplicationDriver {
                             return !input.isValid();
                         }
                     });
+                    GxtModal.waitForModal(dataEntryTab.getContainer()).closeByWindowHeaderButton();
                     return; // success, field is marked as not valid and therefore submission is not possible
             }
         }
@@ -655,18 +680,18 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         for (IndicatorLink row : linkedIndicatorRows) {
 
-            linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).click();
-            linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).click();
+            linkIndicatorsPage.getSourceDb().clickCell(aliasTable.getAlias(row.getSourceDb()));
+            linkIndicatorsPage.getTargetDb().clickCell(aliasTable.getAlias(row.getDestDb()));
 
             Tester.sleepSeconds(1); // sometimes it's too fast and we have to give time show "Loading" and only then wait for rows
 
             GxtGrid sourceIndicator = linkIndicatorsPage.getSourceIndicator().waitUntilAtLeastOneRowIsLoaded();
             GxtGrid targetIndicator = linkIndicatorsPage.getTargetIndicator().waitUntilAtLeastOneRowIsLoaded();
 
-            sourceIndicator.findCell(aliasTable.getAlias(row.getSourceIndicator())).click();
-            targetIndicator.findCell(aliasTable.getAlias(row.getDestIndicator())).click();
+            sourceIndicator.clickCell(aliasTable.getAlias(row.getSourceIndicator()));
+            targetIndicator.clickCell(aliasTable.getAlias(row.getDestIndicator()));
 
-            linkIndicatorsPage.clickLinkButton();
+            linkIndicatorsPage.linkSelection();
         }
     }
 
@@ -852,29 +877,13 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     }
 
-    public void assertDesignerFieldMandatory(String fieldLabel) {
-        assertTrue("Designer field with label " + fieldLabel + " is not mandatory",
-                formDesigner().dropTarget().fieldByLabel(fieldLabel).isMandatory());
+    public DesignerField getDesignerField(String fieldLabel) {
+        return formDesigner().dropTarget().fieldByLabel(fieldLabel);
     }
 
     public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
         formDesigner().dropTarget().fieldByLabel(fieldLabel).element().clickWhenReady();
-        BsFormPanel form = formDesigner().properties().form();
-        for (FieldValue value : values) {
-            switch(value.getField()) {
-                case "code":
-                    form.findFieldByLabel(I18N.CONSTANTS.codeFieldLabel()).fill(value.getValue());
-                    break;
-                case "label":
-                    form.findFieldByLabel(I18N.CONSTANTS.labelFieldLabel()).fill(value.getValue());
-                    break;
-                case "description":
-                    form.findFieldByLabel(I18N.CONSTANTS.description()).fill(value.getValue());
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unknown designer field property: " + value.getField());
-            }
-        }
+        formDesigner().properties().setValues(values);
     }
 
     public void assertDesignerFieldReorder(String fieldLabel, int positionOnPanel) {
@@ -898,6 +907,22 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    public Optional<BsFormPanel.BsField> getFormFieldFromNewSubmission(String formName, String fieldLabel) {
+        ensureLoggedIn();
+
+        if (currentModal == null) {
+            DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+            dataEntryTab.buttonClick(I18N.CONSTANTS.newSite());
+
+            currentModal = FormModal.find(dataEntryTab.getContainer());
+        }
+        try {
+            return Optional.fromNullable(currentModal.form().findFieldByLabel(fieldLabel));
+        } catch (AssertionError e) {
+            return Optional.absent();
+        }
+    }
+
     public void assertFieldValuesOnNewForm(String formName, List<FieldValue> values) {
         ensureLoggedIn();
 
@@ -917,10 +942,41 @@ public class UiApplicationDriver extends ApplicationDriver {
         }
     }
 
+    public void removeRows(List<String> cells) {
+        TablePage tablePage = tablePage();
+        BsTable table = tablePage.table();
+
+        table.showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        for (String cellText : cells) {
+            table.waitForCellByText(cellText).select();
+            table.removeSelectedRow();
+        }
+    }
+
+    @Override
+    public List<String> getFilterValues(String filterName, String formName) {
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+
+        DataEntryFilter filter = dataEntryTab.filter(filterName);
+
+        List<String> filterItemsOnUi = filter.select().filterItems();
+
+        // reset state for next step
+        dataEntryTab.filter("Forms").select();
+
+        return filterItemsOnUi;
+    }
+
     public Object getCurrentPage() {
         return currentPage;
     }
 
+    public ApplicationPage getApplicationPage() {
+        ensureLoggedIn();
+        
+        return applicationPage;
+    }
+    
     public void renameDatabase(String oldName, String newName, String newDescription) {
         ensureLoggedIn();
 
@@ -929,13 +985,136 @@ public class UiApplicationDriver extends ApplicationDriver {
         DatabasesPage databasesPage = designTab.showDatabasesGrid();
         databasesPage.rename(aliasTable.getAlias(oldName), newName, newDescription);
 
+        Sleep.sleepSeconds(2);
+
         // validate values are changed in table
         Assert.assertNotNull(databasesPage.grid().findCell(newName));
         Assert.assertNotNull(databasesPage.grid().findCell(newDescription));
     }
 
     @Override
+    public List<String> getSavedReports() {
+        ReportsTab reports = getApplicationPage().navigateToReportsTab();
+        return aliasTable.deAlias(reports.reportsList().getTitles());
+    }
+
+    @Override
+    public List<String> getDashboardPortlets() {
+        Dashboard dashboard = getApplicationPage().navigateToDashboard();
+        return aliasTable.deAlias(dashboard.getPortletTitles());
+    }
+
+    @Override
+    public void importForm(String formName, DataTable dataTable) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        aliasTable.alias(dataTable);
+        dataEntryTab.importData(dataTable);
+    }
+
+    public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(formName));
+
+        aliasTable.alias(dataTable);
+
+        dataTable = copyLastRow(dataTable, quantityOfRowCopy);
+
+        dataEntryTab.importData(dataTable);
+    }
+
+    private static DataTable copyLastRow(DataTable dataTable, int quantityOfRowCopy) {
+        List<List<String>> rows = Lists.newArrayList();
+
+        // copy existing rows
+        for (DataTableRow row : dataTable.getGherkinRows()) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : row.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+
+        // copy last row
+        DataTableRow lastRow = dataTable.getGherkinRows().get(dataTable.getGherkinRows().size() - 1);
+        for (int i = 0; i < (quantityOfRowCopy - 1); i++) {
+            final List<String> newRow = Lists.newArrayList();
+            for (String cell : lastRow.getCells()) {
+                newRow.add(cell);
+            }
+            rows.add(newRow);
+        }
+        return DataTable.create(rows);
+    }
+
+    public void importSchema(String databaseName, String cvsText) {
+        ensureLoggedIn();
+
+        DesignTab designTab = getApplicationPage().navigateToDesignTab();
+        designTab.selectDatabase(databaseName);
+
+        ImportSchemaDialog dialog = designTab.design().clickImport();
+        dialog.enterCvsText(cvsText);
+        dialog.clickOk();
+        dialog.clickImportAnyway();
+        dialog.closeOnSuccess();
+
+    }
+
+    @Override
     public void cleanup() throws Exception {
         setup().cleanup();
+    }
+
+    public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
+        UserAccount account = accounts.ensureAccountExists(userEmail);
+        ensureLoggedIn();
+
+        UsersPage usersPage = applicationPage.navigateToDesignTab().selectDatabase(getAliasTable().getAlias(databaseName)).users();
+        GxtModal modal = usersPage.addUser();
+
+        modal.form().fillTextField("Name", account.getEmail());
+        modal.form().fillTextField("Email", account.getEmail());
+        modal.form().select("Partner", getAliasTable().getAlias(partner));
+
+        modal.accept();
+
+        Sleep.sleepSeconds(1);
+
+        usersPage.setPermission(account.getEmail(), permissions);
+    }
+
+    @Override
+    public DataTable oldTable(String formName) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
+        GxtGrid grid = dataEntryTab.navigateToForm(aliasTable.getAlias(formName)).grid();
+
+        return grid.extractData();
+    }
+
+    @Override
+    public void beginNewFormSubmission(String formName) {
+        ensureLoggedIn();
+
+        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab().navigateToForm(aliasTable.getAlias(formName));
+        dataEntryTab.buttonClick(I18N.CONSTANTS.newSite());
+
+        currentModal = FormModal.find(dataEntryTab.getContainer());
+    }
+
+    public BsModal getCurrentModal() {
+        return currentModal;
+    }
+
+    @Override
+    public void setCurrentModal(BsModal currentModal) {
+        this.currentModal = currentModal;
     }
 }

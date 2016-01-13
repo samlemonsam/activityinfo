@@ -22,6 +22,8 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -29,6 +31,7 @@ import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yuriyz on 7/30/14.
@@ -37,6 +40,7 @@ public class RelevanceHandler {
 
     private final SimpleFormPanel simpleFormPanel;
     private List<FormField> fieldsWithSkipExpression = Lists.newArrayList();
+    private Set<FieldContainer> fieldsWithAppliedRelevance = Sets.newHashSet();
 
     public RelevanceHandler(SimpleFormPanel simpleFormPanel) {
         this.simpleFormPanel = simpleFormPanel;
@@ -44,19 +48,53 @@ public class RelevanceHandler {
 
     public void onValueChange() {
         for (FormField formField : fieldsWithSkipExpression) {
-            applySkipLogic(formField);
+            applyRelevanceLogic(formField);
         }
     }
 
-    private void applySkipLogic(final FormField field) {
+    private void applyRelevanceLogic(final FormField field) {
         if (field.hasRelevanceConditionExpression()) {
+            try {
+                ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
+                ExprParser parser = new ExprParser(lexer);
+                ExprNode expr = parser.parse();
+                FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
+                if (fieldContainer != null) {
+                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance()));
+                    fieldContainer.getFieldWidget().setReadOnly(!relevant);
 
-            ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
-            ExprParser parser = new ExprParser(lexer);
-            ExprNode expr = parser.parse();
-            FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
-            // todo yuriy: revisit it, it will not work with subforms
-            fieldContainer.getFieldWidget().setReadOnly(!expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getModel().getRootFormClass(), simpleFormPanel.getModel().getWorkingRootInstance())));
+                    if (!relevant) {
+                        if (resettingValues) { // we are in resetting state -> handle nested relevance
+                            fieldContainer.getFieldWidget().clearValue();
+                            fieldContainer.getFieldWidget().fireValueChanged();
+                        }
+                        fieldsWithAppliedRelevance.add(fieldContainer);
+                    } else {
+                        fieldsWithAppliedRelevance.remove(fieldContainer);
+                    }
+                } else {
+                    Log.error("Can't find container for fieldId: " + field.getId() + ", fieldName: " + field.getLabel() + ", expression: " + field.getRelevanceConditionExpression());
+                }
+            } catch (Exception e) {
+                Log.error("Error: Unable to apply relevance logic. FieldId: " + field.getId() +
+                        ", fieldName: " + field.getLabel() + ", expression: " + field.getRelevanceConditionExpression(), e);
+            }
+        }
+    }
+
+    private boolean resettingValues = false;
+
+    public void resetValuesForFieldsWithAppliedRelevance() {
+        try {
+            resettingValues = true;
+            for (FieldContainer container : fieldsWithAppliedRelevance) {
+                container.getFieldWidget().clearValue();
+                container.getFieldWidget().fireValueChanged();
+            }
+        } catch (Exception e) {
+            Log.error("Failed to reset values for fields with applied relevance");
+        } finally {
+            resettingValues = false;
         }
     }
 

@@ -17,6 +17,4 @@ public class Sampling {
         int index = ThreadLocalRandom.current().nextInt(0, items.size() - 1);
         return items.get(index);
     }
-
-    
 }

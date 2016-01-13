@@ -5,6 +5,8 @@ import org.apache.commons.pool2.KeyedPooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -20,6 +22,7 @@ public class WebDriverPool {
 
     public WebDriverPool() {
         pool = new GenericKeyedObjectPool<>(new Factory());
+        pool.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(5));
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -86,7 +89,13 @@ public class WebDriverPool {
     
         @Override
         public void passivateObject(BrowserProfile browserProfile, PooledObject<WebDriver> pooledObject) throws Exception {
-    
+            pooledObject.getObject().navigate().to("about:blank");
+            try {
+                Alert alert = pooledObject.getObject().switchTo().alert();
+                alert.accept();
+            } catch (NoAlertPresentException ignored) {
+                // continue
+            }
         }
     }
 
@@ -106,7 +115,9 @@ public class WebDriverPool {
 
         @Override
         public void setConnected(boolean connected) {
-            ((WebDriverConnection) getWrappedDriver()).setConnected(connected);
+            if(getWrappedDriver() instanceof WebDriverConnection) {
+                ((WebDriverConnection) getWrappedDriver()).setConnected(connected);
+            }
         }
     }
 }

@@ -69,7 +69,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     private DateDimension yearDim = new DateDimension(DateUnit.YEAR);
     private DateDimension monthDim = new DateDimension(DateUnit.MONTH);
     private final Dimension activityCategoryDim = new Dimension(DimensionType.ActivityCategory);
-    private Dimension siteDim = new Dimension(DimensionType.Site);
 
     @BeforeClass
     public static void setup() {
@@ -465,38 +464,16 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
     @Test
     @OnDataSet("/dbunit/sites-zeros.db.xml")
-    public void testZerosExcluded() {
+    public void zerosIncluded() {
 
         withIndicatorAsDimension();
-        filter.addRestriction(DimensionType.Indicator, 5);
+        filter.addRestriction(DimensionType.Indicator, asList(5, 6));
 
         execute();
 
-        assertEquals(1, buckets.size());
-        assertEquals(0, (int) buckets.get(0).doubleValue());
-        assertEquals(5,
-                ((EntityCategory) buckets.get(0).getCategory(this.indicatorDim))
-                        .getId());
+        assertThat().forIndicator(5).thereIsOneBucketWithValue(0); // average indicator
+        assertThat().forIndicator(6).thereIsOneBucketWithValue(0);  // sum indicator
     }
-
-
-    @Test
-    @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void testPercentages() {
-
-        withIndicatorAsDimension();
-        withSiteAsDimension();
-
-        filter.addRestriction(DimensionType.Indicator, 676);
-        
-        execute();
-
-        assertBucketCount(2);
-        assertThat().forSite(1).thereIsOneBucketWithValue(40);
-        assertThat().forSite(2).thereIsOneBucketWithValue(60);
-
-    }
-
 
     @Test
     @OnDataSet("/dbunit/sites-weeks.db.xml")
@@ -870,10 +847,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         dimensions.add(indicatorDim);
     }
 
-    private void withSiteAsDimension() {
-        dimensions.add(siteDim);
-    }
-    
     private void withProjectAsDimension() {
         dimensions.add(projectDim);
     }

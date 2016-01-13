@@ -14,8 +14,10 @@ import org.activityinfo.ui.client.widget.TextBox;
 public class TextFieldWidget implements FormFieldWidget<TextValue> {
 
     private final TextBox box;
+    private final ValueUpdater<TextValue> valueUpdater;
 
     public TextFieldWidget(final ValueUpdater<TextValue> valueUpdater) {
+        this.valueUpdater = valueUpdater;
         this.box = new TextBox();
         this.box.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -26,9 +28,14 @@ public class TextFieldWidget implements FormFieldWidget<TextValue> {
         this.box.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                valueUpdater.update(getValue());
+                fireValueChanged();
             }
         });
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
     }
 
     private TextValue getValue() {
@@ -38,6 +45,11 @@ public class TextFieldWidget implements FormFieldWidget<TextValue> {
     @Override
     public void setReadOnly(boolean readOnly) {
         box.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return box.isReadOnly();
     }
 
     @Override

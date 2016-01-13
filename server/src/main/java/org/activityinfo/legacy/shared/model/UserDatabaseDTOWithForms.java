@@ -22,16 +22,21 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
- * @author yuriyz on 07/16/2015.
+ * Alternate DTO for UserDatabase for compatibility with the 2.x JSON API
  */
-public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO, LockedPeriodDTO.HasLockedPeriod, ProvidesKey {
+@JsonAutoDetect(JsonMethod.NONE)
+public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO {
 
     private CountryDTO country;
     private List<PartnerDTO> partners = new ArrayList<PartnerDTO>(0);
@@ -42,11 +47,6 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
     public final static String ENTITY_NAME = "UserDatabase";
 
     public UserDatabaseDTOWithForms() {
-    }
-
-    public UserDatabaseDTOWithForms(int id, String name) {
-        setId(id);
-        setName(name);
     }
 
     public UserDatabaseDTOWithForms(UserDatabaseDTO userDatabaseDTO) {
@@ -308,17 +308,6 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
     }
 
     /**
-     * @return the Partner of the UserDatabase to which the client belongs
-     */
-    public PartnerDTO getMyPartner() {
-        return getPartnerById(getMyPartnerId());
-    }
-
-    public boolean hasPartnerId() {
-        return (get("myPartnerId") != null);
-    }
-
-    /**
      * @return the id of the Partner to which the client belongs
      */
     public int getMyPartnerId() {
@@ -353,21 +342,6 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
         return ENTITY_NAME;
     }
 
-    /**
-     * Searches this UserDatabase's list of Partners for the PartnerDTO with the
-     * given id.
-     *
-     * @return the matching UserDatabaseDTO or null if no matches
-     */
-    public PartnerDTO getPartnerById(int id) {
-        for (PartnerDTO partner : getPartners()) {
-            if (partner.getId() == id) {
-                return partner;
-            }
-        }
-        return null;
-    }
-
     public ActivityFormDTO getActivityById(int id) {
         for (ActivityFormDTO activity : getActivities()) {
             if (activity.getId() == id) {
@@ -377,60 +351,14 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
         return null;
     }
 
-    @Override
-    public String getKey() {
-        return "db" + getId();
-    }
 
     public void setLockedPeriods(Set<LockedPeriodDTO> lockedPeriods) {
         this.lockedPeriods = lockedPeriods;
     }
-
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    
+    @JsonProperty @JsonView(DTOViews.Schema.class)
     public Set<LockedPeriodDTO> getLockedPeriods() {
         return lockedPeriods;
     }
 
-    @Override
-    public Set<LockedPeriodDTO> getEnabledLockedPeriods() {
-        Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
-
-        for (LockedPeriodDTO lcokedPeriod : getLockedPeriods()) {
-            if (lcokedPeriod.isEnabled()) {
-                lockedPeriods.add(lcokedPeriod);
-            }
-        }
-
-        return lockedPeriods;
-    }
-
-    public ProjectDTO getProjectById(int value) {
-        for (ProjectDTO project : getProjects()) {
-            if (value == project.getId()) {
-                return project;
-            }
-        }
-
-        return null;
-    }
-
-    public boolean isAllowedToEdit(SiteDTO site) {
-        if (isEditAllAllowed()) {
-            return true;
-        } else {
-            return isEditAllowed() && getMyPartnerId() == site.getPartnerId();
-        }
-    }
-
-    @JsonIgnore
-    @Override
-    public Map<String, Object> getProperties() {
-        return super.getProperties();
-    }
-
-    @JsonIgnore
-    @Override
-    public Collection<String> getPropertyNames() {
-        return super.getPropertyNames();
-    }
 }

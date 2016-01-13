@@ -30,6 +30,7 @@ import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -77,7 +78,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     return applyPermissions(context, form);
                 }
             }
-        }).then(callback);
+        }).join(new RestrictPartnersAccordingToPermissions()).then(callback);
 
     }
 
@@ -202,10 +203,10 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     countryId = row.getInt("countryId");
                     databaseId = row.getInt("databaseId");
                     Extents countryBounds = new Extents(
-                            row.getDouble("x1"),
                             row.getDouble("y1"),
-                            row.getDouble("x2"),
-                            row.getDouble("y2"));
+                            row.getDouble("y2"),
+                            row.getDouble("x1"),
+                            row.getDouble("x2"));
 
                     LocationTypeDTO locationType = new LocationTypeDTO();
                     locationType.setId(row.getInt("locationTypeId"));
@@ -213,10 +214,10 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     locationType.setCountryBounds(countryBounds);
                     locationType.setWorkflowId(row.getString("locationTypeWorkflowId"));
 
-                    if(!row.isNull("locationTypeLevelId")) {
+                    if (!row.isNull("locationTypeLevelId")) {
                         locationType.setBoundAdminLevelId(row.getInt("locationTypeLevelId"));
                     }
-                    if(!row.isNull("locationTypeDatabaseId")) {
+                    if (!row.isNull("locationTypeDatabaseId")) {
                         locationType.setDatabaseId(row.getInt("locationTypeDatabaseId"));
                     }
 
@@ -256,7 +257,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                         @Override
                         public void onSuccess(SqlTransaction tx, SqlResultSet results) {
                             Map<Integer, AdminLevelDTO> levels = new HashMap<Integer, AdminLevelDTO>();
-                            for(SqlResultSetRow row : results.getRows()) {
+                            for (SqlResultSetRow row : results.getRows()) {
                                 AdminLevelDTO level = new AdminLevelDTO();
                                 level.setId(row.getInt("adminLevelId"));
                                 level.setName(row.getString("name"));
@@ -366,17 +367,17 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                                 lockedPeriod.setEnabled(row.getBoolean("enabled"));
                                 lockedPeriod.setName(row.getString("name"));
 
-                                if(!row.isNull("userDatabaseId")) {
+                                if (!row.isNull("userDatabaseId")) {
                                     lockedPeriod.setParentId(row.getInt("userDatabaseId"));
                                     lockedPeriod.setParentType(UserDatabaseDTO.ENTITY_NAME);
                                     activity.getLockedPeriods().add(lockedPeriod);
 
-                                } else if(!row.isNull("activityId")) {
+                                } else if (!row.isNull("activityId")) {
                                     lockedPeriod.setParentId(row.getInt("activityId"));
                                     lockedPeriod.setParentType(ActivityDTO.ENTITY_NAME);
                                     activity.getLockedPeriods().add(lockedPeriod);
 
-                                } else if(!row.isNull("projectId")) {
+                                } else if (!row.isNull("projectId")) {
                                     lockedPeriod.setParentId(row.getInt("projectId"));
                                     lockedPeriod.setParentType(ProjectDTO.ENTITY_NAME);
                                     activity.getLockedPeriods().add(lockedPeriod);
@@ -402,7 +403,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 public void onSuccess(SqlTransaction tx, SqlResultSet results) {
                     List<PartnerDTO> partners = Lists.newArrayList();
 
-                    for(SqlResultSetRow row : results.getRows()) {
+                    for (SqlResultSetRow row : results.getRows()) {
                         PartnerDTO partner = new PartnerDTO();
                         partner.setId(row.getInt("partnerId"));
                         partner.setName(row.getString("name"));
@@ -444,7 +445,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     indicator.setName(rs.getString("name"));
                     indicator.setTypeId(rs.getString("type"));
                     indicator.setExpression(rs.getString("expression"));
-                    indicator.setSkipExpression(rs.getString("skipExpression"));
+                    indicator.setRelevanceExpression(rs.getString("skipExpression"));
                     indicator.setNameInExpression(rs.getString("nameInExpression"));
                     indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
                     indicator.setCategory(rs.getString("category"));
@@ -569,6 +570,31 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             });
             return promise;
         }
+    }
 
+    private static class RestrictPartnersAccordingToPermissions implements Function<ActivityFormDTO, Promise<ActivityFormDTO>> {
+        @Override
+        public Promise<ActivityFormDTO> apply(ActivityFormDTO form) {
+            List<PartnerDTO> allPartners = form.getPartnerRange();
+            Set<PartnerDTO> result = Sets.newHashSet();
+            Optional<PartnerDTO> defaultPartner = UserDatabaseDTO.getDefaultPartner(allPartners);
+
+            if (defaultPartner.isPresent()) {
+                result.add(defaultPartner.get());
+            }
+
+            if (form.isEditAllAllowed()) {
+                result.addAll(allPartners);
+            }
+
+            for (PartnerDTO partner : allPartners) {
+                if (partner.getId() == form.getCurrentPartnerId()) {
+                    result.add(partner);
+                }
+            }
+
+            form.setPartnerRange(Lists.newArrayList(result));
+            return Promise.resolved(form);
+        }
     }
 }

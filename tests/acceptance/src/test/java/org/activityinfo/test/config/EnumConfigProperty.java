@@ -2,8 +2,6 @@ package org.activityinfo.test.config;
 
 import com.google.common.base.Enums;
 import com.google.common.base.Optional;
-import org.activityinfo.test.config.ConfigProperty;
-import org.activityinfo.test.config.ConfigurationError;
 
 import java.util.Arrays;
 

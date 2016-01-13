@@ -5,7 +5,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.core.shared.type.converter.CoordinateAxis;
 import org.activityinfo.core.shared.type.converter.CoordinateFormatException;
 import org.activityinfo.core.shared.type.converter.CoordinateParser;
@@ -87,8 +86,8 @@ public class GeographicPointImporter implements FieldImporter {
 
     @Override
     public boolean updateInstance(SourceRow row, FormInstance instance) {
-        final boolean isLatOk = validateCoordinate(row, 0).shouldPersist();
-        final boolean isLonOk = validateCoordinate(row, 1).shouldPersist();
+        final boolean isLatOk = validateCoordinate(row, 0).isPersistable();
+        final boolean isLonOk = validateCoordinate(row, 1).isPersistable();
         if (isLatOk && isLonOk) {
             double latitude = parseCoordinate(row, 0);
             double longitude = parseCoordinate(row, 1);

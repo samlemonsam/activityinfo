@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.api;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -7,6 +8,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+
+import javax.annotation.Nullable;
 
 
 public class XPathBuilder {
@@ -78,6 +81,14 @@ public class XPathBuilder {
         return tagName("div", conditions);
     }
 
+    public XPathBuilder select(String... conditions) {
+        return tagName("select", conditions);
+    }
+
+    public XPathBuilder option(String... conditions) {
+        return tagName("option", conditions);
+    }
+
     public XPathBuilder table(String... conditions) {
         return tagName("table", conditions);
     }
@@ -107,12 +118,20 @@ public class XPathBuilder {
         return tagName("input", conditions);
     }
 
+    public XPathBuilder form(String... conditions) {
+        return tagName("form", conditions);
+    }
+
     public XPathBuilder textArea(String... conditions) {
         return tagName("textArea", conditions);
     }
 
     public XPathBuilder b(String... conditions) {
         return tagName("b", conditions);
+    }
+
+    public XPathBuilder a(String... conditions) {
+        return tagName("a", conditions);
     }
 
     public XPathBuilder anyElement(String... conditions) {
@@ -246,6 +265,22 @@ public class XPathBuilder {
     public FluentElement waitForFirst() {
         return context.waitFor(firstLocator());
     }
+    
+    public FluentElements waitForList() {
+        return context.waitFor(new Function<WebDriver, FluentElements>() {
+            @Nullable
+            @Override
+            public FluentElements apply(WebDriver input) {
+                FluentElements elements = asList();
+                if(elements.size() > 0) {
+                    return elements;
+                } else {
+                    return null;
+                }
+            }
+        });
+    }
+    
 
     public <T> T find(Class<T> clazz) {
         return all().as(clazz).first().get();

@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Formatter;
-import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 

@@ -53,40 +53,44 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
 
     private final FlowPanel panel;
     private final List<CheckBox> controls;
+    private final ValueUpdater valueUpdater;
+    private boolean readOnly;
 
     public CheckBoxFieldWidget(ReferenceType type, List<FormInstance> range, final ValueUpdater valueUpdater) {
+        this.valueUpdater = valueUpdater;
         panel = new FlowPanel();
         controls = new ArrayList<>();
-
-        ValueChangeHandler<Boolean> changeHandler = new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                valueUpdater.update(updatedValue());
-            }
-        };
 
         String groupId = Long.toString(new Date().getTime());
         for (final FormInstance instance : range) {
             CheckBox checkBox = createControl(groupId, instance, type.getCardinality());
-            checkBox.addValueChangeHandler(changeHandler);
+            checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    fireValueChanged();
+                }
+            });
             panel.add(checkBox);
             controls.add(checkBox);
         }
 
-        // inform user that there is not any data on server for given formfield
+        // inform user that there is no any data on server for given formfield
         if (controls.isEmpty()) {
             panel.add(new HTML(FormFieldWidgetFactory.TEMPLATE.error(I18N.CONSTANTS.noDataForField())));
 
             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    valueUpdater.update(updatedValue()); // trigger update
+                    fireValueChanged();
                 }
             });
-
         }
     }
 
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(updatedValue());
+    }
 
     private CheckBox createControl(String groupId, FormInstance instance, Cardinality cardinality) {
         final CheckBox checkBox;
@@ -102,10 +106,18 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
 
     @Override
     public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+
         for (CheckBox control : controls) {
             control.setEnabled(!readOnly);
         }
     }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
 
     private ReferenceValue updatedValue() {
         final Set<ResourceId> value = Sets.newHashSet();

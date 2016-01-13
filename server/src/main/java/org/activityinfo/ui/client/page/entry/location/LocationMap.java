@@ -30,11 +30,11 @@ import com.extjs.gxt.ui.client.store.StoreListener;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.google.common.collect.Lists;
 import com.google.gwt.resources.client.ImageResource;
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.reports.content.MapboxLayers;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 import org.activityinfo.ui.client.util.LeafletUtil;
 import org.discotools.gwt.leaflet.client.LeafletResourceInjector;
@@ -192,10 +192,10 @@ public class LocationMap extends Html {
                 empty = false;
             }
         }
-
-        if (!empty) {
-            updateMap(bounds);
-        }
+//
+//        if (searchPresenter.get !empty) {
+//            updateMap(bounds);
+//        }
     }
 
     private void bindClickEvent(final LocationDTO location, Marker marker) {

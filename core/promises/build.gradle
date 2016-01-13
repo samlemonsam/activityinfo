@@ -8,12 +8,20 @@ gwt {
 }
 
 dependencies {
-    compile libraries.guava
+    gwt     libraries.gwt.user
     gwt     libraries.gwt.guava
+    compile libraries.guava
+    compile libraries.jsr305
 }
 
 
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.gwt ]
+    }
 }

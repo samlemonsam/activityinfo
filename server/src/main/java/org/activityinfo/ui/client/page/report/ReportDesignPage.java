@@ -59,10 +59,15 @@ import org.activityinfo.ui.client.page.report.editor.CompositeEditor2;
 import org.activityinfo.ui.client.page.report.editor.EditorProvider;
 import org.activityinfo.ui.client.page.report.editor.ReportElementEditor;
 import org.activityinfo.ui.client.page.report.resources.ReportResources;
+import org.activityinfo.ui.client.widget.loading.ExceptionOracle;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ReportDesignPage extends ContentPanel implements Page, ExportCallback {
+    
+    private static final Logger LOGGER = Logger.getLogger(ReportDesignPage.class.getName());
 
     private class SaveCallback implements AsyncCallback<VoidResult> {
         @Override
@@ -73,7 +78,8 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
 
         @Override
         public final void onFailure(final Throwable caught) {
-            MessageBox.alert(I18N.CONSTANTS.serverError(), caught.getMessage(), null);
+            LOGGER.log(Level.SEVERE, "Exception while saving report", caught);
+            MessageBox.alert(I18N.CONSTANTS.serverError(), ExceptionOracle.getExplanation(caught), null);
         }
 
         public void onSaved() {

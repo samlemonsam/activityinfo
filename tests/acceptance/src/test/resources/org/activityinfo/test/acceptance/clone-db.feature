@@ -18,3 +18,14 @@ Feature: Clone database
     Then "NFI Distribution" form has "Partner" form field with values in database "RRMP_Clone":
       | NRC  |
       | PP   |
+
+  @AI-1226
+  Scenario: Clone database with classic and new forms
+    Given I have created a database "original"
+    And I have created a form named "F1"
+    And I have created a form "F2" using the new layout
+    When I have cloned a database "original" with name "original_clone"
+    Then "original" database has "F1" form
+    Then "original" database has "F2" form
+    Then "original_clone" database has "F1" form
+    Then "original_clone" database has "F2" form

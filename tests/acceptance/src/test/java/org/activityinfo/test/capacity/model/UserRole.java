@@ -3,8 +3,6 @@ package org.activityinfo.test.capacity.model;
 import com.google.common.base.Optional;
 import org.activityinfo.test.capacity.action.UserAction;
 
-import java.util.Iterator;
-
 /**
  * Provides a "script" for agents within a scenario to follow
  */

@@ -21,23 +21,30 @@ package org.activityinfo.test.pageobject.web.design;
  * #L%
  */
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
 import org.activityinfo.test.pageobject.gxt.GxtTree;
 import org.activityinfo.test.pageobject.gxt.ToolbarMenu;
+import org.activityinfo.test.pageobject.web.entry.ImportSchemaDialog;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
 
 /**
  * @author yuriyz on 04/02/2015.
  */
 public class DesignPage {
 
+    private FluentElement container;
     private GxtTree designTree;
     private ToolbarMenu toolbarMenu;
 
     public DesignPage(FluentElement container) {
 
-        GxtPanel panel = GxtPanel.findStartsWith(container, "Design");
+        GxtPanel panel = GxtPanel.findStartsWith(container, "Design ");
 
+        this.container = container;
         this.designTree = panel.treeGrid();
         this.toolbarMenu = panel.toolbarMenu();
     }
@@ -48,5 +55,20 @@ public class DesignPage {
 
     public ToolbarMenu getToolbarMenu() {
         return toolbarMenu;
+    }
+
+    public FluentElement getContainer() {
+        return container;
+    }
+
+    public ImportSchemaDialog clickImport() {
+        getToolbarMenu().clickButton(I18N.CONSTANTS.importText());
+        return ImportSchemaDialog.waitOnDialog(getContainer());
+    }
+    
+    public GxtModal newBetaForm() {
+        getToolbarMenu().clickButton(I18N.CONSTANTS.newText());
+        container.root().find().span(containingText(I18N.CONSTANTS.newForm())).clickWhenReady();
+        return GxtModal.waitForModal(container.root());
     }
 }

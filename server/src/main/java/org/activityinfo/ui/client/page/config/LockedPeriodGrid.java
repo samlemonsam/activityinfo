@@ -22,27 +22,29 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.event.ComponentEvent;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.MessageBoxEvent;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.monitor.NullAsyncMonitor;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.IsActivityDTO;
+import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.page.common.columns.EditCheckColumnConfig;
 import org.activityinfo.ui.client.page.common.columns.EditableLocalDateColumn;
 import org.activityinfo.ui.client.page.common.columns.ReadLockedPeriodTypeColumn;
@@ -55,7 +57,6 @@ import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.LockedPeriodListEditor;
 import org.activityinfo.ui.client.page.config.mvp.CanCreate;
-import org.activityinfo.ui.client.page.config.mvp.CanDelete;
 import org.activityinfo.ui.client.page.config.mvp.CanUpdate;
 
 import java.util.ArrayList;
@@ -66,7 +67,6 @@ import java.util.Map;
 public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEditor {
 
     private EventBus eventBus = new SimpleEventBus();
-    private boolean mustConfirmDelete = true;
 
     // UI stuff
     private ListStore<LockedPeriodDTO> lockedPeriodStore;
@@ -116,12 +116,24 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
         lockedPeriodGrid.addListener(Events.OnClick, new Listener<ComponentEvent>() {
             @Override
             public void handleEvent(ComponentEvent be) {
-                lockedPeriod = lockedPeriodGrid.getSelectionModel().getSelectedItem();
-                setDeleteEnabled(lockedPeriodGrid.getSelectionModel().getSelectedItem() != null);
+                updateState();
             }
         });
-
         add(lockedPeriodGrid);
+    }
+
+    private void updateState() {
+        lockedPeriod = lockedPeriodGrid.getSelectionModel().getSelectedItem();
+        setDeleteEnabled(lockedPeriodGrid.getSelectionModel().getSelectedItem() != null);
+    }
+
+    private void updateStateLater() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                updateState();
+            }
+        });
     }
 
     private void initializeComponent() {
@@ -135,6 +147,13 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
             @Override
             public void handleEvent(StoreEvent be) {
                 actionToolbar.setUpdateEnabled(true);
+                updateStateLater();
+            }
+        });
+        lockedPeriodStore.addListener(Store.Remove, new Listener<BaseEvent>() {
+            @Override
+            public void handleEvent(BaseEvent be) {
+                updateStateLater();
             }
         });
     }
@@ -243,22 +262,16 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public void askConfirmDelete(LockedPeriodDTO item) {
-        if (mustConfirmDelete) {
-            MessageBox.confirm(I18N.CONSTANTS.deleteLockedPeriodTitle(),
-                    I18N.CONSTANTS.deleteLockedPeriodQuestion(),
-                    new Listener<MessageBoxEvent>() {
-                        @Override
-                        public void handleEvent(MessageBoxEvent be) {
-                            if (be.isCancelled()) {
-                                eventBus.fireEvent(new CancelDeleteEvent());
-                            } else {
-                                eventBus.fireEvent(new ConfirmDeleteEvent());
-                            }
+        MessageBox.confirm(I18N.CONSTANTS.deleteLockedPeriodTitle(),
+                I18N.CONSTANTS.deleteLockedPeriodQuestion(),
+                new Listener<MessageBoxEvent>() {
+                    @Override
+                    public void handleEvent(MessageBoxEvent be) {
+                        if (be.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                            eventBus.fireEvent(new ConfirmDeleteEvent());
                         }
-                    });
-        } else {
-            eventBus.fireEvent(new ConfirmDeleteEvent());
-        }
+                    }
+                });
     }
 
     @Override
@@ -314,11 +327,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public HandlerRegistration addStartCreateHandler(CanCreate.StartCreateHandler handler) {
         return eventBus.addHandler(StartCreateEvent.TYPE, handler);
-    }
-
-    @Override
-    public HandlerRegistration addCancelDeleteHandler(CanDelete.CancelDeleteHandler handler) {
-        return eventBus.addHandler(CancelDeleteEvent.TYPE, handler);
     }
 
     @Override
@@ -425,10 +433,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public AsyncMonitor getDeletingMonitor() {
         return deletingMonitor;
-    }
-
-    @Override
-    public void setMustConfirmDelete(boolean mustConfirmDelete) {
     }
 
     @Override

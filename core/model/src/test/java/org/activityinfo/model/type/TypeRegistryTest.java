@@ -21,13 +21,20 @@ package org.activityinfo.model.type;
  * #L%
  */
 
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * @author yuriyz on 8/13/14.
  */
 public class TypeRegistryTest {
+
+    @BeforeClass
+    public static void setupI18N() {
+        LocaleProxy.initialize();
+    }
 
     /**
      * Check whether serialization/deserialization works for all parametrized types. If there is error in deserialization

@@ -35,7 +35,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestOracle;
-import org.activityinfo.ui.client.component.form.field.suggest.InstanceSuggestion;
+import org.activityinfo.ui.client.component.form.field.suggest.Suggestion;
 import org.activityinfo.ui.client.widget.SuggestBox;
 
 import java.util.List;
@@ -50,25 +50,38 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
 
     private ResourceId value;
     private List<FormInstance> range;
+    private Suggestion selectedSuggestion;
+    private final ValueUpdater<ReferenceValue> valueUpdater;
 
     public SuggestBoxWidget(List<FormInstance> instances, final ValueUpdater<ReferenceValue> valueUpdater) {
         this.range = instances;
+        this.valueUpdater = valueUpdater;
         this.suggestBox = new SuggestBox(new InstanceSuggestOracle(instances));
         this.suggestBox.setPlaceholder(I18N.CONSTANTS.suggestBoxPlaceholder());
         this.suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                InstanceSuggestion suggestion = (InstanceSuggestion) event.getSelectedItem();
-                if(!Objects.equals(suggestion.getInstanceId(), value)) {
-                    valueUpdater.update(new ReferenceValue(suggestion.getInstanceId()));
+                selectedSuggestion = (Suggestion) event.getSelectedItem();
+                if(!Objects.equals(selectedSuggestion.getId(), value)) {
+                    fireValueChanged();
                 }
             }
         });
     }
 
     @Override
+    public void fireValueChanged() {
+        valueUpdater.update(selectedSuggestion != null ? new ReferenceValue(selectedSuggestion.getId()) : new ReferenceValue());
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         suggestBox.setEnabled(!readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return !suggestBox.isEnabled();
     }
 
     @Override

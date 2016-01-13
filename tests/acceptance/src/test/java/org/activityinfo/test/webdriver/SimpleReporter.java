@@ -1,6 +1,5 @@
 package org.activityinfo.test.webdriver;
 
-import com.google.common.io.Files;
 import cucumber.api.Scenario;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -27,9 +26,7 @@ public class SimpleReporter implements SessionReporter {
 
     @Override
     public void finished(Scenario scenario) {
-        if(scenario.isFailed()) {
-            screenshot();
-        }
+        screenshot();
     }
 
     @Override

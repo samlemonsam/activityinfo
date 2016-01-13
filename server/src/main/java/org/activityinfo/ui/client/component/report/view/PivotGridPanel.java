@@ -89,7 +89,9 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
 
     @Override
     public void loading() {
-        el().mask();
+        if(isRendered()) {
+            el().mask();
+        }
     }
 
     @Override
@@ -99,7 +101,9 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
 
     @Override
     public void show(final PivotReportElement element) {
-        el().unmask();
+        if(isRendered()) {
+            el().unmask();
+        }
 
         if (grid != null) {
             removeAll();

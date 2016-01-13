@@ -22,7 +22,6 @@ package org.activityinfo.test.pageobject.web.design.designer;
  */
 
 import com.google.common.collect.Sets;
-import com.mysql.jdbc.StringUtils;
 
 import java.util.Set;
 
@@ -30,6 +29,9 @@ import java.util.Set;
  * @author yuriyz on 06/19/2015.
  */
 public enum DesignerFieldPropertyType {
+    CODE("code"),
+    LABEL("label"),
+    DESCRIPTION("description"),
     RELEVANCE("relevance"),
     REQUIRED("required"),
     VISIBLE("visible");
@@ -46,7 +48,7 @@ public enum DesignerFieldPropertyType {
 
     public static Set<DesignerFieldPropertyType> fromCommaSeparateString(String propertyTypesSeparatedByComma) {
         Set<DesignerFieldPropertyType> result = Sets.newHashSet();
-        for (String property : StringUtils.split(propertyTypesSeparatedByComma, ",", true)) {
+        for (String property : propertyTypesSeparatedByComma.split("\\s*,\\s*")) {
             result.add(fromValue(property));
         }
         return result;

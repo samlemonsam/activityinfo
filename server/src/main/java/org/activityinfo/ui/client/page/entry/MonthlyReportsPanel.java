@@ -39,15 +39,22 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
-import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
+import org.activityinfo.legacy.shared.command.GetMonthlyReports;
+import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
+import org.activityinfo.legacy.shared.model.LockedPeriodSet;
+import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
@@ -55,6 +62,7 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MonthlyReportsPanel extends ContentPanel implements ActionListener {
     private final Dispatcher service;
@@ -113,7 +121,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
 
         DateWrapper today = new DateWrapper();
         DateTimeFormat monthFormat = DateTimeFormat.getFormat("MMM yyyy");
-        for (int year = today.getFullYear(); year != today.getFullYear() - 3; --year) {
+        for (int year = today.getFullYear() + 2; year != today.getFullYear() - 3; --year) {
 
             for (int month = 12; month != 0; --month) {
                 DateWrapper d = new DateWrapper(year, month, 1);
@@ -251,8 +259,28 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         }
 
         @Override
-        protected void load(Object loadConfig, AsyncCallback<MonthlyReportResult> callback) {
-            service.execute(new GetMonthlyReports(siteId, startMonth, 7), callback);
+        protected void load(Object loadConfig, final AsyncCallback<MonthlyReportResult> callback) {
+            service.execute(new GetMonthlyReports(siteId, startMonth, 7), new AsyncCallback<MonthlyReportResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
+                }
+
+                @Override
+                public void onSuccess(MonthlyReportResult result) {
+                    callback.onSuccess(filter(result));
+                }
+            });
+        }
+
+        private MonthlyReportResult filter(MonthlyReportResult result) {
+            final List<IndicatorRowDTO> indicators = Lists.newArrayList();
+            for (IndicatorRowDTO indicator : result.getData()) {
+                if (!indicator.isCalculated()) {
+                    indicators.add(indicator);
+                }
+            }
+            return new MonthlyReportResult(indicators);
         }
     }
 }

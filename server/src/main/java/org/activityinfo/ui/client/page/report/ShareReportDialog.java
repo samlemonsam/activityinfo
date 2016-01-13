@@ -22,9 +22,12 @@ package org.activityinfo.ui.client.page.report;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.data.ModelData;
+import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.button.Button;
@@ -32,6 +35,7 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
@@ -111,7 +115,7 @@ public class ShareReportDialog extends Dialog {
                                  ListStore<ReportVisibilityDTO> store,
                                  Grid<ReportVisibilityDTO> grid) {
 
-                return model.getDatabaseName() + " Users";
+                return I18N.MESSAGES.databaseUserGroup(model.getDatabaseName());
 
             }
         });
@@ -119,31 +123,34 @@ public class ShareReportDialog extends Dialog {
         visibleColumn = new CheckColumnConfig("visible", I18N.CONSTANTS.shared(), 75);
         visibleColumn.setDataIndex("visible");
 
-        dashboardColumn = new CheckColumnConfig("defaultDashboard", I18N.CONSTANTS.defaultDashboard(), 75);
+        dashboardColumn = new CheckColumnConfig("defaultDashboard", I18N.CONSTANTS.defaultDashboard(), 75) {
+            @Override
+            protected void onMouseDown(GridEvent<ModelData> ge) {
+                super.onMouseDown(ge);
+                Record record = grid.getStore().getRecord(ge.getModel());
+    
+                // Putting on the dashboard implies sharing
+                if(record.get("defaultDashboard") == Boolean.TRUE &&
+                   record.get("visible") != Boolean.TRUE) {
+                    
+                    record.set("visible", true);
+                }
+            }
+        };
         dashboardColumn.setDataIndex("defaultDashboard");
 
-        ColumnModel columnModel = new ColumnModel(Arrays.asList(icon, name, visibleColumn, dashboardColumn));
-        return columnModel;
+        return new ColumnModel(Arrays.asList(icon, name, visibleColumn, dashboardColumn));
     }
 
     public void show(ReportMetadataDTO metadata) {
         super.show();
 
-        BatchCommand batch = new BatchCommand();
-        batch.add(new GetReportModel(metadata.getId()));
-        batch.add(new GetIndicators(currentReport.getIndicators()));
-        batch.add(new GetReportVisibility(metadata.getId()));
-
-        dispatcher.execute(batch,
-                new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
-                new SuccessCallback<BatchResult>() {
+        dispatcher.execute(new GetReportModel(metadata.getId()), new MaskingAsyncMonitor(grid, I18N.CONSTANTS.loading()),
+                new SuccessCallback<ReportDTO>() {
 
                     @Override
-                    public void onSuccess(BatchResult batch) {
-
-                        currentReport = ((ReportDTO) batch.getResult(0)).getReport();
-
-                        populateGrid((IndicatorResult) batch.getResult(1), (ReportVisibilityResult) batch.getResult(2));
+                    public void onSuccess(ReportDTO reportDTO) {
+                        show(reportDTO.getReport());
                     }
                 });
     }
@@ -179,26 +186,27 @@ public class ShareReportDialog extends Dialog {
         }
 
         for (IndicatorDTO indicator : indicators.getIndicators()) {
-            if (databases.containsKey(indicator.getDatabaseId())) {
-                gridStore.add(databases.get(indicator.getDatabaseId()));
-            } else {
+            if (!databases.containsKey(indicator.getDatabaseId())) {
                 ReportVisibilityDTO model = new ReportVisibilityDTO();
                 model.setDatabaseId(indicator.getDatabaseId());
                 model.setDatabaseName(indicator.getDatabaseName());
-                gridStore.add(model);
+                databases.put(indicator.getDatabaseId(), model);
             }
         }
 
-        if (gridStore.getCount() == 0) {
-            MessageBox.alert(I18N.CONSTANTS.share(),
-                    "This report is still empty, so it can't yet be shared.",
-                    new Listener<MessageBoxEvent>() {
+        for (ReportVisibilityDTO model : databases.values()) {
+            gridStore.add(model);
+        }
 
-                        @Override
-                        public void handleEvent(MessageBoxEvent be) {
-                            hide();
-                        }
-                    });
+        if (gridStore.getCount() == 0) {
+            MessageBox.alert(I18N.CONSTANTS.share(), I18N.CONSTANTS.emptyReportsCannotBeShared(),
+                new Listener<MessageBoxEvent>() {
+
+                    @Override
+                    public void handleEvent(MessageBoxEvent be) {
+                        hide();
+                    }
+                });
         }
     }
 

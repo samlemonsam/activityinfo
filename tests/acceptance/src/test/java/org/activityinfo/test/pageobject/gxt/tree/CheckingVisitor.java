@@ -23,6 +23,14 @@ public class CheckingVisitor implements GxtTreeVisitor {
 
         } else {
             node.ensureExpanded();
+            
+            // There can be a delay between the initial rendering of the tree nodes
+            // and updating the checked state. 
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         return Action.CONTINUE;
     }

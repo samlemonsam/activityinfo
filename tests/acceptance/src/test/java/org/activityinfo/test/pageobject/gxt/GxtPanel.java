@@ -3,9 +3,7 @@ package org.activityinfo.test.pageobject.gxt;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 
 public class GxtPanel {
 

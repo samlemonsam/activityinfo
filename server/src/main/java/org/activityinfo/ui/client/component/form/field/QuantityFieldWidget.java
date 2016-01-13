@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -31,17 +32,21 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     private final FlowPanel panel;
     private final DoubleBox box;
     private final InlineLabel unitsLabel;
+    private final ValueUpdater<Quantity> valueUpdater;
+    private final QuantityType type;
 
     public QuantityFieldWidget(final QuantityType type, final ValueUpdater<Quantity> valueUpdater,
                                @Nullable EventBus eventBus, ResourceId fieldId) {
+        this.type = type;
         this.eventBus = eventBus;
         this.fieldId = fieldId;
+        this.valueUpdater = valueUpdater;
 
         box = new DoubleBox();
         box.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> event) {
-                valueUpdater.update(new Quantity(event.getValue(), type.getUnits()));
+                fireValueChanged();
             }
         });
         box.addKeyUpHandler(new KeyUpHandler() {
@@ -61,8 +66,18 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     }
 
     @Override
+    public void fireValueChanged() {
+        valueUpdater.update(box.getValue() != null ? new Quantity(box.getValue(), type.getUnits()) : null);
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         box.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return box.isReadOnly();
     }
 
     @Override
@@ -107,6 +122,7 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     }
 
     private String invalidErrorMessage() {
-        return I18N.MESSAGES.quantityFieldInvalidValue(15, 2000, 1.5);
+        NumberFormat decimalFormat = NumberFormat.getDecimalFormat();
+        return I18N.MESSAGES.quantityFieldInvalidValue(15, decimalFormat.format(2000), decimalFormat.format(1.5));
     }
 }

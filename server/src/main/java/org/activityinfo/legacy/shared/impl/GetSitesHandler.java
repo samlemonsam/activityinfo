@@ -51,6 +51,7 @@ import org.activityinfo.model.form.FormFieldType;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
@@ -732,7 +733,9 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                             if(!row.isNull("Value")) {
                                 indicatorValue = row.getDouble("Value");
                             }
-                        } else if (indicatorType == FieldTypeClass.FREE_TEXT || indicatorType == FieldTypeClass.NARRATIVE) {
+                        } else if (indicatorType == FieldTypeClass.FREE_TEXT ||
+                                indicatorType == FieldTypeClass.NARRATIVE ||
+                                indicatorType == AttachmentType.TYPE_CLASS) {
                             if(!row.isNull("TextValue")) {
                                 indicatorValue = row.getString("TextValue");
                             }
@@ -838,7 +841,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         indicator.setName("indicatorName");
         indicator.setTypeId(rs.getString("type"));
         indicator.setExpression(rs.getString("expression"));
-        indicator.setSkipExpression(rs.getString("skipExpression"));
+        indicator.setRelevanceExpression(rs.getString("skipExpression"));
         indicator.setNameInExpression(rs.getString("code"));
         indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
         indicator.setUnits(rs.getString("units"));

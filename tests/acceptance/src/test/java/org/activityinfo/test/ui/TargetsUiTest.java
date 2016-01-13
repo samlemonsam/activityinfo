@@ -22,12 +22,18 @@ package org.activityinfo.test.ui;
  */
 
 import com.google.common.collect.Lists;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.FieldValue;
+import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.design.TargetsPage;
-import org.junit.Rule;
+import org.activityinfo.test.sut.DevServerAccounts;
 import org.junit.Test;
+
+import javax.inject.Inject;
+import java.util.Locale;
 
 import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
@@ -42,11 +48,21 @@ public class TargetsUiTest {
     private static final String DATABASE = "My db";
     private static final String FORM_NAME = "NFI Distribution";
 
-    @Rule
-    public UiDriver driver = new UiDriver();
+    @Inject
+    private UiApplicationDriver driver;
+
+    @Inject
+    private DevServerAccounts accounts;
 
     private void background() throws Exception {
-        driver.loginAsAny();
+
+        LocaleProxy.initialize();
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag("en"));
+        accounts.setLocale("en");
+
+        System.out.println(I18N.CONSTANTS.databases());
+
+        driver.login();
         driver.setup().createDatabase(property("name", DATABASE));
 
         String[] partners = new String[] { "ARC", "NRC", "RI" };
@@ -75,21 +91,21 @@ public class TargetsUiTest {
         );
 
 
-        driver.ui().createTarget(
+        driver.createTarget(
                 property("database", DATABASE),
                 property("name", "Target1"),
                 property("project", "FY2014")
         );
-        driver.ui().createTarget(
+        driver.createTarget(
                 property("database", DATABASE),
                 property("name", "Target2"),
                 property("project", "FY2015")
         );
 
-        driver.ui().setTargetValues("Target1", Lists.newArrayList(
+        driver.setTargetValues("Target1", Lists.newArrayList(
                 new FieldValue("nb. kits", "1000")
         ));
-        driver.ui().setTargetValues("Target2", Lists.newArrayList(
+        driver.setTargetValues("Target2", Lists.newArrayList(
                 new FieldValue("nb. kits", "2000")
         ));
     }
@@ -98,13 +114,13 @@ public class TargetsUiTest {
     public void treeEditorStateOnSelectionChange() throws Exception {
         background();
 
-        driver.ui().setTargetValues("Target1", Lists.newArrayList(
+        driver.setTargetValues("Target1", Lists.newArrayList(
                 new FieldValue("nb. kits", "1000")
         ));
 
-        TargetsPage targetPage = driver.ui().targetsPage();
-        targetPage.select(driver.getAlias("Target2"));
-        targetPage.select(driver.getAlias("Target1")); // switch back and check whether value is in tree
+        TargetsPage targetPage = driver.targetsPage();
+        targetPage.select(driver.alias("Target2"));
+        targetPage.select(driver.alias("Target1")); // switch back and check whether value is in tree
 
         assertNotNull(targetPage.valueGrid().findCell("1000")); // value must be present in tree
     }
@@ -115,7 +131,7 @@ public class TargetsUiTest {
         background();
 
 
-        ApplicationPage app = driver.applicationPage();
+        ApplicationPage app = driver.getApplicationPage();
 
         TargetsPage targets = app.navigateToDesignTab().selectDatabase(driver.alias(DATABASE)).targets();
         targets.select("Target1");
@@ -133,7 +149,7 @@ public class TargetsUiTest {
     public void targetEdit() throws Exception {
         background();
 
-        TargetsPage targets = driver.applicationPage().navigateToDesignTab().
+        TargetsPage targets = driver.getApplicationPage().navigateToDesignTab().
                 selectDatabase(driver.alias(DATABASE)).targets();
         targets.editTarget("Target1", driver.alias("ARC"), driver.alias("FY2014"));
 

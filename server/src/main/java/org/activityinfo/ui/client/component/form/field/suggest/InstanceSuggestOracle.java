@@ -23,7 +23,7 @@ public class InstanceSuggestOracle extends SuggestOracle {
         for(FormInstance instance : instances) {
             String label = FormInstanceLabeler.getLabel(instance);
             if (scorer.score(request.getQuery(), label) > 0.5) {
-                suggestions.add(new InstanceSuggestion(instance));
+                suggestions.add(new org.activityinfo.ui.client.component.form.field.suggest.Suggestion(instance));
             }
         }
 
@@ -31,8 +31,8 @@ public class InstanceSuggestOracle extends SuggestOracle {
         if (suggestions.isEmpty()) {
             for(FormInstance instance : instances) {
                 String label = FormInstanceLabeler.getLabel(instance);
-                if (label.contains(request.getQuery())) {
-                    suggestions.add(new InstanceSuggestion(instance));
+                if (request.getQuery() != null && label.toUpperCase().contains(request.getQuery().toUpperCase())) {
+                    suggestions.add(new org.activityinfo.ui.client.component.form.field.suggest.Suggestion(instance));
                 }
             }
         }

@@ -4,6 +4,8 @@ import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 
 public class GxtCommentsForm extends Form {
 
@@ -59,6 +61,11 @@ public class GxtCommentsForm extends Form {
         }
 
         @Override
+        public boolean isSuggestBox() {
+            return false;
+        }
+
+        @Override
         public void fill(String value) {
             textArea.sendKeys(value);
         }
@@ -85,6 +92,11 @@ public class GxtCommentsForm extends Form {
 
         @Override
         public boolean isValid() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<String> availableItems() {
             throw new UnsupportedOperationException();
         }
     }

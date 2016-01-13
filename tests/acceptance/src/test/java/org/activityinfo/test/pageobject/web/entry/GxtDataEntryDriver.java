@@ -6,6 +6,8 @@ import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 public class GxtDataEntryDriver implements DataEntryDriver {
     
     private DataEntryDriver current;
@@ -72,5 +74,15 @@ public class GxtDataEntryDriver implements DataEntryDriver {
     @Override
     public void sendKeys(CharSequence keys) {
         current.sendKeys(keys);
+    }
+
+    @Override
+    public List<String> availableValues() {
+        return current.availableValues();
+    }
+
+    @Override
+    public void close() {
+        current.close();
     }
 }

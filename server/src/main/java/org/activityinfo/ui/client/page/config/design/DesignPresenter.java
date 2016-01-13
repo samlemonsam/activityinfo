@@ -29,28 +29,26 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.TreeStore;
-import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.state.StateProvider;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationEvent;
@@ -64,7 +62,6 @@ import org.activityinfo.ui.client.page.common.grid.TreeGridView;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.DbPage;
 import org.activityinfo.ui.client.page.config.DbPageState;
-import org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporter;
 import org.activityinfo.ui.client.page.instance.InstancePage;
@@ -310,15 +307,20 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         ModelData selected = view.getSelection();
 
         if ("Activity".equals(entityName)) {
-            final NewFormDialog newFormDialog = new NewFormDialog();
-            newFormDialog.show();
-            newFormDialog.setSuccessHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    createNewActivity(newFormDialog);
-                }
-            });
-            return;
+            newEntity = new ActivityDTO();
+            newEntity.set("databaseId", db.getId());
+            newEntity.set("classicView", true);
+            newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
+
+        } else if("Form".equals(entityName)) {
+            newEntity = new ActivityDTO();
+            newEntity.set("databaseId", db.getId());
+            newEntity.set("classicView", false);
+            newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
+            newEntity.set("locationTypeId", db.getCountry().getNullLocationType().getId());
+            newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
 
         } else if ("LocationType".equals(entityName)) {
             newEntity = new LocationTypeDTO();
@@ -328,7 +330,10 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         } else if ("AttributeGroup".equals(entityName)) {
             IsActivityDTO activity = findActivityFolder(selected);
 
-            newEntity = new AttributeGroupDTO();
+            AttributeGroupDTO newAttributeGroup = new AttributeGroupDTO();
+            newAttributeGroup.setMultipleAllowed(false);
+
+            newEntity = newAttributeGroup;
             newEntity.set("activityId", activity.getId());
             parent = treeStore.getChild((ModelData) activity, 0);
 
@@ -345,6 +350,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
             IndicatorDTO newIndicator = new IndicatorDTO();
             newIndicator.setAggregation(IndicatorDTO.AGGREGATE_SUM);
+            newIndicator.setType(FieldTypeClass.QUANTITY);
 
             if (activity instanceof ActivityFormDTO) {
                 newIndicator.set("sortOrder", ((ActivityFormDTO)activity).getIndicators().size() + 1);
@@ -356,60 +362,59 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
             parent = treeStore.getChild((ModelData) activity, 1);
 
         } else {
-            return; // TODO log error
+            Log.error("Unsupported entity type.");
+            return;
         }
 
         createEntity(parent, newEntity);
     }
 
-    private void createNewActivity(NewFormDialog newFormDialog) {
-        final ActivityFormDTO newActivity = new ActivityFormDTO(db);
-        newActivity.set("databaseId", db.getId());
-        newActivity.setName(newFormDialog.getName());
-        newActivity.setCategory(newFormDialog.getCategory());
+//    private void createNewActivity(NewFormDialog newFormDialog) {
+//        final ActivityFormDTO newActivity = new ActivityFormDTO(db);
+//        newActivity.set("databaseId", db.getId());
+//        newActivity.setName(newFormDialog.getName());
+//        newActivity.setCategory(newFormDialog.getCategory());
+//
+//        if (newFormDialog.getViewType() == NewFormDialog.ViewType.CLASSIC || newFormDialog.getViewType() == NewFormDialog.ViewType.CLASSIC_MONTHLY) {
+//
+//            newActivity.setClassicView(true);
+//            newActivity.setReportingFrequency(newFormDialog.getViewType() == NewFormDialog.ViewType.CLASSIC ?
+//                    ActivityFormDTO.REPORT_ONCE : ActivityFormDTO.REPORT_MONTHLY);
+//
+//            createEntity(null, newActivity);
+//            return;
+//        } else if (newFormDialog.getViewType() == NewFormDialog.ViewType.NEW_FORM_DESIGNER) {
+//
+//            newActivity.setClassicView(false);
+//            newActivity.setReportingFrequency(ActivityFormDTO.REPORT_ONCE);
+//            newActivity.setLocationType(newActivityLocationTypeForModernView());
+//
+//            service.execute(new CreateEntity(newActivity), new SuccessCallback<CreateResult>() {
+//                @Override
+//                public void onSuccess(CreateResult result) {
+//
+//                    newActivity.setId(result.getNewId());
+//
+//                    eventBus.fireEvent(new NavigationEvent(
+//                            NavigationHandler.NAVIGATION_REQUESTED,
+//                            new InstancePlace(newActivity.getResourceId(), InstancePage.DESIGN_PAGE_ID)));
+//                }
+//            });
+//
+//            return;
+//        }
+//
+//        throw new RuntimeException("Unsupported view type of activity: " + newFormDialog.getViewType());
+//    }
 
-        if (newFormDialog.getViewType() == NewFormDialog.ViewType.CLASSIC || newFormDialog.getViewType() == NewFormDialog.ViewType.CLASSIC_MONTHLY) {
-
-            newActivity.setClassicView(true);
-            newActivity.setReportingFrequency(newFormDialog.getViewType() == NewFormDialog.ViewType.CLASSIC ?
-                    ActivityFormDTO.REPORT_ONCE : ActivityFormDTO.REPORT_MONTHLY);
-
-            createEntity(null, newActivity);
-            return;
-        } else if (newFormDialog.getViewType() == NewFormDialog.ViewType.NEW_FORM_DESIGNER) {
-
-            newActivity.setClassicView(false);
-            newActivity.setReportingFrequency(ActivityFormDTO.REPORT_ONCE);
-            newActivity.setLocationType(newActivityLocationTypeForModernView());
-
-            service.execute(new CreateEntity(newActivity), new SuccessCallback<CreateResult>() {
-                @Override
-                public void onSuccess(CreateResult result) {
-
-                    newActivity.setId(result.getNewId());
-
-                    eventBus.fireEvent(new NavigationEvent(
-                            NavigationHandler.NAVIGATION_REQUESTED,
-                            new InstancePlace(newActivity.getResourceId(), InstancePage.DESIGN_PAGE_ID)));
-                }
-            });
-
-            return;
-        }
-
-        throw new RuntimeException("Unsupported view type of activity: " + newFormDialog.getViewType());
-    }
-
-    private LocationTypeDTO newActivityLocationTypeForModernView() {
-        for (LocationTypeDTO dto : db.getCountry().getLocationTypes()) {
-            if (dto.isNationwide()) {
-                return dto;
-            }
-        }
-
-        MessageBox.info(I18N.CONSTANTS.alert(), I18N.MESSAGES.noNationWideLocationType(db.getName(), db.getCountry().getName()), null);
-        throw new RuntimeException("Failed to find nationwide location type, db:" + db.getName() + ", country:" + db.getCountry().getName());
-    }
+//    private LocationTypeDTO newActivityLocationTypeForModernView() {
+//        for (LocationTypeDTO dto : db.getCountry().getLocationTypes()) {
+//            if (dto.isNationwide()) {
+//                return dto;
+//            }
+//        }
+//        throw new RuntimeException("Failed to find nationwide location type, db:" + db.getName() + ", country:" + db.getCountry().getName());
+//    }
 
     private void createEntity(final ModelData parent, final EntityDTO newEntity) {
         view.showNewForm(newEntity, new FormDialogCallback() {
@@ -424,10 +429,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
                     @Override
                     public void onSuccess(CreateResult result) {
-                        newEntity.set("id", result.getNewId()); // todo add
-                        // setId to
-                        // EntityDTO
-                        // interface
+                        newEntity.set("id", result.getNewId());
 
                         if (parent == null) {
                             treeStore.add(newEntity, false);
@@ -435,7 +437,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                             treeStore.add(parent, newEntity, false);
                         }
 
-                        if (newEntity instanceof IsActivityDTO) {
+                        if (newEntity instanceof IsActivityDTO && ((IsActivityDTO) newEntity).getClassicView()) {
                             treeStore.add(newEntity, new AttributeGroupFolder(messages.attributes()), false);
                             treeStore.add(newEntity, new IndicatorFolder(messages.indicators()), false);
                         }
@@ -475,7 +477,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         service.execute(new Delete((EntityDTO) model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
-
+                Log.error(caught.getMessage(), caught);
             }
 
             @Override
@@ -529,11 +531,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
         IsActivityDTO activity = getSelectedActivity(selectedItem);
-        if (activity != null) {
-            return  activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
-        } else {
-            return selectedItem instanceof IsFormClass;
-        }
+        return activity != null && !activity.getClassicView();
     }
 
     private IsActivityDTO getSelectedActivity(ModelData selectedItem) {

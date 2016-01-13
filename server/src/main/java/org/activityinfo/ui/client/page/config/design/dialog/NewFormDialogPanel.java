@@ -27,6 +27,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.ui.client.widget.CheckBox;
 import org.activityinfo.ui.client.widget.RadioButton;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.form.FormGroup;
@@ -46,13 +47,11 @@ public class NewFormDialogPanel extends Composite {
     @UiField
     TextBox categoryField;
     @UiField
-    RadioButton classic;
-    @UiField
-    RadioButton formDesigner;
-    @UiField
     Anchor explanationLink;
     @UiField
     FormGroup nameFieldGroup;
+    @UiField
+    CheckBox newFormLayout;
 
     public NewFormDialogPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -67,12 +66,8 @@ public class NewFormDialogPanel extends Composite {
         return categoryField;
     }
 
-    public RadioButton getClassic() {
-        return classic;
-    }
-
-    public RadioButton getFormDesigner() {
-        return formDesigner;
+    public CheckBox getNewFormLayout() {
+        return newFormLayout;
     }
 
     public FormGroup getNameFieldGroup() {

@@ -49,10 +49,16 @@ class JsonChecker {
             if ("null".equals(expected.asText()) && actual instanceof NullNode) {
                 return;
             }
-            if(!actual.isTextual()) {
+            if (!actual.isTextual()) {
                 throw new AssertionError(String.format("Expected an text at %s; found: %s", path, actual));
             }
             checkString(path, expected.asText(), actual.asText());
+
+        } else if (expected.isNumber()) {
+            if(!actual.isNumber()) {
+                throw new AssertionError(String.format("Expected a number at %s; found: %s", path, actual));
+            }
+            checkNumber(path, expected.asDouble(), actual.asDouble());
             
         } else if (expected instanceof ObjectNode) {
             if(!actual.isObject()) {
@@ -70,6 +76,14 @@ class JsonChecker {
             if(!expected.equals(actual)) {
                 throw mismatchException(path, expected, actual);
             }
+        }
+    }
+
+    private void checkNumber(String path, double expected, double actual) {
+        double diff = Math.abs(expected - actual);
+        if(diff > 0.0001) {
+            throw new AssertionError(String.format("At %s, expected:\n%f\nFound:\n%f",
+                    path, expected, actual));
         }
     }
 
@@ -147,8 +161,8 @@ class JsonChecker {
     private void checkArray(String path, ArrayNode expectedArray, ArrayNode actualArray) {
         int expectedArraySize = expectedArray.size();
         if (expectedArraySize != actualArray.size()) {
-            throw new AssertionError(String.format("Expected an array with %d elements, found %d.",
-                    expectedArraySize, actualArray.size()));
+            throw new AssertionError(String.format("At %s, Expected an array with %d elements, found %d.",
+                    path, expectedArraySize, actualArray.size()));
         }
 
         if (ignorePositionInArray) {

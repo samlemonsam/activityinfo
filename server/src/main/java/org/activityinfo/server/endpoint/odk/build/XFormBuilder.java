@@ -148,9 +148,7 @@ public class XFormBuilder {
                 Bind bind = new Bind();
                 bind.setNodeSet(field.getAbsoluteFieldName());
                 bind.setType(field.getBuilder().getModelBindType());
-                if (field.getModel().isReadOnly()) {
-                    bind.setReadonly(XPathBuilder.TRUE);
-                }
+
                 //TODO Fix this
                 //bind.calculate = formField.getExpression();
                 bind.setRelevant(xPathBuilder.build(field.getModel().getRelevanceConditionExpression()));
@@ -230,6 +228,7 @@ public class XFormBuilder {
         FormField formField = new FormField(locationNameFieldId);
         formField.setType(TextType.INSTANCE);
         formField.setLabel(original.getLabel());
+        formField.setRequired(original.isRequired());
         return new OdkField(formField, factory.get(formField.getType()));
     }
 

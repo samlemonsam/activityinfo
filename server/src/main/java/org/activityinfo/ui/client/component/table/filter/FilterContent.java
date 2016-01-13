@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.table.filter;
  * #L%
  */
 
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.activityinfo.core.shared.criteria.HasCriteria;
 
@@ -30,4 +31,8 @@ import org.activityinfo.core.shared.criteria.HasCriteria;
 public interface FilterContent extends HasCriteria, IsWidget {
 
     public void clear();
+
+    public boolean isValid();
+
+    public void setChangeHandler(ValueChangeHandler handler);
 }

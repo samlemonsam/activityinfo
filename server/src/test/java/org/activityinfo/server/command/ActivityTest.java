@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
@@ -108,6 +109,12 @@ public class ActivityTest extends CommandTestCase2 {
         assertEquals("public", Published.NOT_PUBLISHED.getIndex(), act.getPublished());
         assertEquals("classicView", false, act.getClassicView());
 
+        Extents countryBounds = act.getLocationType().getCountryBounds();
+        assertThat(countryBounds.getMinLat(), Matchers.equalTo(-13.0));
+        assertThat(countryBounds.getMaxLat(), Matchers.equalTo(5.0));
+
+        assertThat(countryBounds.getMinLon(), Matchers.equalTo(12.0));
+        assertThat(countryBounds.getMaxLon(), Matchers.equalTo(31.0));
     }
 
 

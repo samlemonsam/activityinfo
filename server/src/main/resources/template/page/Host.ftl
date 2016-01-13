@@ -100,8 +100,8 @@
         };
     </script>
 
-    <#if newUI>
-        <script type="text/javascript" language="javascript" src="AI/AI.nocache.js"></script>
+    <#if loggingEnabled>
+        <script type="text/javascript" language="javascript" src="ActivityInfoLogging/ActivityInfoLogging.nocache.js"></script>
     <#else>
         <script type="text/javascript" language="javascript" src="ActivityInfo/ActivityInfo.nocache.js"></script>
     </#if>

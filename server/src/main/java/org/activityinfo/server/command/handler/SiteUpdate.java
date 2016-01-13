@@ -3,9 +3,14 @@ package org.activityinfo.server.command.handler;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.impl.ActivityFormCache;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.AttributeDTO;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.JsonUtil;
+import org.activityinfo.model.form.FormFieldType;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
@@ -74,7 +79,7 @@ public class SiteUpdate {
         if(site.getActivity().getReportingFrequency() == ActivityFormDTO.REPORT_ONCE &&
             propertyMap.containsKey(REPORTING_PERIOD_ID)) {
 
-            newReportingPeriod(site, propertyMap);
+            newReportingPeriod(user, site, propertyMap);
         }
         
         persistHistory(site, true, user, propertyMap);
@@ -99,7 +104,7 @@ public class SiteUpdate {
         updateAttributeValues(site, changes);
 
         if(site.getActivity().getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            updateUniqueReportingPeriod(site, changes);
+            updateUniqueReportingPeriod(user, site, changes);
         }
 
         validateProperties(site);
@@ -113,7 +118,7 @@ public class SiteUpdate {
         return newVersion;
     }
 
-    private void updateUniqueReportingPeriod(Site site, PropertyMap propertyMap) {
+    private void updateUniqueReportingPeriod(User user, Site site, PropertyMap propertyMap) {
         ReportingPeriod period;
         if(!site.getReportingPeriods().isEmpty()) {
             period = site.getReportingPeriods().iterator().next();
@@ -123,7 +128,7 @@ public class SiteUpdate {
         period.setDate1(site.getDate1());
         period.setDate2(site.getDate2());        
     
-        updateIndicatorValues(period, propertyMap);
+        updateIndicatorValues(user, period, propertyMap);
     }
 
     private Activity activityReference(PropertyMap map) {
@@ -135,14 +140,14 @@ public class SiteUpdate {
         return activity;
     }
 
-    private void newReportingPeriod(Site site, PropertyMap propertyMap) {
+    private void newReportingPeriod(User user, Site site, PropertyMap propertyMap) {
         ReportingPeriod period = new ReportingPeriod(site);
         period.setDate1(propertyMap.getDate("date1"));
         period.setDate2(propertyMap.getDate("date2"));
         period.setId(propertyMap.getRequiredInt(REPORTING_PERIOD_ID));
         entityManager.persist(period);
 
-        updateIndicatorValues(period, propertyMap);
+        updateIndicatorValues(user, period, propertyMap);
 
     }
 
@@ -192,7 +197,7 @@ public class SiteUpdate {
         return partner;
     }
     
-    private void updateIndicatorValues(ReportingPeriod period, PropertyMap propertyMap) {
+    private void updateIndicatorValues(User user, ReportingPeriod period, PropertyMap propertyMap) {
         
         Map<Integer, IndicatorValue> existingValues = new HashMap<>();
         for (IndicatorValue value : period.getIndicatorValues()) {
@@ -210,6 +215,11 @@ public class SiteUpdate {
                 if (valueEntity == null) {
                     if (value != null) {
                         Indicator indicator = entityManager.getReference(Indicator.class, indicatorId);
+
+                        if (FormFieldType.valueOf(indicator.getType()) == AttachmentType.TYPE_CLASS) {
+                            permissionOracle.assertEditAllowed(AttachmentValue.fromJson((String) value), user);
+                        }
+
                         valueEntity = new IndicatorValue(period, indicator);
                         valueEntity.setValue(value);
                         existingValues.put(indicatorId, valueEntity);

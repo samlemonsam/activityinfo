@@ -1,7 +1,15 @@
 package org.activityinfo.model.form;
 
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 
 /**
  * The type of field, which influences how input is presented
@@ -21,7 +29,27 @@ public class FormFieldType {
 
 
     public static FieldTypeClass valueOf(String name) {
-        return TypeRegistry.get().getTypeClass(name);
+        switch(name) {
+            case "QUANTITY":
+                return QuantityType.TYPE_CLASS;
+            case "NARRATIVE":
+                return NarrativeType.TYPE_CLASS;
+            case "FREE_TEXT":
+                return TextType.TYPE_CLASS;
+            case "LOCAL_DATE":
+                return LocalDateType.TYPE_CLASS;
+            case "GEOGRAPHIC_POINT":
+                return GeoPointType.TYPE_CLASS;
+            case "REFERENCE":
+                return ReferenceType.TYPE_CLASS;
+            case "BOOLEAN":
+                return BooleanType.TYPE_CLASS;
+            case "BARCODE":
+                return BarcodeType.TYPE_CLASS;
+            case "ATTACHMENT":
+                return AttachmentType.TYPE_CLASS;
+        }
+        throw new IllegalArgumentException("name: " + name);
     }
 
     public static FieldTypeClass[] values() {

@@ -21,11 +21,18 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.joda.time.LocalDate;
+import org.openqa.selenium.WebDriver;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
 /**
  * @author yuriyz on 06/25/2015.
@@ -39,6 +46,12 @@ public class TableFilterDialog {
     }
 
     public BsTable table() {
+        modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return modal.getWindowElement().find().table().firstIfPresent().isPresent();
+            }
+        });
         return new BsTable(modal.getWindowElement().find().table().first(), BsTable.Type.GRID_TABLE);
     }
 
@@ -55,10 +68,25 @@ public class TableFilterDialog {
     }
 
     public TableFilterDialog select(List<String> filterValues) {
+        modal.getWindowElement().waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return button(I18N.CONSTANTS.deselectAll()).isPresent();
+            }
+        });
+        deselectAll(); // before select, deselect all items
         for (String filterValue : filterValues) {
             selectFilterValue(filterValue);
         }
         return this;
+    }
+
+    private Optional<FluentElement> button(String buttonName) {
+        return modal.getWindowElement().find().button(withClass("btn"), withText(buttonName)).firstIfPresent();
+    }
+
+    private void deselectAll() {
+        button(I18N.CONSTANTS.deselectAll()).get().clickWhenReady();
     }
 
     private void selectFilterValue(String filterValue) {

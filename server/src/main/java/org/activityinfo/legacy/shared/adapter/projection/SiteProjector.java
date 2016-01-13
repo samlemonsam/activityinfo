@@ -41,7 +41,7 @@ public class SiteProjector implements Function<ListResult<SiteDTO>, List<Project
                 partnerProjectors.add(new PartnerProjectionUpdater(path, databaseId, fieldIndex));
             } else if (fieldId.getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
                 int indicatorId = CuidAdapter.getLegacyIdFromCuid(fieldId);
-                indicatorProjectors.add(new IndicatorProjectionUpdater(path, indicatorId));
+                indicatorProjectors.add(new IndicatorProjectionUpdater(path, activity.getIndicatorById(indicatorId)));
             } else if (fieldId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
                 int fieldIndex = CuidAdapter.getBlock(fieldId, 1);
                 siteProjectors.add(new SiteProjectionUpdater(path, fieldIndex));
@@ -58,6 +58,11 @@ public class SiteProjector implements Function<ListResult<SiteDTO>, List<Project
     public List<Projection> apply(ListResult<SiteDTO> input) {
         List<Projection> projections = Lists.newArrayList();
         for (SiteDTO site : input.getData()) {
+
+            if (site.isLinked()) {
+                continue; // we do not support linked sites right now on new UI
+            }
+
             Projection projection = new Projection(site.getInstanceId(), site.getFormClassId());
             for (ProjectionUpdater<PartnerDTO> projector : partnerProjectors) {
                 projector.update(projection, site.getPartner());

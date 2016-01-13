@@ -40,7 +40,6 @@ public class TargetForm extends FormPanel {
     private FormBinding binding;
 
     public TargetForm(UserDatabaseDTO database) {
-        super();
 
         binding = new FormBinding(this);
 
@@ -53,17 +52,17 @@ public class TargetForm extends FormPanel {
         binding.addFieldBinding(new FieldBinding(nameField, "name"));
         this.add(nameField);
 
-        DateField date1Field = new DateField();
-        date1Field.setFieldLabel(constants.fromDate());
-        date1Field.setAllowBlank(false);
-        binding.addFieldBinding(new FieldBinding(date1Field, "date1"));
-        this.add(date1Field);
+        DateField fromDateField = new DateField();
+        fromDateField.setFieldLabel(constants.fromDate());
+        fromDateField.setAllowBlank(false);
+        binding.addFieldBinding(LocalDateBinding.create(fromDateField, "fromDate"));
+        this.add(fromDateField);
 
-        DateField date2Field = new DateField();
-        date2Field.setFieldLabel(constants.toDate());
-        date2Field.setAllowBlank(false);
-        binding.addFieldBinding(new FieldBinding(date2Field, "date2"));
-        this.add(date2Field);
+        DateField toDateField = new DateField();
+        toDateField.setFieldLabel(constants.toDate());
+        toDateField.setAllowBlank(false);
+        binding.addFieldBinding(LocalDateBinding.create(toDateField, "toDate"));
+        this.add(toDateField);
 
         MappingComboBox<Integer> projectCombo = new MappingComboBox<Integer>();
         projectCombo.setFieldLabel(constants.project());

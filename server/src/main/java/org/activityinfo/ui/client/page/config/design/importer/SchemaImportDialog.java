@@ -12,14 +12,16 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporter.ProgressListener;
 import org.activityinfo.ui.client.style.BaseStylesheet;
@@ -97,7 +99,9 @@ public class SchemaImportDialog {
     @UiField HTMLPanel progressPanel;
     @UiField HTMLPanel successPanel;
     @UiField HTMLPanel failurePanel;
-    @UiField ScrollPanel warningPanel;
+    @UiField HTMLPanel warningPanel;
+    @UiField ParagraphElement errorDescription;
+    @UiField ScrollPanel warningScrollPanel;
 
 
     private ModalDialog dialog;
@@ -302,7 +306,7 @@ public class SchemaImportDialog {
 
             @Override
             public void onFailure(Throwable caught) {
-                onImportFailed();
+                onImportFailed(caught);
             }
         });
     }
@@ -316,10 +320,13 @@ public class SchemaImportDialog {
         dialog.getPrimaryButton().setText(I18N.CONSTANTS.close());
     }
 
-    private void onImportFailed() {
+    private void onImportFailed(Throwable caught) {
+        Log.error(caught.getMessage(), caught);
+
         currentState = State.IMPORT_FAILED;
         progressPanel.setVisible(false);
         failurePanel.setVisible(true);
+        errorDescription.setInnerText(SafeHtmlUtils.htmlEscape(caught.getMessage()));
         dialog.getPrimaryButton().setEnabled(true);
         dialog.getPrimaryButton().setText(I18N.CONSTANTS.retry());
     }

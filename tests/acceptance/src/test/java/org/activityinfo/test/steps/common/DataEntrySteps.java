@@ -1,6 +1,12 @@
 package org.activityinfo.test.steps.common;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
@@ -9,32 +15,44 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ApplicationDriver;
+import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.TableDataParser;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
+import org.activityinfo.test.sut.Accounts;
+import org.activityinfo.test.sut.UserAccount;
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @ScenarioScoped
 public class DataEntrySteps {
 
-
     @Inject
     private ApplicationDriver driver;
+
+    @Inject
+    private Accounts accounts;
 
     private File exportedFile = null;
 
@@ -76,13 +94,10 @@ public class DataEntrySteps {
         assertThat(entries, contains(createdToday()));
     }
 
-
     @Then("^I can submit a \"([^\"]*)\" form with:$")
     public void I_can_submit_a_form_with(String formName, List<FieldValue> values) throws Throwable {
         driver.submitForm(formName, values);
     }
-
-
 
     @Then("^the submission's history should show a change from (.*) to (.*)$")
     public void the_submission_s_history_should_show_one_change_from_to(String from, String to) throws Throwable {
@@ -97,7 +112,7 @@ public class DataEntrySteps {
 
     }
 
-    
+
 
     private void dumpChanges(List<HistoryEntry> entries) {
         StringBuilder s = new StringBuilder();
@@ -151,7 +166,7 @@ public class DataEntrySteps {
     }
 
     private static DataTable subsetColumns(DataTable table, List<String> expectedColumns) {
-        
+
         List<String> columns = table.getGherkinRows().get(0).getCells();
         List<Integer> columnIndexes = new ArrayList<>();
         List<String> missingColumns = new ArrayList<>();
@@ -163,11 +178,11 @@ public class DataEntrySteps {
                 columnIndexes.add(index);
             }
         }
-        
+
         if(!missingColumns.isEmpty()) {
             throw new AssertionError("Missing expected columns " + missingColumns + " in table:\n" + table.toString());
         }
-        
+
         List<List<String>> rows = new ArrayList<>();
         for (DataTableRow dataTableRow : table.getGherkinRows()) {
             List<String> row = new ArrayList<>();
@@ -176,7 +191,7 @@ public class DataEntrySteps {
             }
             rows.add(row);
         }
-        
+
         return DataTable.create(rows);
     }
 
@@ -190,11 +205,6 @@ public class DataEntrySteps {
         driver.assertEntryCannotBeModifiedOrDeleted(databaseName, values);
     }
 
-    @Then("^new entry with end date \"([^\"]*)\" cannot be submitted in \"([^\"]*)\" form$")
-    public void new_entry_with_end_date_cannot_be_submitted_in_database(String endDate, String formName) throws Throwable {
-        driver.assertSubmissionIsNotAllowedBecauseOfLock(formName, endDate);
-    }
-
     @Then("^\"([^\"]*)\" form entry appears with lock in Data Entry and cannot be modified nor deleted with any of these values:$")
     public void form_entry_appears_with_lock_in_Data_Entry_and_cannot_be_modified_nor_deleted_with_any_of_these_values(String formName, List<FieldValue> values) throws Throwable {
         driver.assertEntryCannotBeModifiedOrDeleted(formName, values);
@@ -203,6 +213,15 @@ public class DataEntrySteps {
     @When("^I open a new form submission for \"([^\"]*)\" then following fields are visible:$")
     public void I_open_a_new_form_submission_for_then_following_fields_are_visible(String formName, List<String> fieldLabels) throws Throwable {
         driver.assertFieldsOnNewForm(formName, fieldLabels);
+    }
+
+    @When("^I open a new form submission for \"([^\"]*)\" then following fields are invisible:$")
+    public void I_open_a_new_form_submission_for_then_following_fields_are_invisible(String formName, List<String> fieldLabels) throws Throwable {
+
+        for (String fieldLabel : fieldLabels) {
+            Optional<BsFormPanel.BsField> formItem = driver.getFormFieldFromNewSubmission(formName, fieldLabel);
+            assertTrue(!formItem.isPresent());
+        }
     }
 
     @When("^I open a new form submission for \"([^\"]*)\" then field values are:$")
@@ -217,11 +236,12 @@ public class DataEntrySteps {
     ) throws Throwable {
 
         TablePage tablePage = openFormTable(database, formName);
-        tablePage.table().showAllColumns().waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().showAllColumns();//.waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
         tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
 
         BsModal bsModal = tablePage.table().editSubmission();
-        bsModal.fill(driver.getAliasTable().alias(fieldValues)).click(I18N.CONSTANTS.save()).waitUntilClosed();
+        bsModal.fill(driver.getAliasTable().alias(fieldValues))
+                .save();
     }
 
     @Then("^table has rows:$")
@@ -235,7 +255,8 @@ public class DataEntrySteps {
     }
 
     private void assertHasRows(DataTable dataTable, boolean hideBuiltInColumns) throws Throwable {
-        BsTable table = tablePage().table();
+        BsTable table = driver.tablePage().table();
+        table.showAllColumns();
         if (hideBuiltInColumns) {
             table.hideBuiltInColumns();
         }
@@ -246,18 +267,13 @@ public class DataEntrySteps {
     public void filter_column_with(String columnName, List<String> filterValues) throws Throwable {
         columnName = driver.getAliasTable().getAlias(columnName);
 
-        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        BsTable table = driver.tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
         table.filter(columnName).select(filterValues).apply();
     }
 
     @When("^open table for the \"([^\"]*)\" form in the database \"([^\"]*)\"$")
     public void open_table_for_the_form_in_the_database(String formName, String databaseName) throws Throwable {
         openFormTable(databaseName, formName);
-    }
-
-    private TablePage tablePage() {
-        Preconditions.checkState(driver.getCurrentPage() instanceof TablePage);
-        return (TablePage) driver.getCurrentPage();
     }
 
     private TablePage openFormTable(String databaseName, String formName) {
@@ -271,7 +287,207 @@ public class DataEntrySteps {
     public void filter_date_column_with_start_date_and_end_date_(String columnName, String startDate, String endDate) throws Throwable {
         columnName = driver.getAliasTable().getAlias(columnName);
 
-        BsTable table = tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
+        BsTable table = driver.tablePage().table().showAllColumns().waitUntilAtLeastOneRowIsLoaded();
         table.filter(columnName).fillRange(LocalDate.parse(startDate), LocalDate.parse(endDate)).apply();
+    }
+
+    @And("^delete rows with text:$")
+    public void delete_rows_with_text(List<String> cells) throws Throwable {
+        driver.removeRows(cells);
+    }
+
+    @Given("^I have submitted to \"([^\"]*)\" form table in \"([^\"]*)\" database:$")
+    public void I_have_submitted_to_form_table_in_database(String formName, String database, DataTable dataTable) throws Throwable {
+        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
+        BsModal modal = tablePage.table().newSubmission();
+
+        modal.fill(dataTable, driver.getAliasTable());
+
+        modal.click(I18N.CONSTANTS.save()).waitUntilClosed();
+    }
+
+    @Then("^\"([^\"]*)\" filter for \"([^\"]*)\" form has values:$")
+    public void filter_for_form_has_values(String filterName, String formName, List<String> filterValues) throws Throwable {
+        List<String> filterItemsOnUi = driver.getFilterValues(filterName, formName);
+
+        filterItemsOnUi = driver.getAliasTable().deAlias(filterItemsOnUi);
+        filterItemsOnUi.removeAll(filterValues);
+
+        assertTrue(filterItemsOnUi.isEmpty());
+    }
+
+    @When("^I import into the form \"([^\"]*)\" spreadsheet:$")
+    public void I_import_into_the_form_spreadsheet(String formName, DataTable dataTable) throws Throwable {
+        driver.importForm(formName, dataTable);
+    }
+
+    @When("^I import into the form \"([^\"]*)\" spreadsheet with (\\d+) rows:$")
+    public void I_import_into_the_form_spreadsheet_with_rows(String formName, int quantityOfRowCopy, DataTable dataTable) throws Throwable {
+        driver.importRowIntoForm(formName, dataTable, quantityOfRowCopy);
+    }
+
+    @Then("^\"([^\"]*)\" table has (\\d+) rows in \"([^\"]*)\" database$")
+    public void table_has_rows_in_database(String formName, int numberOfExpectedRows, String database) throws Throwable {
+        TablePage tablePage = driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
+        BsTable.waitUntilRowsLoaded(tablePage, numberOfExpectedRows);
+    }
+
+    @Then("^new form dialog for \"([^\"]*)\" form has following items for partner field$")
+    public void new_form_dialog_for_form_has_following_items_for_partner_field(String formName, List<String> expectedPartnerValues) throws Throwable {
+        DataEntryDriver dataEntryDriver = driver.startNewSubmission(formName);
+        boolean foundPartnerField = false;
+        while(dataEntryDriver.nextField()) {
+            switch(dataEntryDriver.getLabel()) {
+                case "Partner":
+                    foundPartnerField = true;
+                    List<String> items = Lists.newArrayList(dataEntryDriver.availableValues());
+
+                    for (String expected : expectedPartnerValues) {
+                        items.remove(expected);
+                        items.remove(driver.getAliasTable().getAlias(expected));
+                    }
+                    assertTrue(items.isEmpty());
+                    break;
+            }
+        }
+
+        dataEntryDriver.close();
+        if (!foundPartnerField) {
+            throw new RuntimeException("Failed to find partner field.");
+        }
+    }
+
+    @Then("^old table for \"([^\"]*)\" form shows:$")
+    public void old_table_for_form_shows(String formName, DataTable dataTable) throws Throwable {
+        DataTable uiTable = driver.getAliasTable().deAlias(driver.oldTable(formName));
+        dataTable.unorderedDiff(uiTable);
+    }
+
+    @Then("^\"([^\"]*)\" field contains image.$")
+    public void field_contains_image(String imageFieldName) throws Throwable {
+        DataEntryTab dataEntryTab = (DataEntryTab) driver.getCurrentPage();
+
+        dataEntryTab.selectSubmission(0);
+        BsModal modal = dataEntryTab.editBetaSubmission();
+
+        Sleep.sleepSeconds(5); // give it a time fetch image serving url and put it to img.src
+        assertTrue(modal.form().findFieldByLabel(driver.getAliasTable().getAlias(imageFieldName)).isBlobImageLoaded());
+
+        modal.cancel();
+    }
+
+    private String firstDownloadableLinkOfFirstSubmission(String attachmentFieldName) {
+        DataEntryTab dataEntryTab = (DataEntryTab) driver.getCurrentPage();
+
+        dataEntryTab.selectSubmission(0);
+        BsModal modal = dataEntryTab.editBetaSubmission();
+
+        String blobLink = modal.form().findFieldByLabel(driver.getAliasTable().getAlias(attachmentFieldName)).getFirstBlobLink();
+
+        assertTrue(blobLink.startsWith("https")); // all links must start from https
+
+        modal.cancel();
+
+        return blobLink;
+    }
+
+    @Then("^\"([^\"]*)\" field has downloadable link.$")
+    public void field_has_downloadable_link(String attachmentFieldName) throws Throwable {
+        String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
+
+        UserAccount currentUser = driver.setup().getCurrentUser();
+
+        Client client = new Client();
+        client.addFilter(new HTTPBasicAuthFilter(currentUser.getEmail(), currentUser.getPassword()));
+        client.setFollowRedirects(false);
+
+        ClientResponse clientResponse = client.resource(blobLink).get(ClientResponse.class);
+
+        assertEquals(Response.Status.SEE_OTHER.getStatusCode(), clientResponse.getStatus());
+
+        String signedUrl = clientResponse.getHeaders().getFirst("Location");
+        assertTrue(!Strings.isNullOrEmpty(signedUrl));
+
+        byte[] bytes = IOUtils.toByteArray(new URL(signedUrl));
+        assertTrue(bytes.length > 100);
+    }
+
+    @Then("^\"([^\"]*)\" field's downloadable link is forbidden for anonymous access.$")
+    public void field_downloadable_link_is_forbidden_for_anonymous_access(String attachmentFieldName) throws Throwable {
+        String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
+
+        URL url = new URL(blobLink);
+        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), connection.getResponseCode());
+    }
+
+    @Then("^\"([^\"]*)\" field's downloadable link is forbidden for \"([^\"]*)\"$")
+    public void field_s_downloadable_link_is_forbidden_for(String attachmentFieldName, String userEmail) throws Throwable {
+
+        UserAccount account = accounts.ensureAccountExists(userEmail);
+        String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
+
+        Client client = new Client();
+        client.addFilter(new HTTPBasicAuthFilter(account.getEmail(), account.getPassword()));
+        client.setFollowRedirects(false);
+
+        ClientResponse clientResponse = client.resource(blobLink).get(ClientResponse.class);
+
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), clientResponse.getStatus());
+    }
+
+    @When("^I begin a new submission for \"([^\"]*)\"$")
+    public void I_begin_a_new_submission_for(String formName) throws Throwable {
+        driver.beginNewFormSubmission(formName);
+    }
+
+    @And("^I enter:$")
+    public void I_enter(List<FieldValue> fieldValues) throws Throwable {
+        Preconditions.checkNotNull(driver.getCurrentModal());
+
+        BsModal modal = driver.getCurrentModal();
+        driver.getAliasTable().alias(fieldValues);
+
+        for (FieldValue fieldValue : fieldValues) {
+            modal.form().findFieldByLabel(fieldValue.getField()).fill(fieldValue.getValue(), fieldValue.getControlType());
+        }
+    }
+
+    @Then("^the \"([^\"]*)\" field should be enabled$")
+    public void the_field_should_be_enabled(String fieldLabel) throws Throwable {
+        assertTrue(getField(driver.getAliasTable().getAlias(fieldLabel)).isEnabled());
+    }
+
+    @Then("^the \"([^\"]*)\" field should be disabled$")
+    public void the_field_should_be_disabled(String fieldLabel) throws Throwable {
+        assertFalse(getField(driver.getAliasTable().getAlias(fieldLabel)).isEnabled());
+    }
+
+    private BsFormPanel.BsField getField(String fieldLabel) {
+        BsFormPanel.BsField field = driver.getCurrentModal().form().findFieldByLabel(fieldLabel);
+        assertNotNull(field);
+        return field;
+    }
+
+    @When("^I save the submission$")
+    public void I_save_the_submission() throws Throwable {
+        BsModal modal = driver.getCurrentModal();
+        modal.click(I18N.CONSTANTS.save());
+        modal.waitUntilClosed();
+    }
+
+    @And("^I edit first row$")
+    public void I_edit_first_row() throws Throwable {
+        TablePage tablePage = (TablePage) driver.getCurrentPage();
+        BsModal modal = tablePage.table().waitUntilAtLeastOneRowIsLoaded().selectFirstRow().editSubmission();
+        driver.setCurrentModal(modal);
+    }
+
+    @Then("^\"([^\"]*)\" field should be with an empty value$")
+    public void field_should_be_with_an_empty_value(String fieldLabel) throws Throwable {
+        assertTrue(driver.getCurrentModal().form().findFieldByLabel(driver.getAliasTable().getAlias(fieldLabel)).isEmpty());
     }
 }

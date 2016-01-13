@@ -2,16 +2,12 @@ package org.activityinfo.test.driver;
 
 
 import com.codahale.metrics.Meter;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
+import com.google.common.base.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import com.mysql.jdbc.StringUtils;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
@@ -65,7 +61,6 @@ public class ApiApplicationDriver extends ApplicationDriver {
     public UserAccount getCurrentUser() {
         return currentUser;
     }
-
 
     private class Command {
         private final JSONObject request;
@@ -205,16 +200,25 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         JSONObject properties = new JSONObject();
         properties.put("name", map.getAlias());
-        properties.put("countryId", 1);
+        properties.put("countryId", findCountryId(map.getString("country", "RDC")));
 
         createEntityAndBindId("UserDatabase", properties);
 
         createdDatabases.add(map.getName());
     }
 
+    private int findCountryId(String countryName) {
+        if("RDC".equals(countryName)) {
+            return 1;
+        } else if("Global".equals(countryName)) {
+            return 3;
+        } else {
+            throw new UnsupportedOperationException("Country: " + countryName);
+        }
+    }
+
     @Override
     public void createForm(TestObject form) throws Exception {
-
 
         JSONObject properties = new JSONObject();
         properties.put("name", form.getAlias());
@@ -260,6 +264,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
             JSONObject properties = new JSONObject();
             properties.put("name", aliases.createAliasIfNotExists(field.getName()));
             properties.put("activityId", field.getId("form"));
+            properties.put("multipleAllowed", field.getBoolean("multipleAllowed", false));
+            properties.put("mandatory", field.getBoolean("mandatory", false));
 
             PendingId groupId = createEntityAndBindId("AttributeGroup", properties);
 
@@ -280,7 +286,9 @@ public class ApiApplicationDriver extends ApplicationDriver {
             properties.put("name", field.getAlias());
             properties.put("activityId", field.getId("form"));
             properties.put("type", type);
-            properties.put("units", field.getString("units", "parsects"));
+            if(type.equals("quantity")) {
+                properties.put("units", field.getString("units", "parsects"));
+            }
             properties.put("aggregation", field.getInteger("aggregation", AggregationMethod.Sum.code()));
 
             // switch also server nameInExpression -> code
@@ -290,6 +298,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 properties.put("calculatedAutomatically", true);
                 properties.put("expression", field.getString("expression"));
             }
+
+            properties.put("relevanceExpression", field.getString("relevanceExpression", ""));
 
             createEntityAndBindId("Indicator", properties);
         }
@@ -337,10 +347,12 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     break;
                 default:
 
-                    if (value.getType() != null && value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
-                        for (String item : StringUtils.split(value.getValue(), ",", true)) {
-                            int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
-                            properties.put("ATTRIB" + attributeId, true);
+                    if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                        for (String item : value.getValue().split("\\s*,\\s*")) {
+                            if (!Strings.isNullOrEmpty(item)) {
+                                int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
+                                properties.put("ATTRIB" + attributeId, true);
+                            }
                         }
                     } else {
                         int indicatorId = aliases.getId(value.getField());
@@ -621,7 +633,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
                 break;
             }
             if(stopwatch.elapsed(TimeUnit.MINUTES) > 5) {
-                throw new AssertionError("Download timed out.");
+                throw new RuntimeException("Download timed out.");
             }
 
             Thread.sleep(1000);

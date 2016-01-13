@@ -10,7 +10,6 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
@@ -31,10 +30,7 @@ public class JsonApiSteps {
     
     @Inject
     private Server server;
-    
-    @Inject
-    private AliasTable aliasTable;
-    
+
     private Scenario scenario;
     
     private ObjectMapper objectMapper;
@@ -102,7 +98,7 @@ public class JsonApiSteps {
                 .path(placeholders.resolvePath(url))
                 .queryParams(placeholders.resolveQueryParams(url));
 
-        scenario.write(String.format("<code><pre>GET %s</pre></code>", resource.getURI().toString()));
+        scenario.write(String.format("GET %s", resource.getURI().toString()));
 
         recordResponse(resource
                 .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -128,10 +124,16 @@ public class JsonApiSteps {
     }
 
     private void responseShouldBe(String expectedResponse, boolean ignorePositionInArray) throws IOException {
+        
+        // ALWAYS verify the charset parameter; don't consider the response to be valid
+        // JSON without it.
+        response.assertCorrectJsonContentType();
+        
         JsonNode expected = jsonParser.parse(expectedResponse);
         JsonNode actual = response.getJson();
 
-        System.out.println(actual.toString());
+        scenario.write(actual.toString());
+        scenario.write("\n");
 
         new JsonChecker(placeholders, ignorePositionInArray).check(expected, actual);
     }

@@ -141,7 +141,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     }
 
     @Offline
-    @Column(name = "Name", nullable = false, length = 45)
+    @Column(name = "Name", nullable = false, length = 255)
     public String getName() {
         return this.name;
     }

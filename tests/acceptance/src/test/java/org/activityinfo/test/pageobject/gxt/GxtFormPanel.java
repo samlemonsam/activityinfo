@@ -93,6 +93,11 @@ public class GxtFormPanel extends Form {
         }
 
         @Override
+        public boolean isSuggestBox() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean isEnabled() {
             boolean enabled = !this.element.exists(By.className(READ_ONLY_CLASS));
             System.out.println(getLabel() + ".enabled = " + enabled);
@@ -109,6 +114,24 @@ public class GxtFormPanel extends Form {
         @Override
         public void fill(LocalDate date) {
             fill(date.toString("M/d/YY"));
+        }
+
+        @Override
+        public List<String> availableItems() {
+            element.findElement(By.className(ARROW_CLASS)).click();
+
+            FluentElement list = this.element.waitFor(By.className(COMBO_LIST_CLASS));
+
+
+            FluentElements items = list.findElements(By.className(COMBO_ITEM_CLASS));
+            List<String> itemLabels = Lists.newArrayList();
+            for (FluentElement element : items) {
+                String text = element.text();
+                itemLabels.add(text);
+            }
+            element.findElement(By.className(ARROW_CLASS)).click();
+
+            return itemLabels;
         }
 
         @Override

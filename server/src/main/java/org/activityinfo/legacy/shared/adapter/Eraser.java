@@ -22,14 +22,10 @@ package org.activityinfo.legacy.shared.adapter;
  */
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.command.BatchCommand;
-import org.activityinfo.legacy.shared.command.Command;
-import org.activityinfo.legacy.shared.command.CreateLocation;
+import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
@@ -55,15 +51,36 @@ public class Eraser {
 
         List<Command> commands = Lists.newArrayList();
         for (ResourceId instanceId : instanceIds) {
-            if (instanceId.getDomain() == CuidAdapter.LOCATION_DOMAIN) {
 
+            char domain = instanceId.getDomain();
+
+            if (domain == CuidAdapter.LOCATION_DOMAIN) {
+
+                // it's workaround, instead of deletion we update/mark Location with workflowstatusid=rejected
 
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("id", CuidAdapter.getLegacyIdFromCuid(instanceId));
                 properties.put("workflowstatusid", Workflow.REJECTED);
 
                 commands.add(new CreateLocation(properties));
+            } else if (domain == CuidAdapter.SITE_DOMAIN) {
+
+                commands.add(new DeleteSite(CuidAdapter.getLegacyIdFromCuid(instanceId)));
+            } else if (domain == CuidAdapter.PROJECT_DOMAIN) {
+
+
+                commands.add(new Delete("Project", CuidAdapter.getLegacyIdFromCuid(instanceId)));
+            } else if (domain == CuidAdapter.ACTIVITY_DOMAIN) {
+
+                commands.add(new Delete("Activity", CuidAdapter.getLegacyIdFromCuid(instanceId)));
+            } else if (domain == CuidAdapter.DATABASE_DOMAIN) {
+
+                commands.add(new Delete("UserDatabase", CuidAdapter.getLegacyIdFromCuid(instanceId)));
             }
+        }
+
+        if (commands.isEmpty()) {
+            return Promise.rejected(new UnsupportedOperationException());
         }
 
         return dispatcher.execute(new BatchCommand(commands)).thenDiscardResult();

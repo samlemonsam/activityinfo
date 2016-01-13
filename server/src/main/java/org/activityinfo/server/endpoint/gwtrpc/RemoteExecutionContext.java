@@ -265,7 +265,8 @@ public class RemoteExecutionContext implements ExecutionContext {
 
         @Override
         public void onFailure(Throwable caught) {
-            this.profiler.failed();            
+            this.profiler.failed();        
+            LOGGER.log(Level.SEVERE, commandName + " failed with exception " + caught.getClass().getSimpleName(), caught);
             callback.onFailure(caught);
         }
 

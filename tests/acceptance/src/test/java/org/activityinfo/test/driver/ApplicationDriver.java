@@ -1,14 +1,20 @@
 package org.activityinfo.test.driver;
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.test.driver.model.IndicatorLink;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
+import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
 import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
@@ -19,6 +25,7 @@ import org.joda.time.LocalDate;
 import org.json.JSONException;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +44,10 @@ public abstract class ApplicationDriver {
     
     public abstract void login(UserAccount account);
 
+    public UserAccount getCurrentUser() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @return an implementation of ApplicationDriver suitable for setting up a test scenario
      */
@@ -51,6 +62,8 @@ public abstract class ApplicationDriver {
             type = TextType.TYPE_CLASS.getId();
         } else if (type.equalsIgnoreCase("date")) {
             type = LocalDateType.TYPE_CLASS.getId();
+        } else if (type.equalsIgnoreCase("image")) {
+            type = AttachmentType.TYPE_CLASS.getId();
         }
         return type;
     }
@@ -87,6 +100,10 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
+    public void submitForm(String formName, FieldValue... values) throws Exception {
+        submitForm(formName, Arrays.asList(values));
+    }
+    
     public void submitForm(String formName, List<FieldValue> values) throws Exception {
         fillForm(startNewSubmission(formName), FieldValue.toMap(values));
     }
@@ -140,7 +157,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    protected DataEntryDriver startNewSubmission(String formName) {
+    public DataEntryDriver startNewSubmission(String formName) {
         throw new PendingException();
     }
     
@@ -302,7 +319,11 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertFieldVisible(String formName, String databaseName, String fieldName, String controlType) {
+    public TablePage tablePage() {
+        throw new PendingException();
+    }
+
+    public Form.FormItem getFormField(String formName, String databaseName, String fieldName, Optional<String> selectedValue) {
         throw new PendingException();
     }
 
@@ -342,7 +363,7 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void assertDesignerFieldMandatory(String fieldLabel) {
+    public DesignerField getDesignerField(String fieldLabel) {
         throw new PendingException();
     }
 
@@ -362,16 +383,70 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
     
-
     public void renameDatabase(String oldName, String newName, String newDescription) {
         throw new PendingException();
     }
 
-    public void shareReportIsEmpty(boolean isEmpty) {
+    /**
+     * 
+     * @return a list of the names of saved reports
+     */
+    public List<String> getSavedReports() {
+        throw new PendingException();
+    }
+
+    /**
+     * @return a list of the names of reports that appear on the user's dashboard
+     */
+    public List<String> getDashboardPortlets() {
         throw new PendingException();
     }
 
     public File exportDatabaseSchema(String databaseName) throws Exception {
+        throw new PendingException();
+    }
+
+    public String alias(String testHandle) {
+        return getAliasTable().getAlias(testHandle);
+    }
+
+    public void removeRows(List<String> cells) {
+        throw new PendingException();
+    }
+
+    public List<String> getFilterValues(String filterName, String formName) {
+        throw new PendingException();
+    }
+
+    public Optional<BsFormPanel.BsField> getFormFieldFromNewSubmission(String formName, String fieldLabel) {
+        throw new PendingException();
+    }
+
+    public void importForm(String formName, DataTable dataTable) {
+        throw new PendingException();
+    }
+
+    public void importRowIntoForm(String formName, DataTable dataTable, int quantityOfRowCopy) {
+        throw new PendingException();
+    }
+
+    public void addUserToDatabase(String userEmail, String databaseName, String partner, List<FieldValue> permissions) {
+        throw new PendingException();
+    }
+
+    public DataTable oldTable(String formName) {
+        throw new PendingException();
+    }
+
+    public void beginNewFormSubmission(String formName) {
+        throw new PendingException();
+    }
+
+    public BsModal getCurrentModal() {
+        throw new PendingException();
+    }
+
+    public void setCurrentModal(BsModal modal) {
         throw new PendingException();
     }
 }

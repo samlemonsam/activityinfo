@@ -5,8 +5,13 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.joda.time.Duration;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class LoadExecutor  {

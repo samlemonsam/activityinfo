@@ -23,7 +23,6 @@ public class FormField extends FormElement {
     private String description;
     private String relevanceConditionExpression;
     private FieldType type;
-    private boolean readOnly;
     private boolean visible = true;
     private Set<ResourceId> superProperties = Sets.newHashSet();
     private boolean required;
@@ -127,17 +126,6 @@ public class FormField extends FormElement {
 
     public boolean hasRelevanceConditionExpression() {
         return !Strings.isNullOrEmpty(relevanceConditionExpression);
-    }
-
-    /**
-     * @return true if this field is read-only.
-     */
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
     }
 
     /**

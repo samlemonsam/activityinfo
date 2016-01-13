@@ -19,6 +19,7 @@ import org.openqa.selenium.WebDriverException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withRole;
 
@@ -42,8 +43,10 @@ public class GxtTree {
         return new GxtTree(container, XPathProvider.TREE_GRID_PROVIDER);
     }
 
-    public void select(String... labels) {
-        findNode(labels).select();
+    public GxtNode select(String... labels) {
+        GxtNode node = findNode(labels);
+        node.select();
+        return node;
     }
 
 
@@ -318,7 +321,10 @@ public class GxtTree {
         public void ensureExpanded() {
 
             Stopwatch stopwatch = Stopwatch.createStarted();
-            while(stopwatch.elapsed(TimeUnit.SECONDS) < 90) {
+            while(true) {
+                if(stopwatch.elapsed(TimeUnit.SECONDS) > 20) {
+                    throw new RuntimeException(format("Failed to expand node %s after 20 seconds", getLabel()));
+                }
                 if(isExpanded()) {
                     break;
                 }
@@ -411,6 +417,10 @@ public class GxtTree {
 
         public String getId() {
             return element.attribute("id");
+        }
+
+        public FluentElement getElement() {
+            return element;
         }
     }
 

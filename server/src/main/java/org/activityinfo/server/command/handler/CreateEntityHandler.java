@@ -29,10 +29,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.handler.crud.ActivityPolicy;
 import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
@@ -40,17 +37,22 @@ import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
+import javax.persistence.QueryTimeoutException;
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CreateEntityHandler extends BaseEntityHandler implements CommandHandler<CreateEntity> {
+
+    private static final Logger LOGGER = Logger.getLogger(CreateEntityHandler.class.getName());
 
     private final Injector injector;
     private final KeyGenerator generator = new KeyGenerator();
 
     @Inject
     public CreateEntityHandler(EntityManager em, Injector injector) {
-        super(em);
+        super(em, injector);
         this.injector = injector;
     }
 
@@ -105,6 +107,10 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         attribute.setGroup(ag);
 
         updateAttributeProperties(properties, attribute);
+        
+        if(attribute.getSortOrder() == 0) {
+            attribute.setSortOrder(queryNextAttributeOrdinal(ag));
+        }
 
         Activity activity = ag.getActivities().iterator().next(); // Assume group has only one activity
 
@@ -114,22 +120,62 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         return new CreateResult(attribute.getId());
     }
 
+
     private CommandResult createIndicator(User user,
                                           CreateEntity cmd,
                                           Map<String, Object> properties) throws IllegalAccessCommandException {
 
+        // query the next indicator sort order index
+        
         Indicator indicator = new Indicator();
         indicator.setId(generator.generateInt());
         Activity activity = entityManager().getReference(Activity.class, properties.get("activityId"));
         indicator.setActivity(activity);
-
-        assertDesignPrivileges(user, indicator.getActivity().getDatabase());
+        assertDesignPrivileges(user, activity.getDatabase());
 
         updateIndicatorProperties(indicator, properties);
+        
+        if(indicator.getSortOrder() == 0) {
+            indicator.setSortOrder(queryNextIndicatorSortOrdinal(activity));
+        }
 
         entityManager().persist(indicator);
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
         return new CreateResult(indicator.getId());
+    }
+
+    private int queryNextIndicatorSortOrdinal(Activity activity) {
+        try {
+
+            Integer nextOrdinal = entityManager()
+                    .createQuery("select max(i.sortOrder) from Indicator i where i.activity = :activity", Integer.class)
+                    .setParameter("activity", activity)
+                    .getSingleResult();
+
+            if (nextOrdinal == null) {
+                return 1;
+            } else {
+                return nextOrdinal + 1;
+            }
+        } catch (QueryTimeoutException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            return 1;
+        }
+    }
+
+
+    private int queryNextAttributeOrdinal(AttributeGroup ag) {
+        Integer nextOrdinal = entityManager()
+                .createQuery("select max(a.sortOrder) from Attribute a where a.group = :group", Integer.class)
+                .setParameter("group", ag)
+                .getSingleResult();
+        
+        if(nextOrdinal == null) {
+            return 1; 
+        } else {
+            return nextOrdinal+1;
+        }
+    
     }
 }

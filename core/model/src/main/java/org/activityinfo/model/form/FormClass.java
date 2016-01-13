@@ -5,10 +5,12 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
 
 import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +43,7 @@ public class FormClass implements IsResource, FormElementContainer {
     private String label;
     private String description;
     private final List<FormElement> elements = Lists.newArrayList();
+    private final Set<ResourceLock> locks = Sets.newHashSet();
 
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
@@ -248,6 +251,10 @@ public class FormClass implements IsResource, FormElementContainer {
         return this;
     }
 
+    public Set<ResourceLock> getLocks() {
+        return locks;
+    }
+
     @Override
     public String toString() {
         return "<FormClass: " + getLabel() + ">";
@@ -258,6 +265,7 @@ public class FormClass implements IsResource, FormElementContainer {
         formClass.setOwnerId(resource.getOwnerId());
         formClass.setLabel(Strings.nullToEmpty(resource.isString(LABEL_FIELD_ID)));
         formClass.elements.addAll(fromRecords(resource.getRecordList("elements")));
+        formClass.locks.addAll(ResourceLock.fromRecords(resource.getRecordList("locks")));
         return formClass;
     }
 
@@ -283,7 +291,8 @@ public class FormClass implements IsResource, FormElementContainer {
         resource.setOwnerId(ownerId);
         resource.set("classId", CLASS_ID);
         resource.set(LABEL_FIELD_ID, label);
-        resource.set("elements", FormElement.asRecordList(elements));
+        resource.set("elements", Resources.asRecordList(elements));
+        resource.set("locks", Resources.asRecordList(locks));
         return resource;
     }
 

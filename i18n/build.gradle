@@ -3,18 +3,94 @@ description = 'ActivityInfo Internationalization Resources'
 
 apply plugin: 'gwt-base'
 
+
 gwt {
     gwtVersion = project.gwtVersion
 }
 
+// Define an addition 'tool' source set that includes
+// the java code to verify i18n resources and merge
+// translations from PoEditor at build time
+
+sourceSets {
+    tool {
+        java {
+            srcDir 'src/tool/java'
+        }
+        resources {
+            srcDir 'src/tool/resources'
+        }
+    }
+}
+
+
 dependencies {
     compile libraries.guava
     compile libraries.gwt.i18nServer
+    gwt     libraries.gwt.user
     gwt     libraries.gwt.guava
+    
+    toolCompile   libraries.jersey.client
+    toolCompile   libraries.jersey.json
+    toolCompile   libraries.jersey.multipart
+    toolCompile   libraries.guava
+    toolCompile   'com.github.javaparser:javaparser-core:2.0.0'
+    toolCompile   'joda-time:joda-time:2.5'
 }
 
+idea {
+    module {
+        testSourceDirs += file('src/tool/java')
+
+        scopes.PROVIDED.plus += [ configurations.gwt ]
+        scopes.TEST.plus += [ configurations.toolCompile ]
+    }
+}
 
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
+}
+
+task checkMessages(type: JavaExec) {
+    group = "Verification"
+    description = 'Checks localization resources'
+
+    dependsOn 'toolClasses'
+    
+    main = 'org.activityinfo.i18n.tools.Check'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
+}
+
+check.dependsOn checkMessages
+
+task pullTranslations(type: JavaExec) {
+    group = "I18N"
+    description = 'Fetches translations from PoEditor.com'
+
+    dependsOn 'toolClasses'
+
+    main = 'org.activityinfo.i18n.tools.Pull'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
+ 
+    doFirst {
+        systemProperty 'poApiKey', project.property('poApiKey')
+    }
+}
+
+task pushTranslations(type: JavaExec) {
+    group = "I18N"
+    description = 'Pushes new translation keys to PoEditor.com'
+
+    dependsOn 'toolClasses'
+
+    main = 'org.activityinfo.i18n.tools.Push'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
+
+    doFirst {
+        systemProperty 'poApiKey', project.property('poApiKey')
+    }
 }

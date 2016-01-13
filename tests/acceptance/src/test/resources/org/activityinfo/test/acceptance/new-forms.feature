@@ -17,6 +17,53 @@ Feature: New form
     When I have added 21 partners
     Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "suggestbox"
 
+  @AI-1213
+  @web
+  Scenario: Partners field is represented by combo box
+    When I have added 11 partners
+    And I have submitted to "Patient Visits" form table in "Patient Registration" database:
+      | Comments   | Partner  | Start Date | End Date   |
+      | text       | enum     | date       | date       |
+      | no comment | partner5 | 2014-01-02 | 2014-01-04 |
+    Then form "Patient Visits" in database "Patient Registration" has "Partner" field represented by "dropdown" with value "partner5"
+
+  @AI-1220
+  @web
+  Scenario: Enumeration field representation
+    Given I have created a form "Enum representation" using the new layout
+    And I have created a multi-valued enumerated field "7 items multiple" with 7 items
+    And I have created a multi-valued enumerated field "17 items multiple" with 17 items
+    And I have created a multi-valued enumerated field "27 items multiple" with 27 items
+    And I have created a single-valued enumerated field "7 items single" with 7 items
+    And I have created a single-valued enumerated field "17 items single" with 17 items
+    And I have created a single-valued enumerated field "27 items single" with 27 items
+    When I open the form designer for "Enum representation" in database "Patient Registration"
+    Then field "7 items multiple" represented by "checkboxes"
+    Then field "17 items multiple" represented by "dropdown"
+    Then field "27 items multiple" represented by "dropdown"
+    Then field "7 items single" represented by "radiobuttons"
+    Then field "17 items single" represented by "dropdown"
+    Then field "27 items single" represented by "suggestbox"
+
+  @AI-1124
+  @web
+  Scenario: Add entry without project in database
+    Given I have submitted to "Medical Activities" form table in "Patient Registration" database:
+      | Number of patients | Donor   | Diseases treated this month    | Comments         | Partner | Start Date | End Date   |
+      | quantity           | enum    | enum                           | text             | enum    | date       | date       |
+      | 13                 | USAID   | cholera                        | no comment       | NRC     | 2014-01-02 | 2014-01-04 |
+    Then table has rows with hidden built-in columns:
+      | Number of patients | Donor   | Diseases treated this month    |
+      | quantity           | enum    | enum                           |
+      | 230                | USAID   | cholera, malaria, tuberculosis |
+      | 11                 | ECHO    | cholera                        |
+      | 13                 | USAID   | cholera                        |
+
+  @AI-1200
+  Scenario: Project built-in field is not shown if there is not projects in the database
+    When I open a new form submission for "Patient Visits" then following fields are invisible:
+      | Project |
+
   @AI-1033
   @AI-1009
   @web

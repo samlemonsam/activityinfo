@@ -26,10 +26,17 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.Style.SortDir;
 import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.ui.client.component.form.field.attachment.UploadUrls;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -86,8 +93,8 @@ public class SiteExporter {
 
     private CellStyle attribValueStyle;
 
-    private List<Integer> indicators;
-    private List<Integer> attributes;
+    private ActivityFormDTO activity;
+    private LinkedHashMap<Integer, IndicatorDTO> indicators;
     private List<Integer> levels;
     private HSSFCellStyle dateTimeStyle;
 
@@ -155,6 +162,7 @@ public class SiteExporter {
     }
 
     public void export(ActivityFormDTO activity, Filter filter) {
+        this.activity = activity;
 
         HSSFSheet sheet = book.createSheet(composeUniqueSheetName(activity));
         sheet.createFreezePane(4, 2);
@@ -227,7 +235,7 @@ public class SiteExporter {
 
         createHeaderCell(headerRow2, column++, "Axe");
 
-        indicators = new ArrayList<>(activity.getIndicators().size());
+        indicators = Maps.newLinkedHashMap();
         for (IndicatorGroup group : activity.groupIndicators()) {
             if (group.getName() != null) {
                 // create a merged cell on the top row spanning all members
@@ -239,23 +247,26 @@ public class SiteExporter {
                         column + group.getIndicators().size() - 1));
             }
             for (IndicatorDTO indicator : group.getIndicators()) {
-                indicators.add(indicator.getId());
+                indicators.put(indicator.getId(), indicator);
                 createHeaderCell(headerRow2, column, indicator.getName(), indicatorHeaderStyle);
                 sheet.setColumnWidth(column, characters(INDICATOR_COLUMN_WIDTH));
                 column++;
             }
         }
 
-        attributes = new ArrayList<>();
         for (AttributeGroupDTO group : activity.getAttributeGroups()) {
             if (group.getAttributes().size() != 0) {
-                createHeaderCell(headerRow1, column, group.getName(), CellStyle.ALIGN_CENTER);
-                sheet.addMergedRegion(new CellRangeAddress(0, 0, column, column + group.getAttributes().size() - 1));
+                if (group.isMultipleAllowed()) {
+                    createHeaderCell(headerRow1, column, group.getName(), CellStyle.ALIGN_CENTER);
+                    sheet.addMergedRegion(new CellRangeAddress(0, 0, column, column + group.getAttributes().size() - 1));
 
-                for (AttributeDTO attrib : group.getAttributes()) {
-                    attributes.add(attrib.getId());
-                    createHeaderCell(headerRow2, column, attrib.getName(), attribHeaderStyle);
-                    sheet.setColumnWidth(column, characters(ATTRIBUTE_COLUMN_WIDTH));
+                    for (AttributeDTO attrib : group.getAttributes()) {
+                        createHeaderCell(headerRow2, column, attrib.getName(), attribHeaderStyle);
+                        sheet.setColumnWidth(column, characters(ATTRIBUTE_COLUMN_WIDTH));
+                        column++;
+                    }
+                } else {
+                    createHeaderCell(headerRow2, column, group.getName(), CellStyle.ALIGN_CENTER);
                     column++;
                 }
             }
@@ -341,16 +352,30 @@ public class SiteExporter {
 
         createCell(row, column++, site.getLocationAxe());
 
-        for (Integer indicatorId : indicators) {
-            createIndicatorValueCell(row, column++, site.getIndicatorValue(indicatorId));
+        for (Map.Entry<Integer, IndicatorDTO> indicator : indicators.entrySet()) {
+            createIndicatorValueCell(row, column++, site.getIndicatorValue(indicator.getKey()), indicator.getValue(),
+                    CuidAdapter.activityFormClass(site.getActivityId()));
         }
 
-        for (Integer attribId : attributes) {
-
-            boolean value = site.getAttributeValue(attribId);
-            Cell valueCell = createCell(row, column, value);
-            valueCell.setCellStyle(attribValueStyle);
-            column++;
+        for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
+            for (AttributeDTO attrib : attributeGroup.getAttributes()) {
+                if (attributeGroup.isMultipleAllowed()) {
+                    boolean value = site.getAttributeValue(attrib.getId());
+                    Cell valueCell = createCell(row, column, value);
+                    valueCell.setCellStyle(attribValueStyle);
+                    column++;
+                } else {
+                    boolean value = site.getAttributeValue(attrib.getId());
+                    if (value) {
+                        Cell valueCell = createCell(row, column, attrib.getName());
+                        valueCell.setCellStyle(attribValueStyle);
+                        break;
+                    }
+                }
+            }
+            if (!attributeGroup.isMultipleAllowed()) {
+                column++;
+            }
         }
 
         for (Integer levelId : levels) {
@@ -428,14 +453,24 @@ public class SiteExporter {
     }
 
 
-    private void createIndicatorValueCell(Row row, int columnIndex, Object value) {
+    private void createIndicatorValueCell(Row row, int columnIndex, Object value, IndicatorDTO indicator, ResourceId formId) {
         if (value != null) {
             Cell cell = row.createCell(columnIndex);
             cell.setCellStyle(indicatorValueStyle);
             if (value instanceof Double) {
                 cell.setCellValue((Double) value);
             } else if (value instanceof String) {
-                cell.setCellValue((String) value);
+                if (indicator.getType() == AttachmentType.TYPE_CLASS && !Strings.isNullOrEmpty((String) value)) {
+                    AttachmentValue attachmentValue = AttachmentValue.fromJson((String) value);
+
+                    String cellValue = "";
+                    for (Attachment attachment : attachmentValue.getValues()) {
+                        cellValue += UploadUrls.getPermanentLink(context.getRootUri(), attachment.getBlobId(), formId) + "\n";
+                    }
+                    cell.setCellValue(cellValue.trim());
+                } else {
+                    cell.setCellValue((String) value);
+                }
             } else if (value instanceof Date) {
                 cell.setCellValue((Date) value);
             } else if (value instanceof LocalDate) {

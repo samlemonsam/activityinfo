@@ -33,6 +33,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
@@ -74,6 +75,15 @@ class IndicatorForm extends AbstractDesignForm {
         codeField = new TextField<>();
         codeField.setFieldLabel(constants.codeFieldLabel());
         codeField.setToolTip(constants.codeFieldLabel());
+        codeField.setValidator(new Validator() {
+            @Override
+            public String validate(Field<?> field, String value) {
+                if (!Strings.isNullOrEmpty(value) && !FormField.isValidCode(value)) {
+                    return constants.invalidCodeMessage();
+                }
+                return null;
+            }
+        });
         binding.addFieldBinding(new OnlyValidFieldBinding(codeField, "nameInExpression"));
         this.add(codeField);
 
@@ -107,7 +117,6 @@ class IndicatorForm extends AbstractDesignForm {
         aggregationCombo.add(IndicatorDTO.AGGREGATE_SUM, constants.sum());
         aggregationCombo.add(IndicatorDTO.AGGREGATE_AVG, constants.average());
         aggregationCombo.add(IndicatorDTO.AGGREGATE_SITE_COUNT, constants.siteCount());
-        aggregationCombo.add(IndicatorDTO.AGGREGATE_PERCENT, "Percentage");
         binding.addFieldBinding(new MappingComboBoxBinding(aggregationCombo, "aggregation"));
         this.add(aggregationCombo);
 
@@ -247,7 +256,7 @@ class IndicatorForm extends AbstractDesignForm {
 
     private void setState() {
         if (typeCombo.getValue() != null) {
-            FieldTypeClass selectedType = TypeRegistry.get().get().getTypeClass(typeCombo.getValue().getWrappedValue());
+            FieldTypeClass selectedType = TypeRegistry.get().getTypeClass(typeCombo.getValue().getWrappedValue());
 
             unitsField.setVisible(selectedType == FieldTypeClass.QUANTITY);
             unitsField.setAllowBlank(selectedType != FieldTypeClass.QUANTITY);

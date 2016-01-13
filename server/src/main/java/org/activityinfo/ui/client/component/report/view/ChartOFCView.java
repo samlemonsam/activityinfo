@@ -118,7 +118,9 @@ public class ChartOFCView extends ContentPanel implements ChartView {
 
     @Override
     public void loading() {
-        el().mask();
+        if(isRendered()) {
+            el().mask();
+        }
     }
 
     @Override
@@ -135,7 +137,9 @@ public class ChartOFCView extends ContentPanel implements ChartView {
      */
     @Override
     public void show(PivotChartReportElement element) {
-        el().unmask();
+        if(isRendered()) {
+            el().unmask();
+        }
 
         PivotChartContent content = element.getContent();
         PivotTableData table = element.getContent().getData();

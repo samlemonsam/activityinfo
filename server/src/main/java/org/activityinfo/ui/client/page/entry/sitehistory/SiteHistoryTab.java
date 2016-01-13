@@ -67,7 +67,7 @@ public class SiteHistoryTab extends TabItem {
 
             @Override
             public void onSuccess(final GetSiteHistoryResult historyResult) {
-                if (historyResult.hasHistories()) {
+                if (historyResult != null && historyResult.hasHistories()) {
                     dispatcher.execute(new GetLocations(historyResult.collectLocationIds()),
                             new AsyncCallback<LocationResult>() {
                                 @Override
@@ -85,6 +85,12 @@ public class SiteHistoryTab extends TabItem {
 
                                         @Override
                                         public void onSuccess(ActivityFormDTO schema) {
+                                            if (schema == null || locationsResult == null || locationsResult.getData() == null ||
+                                                    historyResult.getSiteHistories() == null) {
+                                                content.setHtml("");
+                                                return;
+                                            }
+
                                             render(schema,
                                                     locationsResult.getData(),
                                                     site,

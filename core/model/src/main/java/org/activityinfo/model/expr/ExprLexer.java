@@ -18,7 +18,7 @@ public class ExprLexer extends UnmodifiableIterator<Token> {
     private int currentCharIndex;
     private int currentTokenStart = 0;
 
-    private static final String OPERATOR_CHARS = "+-/*&|=!";
+    private static final String OPERATOR_CHARS = "+-/*&|=!<>";
 
     public ExprLexer(String string) {
         assert string != null : "expr cannot be null";

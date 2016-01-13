@@ -48,7 +48,7 @@ public class DatabasesPage {
     }
 
     public DatabasesPage rename(String oldName, String newName, String newDescription) {
-        grid().findCell(oldName).click();
+        grid().clickCell(oldName);
         buttonClick(I18N.CONSTANTS.renameDatabase());
         GxtModal modal = new GxtModal(container);
 

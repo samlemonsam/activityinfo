@@ -27,18 +27,18 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Pair;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.FormClassSet;
+import org.activityinfo.core.shared.importing.source.SourceRow;
+import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.core.shared.importing.source.SourceRow;
-import org.activityinfo.core.shared.importing.validation.ValidationResult;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 
 import java.util.List;
 import java.util.Map;
@@ -77,6 +77,7 @@ public class HierarchyClassImporter implements FieldImporter {
                     return null;
                 }
             });
+            promises.add(promise.thenDiscardResult());
         }
 
         return Promise.waitAll(promises);
@@ -134,7 +135,7 @@ public class HierarchyClassImporter implements FieldImporter {
 
         final Map<ResourceId, ResourceId> toSave = Maps.newHashMap();
         for (ValidationResult result : validationResults) {
-            if (result.shouldPersist() && result.getRangeWithInstanceId() != null) {
+            if (result.isPersistable() && result.getRangeWithInstanceId() != null) {
                 ResourceId range = result.getRangeWithInstanceId().getA();
                 ResourceId value = toSave.get(range);
                 if (value == null) {

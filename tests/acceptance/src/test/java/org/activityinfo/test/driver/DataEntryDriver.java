@@ -3,6 +3,8 @@ package org.activityinfo.test.driver;
 
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 /**
  * Common interface to entering data through the web,
  * ODK, etc.
@@ -49,4 +51,8 @@ public interface DataEntryDriver {
     boolean isNextEnabled();
 
     void sendKeys(CharSequence keys);
+
+    List<String> availableValues();
+
+    void close();
 }

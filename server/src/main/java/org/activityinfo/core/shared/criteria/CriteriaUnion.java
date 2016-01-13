@@ -7,9 +7,10 @@ import org.activityinfo.model.form.FormInstance;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
-public class CriteriaUnion implements Criteria {
+public class CriteriaUnion implements Criteria, Iterable<Criteria>  {
 
     private final List<Criteria> elements;
 
@@ -24,8 +25,11 @@ public class CriteriaUnion implements Criteria {
 
     @Override
     public boolean apply(@Nonnull FormInstance instance) {
-        for(Criteria criterium : elements) {
-            if(criterium.apply(instance)) {
+        if (elements.isEmpty()) {
+            return true;
+        }
+        for (Criteria criterium : elements) {
+            if (criterium.apply(instance)) {
                 return true;
             }
         }
@@ -34,15 +38,32 @@ public class CriteriaUnion implements Criteria {
 
     @Override
     public boolean apply(@Nonnull Projection projection) {
-        for(Criteria criterium : elements) {
-            if(criterium.apply(projection)) {
+        if (elements.isEmpty()) {
+            return true;
+        }
+        for (Criteria criterium : elements) {
+            if (criterium.apply(projection)) {
                 return true;
             }
         }
         return false;
     }
 
+    @Override
+    public Criteria copy() {
+        List<Criteria> copy = Lists.newArrayList();
+        for (Criteria criteria : elements) {
+            copy.add(criteria.copy());
+        }
+        return new CriteriaUnion(copy);
+    }
+
     public Collection<Criteria> getElements() {
         return elements;
+    }
+
+    @Override
+    public Iterator<Criteria> iterator() {
+        return elements.iterator();
     }
 }

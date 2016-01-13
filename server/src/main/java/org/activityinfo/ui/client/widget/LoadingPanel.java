@@ -82,6 +82,15 @@ public class LoadingPanel<V> implements IsWidget {
         });
     }
 
+    public Promise<Void> showWithoutLoad() {
+        return show(new Provider<Promise<V>>() {
+            @Override
+            public Promise<V> get() {
+                return Promise.resolved(null);
+            }
+        });
+    }
+
     private Promise<Void> tryLoad() {
         Promise<V> promisedValue = valueProvider.get();
 

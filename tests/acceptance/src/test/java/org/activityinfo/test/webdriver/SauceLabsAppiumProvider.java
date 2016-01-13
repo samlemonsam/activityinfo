@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
-import org.activityinfo.test.odk.AndroidDevice;
 import org.activityinfo.test.pageobject.odk.OdkApp;
 import org.activityinfo.test.pageobject.odk.OdkVersion;
 import org.openqa.selenium.remote.CapabilityType;

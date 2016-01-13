@@ -21,10 +21,25 @@ package org.activityinfo.test.ui;
  * #L%
  */
 
-import org.junit.Rule;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import org.activityinfo.test.driver.UiApplicationDriver;
+import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.gxt.GxtModal;
+import org.activityinfo.test.pageobject.gxt.GxtTree;
+import org.activityinfo.test.pageobject.web.design.DesignPage;
+import org.activityinfo.test.pageobject.web.design.DesignTab;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
+import javax.inject.Inject;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static org.activityinfo.test.driver.Property.name;
 import static org.activityinfo.test.driver.Property.property;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
 /**
  * @author yuriyz on 06/30/2015.
@@ -32,16 +47,123 @@ import static org.activityinfo.test.driver.Property.property;
 public class DesignUiTest {
 
     private static final String DATABASE = "DesignUiDb";
+    private static final String FORM = "Form";
 
-    @Rule
-    public UiDriver driver = new UiDriver();
+    @Inject
+    public UiApplicationDriver driver;
 
     @Test
     public void renameDatabase() throws Exception {
-        driver.loginAsAny();
+        driver.login();
         driver.setup().createDatabase(property("name", DATABASE));
 
-        driver.ui().renameDatabase(DATABASE, "NewDesignUiDb", "New Desc");
+        driver.renameDatabase(DATABASE, "NewDesignUiDb", "New Desc");
 
+    }
+
+    @Test // AI-877
+    public void navigateAwayWithoutSavingChanges() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE));
+        driver.setup().createForm(name(FORM),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        driver.ensureLoggedIn();
+
+        String db = driver.getAliasTable().getAlias(DATABASE);
+        String form = driver.getAliasTable().getAlias(FORM);
+
+        DesignTab tab = driver.getApplicationPage().navigateToDesignTab().selectDatabase(db);
+        DesignPage designPage = tab.design();
+
+        GxtTree.GxtNode node = designPage.getDesignTree().select(form);
+        FluentElement nodeElement = node.getElement();
+        nodeElement.doubleClick();
+
+        FluentElement editor = findInputEditor(tab.getContainer());
+        editor.sendKeys("123");
+
+        try {
+            driver.getApplicationPage().navigateToDashboard();
+        } catch (Exception e) {
+            // ignore : our goal is to navigate away and make sure confirmation dialog appears
+        }
+
+        GxtModal confirmationModal = GxtModal.waitForModal(designPage.getContainer().root());
+        assertNotNull(confirmationModal);
+    }
+
+    @Test // AI-878
+    public void saveButtonState() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE));
+        driver.setup().createForm(name(FORM),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        driver.ensureLoggedIn();
+
+        String db = driver.getAliasTable().getAlias(DATABASE);
+        String form = driver.getAliasTable().getAlias(FORM);
+
+        DesignTab tab = driver.getApplicationPage().navigateToDesignTab().selectDatabase(db);
+        DesignPage designPage = tab.design();
+
+        GxtTree.GxtNode node = designPage.getDesignTree().select(form);
+        FluentElement nodeElement = node.getElement();
+        nodeElement.doubleClick();
+
+        FluentElement editor = findInputEditor(tab.getContainer());
+        editor.sendKeys("123", Keys.ENTER);
+
+        designPage.getToolbarMenu().clickButton("Save");
+
+        assertFalse(designPage.getToolbarMenu().button("Saved").isEnabled());
+
+    }
+
+    @Test // AI-1081
+    public void longNamesSaving() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE));
+        driver.setup().createForm(name(Strings.padEnd("form1_", 500, 'a')),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        String formName = Strings.padEnd("form2_", 500, 'a');
+        driver.setup().createForm(name(formName),
+                property("database", DATABASE),
+                property("classicView", true));
+
+        driver.setup().createField(
+                property("form", formName),
+                property("name", Strings.padEnd("enum_", 500, 'a')),
+                property("type", "enumerated"),
+                property("multipleAllowed", true),
+                property("items", Lists.newArrayList(Strings.padEnd("enumItem_", 500, 'a'))));
+
+        driver.setup().createField(
+                property("form", formName),
+                property("name", Strings.padEnd("quantity_", 500, 'a')),
+                property("type", "quantity"),
+                property("code", "quantity_code")
+        );
+    }
+    
+    @Test
+    public void globalDatabase() throws Exception {
+        driver.login();
+        driver.setup().createDatabase(property("name", DATABASE), property("country", "Global"));
+        driver.createForm(name(FORM),
+                property("database", DATABASE),
+                property("classicView", false));
+
+        FormDesignerPage formDesignerPage = driver.openFormDesigner(DATABASE, FORM);
+        formDesignerPage.save();
+    }
+
+    private FluentElement findInputEditor(FluentElement container) {
+        return container.find().div(withClass("x-editor")).descendants().input(withClass("x-form-text")).first();
     }
 }

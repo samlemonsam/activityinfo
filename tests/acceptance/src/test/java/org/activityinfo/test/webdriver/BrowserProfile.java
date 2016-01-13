@@ -2,8 +2,6 @@ package org.activityinfo.test.webdriver;
 
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import org.openqa.selenium.remote.BrowserType;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
@@ -12,7 +10,6 @@ import java.util.Collections;
 import java.util.Set;
 
 public class BrowserProfile implements DeviceProfile, Serializable {
-    
     
     @Nonnull
     private final OperatingSystem os;
@@ -48,19 +45,12 @@ public class BrowserProfile implements DeviceProfile, Serializable {
         return browserVersion;
     }
 
-    @Override
     public Serializable getId() {
         return this;
     }
 
-    @Override
     public String getName() {
         return Joiner.on(" ").join(Arrays.asList(os.toString(), browser, browserVersion));
-    }
-
-    @Override
-    public Set<String> getTags() {
-        return tags;
     }
 
     @Override

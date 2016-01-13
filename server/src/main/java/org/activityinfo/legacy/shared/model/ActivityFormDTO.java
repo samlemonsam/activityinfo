@@ -24,6 +24,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -62,8 +63,8 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
 
     // to ensure serializer
     private Published _published;
-    private List<PartnerDTO> partners;
-    private List<ProjectDTO> projects;
+    private List<PartnerDTO> partners = Lists.newArrayList();
+    private List<ProjectDTO> projects = Lists.newArrayList();
     private LocationTypeDTO locationType;
 
     private boolean editAllowed;

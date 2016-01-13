@@ -1,27 +1,29 @@
 package org.activityinfo.test.ui;
 
+import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
-import org.junit.Rule;
 import org.junit.Test;
 
+import javax.inject.Inject;
+
 import static org.activityinfo.test.driver.Property.property;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.everyItem;
 import static org.junit.Assert.assertThat;
 
 
 public class UserSortingUiTest {
     
-    @Rule
-    public UiDriver driver = new UiDriver();
+    @Inject
+    public UiApplicationDriver driver;
     
     @Test
     public void test() throws Exception {
 
         String database = "My db";
         
-        driver.loginAsAny();
+        driver.login();
         driver.setup().createDatabase(property("name", database));
         
         String[] partners = new String[] { "ARC", "NRC", "RI" };
@@ -40,7 +42,7 @@ public class UserSortingUiTest {
                     property("permissions", "View"));
         }
 
-        ApplicationPage app = driver.applicationPage();
+        ApplicationPage app = driver.getApplicationPage();
         GxtGrid userGrid = app.navigateToDesignTab().selectDatabase(driver.alias(database)).users().grid();
         userGrid.waitUntilAtLeastOneRowIsLoaded();
         

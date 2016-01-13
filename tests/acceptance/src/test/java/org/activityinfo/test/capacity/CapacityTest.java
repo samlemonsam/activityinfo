@@ -11,12 +11,14 @@ import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.capacity.model.UserRole;
 import org.activityinfo.test.capacity.scripts.CapacityTestScript;
 import org.activityinfo.test.capacity.scripts.DatabaseStress;
-import org.activityinfo.test.capacity.scripts.SingleDatabase;
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.UserAccount;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**

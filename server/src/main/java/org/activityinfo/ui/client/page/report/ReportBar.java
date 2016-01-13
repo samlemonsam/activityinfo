@@ -57,10 +57,10 @@ public class ReportBar extends LayoutContainer {
 
         addTitle();
 
-        switchViewButton = new Button("Switch to page view", IconImageBundle.ICONS.page());
+        switchViewButton = new Button(I18N.CONSTANTS.switchToPageView(), IconImageBundle.ICONS.page());
         add(switchViewButton);
 
-        dashboardButton = new ToggleButton("Pin to dashboard", IconImageBundle.ICONS.star());
+        dashboardButton = new ToggleButton(I18N.CONSTANTS.pinToDashboard(), IconImageBundle.ICONS.star());
         add(dashboardButton);
 
         shareButton = new Button(I18N.CONSTANTS.share(), IconImageBundle.ICONS.group());

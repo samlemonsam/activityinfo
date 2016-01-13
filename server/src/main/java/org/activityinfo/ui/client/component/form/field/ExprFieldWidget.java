@@ -56,6 +56,7 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
     }
 
     private final FormClass validationFormClass;
+    private final ValueUpdater<ExprValue> valueUpdater;
 
     @UiField
     HTMLPanel boxWrapper;
@@ -68,23 +69,30 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
         uiBinder.createAndBindUi(this);
 
         this.validationFormClass = validationFormClass;
+        this.valueUpdater = valueUpdater;
 
         this.box.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                valueUpdater.update(ExprValue.valueOf(event.getValue()));
+                fireValueChanged();
             }
         });
         this.box.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                valueUpdater.update(getValue());
-                validate();
+                fireValueChanged();
             }
         });
     }
 
-    private void validate() {
+    @Override
+    public void fireValueChanged() {
+        if (validate()) {
+            valueUpdater.update(getValue());
+        }
+    }
+
+    private boolean validate() {
         // reset first
         boxWrapper.removeStyleName("has-error");
         errorMessages.addClassName("hide");
@@ -102,7 +110,7 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
             for (SymbolExpr placeholderExpr : symbolExprList) {
                 if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
                     showError(I18N.MESSAGES.doesNotExist(placeholderExpr.getName()));
-                    return;
+                    return false;
                 }
             }
         } catch (Exception e) {
@@ -110,7 +118,9 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
 
             // expression is invalid
             showError(I18N.CONSTANTS.calculationExpressionIsInvalid());
+            return false;
         }
+        return true;
     }
 
     private void showError(String errorMessage) {
@@ -149,6 +159,11 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
     @Override
     public void setReadOnly(boolean readOnly) {
         box.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return box.isReadOnly();
     }
 
     @Override

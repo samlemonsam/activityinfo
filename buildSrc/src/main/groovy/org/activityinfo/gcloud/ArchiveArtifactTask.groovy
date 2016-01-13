@@ -7,9 +7,14 @@ import org.gradle.api.tasks.TaskAction
 class ArchiveArtifactTask extends DefaultTask {
     
     File archivePath
+    String renameTo
     
     String getArchiveUrl() {
-        return "gs://ai-pipeline/artifacts/${archivePath.name}"
+        if(renameTo) {
+            return "gs://ai-pipeline/artifacts/${renameTo}"
+        } else {
+            return "gs://ai-pipeline/artifacts/${archivePath.name}"
+        }
     }
     
     @TaskAction

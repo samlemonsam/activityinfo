@@ -6,14 +6,13 @@ import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -94,37 +93,36 @@ public class SingleClassImporter implements FieldImporter {
         final InstanceScorer.Score score = instanceScorer.score(row);
         final int bestMatchIndex = score.getBestMatchIndex();
 
+        ResourceId instanceId = bestMatchIndex != -1 ? scoreSource.getReferenceInstanceIds().get(bestMatchIndex) : null;
+
         for (int i = 0; i != sources.size(); ++i) {
             if (score.getImported()[i] == null) {
                 if(required) {
-                    results.add(ValidationResult.error("required missing"));
+                    results.add(ValidationResult.error("required missing").setInstanceId(instanceId));
                 } else {
-                    results.add(ValidationResult.MISSING);
+                    results.add(ValidationResult.missing().setInstanceId(instanceId));
                 }
             } else if (bestMatchIndex == -1) {
                 results.add(ValidationResult.error("No match"));
             } else {
                 String matched = scoreSource.getReferenceValues().get(bestMatchIndex)[i];
-                final ValidationResult converted = ValidationResult.converted(matched, score.getBestScores()[i]);
-                converted.setInstanceId(scoreSource.getReferenceInstanceIds().get(bestMatchIndex));
-                results.add(converted);
+                results.add(ValidationResult.converted(matched, score.getBestScores()[i]).setInstanceId(instanceId));
             }
         }
     }
 
     @Override
     public boolean updateInstance(SourceRow row, FormInstance instance) {
-        // root
+
         final List<ValidationResult> validationResults = Lists.newArrayList();
         validateInstance(row, validationResults);
         for (ValidationResult result : validationResults) {
-            if (result.shouldPersist() && result.getInstanceId() != null) {
+            if (result.isPersistable() && result.getInstanceId() != null) {
                 instance.set(fieldId, result.getInstanceId());
+                break;
             }
         }
 
-        // nested data
-        // todo ???
         return true;
     }
 

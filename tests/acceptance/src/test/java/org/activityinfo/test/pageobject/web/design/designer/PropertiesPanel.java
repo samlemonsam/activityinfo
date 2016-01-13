@@ -21,8 +21,14 @@ package org.activityinfo.test.pageobject.web.design.designer;
  * #L%
  */
 
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
+import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
+
+import java.util.List;
 
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 
@@ -43,5 +49,38 @@ public class PropertiesPanel {
 
     public FluentElement getContainer() {
         return container;
+    }
+
+    public void setValues(List<FieldValue> values) {
+        for (FieldValue value : values) {
+            switch(value.getField()) {
+                case "code":
+                    setProperty(I18N.CONSTANTS.codeFieldLabel(), value.getValue());
+                    break;
+                case "label":
+                    setProperty(I18N.CONSTANTS.labelFieldLabel(), value.getValue());
+                    break;
+                case "description":
+                    setProperty(I18N.CONSTANTS.description(), value.getValue());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown designer field property: " + value.getField());
+            }
+        }
+    }
+
+    public void setProperty(String fieldLabel, String value) {
+        form().findFieldByLabel(fieldLabel).fill(value);
+    }
+
+    public void setLabel(String label) {
+        setProperty(I18N.CONSTANTS.labelFieldLabel(), label);
+    }
+
+    public RelevanceDialog relevanceDialog() {
+        form().findFieldByLabel(I18N.CONSTANTS.relevance()).select(I18N.CONSTANTS.relevanceEnabledIf());
+        form().getForm().find().button(XPathBuilder.withText(I18N.CONSTANTS.defineRelevanceLogic())).clickWhenReady();
+
+        return new RelevanceDialog(BsModal.waitForModal(container));
     }
 }

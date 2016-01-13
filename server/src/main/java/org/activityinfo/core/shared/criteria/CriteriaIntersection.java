@@ -8,7 +8,6 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A {@code Criteria} that is satisfied only if all of its
@@ -28,8 +27,8 @@ public class CriteriaIntersection implements Criteria, Iterable<Criteria> {
 
     @Override
     public boolean apply(@Nonnull FormInstance input) {
-        for(Criteria criteria : members) {
-            if(!criteria.apply(input)) {
+        for (Criteria criteria : members) {
+            if (!criteria.apply(input)) {
                 return false;
             }
         }
@@ -39,11 +38,20 @@ public class CriteriaIntersection implements Criteria, Iterable<Criteria> {
     @Override
     public boolean apply(@Nonnull Projection input) {
         for(Criteria criteria : members) {
-            if(!criteria.apply(input)) {
+            if (!criteria.apply(input)) {
                 return false;
             }
         }
         return true;
+    }
+
+    @Override
+    public Criteria copy() {
+        List<Criteria> copy = Lists.newArrayList();
+        for (Criteria criteria : members) {
+            copy.add(criteria.copy());
+        }
+        return new CriteriaIntersection(copy);
     }
 
     @Override

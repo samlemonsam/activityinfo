@@ -5,88 +5,71 @@ dependencies {
     compile 'org.apache.poi:poi-ooxml:3.12-beta1'
     compile 'org.apache.poi:poi:3.12-beta1'
     
-    testCompile libraries.junit
-    testCompile libraries.guice
-    testCompile libraries.jersey.client
-    testCompile libraries.jersey.json
-    testCompile libraries.cucumber.java
-    testCompile libraries.cucumber.junit
-    testCompile libraries.cucumber.guice
-    testCompile libraries.jsr305
-    compile libraries.jdbc.mysql
+    compile libraries.hamcrest
+    compile libraries.junit
+    compile libraries.guice
+    compile libraries.jersey.client
+    compile libraries.jersey.json
+    compile libraries.cucumber.java
+    compile libraries.cucumber.guice
 
-    testCompile 'org.seleniumhq.selenium:selenium-java:2.43.0'
-    testCompile 'com.saucelabs:sauce_junit:2.1.13'
-    testCompile 'com.github.detro:phantomjsdriver:1.2.0'
-    testCompile 'org.yaml:snakeyaml:1.14'
-    testCompile 'org.apache.commons:commons-pool2:2.0'
-    testCompile 'joda-time:joda-time:2.5'
-    testCompile 'org.littleshoot:littleproxy:1.0.0-beta7'
-    testCompile 'org.apache.commons:commons-csv:1.1'
-    testCompile libraries.bcrypt
-    testCompile libraries.metrics.core
-    testCompile libraries.jersey.server
-    testCompile libraries.jersey.simpleServer
 
-    testCompile 'io.appium:java-client:2.2.0'
+    compile libraries.jsr305
+
+    compile 'org.seleniumhq.selenium:selenium-java:2.43.0'
+    compile 'com.saucelabs:sauce_junit:2.1.13'
+    compile 'com.github.detro:phantomjsdriver:1.2.0'
+    compile 'org.yaml:snakeyaml:1.14'
+    compile 'org.apache.commons:commons-pool2:2.0'
+    compile 'joda-time:joda-time:2.5'
+    compile 'org.littleshoot:littleproxy:1.0.0-beta7'
+    compile 'org.apache.commons:commons-csv:1.1'
+    compile 'io.airlift:airline:0.7'
     
-    testCompile libraries.c3p0
+    compile libraries.bcrypt
+    compile libraries.metrics.core
+    compile libraries.jersey.server
+    compile libraries.jersey.simpleServer
 
-    testCompile project(':core:model')
-    testCompile project(':i18n')
-    testCompile project(path: ':server', configuration: 'i18n')
-    testCompile libraries.gwt.i18nServer
+    compile 'io.appium:java-client:2.2.0'
+    
+    compile project(':core:model')
+    compile project(':i18n')
+    compile libraries.gwt.i18nServer
 }
 
-test {
-    // Do not run acceptance tests during normal test phase
-    exclude "**/*AT.*"
-    exclude "**/*Smoke*.*"
-    exclude "**/*UiTest*"
-    
-}
+// we're not using the standard test plug
+// as we have our own test harness
+test.enabled = false
 
-task commitTest(type: Test) {
-    group = "Verification"
-    description = "Runs API tests against Local Development Server upon commit"
-    
-    dependsOn ':server:configureDatabase'
-    dependsOn ':server:appengineStartAT'
-    finalizedBy ':server:appengineStop'
-    
-    include "**/FunctionalApiAT*"
-}
 
-task acceptanceTest(type: Test) {
+task acceptanceTest(type: JavaExec) {
     group = "Verification"
     description = 'Runs acceptance test suite'
-    
+
+    dependsOn 'classes'
     dependsOn ':server:configureDatabase'
+
+    args '--url', project.environment.url
+    args '--api'
+    args '--ui'
+    args '-T', '6'
+    args '--outputDir', "$buildDir/test-results"
+    args '--retries', '3'
+
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
     
     // Determine the server against which to test
     if(project.environment.local) {
         dependsOn ':server:appengineStartAT'
         finalizedBy ':server:appengineStop'
     } 
-
-    // Run only functional tests
-    include "**/Functional*AT*"
-    include "**/*UiTest*"
-    exclude "**/*\$*"
 }
 
-task browserAcceptanceTest(type: Test) {
-    group = "Verification"
-    description = 'Runs functional tests against a specific browser'
-    dependsOn ':server:configureDatabase'
 
-    include "**/CrossBrowserAT*"
-    exclude "**/*\$*"
-    
-    outputs.upToDateWhen { false }
-}
-
-task instrumentedAcceptanceTest(type: Test) {
+task instrumentedAcceptanceTest(type: JavaExec) {
     group = "Verification"
     description = 'Runs acceptance tests against an instrumented server to gather test coverage metrics'
 
@@ -95,16 +78,23 @@ task instrumentedAcceptanceTest(type: Test) {
     }
 
     // Determine the server against which to test
+    dependsOn 'classes'
     dependsOn { ':server:appengineStartInstrumentedAT' }
     finalizedBy { ':server:appengineStop' }
 
     // some tests may fail due to the instrumentation process
-    ignoreFailures = true
     systemProperty "gwt.coverage.report.dir", coverageReportDir
 
-    include "**/Functional*AT.*"
-    include "**/*UiTest*"
-    exclude "**/*\$*"
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
+
+    args '--url', project.environment.url
+    args '--api', '--ui', '--odk'   
+    args '--retries', '3'
+    args '-T', '4'
+    args '--webdriver', 'chrome'
+    args '--outputDir', "$buildDir/test-results"
 }
 
 
@@ -139,7 +129,7 @@ task acceptanceTestCoverage(type: org.activityinfo.coverage.MergeCoverageTask) {
 task capacityTest(type: JavaExec) {
     description = 'Runs capacity tests to verify performance under load'
     main = 'org.activityinfo.test.capacity.CapacityTest'
-    dependsOn 'testClasses', ':server:configureDatabase'
+    dependsOn 'classes', ':server:configureDatabase'
     classpath = sourceSets.test.runtimeClasspath
     workingDir = "$buildDir/capacity"
     
@@ -153,7 +143,7 @@ task capacityTest(type: JavaExec) {
 task smokeTest(type: Test) {
     description = 'Runs pre-release smoke tests'
     group = "Delivery Pipeline"
-    dependsOn 'testClasses'
+    dependsOn 'classes'
 
     include "**/*SmokeTest.*"
 
@@ -162,19 +152,13 @@ task smokeTest(type: Test) {
     }
 }
 
+
 tasks.each { task ->
-    if(task.name =~ /commitTest|[aA]cceptanceTest$/) {
+    if(task.name =~ /[aA]cceptanceTest$/) {
         task.configure {
-            scanForTestClasses = false
 
             doFirst {
                 systemProperties.putAll(project.environment.systemProperties)
-
-                // Keep console output to a minimum
-                testLogging {
-                    showStandardStreams = false
-                    events = ['failed', 'passed']
-                }
             }
             systemProperty 'webdriver', project.property('webdriver')
             systemProperty 'webdriver.chrome.silentOutput', 'true'

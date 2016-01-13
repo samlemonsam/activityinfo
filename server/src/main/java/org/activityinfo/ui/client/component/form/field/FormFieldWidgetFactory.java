@@ -33,23 +33,25 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.image.ImageType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUploadFieldWidget;
+import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
-import org.activityinfo.ui.client.component.form.field.image.ImageUploadFieldWidget;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -91,14 +93,14 @@ public class FormFieldWidgetFactory {
     }
 
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater) {
-        return createWidget(null, formClass, field, valueUpdater, null, null);
+        return createWidget(formClass, field, valueUpdater, null, null);
     }
 
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater, @Nullable EventBus eventBus) {
-        return createWidget(null, formClass, field, valueUpdater, null, eventBus);
+        return createWidget(formClass, field, valueUpdater, null, eventBus);
     }
 
-    public Promise<? extends FormFieldWidget> createWidget(String resourceId, FormClass formClass, FormField field,
+    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field,
                                                            ValueUpdater valueUpdater, FormClass validationFormClass, @Nullable EventBus eventBus) {
         FieldType type = field.getType();
 
@@ -132,8 +134,13 @@ public class FormFieldWidgetFactory {
         } else if (type instanceof BooleanType) {
             return Promise.resolved(new BooleanFieldWidget(valueUpdater));
 
-        } else if (type instanceof ImageType) {
-            return Promise.resolved(new ImageUploadFieldWidget(resourceId, field, valueUpdater));
+        } else if (type instanceof AttachmentType) {
+            AttachmentType attachmentType = (AttachmentType) type;
+            if (attachmentType.getKind() == AttachmentType.Kind.IMAGE) {
+                return Promise.resolved(new ImageUploadFieldWidget(formClass.getId(), valueUpdater, fieldWidgetMode));
+            } else {
+                return Promise.resolved(new AttachmentUploadFieldWidget(formClass.getId(), valueUpdater, fieldWidgetMode));
+            }
 
         } else if (type instanceof ReferenceType) {
             return createReferenceWidget(field, valueUpdater);
@@ -161,11 +168,19 @@ public class FormFieldWidgetFactory {
                     @Override
                     public FormFieldWidget apply(List<FormInstance> input) {
 
-                        if (input.size() < SMALL_BALANCE_NUMBER) {
+                        int size = input.size();
+
+                        boolean isProjectField = !type.getRange().isEmpty() &&
+                                type.getRange().iterator().next().getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
+                        if (size == 0 && isProjectField) { // for now hide only project field (AI-1200)
+                            return NullFieldWidget.INSTANCE;
+                        }
+
+                        if (size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
                             return new CheckBoxFieldWidget(type, input, valueUpdater);
 
-                        } else if (input.size() < MEDIUM_BALANCE_NUMBER) {
+                        } else if (size < MEDIUM_BALANCE_NUMBER) {
                             // Dropdown list
                             return new ComboBoxFieldWidget(input, valueUpdater);
 

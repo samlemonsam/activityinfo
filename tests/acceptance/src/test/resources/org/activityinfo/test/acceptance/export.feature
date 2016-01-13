@@ -10,12 +10,17 @@ Feature: Export to Excel
       | NRC     | USAID |  1000     |
       | NRC     | ECHO  |   500     |
       | NRC     | ECHO  |  2000     |
+      | NRC     |       |  2000     |
+    And I have created a multi-valued enumerated field "Diseases" with items:
+      | cholera |
+      | malaria |
     When I export the form "NFI Distribution"
     Then the exported spreadsheet contains:
-      | Partner | USAID | ECHO  | Nb. kits  |
-      | NRC     | true  | false | 1,000     |
-      | NRC     | false | true  | 500       |
-      | NRC     | false | true  | 2,000     |
+      | Partner | Donor | cholera | malaria | Nb. kits |
+      | NRC     | USAID | false   | false   | 1,000    |
+      | NRC     | ECHO  | false   | false   | 500      |
+      | NRC     | ECHO  | false   | false   | 2,000    |
+      | NRC     |       | false   | false   | 2,000    |
 
   Scenario: Export single form without submissions to Excel
     Given I have created a database "RRMP"

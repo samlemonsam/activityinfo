@@ -257,8 +257,11 @@ public class FormInstance implements IsResource {
 
     public ResourceId getInstanceId(ResourceId fieldId) {
         final FieldValue value = get(fieldId);
-        if(value instanceof ReferenceValue) {
-            return ((ReferenceValue) value).getResourceIds().iterator().next();
+        if (value instanceof ReferenceValue) {
+            Set<ResourceId> ids = ((ReferenceValue) value).getResourceIds();
+            if (!ids.isEmpty()) {
+                return ids.iterator().next();
+            }
         }
         return null;
     }

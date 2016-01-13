@@ -47,6 +47,7 @@ import org.activityinfo.legacy.shared.command.result.ListResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
+import org.activityinfo.ui.client.widget.loading.ExceptionOracle;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,8 +78,7 @@ public class IndicatorGridPanel extends ContentPanel {
             dispatcher.execute(new GetActivityForms().setFilter(activityIdsFilter())).then(new AsyncCallback<ActivityFormResults>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    showEmptyText(I18N.CONSTANTS.failedToLoadEntries());
-
+                    showEmptyText(ExceptionOracle.getExplanation(caught));
                     callback.onFailure(caught);
                 }
 

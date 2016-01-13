@@ -8,12 +8,18 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.util.Pair;
+import org.activityinfo.test.Sleep;
+import org.activityinfo.test.driver.BsDataEntryDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
+import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.gxt.GxtGrid;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.gxt.GxtPanel;
@@ -64,10 +70,27 @@ public class DataEntryTab {
         
         return this;
     }
+
+    public DataEntryFilter filter(String labelOfFilter) {
+        FluentElement element = container.find().descendants().span(withText(labelOfFilter)).ancestor().div(withClass("x-panel")).first();
+        return new DataEntryFilter(element, labelOfFilter);
+    }
     
-    public GxtDataEntryDriver newSubmission() {
+    public DataEntryDriver newSubmission() {
         buttonClick(I18N.CONSTANTS.newSite());
-        return new GxtDataEntryDriver(new GxtModal(container));
+        final FluentElement windowElement = container.root();
+        return container.waitFor(new Function<WebDriver, DataEntryDriver>() {
+            @Override
+            public DataEntryDriver apply(WebDriver input) {
+                if(windowElement.find().div(withClass(GxtModal.CLASS_NAME)).exists()) {
+                    return new GxtDataEntryDriver(new GxtModal(windowElement));
+                } else if(windowElement.find().div(withClass("formPanel")).firstIfPresent().isPresent()) {
+                    return new BsDataEntryDriver(windowElement);
+                } else {
+                    return null;
+                }
+            }
+        });
     }
     
     public DataEntryDriver updateSubmission() {
@@ -137,14 +160,17 @@ public class DataEntryTab {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public GxtGrid grid() {
+        GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
+        grid.waitUntilAtLeastOneRowIsLoaded();
+        return grid;
     }
 
     public void selectSubmission(int rowIndex) {
-        GxtGrid grid = GxtGrid.waitForGrids(container).first().get();
-        grid.waitUntilAtLeastOneRowIsLoaded();
         try {
-            grid.rows().get(rowIndex).select();
+            grid().rows().get(rowIndex).select();
         } catch (StaleElementReferenceException e) {
             GxtGrid.waitForGrids(container).first().get().rows().get(rowIndex).select();
         }
@@ -156,48 +182,45 @@ public class DataEntryTab {
             tab.click();
         }
     }
-    
+
     public List<HistoryEntry> changes() {
-        
+
         selectTab("History");
-        
+
         return container.waitFor(new Function<WebDriver, List<HistoryEntry>>() {
             @Override
             public List<HistoryEntry> apply(WebDriver input) {
-                List<HistoryEntry> entries = Lists.newArrayList();
-                FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
-                for (FluentElement p : paragraphs) {
-                    String text;
-                    try {
+                try {
+                    List<HistoryEntry> entries = Lists.newArrayList();
+                    FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
+                    for (FluentElement p : paragraphs) {
+                        String text;
                         text = p.text();
-                    } catch (StaleElementReferenceException ignored) {
-                        return null;
-                    }
-                    if(text.contains("Loading")) {
-                        return null;
-                    }
-                    if(!text.trim().isEmpty()) {
-                        HistoryEntry entry = new HistoryEntry(text);
-                        FluentElements changes = p.find().parent().p().followingSibling().ul().li().asList();
-                        for (FluentElement change : changes) {
-                            entry.addChange(change.text());
+
+                        if(text.contains("Loading")) {
+                            return null;
                         }
-                       
-                        entries.add(entry);
+                        if(!text.trim().isEmpty()) {
+                            HistoryEntry entry = new HistoryEntry(text);
+                            FluentElements changes = p.find().parent().p().followingSibling().ul().li().asList();
+                            for (FluentElement change : changes) {
+                                entry.addChange(change.text());
+                            }
+
+                            entries.add(entry);
+                        }
                     }
+                    return entries;
+                } catch (StaleElementReferenceException ignored) {
+                    return null;
                 }
-                return entries;
             }
         });
     }
 
     public DetailsEntry details() {
+        Sleep.sleepSeconds(2); // sometimes it's too fast and we read details of previous row, give it time to switch
         selectTab("Details");
-        try {
-            Thread.sleep(300); // sometimes it's too fast and we read details of previous row, give it time to switch
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         container.waitFor(By.className("indicatorHeading"));
         return container.waitFor(new Function<WebDriver, DetailsEntry>() {
             @Override
@@ -252,5 +275,42 @@ public class DataEntryTab {
 
     public FluentElement getContainer() {
         return container;
+    }
+
+    public void importData(DataTable dataTable) {
+        container.find().button(withText(I18N.CONSTANTS.importText())).clickWhenReady();
+
+        ImportDialog importDialog = ImportDialog.find(container)
+                .enterExcelData(dataTable);
+
+        int size = dataTable.getGherkinRows().size();
+        Sleep.sleepSeconds(3);
+
+        importDialog.clickNextButton();
+        //importDialog.enterMapping(createMapping(dataTable))
+        Sleep.sleepMillis(size * 10 + 3000);
+
+        importDialog.clickNextButton();
+        Sleep.sleepMillis(size * 10);
+
+        importDialog.clickFinishButton();
+        Sleep.sleepMillis(size * 20);
+
+        importDialog.waitUntilClosed();
+    }
+
+    private List<Pair<String, String>> createMapping(DataTable dataTable) {
+        List<Pair<String, String>> mapping = Lists.newArrayList();
+        DataTableRow headerRow = dataTable.getGherkinRows().get(0);
+        for (String cell : headerRow.getCells()) {
+            mapping.add(Pair.newPair(cell, cell));
+        }
+        return mapping;
+    }
+
+    public BsModal editBetaSubmission() {
+        buttonClick(I18N.CONSTANTS.edit());
+        Sleep.sleepSeconds(1);
+        return BsModal.waitForNewFormModal(container.root());
     }
 }

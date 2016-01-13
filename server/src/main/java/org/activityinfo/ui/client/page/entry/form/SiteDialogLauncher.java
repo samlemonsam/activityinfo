@@ -148,17 +148,6 @@ public class SiteDialogLauncher {
             public void onSuccess(SchemaDTO schema) {
                 final ActivityDTO activity = schema.getActivityById(site.getActivityId());
 
-                if (!activity.getClassicView()) {// modern view
-                    resourceLocator.getFormInstance(site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
-                        @Override
-                        public void onSuccess(FormInstance result) {
-                            showModernFormDialog(activity.getName(), result, callback, false);
-                        }
-                    });
-
-                    return;
-                }
-
                 // check whether the site has been locked
                 // (this only applies to Once-reported activities because
                 //  otherwise the date criteria applies to the monthly report)
@@ -168,6 +157,17 @@ public class SiteDialogLauncher {
                         MessageBox.alert(I18N.CONSTANTS.lockedSiteTitle(), I18N.CONSTANTS.siteIsLocked(), null);
                         return;
                     }
+                }
+
+                if (!activity.getClassicView()) {// modern view
+                    resourceLocator.getFormInstance(site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
+                        @Override
+                        public void onSuccess(FormInstance result) {
+                            showModernFormDialog(activity.getName(), result, callback, false);
+                        }
+                    });
+
+                    return;
                 }
 
                 dispatcher.execute(new GetActivityForm(activity.getId())).then(new AsyncCallback<ActivityFormDTO>() {

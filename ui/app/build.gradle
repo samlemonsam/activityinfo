@@ -1,0 +1,24 @@
+
+apply plugin: 'gwt'
+
+gwt {
+    gwtVersion = project.gwtVersion
+    modules 'org.activityinfo.ui.App'
+}
+
+dependencies {
+    compile libraries.guava
+    compile libraries.gwt.i18nServer
+    gwt libraries.gwt.user
+    gwt libraries.gwt.guava
+    gwt project(':ui:style')
+    gwt project(':ui:icons')
+    gwt project(':i18n')
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.gwt ]
+    }
+}
+

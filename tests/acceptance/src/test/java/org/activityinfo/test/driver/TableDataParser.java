@@ -21,8 +21,11 @@ package org.activityinfo.test.driver;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -35,6 +38,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 07/14/2015.
@@ -97,6 +101,42 @@ public class TableDataParser {
         }
 
         return DataTable.create(rows);
+    }
+
+    public static String getFirstColumnValue(DataTable table, String columnName) {
+        List<String> values = getColumnValues(table, columnName);
+        return values.size() > 2 ? values.get(2) : null; // first row is header, second row is type
+    }
+
+    public static List<String> getColumnValues(DataTable table, String columnName) {
+        List<String> headerRow = table.getGherkinRows().get(0).getCells();
+
+        int columnIndex = -1;
+        for (int i = 0; i < headerRow.size(); i++) {
+            columnIndex = i;
+            if (headerRow.get(i).equalsIgnoreCase(columnName)) {
+                break;
+            }
+        }
+
+        List<String> columnCells = Lists.newArrayList();
+        if (columnIndex != -1) {
+            for (DataTableRow row : table.getGherkinRows()) {
+                columnCells.add(row.getCells().get(columnIndex));
+            }
+        }
+        return columnCells;
+    }
+
+    public static Map<String, String> asMap(DataTable table) {
+        Map<String, String> map = Maps.newHashMap();
+        for (int i = 1; i < table.getGherkinRows().size(); i++) {
+            List<String> cells = table.getGherkinRows().get(i).getCells();
+            Preconditions.checkState(cells.size() == 2, "It's expected to have exactly 2 columns (key, value)");
+
+            map.put(cells.get(0), cells.get(1));
+        }
+        return map;
     }
 }
 

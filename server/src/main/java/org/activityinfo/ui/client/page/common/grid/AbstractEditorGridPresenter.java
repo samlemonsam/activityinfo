@@ -28,9 +28,12 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.loader.CommandLoadEvent;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.command.Command;
@@ -38,7 +41,11 @@ import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.PageState;
+import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
+import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
+import org.activityinfo.ui.client.page.config.design.AbstractDesignForm;
+import org.activityinfo.ui.client.page.config.design.DesignView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +115,10 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
      */
     public void onSave() {
 
+        if (!isValid()) {
+            return;
+        }
+
         service.execute(createSaveCommand(), view.getSavingMonitor(), new AsyncCallback() {
             @Override
             public void onFailure(Throwable caught) {
@@ -119,9 +130,23 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
             public void onSuccess(Object result) {
                 getStore().commitChanges();
 
+                if (AbstractEditorGridPresenter.this.view.getToolBar() != null) {
+                    AbstractEditorGridPresenter.this.view.getToolBar().setDirty(false);
+                }
                 onSaved();
             }
         });
+    }
+
+    private boolean isValid() {
+        if (view instanceof DesignView) {
+            AbstractDesignForm currentForm = ((DesignView) view).getCurrentForm();
+            if (!currentForm.isValid()) {
+                MessageBox.alert(currentForm.getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -149,17 +174,30 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
         if (getModifiedRecords().size() == 0) {
             callback.onDecided(true);
         } else {
-            service.execute(createSaveCommand(), view.getSavingMonitor(), new AsyncCallback<BatchResult>() {
-
+            final SavePromptMessageBox box = new SavePromptMessageBox();
+            box.show(new SaveChangesCallback() {
                 @Override
-                public void onSuccess(BatchResult result) {
-                    getStore().commitChanges();
-                    callback.onDecided(true);
+                public void save(AsyncMonitor monitor) {
+                    service.execute(createSaveCommand(), view.getSavingMonitor(), new SuccessCallback<BatchResult>() {
+                        @Override
+                        public void onSuccess(BatchResult result) {
+                            box.hide();
+                            getStore().commitChanges();
+                            callback.onDecided(true);
+                        }
+                    });
                 }
 
                 @Override
-                public void onFailure(Throwable caught) {
-                    // TODO
+                public void cancel() {
+                    box.hide();
+                    callback.onDecided(false);
+                }
+
+                @Override
+                public void discard() {
+                    box.hide();
+                    callback.onDecided(true);
                 }
             });
         }

@@ -32,6 +32,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.activityinfo.model.util.StringUtil.truncate;
+
 import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
 
 public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
@@ -53,7 +55,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         FormClass formClass = validateFormClass(cmd.getJson());
 
         if (domain == ACTIVITY_DOMAIN) {
-            updateActivityFormClass(cmd, user, formClass);
+            return updateActivityFormClass(cmd, user, formClass);
         } else {
 
             FormClassEntity hibernateFormClass = new FormClassEntity();
@@ -67,16 +69,15 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
             } else {
                 entityManager.get().merge(hibernateFormClass);
             }
-        }
-
-        return new VoidResult();
+            return new VoidResult();
+        }        
     }
 
     private boolean exists(String formClassId) {
         return entityManager.get().find(FormClassEntity.class, formClassId) != null;
     }
 
-    private void updateActivityFormClass(UpdateFormClass cmd, User user, FormClass formClass) {
+    private CommandResult updateActivityFormClass(UpdateFormClass cmd, User user, FormClass formClass) {
         int activityId = CuidAdapter.getLegacyIdFromCuid(cmd.getFormClassId());
         Activity activity = entityManager.get().find(Activity.class, activityId);
 
@@ -88,16 +89,15 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
 //        activity.setClassicView(false);
 
-        if (cmd.isSyncActivityEntities()) {
-            syncEntities(activity, formClass);
-        } else {
-            entityManager.get().persist(activity);
-        }
+        syncEntities(activity, formClass);
+        entityManager.get().persist(activity);
+
+        return new VoidResult();
     }
 
     private FormClass validateFormClass(String json) {
         try {
-            Resource resource = Resources.fromJson(json);
+            Resource resource = Resources.resourceFromJson(json);
             return FormClass.fromResource(resource);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormClass json: " + e.getMessage(), e);
@@ -113,7 +113,8 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
      */
     private void syncEntities(Activity activity, FormClass formClass) {
 
-        activity.setName(formClass.getLabel());
+        activity.setName(truncate(formClass.getLabel()));
+        updateLocationType(activity, formClass);
 
         List<FormFieldEntity> fields = new ArrayList<>();
         fields.addAll(activity.getIndicators());
@@ -147,6 +148,20 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // delete any entities that were not matched to FormFields
         for(FormFieldEntity entity : entityMap.values()) {
             entity.delete();
+        }
+    }
+
+    private void updateLocationType(Activity activity, FormClass formClass) {
+        boolean hasLocationTypeField = false;
+        for (FormField formField : formClass.getFields()) {
+            int fieldIndex = CuidAdapter.getBlockSilently(formField.getId(), 1);
+            if (fieldIndex == CuidAdapter.LOCATION_FIELD) {
+                hasLocationTypeField = true;
+            }
+        }
+        if (!hasLocationTypeField) {
+            // if there is no location type field then we have to stick to "Nationwide" location type (null location type) - AI-1216
+            activity.setLocationType(LocationType.queryNullLocationType(entityManager.get(), activity));
         }
     }
 
@@ -185,7 +200,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         indicator.setDescription(field.getDescription());
         indicator.setSortOrder(sortOrder);
         indicator.setNameInExpression(field.getCode());
-        indicator.setSkipExpression(field.getRelevanceConditionExpression());
+        indicator.setRelevanceExpression(field.getRelevanceConditionExpression());
         indicator.setCalculatedAutomatically(field.getType() instanceof CalculatedFieldType);
 
         if (field.getType() instanceof QuantityType) {
@@ -201,7 +216,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         } else if (field.getType() instanceof CalculatedFieldType) {
             CalculatedFieldType type = (CalculatedFieldType) field.getType();
             indicator.setType(QuantityType.TYPE_CLASS.getId());
-            indicator.setExpression(type.getExpression().getExpression());
+            indicator.setExpression(type.getExpressionAsString());
 
         } else if (field.getType() instanceof BarcodeType) {
             indicator.setType(TextType.TYPE_CLASS.getId());
@@ -214,14 +229,6 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
         } else {
             indicator.setType(field.getType().getTypeClass().getId());
-        }
-    }
-
-    private String truncate(String label, int maxLength) {
-        if(label.length() > maxLength) {
-            return label.substring(0, maxLength);
-        } else {
-            return label;
         }
     }
 

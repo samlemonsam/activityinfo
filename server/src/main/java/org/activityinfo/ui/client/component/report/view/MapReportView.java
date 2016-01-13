@@ -51,7 +51,9 @@ public class MapReportView extends ContentPanel implements ReportView<MapReportE
 
     @Override
     public void loading() {
-        el().mask();
+        if(isRendered()) {
+            el().mask();
+        }
     }
 
     @Override
@@ -63,7 +65,9 @@ public class MapReportView extends ContentPanel implements ReportView<MapReportE
 
     @Override
     public void show(MapReportElement element) {
-        el().unmask();
+        if(isRendered()) {
+            el().unmask();
+        }
         this.element = element;
         addContent();
     }

@@ -36,9 +36,24 @@ public class Icons  {
         return "icon icon_edit";
     }
 
+    //@Source(value = "icons/icomoon/close.svg")
+    public String close() {
+        return "icon icon_close";
+    }
+
+    //@Source(value = "icons/icomoon/cloud-download.svg")
+    public String cloudDownload() {
+        return "icon icon_cloud_download";
+    }
+
     //@Source(value = "icons/icomoon/filter.svg")
     public String filter() {
         return "icon icon_filter";
+    }
+
+    //@Source(value = "icons/icomoon/file.svg")
+    public String file() {
+        return "icon icon_file";
     }
 
     //@Source(value = "icons/icomoon/wrench.svg")
@@ -79,6 +94,16 @@ public class Icons  {
     //@Source("icons/icomoon/file-excel.svg")
     public String excelFile() {
         return "icon icon_file-excel";
+    }
+
+    //@Source("icons/icomoon/file-pdf.svg")
+    public String filePdf() {
+        return "icon icon_file-pdf";
+    }
+
+    //@Source("icons/icomoon/file-word.svg")
+    public String fileWord() {
+        return "icon icon_file-word";
     }
 
     //@Source("icons/icomoon/cloud-upload.svg")
@@ -137,4 +162,8 @@ public class Icons  {
         return "icon icon_exception";
     }
 
+    public String bars() {
+        return "icon icon_bars";
+    }
+    
 }

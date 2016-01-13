@@ -23,17 +23,21 @@ package org.activityinfo.test.pageobject.bootstrap;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import cucumber.api.DataTable;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.ModalDialog;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import java.util.List;
@@ -51,6 +55,26 @@ public class BsModal extends ModalDialog {
 
     public BsModal(FluentElement windowElement) {
         this.windowElement = windowElement;
+    }
+
+    public static BsModal waitForModal(final FluentElement container) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().exists(By.className(CLASS_NAME));
+            }
+        });
+        return find(container.root());
+    }
+
+    public static BsModal waitForNewFormModal(final FluentElement container) {
+        container.waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver input) {
+                return container.root().find().div(withClass("formPanel")).firstIfPresent().isPresent();
+            }
+        });
+        return waitForModal(container.root());
     }
 
     public static BsModal find(FluentElement parent) {
@@ -94,14 +118,14 @@ public class BsModal extends ModalDialog {
         BsFormPanel.BsField item = form.findFieldByLabel(value.getField());
 
         // fill by control type
-        if ("radio".equalsIgnoreCase(value.getControlType())) {
+        if ("radio".equalsIgnoreCase(value.getControlType()) || "dropdown".equalsIgnoreCase(value.getControlType())) {
             item.select(value.getValue());
             return;
         }
 
         // fill by type
         Optional<? extends FieldTypeClass> type = value.getType();
-        if (type == null || !type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
+        if (!type.isPresent() || type.get() == TextType.TYPE_CLASS || type.get() == NarrativeType.TYPE_CLASS) {
             item.fill(value.getValue());
         } else {
             if (type.get() == LocalDateType.TYPE_CLASS) {
@@ -110,6 +134,42 @@ public class BsModal extends ModalDialog {
                 item.select(value.getValue());
             }
         }
+    }
+
+
+    public void fill(DataTable dataTable, AliasTable aliasTable) {
+
+        BsFormPanel form = form();
+        DataTableRow labelRow = dataTable.getGherkinRows().get(0);
+        DataTableRow typeRow = dataTable.getGherkinRows().get(1);
+
+        for (int i = 2; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+            for (int j = 0; j < row.getCells().size(); j++) {
+                String value = row.getCells().get(j);
+                String label = labelRow.getCells().get(j);
+                String type = typeRow.getCells().get(j);
+
+                label = isBuiltinLabel(label) ? label : aliasTable.getAlias(label);
+
+                BsFormPanel.BsField field = form.findFieldByLabel(label);
+                if (type.equalsIgnoreCase("text") || type.equalsIgnoreCase("quantity")) {
+                    field.fill(value);
+                } else if (type.equalsIgnoreCase("enum")) {
+                    field.select(aliasTable.getAlias(value));
+                } else if (type.equalsIgnoreCase("date")) {
+                    field.fill(org.joda.time.LocalDate.parse(value));
+                } else {
+                    throw new RuntimeException("Unsupported type: " + type);
+                }
+            }
+        }
+    }
+
+    private static boolean isBuiltinLabel(String label) {
+        return label.equalsIgnoreCase("partner") || label.equalsIgnoreCase("comments") ||
+                label.equalsIgnoreCase("start date") || label.equalsIgnoreCase("end date") ||
+                label.equalsIgnoreCase("project");
     }
 
     private FluentElement buttonsContainer() {
@@ -154,6 +214,18 @@ public class BsModal extends ModalDialog {
         waitUntilClosed();
     }
 
+    public BsModal save() {
+        click(I18N.CONSTANTS.save());
+        waitUntilClosed();
+        return this;
+    }
+
+    public BsModal cancel() {
+        click(I18N.CONSTANTS.cancel());
+        waitUntilClosed();
+        return this;
+    }
+
     public boolean isClosed() {
         return !windowElement.isDisplayed();
     }
@@ -170,4 +242,19 @@ public class BsModal extends ModalDialog {
             }
         });
     }
+
+    public void waitUntilNotClosed(int waitSeconds) {
+        try {
+            getWindowElement().waitUntil(new Predicate<WebDriver>() {
+                @Override
+                public boolean apply(WebDriver input) {
+                    return !windowElement.isDisplayed();
+                }
+            }, waitSeconds);
+            throw new RuntimeException("Dialog was closed.");
+        } catch (TimeoutException e) {
+            // we are lucky and dialog is not closed
+        }
+    }
+
 }

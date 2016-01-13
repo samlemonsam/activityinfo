@@ -6,11 +6,10 @@ import com.sun.jersey.api.client.ClientResponse;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Wrapper around a ClientResponse to simplify accessing the entity multiple times.
@@ -32,7 +31,7 @@ class ApiResponse {
     
     public JsonNode getJson() throws IOException {
         if(!isSuccess()) {
-            throw new AssertionError(String.format("Request failed with status code %d:\n%s", response.getStatus(),
+            throw new AssertionError(String.format("Request failed with status code %d:%n%s", response.getStatus(),
                     getResponseEntity()));
         }
         return objectMapper.readTree(getResponseEntity());
@@ -48,7 +47,7 @@ class ApiResponse {
     public void assertStatusCodeIs(int statusCode) {
         if(response.getStatus() != statusCode) {
             throw new AssertionError(String.format(
-                    "Expected response with status code %d, actual status code was %d.\n%s",
+                    "Expected response with status code %d, actual status code was %d.%n%s",
                     statusCode,
                     response.getStatus(),
                     response.getEntity(String.class)));
@@ -72,8 +71,19 @@ class ApiResponse {
     public void assertErrorMessageContains(String errorMessage) {
         String message = getResponseEntity();
         if(!message.toLowerCase().contains(errorMessage.toLowerCase())) {
-            throw new AssertionError(String.format("Expected an error message containing the phrase '%s' but received:\n%s",
+            throw new AssertionError(String.format("Expected an error message containing the phrase '%s' but received:%n%s",
                     errorMessage, message));
+        }
+    }
+    
+    public void assertCorrectJsonContentType() {
+        MediaType type = response.getType();
+        if(!type.getType().equals("application") || !type.getSubtype().equals("json")) {
+            throw new AssertionError(String.format("Expected Content-Type header application/json; found: " + type.toString()));
+        }
+        String charset = type.getParameters().get("charset");
+        if(!"UTF-8".equals(charset)) {
+            throw new AssertionError(String.format("Expected charset UTF-8, found: '%s'", type.toString()));
         }
     }
 }

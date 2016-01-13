@@ -26,7 +26,7 @@
 
   <!--  This is test data used for the SchemaBuilderTest cases -->
 
-  <country countryId="1" name="Rdc" x1="0" y1="0" x2="0" y2="0"/>
+  <country countryId="1" name="Rdc" x1="12" y1="-13" x2="31" y2="5"/>
 
   <adminLevel countryId="1" adminLevelId="1" name="Province"/>
 

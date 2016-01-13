@@ -68,13 +68,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         public Promise<Void> loadCountries() {
             return execute(SqlQuery.select()
-                    .appendColumn("CountryId", "id")
-                    .appendColumn("Name", "name")
-                    .appendColumn("X1", "x1")
-                    .appendColumn("y1", "y1")
-                    .appendColumn("x2", "x2")
-                    .appendColumn("y2", "y2")
-                    .from("country"),
+                            .appendColumn("CountryId", "id")
+                            .appendColumn("Name", "name")
+                            .appendColumn("X1", "x1")
+                            .appendColumn("y1", "y1")
+                            .appendColumn("x2", "x2")
+                            .appendColumn("y2", "y2")
+                            .from("country"),
                     new RowHandler() {
                         @Override
                         public void handleRow(SqlResultSetRow rs) {
@@ -153,8 +153,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         public Promise<Void> loadAdminLevels() {
             return execute(SqlQuery.select("adminLevelId", "name", "parentId", "countryId")
-                    .from("adminlevel")
-                    .whereTrue("deleted=0"),
+                            .from("adminlevel")
+                            .whereTrue("deleted=0"),
                     new RowHandler() {
 
                         @Override
@@ -176,30 +176,30 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         public Promise<Void> loadDatabases() {
             final Promise<Void> promise = new Promise<>();
             SqlQuery query = SqlQuery.select("d.DatabaseId")
-                                     .appendColumn("d.Name")
-                                     .appendColumn("d.FullName")
-                                     .appendColumn("d.OwnerUserId")
-                                     .appendColumn("d.CountryId")
-                                     .appendColumn("o.Name", "OwnerName")
-                                     .appendColumn("o.Email", "OwnerEmail")
-                                     .appendColumn("p.AllowViewAll", "allowViewAll")
-                                     .appendColumn("p.AllowEdit", "allowEdit")
-                                     .appendColumn("p.AllowEditAll", "allowEditAll")
-                                     .appendColumn("p.AllowManageUsers", "allowManageUsers")
-                                     .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
-                                     .appendColumn("p.AllowDesign", "allowDesign")
-                                     .appendColumn("p.PartnerId", "partnerId")
-                                     .from("userdatabase d")
-                                     .leftJoin(SqlQuery.selectAll()
-                                                       .from("userpermission")
-                                                       .where("userpermission.UserId")
-                                                       .equalTo(context.getUser().getId()), "p")
-                                     .on("p.DatabaseId = d.DatabaseId")
-                                     .leftJoin("userlogin o")
-                                     .on("d.OwnerUserId = o.UserId")
-                                     .where("d.DateDeleted")
-                                     .isNull()
-                                     .orderBy("d.Name");
+                    .appendColumn("d.Name")
+                    .appendColumn("d.FullName")
+                    .appendColumn("d.OwnerUserId")
+                    .appendColumn("d.CountryId")
+                    .appendColumn("o.Name", "OwnerName")
+                    .appendColumn("o.Email", "OwnerEmail")
+                    .appendColumn("p.AllowViewAll", "allowViewAll")
+                    .appendColumn("p.AllowEdit", "allowEdit")
+                    .appendColumn("p.AllowEditAll", "allowEditAll")
+                    .appendColumn("p.AllowManageUsers", "allowManageUsers")
+                    .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
+                    .appendColumn("p.AllowDesign", "allowDesign")
+                    .appendColumn("p.PartnerId", "partnerId")
+                    .from("userdatabase d")
+                    .leftJoin(SqlQuery.selectAll()
+                            .from("userpermission")
+                            .where("userpermission.UserId")
+                            .equalTo(context.getUser().getId()), "p")
+                    .on("p.DatabaseId = d.DatabaseId")
+                    .leftJoin("userlogin o")
+                    .on("d.OwnerUserId = o.UserId")
+                    .where("d.DateDeleted")
+                    .isNull()
+                    .orderBy("d.Name");
 
             // this is quite hackesh. we ultimately need to split up GetSchema()
             // into
@@ -280,7 +280,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 //                                loadAttributes(),
 //                                joinAttributesToActivities(),
                                 loadLockedPeriods())
-                               .then(promise);
+                                .then(promise);
                     }
                 }
             });
@@ -373,8 +373,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                 if (!parentFound) {
                                     Log.debug(
                                             "Orphan lockedPeriod: No parent (UserDatabase/Activity/Project) found for" +
-                                            " LockedPeriod with Id=" +
-                                            lockedPeriod.getId());
+                                                    " LockedPeriod with Id=" +
+                                                    lockedPeriod.getId());
                                 }
                             }
                             promise.resolve(null);
@@ -385,10 +385,10 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
         private Promise<Void> joinPartnersToDatabases() {
             SqlQuery query = SqlQuery.select("d.databaseId", "d.partnerId", "p.name", "p.fullName")
-                                     .from(Tables.PARTNER_IN_DATABASE, "d")
-                                     .leftJoin(Tables.PARTNER, "p")
-                                     .on("d.PartnerId = p.PartnerId")
-                                     .orderBy("p.name");
+                    .from(Tables.PARTNER_IN_DATABASE, "d")
+                    .leftJoin(Tables.PARTNER, "p")
+                    .on("d.PartnerId = p.PartnerId")
+                    .orderBy("p.name");
 
             // Only allow results that are visible to this user if we are on the
             // server,
@@ -451,12 +451,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     int databaseId = row.getInt("databaseId");
                     UserDatabaseDTO database = databaseMap.get(databaseId);
                     activity.setDatabase(database);
+                    activity.setPartnerRange(database.getAllowablePartners());
                     database.getActivities().add(activity);
 
                     int locationTypeId = row.getInt("locationTypeId");
                     LocationTypeDTO locationType = locationTypes.get(locationTypeId);
 
-                    if(locationType == null) {
+                    if (locationType == null) {
                         throw new IllegalStateException("No location type for " + locationTypeId);
                     }
                     activity.setLocationType(locationType);
@@ -466,6 +467,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                 }
             });
         }
+
 //
 //        public Promise<Void> loadIndicators() {
 //            SqlQuery query = SqlQuery.select("indicatorId",
@@ -500,7 +502,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 //                    indicator.setName(rs.getString("name"));
 //                    indicator.setTypeId(rs.getString("type"));
 //                    indicator.setExpression(rs.getString("expression"));
-//                    indicator.setSkipExpression(rs.getString("skipExpression"));
+//                    indicator.setRelevanceExpression(rs.getString("skipExpression"));
 //                    indicator.setNameInExpression(rs.getString("nameInExpression"));
 //                    indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
 //                    indicator.setCategory(rs.getString("category"));
@@ -660,8 +662,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             schemaDTO.setDatabases(databaseList);
 
             Promise.waitAll(tasks)
-                   .then(Functions.constant(schemaDTO))
-                   .then(callback);
+                    .then(Functions.constant(schemaDTO))
+                    .then(callback);
         }
     }
 }

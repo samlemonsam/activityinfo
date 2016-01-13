@@ -22,13 +22,13 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:b="urn:import:org.activityinfo.ui.client.page.app"
-    >
+             xmlns:b="urn:import:org.activityinfo.ui.client.page.app">
   <ui:with field="resources" type="org.activityinfo.ui.client.page.app.resources.AppFrameResources"/>
   <ui:with field="clientContext" type="org.activityinfo.ui.client.ClientContext"/>
 
   <ui:data field="backgroundImage" src="resources/background.gif"/>
   <ui:data field="gearImage" src="resources/gear.png"/>
+  <ui:data field="helpImage" src="resources/help.png"/>
 
   <ui:style>
     @url backgroundUrl backgroundImage;
@@ -81,6 +81,10 @@
       width: 17px;
     }
 
+    .helpIcon {
+      background-image: helpUrl;
+    }
+
   </ui:style>
   <g:LayoutPanel styleName="{style.bar}">
     <g:layer width='100%' bottom='0px' height='3px'>
@@ -88,12 +92,10 @@
     </g:layer>
     <g:layer bottom='2px' height='35px'>
       <g:HTMLPanel styleName="{style.leftPanel}">
-        <g:Label text="{clientContext.getAppTitle}" styleName="{style.logo}"
-                 ui:field="logo"/>
+        <g:Label text="{clientContext.getAppTitle}" styleName="{style.logo}" ui:field="logo"/>
         <b:SectionTabStrip ui:field="sectionTabStrip"/>
-        <g:Label styleName="{style.icon} {style.settingsIcon}"
-                 ui:field="settingsButton"/>
-
+        <g:Label styleName="{style.icon} {style.settingsIcon}" ui:field="settingsButton"/>
+        <g:Label styleName="{style.icon} {style.helpIcon}" ui:field="helpButton"/>
       </g:HTMLPanel>
     </g:layer>
 

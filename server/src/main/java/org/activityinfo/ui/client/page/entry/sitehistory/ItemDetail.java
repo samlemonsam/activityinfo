@@ -26,6 +26,7 @@ import com.google.common.base.Objects;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.attachment.AttachmentType;
 
 import java.util.Map;
 
@@ -38,6 +39,10 @@ class ItemDetail {
         ActivityFormDTO form = ctx.getForm();
 
         String key = entry.getKey();
+        if (entry.getKey() == null) {
+            return null;
+        }
+
         final Object oldValue = state.get(key);
         final Object newValue = entry.getValue();
         state.put(key, newValue);
@@ -66,35 +71,22 @@ class ItemDetail {
             addValues(sb, I18N.CONSTANTS.location(), oldName, newName);
 
         } else if (key.equals("projectId")) {
-            String oldName = null;
-            if (oldValue != null) {
-                ProjectDTO project = form.getProjectById(toInt(oldValue));
-                if (project != null) {
-                    oldName = project.getName();
-                }
-            }
-            String newName = form.getProjectById(toInt(newValue)).getName();
+            String oldName = projectLabel(form, oldValue);
+            String newName = projectLabel(form, newValue);
+
             addValues(sb, I18N.CONSTANTS.project(), oldName, newName);
 
         } else if (key.equals("partnerId")) {
-            String oldName = null;
-            if (oldValue != null) {
-                PartnerDTO oldPartner = form.getPartnerById(toInt(oldValue));
-                if (oldPartner != null) {
-                    oldName = oldPartner.getName();
-                }
-            }
-            PartnerDTO newPartner = form.getPartnerById(toInt(newValue));
-            if (newPartner != null) {
-                String newName = newPartner.getName();
-                addValues(sb, I18N.CONSTANTS.partner(), oldName, newName);
-            }
+            String oldName = partnerLabel(form, oldValue);
+            String newName = partnerLabel(form, newValue);
+
+            addValues(sb, I18N.CONSTANTS.partner(), oldName, newName);
 
         } else if (key.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
             // custom
             int id = IndicatorDTO.indicatorIdForPropertyName(key);
             IndicatorDTO dto = form.getIndicatorById(id);
-            if (dto != null) {
+            if (dto != null && dto.getType() != AttachmentType.TYPE_CLASS) {
                 String name = dto.getName();
 
                 Month m = IndicatorDTO.monthForPropertyName(key);
@@ -131,6 +123,32 @@ class ItemDetail {
             return d;
         } else {
             return null;
+        }
+    }
+
+    private static String partnerLabel(ActivityFormDTO form, Object partnerId) {
+        if(partnerId == null) {
+            return null;
+        } else {
+            PartnerDTO oldPartner = form.getPartnerById(toInt(partnerId));
+            if(oldPartner == null) {
+                return I18N.CONSTANTS.deletedPartner();
+            } else {
+                return oldPartner.getName();
+            }
+        }
+    }
+
+    private static String projectLabel(ActivityFormDTO form, Object projectId) {
+        if(projectId == null) {
+            return null;
+        } else {
+            ProjectDTO project = form.getProjectById(toInt(projectId));
+            if (project == null) {
+                return I18N.CONSTANTS.deletedProject();
+            } else {
+                return project.getName();
+            }
         }
     }
 

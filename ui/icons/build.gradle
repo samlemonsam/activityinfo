@@ -25,7 +25,7 @@ grunt {
     workDir = file("${project.projectDir}")
 
     // Whether colors should output on the terminal
-    colors = true
+    colors = false
 
     // Whether output from Grunt should be buffered - useful when running tasks in parallel
     bufferOutput = false
@@ -46,3 +46,6 @@ grunt_build.dependsOn 'npmInstall'
 
 jar.dependsOn grunt_build
 
+grunt_build.inputs.dir "${projectDir}/src/main/svg"
+grunt_build.inputs.dir "${projectDir}/src/main/template"
+grunt_build.outputs.dir "${buildDir}/fonts"

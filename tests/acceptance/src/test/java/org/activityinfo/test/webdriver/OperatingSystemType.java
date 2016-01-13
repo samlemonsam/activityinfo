@@ -1,8 +1,6 @@
 package org.activityinfo.test.webdriver;
 
 
-import com.google.common.base.Strings;
-
 import java.util.Locale;
 
 public enum OperatingSystemType {

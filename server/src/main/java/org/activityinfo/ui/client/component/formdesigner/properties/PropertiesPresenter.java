@@ -51,7 +51,8 @@ import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetCo
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
-import org.activityinfo.ui.client.component.formdesigner.skip.SkipDialog;
+import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
+import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
 
 import java.util.List;
 
@@ -68,7 +69,6 @@ public class PropertiesPresenter {
     private HandlerRegistration descriptionKeyUpHandler;
     private HandlerRegistration codeKeyUpHandler;
     private HandlerRegistration requiredValueChangeHandler;
-    private HandlerRegistration readonlyValueChangeHandler;
     private HandlerRegistration visibleValueChangeHandler;
     private HandlerRegistration relevanceButtonClickHandler;
     private HandlerRegistration relevanceEnabledValueHandler;
@@ -105,7 +105,6 @@ public class PropertiesPresenter {
         }
 
         view.getRequiredGroup().setVisible(false);
-        view.getReadOnlyGroup().setVisible(false);
         view.getVisibleGroup().setVisible(false);
         view.getRelevanceGroup().setVisible(false);
         view.getCodeGroup().setVisible(false);
@@ -121,9 +120,6 @@ public class PropertiesPresenter {
         }
         if (requiredValueChangeHandler != null) {
             requiredValueChangeHandler.removeHandler();
-        }
-        if (readonlyValueChangeHandler != null) {
-            readonlyValueChangeHandler.removeHandler();
         }
         if (relevanceButtonClickHandler != null) {
             relevanceButtonClickHandler.removeHandler();
@@ -149,7 +145,6 @@ public class PropertiesPresenter {
 
         view.setVisible(true);
         view.getRequiredGroup().setVisible(true);
-        view.getReadOnlyGroup().setVisible(true);
         view.getVisibleGroup().setVisible(true);
         view.getRelevanceGroup().setVisible(!isBuiltIn);
         view.getCodeGroup().setVisible(true);
@@ -159,10 +154,12 @@ public class PropertiesPresenter {
         view.getRequired().setValue(formField.isRequired());
         view.getVisible().setValue(formField.isVisible());
         view.getCode().setValue(Strings.nullToEmpty(formField.getCode()));
-        view.getReadOnly().setValue(formField.isReadOnly());
 
         view.getRequired().setEnabled(!isBuiltIn);
         view.getVisible().setEnabled(!isBuiltIn);
+        if (isBuiltIn && !formField.isVisible()) { // in case it's invisible we should give user ability to make it visible again
+            view.getVisible().setEnabled(true);
+        }
 
         setRelevanceState(formField, !isBuiltIn);
         validateCode(fieldWidgetContainer);
@@ -171,7 +168,7 @@ public class PropertiesPresenter {
         relevanceButtonClickHandler = view.getRelevanceButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                SkipDialog dialog = new SkipDialog(fieldWidgetContainer, PropertiesPresenter.this);
+                RelevanceDialog dialog = new RelevanceDialog(fieldWidgetContainer, PropertiesPresenter.this);
                 dialog.show();
             }
         });
@@ -205,13 +202,6 @@ public class PropertiesPresenter {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 formField.setRequired(view.getRequired().getValue());
-                fieldWidgetContainer.syncWithModel();
-            }
-        });
-        readonlyValueChangeHandler = view.getReadOnly().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                formField.setReadOnly(view.getReadOnly().getValue());
                 fieldWidgetContainer.syncWithModel();
             }
         });

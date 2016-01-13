@@ -23,9 +23,9 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -46,7 +46,8 @@ import java.util.List;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class LocationTypeDTO extends BaseModelData implements EntityDTO, IsFormClass {
 
-    public static final int NOT_NATIONWIDE_LOCATION_TYPE_ID = 20301;
+    public static final int GLOBAL_COUNTRY_ID = 3;
+    public static final int GLOBAL_NULL_LOCATION_TYPE = 51545;
 
     public static final String NATIONWIDE_NAME = "Country";
 
@@ -98,9 +99,21 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         return get("name");
     }
 
-    public boolean isNationwide() {
-        // hack!!
-        return NATIONWIDE_NAME.equals(getName()) && getId() != NOT_NATIONWIDE_LOCATION_TYPE_ID;
+    /**
+     * 
+     * @return true if this location type represents the nationwide or "nullary" location type 
+     * used by activities that actually have no geography.
+     */
+    public boolean isNationwide() { 
+        // Very special case for the Global null location type
+        // which is not named "Country" but "Global"
+        if(getId() == GLOBAL_NULL_LOCATION_TYPE) {
+            return true;
+        }
+        return NATIONWIDE_NAME.equals(getName()) &&
+               getId() != GLOBAL_NULL_LOCATION_TYPE &&
+                getBoundAdminLevelId() == null && 
+                getDatabaseId() == null;
     }
 
     @JsonProperty("adminLevelId") @JsonView(DTOViews.Schema.class)

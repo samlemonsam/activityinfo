@@ -1,8 +1,10 @@
 package org.activityinfo.core.shared.importing.strategy;
 
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.type.converter.Converter;
 import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.attachment.AttachmentType;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,16 +25,19 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
 
     @Override
     public boolean accept(FormTree.Node fieldNode) {
-        return !fieldNode.isReference();
+        return !fieldNode.isReference() && !fieldNode.isEnum();
     }
 
     @Override
     public List<ImportTarget> getImportSites(FormTree.Node node) {
+        if (node.getType() instanceof AttachmentType) { // we are not ready for attachment import yet
+            return Collections.emptyList();
+        }
         return Collections.singletonList(target(node));
     }
 
     @Override
-    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> bindings) {
+    public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> bindings, ImportModel model) {
 
         ImportTarget requiredTarget = target(node);
         ColumnAccessor column = bindings.get(VALUE);
@@ -42,7 +47,7 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
 
         Converter converter = converterFactory.createStringConverter(node.getTypeClass());
 
-        return new DataFieldImporter(column, requiredTarget, converter);
+        return new DataFieldImporter(column, requiredTarget, converter, node, model);
     }
 
     private ImportTarget target(FormTree.Node node) {

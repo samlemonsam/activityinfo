@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import org.activityinfo.test.Sleep;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -81,13 +82,19 @@ public class FluentElement {
         return element;
     }
 
-    public void waitUntil(Predicate<WebDriver> predicate) {
-        WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+    public void waitUntil(Predicate<WebDriver> predicate, int timeInSeconds) {
+        WebDriverWait wait = new WebDriverWait(webDriver, timeInSeconds);
+        wait.ignoring(StaleElementReferenceException.class);
         wait.until(predicate);
+    }
+
+    public void waitUntil(Predicate<WebDriver> predicate) {
+        waitUntil(predicate, TIMEOUT_SECONDS);
     }
     
     public <T> void waitUntil(ExpectedCondition<T> condition) {
         WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+        wait.ignoring(StaleElementReferenceException.class);
         wait.until(condition);
     }
 
@@ -97,12 +104,14 @@ public class FluentElement {
 
     public FluentElement waitFor(By by, int timeout) {
         WebDriverWait wait = new WebDriverWait(webDriver, timeout);
+        wait.ignoring(StaleElementReferenceException.class);
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(by));
         return new FluentElement(webDriver, element);
     }
     
     public <T> T waitFor(Function<WebDriver, T> function) {
         WebDriverWait wait = new WebDriverWait(webDriver, TIMEOUT_SECONDS);
+        wait.ignoring(StaleElementReferenceException.class);
         return wait.until(function);
     }
     
@@ -131,16 +140,17 @@ public class FluentElement {
     }
 
     public void sendKeys(CharSequence... keys) {
-//        try {
-        element().sendKeys(keys);
-//        } catch (WebDriverException e) {
-//            // sometimes got unknown error: cannot focus element
-//            Actions actions = new Actions(webDriver);
-//            actions.moveToElement(element());
-//            actions.click();
-//            actions.sendKeys(keys);
-//            actions.build().perform();
-//        }
+        // workaround for https://code.google.com/p/selenium/issues/detail?id=4469
+        // Very slow in entering huge string in textarea(using send keys in java)
+        if (keys[0].length() < 1000) {
+            element().sendKeys(keys);
+        } else {
+            ((JavascriptExecutor) webDriver).executeScript("arguments[0].value = arguments[1];", element, keys[0]);
+
+            // force trigger key listeners
+            element().sendKeys("a", Keys.BACK_SPACE);
+            Sleep.sleepSeconds(1);
+        }
     }
 
     public boolean exists(By by) {
@@ -208,5 +218,9 @@ public class FluentElement {
         Actions actions = new Actions(webDriver);
         actions.dragAndDrop(element, dropElement.element());
         actions.perform();
+    }
+
+    public FluentElement activeElement() {
+        return new FluentElement(webDriver, webDriver.switchTo().activeElement());
     }
 }

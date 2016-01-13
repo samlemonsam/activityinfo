@@ -51,7 +51,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
     @Inject
     public UpdateEntityHandler(EntityManager em, Injector injector) {
-        super(em);
+        super(em, injector);
         this.injector = injector;
     }
 

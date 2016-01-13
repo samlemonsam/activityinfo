@@ -38,6 +38,7 @@ import org.activityinfo.server.report.generator.MapIconPath;
 import org.activityinfo.server.report.renderer.image.ImageCreator;
 import org.activityinfo.server.report.renderer.image.ItextGraphic;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -75,21 +76,16 @@ public class HtmlReportRenderer extends ItextReportRenderer {
     }
 
     public void render(ReportElement element, final Writer writer) throws IOException {
+        // Nasty hack to correct image layout in HTML
+        // HtmlWriter always writes with 
+        
         // The HtmlWriter encodes everything as ISO-8859-1
-        // so we can be safely naive here about encoding
         final Charset charset = Charset.forName("ISO-8859-1");
-        render(element, new OutputStream() {
-
-            @Override
-            public void write(int b) throws IOException {
-                writer.append((char) b);
-            }
-
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-                writer.append(new String(b, off, len, charset));
-            }
-        });
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        render(element, baos);
+        String html = new String(baos.toByteArray(), charset);
+        html = html.replaceAll("<img align=\"Left\"", "<img ");
+        writer.write(html);
     }
 
     @Override
@@ -147,6 +143,8 @@ public class HtmlReportRenderer extends ItextReportRenderer {
         public float getScaledHeight() {
             return height;
         }
+        
+        
     }
 
     private class HtmlImage implements ItextGraphic {
@@ -168,10 +166,11 @@ public class HtmlReportRenderer extends ItextReportRenderer {
         public Image toItextImage() throws BadElementException {
             try {
                 GeneratedResource storage = imageStorageProvider.create("image/png", "activityinfo.png");
-                ImageIO.write(image, "PNG", storage.openOutputStream());
-                storage.openOutputStream().close();
-
+                try(OutputStream output = storage.openOutputStream()) {
+                    ImageIO.write(image, "PNG", output);
+                }
                 return new MyImage(new URL(storage.getDownloadUri()), image.getWidth(), image.getHeight());
+                
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

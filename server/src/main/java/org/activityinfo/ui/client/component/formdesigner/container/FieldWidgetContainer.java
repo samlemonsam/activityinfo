@@ -126,7 +126,6 @@ public class FieldWidgetContainer implements WidgetContainer {
         if (formField.isRequired()) {
             label.append(LABEL_TEMPLATE.mandatoryMarker());
         }
-        formFieldWidget.setReadOnly(formField.isReadOnly());
 
         String labelHtml = label.toSafeHtml().asString();
         if (!formField.isVisible()) {

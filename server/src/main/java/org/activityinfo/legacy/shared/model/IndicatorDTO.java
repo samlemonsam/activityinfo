@@ -51,7 +51,6 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     public final static int AGGREGATE_SUM = 0;
     public final static int AGGREGATE_AVG = 1;
     public final static int AGGREGATE_SITE_COUNT = 2;
-    public final static int AGGREGATE_PERCENT = 3;
 
     public static final String PROPERTY_PREFIX = "I";
 
@@ -197,13 +196,12 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         set("expression", expression);
     }
 
-    @JsonProperty("relevanceCondition") @JsonView(DTOViews.Schema.class)
-    public String getSkipExpression() {
-        return get("skipExpression");
+    public String getRelevanceExpression() {
+        return get("relevanceExpression");
     }
 
-    public void setSkipExpression(String skipExpression) {
-        set("skipExpression", skipExpression);
+    public void setRelevanceExpression(String relevanceExpression) {
+        set("relevanceExpression", relevanceExpression);
     }
 
     @JsonProperty("code") @JsonView(DTOViews.Schema.class)
@@ -229,7 +227,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         return !Strings.isNullOrEmpty(getExpression());
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+
     public FieldTypeClass getType() {
         return TypeRegistry.get().getTypeClass(getTypeId());
     }
@@ -240,6 +238,8 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     public void setTypeId(String typeId) { set("type", typeId); }
 
+    @JsonProperty("type")
+    @JsonView(DTOViews.Schema.class)
     private String getTypeId() {
         return get("type", QuantityType.TYPE_CLASS.getId());
     }
@@ -378,7 +378,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         FormField field = new FormField(CuidAdapter.indicatorField(getId()));
         field.setLabel(getName());
         field.setDescription(getDescription());
-        field.setRelevanceConditionExpression(getSkipExpression());
+        field.setRelevanceConditionExpression(getRelevanceExpression());
 
         String code = getNameInExpression();
         if(!Strings.isNullOrEmpty(code)) {

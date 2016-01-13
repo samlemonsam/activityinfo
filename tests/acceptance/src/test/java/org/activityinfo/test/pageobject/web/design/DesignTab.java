@@ -77,7 +77,7 @@ public class DesignTab {
     }
 
     public BsModal newDatabase() {
-        container.find().button(withText("New Database")).clickWhenReady();
+        container.find().button(withText("New Database")).waitForFirst().clickWhenReady();
         return modalDialog();
     }
 

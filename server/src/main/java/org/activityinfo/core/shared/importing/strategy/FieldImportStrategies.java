@@ -2,8 +2,8 @@ package org.activityinfo.core.shared.importing.strategy;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.type.converter.JsConverterFactory;
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.model.formTree.FormTree;
 
 import java.util.List;
 
@@ -19,11 +19,12 @@ public class FieldImportStrategies {
         strategies.add(new SingleClassReferenceStrategy());
         strategies.add(new DataFieldImportStrategy(converterFactory));
         strategies.add(new HierarchyReferenceStrategy());
+        strategies.add(new EnumImportStrategy());
     }
 
     public FieldImportStrategy forField(FormTree.Node fieldNode) {
-        for(FieldImportStrategy strategy : strategies) {
-            if(strategy.accept(fieldNode)) {
+        for (FieldImportStrategy strategy : strategies) {
+            if (strategy.accept(fieldNode)) {
                 return strategy;
             }
         }

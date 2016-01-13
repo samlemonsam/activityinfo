@@ -24,11 +24,6 @@ public class FormResource {
 
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
 
-    /**
-     * This is the filename expected by ODK
-     */
-    private static final String ITEMSETS_CSV = "itemsets.csv";
-
     private ResourceLocatorSyncImpl locator;
     private OdkFormFieldBuilderFactory factory;
     private Provider<AuthenticatedUser> authProvider;

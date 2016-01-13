@@ -21,10 +21,15 @@ package org.activityinfo.ui.client.util;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.form.FormField;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 1/27/14.
@@ -128,11 +133,41 @@ public class GwtUtil {
         if (descendant != null) {
             if (descendant.getClassName().contains("bs ")) {
                 return descendant;
-            } else if (descendant.getParentElement() != null)  {
+            } else if (descendant.getParentElement() != null) {
                 return getBsContainer(DOM.asOld(descendant.getParentElement()));
             }
             return descendant;
         }
         return null;
+    }
+
+    public static void addTooltipToOptions(Element containerElement, int maxCharacters, List<FormField> fields) {
+        NodeList<Element> elements = containerElement.getElementsByTagName("option");
+        for (int i = 0; i < elements.getLength(); i++) {
+            Element item = elements.getItem(i);
+
+            String innerText = item.getInnerText();
+            item.setTitle(innerText);
+
+            if (innerText.length() > maxCharacters) {
+                innerText = innerText.substring(0, maxCharacters) + "...";
+
+                String code = getCodeById(fields, item.getAttribute("value"));
+                if (!Strings.isNullOrEmpty(code)) {
+                    innerText = code + " - "+ innerText;
+                }
+
+                item.setInnerText(innerText);
+            }
+        }
+    }
+
+    private static String getCodeById(List<FormField> fields, String value) {
+        for (FormField field : fields) {
+            if (field.getId().asString().equals(value)) {
+                return field.getCode();
+            }
+        }
+        return "";
     }
 }

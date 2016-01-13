@@ -37,6 +37,108 @@ def healthCheck() {
     }
 }
 
+task appengineExplodeDevMode(type: Copy) {
+    group = "Google App Engine"
+    description = "Creates a partial, exploded web app layout for GWT Dev Mode"
+    
+    // In order to run (super)dev mode, we need ONLY the part of the
+    // web app required for the server side, which includes
+    // compiled Java classes, resources, and server-side libraries
+    
+    dependsOn compileJava
+    from("$projectDir/src/main/webapp")
+    from(configurations.runtime) {
+        into "WEB-INF/lib"
+    }
+    from(sourceSets.main.output) {
+        into "WEB-INF/classes"
+    }
+    into "$buildDir/explodedDevMode"
+}
+
+
+task appengineDevMode(type: JavaExec) {
+    dependsOn appengineDownloadSdk
+    dependsOn appengineExplodeDevMode
+
+    main = 'com.google.gwt.dev.DevMode'
+    
+    // Java sources first, so that changes get picked up on refresh
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath project(":i18n").sourceSets.main.java.srcDirs
+    classpath project(":i18n").sourceSets.main.resources.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+
+
+    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
+    args '-war', "${buildDir}/explodedDevMode"
+    args '-startupUrl', 'login'
+    args '-port', devServerPort
+    args 'org.activityinfo.ui.ActivityInfoFFTest'
+
+    doFirst {
+        // The SDK root is only available after appengineDownloadSdk runs
+        def sdkRoot = System.getProperty('appengine.sdk.root')
+        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
+        
+        // Write the application configuration pointing to the development database
+        writeConfiguration mysql.localDev
+        jvmArgs "-Dactivityinfo.config=${configFile}"
+        jvmArgs "-Xdebug"
+        jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+    }
+}
+
+
+task appengineDevMode3(type: JavaExec) {
+    dependsOn appengineDownloadSdk
+    dependsOn appengineExplodeDevMode
+
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Java sources first, so that changes get picked up on refresh
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    for(subProject in [':i18n', ':ui:app', ':ui:style', ':ui:icons']) {
+        classpath project(subProject).sourceSets.main.java.srcDirs
+        classpath project(subProject).sourceSets.main.resources.srcDirs
+    }
+    classpath project(':ui:style').task('grunt_build').outputs.files
+    
+    // Compiled java classes and libraries second
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
+    args '-war', "${buildDir}/explodedDevMode"
+    args '-startupUrl', 'app'
+    args '-port', devServerPort
+    args 'org.activityinfo.ui.App'
+
+    doFirst {
+        // The SDK root is only available after appengineDownloadSdk runs
+        def sdkRoot = System.getProperty('appengine.sdk.root')
+        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+        classpath project(':ui:app').configurations.getByName('gwt').files
+        classpath project(':ui:style').configurations.getByName('gwt').files
+
+        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
+
+        // Write the application configuration pointing to the development database
+        writeConfiguration mysql.localDev
+        jvmArgs "-Dactivityinfo.config=${configFile}"
+        jvmArgs "-Xdebug"
+        jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+    }
+}
+
 appengineRun {
     ext.database = mysql.localDev
     
@@ -59,7 +161,7 @@ task appengineRunAT(type: RunTask) {
     group = "Google App Engine"
     description = "Runs a local AppEngine Development Server for Acceptance Testing"
 
-    dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
+    dependsOn 'appengineExplodeApp', 'setupDatabaseAT', 'classes', 'compileGwt'
     ext.database = mysql.localAT
 }
 
@@ -67,6 +169,7 @@ task appengineStartInstrumentedAT(type: RunTask) {
     group = "Google App Engine"
     description = "Starts a local AppEngine Dev Server instrumented for measuring test coverage"
 
+    dependsOn 'classes', 'compileGwt'
     dependsOn 'setupDatabaseAT'
     dependsOn 'appengineExplodeInstrumentedApp'
 
@@ -81,6 +184,11 @@ task appengineStartInstrumentedAT(type: RunTask) {
         logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
 
         jvmFlags.add("-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}")
+        
+        // Apparently between the Jacoco instrumentation adds significantly more pressure on
+        // the Permgen space. Set a high maximum to avoid the case that the dev server crashes
+        // during the tests
+        jvmFlags.add("-XX:MaxPermSize=2048m")
     }
 }
 

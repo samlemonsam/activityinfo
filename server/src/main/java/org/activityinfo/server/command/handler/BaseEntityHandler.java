@@ -25,6 +25,7 @@ package org.activityinfo.server.command.handler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.inject.Injector;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
@@ -32,11 +33,14 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.service.blob.BlobFieldStorageService;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static org.activityinfo.model.util.StringUtil.truncate;
 
 /**
  * Provides functionality common to CreateEntityHandler and UpdateEntityHandler
@@ -49,16 +53,16 @@ public class BaseEntityHandler {
     private final PermissionOracle permissionsOracle;
 
 
-    public BaseEntityHandler(EntityManager em) {
+    public BaseEntityHandler(EntityManager em, Injector injector) {
         this.em = em;
-        this.permissionsOracle = new PermissionOracle(Providers.of(em));
+        this.permissionsOracle = new PermissionOracle(Providers.of(em), injector.getInstance(BlobFieldStorageService.class));
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {
         PropertyMap changes = new PropertyMap(changeMap);
         
         if (changes.containsKey("name")) {
-            indicator.setName(trim(changes.get("name")));
+            indicator.setName(trimAndTruncate(changes.get("name")));
         }
 
         if (changes.containsKey("type")) {
@@ -70,15 +74,20 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("expression")) {
-            indicator.setExpression(trim(changes.get("expression")));
+            indicator.setExpression(trimAndTruncate(changes.get("expression")));
         }
 
-        if (changes.containsKey("skipExpression")) {
-            indicator.setSkipExpression(trim(changes.get("skipExpression")));
+        if (changes.containsKey("relevanceExpression")) {
+            indicator.setRelevanceExpression(trimAndTruncate(changes.get("relevanceExpression")));
         }
 
         if (changes.containsKey("nameInExpression")) {
-            indicator.setNameInExpression(trim(changes.get("nameInExpression")));
+            indicator.setNameInExpression(trimAndTruncate(changes.get("nameInExpression")));
+        }
+        
+        // Allow "code" as an alias from the JSON API
+        if (changes.containsKey("code")) {
+            indicator.setNameInExpression(trimAndTruncate(changes.get("code")));
         }
 
         if (changes.containsKey("calculatedAutomatically")) {
@@ -90,19 +99,19 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("category")) {
-            indicator.setCategory(trim(changes.get("category")));
+            indicator.setCategory(trimAndTruncate(changes.get("category")));
         }
 
         if (changes.containsKey("listHeader")) {
-            indicator.setListHeader(trim(changes.get("listHeader")));
+            indicator.setListHeader(trimAndTruncate(changes.get("listHeader")));
         }
 
         if (changes.containsKey("description")) {
-            indicator.setDescription(trim(changes.get("description")));
+            indicator.setDescription(trimAndTruncate(changes.get("description")));
         }
 
         if (changes.containsKey("units")) {
-            indicator.setUnits(trim(changes.get("units")));
+            indicator.setUnits(trimAndTruncate(changes.get("units")));
         }
 
         if (changes.containsKey("sortOrder")) {
@@ -135,7 +144,7 @@ public class BaseEntityHandler {
 
     protected void updateAttributeProperties(Map<String, Object> changes, Attribute attribute) {
         if (changes.containsKey("name")) {
-            attribute.setName(trim(changes.get("name")));
+            attribute.setName(trimAndTruncate(changes.get("name")));
         }
         if (changes.containsKey("sortOrder")) {
             attribute.setSortOrder((Integer) changes.get("sortOrder"));
@@ -145,7 +154,7 @@ public class BaseEntityHandler {
 
     protected void updateAttributeGroupProperties(AttributeGroup group, Map<String, Object> changes) {
         if (changes.containsKey("name")) {
-            group.setName(trim(changes.get("name")));
+            group.setName(trimAndTruncate(changes.get("name")));
         }
 
         if (changes.containsKey("multipleAllowed")) {
@@ -167,7 +176,7 @@ public class BaseEntityHandler {
 
     protected void updateLockedPeriodProperties(LockedPeriod lockedPeriod, Map<String, Object> changes) {
         if (changes.containsKey("name")) {
-            lockedPeriod.setName(trim(changes.get("name")));
+            lockedPeriod.setName(trimAndTruncate(changes.get("name")));
         }
         if (changes.containsKey("toDate")) {
             lockedPeriod.setToDate((LocalDate) changes.get("toDate"));
@@ -183,10 +192,10 @@ public class BaseEntityHandler {
         entityManager().merge(lockedPeriod);
     }
 
-    private String trim(Object value) {
+    private String trimAndTruncate(Object value) {
         if (value instanceof String) {
             String stringValue = (String)value;
-            return Strings.emptyToNull(stringValue.trim());
+            return truncate(Strings.emptyToNull(stringValue.trim()));
         } else {
             return null;
         }
@@ -194,15 +203,15 @@ public class BaseEntityHandler {
 
     protected void updateTargetProperties(Target target, Map<String, Object> changes) {
         if (changes.containsKey("name")) {
-            target.setName(trim(changes.get("name")));
+            target.setName(trimAndTruncate(changes.get("name")));
         }
 
-        if (changes.containsKey("date1")) {
-            target.setDate1((Date) changes.get("date1"));
+        if (changes.containsKey("fromDate")) {
+            target.setDate1(((LocalDate) changes.get("fromDate")).atMidnightInMyTimezone());
         }
 
-        if (changes.containsKey("date2")) {
-            target.setDate2((Date) changes.get("date2"));
+        if (changes.containsKey("toDate")) {
+            target.setDate2(((LocalDate) changes.get("toDate")).atMidnightInMyTimezone());
         }
 
         if (changes.containsKey("projectId")) {

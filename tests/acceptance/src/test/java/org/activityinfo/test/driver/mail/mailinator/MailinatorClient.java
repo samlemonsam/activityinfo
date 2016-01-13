@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Fetches emails via the mailinator API.
@@ -34,11 +36,14 @@ public class MailinatorClient implements EmailDriver {
 
     private static final String SENDER_EMAIL = "notifications@activityinfo.org";
 
+    public static final Logger LOGGER = Logger.getLogger(MailinatorClient.class.getName());
 
     private static final ConfigProperty API_KEY = new ConfigProperty("mailinatorApiKey", 
             "API Key required to access mailinator API");
 
     public static final int MAILINATOR_API_RETRY_LIMIT = 10;
+
+    public static final String MAILINATOR_URI = "https://api.mailinator.com/api";
 
     private final String key;
     private ObjectMapper objectMapper;
@@ -55,7 +60,7 @@ public class MailinatorClient implements EmailDriver {
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
         Client client = Client.create(clientConfig);
         objectMapper = new ObjectMapper();
-        root = client.resource("https://api.mailinator.com/api");
+        root = client.resource(MAILINATOR_URI);
     }
     
     @Override
@@ -85,51 +90,80 @@ public class MailinatorClient implements EmailDriver {
 
             // in case client handler fail to retrieve the results retry it
 
+            int delay = retries * 1000;
+            LOGGER.info(String.format("queryInbox - Delay: %sms, retry: %s", delay, retries));
+
             try { // sleep, accessing the free mailinator API too rapidly is not permitted
-                Thread.sleep(1000);
+                Thread.sleep(delay);
             } catch (InterruptedException e1) {
                 throw new AssertionError(e1);
             }
 
             if (retries > MAILINATOR_API_RETRY_LIMIT) {
-                throw new AssertionError("Failed to connect to mailinator API, after " + MAILINATOR_API_RETRY_LIMIT + " retries.");
+                throw new AssertionError("Failed to query inbox from mailinator API, after " + MAILINATOR_API_RETRY_LIMIT + " retries. "
+                        + String.format("%s/inbox?token=%s&to=%s", MAILINATOR_URI, key, account.nameFromEmail()));
             }
 
-            System.out.println(e.getMessage());
+            LOGGER.info(e.getMessage());
 
             retries++;
             return queryInbox(account, retries);
         }
     }
     
-    public Message queryMessage(MessageHeader messageHeader) throws IOException {
-        
-        RATE_LIMITER.acquire();
-        
-        String json = root
-                .path("email")
-                .queryParam("token", key)
-                .queryParam("msgid", messageHeader.getId())
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .get(String.class);
-        
-        System.out.println(json);
+    public Message queryMessage(MessageHeader messageHeader, int retries) throws IOException {
+        try {
+            RATE_LIMITER.acquire();
 
-        Message data = objectMapper.readValue(json, MessageResult.class).getData();
-        Preconditions.checkNotNull(data);
-        return data;
+            LOGGER.info(String.format("Quering %s/email?token=%s&msgid=%s ...", MAILINATOR_URI, key, messageHeader.getId()));
+
+            String json = root
+                    .path("email")
+                    .queryParam("token", key)
+                    .queryParam("msgid", messageHeader.getId())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .get(String.class);
+
+            LOGGER.info(json);
+
+            Message data = objectMapper.readValue(json, MessageResult.class).getData();
+            Preconditions.checkNotNull(data);
+            return data;
+        } catch (Exception e) {
+
+            int delay = retries * 1000;
+            LOGGER.info(String.format("queryMessage - Delay: %sms, retry: %s", delay, retries));
+
+            try { // sleep, accessing the free mailinator API too rapidly is not permitted
+                Thread.sleep(delay);
+            } catch (InterruptedException e1) {
+                throw new AssertionError(e1);
+            }
+
+            if (retries > MAILINATOR_API_RETRY_LIMIT) {
+                throw new AssertionError("Failed to query message from mailinator API, after " + MAILINATOR_API_RETRY_LIMIT + " retries.");
+            }
+
+            LOGGER.info(e.getMessage());
+
+            retries++;
+            return queryMessage(messageHeader, retries);
+        }
     }
 
 
     @Override
     public NotificationEmail lastNotificationFor(UserAccount account) throws IOException {
-
-        List<MessageHeader> messages = queryInbox(account);
-        for (MessageHeader header : messages) {
-            if (header.getFrom().equals(SENDER_EMAIL)) {
-                Message message = queryMessage(header);
-                return new NotificationEmail(header.getSubject(), message.getPlainText());
+        try {
+            List<MessageHeader> messages = queryInbox(account);
+            for (MessageHeader header : messages) {
+                if (header.getFrom().equals(SENDER_EMAIL)) {
+                    Message message = queryMessage(header, 1);
+                    return new NotificationEmail(header.getSubject(), message.getPlainText());
+                }
             }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to fetch email from mailinator. " + e.getMessage(), e);
         }
         throw new AssertionError("No emails from " + SENDER_EMAIL + " found.");
     }

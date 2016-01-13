@@ -42,8 +42,10 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author yuriyz on 11/26/2014.
@@ -143,14 +145,13 @@ public class CloneDatabaseTest extends CommandTestCase2 {
         assertFormClassesCloned(sourceDb, targetDb);
 
         if (cloneDatabase.isCopyPartners()) {
-            for (PartnerDTO sourceItem : sourceDb.getPartners()) {
-                String name = sourceItem.get("name");
+            for (PartnerDTO sourcePartner : sourceDb.getPartners()) {
+                String name = sourcePartner.get("name");
                 if (name.equals("Default")) {
                     continue;
                 }
-                PartnerDTO targetTarget = entityByName(targetDb.getPartners(), name);
-
-                assertProperties(sourceItem, targetTarget, "name", "fullName");
+                PartnerDTO targetPartner = entityByName(targetDb.getPartners(), name);
+                assertThat("partner " + name + " has same id", sourcePartner.getId(), equalTo(targetPartner.getId()));
             }
         }
         if (cloneDatabase.isCopyUserPermissions()) {

@@ -20,19 +20,27 @@ public class InstanceQuery {
     private int offset;
     private int maxCount;
 
+    // table filter : used to fetch unique filter items
+    private FieldPath filterFieldPath;
+
     public InstanceQuery() {
     }
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria) {
-        this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT);
+        this(fieldPaths, criteria, 0, FALLBACK_MAX_COUNT, null);
     }
 
     public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount) {
+        this(fieldPaths, criteria, offset, maxCount, null);
+    }
+
+    public InstanceQuery(List<FieldPath> fieldPaths, Criteria criteria, int offset, int maxCount, FieldPath filterFieldPath) {
         assert criteria != null;
         this.criteria = criteria;
         this.fieldPaths = fieldPaths;
         this.offset = offset;
         this.maxCount = maxCount;
+        this.filterFieldPath = filterFieldPath;
     }
 
     public List<FieldPath> getFieldPaths() {
@@ -51,13 +59,24 @@ public class InstanceQuery {
         return criteria;
     }
 
-    public InstanceQuery setFieldPaths(List<FieldPath> fieldPaths) {
-        this.fieldPaths = fieldPaths;
-        return this;
+    public void setCriteria(Criteria criteria) {
+        this.criteria = criteria;
     }
 
-    public InstanceQuery setCriteria(Criteria criteria) {
-        this.criteria = criteria;
+    public FieldPath getFilterFieldPath() {
+        return filterFieldPath;
+    }
+
+    public boolean isFilterQuery() {
+        return filterFieldPath != null;
+    }
+
+    public InstanceQuery setFilterFieldPath(FieldPath filterFieldPath) {
+        this.filterFieldPath = filterFieldPath;
+        return this;
+    }
+    public InstanceQuery setFieldPaths(List<FieldPath> fieldPaths) {
+        this.fieldPaths = fieldPaths;
         return this;
     }
 

@@ -37,6 +37,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetPartnersDimension;
@@ -59,7 +60,6 @@ public class PartnerFilterPanel extends ContentPanel implements FilterPanel {
     private final Dispatcher service;
     private FilterToolBar filterToolBar;
     private Filter baseFilter = new Filter();
-    ;
 
     private Filter value = new Filter();
 
@@ -130,31 +130,32 @@ public class PartnerFilterPanel extends ContentPanel implements FilterPanel {
         final Filter filter = new Filter(rawFilter);
         filter.clearRestrictions(DimensionType.Partner);
 
-        if (baseFilter == null || !baseFilter.equals(filter)) {
-            service.execute(new GetPartnersDimension(filter), new AsyncCallback<PartnerResult>() {
+        // force to refresh on site crud
+//        if (baseFilter == null || !baseFilter.equals(filter)) {
+        service.execute(new GetPartnersDimension(filter), new AsyncCallback<PartnerResult>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
+            @Override
+            public void onFailure(Throwable caught) {
+                Log.error(caught.getMessage(), caught);
+            }
 
-                }
+            @Override
+            public void onSuccess(PartnerResult result) {
+                List<Integer> ids = getSelectedIds();
+                store.removeAll();
+                store.add(result.getData());
+                applyInternalValue();
 
-                @Override
-                public void onSuccess(PartnerResult result) {
-                    List<Integer> ids = getSelectedIds();
-                    store.removeAll();
-                    store.add(result.getData());
-                    applyInternalValue();
-
-                    for (PartnerDTO partner : store.getModels()) {
-                        if (ids.contains(partner.getId())) {
-                            listView.setChecked(partner, true);
-                        }
+                for (PartnerDTO partner : store.getModels()) {
+                    if (ids.contains(partner.getId())) {
+                        listView.setChecked(partner, true);
                     }
-
-                    baseFilter = filter;
                 }
-            });
-        }
+
+                baseFilter = filter;
+            }
+        });
+//        }
     }
 
     protected void clearFilter() {

@@ -22,24 +22,11 @@
     </f:FormGroup>
 
     <!-- Style: form designer (new) -->
-    <f:FormGroup label="{i18n.style}" columnLabelWidth="2">
-      <a:RadioButton ui:field="formDesigner" name="group" width="100%" checked="true">
-        <ui:text from='{i18n.newFormAsFormDesigner}'/>
-        <span class="help-block"><ui:text from='{i18n.recommendedMode}'/></span>
-      </a:RadioButton>
-    </f:FormGroup>
-
-    <!-- Style: classic (old) -->
     <f:FormGroup columnLabelWidth="2">
-      <a:RadioButton ui:field="classic" name="group" width="100%">
-        <ui:text from='{i18n.newFormAsClassic}'/>
-        <span class="help-block"><ui:text from='{i18n.newFormAsClassicHelpBlock}'/></span>
-      </a:RadioButton>
-    </f:FormGroup>
-
-    <!-- Link that explains the difference between classic and modern view -->
-    <f:FormGroup columnLabelWidth="2">
-      <g:Anchor ui:field="explanationLink" target="_blank"><ui:text from='{i18n.showMeTheDifference}'/></g:Anchor>
+      <a:CheckBox ui:field="newFormLayout" name="group" width="100%" checked="false">
+        <ui:text from='{i18n.tryNewFormLayout}'/>
+      </a:CheckBox>
+      <g:Anchor styleName="help-block" ui:field="explanationLink" target="_blank"><ui:text from='{i18n.whatsThis}'/></g:Anchor>
     </f:FormGroup>
 
   </g:HTMLPanel>

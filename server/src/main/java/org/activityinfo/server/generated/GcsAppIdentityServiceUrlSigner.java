@@ -9,11 +9,16 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 public class GcsAppIdentityServiceUrlSigner  {
 
-    private static final int EXPIRATION_TIME = 5;
+    /**
+     * Expire the link after 14 days. This is a reasonable window of time to allow viewing of content,
+     * particuarly that generated for emails.
+     */
+    private static final int EXPIRATION_DAYS = 14;
+
     private static final String BASE_URL = "https://storage.googleapis.com";
 
     private final AppIdentityService identityService = AppIdentityServiceFactory.getAppIdentityService();
@@ -32,10 +37,7 @@ public class GcsAppIdentityServiceUrlSigner  {
     }
 
     private static long expiration() {
-        final long unitMil = 1000l;
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, EXPIRATION_TIME);
-        return calendar.getTimeInMillis() / unitMil;
+        return System.currentTimeMillis() + TimeUnit.DAYS.toMillis(EXPIRATION_DAYS);
     }
 
     private String stringToSign(final long expiration, String path, String httpVerb) {

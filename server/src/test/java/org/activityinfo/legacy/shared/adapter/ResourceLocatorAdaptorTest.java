@@ -33,6 +33,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,7 @@ import static org.activityinfo.core.shared.criteria.ParentCriteria.isChildOf;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdminFieldId;
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
@@ -198,6 +199,32 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getAdminEntity(2).getName(), equalTo("Irumu"));
         assertThat(location.getLatitude(), equalTo(-1d));
         assertThat(location.getLongitude(), equalTo(13d));
+
+        // remove location
+        assertResolves(resourceLocator.remove(instance.getId()));
+
+        // check whether location is removed
+        result = execute(query);
+        assertThat(result.getData(), IsEmptyCollection.empty());
+    }
+
+    @Test
+    public void siteDeletion() {
+
+        InstanceQuery query = new InstanceQuery(asList(new FieldPath(getNameFieldId(VILLAGE_CLASS))),
+                new ClassCriteria(NFI_DIST_FORM_CLASS));
+
+        List<Projection> projections = assertResolves(resourceLocator.query(query));
+        assertThat(projections.size(), equalTo(3));
+
+        final Projection firstProjection = projections.get(0);
+
+        assertResolves(resourceLocator.remove(firstProjection.getRootInstanceId()));
+
+        projections = assertResolves(resourceLocator.query(query));
+        assertThat(projections.size(), equalTo(2)); // size is reduced
+        assertThat(projections, not(hasItem(firstProjection)));
+
     }
 
     @Test
@@ -358,62 +385,6 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         List<FormInstance> levels = assertResolves(adapter.queryInstances(isChildOf(rdc.getId())));
         System.out.println(levels);
 
-    }
-
-    @Test
-    public void persistFormClass() {
-        FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setOwnerId(ResourceId.generateId());
-        FormField formField = formClass.addField(ResourceId.generateId());
-        formField.setLabel("label1");
-        formField.setType(TextType.INSTANCE);
-
-        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
-
-        assertResolves(locator.persist(formClass));
-
-        formField.setLabel("label2"); // update and persist second time
-        assertResolves(locator.persist(formClass));
-
-        FormClass resolvedFormClass = assertResolves(locator.getFormClass(formClass.getId()));
-        assertEquals(resolvedFormClass.getId(), formClass.getId());
-        assertEquals(resolvedFormClass.getOwnerId(), formClass.getOwnerId());
-
-        FormField resolvedField = resolvedFormClass.getField(formField.getId());
-        assertNotNull(resolvedField);
-        assertEquals(resolvedField.getLabel(), formField.getLabel());
-
-    }
-
-    @Test
-    public void persistFormInstance() {
-        ResourceId classId = ResourceId.valueOf("a0000000001"); // classId of activityId = 1
-        ResourceId ownerId = ResourceId.valueOf("a0000000002"); // classId of activityId = 2
-
-        FormInstance instance = new FormInstance(ResourceId.generateId(), classId);
-        instance.set(classId, "instanceString");
-        instance.setOwnerId(ownerId);
-
-        assertResolves(resourceLocator.persist(instance));
-
-        IdCriteria criteria = new IdCriteria(instance.getId())
-                .setMappedToLegacyModel(false);
-        List<FormInstance> serverInstance = assertResolves(resourceLocator.queryInstances(criteria));
-
-        assertEquals(instance.get(classId), serverInstance.get(0).get(classId));
-
-        // update and fetch again
-        instance.set(classId, "instanceString1");
-
-        assertResolves(resourceLocator.persist(instance));
-
-        serverInstance = assertResolves(resourceLocator.queryInstances(criteria));
-
-        assertEquals(instance.get(classId), serverInstance.get(0).get(classId));
-
-        // fetch by owner
-        serverInstance = assertResolves(resourceLocator.queryInstances(ParentCriteria.isChildOf(ownerId)));
-        assertEquals(instance.get(classId), serverInstance.get(0).get(classId));
     }
 
 }

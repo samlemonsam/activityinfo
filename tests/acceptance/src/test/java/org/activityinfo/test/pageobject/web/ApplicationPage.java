@@ -26,9 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.containingText;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
+import static org.activityinfo.test.pageobject.api.XPathBuilder.*;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 
 /**
@@ -95,7 +93,7 @@ public class ApplicationPage {
 
     public void assertOfflineModeLoads(int timeout, TimeUnit timeoutUnits) {
         page.wait(timeout, timeoutUnits).until(new Predicate<WebDriver>() {
-            
+
             private String lastStatus = "";
 
             @Override
@@ -111,7 +109,7 @@ public class ApplicationPage {
 
                     } else if (element.getText().contains("%")) {
                         String status = element.getText();
-                        if(!lastStatus.equals(status)) {
+                        if (!lastStatus.equals(status)) {
                             LOGGER.info("Offline Status: " + status);
                             lastStatus = status;
                         }
@@ -120,6 +118,16 @@ public class ApplicationPage {
                 return false;
             }
         });
+    }
+
+
+    public Dashboard navigateToDashboard() {
+        try {
+            page.find().div(containingText(I18N.CONSTANTS.dashboard())).clickWhenReady();
+        } catch(Exception ignored) {
+        }
+
+        return new Dashboard(container());
     }
     
     public DataEntryTab navigateToDataEntryTab() {
@@ -174,6 +182,8 @@ public class ApplicationPage {
         });
         return new FormDesignerPage(page);
     }
+
+
     
     public ReportsTab navigateToReportsTab() {
         FluentElement container = container();

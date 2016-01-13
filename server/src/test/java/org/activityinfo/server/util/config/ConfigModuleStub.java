@@ -16,6 +16,7 @@ public class ConfigModuleStub extends AbstractModule {
     @Provides
     public DeploymentConfiguration provideDeploymentConfig() {
         Properties properties = new Properties();
+        properties.setProperty(DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME, "app_default_bucket");
         return new DeploymentConfiguration(properties);
     }
 

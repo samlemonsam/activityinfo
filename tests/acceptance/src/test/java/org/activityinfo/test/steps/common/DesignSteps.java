@@ -21,15 +21,24 @@ package org.activityinfo.test.steps.common;
  * #L%
  */
 
+import com.google.common.base.Optional;
+import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
+import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
+import org.openqa.selenium.support.ui.Select;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author yuriyz on 05/12/2015.
@@ -75,12 +84,39 @@ public class DesignSteps {
 
     @When("^I open the table for \"([^\"]*)\" in database \"([^\"]*)\"$")
     public void I_open_the_table_for_in_database(String formName, String database) throws Throwable {
-        driver.openFormTable(database, formName);
+        driver.openFormTable(driver.getAliasTable().getAlias(database), driver.getAliasTable().getAlias(formName));
     }
 
     @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\"$")
     public void form_in_database_has_field_represented_by(String formName, String databaseName, String fieldName, String controlType) throws Throwable {
-        driver.assertFieldVisible(formName, databaseName, fieldName, controlType);
+        assertFieldControl(formName, databaseName, fieldName, controlType, Optional.<String>absent());
+    }
+
+    @Then("^form \"([^\"]*)\" in database \"([^\"]*)\" has \"([^\"]*)\" field represented by \"([^\"]*)\" with value \"([^\"]*)\"$")
+    public void form_in_database_has_field_represented_by_with_value(String formName, String databaseName, String fieldName, String controlType, String selectedValue) throws Throwable {
+        assertFieldControl(formName, databaseName, fieldName, controlType, Optional.fromNullable(selectedValue));
+    }
+
+    private void assertFieldControl(String formName, String databaseName, String fieldName, String controlType, Optional<String> selectedValue) {
+        if (selectedValue.isPresent()) {
+            selectedValue = Optional.of(driver.getAliasTable().getAlias(selectedValue.get()));
+        }
+
+        Form.FormItem formField = driver.getFormField(formName, databaseName, fieldName, selectedValue);
+
+        switch (ControlType.fromValue(controlType)) {
+            case SUGGEST_BOX:
+                assertTrue(formField.isSuggestBox());
+                break;
+            case DROP_DOWN:
+                assertTrue(formField.isDropDown());
+
+                if (selectedValue.isPresent()) {
+                    Select select = new Select(formField.getElement().find().select().first().element());
+                    assertEquals(select.getFirstSelectedOption().getAttribute("text"), selectedValue.get());
+                }
+                break;
+        }
     }
 
     @When("^I add a lock \"([^\"]*)\" on the database \"([^\"]*)\" from \"([^\"]*)\" to \"([^\"]*)\"$")
@@ -120,7 +156,8 @@ public class DesignSteps {
 
     @Then("^\"([^\"]*)\" designer field is mandatory$")
     public void designer_field_is_mandatory(String fieldLabel) throws Throwable {
-        driver.assertDesignerFieldMandatory(fieldLabel);
+        assertTrue("Designer field with label " + fieldLabel + " is not mandatory",
+                driver.getDesignerField(fieldLabel).isMandatory());
     }
 
     @Then("^change designer field \"([^\"]*)\" with:$")
@@ -137,8 +174,33 @@ public class DesignSteps {
         }
     }
 
-    @Then("^share report dialog should not be empty$")
-    public void share_report_dialog_should_not_be_empty() throws Throwable {
-        driver.shareReportIsEmpty(false);
+    @And("^I add \"([^\"]*)\" to database \"([^\"]*)\" with partner \"([^\"]*)\" and permissions$")
+    public void I_add_to_database_with_partner_and_permissions(String userEmail, String databaseName, String partner, List<FieldValue> permissions) throws Throwable {
+        driver.addUserToDatabase(userEmail, databaseName, partner, permissions);
+    }
+
+    @And("^drop field:$")
+    public void drop_field(DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        Map<String, String> fieldProperties = TableDataParser.asMap(dataTable);
+
+        for (Map.Entry<String, String> entry : fieldProperties.entrySet()) {
+            page.fields().dropNewField(entry.getValue());
+            page.selectFieldByLabel(entry.getValue());
+
+            String label = driver.getAliasTable().createAlias(entry.getKey());
+            page.properties().setLabel(label);
+        }
+
+        page.save();
+
+    }
+
+    @And("^set relevance for \"([^\"]*)\" field:$")
+    public void set_relevance_for_field(String fieldName, DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+        page.setRelevance(driver.getAliasTable().getAlias(fieldName), dataTable, driver.getAliasTable());
+        page.save();
     }
 }

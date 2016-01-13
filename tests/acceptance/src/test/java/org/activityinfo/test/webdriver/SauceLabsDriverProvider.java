@@ -6,10 +6,7 @@ import com.saucelabs.saucerest.SauceREST;
 import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.config.ConfigurationError;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.BrowserType;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.*;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
@@ -100,6 +97,9 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
     public WebDriver start(String name, BrowserProfile profile) {
 
         DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setCapability("name", name);
+        capabilities.setCapability("build", System.getenv("BUILD_TAG"));
+            
         if(!Strings.isNullOrEmpty(System.getenv("SELENIUM_BROWSER"))) {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, System.getenv("SELENIUM_BROWSER"));
             capabilities.setCapability(CapabilityType.VERSION, System.getenv("SELENIUM_VERSION"));
@@ -113,7 +113,6 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
         } else {
             capabilities.setCapability(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
-            capabilities.setCapability("name", name);
         }
 
         if(SAUCE_FAST.isPresent()) {
@@ -123,7 +122,9 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
         RemoteWebDriver remoteWebDriver = new RemoteWebDriver(getWebDriverServer(), capabilities);
         System.out.println(format("SauceOnDemandSessionID=%s job-name=%s", remoteWebDriver.getSessionId(), name));
-        
+
+        remoteWebDriver.setFileDetector(new LocalFileDetector());
+
         return remoteWebDriver;
     }
 

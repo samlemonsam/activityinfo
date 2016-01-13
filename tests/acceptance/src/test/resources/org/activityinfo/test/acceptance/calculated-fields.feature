@@ -8,7 +8,7 @@ Feature: Calculated fields
     And I have created a form named "NFI Distribution"
 
   @AI-991
-  Scenario: Calculating Percentages.
+  Scenario: Calculating Percentages
     Given I have created a quantity field "a" in "NFI Distribution" with code "a"
     And I have created a quantity field "b" in "NFI Distribution" with code "b"
     And I have created a calculated field "c" in "NFI Distribution" with expression "{a}/{b}"
@@ -30,7 +30,7 @@ Feature: Calculated fields
     Then the submission's detail shows:
       | field              | value           |
       | a                  | 1               |
-      | c                  | ∞              |
+      | c                  | ∞               |
     When I update the submission with:
       | field              | value           |
       | a                  | 0               |
@@ -40,7 +40,7 @@ Feature: Calculated fields
       | c                  | NaN             |
 
   @AI-1041
-  Scenario: Pivot calculated indicator.
+  Scenario: Pivot calculated indicator
     Given I have created a quantity field "total" in "NFI Distribution" with code "total"
     And I have created a quantity field "withHelmet" in "NFI Distribution" with code "helmet"
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({helmet}/{total})*100" with aggregation "Average"
@@ -64,7 +64,7 @@ Feature: Calculated fields
       | percent          | 50    |
 
   @AI-1082
-  Scenario: Drill down on calculated indicator.
+  Scenario: Drill down on calculated indicator
     Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
     And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
     And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
@@ -106,7 +106,7 @@ Feature: Calculated fields
       | NRC      | RDC  | 2014-05-21 | | 450   |
 
   @AI-1082
-  Scenario: Calculated indicators pivoted by Partner.
+  Scenario: Calculated indicators pivoted by Partner
     Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
     And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
     And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
@@ -155,7 +155,7 @@ Feature: Calculated fields
       | End Date   | 2016-07-21 |
     Then aggregating the indicators percent by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
-      | NRC     | 700   | 20   | ∞   |
+      | NRC     | 700   | 20   | ∞    |
       | UPS     | 1,000 | 10   |      |
     Then aggregating the indicators plus by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
@@ -167,5 +167,5 @@ Feature: Calculated fields
       | UPS     | 210  | 60   |      |
     Then aggregating the indicators plus and percent by Partner and Year should yield:
       |         | 2014   | 2015 | 2016 |
-      | NRC     | 1,162  | 44   | ∞   |
+      | NRC     | 1,162  | 44   | ∞    |
       | UPS     | 1,110  | 65   |      |

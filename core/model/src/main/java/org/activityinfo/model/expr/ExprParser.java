@@ -7,6 +7,8 @@ import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
+import org.activityinfo.model.type.NullFieldType;
+import org.activityinfo.model.type.NullFieldValue;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,7 +17,8 @@ import java.util.Set;
 
 public class ExprParser {
 
-    private static final Set<String> INFIX_OPERATORS = Sets.newHashSet("+", "-", "*", "/", "&&", "||", "==", "!=" );
+    private static final Set<String> INFIX_OPERATORS = Sets.newHashSet(
+            "+", "-", "*", "/", "&&", "||", "==", "!=", "<", ">", ">=", "<=");
 
     private static final Set<String> PREFIX_OPERATORS = Sets.newHashSet("!" );
 
@@ -39,6 +42,9 @@ public class ExprParser {
     }
 
     public ExprNode parse() {
+        if(!lexer.hasNext()) {
+            return new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE);
+        }
         ExprNode expr = parseSimple();
         if (!lexer.hasNext()) {
             return expr;

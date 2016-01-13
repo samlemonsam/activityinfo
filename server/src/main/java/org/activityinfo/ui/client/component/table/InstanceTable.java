@@ -105,8 +105,13 @@ public class InstanceTable implements IsWidget {
         this.criteria = criteria;
     }
 
+    public Criteria getCriteria() {
+        return criteria;
+    }
+
     public void setColumns(List<FieldColumn> columns) {
         removeAllColumns();
+        dataLoader.reset();
         for (FieldColumn column : columns) {
             final FilterCellAction filterAction = new FilterCellAction(this, column);
             table.addColumn(column, new FilterHeader(column, filterAction));

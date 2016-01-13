@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -60,7 +61,7 @@ public class FormSection extends FormElement implements FormElementContainer {
         record.set("id", id.asString());
         record.set("label", label);
         record.set("type", "section");
-        record.set("elements", asRecordList(getElements()));
+        record.set("elements", Resources.asRecordList(getElements()));
         return record;
     }
 

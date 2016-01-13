@@ -6,9 +6,11 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -69,9 +71,10 @@ public class FieldColumn extends Column<Projection, String> {
             }
             return Joiner.on(", ").join(values);
 
+        } else if (fieldValue instanceof AttachmentValue && ((AttachmentValue) fieldValue).hasValues()) {
+            return I18N.CONSTANTS.present();
         } else if (fieldValue != null) {
             return fieldValue.toString();
-
         }
 
         return NON_BREAKING_SPACE;

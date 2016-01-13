@@ -3,6 +3,8 @@ package org.activityinfo.test.pageobject.web.entry;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 public class LocationDataEntryDriver implements DataEntryDriver {
     
     private final LocationDialog dialog;
@@ -58,5 +60,15 @@ public class LocationDataEntryDriver implements DataEntryDriver {
     @Override
     public void sendKeys(CharSequence keys) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> availableValues() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void close() {
+        dialog.close();
     }
 }

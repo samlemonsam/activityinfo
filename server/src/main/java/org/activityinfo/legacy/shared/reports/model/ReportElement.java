@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.reports.model;
  */
 
 import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.reports.content.Content;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -74,7 +75,7 @@ import java.util.Set;
  * @see org.activityinfo.legacy.shared.reports.content.Content
  * @see org.activityinfo.server.report.renderer.Renderer
  */
-public abstract class ReportElement<ContentT extends Content> implements Serializable {
+public abstract class ReportElement<ContentT extends Content> implements Serializable, CommandResult {
 
     private Filter filter = new Filter();
     private String title;

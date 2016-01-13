@@ -21,6 +21,10 @@ public class TestObject {
         }
     }
 
+    public void set(Property property) {
+        map.put(property.getKey(), property.getValue());
+    }
+
     /**
      * @return the id stored in the alias table for this object's {@code name}
      */

@@ -9,7 +9,6 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.test.driver.mail.EmailDriver;
 import org.activityinfo.test.driver.mail.NotificationEmail;
-import org.activityinfo.test.driver.mail.mailinator.MailinatorClient;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.ConfirmPage;
 import org.activityinfo.test.pageobject.web.LoginPage;

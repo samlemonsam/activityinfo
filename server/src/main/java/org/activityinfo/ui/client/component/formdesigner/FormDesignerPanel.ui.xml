@@ -71,9 +71,9 @@
           <br/>
           <div class="panel panel-default">
             <div class="panel-heading">
-              <b>
-                <ui:text from='{i18n.widgets}'/>
-              </b>
+              <h4>
+                <ui:text from='{i18n.fields}'/>
+              </h4>
             </div>
             <div class="panel-body">
               <palette:FieldPalette ui:field="fieldPalette" width="350px"/>

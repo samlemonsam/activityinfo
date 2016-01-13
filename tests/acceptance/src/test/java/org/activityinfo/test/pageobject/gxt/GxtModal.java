@@ -2,6 +2,7 @@ package org.activityinfo.test.pageobject.gxt;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.Form;
@@ -57,6 +58,10 @@ public class GxtModal extends ModalDialog {
         clickButton("Close");
     }
 
+    public void closeByWindowHeaderButton() {
+        windowElement.find().div(XPathBuilder.withClass("x-tool-close")).clickWhenReady();
+    }
+
     public void discardChanges() {
         clickButton("Discard Changes");
     }
@@ -67,7 +72,7 @@ public class GxtModal extends ModalDialog {
 
     @Override
     public void accept() {
-        accept("Save");
+        accept(I18N.CONSTANTS.save());
     }
 
     public void accept(String buttonName) {

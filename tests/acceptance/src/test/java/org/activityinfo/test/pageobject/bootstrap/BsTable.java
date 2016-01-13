@@ -25,13 +25,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.mysql.jdbc.StringUtils;
 import cucumber.api.DataTable;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
+import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -41,8 +41,10 @@ import org.openqa.selenium.internal.Locatable;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author yuriyz on 06/09/2015.
@@ -51,7 +53,8 @@ public class BsTable {
 
     public static enum Type {
         CELL_TABLE("cellTableCell", "cellTableOddRow", "cellTableEvenRow"),
-        GRID_TABLE("data-grid-cell", "data-grid-odd-row", "data-grid-even-row");
+        GRID_TABLE("data-grid-cell", "data-grid-odd-row", "data-grid-even-row"),
+        DATA_GRID_TABLE("data-grid-widget", "data-grid-odd-row", "data-grid-even-row");
 
         private final String tdClass;
         private final String trOddClass;
@@ -107,6 +110,10 @@ public class BsTable {
 
         public FluentElement getContainer() {
             return container;
+        }
+
+        public void select() {
+            container.clickWhenReady();
         }
     }
 
@@ -277,9 +284,9 @@ public class BsTable {
                 }
 
                 if (text.contains(",") && cellStr.contains(",")) { // check enum values
-                    List<String> deAliasedEnumValues = AliasTable.deAliasEnumValueSplittedByComma(text);
+                    List<String> deAliasedEnumValues = AliasTable.deAliasEnumValueSplitByComma(text);
                     if (!deAliasedEnumValues.isEmpty()) {
-                        deAliasedEnumValues.removeAll(StringUtils.split(cellStr, ",", true));
+                        deAliasedEnumValues.removeAll(asList(cellStr.split("\\s*,\\s*")));
                         if (deAliasedEnumValues.isEmpty()) { // all enum values are matched
                             cellMatched = true;
                             break;
@@ -307,6 +314,14 @@ public class BsTable {
         dialog.hideBuiltInColumns();
         dialog.ok();
         dialog.getModal().waitUntilClosed();
+        return this;
+    }
+
+    public BsTable removeSelectedRow() {
+        buttonClick(I18N.CONSTANTS.remove());
+        BsModal.find(container.root()).
+                click(I18N.CONSTANTS.delete()).
+                waitUntilClosed();
         return this;
     }
 
@@ -343,5 +358,52 @@ public class BsTable {
             }
         });
         return this;
+    }
+
+    public BsTable selectFirstRow() {
+        rows().iterator().next().getContainer().clickWhenReady();
+        return this;
+    }
+
+    public static final int LOAD_COUNT = 200;
+
+    public static void waitUntilRowsLoaded(final TablePage tablePage, final int expectedRows) {
+
+        BsTable table = tablePage.table();
+
+        // start scrolling down and check that rows are loaded during scrolling
+        for (int i = 1; i < 11; i++) {
+            final int index = i;
+
+            table.scrollToTheBottom();
+
+            table.getContainer().waitUntil(new Predicate<WebDriver>() {
+                @Override
+                public boolean apply(WebDriver input) {
+
+                    final BsTable table = tablePage.table(); // not clear why but we may get StaleReferenceException here sometimes, refresh reference
+
+                    // we don't really use scroll but just back end forth to emulate it. Need something better here
+                    table.scrollToTheTop();
+                    table.scrollToTheBottom();
+                    int rowCount = table.rowCount();
+                    System.out.println("infiniteScroll, rowCount: " + rowCount);
+                    return rowCount > index * LOAD_COUNT;
+                }
+            });
+
+            table = tablePage.table(); // not clear why but we may get StaleReferenceException here sometimes, refresh reference
+            int rowCount = table.rowCount();
+            assertTrue("rowCount: " + rowCount + ", expected to be more then: " + LOAD_COUNT * i +
+                            ", end less/equals then: " + (LOAD_COUNT * (i + 1)),
+                    rowCount >= LOAD_COUNT * i /*&& rowCount <= (LOAD_COUNT * (iteration + 1))*/);
+            if (rowCount == expectedRows) {
+                return;
+            }
+        }
+
+        throw new AssertionError("Failed to load all rows on infinite scroll. Expected: " + expectedRows +
+                ", but got: " + table.rowCount());
+
     }
 }

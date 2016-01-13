@@ -21,6 +21,8 @@ package org.activityinfo.ui.client.widget;
  * #L%
  */
 
+import com.google.gwt.user.client.Window;
+
 /**
  * @author yuriyz on 3/14/14.
  */
@@ -28,6 +30,9 @@ public class DoubleBox extends com.google.gwt.user.client.ui.DoubleBox {
 
     public DoubleBox() {
         setStyleName("form-control");
-        getElement().setPropertyString("type", "number");
+
+        // AI-1217 : removed type=number for all browsers because it's too tricky
+        //https://www.aeyoun.com/webdev/html5-input-number-localization.html
+        //getElement().setPropertyString("type", "number");
     }
 }
