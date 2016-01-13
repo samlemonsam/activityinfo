@@ -182,7 +182,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
         execute();
 
-        assertThat().forYear(2008).thereIsOneBucketWithValue(1);
+        assertThat().forYear(2008).thereIsOneBucketWithValue(3);
         assertThat().forYear(2009).thereIsOneBucketWithValue(4);
     }
 
