@@ -61,7 +61,7 @@ public class DateDimBinding extends DimBinding {
                     c[i] = new MonthCategory(localDate.getYear(), localDate.getMonthOfYear());
                     break;
                 case WEEK_MON:
-                    c[i] = new WeekCategory(localDate.getYear(), localDate.getWeekOfWeekyear());
+                    c[i] = new WeekCategory(localDate.getWeekyear(), localDate.getWeekOfWeekyear());
                     break;
                 case DAY:
                     c[i] = new DayCategory(date);
