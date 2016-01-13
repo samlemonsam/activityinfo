@@ -11,6 +11,8 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.Bucket;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
@@ -31,6 +33,7 @@ import org.activityinfo.service.store.BatchingFormTreeBuilder;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -38,8 +41,9 @@ import java.util.logging.Logger;
  * Executes a legacy PivotSites query against the new API
  */
 public class PivotAdapter {
-    
+
     private static final Logger LOGGER = Logger.getLogger(PivotAdapter.class.getName());
+    public static final String SITE_ID_KEY = "__site_id";
 
     private final IndicatorOracle indicatorOracle;
     private final CollectionCatalog catalog;
@@ -58,7 +62,7 @@ public class PivotAdapter {
     
     private Multimap<String, String> attributeFilters = HashMultimap.create();
 
-    private final Map<Object, Bucket> buckets = Maps.newHashMap();
+    private final Map<Object, Accumulator> buckets = Maps.newHashMap();
 
     private final Stopwatch metadataTime = Stopwatch.createUnstarted();
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
@@ -212,9 +216,8 @@ public class PivotAdapter {
                 metadataTime, treeTime, queryTime, aggregateTime));
 
 
-        return new PivotSites.PivotResult(Lists.newArrayList(buckets.values()));
+        return new PivotSites.PivotResult(createBuckets());
     }
-
 
     private void executeIndicatorValuesQuery(ActivityMetadata activity) {
         ResourceId formClassId = activity.getFormClassId();
@@ -233,21 +236,22 @@ public class PivotAdapter {
             }
         }
         
+        // if any of the indicators are "site count" indicators, then we need
+        // to query the site id as well
+        addSiteIdToQuery(activity, queryModel);
+
         // declare the filter
         queryModel.setFilter(composeFilter(activity));
 
         // Query the table 
-        queryTime.start();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
-        ColumnSet columnSet = builder.build(queryModel);
-        
-        queryTime.stop();
-        
-        aggregateTime.start();
+        ColumnSet columnSet = executeQuery(queryModel);
         
         // Now add the results to the buckets
+        aggregateTime.start();
+        int[] siteIds = extractSiteIds(columnSet);
         DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
 
+        
         for (IndicatorMetadata indicator : activity.getIndicators()) {
             ColumnView measureView = columnSet.getColumnView(indicator.getAlias());
             DimensionCategory indicatorCategory = null;
@@ -255,41 +259,73 @@ public class PivotAdapter {
             if (indicatorDimension.isPresent()) {
                 indicatorCategory = indicatorDimension.get().category(indicator);
             }
-
             for (int i = 0; i < columnSet.getNumRows(); i++) {
 
-                double value = measureView.getDouble(i);
-                if (!Double.isNaN(value)) {
-
-                    Bucket bucket = new Bucket();
-                    bucket.setCount(1);
-                    bucket.setSum(value);
-                    bucket.setAggregationMethod(indicator.getAggregation());
-
-                    if (indicatorDimension.isPresent()) {
-                        bucket.setCategory(indicatorDimension.get().getModel(), indicatorCategory);
+                if(indicator.getAggregation() == IndicatorDTO.AGGREGATE_SITE_COUNT) {
+               
+                    Map<Dimension, DimensionCategory> key = bucketKey(categories, indicatorCategory, i);
+                    Accumulator bucket = bucketForKey(key, indicator.aggregation);
+                    bucket.addSite(siteIds[i]);
+                    
+                } else {
+                    double value = measureView.getDouble(i);
+                    if (!Double.isNaN(value)) {
+                        Map<Dimension, DimensionCategory> key = bucketKey(categories, indicatorCategory, i);
+                        Accumulator bucket = bucketForKey(key, indicator.aggregation);
+                        bucket.addValue(value);
                     }
-
-                    for (int j = 0; j < groupBy.size(); j++) {
-                        bucket.setCategory(groupBy.get(j).getModel(), categories[j][i]);
-                    }
-
-                    addBucket(bucket);
                 }
+          
             }
         }
         aggregateTime.stop();
     }
-    
+
+    private Map<Dimension, DimensionCategory> bucketKey(
+        DimensionCategory[][] categories, @Nullable DimensionCategory indicatorCategory, int rowIndex) {
+        
+        Map<Dimension, DimensionCategory> key = new HashMap<>();
+
+        // Only include indicator as dimension if we are pivoting on dimension
+        if (indicatorCategory != null) {
+            key.put(indicatorDimension.get().getModel(), indicatorCategory);
+        }
+
+        for (int j = 0; j < groupBy.size(); j++) {
+            key.put(groupBy.get(j).getModel(), categories[j][rowIndex]);
+        }
+        return key;
+    }
+
+    private Accumulator bucketForKey(Map<Dimension, DimensionCategory> key, int aggregation) {
+        Accumulator bucket = buckets.get(key);
+        if(bucket == null) {
+            bucket = new Accumulator(key, aggregation);
+            buckets.put(key, bucket);
+        }
+        return bucket;
+    }
+
+    /**
+     * Queries the count of sites (not monthly reports) that match the filter
+     */
     private void executeSiteCountQuery(ActivityMetadata activity) {
+        if(activity.isMonthly() &&
+            (command.isPivotedBy(DimensionType.Date) ||
+             command.isPivotedBy(DimensionType.Indicator))) {
+            
+            executeSiteCountQueryOnReportingPeriod(activity);
+        } else {
+            executeSiteCountQueryOnSite(activity);
+        }
+    }
+
+    private void executeSiteCountQueryOnSite(ActivityMetadata activity) {
         Preconditions.checkState(!indicatorDimension.isPresent());
 
-        int activityId = activity.getId();
-        ResourceId formClassId = activity.getFormClassId();
-        FormTree formTree = formTrees.get(activity.getFormClassId());
-        QueryModel queryModel = new QueryModel(activity.getFormClassId());
+        FormTree formTree = formTrees.get(activity.getSiteFormClassId());
+        QueryModel queryModel = new QueryModel(activity.getSiteFormClassId());
 
-        
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
             for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
@@ -298,31 +334,92 @@ public class PivotAdapter {
         }
 
         // Query the table 
-        queryTime.start();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
-        ColumnSet columnSet = builder.build(queryModel);
-        queryTime.stop();
+        ColumnSet columnSet = executeQuery(queryModel);
 
         aggregateTime.start();
 
-        // Now add the results to the buckets
+        // Now add the counts to the buckets
         DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
 
         for (int i = 0; i < columnSet.getNumRows(); i++) {
 
-            Bucket bucket = new Bucket();
-            if(command.getValueType() == PivotSites.ValueType.TOTAL_SITES) {
-                bucket.setCount(1);
-                bucket.setAggregationMethod(2);
-            }
-
-            for (int j = 0; j < groupBy.size(); j++) {
-                bucket.setCategory(groupBy.get(j).getModel(), categories[j][i]);
-            }
+            Map<Dimension, DimensionCategory> key = bucketKey(categories, null, i);
+            Accumulator bucket = bucketForKey(key, IndicatorDTO.AGGREGATE_SITE_COUNT);
             
-            addBucket(bucket);
+            bucket.addCount(1);
         }
         aggregateTime.stop();
+    }
+
+    private void executeSiteCountQueryOnReportingPeriod(ActivityMetadata activity) {
+        Preconditions.checkArgument(activity.isMonthly());
+        
+        FormTree formTree = formTrees.get(activity.getFormClassId());
+        QueryModel queryModel = new QueryModel(activity.getFormClassId());
+
+        // Add dimensions columns as needed
+        for (DimBinding dimension : groupBy) {
+            for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
+                queryModel.addColumn(columnModel);
+            }
+        }
+        
+        addSiteIdToQuery(activity, queryModel);
+
+        // Query the table 
+        ColumnSet columnSet = executeQuery(queryModel);
+
+        aggregateTime.start();
+
+        // Now add the counts to the buckets
+        DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
+        int siteId[] = extractSiteIds(columnSet);
+        
+        for (int i = 0; i < columnSet.getNumRows(); i++) {
+
+            Map<Dimension, DimensionCategory> key = bucketKey(categories, null, i);
+            Accumulator bucket = bucketForKey(key, IndicatorDTO.AGGREGATE_SITE_COUNT);
+
+            bucket.addSite(siteId[i]);
+        }
+        aggregateTime.stop();
+    }
+
+    private ColumnSet executeQuery(QueryModel queryModel) {
+        queryTime.start();
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = builder.build(queryModel);
+        queryTime.stop();
+        return columnSet;
+    }
+
+    private void addSiteIdToQuery(ActivityMetadata activity, QueryModel queryModel) {
+        if(activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
+            queryModel.selectResourceId().as(SITE_ID_KEY);
+        } else {
+            queryModel.selectField(CuidAdapter.field(activity.getFormClassId(), CuidAdapter.SITE_FIELD)).as(SITE_ID_KEY);
+        }
+    }
+
+    private int[] extractSiteIds(ColumnSet columnSet) {
+        ColumnView columnView = columnSet.getColumnView(SITE_ID_KEY);
+        int[] ids = new int[columnView.numRows()];
+
+        for (int i = 0; i < columnView.numRows(); i++) {
+            String resourceId = columnView.getString(i);
+            if(resourceId != null) {
+                ids[i] = CuidAdapter.getLegacyIdFromCuid(resourceId);
+            }
+        }
+        return ids;
+    }
+
+    private List<Bucket> createBuckets() {
+        List<Bucket> list = Lists.newArrayList();
+        for (Accumulator accumulator : buckets.values()) {
+            list.add(accumulator.createBucket());
+        }
+        return list;
     }
 
     private ExprValue composeFilter(ActivityMetadata activity) {
@@ -371,7 +468,6 @@ public class PivotAdapter {
         }
     }
     
-
     private List<String> findAdminIdExprs(FormTree formTree) {
         List<String> expressions = Lists.newArrayList();
         for (FormClass formClass : formTree.getFormClasses()) {
@@ -406,7 +502,7 @@ public class PivotAdapter {
                     filter.append(" || ");
                 }
                 filter.append("(");
-                filter.append("[" + field + "]");
+                filter.append("[").append(field).append("]");
                 filter.append("==");
                 filter.append("'").append(value).append("'");
                 filter.append(")");
@@ -414,9 +510,7 @@ public class PivotAdapter {
             }
             filter.append(")");
         }
-        
     }
-
 
     private void appendFilter(String fieldName, char domain, DimensionType type, StringBuilder filter) {
         Set<Integer> ids = this.filter.getRestrictions(type);
@@ -449,15 +543,4 @@ public class PivotAdapter {
         }
         return array;
     }
-
-
-    public void addBucket(Bucket bucket) {
-        Bucket existing = buckets.get(bucket.getKey());
-        if (existing == null) {
-            buckets.put(bucket.getKey(), bucket);
-        } else {
-            existing.add(bucket);
-        }
-    }
-
 }

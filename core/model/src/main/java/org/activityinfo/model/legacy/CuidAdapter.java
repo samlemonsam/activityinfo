@@ -209,10 +209,6 @@ public class CuidAdapter {
         return cuid(ATTRIBUTE_DOMAIN, attributeId);
     }
 
-    public static ResourceId siteField(int siteId) {
-        return cuid(INDICATOR_DOMAIN, siteId);
-    }
-
     /**
      * @return the {@code FormField} ResourceId for the field of a given Activity {@code FormClass} that
      * references the given AttributeGroup FormClass

@@ -376,7 +376,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void nonExistingSite() {
 
-        Optional<ResourceCollection> collection = catalogProvider.lookupCollection(CuidAdapter.siteField(9444441));
+        Optional<ResourceCollection> collection = catalogProvider.lookupCollection(CuidAdapter.locationFormClass(9444441));
     
         assertFalse(collection.isPresent());
     }

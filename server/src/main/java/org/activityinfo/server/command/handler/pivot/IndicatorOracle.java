@@ -49,13 +49,13 @@ public class IndicatorOracle {
         
         HibernateEntityManager entityManager = (HibernateEntityManager) this.entityManager.get();
         entityManager.getSession().doWork(new AbstractWork() {
-            @Override
-            public void execute(Connection connection) throws SQLException {
+          @Override
+          public void execute(Connection connection) throws SQLException {
 
-                try (Statement s = connection.createStatement()) {
-                    fetchIndicators(s, filter, activityMap);
-                }
+            try (Statement s = connection.createStatement()) {
+              fetchIndicators(s, filter, activityMap);
             }
+          }
         });
         
         return Lists.newArrayList(activityMap.values());
@@ -66,7 +66,7 @@ public class IndicatorOracle {
         sql.append("SELECT" +
                 " i.indicatorId, " +        // (1)    
                 " i.aggregation, " +        // (2)    
-                " i.activityId," +          // (3)
+                " a.activityId," +          // (3)
                 " a.name, " +               // (4)
                 " a.category, " +            // (5)
                 " a.reportingFrequency," +  // (6)
@@ -78,14 +78,14 @@ public class IndicatorOracle {
                 " si.activityId, " +        // (12)
                 " sa.reportingFrequency, " + // (13)
                 " (si.dateDeleted IS NOT NULL AND " + // (14) 
-                  "sa.datedeleted IS NOT NULL)  " +
-                "FROM indicator i " +
-                "LEFT JOIN activity a ON (a.activityId=i.activityId) " +
+                  "sa.datedeleted IS NOT NULL)  " + 
+                "FROM activity a " +
+                "LEFT JOIN indicator i ON (a.activityId=i.activityId) " +
                 "LEFT JOIN userdatabase d ON (a.databaseId=d.databaseId) " +
                 "LEFT JOIN indicatorlink k ON (i.indicatorId = k.destinationIndicatorId) " +
                 "LEFT JOIN indicator si ON (k.sourceIndicatorId = si.indicatorId) " +
                 "LEFT JOIN activity sa ON (si.activityId = a.activityId) " +
-                "WHERE i.type = 'QUANTITY' ");
+                "WHERE (i.type = 'QUANTITY' OR i.type IS NULL) ");
 
 
         appendFilter(filter, DimensionType.Indicator, "i.indicatorId", sql);
@@ -95,6 +95,7 @@ public class IndicatorOracle {
 
             while (rs.next()) {
                 int activityId = rs.getInt(3);
+                assert  activityId != 0;
 
                 ActivityMetadata activity = activityMap.get(activityId);
                 if (activity == null) {
@@ -109,8 +110,9 @@ public class IndicatorOracle {
                 }
 
                 int indicatorId = rs.getInt(1);
-                IndicatorMetadata indicator = activity.indicators.get(indicatorId);
-                if(indicator == null) {
+                if(!rs.wasNull()) {
+                  IndicatorMetadata indicator = activity.indicators.get(indicatorId);
+                  if (indicator == null) {
                     indicator = new IndicatorMetadata();
                     indicator.sourceId = indicatorId;
                     indicator.destinationId = indicatorId;
@@ -118,56 +120,55 @@ public class IndicatorOracle {
                     indicator.aggregation = rs.getInt(2);
                     indicator.sortOrder = rs.getInt(9);
                     activity.indicators.put(indicatorId, indicator);
-                }
-                
-                int linkedIndicatorId = rs.getInt(11);
-                if(!rs.wasNull()) {
+                  }
+
+                  int linkedIndicatorId = rs.getInt(11);
+                  if (!rs.wasNull()) {
                     boolean deleted = rs.getBoolean(14);
                     if (!deleted) {
 
-                        ActivityMetadata linkedActivity;
-                        int linkedActivityId = rs.getInt(12);
-                        if (linkedActivityId == activityId) {
-                            linkedActivity = activity;
-                        } else {
-                            linkedActivity = activity.linkedActivities.get(linkedActivityId);
-                            if (linkedActivity == null) {
-                                linkedActivity = new ActivityMetadata();
-                                linkedActivity.id = linkedActivityId;
-                                linkedActivity.reportingFrequency = rs.getInt(13);
-                                // in the context of being linked, the activity is treated as if 
-                                // it the same as the destination activity
-                                linkedActivity.name = activity.getName();
-                                linkedActivity.databaseId = activity.getDatabaseId();
-                                linkedActivity.databaseName = activity.getDatabaseName();
-                                activity.linkedActivities.put(linkedActivityId, linkedActivity);
-                            }
+                      ActivityMetadata linkedActivity;
+                      int linkedActivityId = rs.getInt(12);
+                      if (linkedActivityId == activityId) {
+                        linkedActivity = activity;
+                      } else {
+                        linkedActivity = activity.linkedActivities.get(linkedActivityId);
+                        if (linkedActivity == null) {
+                          linkedActivity = new ActivityMetadata();
+                          linkedActivity.id = linkedActivityId;
+                          linkedActivity.reportingFrequency = rs.getInt(13);
+                          // in the context of being linked, the activity is treated as if 
+                          // it the same as the destination activity
+                          linkedActivity.name = activity.getName();
+                          linkedActivity.databaseId = activity.getDatabaseId();
+                          linkedActivity.databaseName = activity.getDatabaseName();
+                          activity.linkedActivities.put(linkedActivityId, linkedActivity);
                         }
+                      }
 
-                        IndicatorMetadata linkedIndicator = new IndicatorMetadata();
-                        linkedIndicator.sourceId = linkedIndicatorId;
-                        linkedIndicator.destinationId = indicatorId;
+                      IndicatorMetadata linkedIndicator = new IndicatorMetadata();
+                      linkedIndicator.sourceId = linkedIndicatorId;
+                      linkedIndicator.destinationId = indicatorId;
 
-                        // in the context of being linked, this indicator is treated as 
-                        // if it were the same as the destination indicator
-                        linkedIndicator.name = indicator.getName();
-                        linkedIndicator.sortOrder = indicator.sortOrder;
-                        linkedIndicator.aggregation = indicator.aggregation;
-                        linkedActivity.linkedIndicators.add(linkedIndicator);
+                      // in the context of being linked, this indicator is treated as 
+                      // if it were the same as the destination indicator
+                      linkedIndicator.name = indicator.getName();
+                      linkedIndicator.sortOrder = indicator.sortOrder;
+                      linkedIndicator.aggregation = indicator.aggregation;
+                      linkedActivity.linkedIndicators.add(linkedIndicator);
                     }
+                  }
                 }
             }
         }
     }
 
     private boolean tooBroad(Filter filter) {
-        if(filter.isRestricted(DimensionType.Indicator) ||
-           filter.isRestricted(DimensionType.Activity) ||
-           filter.isRestricted(DimensionType.Database)) {
-            return false;
-        }
-        
-        return true;
+      return !(
+          filter.isRestricted(DimensionType.Indicator) ||
+          filter.isRestricted(DimensionType.Activity) ||
+          filter.isRestricted(DimensionType.Database));
+
     }
 
     private void appendFilter(Filter filter, DimensionType type, String column, StringBuilder sql) {

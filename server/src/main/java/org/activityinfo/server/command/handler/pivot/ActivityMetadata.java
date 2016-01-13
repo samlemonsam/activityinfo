@@ -57,11 +57,21 @@ public class ActivityMetadata {
         if(reportingFrequency == ActivityFormDTO.REPORT_MONTHLY) {
             return CuidAdapter.reportingPeriodFormClass(id);
         } else {
-            return CuidAdapter.activityFormClass(id);
+            return getSiteFormClassId();
         }
+    }
+
+
+    public ResourceId getSiteFormClassId() {
+        return CuidAdapter.activityFormClass(id);
     }
 
     public Collection<ActivityMetadata> getLinkedActivities() {
         return linkedActivities.values();
+    }
+
+
+    public boolean isMonthly() {
+        return reportingFrequency == ActivityFormDTO.REPORT_MONTHLY;
     }
 }

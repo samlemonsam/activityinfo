@@ -41,21 +41,31 @@ public class Bucket implements Serializable {
     private int aggregationMethod;
     private AiLatLng point;
 
-    private Map<Dimension, DimensionCategory> categories = new HashMap<Dimension, DimensionCategory>();
+    private Map<Dimension, DimensionCategory> categories;
 
     public Bucket() {
+        categories = new HashMap<Dimension, DimensionCategory>();
     }
 
     public Bucket(double sum) {
         this.sum = sum;
         this.count = 1;
         this.aggregationMethod = IndicatorDTO.AGGREGATE_SUM;
+        this.categories = new HashMap<>();
     }
 
     public Bucket(double sum, int count, int aggregationMethod) {
         this.sum = sum;
         this.count = count;
         this.aggregationMethod = aggregationMethod;
+        this.categories = new HashMap<>();
+    }
+
+    public Bucket(double sum, int count, int aggregationMethod, Map<Dimension, DimensionCategory> categories) {
+        this.sum = sum;
+        this.count = count;
+        this.aggregationMethod = aggregationMethod;
+        this.categories = categories;
     }
 
     public Collection<Dimension> dimensions() {
