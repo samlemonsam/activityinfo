@@ -24,7 +24,6 @@ import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
-import org.activityinfo.ui.client.component.form.field.NullFieldWidget;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 
 import javax.annotation.Nullable;
@@ -41,30 +40,10 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final boolean withScroll;
 
     private final FormModel model;
-    private final ResourceLocator locator;
-    private final RelevanceHandler relevanceHandler;
     private final FormWidgetCreator widgetCreator;
     private final FormActions formActions;
-
-    /**
-     * The original, unmodified instance
-     */
-    private Resource instance;
-
-    /**
-     * A new version of the instance, being updated by the user
-     */
-    private FormInstance workingInstance;
-
-    private FormClass formClass;
-    private ResourceLocator locator;
+    private final ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
-
-    // validation form class is used to refer to "top-level" form class.
-    // For example "Properties panel" renders current type-formClass but in order to validate expression we need
-    // reference to formClass that is currently editing on FormDesigner.
-    // it can be null.
-    private FormClass validationFormClass = null;
 
     public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory) {
@@ -153,9 +132,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         }
 
         return Promise.waitAll(tasks).then(new Function<Void, Void>() {
-            @Nullable
             @Override
-            public Void apply(@Nullable Void input) {
+            public Void apply(Void input) {
                 relevanceHandler.onValueChange(); // invoke relevance handler once values are set
                 return null;
             }
@@ -219,12 +197,13 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
 
     private Optional<Boolean> validateBuiltinDates(FieldContainer container, FormField field) {
         if (BuiltinFields.isBuiltInDate(field.getId())) {
-            DateRange dateRange = BuiltinFields.getDateRange(workingInstance, formClass);
+            FormClass rootFormClass = getModel().getRootFormClass();
+            DateRange dateRange = BuiltinFields.getDateRange(getModel().getWorkingRootInstance(), rootFormClass);
 
-            if (!formClass.getLocks().isEmpty()) {
-                if (new LockEvaluator(formClass).isLockedSilently(workingInstance)) {
-                    getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
-                    getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+            if (!rootFormClass.getLocks().isEmpty()) {
+                if (new LockEvaluator(rootFormClass).isLockedSilently(getModel().getWorkingRootInstance())) {
+                    getWidgetCreator().get(BuiltinFields.getStartDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+                    getWidgetCreator().get(BuiltinFields.getEndDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
                     return Optional.of(false);
                 }
             }
@@ -234,8 +213,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 return Optional.of(false);
             } else {
                 if (dateRange.isValid()) {
-                    getFieldContainer(BuiltinFields.getStartDateField(formClass).getId()).setValid();
-                    getFieldContainer(BuiltinFields.getEndDateField(formClass).getId()).setValid();
+                    getWidgetCreator().get(BuiltinFields.getStartDateField(rootFormClass).getId()).setValid();
+                    getWidgetCreator().get(BuiltinFields.getEndDateField(rootFormClass).getId()).setValid();
                     return Optional.of(true);
                 }
             }
@@ -284,14 +263,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
 
     public FormActions getFormActions() {
         return formActions;
-    }
-
-    public void setValidationFormClass(FormClass validationFormClass) {
-        this.validationFormClass = validationFormClass;
-    }
-
-    public FormClass getValidationFormClass() {
-        return validationFormClass;
     }
 
     public RelevanceHandler getRelevanceHandler() {

@@ -75,30 +75,27 @@ public class FormWidgetCreator {
     public Promise<Void> createWidgets(final FormClass formClass, final FieldUpdated fieldUpdated) {
         List<Promise<Void>> promises = Lists.newArrayList();
         for (final FormField field : formClass.getFields()) {
-            if (field.isVisible()) {
-                if (field.getType() instanceof SubFormType) {
-                    Promise<Void> subFormWidgetsPromise = createWidgets(model.getSubFormByOwnerFieldId(field.getId()), fieldUpdated);
-                    promises.add(subFormWidgetsPromise);
-                } else {
+            if (field.getType() instanceof SubFormType) {
+                Promise<Void> subFormWidgetsPromise = createWidgets(model.getSubFormByOwnerFieldId(field.getId()), fieldUpdated);
+                promises.add(subFormWidgetsPromise);
+            } else {
+                Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
+                    @Override
+                    public void update(FieldValue value) {
+                        fieldUpdated.onFieldUpdated(field, value);
+                    }
+                }, model.getValidationFormClass(), model.getEventBus()).then(new Function<FormFieldWidget, Void>() {
+                    @Override
+                    public Void apply(@Nullable FormFieldWidget widget) {
+                        FieldContainer fieldContainer = containerFactory.createContainer(field, widget, 4);
+                        containers.put(field.getId(), fieldContainer);
 
-                    Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
-                        @Override
-                        public void update(FieldValue value) {
-                            fieldUpdated.onFieldUpdated(field, value);
-                        }
-                    }, model.getValidationFormClass(), model.getEventBus()).then(new Function<FormFieldWidget, Void>() {
-                        @Override
-                        public Void apply(@Nullable FormFieldWidget widget) {
-                            FieldContainer fieldContainer = containerFactory.createContainer(field, widget, 4);
-                            containers.put(field.getId(), fieldContainer);
+                        model.addContainerOfClass(formClass.getId(), fieldContainer);
 
-                            model.addContainerOfClass(formClass.getId(), fieldContainer);
-
-                            return null;
-                        }
-                    });
-                    promises.add(promise);
-                }
+                        return null;
+                    }
+                });
+                promises.add(promise);
             }
         }
         return Promise.waitAll(promises);

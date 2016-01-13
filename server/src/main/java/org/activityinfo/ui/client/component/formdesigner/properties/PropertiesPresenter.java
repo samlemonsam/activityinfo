@@ -51,7 +51,6 @@ import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetCo
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
-import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
 import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
 
 import java.util.List;
@@ -141,7 +140,7 @@ public class PropertiesPresenter {
         formDesigner.getFormDesignerPanel().setPropertiesTabSelected();
 
         final FormField formField = fieldWidgetContainer.getFormField();
-        boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId());
+        boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getModel().getRootFormClass().getId(), formField.getId());
 
         view.setVisible(true);
         view.getRequiredGroup().setVisible(true);
