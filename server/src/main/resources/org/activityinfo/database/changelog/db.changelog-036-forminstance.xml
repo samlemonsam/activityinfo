@@ -25,37 +25,26 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-  <changeSet author="yuriyz" id="032-01">
-    <comment>
-      Introduced formclass table for saving formclasses.
-    </comment>
-    <createTable tableName="formclass">
-      <column name="formClassId" type="VARCHAR(255)">
-        <constraints nullable="false" primaryKey="true"/>
-      </column>
-      <column name="formClassOwnerId" type="VARCHAR(255)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="json" type="longtext">
-        <constraints nullable="false"/>
-      </column>
-    </createTable>
-  </changeSet>
-  <changeSet author="yuriyz" id="032-02">
-    <comment>
-      allow saving as gzipped json for large formclasses
-    </comment>
-    <addColumn tableName="formclass">
-      <column name="gzJson" type="longblob"/>
-    </addColumn>
-  </changeSet>
-  <changeSet author="yuriyz" id="032-03">
-    <comment>
-      added type json to indicator table
-    </comment>
-    <addColumn tableName="indicator">
-      <column name="typeJson" type="VARCHAR(999)"/>
-    </addColumn>
-  </changeSet>
-
+    <changeSet author="yuriyz" id="036-01">
+        <comment>
+            Introduced forminstance table for saving forminstances.
+        </comment>
+        <createTable tableName="forminstance">
+            <column name="formInstanceId" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="formInstanceClassId" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="formInstanceOwnerId" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="json" type="longtext">
+                <constraints nullable="true"/>
+            </column>
+            <column name="gzJson" type="longblob">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
