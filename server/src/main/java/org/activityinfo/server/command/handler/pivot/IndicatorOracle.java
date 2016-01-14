@@ -23,7 +23,6 @@ import java.util.Map;
 /**
  * Provides a mapping from indicator ids to activity ids useful in translating legacy API requests.
  * 
- * <p>The mapping from indicatorId to activityId is immutable and so can be aggressively cached.</p>
  */
 @Singleton
 public class IndicatorOracle {

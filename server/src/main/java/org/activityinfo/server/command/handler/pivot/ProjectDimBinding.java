@@ -3,6 +3,7 @@ package org.activityinfo.server.command.handler.pivot;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -29,7 +30,7 @@ public class ProjectDimBinding extends DimBinding {
         projectId.setId(PROJECT_ID_COLUMN);
 
         ColumnModel projectLabel = new ColumnModel();
-        projectLabel.setExpression(CuidAdapter.projectField(activityId).asString() + ".label");
+        projectLabel.setExpression(new CompoundExpr(CuidAdapter.projectField(activityId), "label"));
         projectLabel.setId(PROJECT_LABEL_COLUMN);
 
         return Arrays.asList(projectId, projectLabel);

@@ -3,6 +3,7 @@ package org.activityinfo.server.command.handler.pivot;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -29,7 +30,7 @@ public class PartnerDimBinding extends DimBinding {
         partnerId.setId(PARTNER_ID_COLUMN);
         
         ColumnModel partnerLabel = new ColumnModel();
-        partnerLabel.setExpression(CuidAdapter.partnerField(activityId).asString() + ".Label");
+        partnerLabel.setExpression(new CompoundExpr(CuidAdapter.partnerField(activityId), "Label"));
         partnerLabel.setId(PARTNER_LABEL_COLUMN);
         
         return Arrays.asList(partnerId, partnerLabel);

@@ -5,6 +5,7 @@ import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
@@ -45,7 +46,7 @@ public class AdminDimBinding extends DimBinding {
         
         if(adminClass.isPresent()) {
             ColumnModel id = new ColumnModel();
-            id.setExpression(levelClassId + "." + ColumnModel.ID_SYMBOL);
+            id.setExpression(new CompoundExpr(levelClassId, ColumnModel.ID_SYMBOL));
             id.setId(idColumn);
             
             ColumnModel label = new ColumnModel();
@@ -53,6 +54,7 @@ public class AdminDimBinding extends DimBinding {
             label.setId(labelColumn);
             
             return Arrays.asList(id, label);
+            
         } else {
             return Collections.emptyList();
         }

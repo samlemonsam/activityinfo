@@ -80,25 +80,7 @@ public abstract class AbstractMySqlTest {
 
         execute(queryModel);
     }
-    protected final void queryGroupBy(ResourceId formClassId, String... fields) {
-        QueryModel queryModel = new QueryModel(formClassId);
-        queryModel.selectResourceId().as("_id");
-        for(String field : fields) {
-            queryModel.selectExpr(field).setId(field);
-        }
-        execute(queryModel);
-    }
 
-
-    protected final void queryAggregate(ResourceId formClassId, List<String> fields, List<String> groupBy) {
-        QueryModel queryModel = new QueryModel(formClassId);
-        queryModel.selectResourceId().as("_id");
-        for(String field : fields) {
-            queryModel.selectExpr(field).setId(field);
-        }
-        queryModel.getGroupBy().addAll(groupBy);
-        execute(queryModel);
-    }
 
     private void execute(QueryModel queryModel) {
         columnSet = executor.build(queryModel);

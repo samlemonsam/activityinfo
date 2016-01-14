@@ -4,6 +4,7 @@ package org.activityinfo.server.command.handler.pivot;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -24,7 +25,11 @@ public class SiteDimBinding extends DimBinding {
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         return Arrays.asList(
                 new ColumnModel().setExpression(ColumnModel.ID_SYMBOL).as(ID_COLUMN),
-                new ColumnModel().setExpression(CuidAdapter.locationField(activityIdOf(formTree)) + ".label").as(LABEL_COLUMN));
+                new ColumnModel().setExpression(
+                        new CompoundExpr(
+                                CuidAdapter.locationField(activityIdOf(formTree)),
+                                "label"))
+                        .as(LABEL_COLUMN));
     }
 
     @Override

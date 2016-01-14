@@ -1,6 +1,9 @@
 package org.activityinfo.model.query;
 
 import com.google.common.collect.Lists;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
@@ -15,9 +18,8 @@ public class QueryModel {
 
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
-    private final List<String> groupBy = Lists.newArrayList();
 
-    private ExprValue filter;
+    private ExprNode filter;
 
 
     public QueryModel() {
@@ -79,11 +81,19 @@ public class QueryModel {
         return column;
     }
 
-    public ExprValue getFilter() {
+    public ExprNode getFilter() {
         return filter;
     }
 
     public void setFilter(ExprValue filter) {
+        if(filter == null) {
+            this.filter = null;
+        } else {
+            this.filter = ExprParser.parse(filter.getExpression());
+        }
+    }
+    
+    public void setFilter(ExprNode filter) {
         this.filter = filter;
     }
 
@@ -96,34 +106,21 @@ public class QueryModel {
     }
 
     /**
-     * 
-     * @return the list of column ids on which to group
-     */
-    public List<String> getGroupBy() {
-        return groupBy;
-    }
-
-    /**
      * Adds the {@code ResourceId} as a string column to the table model with
      * the given column id
      */
     public ColumnModel selectResourceId() {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setExpression(ColumnModel.ID_SYMBOL);
+        columnModel.setExpression(new SymbolExpr(ColumnModel.ID_SYMBOL));
         columns.add(columnModel);
         return columnModel;
     }
 
     public ColumnModel selectClassId() {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setExpression(ColumnModel.CLASS_SYMBOL);
+        columnModel.setExpression(new SymbolExpr(ColumnModel.CLASS_SYMBOL));
         columns.add(columnModel);
         return columnModel;
-    }
-    
-    public QueryModel groupBy(String columnId) {
-        groupBy.add(columnId);
-        return this;
     }
 
     @Override
@@ -134,7 +131,7 @@ public class QueryModel {
             if(needsComma) {
                 sb.append(", ");
             }
-            sb.append("(").append(column.getExpression().getExpression()).append(") as ").append(column.getId());
+            sb.append("(").append(column.getExpression()).append(") as ").append(column.getId());
             needsComma = true;
         }
         return sb.toString();

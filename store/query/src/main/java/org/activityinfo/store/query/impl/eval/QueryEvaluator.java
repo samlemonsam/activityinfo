@@ -10,7 +10,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.store.query.impl.CollectionScanBatch;
 import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
@@ -48,16 +47,21 @@ public class QueryEvaluator {
         aggregateFunctions.put("sum", new SumFunction());
     }
 
-    public Slot<ColumnView> evaluateExpression(String expression) {
-        ExprNode expr = ExprParser.parse(expression);
+    public Slot<ColumnView> evaluateExpression(ExprNode expr) {
         return expr.accept(columnVisitor);
     }
 
-    public Function<ColumnView, ColumnView> filter(ExprValue filter) {
+
+    private Slot<ColumnView> evaluateExpression(String expression) {
+        ExprNode parsed = ExprParser.parse(expression);
+        return parsed.accept(columnVisitor);
+    }
+
+    public Function<ColumnView, ColumnView> filter(ExprNode filter) {
         if(filter == null) {
             return Functions.identity();
         } else {
-            return new ColumnFilter(evaluateExpression(filter.getExpression()));
+            return new ColumnFilter(evaluateExpression(filter));
         }
     }
 
@@ -144,4 +148,5 @@ public class QueryEvaluator {
             }
         }
     }
+
 }

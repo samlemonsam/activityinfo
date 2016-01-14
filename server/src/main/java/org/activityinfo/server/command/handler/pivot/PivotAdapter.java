@@ -18,6 +18,10 @@ import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.functions.AndFunction;
+import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
+import org.activityinfo.model.expr.functions.LessOrEqualFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -28,7 +32,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.expr.ExprValue;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -36,6 +40,9 @@ import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Logger;
+
+import static java.util.Collections.*;
+import static org.activityinfo.model.expr.Exprs.*;
 
 /**
  * Executes a legacy PivotSites query against the new API
@@ -325,7 +332,8 @@ public class PivotAdapter {
 
         FormTree formTree = formTrees.get(activity.getSiteFormClassId());
         QueryModel queryModel = new QueryModel(activity.getSiteFormClassId());
-
+        queryModel.setFilter(composeFilter(activity));
+        
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
             for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
@@ -356,6 +364,7 @@ public class PivotAdapter {
         
         FormTree formTree = formTrees.get(activity.getFormClassId());
         QueryModel queryModel = new QueryModel(activity.getFormClassId());
+        queryModel.setFilter(composeFilter(activity));
 
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
@@ -422,116 +431,103 @@ public class PivotAdapter {
         return list;
     }
 
-    private ExprValue composeFilter(ActivityMetadata activity) {
-        StringBuilder filter = new StringBuilder();
-        appendFilter("_id", CuidAdapter.SITE_DOMAIN, DimensionType.Site, filter);
-        appendFilter("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner, filter);
-        appendFilter("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project, filter);
-        appendFilter("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location, filter);
-        appendAdminFilter(activity, filter);
-        appendAttributeFilter(filter);
-        
-        if(filter.length() > 0) {
-            LOGGER.info("Filter: " + filter);
-            return new ExprValue(filter.toString());
+    private ExprNode composeFilter(ActivityMetadata activity) {
+        List<ExprNode> conditions = Lists.newArrayList();
+        conditions.addAll(filterExpr(ColumnModel.ID_SYMBOL, CuidAdapter.SITE_DOMAIN, DimensionType.Site));
+        conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
+        conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
+        conditions.addAll(filterExpr("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location));
+        conditions.addAll(adminFilter(activity));
+        conditions.addAll(attributeFilters());
+        conditions.addAll(dateFilter());
+                
+        if(conditions.size() > 0) {
+            ExprNode filterExpr = Exprs.allTrue(conditions);
+            LOGGER.info("Filter: " + filterExpr);
+
+            return filterExpr;
+
         } else {
             return null;
         }
     }
 
-    private void appendAdminFilter(ActivityMetadata activity, StringBuilder filterExpr) {
+
+    private Set<ExprNode> adminFilter(ActivityMetadata activity) {
         if (this.filter.isRestricted(DimensionType.AdminLevel)) {
 
-            if(filterExpr.length() > 0) {
-                filterExpr.append(" && ");
-            }
-
+            List<ExprNode> conditions = Lists.newArrayList();
+            
             // we don't know which adminlevel this belongs to so we have construct a giant OR statement
-            List<String> adminIdExprs = findAdminIdExprs(formTrees.get(activity.getFormClassId()));
+            List<ExprNode> adminIdExprs = findAdminIdExprs(formTrees.get(activity.getFormClassId()));
 
-            filterExpr.append("(");
-            boolean needsOr = false;
-            for(String adminIdExpr : adminIdExprs) {
+            for(ExprNode adminIdExpr : adminIdExprs) {
                 for (Integer adminEntityId : this.filter.getRestrictions(DimensionType.AdminLevel)) {
-                    if(needsOr) {
-                        filterExpr.append(" || ");
-                    } 
-                    filterExpr.append("(");
-                    filterExpr.append(adminIdExpr);
-                    filterExpr.append("==");
-                    filterExpr.append("'").append(CuidAdapter.entity(adminEntityId)).append("'");
-                    filterExpr.append(")");
-                    needsOr = true;
+                    conditions.add(Exprs.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
                 }
             }
-            filterExpr.append(")");
+            
+            return singleton(anyTrue(conditions));
+            
+        } else {
+            return emptySet();
         }
     }
     
-    private List<String> findAdminIdExprs(FormTree formTree) {
-        List<String> expressions = Lists.newArrayList();
+    private List<ExprNode> findAdminIdExprs(FormTree formTree) {
+        List<ExprNode> expressions = Lists.newArrayList();
         for (FormClass formClass : formTree.getFormClasses()) {
             if(formClass.getId().getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
-                expressions.add(formClass.getId() + "." + ColumnModel.ID_SYMBOL);
+                expressions.add(new CompoundExpr(formClass.getId(), ColumnModel.ID_SYMBOL));
             }
         }
         return expressions;
     }
 
-    private void appendAttributeFilter(StringBuilder filter) {
-        // TODO: ESCAPING
+    private List<ExprNode> attributeFilters() {
                 
+        List<ExprNode> conditions = Lists.newArrayList();
+        
         for (String field : attributeFilters.keySet()) {
+            List<ExprNode> valueConditions = Lists.newArrayList();
+            for (String value : attributeFilters.get(field)) {
+                valueConditions.add(Exprs.equals(new SymbolExpr(field), new ConstantExpr(value)));
+            }
+            conditions.add(Exprs.anyTrue(valueConditions));
+        }
+        return conditions;
+    }
 
-            if (field.contains("]")) {
-                throw new UnsupportedOperationException("TODO: escaping for '" + field + "'");
+    private List<ExprNode> filterExpr(String fieldName, char domain, DimensionType type) {
+        Set<Integer> ids = this.filter.getRestrictions(type);
+        if(ids.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            List<ExprNode> conditions = Lists.newArrayList();
+
+            for (Integer id : ids) {
+                conditions.add(Exprs.equals(symbol(fieldName), idConstant(CuidAdapter.cuid(domain, id))));
             }
 
-            if (filter.length() > 0) {
-                filter.append(" && ");
-            }
-            Collection<String> values = attributeFilters.get(field);
-
-            filter.append("(");
-            boolean needsComma = false;
-            for (String value : values) {
-                if (value.contains("'")) {
-                    throw new UnsupportedOperationException("TODO: escaping for '" + value + "'");
-                }
-                if (needsComma) {
-                    filter.append(" || ");
-                }
-                filter.append("(");
-                filter.append("[").append(field).append("]");
-                filter.append("==");
-                filter.append("'").append(value).append("'");
-                filter.append(")");
-                needsComma = true;
-            }
-            filter.append(")");
+            return singletonList(Exprs.anyTrue(conditions));
         }
     }
 
-    private void appendFilter(String fieldName, char domain, DimensionType type, StringBuilder filter) {
-        Set<Integer> ids = this.filter.getRestrictions(type);
-        if(!ids.isEmpty()) {
-            if(filter.length() > 0) {
-                filter.append(" && ");
-            }
-            filter.append("(");
-            boolean needsComma = false;
-            for (Integer id : ids) {
-                if(needsComma) {
-                    filter.append(" || ");
-                } 
-                filter.append("(");
-                filter.append(fieldName);
-                filter.append("==");
-                filter.append("'").append(CuidAdapter.cuid(domain, id).asString()).append("'");
-                filter.append(")");
-                needsComma = true;
-            }
-            filter.append(")");
+
+    private Collection<FunctionCallNode> dateFilter() {
+        if(filter.isDateRestricted()) {
+            
+            SymbolExpr dateExpr = new SymbolExpr("date2");
+            ConstantExpr minDate = new ConstantExpr(new LocalDate(filter.getMinDate()));
+            ConstantExpr maxDate = new ConstantExpr(new LocalDate(filter.getMaxDate()));
+            
+            return singleton(
+                    new FunctionCallNode(AndFunction.INSTANCE,
+                            new FunctionCallNode(GreaterOrEqualFunction.INSTANCE, dateExpr, minDate),
+                            new FunctionCallNode(LessOrEqualFunction.INSTANCE, dateExpr, maxDate)));
+            
+        } else {
+            return Collections.emptyList();
         }
     }
     

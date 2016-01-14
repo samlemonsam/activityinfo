@@ -16,7 +16,6 @@ import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -53,10 +52,10 @@ public class ColumnSetBuilder {
         for(ColumnModel column : table.getColumns()) {
             Slot<ColumnView> view;
             try {
-                view = evaluator.evaluateExpression(column.getExpression().getExpression());
+                view = evaluator.evaluateExpression(column.getExpression());
             } catch(ExprException e) {
                 throw new QuerySyntaxException("Syntax error in column " + column.getId() +
-                        " '" + column.getExpression().getExpression() + "' : " + e.getMessage(), e);
+                        " '" + column.getExpression() + "' : " + e.getMessage(), e);
             }
             columnViews.put(column.getId(), view);
         }
@@ -103,34 +102,8 @@ public class ColumnSetBuilder {
             }
         }
         
-        if(table.getGroupBy().isEmpty()) {
-            LOGGER.info("TableBuilder complete");
-            return new ColumnSet(numRows, dataMap);
-        
-        } else {
-            // Need to aggregate!
-            
-            return aggregate(dataMap, table.getGroupBy());
-                
-        }
+        LOGGER.info("TableBuilder complete");
+        return new ColumnSet(numRows, dataMap);
     }
 
-    private ColumnSet aggregate(Map<String, ColumnView> dataMap, List<String> groupColumnNames) {
-        
-        ColumnView columnKeys[] = new ColumnView[groupColumnNames.size()];
-        int index = 0;
-        for (String columnName : groupColumnNames) {
-            ColumnView columnView = dataMap.get(columnName);
-            if(columnView == null) {
-                throw new IllegalArgumentException("No such column '" + columnName + "'");
-            }
-            columnKeys[index] = columnView;
-        }
-        
-        
-        
-        
-        
-        return null;
-    }
 }

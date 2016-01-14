@@ -8,6 +8,7 @@ import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.time.LocalDate;
 
 import java.io.Serializable;
 
@@ -58,6 +59,9 @@ public class ConstantColumnView implements ColumnView, Serializable {
 
         } else if(value instanceof BooleanFieldValue) {
             return new ConstantColumnView(numRows, value == BooleanFieldValue.TRUE);
+
+        } else if(value instanceof LocalDate) {
+            return new ConstantColumnView(numRows, value.toString());
             
         } else {
             throw new IllegalArgumentException("value: " + value + " [" + value.getClass().getName() + "]");

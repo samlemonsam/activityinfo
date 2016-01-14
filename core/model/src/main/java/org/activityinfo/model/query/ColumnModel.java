@@ -1,5 +1,8 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
@@ -14,7 +17,7 @@ public class ColumnModel {
     public static final String CLASS_SYMBOL = "_class";
 
     private String id;
-    private ExprValue expression;
+    private ExprNode expression;
 
     /**
      *
@@ -40,34 +43,31 @@ public class ColumnModel {
         return setId(id);
     }
 
-    public ExprValue getExpression() {
+    public ExprNode getExpression() {
         return expression;
     }
 
-    public ColumnModel setExpression(ExprValue exprValue) {
-        this.expression = exprValue;
+    public ColumnModel setExpression(ExprNode expression) {
+        this.expression = expression;
         return this;
+    }
+
+    public ColumnModel setExpression(ExprValue exprValue) {
+        return setExpression(exprValue.getExpression());
     }
 
     @JsonSetter
     public ColumnModel setExpression(String expression) {
-        this.expression = new ExprValue(expression);
+        this.expression = ExprParser.parse(expression);
         return this;
     }
 
     public ColumnModel setExpression(ResourceId resourceId) {
-        return setExpression(resourceId.asString());
+        return setExpression(new SymbolExpr(resourceId));
     }
 
-    public ColumnModel setExpression(FieldPath expression) {
-        StringBuilder sb = new StringBuilder();
-        for (ResourceId fieldId : expression.getPath()) {
-            if(sb.length() > 0) {
-                sb.append(".");
-            }
-            sb.append(fieldId.asString());
-        }
-        return setExpression(sb.toString());
+    public ColumnModel setExpression(FieldPath path) {
+        return setExpression(path.toExpr());
     }
 
 }
