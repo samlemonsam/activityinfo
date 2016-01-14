@@ -1,18 +1,19 @@
 package org.activityinfo.i18n.tools;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.activityinfo.i18n.tools.model.ResourceClassTerm;
+import org.activityinfo.i18n.tools.model.Term;
 import org.activityinfo.i18n.tools.model.TranslationSet;
 import org.activityinfo.i18n.tools.model.TranslationSource;
-import org.activityinfo.i18n.tools.po.PoEditorClient;
-import org.activityinfo.i18n.tools.po.PoTerm;
-import org.activityinfo.i18n.tools.po.PoTermUpdate;
-import org.activityinfo.i18n.tools.po.PoUploadResponse;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+//import org.activityinfo.i18n.tools.po.PoEditorClient;
+//import org.activityinfo.i18n.tools.po.PoTerm;
+//import org.activityinfo.i18n.tools.po.PoTermUpdate;
+//import org.activityinfo.i18n.tools.po.PoUploadResponse;
 
 /**
  * Defines the source of the translations as a PoEditor.com project
@@ -38,15 +39,17 @@ public class PoEditorSource implements TranslationSource {
     }
 
     @Override
-    public Map<String, PoTerm> fetchTerms() throws IOException {
-        PoEditorClient client = new PoEditorClient(apiToken);
-        return client.getTerms(projectId);
+    public Map<String, ? extends Term> fetchTerms() throws IOException {
+//        PoEditorClient client = new PoEditorClient(apiToken);
+//        return client.getTerms(projectId);
+        return null;
     }
 
     @Override
     public TranslationSet fetchTranslations(String language) throws IOException {
-        PoEditorClient client = new PoEditorClient(apiToken);
-        return client.getTranslations(projectId, language);
+//        PoEditorClient client = new PoEditorClient(apiToken);
+//        return client.getTranslations(projectId, language);
+        return null;
     }
 
 
@@ -58,24 +61,24 @@ public class PoEditorSource implements TranslationSource {
      */
     public void updateTerms(List<ResourceClassTerm> terms) throws IOException {
         
-        List<PoTermUpdate> updates = Lists.newArrayList();
-        for (ResourceClassTerm term : terms) {
-            updates.add(new PoTermUpdate(term.getKey(), term.getDefaultTranslation()));
-        }
-        
-        PoEditorClient client = new PoEditorClient(apiToken);
-        PoUploadResponse response = client.upload(projectId, updates);
-
-        PoUploadResponse.Details details = response.getDetails();
-        System.out.println(String.format("Terms:       %5d  Added: %5d  Deleted: %d",
-                details.getTerms().getParsed(),
-                details.getTerms().getAdded(),
-                details.getTerms().getDeleted()));
-
-        System.out.println(String.format("Definitions: %5d  Added: %5d  Updated: %d",
-                details.getDefinitions().getParsed(),
-                details.getDefinitions().getAdded(),
-                details.getDefinitions().getUpdated()));
+//        List<PoTermUpdate> updates = Lists.newArrayList();
+//        for (ResourceClassTerm term : terms) {
+//            updates.add(new PoTermUpdate(term.getKey(), term.getDefaultTranslation()));
+//        }
+//
+//        PoEditorClient client = new PoEditorClient(apiToken);
+//        PoUploadResponse response = client.upload(projectId, updates);
+//
+//        PoUploadResponse.Details details = response.getDetails();
+//        System.out.println(String.format("Terms:       %5d  Added: %5d  Deleted: %d",
+//                details.getTerms().getParsed(),
+//                details.getTerms().getAdded(),
+//                details.getTerms().getDeleted()));
+//
+//        System.out.println(String.format("Definitions: %5d  Added: %5d  Updated: %d",
+//                details.getDefinitions().getParsed(),
+//                details.getDefinitions().getAdded(),
+//                details.getDefinitions().getUpdated()));
     }
 
     @Override

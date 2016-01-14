@@ -21,6 +21,7 @@ package org.activityinfo.model.type.subform;
 * #L%
 */
 
+import com.google.common.base.Strings;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
@@ -51,8 +52,9 @@ public class SubFormType implements ParametrizedFieldType {
 
         @Override
         public SubFormType deserializeType(Record typeParameters) {
+            String classId = typeParameters.getString("classReference");
             return new SubFormType()
-                    .setClassReference((ReferenceType) ReferenceType.TYPE_CLASS.deserializeType(typeParameters.getRecord("classReference")));
+                    .setClassId(Strings.isNullOrEmpty(classId) ? null : ResourceId.valueOf(classId));
         }
 
         @Override
@@ -68,29 +70,23 @@ public class SubFormType implements ParametrizedFieldType {
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
-    private ReferenceType classReference;
+    private ResourceId classId;
 
     public SubFormType() {
-        this(new ReferenceType()
-                .setCardinality(Cardinality.SINGLE)
-                .setRange(PredefinedPeriods.MONTHLY.getResourceId()));
+        this(PredefinedPeriods.MONTHLY.getResourceId());
     }
 
-    public SubFormType(ReferenceType classReference) {
-        this.classReference = classReference;
+    public SubFormType(ResourceId classId) {
+        this.classId = classId;
     }
 
-    public ReferenceType getClassReference() {
-        return classReference;
+    public SubFormType setClassId(ResourceId classId) {
+        this.classId = classId;
+        return this;
     }
 
     public ResourceId getClassId() {
-        return classReference != null && !classReference.getRange().isEmpty() ? classReference.getRange().iterator().next() : null;
-    }
-
-    public SubFormType setClassReference(ReferenceType classReference) {
-        this.classReference = classReference;
-        return this;
+        return classId;
     }
 
     @Override
@@ -102,7 +98,7 @@ public class SubFormType implements ParametrizedFieldType {
     public Record getParameters() {
         return new Record()
                 .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("classReference", classReference.getParameters());
+                .set("classReference", classId != null ? classId.asString() : "");
     }
 
     @Override

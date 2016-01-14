@@ -93,7 +93,7 @@ public class FormModelTest extends CommandTestCase2 {
         subFormChildField.setType(TextType.INSTANCE);
 
         SubFormType subFormType = new SubFormType();
-        subFormType.getClassReference().setRange(setupSubform.getId());
+        subFormType.setClassId(setupSubform.getId());
 
         subformOwnerField = formClass.addField();
         subformOwnerField.setType(subFormType);
