@@ -47,8 +47,6 @@ public class ColumnCombiner implements ColumnViewBuilder {
                 return combineDouble(cols);
             case BOOLEAN:
                 break;
-            case DATE:
-                break;
         }
         throw new UnsupportedOperationException();
     }

@@ -10,8 +10,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -103,20 +101,6 @@ public class RowBasedJsonWriter {
                         if(value != ColumnView.NA) {
                             writer.name(id);
                             writer.value(value != 0);
-                        }
-                    }
-                };
-
-            case DATE:
-                final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-                return new FieldWriter() {
-                    @Override
-                    public void write(int rowIndex) throws IOException {
-                        Date date = view.getDate(rowIndex);
-                        if(date != null) {
-                            writer.name(id);
-                            writer.value(dateFormat.format(date));
                         }
                     }
                 };

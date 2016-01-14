@@ -15,7 +15,6 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
 
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +42,7 @@ public class ViewBuilderFactory {
         } else if(type instanceof BooleanType) {
             return new BooleanColumnBuilder();
         } else if(type instanceof LocalDateType) {
-            return new DateColumnBuilder(new LocalDateReader());
+            return new StringColumnBuilder(new LocalDateReader());
         } else if(type instanceof AttachmentType) {
             return new StringColumnBuilder(new AttachmentBlobIdReader());
         } else if(type instanceof GeoAreaType) {
@@ -110,11 +109,11 @@ public class ViewBuilderFactory {
         }
     }
 
-    private static class LocalDateReader implements DateReader {
+    private static class LocalDateReader implements StringReader {
         @Override
-        public Date readDate(FieldValue value) {
+        public String readString(FieldValue value) {
             if(value instanceof LocalDate) {
-                return ((LocalDate) value).atMidnightInMyTimezone();
+                return value.toString();
             }
             return null;
         }

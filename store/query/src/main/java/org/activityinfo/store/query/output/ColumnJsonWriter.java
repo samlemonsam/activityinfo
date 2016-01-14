@@ -75,8 +75,6 @@ public class ColumnJsonWriter {
             case NUMBER:
                 writer.name("value").value(view.getDouble(0));
                 break;
-            case DATE:
-                throw new UnsupportedOperationException("todo");
         }
     }
     
@@ -106,9 +104,6 @@ public class ColumnJsonWriter {
             case NUMBER:
                 writeDoubleValues(view);
                 break;
-            case DATE:
-                writeDateValues(view);
-                break;
         }
         writer.endArray();
     }
@@ -129,13 +124,8 @@ public class ColumnJsonWriter {
             }
         }
     }
-
-    private void writeDateValues(ColumnView view) throws IOException {
-        for(int i=0;i<view.numRows();++i) {
-            this.writer.value(view.getDate(i).toString());
-        }
-    }
-
+    
+    
     public void flush() throws IOException {
         writer.flush();
     }
