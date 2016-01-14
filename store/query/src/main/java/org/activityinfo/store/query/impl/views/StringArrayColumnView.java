@@ -6,7 +6,6 @@ import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -50,11 +49,6 @@ public class StringArrayColumnView implements ColumnView, Serializable {
     @Override
     public String getString(int row) {
         return values[row];
-    }
-
-    @Override
-    public Date getDate(int row) {
-        return null;
     }
 
     @Override

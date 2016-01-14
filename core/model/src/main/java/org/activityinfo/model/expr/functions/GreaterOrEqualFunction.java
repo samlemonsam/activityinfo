@@ -45,4 +45,9 @@ public class GreaterOrEqualFunction extends ComparisonOperator {
 
         throw new UnsupportedOperationException("Operators are not supported.");
     }
+
+    @Override
+    protected boolean apply(double x, double y) {
+        return x >= y;
+    }
 }

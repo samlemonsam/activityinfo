@@ -1,11 +1,8 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.model.query;
 
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class DoubleArrayColumnView implements ColumnView, Serializable {
     private double[] values;
@@ -44,11 +41,6 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Date getDate(int row) {
         return null;
     }
 

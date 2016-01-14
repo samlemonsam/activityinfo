@@ -6,7 +6,6 @@ import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
 import java.util.BitSet;
-import java.util.Date;
 
 /**
  * A {@code ColumnView} of a boolean collection field that uses
@@ -47,11 +46,6 @@ public class BitSetColumnView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Date getDate(int row) {
         return null;
     }
 

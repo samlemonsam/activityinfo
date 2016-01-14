@@ -5,6 +5,7 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
@@ -91,23 +92,23 @@ public class QueryEvaluator {
 
         @Override
         public Slot<ColumnView> visitFunctionCall(final FunctionCallNode call) {
-            if(ColumnFunctions.isSupported(call.getFunction())) {
-                final List<Slot<ColumnView>> arguments = Lists.newArrayList();
+            if(call.getFunction() instanceof ColumnFunction) {
+                final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
                 for(ExprNode argument : call.getArguments()) {
-                    arguments.add(argument.accept(this));
+                    argumentSlots.add(argument.accept(this));
                 }
                 return new Slot<ColumnView>() {
                     @Override
                     public ColumnView get() {
-                        List<ColumnView> columns = Lists.newArrayList();
-                        for (Slot<ColumnView> argument : arguments) {
+                        List<ColumnView> arguments = Lists.newArrayList();
+                        for (Slot<ColumnView> argument : argumentSlots) {
                             ColumnView view = argument.get();
                             if(view == null) {
                                 throw new IllegalStateException();
                             }
-                            columns.add(view);
+                            arguments.add(view);
                         }
-                        return ColumnFunctions.create(call.getFunction(), columns);
+                        return ((ColumnFunction) call.getFunction()).columnApply(arguments);
                     }
                 };
             } else {

@@ -4,8 +4,6 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
-import java.util.Date;
-
 public abstract class AbstractStringView implements ColumnView {
 
     @Override
@@ -21,11 +19,6 @@ public abstract class AbstractStringView implements ColumnView {
     @Override
     public final double getDouble(int row) {
         return Double.NaN;
-    }
-
-    @Override
-    public final Date getDate(int row) {
-        return null;
     }
 
     @Override

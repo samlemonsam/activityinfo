@@ -3,13 +3,12 @@ package org.activityinfo.model.query;
 import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public interface ColumnView extends Serializable {
 
-    public static final int TRUE = 1;
-    public static final int FALSE = 0;
-    public static final int NA = Integer.MAX_VALUE;
+    int TRUE = 1;
+    int FALSE = 0;
+    int NA = Integer.MAX_VALUE;
 
 
     ColumnType getType();
@@ -22,8 +21,6 @@ public interface ColumnView extends Serializable {
 
     String getString(int row);
 
-    Date getDate(int row);
-    
     Extents getExtents(int row);
 
     /**

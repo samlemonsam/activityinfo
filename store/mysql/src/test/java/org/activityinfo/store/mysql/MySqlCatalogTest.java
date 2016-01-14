@@ -9,6 +9,7 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
@@ -32,10 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
@@ -213,7 +211,17 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         
         query(CuidAdapter.reportingPeriodFormClass(3), "rate", "date1", "date2", "site.partner", "site.partner.label",
                 "site.location.label");
+        
+        assertThat(column("date1"), hasValues("2009-01-01", "2009-02-01", "2009-03-01"));
+    }
 
+
+    @Test
+    public void testReportingPeriodWithDateFilter() {
+        queryWhere(CuidAdapter.reportingPeriodFormClass(3), Arrays.asList(ColumnModel.ID_SYMBOL, "date1"), 
+            "date1 > '2009-01-15'");
+        assertThat(column(ColumnModel.ID_SYMBOL), hasValues("m0000000092", "m0000000093"));
+        assertThat(column("date1"),               hasValues("2009-02-01", "2009-03-01"));
     }
 
     @Test

@@ -6,7 +6,6 @@ import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
 import java.util.BitSet;
-import java.util.Date;
 
 public class BitSetWithMissingView implements ColumnView, Serializable {
 
@@ -55,11 +54,6 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Date getDate(int row) {
         return null;
     }
 

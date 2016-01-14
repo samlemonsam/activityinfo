@@ -4,8 +4,6 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
-import java.util.Date;
-
 
 public class FilteredColumnView implements ColumnView {
     private ColumnView view;
@@ -39,11 +37,6 @@ public class FilteredColumnView implements ColumnView {
     @Override
     public String getString(int row) {
         return view.getString(filteredIndices[row]);
-    }
-
-    @Override
-    public Date getDate(int row) {
-        return view.getDate(filteredIndices[row]);
     }
 
     @Override

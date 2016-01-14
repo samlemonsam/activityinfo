@@ -7,8 +7,6 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
-import java.util.Date;
-
 
 public class ColumnViewWrapper implements ColumnView {
     private JsonArray array;
@@ -49,11 +47,6 @@ public class ColumnViewWrapper implements ColumnView {
         } else {
             return jsonElement.getAsString();
         }
-    }
-
-    @Override
-    public Date getDate(int row) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

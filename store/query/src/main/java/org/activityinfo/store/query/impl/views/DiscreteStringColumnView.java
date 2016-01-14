@@ -5,7 +5,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class DiscreteStringColumnView implements ColumnView, Serializable {
 
@@ -48,11 +47,6 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
         } else {
             return labels[labelIndex];
         }
-    }
-
-    @Override
-    public Date getDate(int row) {
-        return null;
     }
 
     @Override

@@ -4,8 +4,6 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
-import java.util.Date;
-
 /**
  * Area column view
  */
@@ -54,11 +52,6 @@ public class GeoColumnView implements ColumnView {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Date getDate(int row) {
         return null;
     }
 

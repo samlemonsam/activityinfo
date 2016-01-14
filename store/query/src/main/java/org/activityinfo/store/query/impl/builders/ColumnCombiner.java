@@ -3,8 +3,8 @@ package org.activityinfo.store.query.impl.builders;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
-import org.activityinfo.store.query.impl.views.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 
 import java.util.List;

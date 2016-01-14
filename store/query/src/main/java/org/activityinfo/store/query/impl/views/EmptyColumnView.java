@@ -5,7 +5,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class EmptyColumnView implements ColumnView, Serializable {
 
@@ -42,11 +41,6 @@ public class EmptyColumnView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Date getDate(int row) {
         return null;
     }
 

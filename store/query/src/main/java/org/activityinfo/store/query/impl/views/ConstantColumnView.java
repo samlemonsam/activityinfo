@@ -10,7 +10,6 @@ import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class ConstantColumnView implements ColumnView, Serializable {
 
@@ -88,11 +87,6 @@ public class ConstantColumnView implements ColumnView, Serializable {
     @Override
     public String getString(int row) {
        return stringValue;
-    }
-
-    @Override
-    public Date getDate(int row) {
-        return null;
     }
 
     @Override

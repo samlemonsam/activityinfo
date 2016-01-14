@@ -62,7 +62,7 @@ public class AttributeDimBinding extends DimBinding {
         FieldPath fieldId = findFieldById(fields);
         if(fieldId == null) {
             fieldId = findFieldByName(fields);
-        }
+        }   
         
         if(fieldId != null) {
             return Collections.singletonList(new ColumnModel().setExpression(fieldId).as(columnId));

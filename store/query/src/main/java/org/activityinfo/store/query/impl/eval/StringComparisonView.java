@@ -5,8 +5,6 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
-import java.util.Date;
-
 public class StringComparisonView implements ColumnView {
 
     private final ColumnView x;
@@ -60,11 +58,6 @@ public class StringComparisonView implements ColumnView {
             case NA:
                 return "NA";
         }
-        return null;
-    }
-
-    @Override
-    public Date getDate(int row) {
         return null;
     }
 

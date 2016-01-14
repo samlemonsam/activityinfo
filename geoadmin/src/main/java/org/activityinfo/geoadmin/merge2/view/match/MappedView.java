@@ -4,8 +4,6 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
-import java.util.Date;
-
 
 public abstract class MappedView implements ColumnView {
     
@@ -48,15 +46,6 @@ public abstract class MappedView implements ColumnView {
             return null;
         }
         return source.getString(newRow);
-    }
-
-    @Override
-    public final Date getDate(int row) {
-        int newRow = transformRow(row);
-        if(newRow == -1) {
-            return null;
-        }
-        return source.getDate(newRow);
     }
 
     @Override

@@ -125,7 +125,6 @@ public class ColumnJsonWriter {
         }
     }
     
-    
     public void flush() throws IOException {
         writer.flush();
     }

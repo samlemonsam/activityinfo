@@ -12,7 +12,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.joda.time.LocalDate;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 
@@ -47,7 +46,7 @@ public class DateDimBinding extends DimBinding {
 
         DimensionCategory[] c = new DimensionCategory[column.numRows()];
         for (int i = 0; i < column.numRows(); i++) {
-            Date date = column.getDate(i);
+            String date = column.getString(i);
             LocalDate localDate = new LocalDate(date);
             
             switch (model.getUnit()) {
@@ -64,7 +63,7 @@ public class DateDimBinding extends DimBinding {
                     c[i] = new WeekCategory(localDate.getWeekyear(), localDate.getWeekOfWeekyear());
                     break;
                 case DAY:
-                    c[i] = new DayCategory(date);
+                    c[i] = new DayCategory(localDate.toDate());
                     break;
             }
         }

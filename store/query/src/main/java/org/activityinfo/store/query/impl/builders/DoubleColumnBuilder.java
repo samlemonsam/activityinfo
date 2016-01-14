@@ -2,10 +2,10 @@ package org.activityinfo.store.query.impl.builders;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.impl.views.DoubleArrayColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.impl.PendingSlot;
 import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.query.impl.PendingSlot;
 
 import java.util.List;
 
