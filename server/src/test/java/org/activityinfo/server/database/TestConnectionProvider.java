@@ -57,8 +57,7 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
     private static final String PASSWORD_PROPERTY = "testDatabasePassword";
     private static final String USERNAME_PROPERTY = "testDatabaseUsername";
 
-//    private static final String DEFAULT_PASSWORD = "adminpwd";
-    private static final String DEFAULT_PASSWORD = "";
+    private static final String DEFAULT_PASSWORD = "adminpwd";
     private static final String DEFAULT_USERNAME = "root";
     
     public static String DATABASE_NAME, USERNAME, PASSWORD;
