@@ -1,6 +1,5 @@
 package org.activityinfo.model.form;
 
-import com.sun.imageio.plugins.common.I18N;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -38,9 +37,6 @@ public class FormClassTest {
         formClass.setOwnerId(ResourceId.ROOT_ID);
         formClass.setLabel("Form");
 
-        FormField notBuiltIn = formClass.addField(ResourceId.generateId())
-                .setLabel("Built-in");
-
         FormField projectField = new FormField(CuidAdapter.field(formClass.getId(), CuidAdapter.PROJECT_FIELD))
                 .setLabel("Project field")
                 .setType(ReferenceType.single(CuidAdapter.projectFormClass(1)));
@@ -52,11 +48,14 @@ public class FormClassTest {
                 .setRequired(true);
         formClass.addElement(startDateField);
 
+        FormField notBuiltIn = formClass.addField(ResourceId.generateId())
+                .setLabel("Built-in");
+
         formClass.reorderFormFields();
 
-        assertTrue(formClass.getFields().indexOf(projectField) == 0);
-        assertTrue(formClass.getFields().indexOf(startDateField) == 1);
-        assertTrue(formClass.getFields().indexOf(notBuiltIn) == 2);
+        assertTrue(formClass.getFields().indexOf(notBuiltIn) == 0);
+        assertTrue(formClass.getFields().indexOf(projectField) == 1);
+        assertTrue(formClass.getFields().indexOf(startDateField) == 2);
     }
 
 }

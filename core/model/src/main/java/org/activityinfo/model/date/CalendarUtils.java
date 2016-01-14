@@ -52,8 +52,8 @@ import java.util.Map;
 public class CalendarUtils {
 
     // for mock purpose
-    public static interface DayOfWeekProvider {
-        public DayOfWeek dayOfWeek(Date date);
+    public interface DayOfWeekProvider {
+        DayOfWeek dayOfWeek(Date date);
     }
 
     public static final DayOfWeekProvider GWT_DAY_OF_WEEK_PROVIDER = new DayOfWeekProvider() {
