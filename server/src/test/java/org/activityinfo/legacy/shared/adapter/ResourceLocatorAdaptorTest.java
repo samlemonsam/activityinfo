@@ -9,14 +9,11 @@ import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.IdCriteria;
-import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.TFormTree;
@@ -25,8 +22,6 @@ import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.geo.AiLatLng;
-import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
@@ -49,7 +44,8 @@ import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdm
 import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -110,20 +106,22 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     }
 
-    @Test
-    public void persistSiteException() {
-
-        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
-                NFI_DIST_FORM_CLASS);
-
-        Promise<Void> result;
-
-        result = resourceLocator.persist(instance);
-        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
-
-        result = resourceLocator.persist(Arrays.asList(instance, instance));
-        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
-    }
+    // This negative test tests case when nullary location does not exist for given locationtype.
+    // However now it should always be present if liquibase migration script was run.
+//    @Test
+//    public void persistSiteException() {
+//
+//        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
+//                NFI_DIST_FORM_CLASS);
+//
+//        Promise<Void> result;
+//
+//        result = resourceLocator.persist(instance);
+//        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
+//
+//        result = resourceLocator.persist(Arrays.asList(instance, instance));
+//        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
+//    }
 
     @Test
     @OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
@@ -272,7 +270,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     @Test
     public void simpleLocationTypeClassQuery() {
-        assertThat(queryByClassType(ClassType.LOCATION_TYPE, databaseId(PEAR_DATABASE_ID)), Matchers.hasSize(3));
+        assertThat(queryByClassType(ClassType.LOCATION_TYPE, databaseId(PEAR_DATABASE_ID)), Matchers.hasSize(6));
     }
 
     @Test

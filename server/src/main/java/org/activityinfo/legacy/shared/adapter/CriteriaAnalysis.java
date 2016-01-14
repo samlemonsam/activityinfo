@@ -59,15 +59,15 @@ public class CriteriaAnalysis extends CriteriaVisitor {
             Preconditions.checkNotNull(id, "ids cannot be null");
   
             if (criteria.isMappedToLegacyModel()) {
+                if (id.getDomain() == CuidAdapter.SITE_DOMAIN) {
+                    querySiteById = true;
+                }
                 if (id.getDomain() != CuidAdapter.ACTIVITY_CATEGORY_DOMAIN) {
                     ids.put(id.getDomain(), CuidAdapter.getLegacyIdFromCuid(id));
-                } else {
-                    if (id.getDomain() == CuidAdapter.SITE_DOMAIN) {
-                        querySiteById = true;
-                    } else if (querySiteById) {
-                        throw new RuntimeException("Id domain is not SITE_DOMAIN while querySiteById flag is set to true." +
-                                "All ids must be site ids. It's not allowed to mix ids");
-                    }
+                }
+                if (querySiteById && id.getDomain() != CuidAdapter.SITE_DOMAIN) {
+                    throw new RuntimeException("Id domain is not SITE_DOMAIN while querySiteById flag is set to true." +
+                            "All ids must be site ids. It's not allowed to mix ids");
                 }
             } else {
                 if (id.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
