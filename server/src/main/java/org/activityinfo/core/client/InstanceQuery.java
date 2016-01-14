@@ -59,8 +59,9 @@ public class InstanceQuery {
         return criteria;
     }
 
-    public void setCriteria(Criteria criteria) {
+    public InstanceQuery setCriteria(Criteria criteria) {
         this.criteria = criteria;
+        return this;
     }
 
     public FieldPath getFilterFieldPath() {

@@ -2,7 +2,6 @@ package org.activityinfo.legacy.shared.command.result;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.resource.Resources;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class FormInstanceListResult implements CommandResult {
     public List<FormInstance> getFormInstanceList() {
         List<FormInstance> result = Lists.newArrayList();
         for (String json : formInstanceJsonList) {
-            result.add(FormInstance.fromResource(Resources.fromJson(json)));
+            result.add(FormInstance.fromJson(json));
         }
         return result;
     }

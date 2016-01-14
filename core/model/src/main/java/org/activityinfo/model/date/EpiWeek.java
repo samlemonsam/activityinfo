@@ -95,4 +95,3 @@ public class EpiWeek implements Serializable {
                 '}';
     }
 }
-}

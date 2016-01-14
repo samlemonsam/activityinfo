@@ -31,8 +31,8 @@ import org.activityinfo.model.form.FormField;
  */
 public interface FieldTemplate extends Template<FormField> {
 
-    public String getLabel();
+    String getLabel();
 
-    public FormField create();
+    FormField create();
 
 }

@@ -7,9 +7,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.entity.FormInstanceEntity;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -62,8 +60,7 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
 
     private FormInstance validateFormInstance(String json) {
         try {
-            Resource resource = Resources.fromJson(json);
-            return FormInstance.fromResource(resource);
+            return FormInstance.fromJson(json);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormInstance json: " + e.getMessage(), e);
             throw new CommandException();

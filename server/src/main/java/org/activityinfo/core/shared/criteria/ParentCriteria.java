@@ -103,7 +103,7 @@ public class ParentCriteria implements Criteria {
 
     @Override
     public Criteria copy() {
-        return new ParentCriteria(parentId);
+        return new ParentCriteria(parent);
     }
 
     public static ParentCriteria isRoot() {

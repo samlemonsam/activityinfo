@@ -83,6 +83,11 @@ public class FormInstance implements IsResource {
         return this;
     }
 
+    public static FormInstance fromJson(String json) {
+        Resource resource = Resources.resourceFromJson(json);
+        return FormInstance.fromResource(resource);
+    }
+
     public static FormInstance fromResource(Resource resource) {
         FormInstance instance = new FormInstance(resource.getId(), resource.getResourceId("classId"));
         if (resource.getOwnerId() != null) { // owner may be null for FieldTypes
