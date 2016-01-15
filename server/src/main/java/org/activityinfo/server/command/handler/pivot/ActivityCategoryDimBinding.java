@@ -21,9 +21,6 @@ public class ActivityCategoryDimBinding extends DimBinding {
 
     @Override
     public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
-        int activityId = activityIdOf(formTree);
-        String name = formTree.getRootFormClass().getLabel();
-
         SimpleCategory category = new SimpleCategory(activity.getCategoryName());
 
         DimensionCategory[] categories = new DimensionCategory[columnSet.getNumRows()];

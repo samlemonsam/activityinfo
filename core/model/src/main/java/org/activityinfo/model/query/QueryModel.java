@@ -61,6 +61,14 @@ public class QueryModel {
         return column;
     }
 
+    public ColumnModel selectExpr(ExprNode expression) {
+        ColumnModel column = new ColumnModel();
+        column.setId("_expr" + (columns.size() + 1));
+        column.setExpression(expression);
+        columns.add(column);
+        return column;
+    }
+
     public ColumnModel selectField(FieldPath path) {
         ColumnModel column = new ColumnModel();
         column.setId(path.getLeafId().asString());

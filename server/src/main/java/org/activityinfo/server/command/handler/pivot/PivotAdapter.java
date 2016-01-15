@@ -14,6 +14,7 @@ import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
+import org.activityinfo.legacy.shared.reports.content.TargetCategory;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
@@ -61,12 +62,14 @@ public class PivotAdapter {
      * Maps indicator ids to form class ids
      */
     private final List<ActivityMetadata> activities;
+    private final Multimap<Integer, ActivityMetadata> databases = HashMultimap.create();
 
     private Map<ResourceId, FormTree> formTrees;
-    
+
     private List<DimBinding> groupBy;
+
     private Optional<IndicatorDimBinding> indicatorDimension = Optional.absent();
-    
+
     private Multimap<String, String> attributeFilters = HashMultimap.create();
 
     private final Map<Object, Accumulator> buckets = Maps.newHashMap();
@@ -75,7 +78,7 @@ public class PivotAdapter {
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryTime = Stopwatch.createUnstarted();
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
-    
+
 
     public PivotAdapter(IndicatorOracle indicatorOracle, CollectionCatalog catalog, PivotSites command) throws InterruptedException {
         this.indicatorOracle = indicatorOracle;
@@ -87,11 +90,14 @@ public class PivotAdapter {
         // Mapping from indicator id -> activityId
         metadataTime.start();
         activities = indicatorOracle.fetch(filter);
+        for (ActivityMetadata activity : activities) {
+            databases.put(activity.getDatabaseId(), activity);
+        }
         metadataTime.stop();
 
         // Query form trees: needed to determine attribute mapping
         formTrees = queryFormTrees();
-        
+
         findAttributeFilterNames();
 
         // Define the dimensions we're pivoting by
@@ -105,11 +111,14 @@ public class PivotAdapter {
         }
     }
 
+    private boolean pivotByTargets() {
+        return command.isPivotedBy(DimensionType.Target);
+    }
 
     private Map<ResourceId, FormTree> queryFormTrees() {
-        
+
         treeTime.start();
-        
+
         Set<ResourceId> formIds = new HashSet<>();
         for(ActivityMetadata activity : activities) {
             formIds.add(activity.getFormClassId());
@@ -120,27 +129,27 @@ public class PivotAdapter {
 
         BatchingFormTreeBuilder builder = new BatchingFormTreeBuilder(catalog);
         Map<ResourceId, FormTree> trees = builder.queryTrees(formIds);
-        
+
         treeTime.stop();
-        
+
         return trees;
-        
+
     }
 
     /**
      * Maps attribute filter ids to their attribute group id and name.
-     * 
+     *
      * Attribute filters are _SERIALIZED_ as only the integer ids of the required attributes,
      * but they are actually applied by _NAME_ to all forms in the query.
-     * 
+     *
      */
     private void findAttributeFilterNames() {
-       
+
         Set<Integer> attributeIds = filter.getRestrictions(DimensionType.Attribute);
         if(attributeIds.isEmpty()) {
             return;
         }
-        
+
         for (FormTree formTree : formTrees.values()) {
             for (FormTree.Node node : formTree.getLeaves()) {
                 if(node.isEnum()) {
@@ -159,7 +168,7 @@ public class PivotAdapter {
             }
         }
     }
-    
+
 
     private DimBinding bindingFor(Dimension dimension) {
         switch (dimension.getType()) {
@@ -167,34 +176,36 @@ public class PivotAdapter {
                 return new PartnerDimBinding();
             case Project:
                 return new ProjectDimBinding();
-            
+
             case Activity:
                 return new ActivityDimBinding();
             case ActivityCategory:
                 return new ActivityCategoryDimBinding();
-            
+
             case Date:
                 return new DateDimBinding((DateDimension) dimension);
-            
+
             case AttributeGroup:
                 return new AttributeDimBinding((AttributeGroupDimension) dimension, formTrees.values());
-            
+
             case AdminLevel:
                 return new AdminDimBinding((AdminDimension) dimension);
-            
+
             case Location:
                 return new LocationDimBinding();
-            
+
             case Site:
                 return new SiteDimBinding();
-            
+
             case Database:
                 return new DatabaseDimBinding();
-            
+
+
+            case Target:
+                return new TargetDimBinding();
+
             case Status:
             case Attribute:
-                break;
-            case Target:
                 break;
         }
         throw new UnsupportedOperationException("Unsupported dimension " + dimension);
@@ -219,12 +230,21 @@ public class PivotAdapter {
             }
         }
 
+        if(command.isPivotedBy(DimensionType.Target) &&
+           command.getValueType() == PivotSites.ValueType.INDICATOR) {
+           
+            for (Integer databaseId : databases.keySet()) {
+                executeTargetValuesQuery(databaseId);
+            }
+        }
+
         LOGGER.info(String.format("Pivot timings: metadata %s, trees: %s, query: %s, aggregate: %s",
                 metadataTime, treeTime, queryTime, aggregateTime));
 
 
         return new PivotSites.PivotResult(createBuckets());
     }
+
 
     private void executeIndicatorValuesQuery(ActivityMetadata activity) {
         ResourceId formClassId = activity.getFormClassId();
@@ -242,7 +262,7 @@ public class PivotAdapter {
                 queryModel.addColumn(columnModel);
             }
         }
-        
+
         // if any of the indicators are "site count" indicators, then we need
         // to query the site id as well
         addSiteIdToQuery(activity, queryModel);
@@ -252,13 +272,13 @@ public class PivotAdapter {
 
         // Query the table 
         ColumnSet columnSet = executeQuery(queryModel);
-        
+
         // Now add the results to the buckets
         aggregateTime.start();
         int[] siteIds = extractSiteIds(columnSet);
         DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
 
-        
+
         for (IndicatorMetadata indicator : activity.getIndicators()) {
             ColumnView measureView = columnSet.getColumnView(indicator.getAlias());
             DimensionCategory indicatorCategory = null;
@@ -269,11 +289,11 @@ public class PivotAdapter {
             for (int i = 0; i < columnSet.getNumRows(); i++) {
 
                 if(indicator.getAggregation() == IndicatorDTO.AGGREGATE_SITE_COUNT) {
-               
+
                     Map<Dimension, DimensionCategory> key = bucketKey(categories, indicatorCategory, i);
                     Accumulator bucket = bucketForKey(key, indicator.aggregation);
                     bucket.addSite(siteIds[i]);
-                    
+
                 } else {
                     double value = measureView.getDouble(i);
                     if (!Double.isNaN(value)) {
@@ -282,15 +302,70 @@ public class PivotAdapter {
                         bucket.addValue(value);
                     }
                 }
-          
+
             }
         }
         aggregateTime.stop();
     }
 
-    private Map<Dimension, DimensionCategory> bucketKey(
-        DimensionCategory[][] categories, @Nullable DimensionCategory indicatorCategory, int rowIndex) {
+    private void executeTargetValuesQuery(Integer databaseId) {
+
+        ResourceId targetFormClassId = CuidAdapter.cuid(CuidAdapter.TARGET_FORM_CLASS_DOMAIN, databaseId);
+
+        QueryModel queryModel = new QueryModel(targetFormClassId);
+
+        Collection<ActivityMetadata> activities = databases.get(databaseId);
+
+        // Add all indicators we're querying for
+        for (ActivityMetadata activity : activities) {
+            for (IndicatorMetadata indicator : activity.getIndicators()) {
+                queryModel.selectField(indicator.getTargetFieldId()).as(indicator.getAlias());
+            }
+        }
+
+        for (DimBinding dimension : groupBy) {
+            for (ColumnModel columnModel : dimension.getTargetColumnQuery(targetFormClassId)) {
+                queryModel.addColumn(columnModel);
+            }
+        }
+
+        ColumnSet columnSet = executeQuery(queryModel);
+
+        // Now add the results to the buckets
+        aggregateTime.start();
+
+        Dimension targetDim = new Dimension(DimensionType.Target);
         
+        for (ActivityMetadata activity : activities) {
+            for (IndicatorMetadata indicator : activity.getIndicators()) {
+
+                ColumnView measureView = columnSet.getColumnView(indicator.getAlias());
+                DimensionCategory indicatorCategory = null;
+
+                if (indicatorDimension.isPresent()) {
+                    indicatorCategory = indicatorDimension.get().category(indicator);
+                }
+                for (int i = 0; i < columnSet.getNumRows(); i++) {
+                    double value = measureView.getDouble(i);
+                    if (!Double.isNaN(value)) {
+                        Map<Dimension, DimensionCategory> key = new HashMap<>();
+                        key.put(targetDim, TargetCategory.TARGETED);
+                        if(indicatorCategory != null) {
+                            key.put(indicatorDimension.get().getModel(), indicatorCategory);
+                        }
+                        Accumulator bucket = bucketForKey(key, indicator.aggregation);
+                        bucket.addValue(value);
+                    }
+                }
+            }
+        }
+        aggregateTime.stop();
+    }
+
+
+    private Map<Dimension, DimensionCategory> bucketKey(
+            DimensionCategory[][] categories, @Nullable DimensionCategory indicatorCategory, int rowIndex) {
+
         Map<Dimension, DimensionCategory> key = new HashMap<>();
 
         // Only include indicator as dimension if we are pivoting on dimension
@@ -318,9 +393,9 @@ public class PivotAdapter {
      */
     private void executeSiteCountQuery(ActivityMetadata activity) {
         if(activity.isMonthly() &&
-            (command.isPivotedBy(DimensionType.Date) ||
-             command.isPivotedBy(DimensionType.Indicator))) {
-            
+                (command.isPivotedBy(DimensionType.Date) ||
+                        command.isPivotedBy(DimensionType.Indicator))) {
+
             executeSiteCountQueryOnReportingPeriod(activity);
         } else {
             executeSiteCountQueryOnSite(activity);
@@ -333,7 +408,7 @@ public class PivotAdapter {
         FormTree formTree = formTrees.get(activity.getSiteFormClassId());
         QueryModel queryModel = new QueryModel(activity.getSiteFormClassId());
         queryModel.setFilter(composeFilter(activity));
-        
+
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
             for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
@@ -353,7 +428,7 @@ public class PivotAdapter {
 
             Map<Dimension, DimensionCategory> key = bucketKey(categories, null, i);
             Accumulator bucket = bucketForKey(key, IndicatorDTO.AGGREGATE_SITE_COUNT);
-            
+
             bucket.addCount(1);
         }
         aggregateTime.stop();
@@ -361,7 +436,7 @@ public class PivotAdapter {
 
     private void executeSiteCountQueryOnReportingPeriod(ActivityMetadata activity) {
         Preconditions.checkArgument(activity.isMonthly());
-        
+
         FormTree formTree = formTrees.get(activity.getFormClassId());
         QueryModel queryModel = new QueryModel(activity.getFormClassId());
         queryModel.setFilter(composeFilter(activity));
@@ -372,7 +447,7 @@ public class PivotAdapter {
                 queryModel.addColumn(columnModel);
             }
         }
-        
+
         addSiteIdToQuery(activity, queryModel);
 
         // Query the table 
@@ -383,7 +458,7 @@ public class PivotAdapter {
         // Now add the counts to the buckets
         DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
         int siteId[] = extractSiteIds(columnSet);
-        
+
         for (int i = 0; i < columnSet.getNumRows(); i++) {
 
             Map<Dimension, DimensionCategory> key = bucketKey(categories, null, i);
@@ -440,7 +515,7 @@ public class PivotAdapter {
         conditions.addAll(adminFilter(activity));
         conditions.addAll(attributeFilters());
         conditions.addAll(dateFilter());
-                
+
         if(conditions.size() > 0) {
             ExprNode filterExpr = Exprs.allTrue(conditions);
             LOGGER.info("Filter: " + filterExpr);
@@ -457,7 +532,7 @@ public class PivotAdapter {
         if (this.filter.isRestricted(DimensionType.AdminLevel)) {
 
             List<ExprNode> conditions = Lists.newArrayList();
-            
+
             // we don't know which adminlevel this belongs to so we have construct a giant OR statement
             List<ExprNode> adminIdExprs = findAdminIdExprs(formTrees.get(activity.getFormClassId()));
 
@@ -466,14 +541,14 @@ public class PivotAdapter {
                     conditions.add(Exprs.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
                 }
             }
-            
+
             return singleton(anyTrue(conditions));
-            
+
         } else {
             return emptySet();
         }
     }
-    
+
     private List<ExprNode> findAdminIdExprs(FormTree formTree) {
         List<ExprNode> expressions = Lists.newArrayList();
         for (FormClass formClass : formTree.getFormClasses()) {
@@ -485,9 +560,9 @@ public class PivotAdapter {
     }
 
     private List<ExprNode> attributeFilters() {
-                
+
         List<ExprNode> conditions = Lists.newArrayList();
-        
+
         for (String field : attributeFilters.keySet()) {
             List<ExprNode> valueConditions = Lists.newArrayList();
             for (String value : attributeFilters.get(field)) {
@@ -516,21 +591,21 @@ public class PivotAdapter {
 
     private Collection<FunctionCallNode> dateFilter() {
         if(filter.isDateRestricted()) {
-            
+
             SymbolExpr dateExpr = new SymbolExpr("date2");
             ConstantExpr minDate = new ConstantExpr(new LocalDate(filter.getMinDate()));
             ConstantExpr maxDate = new ConstantExpr(new LocalDate(filter.getMaxDate()));
-            
+
             return singleton(
                     new FunctionCallNode(AndFunction.INSTANCE,
                             new FunctionCallNode(GreaterOrEqualFunction.INSTANCE, dateExpr, minDate),
                             new FunctionCallNode(LessOrEqualFunction.INSTANCE, dateExpr, maxDate)));
-            
+
         } else {
             return Collections.emptyList();
         }
     }
-    
+
     private DimensionCategory[][] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
         DimensionCategory[][] array = new DimensionCategory[groupBy.size()][];
 

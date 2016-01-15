@@ -10,9 +10,13 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.sql.*;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class HibernateQueryExecutor implements QueryExecutor {
+    
+    private static final Logger LOGGER = Logger.getLogger(HibernateQueryExecutor.class.getName());
+    
     private final Provider<EntityManager> entityManager;
 
     @Inject
@@ -27,6 +31,8 @@ public class HibernateQueryExecutor implements QueryExecutor {
 
     @Override
     public ResultSet query(final String sql) {
+        LOGGER.info("Executing query: " + sql);
+
         return doWork(new AbstractReturningWork<ResultSet>() {
             @Override
             public ResultSet execute(Connection connection) throws SQLException {

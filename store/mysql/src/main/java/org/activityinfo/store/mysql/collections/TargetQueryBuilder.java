@@ -82,12 +82,14 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
             Arrays.fill(valueBuffer, Double.NaN);
 
             try (ResultSet rs = executor.query("SELECT  " +
-                    "T.TargetId, " +
-                    "T.Name, " +
-                    "T.Date1, " +
-                    "T.Date2, " +
-                    "T.PartnerId, " +
-                    "T.ProjectId, " +
+                    "T.TargetId, " +        // (1)
+                    "T.Name, " +            // (2)
+                    "T.Date1, " +           // (3)
+                    "T.Date2, " +           // (4)
+                    "T.PartnerId, " +       // (5)    
+                    "T.ProjectId, " +       // (6)
+                    "V.IndicatorId, " +     // (7)
+                    "V.Value " +            // (8)
                     "FROM target T " +
                     "LEFT JOIN targetvalue V ON (T.targetId = V.targetId) " +
                     "WHERE T.DatabaseId = " + target.getDatabaseId() + " " +
@@ -104,11 +106,20 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
                         if (lastTargetId > 0) {
                             flushValues();
                         }
-
-
                         lastTargetId = targetId;
                     }
-
+                    
+                    int indicatorId = rs.getInt(7);
+                    double value = rs.getDouble(8);
+                    if(!rs.wasNull()) {
+                        ValueEmitter valueEmitter = valueEmitters.get(indicatorId);
+                        if(valueEmitter != null) {
+                            valueEmitter.set(value);
+                        }
+                    }
+                }
+                if(lastTargetId > 0) {
+                    flushValues();
                 }
 
                 for (CursorObserver<?> observer : observers) {
@@ -125,6 +136,9 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
         for (ValueEmitter valueEmitter : valueEmitters.values()) {
             valueEmitter.flush();
         }
+
+        // Reset buffer
+        Arrays.fill(valueBuffer, Double.NaN);
     }
     
     private class ValueEmitter  {
@@ -137,6 +151,10 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
             this.bufferIndex = index;
             this.observer = observer;
             this.units = ((QuantityType) indicatorField.getType()).getUnits();
+        }
+        
+        public void set(double value) {
+            valueBuffer[bufferIndex] = value;
         }
         
         public void flush() {

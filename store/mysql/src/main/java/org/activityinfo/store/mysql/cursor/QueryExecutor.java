@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface QueryExecutor {
 
-    public ResultSet query(String sql);
+    ResultSet query(String sql);
 
     int update(String sql, List<?> parameters);
 }

@@ -306,6 +306,8 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         execute();
 
         assertThat().thereAre(2).buckets();
+        assertThat().forRealizedIndicator(1).thereIsOneBucketWithValue(10000);
+        assertThat().forIndicatorTarget(1).thereIsOneBucketWithValue(20000);
     }
 
 

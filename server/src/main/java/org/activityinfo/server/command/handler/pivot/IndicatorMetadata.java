@@ -1,6 +1,10 @@
 package org.activityinfo.server.command.handler.pivot;
 
 import com.google.common.collect.Sets;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -32,15 +36,23 @@ public class IndicatorMetadata {
     public ResourceId getFieldId() {
         return CuidAdapter.indicatorField(sourceId);
     }
-    
-    public String getFieldExpression() {
-        if(aggregation == 2) {
-            return "1";
-        } else {
-            return CuidAdapter.indicatorField(sourceId).asString();
-        }
+
+    public ResourceId getTargetFieldId() {
+        return CuidAdapter.cuid(CuidAdapter.TARGET_INDICATOR_FIELD_DOMAIN, sourceId);
     }
 
+    public ExprNode getFieldExpression() {
+        switch (aggregation) {
+            case IndicatorDTO.AGGREGATE_SITE_COUNT:
+                return new ConstantExpr(1);
+            default:
+                return new SymbolExpr(CuidAdapter.indicatorField(sourceId));
+        }
+    }
+    
+    public ExprNode getTargetFieldExpression() {
+        return new SymbolExpr(CuidAdapter.indicatorField(sourceId));
+    }
 
     public String getAlias() {
         return "I" + sourceId;

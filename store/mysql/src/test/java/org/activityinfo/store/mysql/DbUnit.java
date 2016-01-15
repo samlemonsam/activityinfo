@@ -67,7 +67,7 @@ public class DbUnit {
         return new QueryExecutor() {
             @Override
             public ResultSet query(String sql) {
-                Statement statement = null;
+                Statement statement;
                 try {
                     statement = connection.createStatement();
                     return statement.executeQuery(sql);

@@ -8,6 +8,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,8 @@ public abstract class DimBinding {
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         return Collections.emptyList();
     }
+    
+    public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) { return Collections.emptyList(); }
 
     public abstract Dimension getModel();
     

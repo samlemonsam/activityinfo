@@ -2,18 +2,19 @@ package org.activityinfo.server.command.handler.pivot;
 
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
-import org.activityinfo.legacy.shared.reports.content.EntityCategory;
+import org.activityinfo.legacy.shared.reports.content.TargetCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 
 import java.util.Arrays;
 
+/**
+ * Maps target
+ */
+public class TargetDimBinding extends DimBinding {
+    private final Dimension model = new Dimension(DimensionType.Target);
 
-public class DatabaseDimBinding extends DimBinding {
-    
-    private static final Dimension model = new Dimension(DimensionType.Database);
-    
     @Override
     public Dimension getModel() {
         return model;
@@ -21,12 +22,10 @@ public class DatabaseDimBinding extends DimBinding {
 
     @Override
     public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
-
-        EntityCategory category = new EntityCategory(activity.getDatabaseId(), activity.getDatabaseName());
-
-        DimensionCategory[] categories = new DimensionCategory[columnSet.getNumRows()];
-        Arrays.fill(categories, category);
-
+        
+        DimensionCategory categories[] = new DimensionCategory[columnSet.getNumRows()];
+        Arrays.fill(categories, TargetCategory.REALIZED);
+        
         return categories;
     }
 }

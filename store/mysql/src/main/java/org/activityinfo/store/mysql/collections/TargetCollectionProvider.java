@@ -42,41 +42,47 @@ public class TargetCollectionProvider implements CollectionProvider {
         
         Set<Integer> targetIds = Sets.newHashSet();
         for (ResourceId resourceId : resourceIds) {
-            targetIds.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
-        }
-        
-        Map<Integer, DatabaseTargetForm> targetMap = Maps.newHashMap();
-        
-        try(ResultSet rs = executor.query(
-            "SELECT " +
-              "D.DatabaseId, " + 
-              "D.Name, " +
-              "I.IndicatorId, " + 
-              "I.Name, " +
-              "I.Units " + 
-            " FROM userdatabase D " +
-            " LEFT JOIN activity A ON (D.DatabaseId = A.DatabaseId) " + 
-            " LEFT JOIN indicator I ON (A.ActivityId=I.ActivityId) " +
-            " WHERE D.dateDeleted IS NULL AND " +
-                "   A.dateDeleted IS NULL AND " +
-                "   I.dateDeleted IS NULL AND " +
-                "   I.Type = 'QUANTITY'")) {
-            
-            while(rs.next()) {
-                int databaseId = rs.getInt(1);
-                DatabaseTargetForm target = targetMap.get(databaseId);
-                if(target == null) {
-                    target = new DatabaseTargetForm(databaseId, rs.getString(2));
-                    targetMap.put(databaseId, target);
-                }
-                
-                target.addIndicator(rs.getInt(3), rs.getString(4), rs.getString(5));
+            if(accept(resourceId)) {
+                targetIds.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
             }
         }
-
+        
         Map<ResourceId, ResourceCollection> collectionMap = Maps.newHashMap();
-        for (DatabaseTargetForm target : targetMap.values()) {
-            collectionMap.put(target.getFormClassId(), new TargetCollection(executor, target));
+
+        if(!targetIds.isEmpty()) {
+            
+            Map<Integer, DatabaseTargetForm> targetMap = Maps.newHashMap();
+
+            try (ResultSet rs = executor.query(
+                    "SELECT " +
+                            "D.DatabaseId, " +
+                            "D.Name, " +
+                            "I.IndicatorId, " +
+                            "I.Name, " +
+                            "I.Units " +
+                            " FROM userdatabase D " +
+                            " LEFT JOIN activity A ON (D.DatabaseId = A.DatabaseId) " +
+                            " LEFT JOIN indicator I ON (A.ActivityId=I.ActivityId) " +
+                            " WHERE D.dateDeleted IS NULL AND " +
+                            "   A.dateDeleted IS NULL AND " +
+                            "   I.dateDeleted IS NULL AND " +
+                            "   I.Type = 'QUANTITY'")) {
+
+                while (rs.next()) {
+                    int databaseId = rs.getInt(1);
+                    DatabaseTargetForm target = targetMap.get(databaseId);
+                    if (target == null) {
+                        target = new DatabaseTargetForm(databaseId, rs.getString(2));
+                        targetMap.put(databaseId, target);
+                    }
+
+                    target.addIndicator(rs.getInt(3), rs.getString(4), rs.getString(5));
+                }
+            }
+
+            for (DatabaseTargetForm target : targetMap.values()) {
+                collectionMap.put(target.getFormClassId(), new TargetCollection(executor, target));
+            }
         }
         
         return collectionMap;
