@@ -73,13 +73,26 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
         assertThat(result.getData().get(1).getName(), equalTo("Solidarites"));
     }
 
-    // report filter population query
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void testIndicatorEmpty() throws CommandException {
+    public void testSiteCountIndicators() throws CommandException {
+        /*
+        Activity #1
+        Indicator #103 (site count)
+        Indicator #675 (site count)
+        
+        Site #1: Partner #1
+        Site #2: Partner #1
+        Site #3: partner #2
+        */
+        
         // empty
         PartnerResult result = execute(DimensionType.Indicator, 103, 675);
-        assertThat(result.getData().size(), equalTo(0));
+        
+        // indicators 103 and 675 are site count indicators, so all sites of activity #1 
+        // should have a non empty value and be considered present
+        
+        assertThat(result.getData().size(), equalTo(2));
     }
 
     @Test
