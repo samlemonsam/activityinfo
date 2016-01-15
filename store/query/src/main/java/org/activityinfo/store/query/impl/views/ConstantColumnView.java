@@ -24,7 +24,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
     }
 
     public ConstantColumnView(int numRows, double doubleValue) {
-        this.type = ColumnType.STRING;
+        this.type = ColumnType.NUMBER;
         this.doubleValue = doubleValue;
         this.stringValue = null;
         this.booleanValue = (doubleValue != 0);
