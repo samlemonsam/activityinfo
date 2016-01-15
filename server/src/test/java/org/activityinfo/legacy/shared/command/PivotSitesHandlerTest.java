@@ -210,13 +210,35 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
     @Test
     public void testSiteCountOnQuarters() {
+                
+        /*
+        Database #1
+        Activity #1 (once)
+        Site #1: [2009-01-01, 2009-01-02]
+        Site #2: [2009-01-15, 2009-01-16]
+        Site #3: [2008-10-05, 2008-10-06]
+        Activity #2 (once)
+        Site #4: [2008-10-06, 2008-11-06]
+        Site #5: [2008-10-05, 2008-10-05]
+        
+        Database #2
+        Activity #3 (monthly)
+        Site #9: [2009-01, 2009-02, 2009-03]
+            
+        Activity #4 (monthly)
+        Site #6: [2009-01, 2009-02]
+        
+        Site #7
+        Activity #5 (monthly)
+        */
+        
         forTotalSiteCounts();
         filteringOnDatabases(1, 2);
         dimensions.add(new DateDimension(DateUnit.QUARTER));
 
         execute();
 
-        assertThat().forQuarter(2008, 4).thereIsOneBucketWithValue(1);
+        assertThat().forQuarter(2008, 4).thereIsOneBucketWithValue(3);
         assertThat().forQuarter(2009, 1).thereIsOneBucketWithValue(4);
     }
 
