@@ -50,11 +50,11 @@ public class InstanceGenerator {
     public static final ResourceId PERIOD_START_DATE_ID = ResourceId.valueOf("_period_start_date");
     public static final ResourceId PERIOD_END_DATE_ID = ResourceId.valueOf("_period_end_date");
 
-    public static enum Direction {
+    public enum Direction {
         BACK, FORWARD
     }
 
-    public static interface Formatter {
+    public interface Formatter {
         String format(String pattern, Date date);
     }
 
@@ -65,7 +65,6 @@ public class InstanceGenerator {
     private List<FormInstance> lastGeneratedList;
     private PeriodValue lastPeriod;
     private int lastCount = 1;
-    private Direction lastDirection;
 
 
     public InstanceGenerator(ResourceId classId) {
@@ -116,7 +115,6 @@ public class InstanceGenerator {
             lastGeneratedList = result;
             lastPeriod = period;
             lastCount = count;
-            lastDirection = direction;
         }
         return result;
     }
@@ -130,7 +128,6 @@ public class InstanceGenerator {
         List<FormInstance> next = generate(lastPeriod, point, Direction.FORWARD, 1, false);
         lastGeneratedList.remove(0); // remove first
         lastGeneratedList.add(size - 1, next.get(0)); // add next at the end
-        lastDirection = Direction.FORWARD;
         return lastGeneratedList;
     }
 
@@ -144,7 +141,6 @@ public class InstanceGenerator {
 
     public List<FormInstance> previous() {
         assertState();
-        lastDirection = Direction.BACK;
         int size = lastGeneratedList.size();
         FormInstance firstInstance = lastGeneratedList.get(0);
         DateRange firstDateRange = getDateRangeFromInstance(firstInstance);
@@ -187,10 +183,10 @@ public class InstanceGenerator {
             EpiWeek epiWeek = CalendarUtils.epiWeek(range.midDate(), dayOfWeekProvider);
             return I18N.CONSTANTS.week() + " " + epiWeek.getWeekInYear() + " " + epiWeek.getYear();
         }
-        return format(getDateForLabel(range, period, direction), period);
+        return format(getDateForLabel(range, period), period);
     }
 
-    private Date getDateForLabel(DateRange range, PeriodValue period, Direction direction) {
+    private Date getDateForLabel(DateRange range, PeriodValue period) {
         if (period.equals(PredefinedPeriods.MONTHLY.getPeriod())) {
             return range.getStart();
         } else if (period.equals(PredefinedPeriods.YEARLY.getPeriod())) {

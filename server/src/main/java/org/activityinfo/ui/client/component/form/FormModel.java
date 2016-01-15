@@ -128,7 +128,6 @@ public class FormModel {
                 return input;
             }
         }).join(new Function<FormClass, Promise<Void>>() {
-            @Nullable
             @Override
             public Promise<Void> apply(FormClass rootFormClass) {
                 List<Promise<FormClass>> promises = Lists.newArrayList();
@@ -185,10 +184,6 @@ public class FormModel {
 
     public FormClass getRootFormClass() {
         return rootFormClass;
-    }
-
-    private void setRootFormClass(FormClass rootFormClass) {
-        throw new RuntimeException("Root form class must be loaded in order to load subforms.");
     }
 
     public FormClass getValidationFormClass() {

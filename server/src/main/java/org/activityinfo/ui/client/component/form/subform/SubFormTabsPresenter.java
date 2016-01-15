@@ -48,7 +48,7 @@ import java.util.Map;
  */
 public class SubFormTabsPresenter {
 
-    public static enum ButtonType {
+    public enum ButtonType {
         FULL_PREVIOUS("_fullprevious"),
         PREVIOUS("_previous"),
         NEXT("_next"),
