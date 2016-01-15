@@ -44,7 +44,7 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
                                    CreateLocationHandlerAsync createLocationHandler,
                                    SearchLocationsHandler searchLocationsHandler,
                                    // SearchHandler searchHandler,
-                                   PivotSitesHandlerAsync pivotSitesHandler,
+                                   OldPivotSitesHandler pivotSitesHandler,
                                    GetLocationsHandler getLocationsHandler,
                                    DeleteSiteHandlerAsync deleteSiteHandler,
                                    GetSiteAttachmentsHandler getSiteAttachmentsHandler,

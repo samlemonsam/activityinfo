@@ -39,16 +39,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class PivotSitesHandlerAsync implements CommandHandlerAsync<PivotSites, PivotSites.PivotResult> {
+public class OldPivotSitesHandler implements CommandHandlerAsync<PivotSites, PivotSites.PivotResult> {
 
     private final SqlDialect dialect;
 
-    private static final Logger LOGGER = Logger.getLogger(PivotSitesHandlerAsync.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(OldPivotSitesHandler.class.getName());
 
     private List<BaseTable> baseTables = Lists.newArrayList();
 
     @Inject
-    public PivotSitesHandlerAsync(SqlDialect dialect) {
+    public OldPivotSitesHandler(SqlDialect dialect) {
         this.dialect = dialect;
         baseTables.add(new SumAvgIndicatorValues());
         baseTables.add(new CountIndicatorValues());
