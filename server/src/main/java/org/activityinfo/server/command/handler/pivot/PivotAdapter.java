@@ -111,10 +111,6 @@ public class PivotAdapter {
         }
     }
 
-    private boolean pivotByTargets() {
-        return command.isPivotedBy(DimensionType.Target);
-    }
-
     private Map<ResourceId, FormTree> queryFormTrees() {
 
         treeTime.start();
@@ -298,8 +294,14 @@ public class PivotAdapter {
                     double value = measureView.getDouble(i);
                     if (!Double.isNaN(value)) {
                         Map<Dimension, DimensionCategory> key = bucketKey(categories, indicatorCategory, i);
-                        Accumulator bucket = bucketForKey(key, indicator.aggregation);
-                        bucket.addValue(value);
+                        
+                        if(command.getValueType() == PivotSites.ValueType.INDICATOR) {
+                            Accumulator bucket = bucketForKey(key, indicator.aggregation);
+                            bucket.addValue(value);
+                        } else {
+                            Accumulator bucket = bucketForKey(key, IndicatorDTO.AGGREGATE_SITE_COUNT);
+                            bucket.addSite(siteIds[i]);
+                        }
                     }
                 }
 
@@ -389,15 +391,29 @@ public class PivotAdapter {
     }
 
     /**
-     * Queries the count of sites (not monthly reports) that match the filter
+     * Queries the count of distinct sites (not monthly reports) that match the filter
      */
     private void executeSiteCountQuery(ActivityMetadata activity) {
-        if(activity.isMonthly() &&
+        
+        if(command.isPivotedBy(DimensionType.Indicator) ||
+           command.getFilter().isRestricted(DimensionType.Indicator)) {
+            
+            // only count sites which have non-empty values for the given
+            // indicators
+            executeIndicatorValuesQuery(activity);
+        
+        } else if(activity.isMonthly() && 
                 (command.isPivotedBy(DimensionType.Date) ||
-                        command.isPivotedBy(DimensionType.Indicator))) {
-
+                 command.getFilter().isDateRestricted())) {
+            
+            // if we are pivoting or filtering by date, then we need
+            // to query the actual reporting periods and count distinct sites
+                
             executeSiteCountQueryOnReportingPeriod(activity);
+        
         } else {
+            
+            // Otherwise, we only need to query the sites add up the total rows
             executeSiteCountQueryOnSite(activity);
         }
     }
@@ -468,6 +484,45 @@ public class PivotAdapter {
         }
         aggregateTime.stop();
     }
+
+
+    private void executeSiteCountWithIndicatorFilter(ActivityMetadata activity) {
+        Preconditions.checkArgument(activity.isMonthly());
+
+        FormTree formTree = formTrees.get(activity.getFormClassId());
+        QueryModel queryModel = new QueryModel(activity.getFormClassId());
+        queryModel.setFilter(composeFilter(activity));
+
+        // Add dimensions columns as needed
+        for (DimBinding dimension : groupBy) {
+            for (ColumnModel columnModel : dimension.getColumnQuery(formTree)) {
+                queryModel.addColumn(columnModel);
+            }
+        }
+
+        addSiteIdToQuery(activity, queryModel);
+
+        // Query the table 
+        ColumnSet columnSet = executeQuery(queryModel);
+
+        aggregateTime.start();
+
+        // Now add the counts to the buckets
+        DimensionCategory[][] categories = extractCategories(activity, formTree, columnSet);
+        int siteId[] = extractSiteIds(columnSet);
+
+        for (int i = 0; i < columnSet.getNumRows(); i++) {
+
+            Map<Dimension, DimensionCategory> key = bucketKey(categories, null, i);
+            Accumulator bucket = bucketForKey(key, IndicatorDTO.AGGREGATE_SITE_COUNT);
+
+            bucket.addSite(siteId[i]);
+        }
+        aggregateTime.stop();
+    }
+
+
+
 
     private ColumnSet executeQuery(QueryModel queryModel) {
         queryTime.start();

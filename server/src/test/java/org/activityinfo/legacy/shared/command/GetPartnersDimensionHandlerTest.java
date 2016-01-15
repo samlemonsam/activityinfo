@@ -113,6 +113,18 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
     @Test
     @OnDataSet("/dbunit/sites-linked.db.xml")
     public void testIndicatorLinked2() throws CommandException {
+        /*
+        Database #1 > Activity #1 (once)
+        Site #2: Partner #1 
+        I1=400
+        
+        Database #2 > Activity #2 (once)
+        Site #1: Partner #1
+        I3=1500
+        
+        Links
+        I3 -> I2
+        */
         // NRC
         PartnerResult result = execute(DimensionType.Indicator, 2);
         assertThat(result.getData().size(), equalTo(1));

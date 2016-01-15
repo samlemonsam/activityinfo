@@ -88,6 +88,12 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     }
     
     @Test
+    public void testLocationPoints() {
+        query(CuidAdapter.locationFormClass(1), "label", "point.latitude", "point.longitude");
+    }
+    
+    
+    @Test
     public void testAdmin() {
 
         query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");

@@ -31,7 +31,6 @@ public class MySqlCatalogIntegrationTest {
 
     private static DbUnit dbunit;
     private static ColumnSetBuilder columnSetBuilder;
-    private ColumnSet columnSet;
     private static CollectionCatalog catalogProvider;
 
     @BeforeClass
@@ -51,8 +50,6 @@ public class MySqlCatalogIntegrationTest {
 
     @Test
     public void testActivity() throws IOException {
-
-        
         QueryModel model = new QueryModel(activityFormClass(33));
         model.selectField("date1");
         model.selectField("date2");
