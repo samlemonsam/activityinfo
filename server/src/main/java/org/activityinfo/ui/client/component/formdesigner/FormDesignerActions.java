@@ -81,10 +81,17 @@ public class FormDesignerActions {
 
             @Override
             public void onSuccess(Void result) {
-                formDesignerPanel.getSaveButton().setText(I18N.CONSTANTS.save());
-                formDesignerPanel.getSaveButton().setEnabled(true);
-                formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saved());
-                formDesigner.getSavedGuard().setSaved(true);
+                // delay a bit to show user progress
+                Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        formDesignerPanel.getSaveButton().setText(I18N.CONSTANTS.save());
+                        formDesignerPanel.getSaveButton().setEnabled(true);
+                        formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saved());
+                        formDesigner.getSavedGuard().setSaved(true);
+                        return false;
+                    }
+                }, 500);
             }
         });
         return voidPromise;

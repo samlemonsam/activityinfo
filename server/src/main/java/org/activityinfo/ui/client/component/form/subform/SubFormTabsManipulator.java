@@ -118,6 +118,9 @@ public class SubFormTabsManipulator {
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
         presenter.set(instanceGenerator.generate(periodValue, new Date(), InstanceGenerator.Direction.BACK, presenter.getTabCount()));
 
+        presenter.setShowNextButtons(true);
+        presenter.setShowPreviousButtons(true);
+
         presenter.setMoveButtonClickHandler(new org.activityinfo.ui.client.widget.ClickHandler<SubFormTabsPresenter.ButtonType>() {
             @Override
             public void onClick(SubFormTabsPresenter.ButtonType buttonType) {
