@@ -376,7 +376,11 @@ public class PivotAdapter {
         }
 
         for (int j = 0; j < groupBy.size(); j++) {
-            key.put(groupBy.get(j).getModel(), categories[j][rowIndex]);
+            Dimension dimension = groupBy.get(j).getModel();
+            DimensionCategory category = categories[j][rowIndex];
+            if(category != null) {
+                key.put(dimension, category);
+            }
         }
         return key;
     }
