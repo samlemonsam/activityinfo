@@ -477,13 +477,36 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     @OnDataSet("/dbunit/sites-deleted.db.xml")
     public void testDeletedNotLinked() {
 
+        /*
+        Database #1
+        Activity #1 (once)
+        Site #1: I1=1500 (site deleted)
+        Site #2: I1=3600
+        Site #3: I1=10000
+        
+        Database #2 (deleted)
+        Activity #3 (monthly)
+        I400: (no data)
+        
+        Database #400
+        Activity #400 (monthly)
+        I401
+        
+        Links
+        I1 -> I400
+        I1 -> I401
+        */
+
+
         withIndicatorAsDimension();
         filter.addRestriction(DimensionType.Indicator, asList(400, 401));
 
         execute();
 
-        assertEquals(1, buckets.size());
-        assertEquals(13600, (int) buckets.get(0).doubleValue());
+        // There should only be one bucket, because indicator 401 belongs to activity 3 -> database 2, 
+        // which is deleted
+        assertBucketCount(1);
+        assertThat().forIndicator(401).thereIsOneBucketWithValue(13600);
     }
 
     @Test

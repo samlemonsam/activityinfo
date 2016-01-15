@@ -84,7 +84,10 @@ public class IndicatorOracle {
                 "LEFT JOIN indicatorlink k ON (i.indicatorId = k.destinationIndicatorId) " +
                 "LEFT JOIN indicator si ON (k.sourceIndicatorId = si.indicatorId) " +
                 "LEFT JOIN activity sa ON (si.activityId = a.activityId) " +
-                "WHERE (i.type = 'QUANTITY' OR i.type IS NULL) ");
+                "WHERE (i.type = 'QUANTITY' OR i.type IS NULL) AND " +
+                    "(i.dateDeleted IS NULL) AND" +
+                    "(a.dateDeleted IS NULL) AND" +
+                    "(d.dateDeleted IS NULL) ");
 
 
         appendFilter(filter, DimensionType.Indicator, "i.indicatorId", sql);
