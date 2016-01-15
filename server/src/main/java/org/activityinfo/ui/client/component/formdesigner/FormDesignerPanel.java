@@ -250,6 +250,11 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                     promises.add(promise);
 
                 } else { // regular formfield
+
+                    if (formField.getId().asString().startsWith("_")) { // skip if form field is built-in
+                        continue;
+                    }
+
                     Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(owner, formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
                         @Nullable
                         @Override
