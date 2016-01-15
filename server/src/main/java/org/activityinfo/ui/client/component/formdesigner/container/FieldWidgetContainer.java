@@ -85,6 +85,7 @@ public class FieldWidgetContainer implements WidgetContainer {
                         super.onComplete();
                         FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
                         formClass.remove(formField);
+                        formDesigner.getPropertiesPresenter().reset(false);
                     }
                 });
             }

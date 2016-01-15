@@ -95,8 +95,14 @@ public class PropertiesPresenter {
     }
 
     public void reset() {
+        reset(true);
+    }
 
-        formDesigner.getContainerPresenter().reset();
+    public void reset(boolean resetContainer) {
+
+        if (resetContainer) {
+            formDesigner.getContainerPresenter().reset();
+        }
 
         if (currentDesignWidget != null) {
             view.getPanel().remove(currentDesignWidget);
@@ -132,6 +138,8 @@ public class PropertiesPresenter {
         if (relevanceEnabledIfValueHandler != null) {
             relevanceEnabledIfValueHandler.removeHandler();
         }
+        view.getLabel().setValue("");
+        view.getDescription().setValue("");
     }
 
     private void show(final FieldWidgetContainer fieldWidgetContainer) {

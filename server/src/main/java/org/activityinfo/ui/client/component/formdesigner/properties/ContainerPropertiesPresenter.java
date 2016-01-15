@@ -245,9 +245,12 @@ public class ContainerPropertiesPresenter {
         if (subformTabCountHandler != null) {
             subformTabCountHandler.removeHandler();
         }
+
         view.getLabelGroup().setVisible(false);
         view.getSubformGroup().setVisible(false);
         view.getSubformSubKindGroup().setVisible(false);
+
+        view.getLabel().setValue("");
     }
 
 

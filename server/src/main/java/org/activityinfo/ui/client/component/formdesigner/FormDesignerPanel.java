@@ -239,9 +239,8 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                     SubFormType subform = (SubFormType) formField.getType();
 
                     Promise<Void> promise = formDesigner.getResourceLocator().getFormClass(subform.getClassId()).then(new Function<FormClass, Void>() {
-                        @Nullable
                         @Override
-                        public Void apply(@Nullable FormClass subform) {
+                        public Void apply(FormClass subform) {
                             formDesigner.getModel().registerSubform(formField.getId(), subform);
                             containerMap.put(formField.getId(), FieldsHolderWidgetContainer.subform(formDesigner, subform, container.getId()));
                             buildWidgetContainers(formDesigner, subform, subform, depth + 1, promises);

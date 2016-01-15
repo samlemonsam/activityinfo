@@ -94,6 +94,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             public void onClick(final ClickEvent event) {
                 formDesigner.getModel().getFormClass(parentId).remove(formSection);
                 formDesigner.getDropControllerRegistry().unregister(formSection.getId());
+                formDesigner.getContainerPresenter().reset();
             }
         });
 
@@ -109,6 +110,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             public void onClick(final ClickEvent event) {
                 formDesigner.getModel().removeSubform(formClass);
                 formDesigner.getDropControllerRegistry().unregister(formClass.getId());
+                formDesigner.getContainerPresenter().reset();
             }
         });
 
