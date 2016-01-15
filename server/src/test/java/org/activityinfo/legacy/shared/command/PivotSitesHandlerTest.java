@@ -640,6 +640,38 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     @Test
     @OnDataSet("/dbunit/monthly-calc-indicators.db.xml")
     public void testMonthlyCalculatedIndicators() {
+
+        /*
+        Database #1
+        
+        Activity #901 (monthly)
+        I7001 = A: quantity
+        I7002 = B: quantity
+        I7003 = C: A+B
+        
+        Site #1 @ Location #401 -> Province #2
+        ReportingPeriod #11 [2009-01-01, 2009-01-31]
+        I7001 = 200
+        I7002 = 300
+        I7003 = 500 (calculated)
+        
+        Reportingperiod #12 [2009-02-01, 2009-02-28]
+        I7001 = 150
+        I7002 = 330
+        I7003 = 480 (calculated)
+        
+        Site #2 @ Location #402 -> Province #3
+        ReportingPeriod #21 [2009-01-01, 2009-01-31]
+        I7001 = 11
+        I7002 = 26
+        I7003 = 37 (calculated)
+        
+        ReportingPeriod #22 [2009-02-01, 2009-02-28]
+        I7001 =  99
+        I7002 =  55
+        I7003 = 154 (calculated)
+        */
+
         withIndicatorAsDimension();
         filteringOnDatabases(1);
         dimensions.add(new DateDimension(DateUnit.MONTH));
