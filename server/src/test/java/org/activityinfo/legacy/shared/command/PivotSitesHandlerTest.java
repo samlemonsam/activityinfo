@@ -571,14 +571,37 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     @Test
     @OnDataSet("/dbunit/sites-linked.db.xml")
     public void testLinkedPartnerFilterData() {
+        
+        /*
+        Data:
+        ----
+        database #1
+        activity #1
+        site #2: partner=NRC2, I1=400
+    
+        database #2
+        activity #2
+        site #1: partner=NRC, I3=1500
+    
+        links:
+        I3 -> I1
+        I3 -> I2
+    
+        ----------
+        Query result:
+        site1: partner=NRC, I3=1500
+        site1: (linked), partner=NRC, I3->I1: 1500, I3->I2: 1500
+        site2: partner=NRC2, I1=400
+        */
+
         withPartnerAsDimension();
         filter.addRestriction(DimensionType.Database, asList(1, 2));
         forTotalSiteCounts();
         execute();
 
         assertThat().thereAre(2).buckets();
-        assertThat().forPartner(1).thereIsOneBucketWithValue(0).andItsPartnerLabelIs("NRC");
-        assertThat().forPartner(2).thereIsOneBucketWithValue(0).andItsPartnerLabelIs("NRC2");
+        assertThat().forPartner(1).thereIsOneBucketWithValue(2).andItsPartnerLabelIs("NRC");
+        assertThat().forPartner(2).thereIsOneBucketWithValue(1).andItsPartnerLabelIs("NRC2");
     }
 
     @Test
