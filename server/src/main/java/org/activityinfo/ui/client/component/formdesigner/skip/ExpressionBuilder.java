@@ -63,7 +63,7 @@ public class ExpressionBuilder {
         ExprFunction rowFunction = row.getFunction();
 
         // FUNCTIONS building
-        if (SkipRowPresenter.SET_FUNCTIONS.contains(rowFunction)) {
+        if (RelevanceRowPresenter.SET_FUNCTIONS.contains(rowFunction)) {
 
             List<ExprNode> arguments = Lists.newArrayList();
             arguments.add(new SymbolExpr(row.getFormField().getId().asString()));

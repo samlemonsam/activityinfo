@@ -6,9 +6,7 @@ import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.IdCriteria;
+import org.activityinfo.core.shared.criteria.*;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
@@ -157,8 +155,9 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<List<Projection>> query(final InstanceQuery query) {
         Joiner joiner = new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria());
-        if (query.getFilterFieldPath() != null) {
+        if (query.isFilterQuery()) {
             // table filter : fetching unique values for given column
+            query.getCriteria().accept(new RemoveFieldCriteriaVisitor());
             return joiner.apply(query).join(new ProjectionsByUniqueColumnFilter(query.getFilterFieldPath()));
         }
         return joiner.apply(query);

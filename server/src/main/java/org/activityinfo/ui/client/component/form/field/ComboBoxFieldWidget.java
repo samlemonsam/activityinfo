@@ -43,12 +43,12 @@ import java.util.Set;
 public class ComboBoxFieldWidget implements ReferenceFieldWidget {
 
     private final ListBox dropBox;
-    private final List<FormInstance> range;
+    private final ValueUpdater<ReferenceValue> valueUpdater;
 
     public ComboBoxFieldWidget(final List<FormInstance> range, final ValueUpdater<ReferenceValue> valueUpdater) {
+        this.valueUpdater = valueUpdater;
         dropBox = new ListBox(false);
         dropBox.addStyleName("form-control");
-        this.range = range;
 
         for (FormInstance instance : range) {
             dropBox.addItem(
@@ -58,14 +58,24 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
         dropBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                valueUpdater.update(updatedValue());
+                fireValueChanged();
             }
         });
     }
 
     @Override
+    public void fireValueChanged() {
+        valueUpdater.update(updatedValue());
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         dropBox.setEnabled(!readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return !dropBox.isEnabled();
     }
 
     private ReferenceValue updatedValue() {

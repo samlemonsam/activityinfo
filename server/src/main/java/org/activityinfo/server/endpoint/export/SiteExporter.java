@@ -36,7 +36,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.ui.client.component.form.field.attachment.Uploader;
+import org.activityinfo.ui.client.component.form.field.attachment.UploadUrls;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -94,7 +94,7 @@ public class SiteExporter {
     private CellStyle attribValueStyle;
 
     private ActivityFormDTO activity;
-    private Map<Integer, IndicatorDTO> indicators;
+    private LinkedHashMap<Integer, IndicatorDTO> indicators;
     private List<Integer> levels;
     private HSSFCellStyle dateTimeStyle;
 
@@ -235,7 +235,7 @@ public class SiteExporter {
 
         createHeaderCell(headerRow2, column++, "Axe");
 
-        indicators = Maps.newHashMap();
+        indicators = Maps.newLinkedHashMap();
         for (IndicatorGroup group : activity.groupIndicators()) {
             if (group.getName() != null) {
                 // create a merged cell on the top row spanning all members
@@ -465,7 +465,7 @@ public class SiteExporter {
 
                     String cellValue = "";
                     for (Attachment attachment : attachmentValue.getValues()) {
-                        cellValue += Uploader.getPermanentLink(attachment.getBlobId(), formId) + "\n";
+                        cellValue += UploadUrls.getPermanentLink(context.getRootUri(), attachment.getBlobId(), formId) + "\n";
                     }
                     cell.setCellValue(cellValue.trim());
                 } else {

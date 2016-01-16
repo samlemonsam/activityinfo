@@ -37,13 +37,15 @@ import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
  */
 public class FormModal {
 
+    public static final String EXPECTED_LABEL_AFTER_FORM_LOADED = "Start Date"; // it's exprected that all forms have Start Date field.
+
     public static BsModal find(FluentElement container) {
         FluentElement dialogElement = container.waitFor(new Function<WebDriver, FluentElement>() {
             @Override
             public FluentElement apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.tagName("label"));
                 for (WebElement element : elements) {
-                    if (element.getText().contains("Start Date")) {
+                    if (element.getText().contains(EXPECTED_LABEL_AFTER_FORM_LOADED)) {
                         return new FluentElement(driver, element).find().ancestor().div(withClass(BsModal.CLASS_NAME)).first();
                     }
                 }

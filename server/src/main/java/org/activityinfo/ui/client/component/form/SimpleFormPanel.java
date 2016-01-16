@@ -63,7 +63,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
 
     private FormClass formClass;
     private ResourceLocator locator;
-    private RelevanceHandler relevanceHandler;
+    private final RelevanceHandler relevanceHandler;
 
     // validation form class is used to refer to "top-level" form class.
     // For example "Properties panel" renders current type-formClass but in order to validate expression we need
@@ -159,22 +159,18 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         return Promise.forEach(formClass.getFields(), new Function<FormField, Promise<Void>>() {
             @Override
             public Promise<Void> apply(final FormField field) {
-                if (!field.isVisible()) {
-                    return Promise.resolved(null); // we have join inside forEach, must return promise
-                } else {
-                    return widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
-                        @Override
-                        public void update(FieldValue value) {
-                            onFieldUpdated(field, value);
-                        }
-                    }, validationFormClass, eventBus).then(new Function<FormFieldWidget, Void>() {
-                        @Override
-                        public Void apply(@Nullable FormFieldWidget widget) {
-                            containers.put(field.getId(), containerFactory.createContainer(field, widget, 4));
-                            return null;
-                        }
-                    });
-                }
+                return widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
+                    @Override
+                    public void update(FieldValue value) {
+                        onFieldUpdated(field, value);
+                    }
+                }, validationFormClass, eventBus).then(new Function<FormFieldWidget, Void>() {
+                    @Override
+                    public Void apply(@Nullable FormFieldWidget widget) {
+                        containers.put(field.getId(), containerFactory.createContainer(field, widget, 4));
+                        return null;
+                    }
+                });
             }
         });
     }
@@ -244,7 +240,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
             return validatedBuiltInDates.get();
         }
 
-        if (field.isRequired() && isEmpty(value) && field.isVisible()) { // if field is not visible user doesn't have chance to fix it
+        if (field.isRequired() && isEmpty(value) && field.isVisible() && !container.getFieldWidget().isReadOnly()) { // if field is not visible user doesn't have chance to fix it
             container.setInvalid(I18N.CONSTANTS.requiredFieldMessage());
             return false;
         } else {
@@ -301,12 +297,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     }
 
     private Widget createHeader(int depth, FormSection section) {
-        StringBuilder html = new StringBuilder();
         String hn = "h" + (3 + depth);
-        html.append("<").append(hn).append(">")
-                .append(SafeHtmlUtils.htmlEscape(section.getLabel()))
-                .append("</").append(hn).append(">");
-        return new HTML(html.toString());
+        return new HTML("<" + hn + ">" + SafeHtmlUtils.htmlEscape(section.getLabel()) + "</" + hn + ">");
     }
 
     @Override
@@ -338,4 +330,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         return validationFormClass;
     }
 
+    public RelevanceHandler getRelevanceHandler() {
+        return relevanceHandler;
+    }
 }

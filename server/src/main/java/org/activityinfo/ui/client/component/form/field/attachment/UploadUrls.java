@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.formdesigner.skip;
+package org.activityinfo.ui.client.component.form.field.attachment;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,31 +21,27 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
  * #L%
  */
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.common.base.Preconditions;
+import org.activityinfo.model.resource.ResourceId;
 
 /**
- * @author yuriyz on 7/23/14.
+ * @author yuriyz on 12/15/2015.
  */
-public class SkipPanel extends Composite {
+public class UploadUrls {
 
-    private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
-
-    interface OurUiBinder extends UiBinder<Widget, SkipPanel> {
+    private UploadUrls() {
     }
 
-    @UiField
-    HTMLPanel rootPanel;
-
-    public SkipPanel() {
-        initWidget(uiBinder.createAndBindUi(this));
+    public static String getBaseUrl(String blobId, ResourceId resourceId) {
+        return "/service/blob/" + blobId + "/" + resourceId.asString();
     }
 
-    public HTMLPanel getRootPanel() {
-        return rootPanel;
+    public static String getPermanentLink(String appUrl, String blobId, ResourceId resourceId) {
+        Preconditions.checkNotNull(appUrl);
+
+        if (appUrl.endsWith("/")) {
+            appUrl = appUrl.substring(0, appUrl.length() - 1);
+        }
+        return appUrl + UploadUrls.getBaseUrl(blobId, resourceId) + "/blobUrl";
     }
 }

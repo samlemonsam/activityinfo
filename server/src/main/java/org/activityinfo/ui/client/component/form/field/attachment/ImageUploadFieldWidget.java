@@ -68,6 +68,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     private final FormPanel rootPanel;
     private final ValueUpdater valueUpdater;
     private final Uploader uploader;
+    private final FieldWidgetMode fieldWidgetMode;
 
     private boolean readOnly;
     private HandlerRegistration oldHandler;
@@ -96,6 +97,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
 
     public ImageUploadFieldWidget(ResourceId resourceId, final ValueUpdater valueUpdater, final FieldWidgetMode fieldWidgetMode) {
         this.valueUpdater = valueUpdater;
+        this.fieldWidgetMode = fieldWidgetMode;
 
         FormPanelStyles.INSTANCE.ensureInjected();
 
@@ -105,7 +107,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             @Override
             public void onClick(ClickEvent event) {
                 event.preventDefault();
-                if (!readOnly) {
+                if (!readOnly && fieldWidgetMode == FieldWidgetMode.NORMAL) {
                     triggerUpload(fileUpload.getElement());
                 }
             }
@@ -113,7 +115,9 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
         downloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open(uploader.getPermanentLink(), "_blank", null);
+                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
+                    Window.open(uploader.getPermanentLink(), "_blank", null);
+                }
             }
         });
         clearButton.addClickHandler(new ClickHandler() {
@@ -260,16 +264,17 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
                 break;
         }
 
+        imageContainer.setVisible(state == State.LOADED && fieldWidgetMode == FieldWidgetMode.NORMAL);
         image.setUrl(imageUrl);
         placeholder.setVisible(state != State.LOADED);
         this.message.setInnerText(message);
         browseLink.setVisible(state != State.LOADING && state != State.LOADED);
         browseLink.setText(state == State.FAILED ? I18N.CONSTANTS.retry() : I18N.CONSTANTS.browse());
-        downloadButton.setVisible(state == State.LOADED);
-        clearButton.setVisible(state == State.LOADED);
+        downloadButton.setVisible(state == State.LOADED && fieldWidgetMode == FieldWidgetMode.NORMAL);
+        clearButton.setVisible(state == State.LOADED && fieldWidgetMode == FieldWidgetMode.NORMAL);
     }
 
-    private void fireValueChanged() {
+    public void fireValueChanged() {
         AttachmentValue attachmentValue = new AttachmentValue();
         if (uploader.getAttachment() != null && !Strings.isNullOrEmpty(uploader.getAttachment().getBlobId())) {
             attachmentValue.getValues().add(uploader.getAttachment());
@@ -280,6 +285,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     @Override

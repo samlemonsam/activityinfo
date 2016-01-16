@@ -29,11 +29,11 @@ import com.google.gwt.user.client.ui.*;
 /**
  * @author yuriyz on 7/24/14.
  */
-public class SkipRow extends Composite {
+public class RelevanceRow extends Composite {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
-    interface OurUiBinder extends UiBinder<Widget, SkipRow> {
+    interface OurUiBinder extends UiBinder<Widget, RelevanceRow> {
     }
 
     @UiField
@@ -51,7 +51,7 @@ public class SkipRow extends Composite {
     @UiField
     ListBox joinFunction;
 
-    public SkipRow() {
+    public RelevanceRow() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 

@@ -6,9 +6,9 @@ import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.images.*;
+import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
-import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 @Path("/service/blob")
@@ -49,7 +50,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
     public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 10;
 
-    private final AppIdentityService appIdentityService;
+    private AppIdentityService appIdentityService;
     private final EntityManager em;
 
     private String bucketName;
@@ -59,13 +60,19 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
 
-        this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
-                new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
-
         try {
-            LOGGER.info("Service account: " + appIdentityService.getServiceAccountName());
-        } catch (ApiProxy.CallNotFoundException e) {
+            if (Strings.isNullOrEmpty(bucketName)) {
+                LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property " + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
+                return;
+            }
+            this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
+                    new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
+            LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
+        } catch (Exception e) {
             // ignore: fails in local tests, bug in LocalServiceTestHelper?
+
+            // also we want to prevent situation when exception in storage leads to server start failure
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -267,7 +274,10 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         return false;
     }
 
-    private static void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
+    private void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
+        if (appIdentityService == null) {
+            throw new WebApplicationException(SERVICE_UNAVAILABLE);
+        }
         if (user == null || user.isAnonymous()) {
             throw new WebApplicationException(UNAUTHORIZED);
         }

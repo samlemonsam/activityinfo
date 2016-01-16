@@ -27,7 +27,7 @@ public abstract class Form {
     public abstract FormItem current();
     
     
-    public interface FormItem {
+    public static interface FormItem {
         
         String getLabel();
         String getPlaceholder();

@@ -124,10 +124,9 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
             @Override
             public void onBrowserEvent(Event event) {
                 event.preventDefault();
-                if (readOnly) {
-                    return;
+                if (!readOnly && fieldWidgetMode == FieldWidgetMode.NORMAL) {
+                    triggerUpload(fileUpload.getElement());
                 }
-                triggerUpload(fileUpload.getElement());
             }
         });
 
@@ -244,6 +243,11 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         for (AttachmentUploadRow row : rowsFromPanel()) {
             row.setReadOnly(readOnly);
         }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     @Override

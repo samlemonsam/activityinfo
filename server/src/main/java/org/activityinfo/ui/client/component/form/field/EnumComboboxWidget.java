@@ -43,9 +43,10 @@ import java.util.Set;
 public class EnumComboboxWidget implements FormFieldWidget<EnumValue> {
 
     private final ListBox dropBox;
+    private final ValueUpdater<EnumValue> valueUpdater;
 
     public EnumComboboxWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater) {
-
+        this.valueUpdater = valueUpdater;
         dropBox = new ListBox(enumType.getCardinality() == Cardinality.MULTIPLE);
         dropBox.addStyleName("form-control");
 
@@ -55,14 +56,24 @@ public class EnumComboboxWidget implements FormFieldWidget<EnumValue> {
         dropBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                valueUpdater.update(updatedValue());
+                fireValueChanged();
             }
         });
     }
 
     @Override
+    public void fireValueChanged() {
+        valueUpdater.update(updatedValue());
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         dropBox.setEnabled(!readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return !dropBox.isEnabled();
     }
 
     private EnumValue updatedValue() {

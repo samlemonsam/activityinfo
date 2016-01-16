@@ -91,6 +91,9 @@ public class ValidationResultCell extends AbstractCell<ValidatedRow> {
                     if (result.getConfidence() == 1) {
                         return ValidationPageStyles.INSTANCE.stateOk();
                     }
+                    if (!result.isPersistable()) {
+                        return ValidationPageStyles.INSTANCE.stateError();
+                    }
                     return ValidationPageStyles.INSTANCE.stateConfidence();
                 case ERROR:
                 case MISSING:

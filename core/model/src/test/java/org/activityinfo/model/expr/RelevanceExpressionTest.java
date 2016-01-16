@@ -45,7 +45,7 @@ import java.util.Arrays;
  */
 
 @SuppressWarnings("NonJREEmulationClassesInClientCode")
-public class SkipExpressionTest {
+public class RelevanceExpressionTest {
 
     private static final ResourceId GENDER_FIELD_ID = ResourceId.generateId();
     private static final ResourceId PREGNANT_FIELD_ID = ResourceId.generateId();
@@ -113,11 +113,11 @@ public class SkipExpressionTest {
     }
 
 
-    private void eval(String skipExpression, boolean expectedValue, FormInstance instance) {
-        ExprLexer lexer = new ExprLexer(skipExpression);
+    private void eval(String relevanceExpression, boolean expectedValue, FormInstance instance) {
+        ExprLexer lexer = new ExprLexer(relevanceExpression);
         ExprParser parser = new ExprParser(lexer);
         ExprNode expr = parser.parse();
-        Assert.assertEquals(skipExpression, expectedValue,
+        Assert.assertEquals(relevanceExpression, expectedValue,
                 Casting.toBoolean(expr.evaluate(new FormEvalContext(formClass, instance))));
     }
 

@@ -39,15 +39,20 @@ public class DateIntervalFieldWidget implements FormFieldWidget<LocalDateInterva
         rootElement = ourUiBinder.createAndBindUi(this);
     }
 
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
+    }
+
     @UiHandler("startDateBox")
     public void onStartDateChanged(ValueChangeEvent<Date> event) {
-        valueUpdater.update(getValue());
+        fireValueChanged();
     }
 
 
     @UiHandler("endDateBox")
     public void onEndDateChanged(ValueChangeEvent<Date> event) {
-
+        fireValueChanged();
     }
 
     private LocalDateInterval getValue() {
@@ -68,6 +73,11 @@ public class DateIntervalFieldWidget implements FormFieldWidget<LocalDateInterva
     public void setReadOnly(boolean readOnly) {
         startDateBox.setReadOnly(readOnly);
         endDateBox.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return startDateBox.isReadOnly();
     }
 
     @Override

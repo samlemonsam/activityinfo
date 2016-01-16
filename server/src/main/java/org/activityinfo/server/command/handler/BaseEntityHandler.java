@@ -77,8 +77,8 @@ public class BaseEntityHandler {
             indicator.setExpression(trimAndTruncate(changes.get("expression")));
         }
 
-        if (changes.containsKey("skipExpression")) {
-            indicator.setSkipExpression(trimAndTruncate(changes.get("skipExpression")));
+        if (changes.containsKey("relevanceExpression")) {
+            indicator.setRelevanceExpression(trimAndTruncate(changes.get("relevanceExpression")));
         }
 
         if (changes.containsKey("nameInExpression")) {
@@ -206,12 +206,12 @@ public class BaseEntityHandler {
             target.setName(trimAndTruncate(changes.get("name")));
         }
 
-        if (changes.containsKey("date1")) {
-            target.setDate1((Date) changes.get("date1"));
+        if (changes.containsKey("fromDate")) {
+            target.setDate1(((LocalDate) changes.get("fromDate")).atMidnightInMyTimezone());
         }
 
-        if (changes.containsKey("date2")) {
-            target.setDate2((Date) changes.get("date2"));
+        if (changes.containsKey("toDate")) {
+            target.setDate2(((LocalDate) changes.get("toDate")).atMidnightInMyTimezone());
         }
 
         if (changes.containsKey("projectId")) {

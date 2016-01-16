@@ -72,16 +72,18 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
     private final EventBus eventBus;
     private final ResourceId fieldId;
     private final DateBox dateBox;
+    private final ValueUpdater<LocalDate> valueUpdater;
 
     public DateFieldWidget(final ValueUpdater<LocalDate> valueUpdater,
                            @Nullable EventBus eventBus, ResourceId fieldId) {
+        this.valueUpdater = valueUpdater;
         this.eventBus = eventBus;
         this.fieldId = fieldId;
         this.dateBox = new DateBox(new DatePicker(), null, createFormat());
         this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                valueUpdater.update(new LocalDate(event.getValue()));
+                fireValueChanged();
             }
         });
         this.dateBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
@@ -92,6 +94,11 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
         });
     }
 
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(new LocalDate(dateBox.getValue()));
+    }
+
     public static DateBox.Format createFormat() {
         return new DateBox.DefaultFormat(DateTimeFormat.getFormat(FORMAT));
     }
@@ -99,6 +106,11 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
     @Override
     public void setReadOnly(boolean readOnly) {
         this.dateBox.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return dateBox.isReadOnly();
     }
 
     @Override

@@ -28,6 +28,8 @@ public class HierarchyFieldWidget implements ReferenceFieldWidget {
     private final Map<ResourceId, LevelView> widgets = new HashMap<>();
     private final Presenter presenter;
 
+    private boolean readOnly;
+
     public HierarchyFieldWidget(ResourceLocator locator, Hierarchy tree,
                                 ValueUpdater valueUpdater) {
 
@@ -42,10 +44,22 @@ public class HierarchyFieldWidget implements ReferenceFieldWidget {
     }
 
     @Override
+    public void fireValueChanged() {
+        this.presenter.fireValueChanged();
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+
         for(LevelView widget : widgets.values()) {
             widget.setReadOnly(readOnly);
         }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     @Override

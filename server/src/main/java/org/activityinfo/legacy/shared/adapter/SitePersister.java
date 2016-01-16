@@ -3,14 +3,12 @@ package org.activityinfo.legacy.shared.adapter;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -41,34 +39,15 @@ public class SitePersister {
         final Promise<SiteBinding> siteBinding = dispatcher.execute(new GetActivityForm(activityId))
                 .then(new SiteBindingFactory());
         return Promise.waitAll(schemaPromise, siteBinding).
-                join(new Function<Void, Promise<LocationResult>>() {
+                join(new Function<Void, Promise<Void>>() {
                     @Override
-                    public Promise<LocationResult> apply(@Nullable Void input) {
-                        GetLocations query = new GetLocations();
-                        UserDatabaseDTO databaseById = schemaPromise.get().getDatabaseById(siteBinding.get().getActivity().getDatabaseId());
-                        for (LocationTypeDTO locationTypeDTO : databaseById.getCountry().getLocationTypes()) {
-                            if (locationTypeDTO.isNationwide()) {
-                                query.setLocationTypeId(locationTypeDTO.getId());
-                                break;
-                            }
-                        }
-                        // yuriyz : dummy result in case we don't need location for fallback
-                        // it's tricky but it produce even worse code if load location inside persist() method where it is really needed
-                        if (query.getLocationTypeId() == null) {
-                            return Promise.resolved(new LocationResult(Lists.newArrayList(new LocationDTO())));
-                        }
-                        return dispatcher.execute(query);
-                    }
-                }).
-                join(new Function<LocationResult, Promise<Void>>() {
-                    @Override
-                    public Promise<Void> apply(LocationResult locationResult) {
-                        return persist(siteBinding.get(), siteInstance, locationResult.getData().get(0)).thenDiscardResult();
+                    public Promise<Void> apply(Void input) {
+                        return persist(siteBinding.get(), siteInstance, schemaPromise.get()).thenDiscardResult();
                     }
                 });
     }
 
-    private Promise<? extends CommandResult> persist(SiteBinding siteBinding, FormInstance instance, LocationDTO locationDTO) {
+    private Promise<? extends CommandResult> persist(SiteBinding siteBinding, FormInstance instance, SchemaDTO schemaDTO) {
 
         Map<String, Object> siteProperties = siteBinding.toChangePropertyMap(instance);
         siteProperties.put("activityId", siteBinding.getActivity().getId());
@@ -82,8 +61,21 @@ public class SitePersister {
 
         if (siteBinding.getLocationType().isNationwide()) {
             siteProperties.put("locationId", siteBinding.getLocationType().getId());
-        } else if (!siteProperties.containsKey("locationId")) { // set the locationtypeid to nationwide if the user deletes the location field
-            siteProperties.put("locationId", locationDTO.getId());
+        }
+
+        if (!siteProperties.containsKey("locationId")) { // fallback to nationwide location type if location field is deleted
+            UserDatabaseDTO databaseById = schemaDTO.getDatabaseById(siteBinding.getActivity().getDatabaseId());
+            for (LocationTypeDTO locationTypeDTO : databaseById.getCountry().getLocationTypes()) {
+                if (locationTypeDTO.isNationwide()) {
+                    siteProperties.put("locationId", siteBinding.getLocationType().getId());
+                    break;
+                }
+            }
+
+            if (!siteProperties.containsKey("locationId")) {
+                throw new RuntimeException("Failed to find nationwide location type for countryName: " +
+                        databaseById.getCountry().getName() + ", countryId: " + databaseById.getCountry().getId());
+            }
         }
 
         // default values for start and end dates (if corresponding form field were removed)
@@ -97,6 +89,7 @@ public class SitePersister {
         final CreateSite createSite = new CreateSite(siteProperties);
 
         if (siteBinding.getLocationType().isAdminLevel()) {
+
             // we need to create the dummy location as well
             Promise<Command> createLocation = Promise.resolved(siteBinding.getAdminEntityId(instance))
                     .join(new FetchEntityFunction())
@@ -118,7 +111,6 @@ public class SitePersister {
 
     private class FetchEntityFunction implements Function<Integer, Promise<List<AdminEntityDTO>>> {
 
-        @Nullable
         @Override
         public Promise<List<AdminEntityDTO>> apply(@Nullable Integer input) {
             GetAdminEntities query = new GetAdminEntities().setEntityId(input);

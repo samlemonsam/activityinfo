@@ -14,10 +14,13 @@ public class ButtonWithIcon extends Button {
 
     public interface Templates extends SafeHtmlTemplates {
         @Template("<span class=\"{0}\"></span> {1}")
-        public SafeHtml withIcon(String styleNames, String text);
+        SafeHtml withIcon(String styleNames, String text);
+
+        @Template("<span class=\"{0}\"></span>")
+        SafeHtml withIcon(String styleNames);
     }
 
-    public Templates TEMPLATES = GWT.create(Templates.class);
+    public static Templates TEMPLATES = GWT.create(Templates.class);
 
     @UiConstructor
     public ButtonWithIcon(ElementStyle style, String iconStyle, String text) {

@@ -134,6 +134,7 @@ public class InstanceTable implements IsWidget {
 
     public void reload() {
         dataLoader.reload();
+        table.redrawHeaders(); // forced to change actions state
     }
 
     public Criteria buildQueryCriteria() {

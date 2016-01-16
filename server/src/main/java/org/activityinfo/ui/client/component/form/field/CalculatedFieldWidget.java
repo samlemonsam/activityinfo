@@ -49,6 +49,11 @@ public class CalculatedFieldWidget implements FormFieldWidget<CalculatedValue> {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
+    @Override
     public Promise<Void> setValue(CalculatedValue value) {
         this.value = value;
         label.setText(value != null ? value.asString() : "");
@@ -58,6 +63,10 @@ public class CalculatedFieldWidget implements FormFieldWidget<CalculatedValue> {
     @Override
     public void clearValue() {
         setValue(null);
+    }
+
+    @Override
+    public void fireValueChanged() {
     }
 
     @Override

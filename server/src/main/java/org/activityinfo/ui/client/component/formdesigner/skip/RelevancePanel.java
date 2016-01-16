@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.importDialog.validation;
+package org.activityinfo.ui.client.component.formdesigner.skip;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,25 +21,31 @@ package org.activityinfo.ui.client.component.importDialog.validation;
  * #L%
  */
 
-import com.bedatadriven.rebar.style.client.Source;
-import com.bedatadriven.rebar.style.client.Stylesheet;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
- * @author yuriyz on 5/5/14.
+ * @author yuriyz on 7/23/14.
  */
-@Source("ValidationPage.less")
-public interface ValidationPageStyles extends Stylesheet {
+public class RelevancePanel extends Composite {
 
-    ValidationPageStyles INSTANCE = GWT.create(ValidationPageStyles.class);
+    private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
-    @ClassName("state-ok")
-    String stateOk();
+    interface OurUiBinder extends UiBinder<Widget, RelevancePanel> {
+    }
 
-    @ClassName("state-error")
-    String stateError();
+    @UiField
+    HTMLPanel rootPanel;
 
-    @ClassName("state-confidence")
-    String stateConfidence();
+    public RelevancePanel() {
+        initWidget(uiBinder.createAndBindUi(this));
+    }
 
+    public HTMLPanel getRootPanel() {
+        return rootPanel;
+    }
 }

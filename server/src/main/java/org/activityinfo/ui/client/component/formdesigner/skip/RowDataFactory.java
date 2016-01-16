@@ -34,7 +34,7 @@ public class RowDataFactory {
     private RowDataFactory() {
     }
 
-    public static RowData create(SkipRow skipRow, FieldValue value, FormClass formClass) {
+    public static RowData create(RelevanceRow skipRow, FieldValue value, FormClass formClass) {
         final ResourceId fieldId = ResourceId.valueOf(skipRow.getFormfield().getValue(skipRow.getFormfield().getSelectedIndex()));
 
         final RowData rowData = new RowData();

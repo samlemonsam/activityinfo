@@ -360,6 +360,11 @@ public class BsTable {
         return this;
     }
 
+    public BsTable selectFirstRow() {
+        rows().iterator().next().getContainer().clickWhenReady();
+        return this;
+    }
+
     public static final int LOAD_COUNT = 200;
 
     public static void waitUntilRowsLoaded(final TablePage tablePage, final int expectedRows) {

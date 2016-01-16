@@ -122,11 +122,7 @@ public class Uploader {
     }
 
     public String getBaseUrl() {
-        return getBaseUrl(attachment.getBlobId(), resourceId);
-    }
-
-    public static String getBaseUrl(String blobId, ResourceId resourceId) {
-        return "/service/blob/" + blobId + "/" + resourceId.asString();
+        return UploadUrls.getBaseUrl(attachment.getBlobId(), resourceId);
     }
 
     public String getPermanentLink() {
@@ -134,11 +130,7 @@ public class Uploader {
     }
 
     public static String getPermanentLink(String blobId, ResourceId resourceId) {
-        String appUrl = GWT.getHostPageBaseURL();
-        if (appUrl.endsWith("/")) {
-            appUrl = appUrl.substring(0, appUrl.length() - 1);
-        }
-        return appUrl + getBaseUrl(blobId, resourceId) + "/blobUrl";
+        return UploadUrls.getPermanentLink(GWT.getHostPageBaseURL(), blobId, resourceId);
     }
 
     private String fileName() {

@@ -841,7 +841,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         indicator.setName("indicatorName");
         indicator.setTypeId(rs.getString("type"));
         indicator.setExpression(rs.getString("expression"));
-        indicator.setSkipExpression(rs.getString("skipExpression"));
+        indicator.setRelevanceExpression(rs.getString("skipExpression"));
         indicator.setNameInExpression(rs.getString("code"));
         indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
         indicator.setUnits(rs.getString("units"));

@@ -243,7 +243,7 @@ public class DatabaseSetupSteps {
                 property("form", formName),
                 property("name", fieldName),
                 property("type", "quantity"),
-                property("skipExpression", relevanceCondition),
+                property("relevanceExpression", relevanceCondition),
                 property("code", fieldCode)
         );
 

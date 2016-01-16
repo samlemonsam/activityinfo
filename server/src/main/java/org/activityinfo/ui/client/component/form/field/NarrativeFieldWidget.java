@@ -14,26 +14,38 @@ import org.activityinfo.ui.client.widget.TextArea;
 public class NarrativeFieldWidget implements FormFieldWidget<NarrativeValue> {
 
     private final TextArea textArea;
+    private final ValueUpdater<NarrativeValue> updater;
 
     public NarrativeFieldWidget(final ValueUpdater<NarrativeValue> updater) {
+        this.updater = updater;
         this.textArea = new TextArea();
         this.textArea.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                updater.update(NarrativeValue.valueOf(event.getValue()));
+                fireValueChanged();
             }
         });
         this.textArea.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                updater.update(NarrativeValue.valueOf(NarrativeFieldWidget.this.textArea.getValue()));
+                fireValueChanged();
             }
         });
     }
 
     @Override
+    public void fireValueChanged() {
+        updater.update(NarrativeValue.valueOf(this.textArea.getValue()));
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         textArea.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return textArea.isReadOnly();
     }
 
     @Override

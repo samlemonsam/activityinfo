@@ -55,6 +55,8 @@ import org.activityinfo.ui.client.widget.form.FormGroup;
  */
 public class NewDbDetailsPage extends WizardPageAdapter {
 
+    public static final int DESCRIPTION_LENGTH_LIMIT = 50;
+
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
     interface OurUiBinder extends UiBinder<Widget, NewDbDetailsPage> {
@@ -165,11 +167,13 @@ public class NewDbDetailsPage extends WizardPageAdapter {
             nameField.showValidationMessage(true);
             result = false;
         }
-        // description is not required
-//        if (Strings.isNullOrEmpty(description.getValue())) {
-//            descriptionField.showValidationMessage(true);
-//            result = false;
-//        }
+        if (!Strings.isNullOrEmpty(description.getValue())) {
+            if (description.getValue().length() > DESCRIPTION_LENGTH_LIMIT) {
+                descriptionField.showValidationMessage(true);
+                descriptionField.showValidationMessage(I18N.MESSAGES.exceedsMaximumLength(DESCRIPTION_LENGTH_LIMIT));
+                result = false;
+            }
+        }
         if (Strings.isNullOrEmpty(country.getValue()) || !GwtUtil.isInt(country.getValue())) {
             countryField.showValidationMessage(true);
             result = false;

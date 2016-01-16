@@ -60,6 +60,10 @@ public class InstanceQuery {
         return filterFieldPath;
     }
 
+    public boolean isFilterQuery() {
+        return filterFieldPath != null;
+    }
+
     public InstanceQuery setFilterFieldPath(FieldPath filterFieldPath) {
         this.filterFieldPath = filterFieldPath;
         return this;

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.importDialog.validation;
+package org.activityinfo.test.driver;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,25 +21,24 @@ package org.activityinfo.ui.client.component.importDialog.validation;
  * #L%
  */
 
-import com.bedatadriven.rebar.style.client.Source;
-import com.bedatadriven.rebar.style.client.Stylesheet;
-import com.google.gwt.core.client.GWT;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- * @author yuriyz on 5/5/14.
+ * @author yuriyz on 12/22/2015.
  */
-@Source("ValidationPage.less")
-public interface ValidationPageStyles extends Stylesheet {
+public class RelevanceTransformatorTest {
 
-    ValidationPageStyles INSTANCE = GWT.create(ValidationPageStyles.class);
+    @Test
+    public void test() {
+        AliasTable aliases = new AliasTable();
+        String genderAlias = aliases.createAlias("Gender");
+        String maleAlias = aliases.createAlias("Male");
 
-    @ClassName("state-ok")
-    String stateOk();
+        RelevanceTransformator transformator = new RelevanceTransformator(aliases);
+        String transformed = transformator.transform("Gender==Male");
 
-    @ClassName("state-error")
-    String stateError();
-
-    @ClassName("state-confidence")
-    String stateConfidence();
-
+        System.out.println("Transformed expression: " + transformed);
+        Assert.assertEquals(String.format("{%s}=={%s}", genderAlias, maleAlias), transformed);
+    }
 }

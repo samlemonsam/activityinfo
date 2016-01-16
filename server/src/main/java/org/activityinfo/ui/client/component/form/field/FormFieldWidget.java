@@ -31,11 +31,15 @@ import org.activityinfo.promise.Promise;
  */
 public interface FormFieldWidget<T extends FieldValue> extends IsWidget {
 
-    public void setReadOnly(boolean readOnly);
+    void setReadOnly(boolean readOnly);
 
-    public Promise<Void> setValue(T value);
+    boolean isReadOnly();
 
-    public void setType(FieldType type);
+    Promise<Void> setValue(T value);
+
+    void setType(FieldType type);
 
     void clearValue();
+
+    void fireValueChanged();
 }

@@ -51,7 +51,7 @@ import java.util.List;
 /**
  * @author yuriyz on 7/24/14.
  */
-public class SkipRowPresenter {
+public class RelevanceRowPresenter {
 
     private static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
             EqualFunction.INSTANCE, NotEqualFunction.INSTANCE
@@ -62,14 +62,14 @@ public class SkipRowPresenter {
     ));
 
     private final FieldWidgetContainer fieldWidgetContainer;
-    private final SkipRow view = new SkipRow();
+    private final RelevanceRow view = new RelevanceRow();
     private final FormFieldWidgetFactory widgetFactory;
 
     private FormFieldWidget valueWidget = null;
     private FieldValue value;
     private RowData rowData;
 
-    public SkipRowPresenter(final FieldWidgetContainer fieldWidgetContainer) {
+    public RelevanceRowPresenter(final FieldWidgetContainer fieldWidgetContainer) {
         this.fieldWidgetContainer = fieldWidgetContainer;
         this.widgetFactory = new FormFieldWidgetFactory(fieldWidgetContainer.getFormDesigner().getResourceLocator(), FieldWidgetMode.NORMAL);
 
@@ -95,7 +95,7 @@ public class SkipRowPresenter {
         ValueUpdater<FieldValue> valueUpdater = new ValueUpdater<FieldValue>() {
             @Override
             public void update(FieldValue value) {
-                SkipRowPresenter.this.value = value;
+                RelevanceRowPresenter.this.value = value;
             }
         };
 
@@ -113,7 +113,7 @@ public class SkipRowPresenter {
 
                 if (rowData != null) {
                     valueWidget.setValue(rowData.getValue());
-                    SkipRowPresenter.this.value = rowData.getValue();
+                    RelevanceRowPresenter.this.value = rowData.getValue();
                 }
             }
         });
@@ -174,7 +174,7 @@ public class SkipRowPresenter {
         view.getJoinFunction().setSelectedIndex(0);
     }
 
-    public SkipRow getView() {
+    public RelevanceRow getView() {
         return view;
     }
 

@@ -45,6 +45,7 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     private static GeographicPointWidgetUiBinder ourUiBinder = GWT.create(GeographicPointWidgetUiBinder.class);
 
     private final HTMLPanel panel;
+    private final ValueUpdater<GeoPoint> valueUpdater;
 
     @UiField
     CoordinateBox latitudeBox;
@@ -53,16 +54,22 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     CoordinateBox longitudeBox;
 
     public GeographicPointWidget(final ValueUpdater<GeoPoint> valueUpdater) {
+        this.valueUpdater = valueUpdater;
         panel = ourUiBinder.createAndBindUi(this);
 
         ValueChangeHandler<Double> handler = new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> event) {
-                valueUpdater.update(getValue());
+                fireValueChanged();
             }
         };
         latitudeBox.addValueChangeHandler(handler);
         longitudeBox.addValueChangeHandler(handler);
+    }
+
+    @Override
+    public void fireValueChanged() {
+        valueUpdater.update(getValue());
     }
 
     private GeoPoint getValue() {
@@ -79,6 +86,11 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     public void setReadOnly(boolean readOnly) {
         latitudeBox.setReadOnly(readOnly);
         longitudeBox.setReadOnly(readOnly);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return latitudeBox.isReadOnly();
     }
 
     @Override

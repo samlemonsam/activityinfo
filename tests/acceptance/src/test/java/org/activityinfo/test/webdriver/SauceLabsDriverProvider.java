@@ -6,10 +6,7 @@ import com.saucelabs.saucerest.SauceREST;
 import org.activityinfo.test.config.ConfigProperty;
 import org.activityinfo.test.config.ConfigurationError;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.BrowserType;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.*;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
@@ -125,7 +122,9 @@ public class SauceLabsDriverProvider implements WebDriverProvider {
 
         RemoteWebDriver remoteWebDriver = new RemoteWebDriver(getWebDriverServer(), capabilities);
         System.out.println(format("SauceOnDemandSessionID=%s job-name=%s", remoteWebDriver.getSessionId(), name));
-        
+
+        remoteWebDriver.setFileDetector(new LocalFileDetector());
+
         return remoteWebDriver;
     }
 

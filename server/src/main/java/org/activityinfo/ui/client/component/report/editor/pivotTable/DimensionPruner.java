@@ -97,6 +97,10 @@ public class DimensionPruner implements HasReportElement<PivotTableReportElement
         Map<Integer, String> valid = validDimensions(schema);
         Set<String> validLabels = new HashSet<>(valid.values());
 
+        // Store group labels so that we can match by name of those
+        // dimensions which might no longer be returned by GetActivityForms(filter)
+        groupNames.putAll(valid);
+        
         boolean dirty = false;
         for (AttributeGroupDimension selectedDim : getSelectedAttributes()) {
             String label = groupNames.get(selectedDim.getAttributeGroupId());
@@ -112,9 +116,6 @@ public class DimensionPruner implements HasReportElement<PivotTableReportElement
             reportEventBus.fireChange();
         }
 
-        // Store group labels so that we can match by name of those
-        // dimensions which might no longer be returned by GetActivityForms(filter)
-        groupNames.putAll(valid);
     }
 
     private Map<Integer, String> validDimensions(ActivityFormResults schema) {
