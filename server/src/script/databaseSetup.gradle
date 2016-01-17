@@ -44,7 +44,7 @@ task migrateDatabaseDev(type: MySqlSetupTask) {
 
 task setupTestDatabase(type: MySqlSetupTask) {
     database =      mysql.local.database('aitest_1')
-    
+    dropDatabase =  true
 }
 
 task setupDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
