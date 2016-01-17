@@ -17,5 +17,7 @@ dependencies {
 
 }
 
+test.dependsOn ':server:setupTestDatabase'
+
 jacocoTestReport.dependsOn 'test'
 

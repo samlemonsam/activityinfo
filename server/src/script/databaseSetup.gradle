@@ -42,6 +42,11 @@ task migrateDatabaseDev(type: MySqlSetupTask) {
     database =      mysql.localDev
 }
 
+task setupTestDatabase(type: MySqlSetupTask) {
+    database =      mysql.local.database('aitest_1')
+    
+}
+
 task setupDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
     description =  "Creates and populates a database for running acceptance tests"
     dropDatabase =  true
