@@ -103,7 +103,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
             return widgetCreator.createWidgets(formClass, this).then(new Function<Void, Void>() {
                 @Nullable
                 @Override
-                public Void apply(@Nullable Void input) {
+                public Void apply(Void input) {
                     addFormElements(formClass, 0);
                     return null;
                 }
@@ -166,12 +166,15 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     public void onFieldUpdated(FormField field, FieldValue newValue) {
-        FormInstance workingInstance = model.getWorkingInstance(field.getId());
-        if (!Objects.equals(workingInstance.get(field.getId()), newValue)) {
-            workingInstance.set(field.getId(), newValue);
-            relevanceHandler.onValueChange(); // skip handler must be applied after workingInstance is updated
+        Optional<FormInstance> workingInstance = model.getWorkingInstance(field.getId());
+
+        if (workingInstance.isPresent()) {
+            if (!Objects.equals(workingInstance.get().get(field.getId()), newValue)) {
+                workingInstance.get().set(field.getId(), newValue);
+                relevanceHandler.onValueChange(); // skip handler must be applied after workingInstance is updated
+            }
+            validateField(widgetCreator.get(field.getId()));
         }
-        validateField(widgetCreator.get(field.getId()));
     }
 
     private boolean validateField(FieldContainer container) {
@@ -240,7 +243,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     private FieldValue getCurrentValue(FormField field) {
-        return model.getWorkingInstance(field.getId()).get(field.getId());
+        return model.getWorkingInstance(field.getId()).get().get(field.getId());
     }
 
     private static Widget createHeader(int depth, String header) {

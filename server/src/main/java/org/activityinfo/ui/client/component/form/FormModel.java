@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import com.google.gwt.event.shared.EventBus;
@@ -203,23 +204,23 @@ public class FormModel {
         this.workingRootInstance = workingRootInstance;
     }
 
-    public FormInstance getWorkingInstance(ResourceId formFieldId) {
+    public Optional<FormInstance> getWorkingInstance(ResourceId formFieldId) {
         FormClass classByField = getClassByField(formFieldId);
         if (classByField.equals(rootFormClass)) {
-            return getWorkingRootInstance();
+            return Optional.of(getWorkingRootInstance());
         }
         FormInstance selectedTab = selectedInstances.get(classByField);
 
         if (selectedTab == null) {
-            return null; // on initial form creation we may have nothing selected
+            return Optional.absent(); // on initial form creation we may have nothing selected
         }
 
         SubformValueKey key = new SubformValueKey(classByField, selectedTab);
         FormInstance subFormInstance = subFormInstances.get(key);
         if (subFormInstance == null) {
-            return createSubFormInstanceValue(key);
+            return Optional.of(createSubFormInstanceValue(key));
         }
-        return subFormInstance;
+        return Optional.of(subFormInstance);
     }
 
     public BiMap<SubformValueKey, FormInstance> getSubFormInstances() {
