@@ -526,7 +526,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Your search did not match any existing sites. Make your search more general or add a new location.")
     String locationSearchNoResults();
 
-    @DefaultStringValue("Site Type")
+    @DefaultStringValue("Location Type")
     String locationType();
 
     @DefaultStringValue("Sites")
@@ -1690,4 +1690,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
+    @DefaultStringValue("Collection")
+    String collection();
 }

@@ -22,6 +22,7 @@ package org.activityinfo.model.type.subform;
  */
 
 import com.google.common.collect.Maps;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -36,9 +37,11 @@ import java.util.Map;
  */
 public enum ClassType {
 
-    LOCATION_TYPE("Location type"),
-    PARTNER("Partner"),
-    PROJECT("Project");
+    COLLECTION,
+
+    LOCATION_TYPE,
+    PARTNER,
+    PROJECT;
 
     private static final Map<String, ClassType> resourceIdLookup = Maps.newHashMap();
 
@@ -48,21 +51,27 @@ public enum ClassType {
         }
     }
 
-    private final String label;
-
-    ClassType(String label) {
-        this.label = label;
-    }
-
     public ResourceId getResourceId() {
         return ResourceId.valueOf("_classType_" + this.name().toLowerCase());
     }
 
     public FormClass getDefinition() {
-        FormClass formClass = new FormClass(getResourceId());
-        formClass.setLabel(label);
+        return new FormClass(getResourceId()).
+                setLabel(getLabel());
+    }
 
-        return formClass;
+    public String getLabel() {
+        switch (this) {
+            case COLLECTION:
+                return I18N.CONSTANTS.collection();
+            case LOCATION_TYPE:
+                return I18N.CONSTANTS.locationType();
+            case PARTNER:
+                return I18N.CONSTANTS.partner();
+            case PROJECT:
+                return I18N.CONSTANTS.project();
+        }
+        return I18N.CONSTANTS.unknown();
     }
 
     public static ClassType byDomain(char domain) {
@@ -81,6 +90,8 @@ public enum ClassType {
                 return PARTNER;
             case CuidAdapter.PROJECT_CLASS_DOMAIN:
                 return PROJECT;
+            case CuidAdapter.COLLECTION_DOMAIN:
+                return COLLECTION;
         }
         return null;
     }
