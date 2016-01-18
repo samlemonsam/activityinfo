@@ -210,7 +210,9 @@ public class FormModel {
         }
         FormInstance selectedTab = selectedInstances.get(classByField);
 
-        Preconditions.checkNotNull(selectedTab, "Tab is not selected. Wrong usage of code! Please make sure tab is selected.");
+        if (selectedTab == null) {
+            return null; // on initial form creation we may have nothing selected
+        }
 
         SubformValueKey key = new SubformValueKey(classByField, selectedTab);
         FormInstance subFormInstance = subFormInstances.get(key);
