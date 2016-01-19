@@ -109,8 +109,8 @@ Feature: Calculated fields
   Scenario: Calculated indicators pivoted by Partner
     Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
     And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
-    And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
-    And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
+    And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Sum"
+    And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Average"
     And I submit a "NFI Distribution" form with:
       | field      | value      |
       | partner    | NRC        |
@@ -155,17 +155,14 @@ Feature: Calculated fields
       | End Date   | 2016-07-21 |
     Then aggregating the indicators percent by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
-      | NRC     | 700   | 20   | ∞    |
+      | NRC     |   350 | 20   | ∞    |
       | UPS     | 1,000 | 10   |      |
     Then aggregating the indicators plus by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
-      | NRC     | 231   | 24   | 7    |
-      | UPS     | 110   | 55   |      |
+      | NRC     |  462  | 24   | 7    |
+      | UPS     |  110  | 55   |      |
     Then aggregating the indicators i1 and plus by Partner and Year should yield:
       |         | 2014 | 2015 | 2016 |
       | NRC     | 772  | 28   | 14   |
       | UPS     | 210  | 60   |      |
-    Then aggregating the indicators plus and percent by Partner and Year should yield:
-      |         | 2014   | 2015 | 2016 |
-      | NRC     | 1,162  | 44   | ∞    |
-      | UPS     | 1,110  | 65   |      |
+
