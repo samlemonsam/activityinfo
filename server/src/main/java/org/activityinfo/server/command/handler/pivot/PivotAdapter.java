@@ -390,6 +390,8 @@ public class PivotAdapter {
         if(bucket == null) {
             bucket = new Accumulator(key, aggregation);
             buckets.put(key, bucket);
+        } else {
+            bucket.maybeUpdateAggregationMethod(aggregation);
         }
         return bucket;
     }

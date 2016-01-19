@@ -104,9 +104,11 @@ Feature: Calculated fields
     Then drill down on "560" should yield:
       | NRC      | RDC  | 2014-07-21 | | 110   |
       | NRC      | RDC  | 2014-05-21 | | 450   |
-
+    
   @AI-1082
-  Scenario: Calculated indicators pivoted by Partner
+  Scenario: Combining sum and average calculated indicators
+    # When combining indicators that use different aggregation methods,
+    # the sum aggregation method should always be used
     Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
     And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
     And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"

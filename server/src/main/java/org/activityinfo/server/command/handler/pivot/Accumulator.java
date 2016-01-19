@@ -1,6 +1,7 @@
 package org.activityinfo.server.command.handler.pivot;
 
 import org.activityinfo.legacy.shared.command.result.Bucket;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 
@@ -16,8 +17,9 @@ import java.util.Set;
 public class Accumulator {
 
   private final Map<Dimension, DimensionCategory> key;
-  private final int aggregationMethod;
   private final Set<Integer> distinctSiteIds = new HashSet<>(0);
+  
+  private int aggregationMethod;
 
   private double sum;
   private int valueCount;
@@ -31,6 +33,14 @@ public class Accumulator {
   public void addValue(double value) {
     valueCount++;
     sum += value;
+  }
+  
+  public void maybeUpdateAggregationMethod(int aggregationMethod) {
+    // When combining average and sum indicators, 
+    // choose the sum aggregation method iff there is one or more indicators with sum aggregation
+    if(aggregationMethod == IndicatorDTO.AGGREGATE_SUM) {
+      this.aggregationMethod = IndicatorDTO.AGGREGATE_SUM;
+    }
   }
   
   public void addSite(int id) {
