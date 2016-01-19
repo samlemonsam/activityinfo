@@ -71,8 +71,8 @@ Feature: Calculated fields
       | plus             |   280 |   39.5 |
       | percent          | 1,200 |   30   |
     Then drill down on "280" should yield:
-      | NRC      | RDC  | 2014-07-21 | | 110   |
-      | NRC      | RDC  | 2014-05-21 | | 450   |
+      | NRC      |       | 2014-07-21 |    | 110   |
+      | NRC      |       | 2014-05-21 |    | 450   |
     
   @AI-1082
   Scenario: Combining sum and average calculated indicators

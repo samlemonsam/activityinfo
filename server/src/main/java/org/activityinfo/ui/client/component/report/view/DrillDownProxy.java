@@ -74,7 +74,11 @@ public class DrillDownProxy extends RpcProxy<List<DrillDownRow>> {
         for (Bucket bucket : result.getBuckets()) {
             DrillDownRow row = new DrillDownRow(getEntity(bucket, siteDimension).getId());
             row.set("partner", getEntity(bucket, partnerDimension).getLabel());
-            row.set("location", getEntity(bucket, locationDimension).getLabel());
+            
+            EntityCategory location = getEntity(bucket, locationDimension);
+            if(location != null) {
+                row.set("location", location.getLabel());
+            }
             row.set("date", getDate(bucket));
             row.set("indicator", getEntity(bucket, indicatorDimension).getLabel());
             row.set("value", bucket.doubleValue());
