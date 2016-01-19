@@ -4,15 +4,15 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.date.DateRange;
-import org.activityinfo.model.form.*;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.lock.LockEvaluator;
 import org.activityinfo.model.resource.Resource;
@@ -20,10 +20,8 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
-import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 
 import javax.annotation.Nullable;
@@ -104,7 +102,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 @Nullable
                 @Override
                 public Void apply(Void input) {
-                    addFormElements(formClass, 0);
+                    PanelFiller filler = new PanelFiller(panel, model, widgetCreator);
+                    filler.add(formClass, 0);
                     return null;
                 }
             });
@@ -138,31 +137,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 return null;
             }
         });
-    }
-
-    private void addFormElements(FormElementContainer container, int depth) {
-        for (FormElement element : container.getElements()) {
-            if (element instanceof FormSection) {
-                panel.add(createHeader(depth, element.getLabel()));
-                addFormElements((FormElementContainer) element, depth + 1);
-            } else if (element instanceof FormField) {
-                FormField formField = (FormField) element;
-                if (formField.isVisible()) {
-                    if (formField.getType() instanceof SubFormType) {
-                        FormClass subForm = getModel().getSubFormByOwnerFieldId(formField.getId());
-                        final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(locator);
-
-                        panel.add(createHeader(depth, subForm.getLabel()));
-                        panel.add(subFormTabsManipulator.getPresenter().getView());
-
-                        subFormTabsManipulator.show(subForm, model);
-                        addFormElements(subForm, depth + 1);
-                    } else {
-                        panel.add(widgetCreator.get(formField.getId()));
-                    }
-                }
-            }
-        }
     }
 
     public void onFieldUpdated(FormField field, FieldValue newValue) {
@@ -244,11 +218,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
 
     private FieldValue getCurrentValue(FormField field) {
         return model.getWorkingInstance(field.getId()).get().get(field.getId());
-    }
-
-    private static Widget createHeader(int depth, String header) {
-        String hn = "h" + (3 + depth);
-        return new HTML("<" + hn + ">" + SafeHtmlUtils.htmlEscape(header) + "</" + hn + ">");
     }
 
     @Override

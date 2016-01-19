@@ -221,14 +221,6 @@ public class SubFormTabsPresenter {
         return tabCount;
     }
 
-    public void setTabCountSafely(String tabCount) {
-        try {
-            setTabCountSafely((int) Double.parseDouble(tabCount));
-        } catch (Exception e) {
-            setTabCountSafely(SubformConstants.DEFAULT_TAB_COUNT);
-        }
-    }
-
     public void setTabCountSafely(int tabCount) {
         if (tabCount < SubformConstants.MIN_TAB_COUNT) {
             tabCount = SubformConstants.MIN_TAB_COUNT;

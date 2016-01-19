@@ -33,8 +33,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.ClassType;
@@ -97,11 +95,9 @@ public class SubFormTabsManipulator {
         this.subForm = subForm;
         this.formModel = formModel;
 
-        ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
-        ResourceId typeClassId = typeClass.getRange().iterator().next();
-        QuantityType tabsCountType = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
+        ResourceId typeClassId = SubformConstants.getSubformType(subForm);
 
-        presenter.setTabCountSafely(tabsCountType.getUnits());
+        presenter.setTabCountSafely(SubformConstants.getTabCount(subForm));
 
         if (PredefinedPeriods.isPeriodId(typeClassId)) {
             generateFormInstanceForPeriod(subForm, typeClassId);

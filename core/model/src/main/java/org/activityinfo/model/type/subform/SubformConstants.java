@@ -22,7 +22,10 @@ package org.activityinfo.model.type.subform;
  */
 
 import com.google.common.collect.Sets;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.number.QuantityType;
 
 import java.util.Collections;
 import java.util.Set;
@@ -64,4 +67,23 @@ public class SubformConstants {
     public static boolean isSubformBuiltInField(ResourceId resourceId) {
         return subformBuiltInFieldIds().contains(resourceId);
     }
+
+    public static boolean isCollection(FormClass formClass) {
+        return ClassType.byId(getSubformType(formClass)) == ClassType.COLLECTION;
+    }
+
+    public static ResourceId getSubformType(FormClass subForm) {
+        ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+        return typeClass.getRange().iterator().next();
+    }
+
+    public static int getTabCount(FormClass subForm) {
+        QuantityType tabsCountType = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
+        try {
+            return (int) Double.parseDouble(tabsCountType.getUnits());
+        } catch (Exception e) {
+            return SubformConstants.DEFAULT_TAB_COUNT;
+        }
+    }
+
 }
