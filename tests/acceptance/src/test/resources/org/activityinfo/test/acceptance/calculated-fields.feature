@@ -44,21 +44,11 @@ Feature: Calculated fields
     Given I have created a quantity field "total" in "NFI Distribution" with code "total"
     And I have created a quantity field "withHelmet" in "NFI Distribution" with code "helmet"
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({helmet}/{total})*100" with aggregation "Average"
-    And I submit a "NFI Distribution" form with:
-      | field      | value  |
-      | partner    | NRC    |
-      | total      | 300    |
-      | withHelmet | 150    |
-    And I submit a "NFI Distribution" form with:
-      | field      | value  |
-      | partner    | NRC    |
-      | total      | 500    |
-      | withHelmet | 50     |
-    And I submit a "NFI Distribution" form with:
-      | field      | value  |
-      | partner    | NRC    |
-      | total      | 100    |
-      | withHelmet | 90     |
+    And I have submitted "NFI Distribution" forms with:
+      | partner    | total  | withHelmet |
+      | NRC        | 300    | 150        |
+      | NRC        | 500    | 50         |
+      | NRC        | 100    | 90         |
     Then aggregating the indicator "percent" by Indicator should yield:
       |                  | Value |
       | percent          | 50    |
@@ -69,39 +59,18 @@ Feature: Calculated fields
     And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
     And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 300        |
-      | i2         | 150        |
-      | Start Date | 2014-05-21 |
-      | End Date   | 2014-05-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 100        |
-      | i2         | 10         |
-      | Start Date | 2014-07-21 |
-      | End Date   | 2014-07-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 4          |
-      | i2         | 20         |
-      | Start Date | 2015-05-21 |
-      | End Date   | 2015-05-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 5          |
-      | i2         | 50         |
-      | Start Date | 2015-07-21 |
-      | End Date   | 2015-07-21 |
+    And I have submitted "NFI Distribution" forms with:
+      | partner | i1  | i2  | Start Date | End Date   |
+      | NRC     | 300 | 150 | 2014-05-21 | 2014-05-21 |
+      | NRC     | 100 | 10  | 2014-07-21 | 2014-07-21 |
+      | NRC     | 4   | 20  | 2015-05-21 | 2015-05-21 |
+      | NRC     | 5   | 50  | 2015-07-21 | 2015-07-21 |
+
     Then aggregating the indicators plus and percent by Indicator and Year should yield:
-      |                  | 2014  | 2015 |
-      | plus             | 560   | 79   |
-      | percent          | 1,200 | 30   |
-    Then drill down on "560" should yield:
+      |                  |  2014 |   2015 |
+      | plus             |   280 |   39.5 |
+      | percent          | 1,200 |   30   |
+    Then drill down on "280" should yield:
       | NRC      | RDC  | 2014-07-21 | | 110   |
       | NRC      | RDC  | 2014-05-21 | | 450   |
     
@@ -113,48 +82,15 @@ Feature: Calculated fields
     And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
     And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
     And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 300        |
-      | i2         | 150        |
-      | Start Date | 2014-05-21 |
-      | End Date   | 2014-05-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | UPS        |
-      | i1         | 100        |
-      | i2         | 10         |
-      | Start Date | 2014-07-21 |
-      | End Date   | 2014-07-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 10         |
-      | i2         | 2          |
-      | Start Date | 2014-10-21 |
-      | End Date   | 2014-10-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 4          |
-      | i2         | 20         |
-      | Start Date | 2015-05-21 |
-      | End Date   | 2015-05-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | UPS        |
-      | i1         | 5          |
-      | i2         | 50         |
-      | Start Date | 2015-07-21 |
-      | End Date   | 2015-07-21 |
-    And I submit a "NFI Distribution" form with:
-      | field      | value      |
-      | partner    | NRC        |
-      | i1         | 7          |
-      | i2         | 0          |
-      | Start Date | 2016-07-21 |
-      | End Date   | 2016-07-21 |
+    And I have submitted "NFI Distribution" forms with:
+      | partner | i1  | i2  | Start Date | End Date   |
+      | NRC     | 300 | 150 | 2014-05-21 | 2014-05-21 |
+      | UPS     | 100 | 10  | 2014-07-21 | 2014-07-21 |
+      | NRC     | 10  | 2   | 2014-10-21 | 2014-10-21 |
+      | NRC     | 4   | 20  | 2015-05-21 | 2015-05-21 |
+      | UPS     | 5   | 50  | 2015-07-21 | 2015-07-21 |
+      | NRC     | 7   | 0   | 2016-07-21 | 2016-07-21 |
+
     Then aggregating the indicators percent by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
       | NRC     | 700   | 20   | ∞    |
