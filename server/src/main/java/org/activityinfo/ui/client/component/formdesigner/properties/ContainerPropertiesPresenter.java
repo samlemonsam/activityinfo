@@ -38,7 +38,6 @@ import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
@@ -62,7 +61,6 @@ public class ContainerPropertiesPresenter {
     private HandlerRegistration labelKeyUpHandler;
     private HandlerRegistration subformKindChangeHandler;
     private HandlerRegistration subformSubKindChangeHandler;
-    private HandlerRegistration subformTabCountHandler;
 
     private final Map<String, FormInstance> kindIdToInstance = Maps.newHashMap();
 
@@ -120,15 +118,6 @@ public class ContainerPropertiesPresenter {
                 }
             });
 
-            subformTabCountHandler = view.getSubformTabCount().addChangeHandler(new ChangeHandler() {
-                @Override
-                public void onChange(ChangeEvent event) {
-                    final QuantityType tabCount = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
-                    tabCount.setUnits(view.getSubformTabCount().getValue().toString());
-                    forceSubformRerender(subForm);
-                }
-            });
-
             // kind
             ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
             ResourceId typeClassId = typeClass.getRange().iterator().next();
@@ -140,10 +129,6 @@ public class ContainerPropertiesPresenter {
                 view.getSubformSubKindGroup().setVisible(true);
                 initSubKindList(classType, typeClassId, subForm);
             }
-
-            // tabs count
-            QuantityType tabCount = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
-            view.getSubformTabCount().setValue(Double.parseDouble(tabCount.getUnits()));
         }
     }
 
@@ -241,9 +226,6 @@ public class ContainerPropertiesPresenter {
         }
         if (subformSubKindChangeHandler != null) {
             subformSubKindChangeHandler.removeHandler();
-        }
-        if (subformTabCountHandler != null) {
-            subformTabCountHandler.removeHandler();
         }
 
         view.getLabelGroup().setVisible(false);

@@ -97,7 +97,7 @@ public class SubFormTabsManipulator {
 
         ResourceId typeClassId = SubformConstants.getSubformType(subForm);
 
-        presenter.setTabCountSafely(SubformConstants.getTabCount(subForm));
+        presenter.setTabCountSafely(SubformConstants.DEFAULT_TAB_COUNT);
 
         if (PredefinedPeriods.isPeriodId(typeClassId)) {
             generateFormInstanceForPeriod(subForm, typeClassId);

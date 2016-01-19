@@ -53,10 +53,6 @@ public class ContainerPropertiesPanel extends Composite {
     @UiField
     FormGroup subformKindGroup;
     @UiField
-    FormGroup subformTabCountGroup;
-    @UiField
-    DoubleBox subformTabCount;
-    @UiField
     HTMLPanel subformGroup;
     @UiField
     ListBox subformSubKind;
@@ -107,14 +103,6 @@ public class ContainerPropertiesPanel extends Composite {
 
     public FormGroup getSubformKindGroup() {
         return subformKindGroup;
-    }
-
-    public FormGroup getSubformTabCountGroup() {
-        return subformTabCountGroup;
-    }
-
-    public DoubleBox getSubformTabCount() {
-        return subformTabCount;
     }
 
     public HTMLPanel getSubformGroup() {

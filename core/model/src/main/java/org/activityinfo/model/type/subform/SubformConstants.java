@@ -25,7 +25,6 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.number.QuantityType;
 
 import java.util.Collections;
 import java.util.Set;
@@ -41,16 +40,10 @@ public class SubformConstants {
      */
     public static final ResourceId TYPE_FIELD_ID = ResourceId.valueOf("_subform_class_type");
 
-    /**
-     * Tabs count on subform.
-     */
-    public static final ResourceId TAB_COUNT_FIELD_ID = ResourceId.valueOf("_subform_tab_count");
-
     private static final Set<ResourceId> BUILT_IN_FIELDS = Sets.newHashSet();
 
     static {
         BUILT_IN_FIELDS.add(TYPE_FIELD_ID);
-        BUILT_IN_FIELDS.add(TAB_COUNT_FIELD_ID);
     }
 
     public static final int DEFAULT_TAB_COUNT = 4;
@@ -75,15 +68,6 @@ public class SubformConstants {
     public static ResourceId getSubformType(FormClass subForm) {
         ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
         return typeClass.getRange().iterator().next();
-    }
-
-    public static int getTabCount(FormClass subForm) {
-        QuantityType tabsCountType = (QuantityType) subForm.getField(SubformConstants.TAB_COUNT_FIELD_ID).getType();
-        try {
-            return (int) Double.parseDouble(tabsCountType.getUnits());
-        } catch (Exception e) {
-            return SubformConstants.DEFAULT_TAB_COUNT;
-        }
     }
 
 }

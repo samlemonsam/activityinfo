@@ -33,7 +33,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
@@ -71,10 +70,6 @@ public class FormDesignerModel {
                         .setCardinality(Cardinality.SINGLE)
                         .setRange(PredefinedPeriods.MONTHLY.getResourceId())
         );
-
-        FormField tabCount = formClass.addField(SubformConstants.TAB_COUNT_FIELD_ID);
-        tabCount.setVisible(false);
-        tabCount.setType(new QuantityType().setUnits(Integer.toString(SubformConstants.DEFAULT_TAB_COUNT)));
 
         registerSubform(formFieldId, formClass);
         return formClass;
