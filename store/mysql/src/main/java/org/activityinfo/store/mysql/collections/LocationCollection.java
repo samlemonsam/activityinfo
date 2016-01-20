@@ -10,19 +10,26 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.primitive.BooleanFieldValue;
+import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.mapping.FieldMapping;
+import org.activityinfo.store.mysql.mapping.FieldValueConverter;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 
 
 public class LocationCollection implements ResourceCollection {
@@ -31,6 +38,8 @@ public class LocationCollection implements ResourceCollection {
     public static final ResourceId AXE_FIELD_ID = ResourceId.valueOf("FF8081814AE3CC9B014AE4C1F2E60006");
     public static final ResourceId ADMIN_FIELD_ID = ResourceId.valueOf("FF8081814AE3CC9B014AE4C59E540009");
     public static final ResourceId POINT_FIELD_ID = ResourceId.valueOf("FF8081814AE3CC9B014AE4C5D7C6000A");
+    public static final ResourceId VISIBLE_FIELD_ID = ResourceId.valueOf("FF808181525E888601525E88867F0000");
+
     public static final String TABLE_NAME = "location";
     
     private QueryExecutor executor;
@@ -86,6 +95,12 @@ public class LocationCollection implements ResourceCollection {
         pointField.setLabel(I18N.CONSTANTS.geographicCoordinatesFieldLabel());
         pointField.setRequired(false);
         pointField.setType(GeoAreaType.INSTANCE);
+        
+        FormField visible = new FormField(VISIBLE_FIELD_ID);
+        visible.setCode("visible");
+        visible.setLabel(I18N.CONSTANTS.visible());
+        visible.setRequired(true);
+        visible.setType(BooleanType.INSTANCE);
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, TABLE_NAME);
         mapping.setBaseFilter("base.locationTypeId=" + locationTypeId);
@@ -96,6 +111,18 @@ public class LocationCollection implements ResourceCollection {
         mapping.addTextField(axeField, "axe");
         mapping.addUnmappedField(adminField);
         mapping.addGeoPoint(pointField);
+        mapping.add(new FieldMapping(visible, "workflowStatusId", new FieldValueConverter() {
+            @Override
+            public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
+                String statusId = rs.getString(index); // either "rejected" or "validatated"
+                return BooleanFieldValue.valueOf("validated".equals(statusId));
+            }
+
+            @Override
+            public Collection<?> toParameters(FieldValue value) {
+                return Collections.singletonList(value == BooleanFieldValue.TRUE ? "validated" : "rejected");
+            }
+        }));
 
         this.mapping = mapping.build();
 

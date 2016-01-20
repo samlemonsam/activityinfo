@@ -24,6 +24,28 @@ public class ColumnSetMatchers {
         }
     }
     
+    public static TypeSafeMatcher<ColumnView> hasValues(final boolean... values) {
+        return new ColumnViewMatcher() {
+            @Override
+            protected boolean matchesSafely(ColumnView item) {
+                if (item.numRows() != values.length) {
+                    return false;
+                }
+                for (int i = 0; i != values.length; ++i) {
+                    if (item.getBoolean(i) != (values[i] ? 1 : 0)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("column with values").appendValueList("[", ", ", "]", values);
+            }
+        };
+    }
+    
     public static TypeSafeMatcher<ColumnView> hasValues(final String... values) {
         return new ColumnViewMatcher() {
             @Override

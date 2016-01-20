@@ -21,6 +21,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.CollectionCatalog;
@@ -186,6 +187,7 @@ public class FormResource {
                 type instanceof QuantityType ||
                 type instanceof EnumType ||
                 type instanceof ReferenceType ||
+                type instanceof BooleanType ||
                 type instanceof LocalDateType;
     }
 
