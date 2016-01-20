@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.collections;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -20,7 +19,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 public class TargetQueryBuilder implements ColumnQueryBuilder {
@@ -28,7 +26,6 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
     private QueryExecutor executor;
     private DatabaseTargetForm target;
 
-    private List<CursorObserver<?>> observers = Lists.newArrayList();
     private Map<Integer, ValueEmitter> valueEmitters = Maps.newHashMap();
 
     private MySqlCursorBuilder baseCursorBuilder;
@@ -66,30 +63,26 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
             baseCursorBuilder.addField(fieldId, observer);
         }
         
-        observers.add(observer);
     }
 
     @Override
     public void execute() throws IOException {
         
-        if(valueEmitters.isEmpty()) {
+        // First do base columns (like dates, project, partner, etc)
+        if(baseCursorBuilder.hasObservers()) {
             Cursor open = baseCursorBuilder.open();
             while(open.next()) {
             }
-        } else {
-
+        }
+        
+        if(!valueEmitters.isEmpty()) {
             valueBuffer = new double[valueEmitters.size()];
             Arrays.fill(valueBuffer, Double.NaN);
 
             try (ResultSet rs = executor.query("SELECT  " +
                     "T.TargetId, " +        // (1)
-                    "T.Name, " +            // (2)
-                    "T.Date1, " +           // (3)
-                    "T.Date2, " +           // (4)
-                    "T.PartnerId, " +       // (5)    
-                    "T.ProjectId, " +       // (6)
-                    "V.IndicatorId, " +     // (7)
-                    "V.Value " +            // (8)
+                    "V.IndicatorId, " +     // (2)
+                    "V.Value " +            // (3)
                     "FROM target T " +
                     "LEFT JOIN targetvalue V ON (T.targetId = V.targetId) " +
                     "WHERE T.DatabaseId = " + target.getDatabaseId() + " " +
@@ -109,8 +102,8 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
                         lastTargetId = targetId;
                     }
                     
-                    int indicatorId = rs.getInt(7);
-                    double value = rs.getDouble(8);
+                    int indicatorId = rs.getInt(2);
+                    double value = rs.getDouble(3);
                     if(!rs.wasNull()) {
                         ValueEmitter valueEmitter = valueEmitters.get(indicatorId);
                         if(valueEmitter != null) {
@@ -122,8 +115,8 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
                     flushValues();
                 }
 
-                for (CursorObserver<?> observer : observers) {
-                    observer.done();
+                for (ValueEmitter valueEmitter : valueEmitters.values()) {
+                    valueEmitter.observer.done();
                 }
 
             } catch (SQLException e) {

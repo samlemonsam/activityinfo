@@ -395,13 +395,19 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertFalse(collection.isPresent());
     }
 
-
     @Test
     public void targets() {
-        query(CuidAdapter.cuid(CuidAdapter.TARGET_FORM_CLASS_DOMAIN, 1), "_id", "name");
+        String targetValue12451 = CuidAdapter.targetIndicatorField(12451).asString();
+        
+        query(CuidAdapter.cuid(CuidAdapter.TARGET_FORM_CLASS_DOMAIN, 1), "_id", "name", "fromDate", "toDate",
+                targetValue12451, "partner.name");
 
         assertThat(column("_id"), hasValues(cuid(TARGET_INSTANCE_DOMAIN, 6001)));
         assertThat(column("name"), hasValues("Long term goals"));
+        assertThat(column("fromDate"), hasValues("2009-01-01"));
+        assertThat(column("toDate"), hasValues("2012-01-01"));
+        assertThat(column(targetValue12451), hasValues(9999));
+        assertThat(column("partner.name"), hasValues("NRC"));
     }
 
 }

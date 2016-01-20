@@ -298,4 +298,8 @@ public class CuidAdapter {
     public static ResourceId lockId(int id) {
         return cuid(LOCK_DOMAIN, id);
     }
+
+    public static ResourceId targetIndicatorField(int indicatorId) {
+        return cuid(TARGET_INDICATOR_FIELD_DOMAIN, indicatorId);
+    }
 }

@@ -34,6 +34,7 @@ public class DatabaseTargetForm implements Serializable {
     public void addIndicator(int id, String name, String units) {
         FormField field = new FormField(CuidAdapter.cuid(CuidAdapter.TARGET_INDICATOR_FIELD_DOMAIN, id));
         field.setLabel(name);
+        field.setSuperProperty(CuidAdapter.indicatorField(id));
         field.setType(new QuantityType(units));
         indicatorFields.add(field);
         fieldMap.put(id, field);

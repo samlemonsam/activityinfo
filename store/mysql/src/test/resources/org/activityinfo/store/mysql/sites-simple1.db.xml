@@ -488,7 +488,7 @@
       sortOrder="999"/>
 
     
-  <target targetId="6001" databaseId="1" name="Long term goals" date1="2009-01-01" date2="2012-01-01"/>
-
+  <target targetId="6001" databaseId="1" name="Long term goals" partnerId="1" date1="2009-01-01" date2="2012-01-01"/>
+  <targetvalue targetId="6001" indicatorId="12451" value="9999"/>
 
 </dataset>
