@@ -111,19 +111,21 @@ public class LocationCollection implements ResourceCollection {
         mapping.addTextField(axeField, "axe");
         mapping.addUnmappedField(adminField);
         mapping.addGeoPoint(pointField);
-        mapping.add(new FieldMapping(visible, "workflowStatusId", new FieldValueConverter() {
-            @Override
-            public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
-                String statusId = rs.getString(index); // either "rejected" or "validatated"
-                return BooleanFieldValue.valueOf("validated".equals(statusId));
-            }
+        
+        if(BETA.ENABLE_BOOLEAN_FIELDS) {
+            mapping.add(new FieldMapping(visible, "workflowStatusId", new FieldValueConverter() {
+                @Override
+                public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
+                    String statusId = rs.getString(index); // either "rejected" or "validatated"
+                    return BooleanFieldValue.valueOf("validated".equals(statusId));
+                }
 
-            @Override
-            public Collection<?> toParameters(FieldValue value) {
-                return Collections.singletonList(value == BooleanFieldValue.TRUE ? "validated" : "rejected");
-            }
-        }));
-
+                @Override
+                public Collection<?> toParameters(FieldValue value) {
+                    return Collections.singletonList(value == BooleanFieldValue.TRUE ? "validated" : "rejected");
+                }
+            }));
+        }
         this.mapping = mapping.build();
 
     }

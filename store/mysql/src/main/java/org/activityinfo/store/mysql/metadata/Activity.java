@@ -6,9 +6,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.mysql.collections.BETA;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -138,10 +140,14 @@ public class Activity implements Serializable {
     }
 
     public Collection<ResourceId> getLocationFormClassIds() {
-        Set<ResourceId> locationFormClassIds = Sets.newHashSet();
-        for (Integer typeId : locationTypeIds) {
-            locationFormClassIds.add(CuidAdapter.locationFormClass(typeId));
+        if(BETA.ENABLE_LOCATION_UNION_FIELDS) {
+            Set<ResourceId> locationFormClassIds = Sets.newHashSet();
+            for (Integer typeId : locationTypeIds) {
+                locationFormClassIds.add(CuidAdapter.locationFormClass(typeId));
+            }
+            return locationFormClassIds;
+        } else {
+            return Collections.singleton(CuidAdapter.locationFormClass(locationTypeId));
         }
-        return locationFormClassIds;
     }
 }
