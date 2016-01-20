@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.impl.builders;
 
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
@@ -46,10 +47,11 @@ public class ColumnCombiner implements ColumnViewBuilder {
             case NUMBER:
                 return combineDouble(cols);
             case BOOLEAN:
-                break;
+                return combineBoolean(cols);
         }
         throw new UnsupportedOperationException();
     }
+
 
     private ColumnView combineString(ColumnView[] cols) {
         int numRows = cols[0].numRows();
@@ -89,6 +91,26 @@ public class ColumnCombiner implements ColumnViewBuilder {
         return new DoubleArrayColumnView(values);
     }
 
+
+    private ColumnView combineBoolean(ColumnView[] cols) {
+        int numRows = cols[0].numRows();
+        int numCols = cols.length;
+
+        int[] values = new int[numRows];
+
+
+        for(int i=0;i!=numRows;++i) {
+            values[i] = ColumnView.NA;
+            for(int j=0;j!=numCols;++j) {
+                int value = cols[j].getBoolean(j);
+                if(value != ColumnView.NA) {
+                    values[i] = value;
+                    break;
+                }
+            }
+        }
+        return new BooleanColumnView(values);
+    }
 
     @Override
     public void setFromCache(ColumnView view) {
