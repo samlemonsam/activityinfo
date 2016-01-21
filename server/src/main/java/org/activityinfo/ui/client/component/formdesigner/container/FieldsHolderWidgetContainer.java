@@ -34,7 +34,6 @@ import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.ui.client.component.form.FormModel;
-import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
@@ -140,9 +139,8 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             final FormClass subForm = (FormClass) elementContainer;
             final FormModel formModel = new FormModel(formDesigner.getResourceLocator());
 
-            if (ClassType.isCollection(subForm)) { // unkeyed
-                new SubFormCollectionManipulator(subForm, formModel, panel.getPanel().getSubformContainer(), true).show();
-            } else { // keyed subform
+            panel.getPanel().getSubformTabs().setVisible(!ClassType.isCollection(subForm));
+            if (!ClassType.isCollection(subForm)) { // keyed subforms
                 final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner, panel.getPanel().getSubformTabs());
 
                 if (panel.getPanel().getSubformTabs().isAttached()) {

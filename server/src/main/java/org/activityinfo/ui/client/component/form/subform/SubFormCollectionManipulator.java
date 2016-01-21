@@ -46,26 +46,20 @@ public class SubFormCollectionManipulator {
     private final FormClass subForm;
     private final FormModel formModel;
     private final FlowPanel rootPanel;
-    private final boolean isDesignMode;
 
     private final Map<FormModel.SubformValueKey, SimpleFormPanel> forms = Maps.newHashMap();
 
     public SubFormCollectionManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel) {
-        this(subForm, formModel, rootPanel, false);
-    }
-
-    public SubFormCollectionManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel, boolean isDesignMode) {
         this.subForm = subForm;
         this.formModel = formModel;
         this.rootPanel = rootPanel;
-        this.isDesignMode = isDesignMode;
     }
 
     public void show() {
         rootPanel.add(createAddButton());
 
         Set<FormModel.SubformValueKey> keys = Sets.newHashSet(formModel.getKeysBySubForm(subForm));
-        if (keys.isEmpty() && !isDesignMode) {
+        if (keys.isEmpty()) {
             keys.add(newKey()); // generate new key if we don't have any existing data yets
         }
 
@@ -87,10 +81,8 @@ public class SubFormCollectionManipulator {
         button.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (!isDesignMode) {
-                    addForm(newKey());
-                    setDeleteButtonsState();
-                }
+                addForm(newKey());
+                setDeleteButtonsState();
             }
         });
         return button;
@@ -103,10 +95,6 @@ public class SubFormCollectionManipulator {
         formPanel.addDeleteButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (isDesignMode) {
-                    return;
-                }
-
                 rootPanel.remove(formPanel);
                 forms.remove(key);
                 formModel.getSubFormInstances().remove(key);
