@@ -1,6 +1,5 @@
 package org.activityinfo.server.command.handler;
 
-import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.OldPivotSites;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -39,11 +38,11 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
             // this is the only thing that is not working, so fall back to the old pivot sites handler
             return dispatcher.execute(new OldPivotSites(cmd));
 
-        } else if(cmd.isPivotedBy(DimensionType.Target)) {
+        } /*else if(cmd.isPivotedBy(DimensionType.Target)) {
             LOGGER.info("Falling back to old query engine for query that includes targets.");
             return dispatcher.execute(new OldPivotSites(cmd));
 
-        }
+        }*/
         
         PivotAdapter adapter = null;
         try {

@@ -46,7 +46,7 @@ public class SiteDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
         ColumnView id = columnSet.getColumnView(ID_COLUMN);
         ColumnView label = columnSet.getColumnView(LABEL_COLUMN);
 

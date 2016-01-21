@@ -17,6 +17,7 @@ public class ActivityMetadata {
     String databaseName;
     int databaseId;
     String categoryName;
+    int sortOrder;
     
     final Map<Integer, IndicatorMetadata> indicators = Maps.newHashMap();
     final Map<Integer, ActivityMetadata> linkedActivities = Maps.newHashMap();
@@ -73,5 +74,9 @@ public class ActivityMetadata {
 
     public boolean isMonthly() {
         return reportingFrequency == ActivityFormDTO.REPORT_MONTHLY;
+    }
+
+    public int getSortOrder() {
+        return sortOrder;
     }
 }

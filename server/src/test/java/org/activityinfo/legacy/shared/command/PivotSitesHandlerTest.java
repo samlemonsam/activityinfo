@@ -86,7 +86,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
     @Before
     public void setUp() throws Exception {
-        dimensions = new HashSet<Dimension>();
+        dimensions = new HashSet<>();
         filter = new Filter();
         helper.setUp();
     }
@@ -162,6 +162,20 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         assertThat().forRealizedIndicator(111).thereIsOneBucketWithValue(1510000);
 
     }
+
+    @Test
+    @OnDataSet("/dbunit/sites-simple-target.db.xml")
+    public void testTargetsWithCalculatedIndicatorsByYear() {
+        withIndicatorAsDimension();
+        dimensions.add(new Dimension(DimensionType.Target));
+        dimensions.add(new DateDimension(DateUnit.YEAR));
+        filter.addRestriction(DimensionType.Indicator, Arrays.asList(1, 111));
+
+        execute();
+
+        assertThat().forIndicatorTarget(111).forYear(2008).thereIsOneBucketWithValue(2000000);
+    }
+
 
     @Test
     public void testTotalSiteCount() {

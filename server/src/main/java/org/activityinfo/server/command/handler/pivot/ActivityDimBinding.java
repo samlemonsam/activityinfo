@@ -4,7 +4,6 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 
 import java.util.Arrays;
@@ -20,16 +19,20 @@ public class ActivityDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
-        int activityId = activityIdOf(formTree);
-        String name = formTree.getRootFormClass().getLabel();
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
 
-        EntityCategory category = new EntityCategory(activityId, name);
-
-        // TODO: Sort order!!!
         DimensionCategory[] categories = new DimensionCategory[columnSet.getNumRows()];
-        Arrays.fill(categories, category);
-        
+        Arrays.fill(categories, categoryOf(activity));
+
         return categories;
+    }
+
+    @Override
+    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+        return categoryOf(activity);
+    }
+
+    private EntityCategory categoryOf(ActivityMetadata activity) {
+        return new EntityCategory(activity.getId(), activity.getName(), activity.getSortOrder());
     }
 }

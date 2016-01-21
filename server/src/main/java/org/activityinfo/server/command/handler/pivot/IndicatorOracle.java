@@ -77,7 +77,8 @@ public class IndicatorOracle {
                 " si.activityId, " +        // (12)
                 " sa.reportingFrequency, " + // (13)
                 " (si.dateDeleted IS NOT NULL AND " + // (14) 
-                  "sa.datedeleted IS NOT NULL)  " + 
+                  "sa.datedeleted IS NOT NULL),  " +
+                " a.sortOrder " +               // (15)
                 "FROM activity a " +
                 "LEFT JOIN indicator i ON (a.activityId=i.activityId) " +
                 "LEFT JOIN userdatabase d ON (a.databaseId=d.databaseId) " +
@@ -108,6 +109,7 @@ public class IndicatorOracle {
                     activity.reportingFrequency = rs.getInt(6);
                     activity.databaseId = rs.getInt(7);
                     activity.databaseName = rs.getString(8);
+                    activity.sortOrder = rs.getInt(15);
                     activityMap.put(activityId, activity);
                 }
 

@@ -26,7 +26,11 @@ public abstract class DimBinding {
 
     public abstract Dimension getModel();
     
-    public abstract DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet);
+    public abstract DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet);
+    
+    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+        return null;
+    }
     
     protected final int activityIdOf(FormTree formTree) {
         return CuidAdapter.getLegacyIdFromCuid(formTree.getRootFormClass().getId());
@@ -41,14 +45,20 @@ public abstract class DimBinding {
         DimensionCategory categories[] = new DimensionCategory[numRows];
 
         for (int i = 0; i < numRows; i++) {
-            String idString = id.getString(i);
-            String labelString = label.getString(i);
-            
-            if(idString != null && labelString != null) {
-                categories[i] = new EntityCategory(CuidAdapter.getLegacyIdFromCuid(idString), label.getString(i));
-            }
+            categories[i] = extractEntityCategory(id, label, i);
         }
 
         return categories;
+    }
+
+    protected EntityCategory extractEntityCategory(ColumnView id, ColumnView label, int i) {
+        String idString = id.getString(i);
+        String labelString = label.getString(i);
+
+        if(idString != null && labelString != null) {
+            return new EntityCategory(CuidAdapter.getLegacyIdFromCuid(idString), label.getString(i));
+        } else {
+            return null;
+        }
     }
 }

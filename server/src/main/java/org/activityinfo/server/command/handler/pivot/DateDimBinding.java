@@ -3,6 +3,7 @@ package org.activityinfo.server.command.handler.pivot;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -40,35 +41,51 @@ public class DateDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, FormTree formTree, ColumnSet columnSet) {
+    public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
+        return Collections.singletonList(new ColumnModel()
+                .setExpression(new SymbolExpr("toDate"))
+                .as(DATE_COLUMN_ID));
+    }
+
+    @Override
+    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
 
         ColumnView column = columnSet.getColumnView(DATE_COLUMN_ID);
 
         DimensionCategory[] c = new DimensionCategory[column.numRows()];
         for (int i = 0; i < column.numRows(); i++) {
-            String date = column.getString(i);
-            LocalDate localDate = new LocalDate(date);
-            
-            switch (model.getUnit()) {
-                case YEAR:
-                    c[i] = new YearCategory(localDate.getYear());
-                    break;
-                case QUARTER:
-                    c[i] = new QuarterCategory(localDate.getYear(), quarterOf(localDate.getMonthOfYear()));
-                    break;
-                case MONTH:
-                    c[i] = new MonthCategory(localDate.getYear(), localDate.getMonthOfYear());
-                    break;
-                case WEEK_MON:
-                    c[i] = new WeekCategory(localDate.getWeekyear(), localDate.getWeekOfWeekyear());
-                    break;
-                case DAY:
-                    c[i] = new DayCategory(localDate.toDate());
-                    break;
-            }
+            c[i] = categoryOf(column.getString(i));
         }
         return c;
     }
+
+    @Override
+    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+        return categoryOf(columnSet.getColumnView(DATE_COLUMN_ID).getString(rowIndex));
+    }
+
+    private DimensionCategory categoryOf(String dateString) {
+        if(dateString == null) {
+            return null;
+        }
+        
+        LocalDate localDate = new LocalDate(dateString);
+
+        switch (model.getUnit()) {
+            case YEAR:
+                return new YearCategory(localDate.getYear());
+            case QUARTER:
+                return new QuarterCategory(localDate.getYear(), quarterOf(localDate.getMonthOfYear()));
+            case MONTH:
+                return new MonthCategory(localDate.getYear(), localDate.getMonthOfYear());
+            case WEEK_MON:
+                return new WeekCategory(localDate.getWeekyear(), localDate.getWeekOfWeekyear());
+            case DAY:
+                return new DayCategory(localDate.toDate());
+        }
+        throw new UnsupportedOperationException();
+    }
+
 
     private int quarterOf(int monthOfYear) {
         int quarter0 = (monthOfYear - 1) / 3;

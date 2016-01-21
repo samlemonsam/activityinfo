@@ -1,14 +1,11 @@
 package org.activityinfo.server.command.handler.pivot;
 
-import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-
-import java.util.Set;
 
 /**
  * Legacy indicator metadata required to construct the pivot query
@@ -19,7 +16,6 @@ public class IndicatorMetadata {
     int destinationId;
     int aggregation;
     int sortOrder;
-    Set<Integer> destinationIndicatorIds = Sets.newHashSet();
 
     public int getSourceId() {
         return sourceId;
@@ -48,10 +44,6 @@ public class IndicatorMetadata {
             default:
                 return new SymbolExpr(CuidAdapter.indicatorField(sourceId));
         }
-    }
-    
-    public ExprNode getTargetFieldExpression() {
-        return new SymbolExpr(CuidAdapter.indicatorField(sourceId));
     }
 
     public String getAlias() {
