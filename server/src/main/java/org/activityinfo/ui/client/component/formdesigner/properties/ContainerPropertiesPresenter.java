@@ -41,12 +41,10 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormKind;
 import org.activityinfo.model.type.subform.SubFormKindRegistry;
-import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -110,7 +108,7 @@ public class ContainerPropertiesPresenter {
                     int selectedIndex = view.getSubformSubKind().getSelectedIndex();
 
                     if (selectedIndex != -1) {
-                        final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+                        final ReferenceType subFormType = subForm.getKeyFieldType().get();
                         FormInstance selectedInstance = kindIdToInstance.get(view.getSubformSubKind().getValue(selectedIndex));
                         subFormType.setRange(selectedInstance.getId());
                         forceSubformRerender(subForm);
@@ -119,7 +117,7 @@ public class ContainerPropertiesPresenter {
             });
 
             // kind
-            ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+            ReferenceType typeClass = subForm.getKeyFieldType().get();
             ResourceId typeClassId = typeClass.getRange().iterator().next();
             view.getSubformKind().setSelectedIndex(getKindIndex(typeClassId));
 
@@ -141,7 +139,7 @@ public class ContainerPropertiesPresenter {
         Preconditions.checkState(selectedValue != null && selectedValue.startsWith("_"),
                 "Value is not valid, it must not be null and start with '_' character.");
 
-        final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+        final ReferenceType subFormType = subForm.getKeyFieldType().get();
 
         ResourceId kindId = ResourceId.valueOf(selectedValue);
         ClassType classType = ClassType.byId(kindId);
@@ -172,10 +170,9 @@ public class ContainerPropertiesPresenter {
         ResourceId restrictedBy = formDesigner.getModel().getRootFormClass().getId();
 
         ParentCriteria criteria = ParentCriteria.isChildOf(classType.getResourceId(), restrictedBy);
-        final ReferenceType subFormType = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
+        final ReferenceType subFormType = subForm.getKeyFieldType().get();
 
         formDesigner.getResourceLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Object>() {
-            @Nullable
             @Override
             public Object apply(List<FormInstance> instances) {
                 int index = 0;

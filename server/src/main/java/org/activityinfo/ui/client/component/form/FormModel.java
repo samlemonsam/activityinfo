@@ -53,7 +53,7 @@ public class FormModel {
         private final FormClass subForm;
         private final FormInstance selectedTab;
 
-        private SubformValueKey(FormClass subForm, FormInstance selectedTab) {
+        public SubformValueKey(FormClass subForm, FormInstance selectedTab) {
             this.subForm = subForm;
             this.selectedTab = selectedTab;
         }
@@ -239,6 +239,18 @@ public class FormModel {
             result.add(key.getSelectedTab());
         }
         return result;
+    }
+
+    public Set<SubformValueKey> getKeysBySubForm(FormClass subForm) {
+        Set<SubformValueKey> set = Sets.newHashSet();
+
+        for (SubformValueKey key : subFormInstances.keySet()) {
+            if (key.getSubForm().equals(subForm)) {
+                set.add(key);
+            }
+        }
+
+        return set;
     }
 
     public void setSelectedInstance(FormInstance tabInstance, FormClass subForm) {

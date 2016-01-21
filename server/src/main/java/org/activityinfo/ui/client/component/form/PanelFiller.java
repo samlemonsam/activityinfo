@@ -26,8 +26,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormType;
-import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 
@@ -59,9 +59,8 @@ public class PanelFiller {
 
                         panel.add(createHeader(depth, subForm.getLabel()));
 
-                        if (SubformConstants.isCollection(subForm)) { // unkeyed subforms -> simple collection
-                            SubFormCollectionManipulator collectionManipulator = new SubFormCollectionManipulator(subForm, model);
-                            collectionManipulator.show(panel);
+                        if (ClassType.isCollection(subForm)) { // unkeyed subforms -> simple collection
+                            new SubFormCollectionManipulator(subForm, model, panel).show();
                         } else { // keyed subforms
                             final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator());
 

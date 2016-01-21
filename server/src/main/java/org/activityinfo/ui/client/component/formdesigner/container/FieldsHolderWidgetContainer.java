@@ -32,7 +32,9 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.ui.client.component.form.FormModel;
+import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
@@ -50,7 +52,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     private final ResourceId parentId;
     private boolean isSubform = false;
     private DropControllerExtended dropController;
-    private final SubFormTabsManipulator tabsManipulator;
 
     protected FieldsHolderWidgetContainer(final FormDesigner formDesigner, final FormElementContainer elementContainer, ResourceId parentId) {
         this.formDesigner = formDesigner;
@@ -83,7 +84,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         panel.getPanel().getWidgetContainer().add(dropPanel);
         dropController = formDesigner.getDropControllerRegistry().register(elementContainer.getId(), dropPanel, formDesigner);
         dropController.getContainerMap().put(elementContainer.getId(), this); // register yourself
-        tabsManipulator = new SubFormTabsManipulator(formDesigner, panel.getPanel().getSubformTabs());
+
         syncWithModel();
     }
 
@@ -101,15 +102,15 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         return container;
     }
 
-    public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass formClass, ResourceId parentId) {
-        FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, formClass, parentId);
+    public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass subForm, ResourceId parentId) {
+        FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, subForm, parentId);
         container.isSubform = true;
-        container.getPanel().getPanel().getSubformTabs().setVisible(true);
+        container.getPanel().getPanel().getSubformTabs().setVisible(!ClassType.isCollection(subForm));
         container.getPanel().getPanel().setOnRemoveConfirmationCallback(new ClickHandler() {
             @Override
             public void onClick(final ClickEvent event) {
-                formDesigner.getModel().removeSubform(formClass);
-                formDesigner.getDropControllerRegistry().unregister(formClass.getId());
+                formDesigner.getModel().removeSubform(subForm);
+                formDesigner.getDropControllerRegistry().unregister(subForm.getId());
                 formDesigner.getContainerPresenter().reset();
             }
         });
@@ -137,18 +138,25 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
         if (isSubform) {
             final FormClass subForm = (FormClass) elementContainer;
+            final FormModel formModel = new FormModel(formDesigner.getResourceLocator());
 
-            if (panel.getPanel().getSubformTabs().isAttached()) {
-                tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()), force);
-            } else {
-                panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
-                    @Override
-                    public void onAttachOrDetach(AttachEvent event) {
-                        if (event.isAttached()) {
-                            tabsManipulator.show(subForm, new FormModel(formDesigner.getResourceLocator()), force);
+            if (ClassType.isCollection(subForm)) { // unkeyed
+                new SubFormCollectionManipulator(subForm, formModel, panel.getPanel().getSubformContainer(), true).show();
+            } else { // keyed subform
+                final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner, panel.getPanel().getSubformTabs());
+
+                if (panel.getPanel().getSubformTabs().isAttached()) {
+                    tabsManipulator.show(subForm, formModel, force);
+                } else {
+                    panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
+                        @Override
+                        public void onAttachOrDetach(AttachEvent event) {
+                            if (event.isAttached()) {
+                                tabsManipulator.show(subForm, formModel, force);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }

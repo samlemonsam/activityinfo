@@ -21,53 +21,16 @@ package org.activityinfo.model.type.subform;
  * #L%
  */
 
-import com.google.common.collect.Sets;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ReferenceType;
-
-import java.util.Collections;
-import java.util.Set;
-
 /**
  * @author yuriyz on 02/06/2015.
  */
 public class SubformConstants {
-
-    /**
-     * In subform case we need to keep type of FormClass. Since we want to keep FormClass to model SubForms
-     * solution is to store type via FormField that keeps reference on FormClass that describes type (e.g. Period or Territory)
-     */
-    public static final ResourceId TYPE_FIELD_ID = ResourceId.valueOf("_subform_class_type");
-
-    private static final Set<ResourceId> BUILT_IN_FIELDS = Sets.newHashSet();
-
-    static {
-        BUILT_IN_FIELDS.add(TYPE_FIELD_ID);
-    }
 
     public static final int DEFAULT_TAB_COUNT = 4;
     public static final int MIN_TAB_COUNT = 1;
     public static final int MAX_TAB_COUNT = 100;
 
     private SubformConstants() {
-    }
-
-    public static Set<ResourceId> subformBuiltInFieldIds() {
-        return Collections.unmodifiableSet(BUILT_IN_FIELDS);
-    }
-
-    public static boolean isSubformBuiltInField(ResourceId resourceId) {
-        return subformBuiltInFieldIds().contains(resourceId);
-    }
-
-    public static boolean isCollection(FormClass formClass) {
-        return ClassType.byId(getSubformType(formClass)) == ClassType.COLLECTION;
-    }
-
-    public static ResourceId getSubformType(FormClass subForm) {
-        ReferenceType typeClass = (ReferenceType) subForm.getField(SubformConstants.TYPE_FIELD_ID).getType();
-        return typeClass.getRange().iterator().next();
     }
 
 }

@@ -10,7 +10,9 @@
   <g:FocusPanel ui:field="focusPanel" addStyleNames="{style.widgetContainer} form-group">
     <g:HTMLPanel width="100%">
       <g:HTML addStyleNames="h5" ui:field="label"/>
-      <c:SubFormTabs ui:field="subformTabs" visible="false"/>
+      <g:FlowPanel ui:field="subformContainer">
+        <c:SubFormTabs ui:field="subformTabs" visible="false"/>
+      </g:FlowPanel>
       <div class="row" width="100%">
         <g:SimplePanel ui:field="widgetContainer" addStyleNames="col-xs-10"/>
         <div class="col-xs-1">

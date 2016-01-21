@@ -32,8 +32,6 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
-import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.style.ModalStylesheet;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.ModalDialog;
@@ -61,16 +59,13 @@ public class FormDialog {
 
         ModalStylesheet.INSTANCE.ensureInjected();
 
-
-        formPanel = new SimpleFormPanel(
-                resourceLocator,
-                new VerticalFieldContainer.Factory(),
-                new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.NORMAL));
-
+        formPanel = new SimpleFormPanel(resourceLocator);
 
         loadingPanel = new LoadingPanel<>(new PageLoadingPanel());
         loadingPanel.setDisplayWidget(formPanel);
+
         dialog = new ModalDialog(loadingPanel);
+
         dialog.getPrimaryButton().setText(I18N.CONSTANTS.save());
         dialog.getPrimaryButton().setStyleName("btn btn-primary");
         dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
@@ -86,7 +81,7 @@ public class FormDialog {
     }
 
     public void setDialogTitle(String h3, String h4) {
-        String html = "<h3>" + h3 + "</h3><br/><h4>" + h4 + "</h4>" ;
+        String html = "<h3>" + h3 + "</h3><br/><h4>" + h4 + "</h4>";
         dialog.setDialogTitle(SafeHtmlUtils.fromSafeConstant(html).asString());
     }
 

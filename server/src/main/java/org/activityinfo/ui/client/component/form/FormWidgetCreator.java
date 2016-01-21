@@ -30,7 +30,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.subform.SubFormType;
-import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -79,11 +78,6 @@ public class FormWidgetCreator {
                 Promise<Void> subFormWidgetsPromise = createWidgets(model.getSubFormByOwnerFieldId(field.getId()), fieldUpdated);
                 promises.add(subFormWidgetsPromise);
             } else {
-
-                if (SubformConstants.isSubformBuiltInField(field.getId())) {
-                    continue; // skip subform built-in fields
-                }
-
                 Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
                     @Override
                     public void update(FieldValue value) {

@@ -1,5 +1,6 @@
 package org.activityinfo.model.form;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -7,8 +8,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
+import org.activityinfo.model.type.ReferenceType;
 
-import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -44,6 +45,9 @@ public class FormClass implements IsResource, FormElementContainer {
     private String description;
     private final List<FormElement> elements = Lists.newArrayList();
     private final Set<ResourceLock> locks = Sets.newHashSet();
+
+    private Optional<ResourceId> parentFormId = Optional.absent();
+    private Optional<FormField> keyField = Optional.absent();
 
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
@@ -255,6 +259,31 @@ public class FormClass implements IsResource, FormElementContainer {
         return locks;
     }
 
+    public Optional<ResourceId> getParentFormId() {
+        return parentFormId;
+    }
+
+    public FormClass setParentFormId(ResourceId parentFormId) {
+        this.parentFormId = Optional.fromNullable(parentFormId);
+        return this;
+    }
+
+    public Optional<FormField> getKeyField() {
+        return keyField;
+    }
+
+    public FormClass setKeyField(FormField keyField) {
+        // key field always reference key FormClass, see org.activityinfo.model.type.subform.SubFormKind.getDefinition()
+        Preconditions.checkState(keyField != null && keyField.getType() instanceof ReferenceType);
+
+        this.keyField = Optional.fromNullable(keyField);
+        return this;
+    }
+
+    public Optional<ReferenceType> getKeyFieldType() {
+        return this.keyField.isPresent() ? Optional.of((ReferenceType) getKeyField().get().getType()) : Optional.<ReferenceType>absent();
+    }
+
     @Override
     public String toString() {
         return "<FormClass: " + getLabel() + ">";
@@ -262,10 +291,14 @@ public class FormClass implements IsResource, FormElementContainer {
 
     public static FormClass fromResource(Resource resource) {
         FormClass formClass = new FormClass(resource.getId());
+
         formClass.setOwnerId(resource.getOwnerId());
         formClass.setLabel(Strings.nullToEmpty(resource.isString(LABEL_FIELD_ID)));
         formClass.elements.addAll(fromRecords(resource.getRecordList("elements")));
         formClass.locks.addAll(ResourceLock.fromRecords(resource.getRecordList("locks")));
+        formClass.keyField = Optional.fromNullable(FormField.fromNullableRecord(resource.isRecord("keyField")));
+        formClass.parentFormId = Optional.fromNullable(resource.isResourceId("parentFormId"));
+
         return formClass;
     }
 
@@ -293,6 +326,8 @@ public class FormClass implements IsResource, FormElementContainer {
         resource.set(LABEL_FIELD_ID, label);
         resource.set("elements", Resources.asRecordList(elements));
         resource.set("locks", Resources.asRecordList(locks));
+        resource.set("keyField", keyField.isPresent() ? keyField.get().asRecord() : null);
+        resource.set("parentFormId", parentFormId.isPresent() ? parentFormId.get() : null);
         return resource;
     }
 

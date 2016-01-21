@@ -112,4 +112,8 @@ public enum ClassType {
     public static boolean isClassType(ResourceId resourceId) {
         return byId(resourceId) != null;
     }
+
+    public static boolean isCollection(FormClass formClass) {
+        return ClassType.byId(formClass.getKeyFieldType().get().getRange().iterator().next()) == ClassType.COLLECTION;
+    }
 }

@@ -23,43 +23,19 @@ package org.activityinfo.ui.client.component.form.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import org.activityinfo.model.resource.ResourceId;
 
 /**
- * @author yuriyz on 11/28/2014.
+ * @author yuriyz on 01/20/2016.
  */
-public class FieldMessageEvent extends GwtEvent<FieldMessageEvent.Handler> {
+public class BeforeSaveEvent extends GwtEvent<BeforeSaveEvent.Handler> {
 
     public interface Handler extends EventHandler {
-        void handle(FieldMessageEvent event);
+        void handle(BeforeSaveEvent event);
     }
 
     public static Type<Handler> TYPE = new Type<>();
 
-    private final ResourceId fieldId;
-    private boolean clearMessage = false;
-    private final String message;
-
-    public FieldMessageEvent(ResourceId fieldId, String message) {
-        this.fieldId = fieldId;
-        this.message = message;
-    }
-
-    public ResourceId getFieldId() {
-        return fieldId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public boolean isClearMessage() {
-        return clearMessage;
-    }
-
-    public FieldMessageEvent setClearMessage(boolean clearMessage) {
-        this.clearMessage = clearMessage;
-        return this;
+    public BeforeSaveEvent() {
     }
 
     @SuppressWarnings("unchecked")

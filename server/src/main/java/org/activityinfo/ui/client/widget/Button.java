@@ -14,7 +14,8 @@ public class Button extends ButtonWithSize {
         super(style, null);
     }
 
-    public void setLabel(String label) {
+    public Button setLabel(String label) {
         super.setHTML(label);
+        return this;
     }
 }

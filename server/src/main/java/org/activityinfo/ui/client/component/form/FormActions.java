@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class FormActions {
     }
 
     public Promise<Void> save() {
+
+        panel.getModel().getEventBus().fireEvent(new BeforeSaveEvent());
+
         List<IsResource> toPersist = Lists.newArrayList();
         toPersist.addAll(panel.getModel().getSubformPresentTabs()); // tab instances
         toPersist.addAll(panel.getModel().getSubFormInstances().values()); // subform values (binded to tab instances)

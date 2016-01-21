@@ -116,6 +116,8 @@ public class QueryExecutor {
             return projects(parent);
         } else if (parentId.equals(ClassType.PARTNER.getResourceId())) {
             return partner(parent);
+        } else if (parentId.equals(ClassType.COLLECTION.getResourceId())) {
+            return queryByClassId(parent.getRestrictedBy());
         } else {
             throw new UnsupportedOperationException("ClassType is not supported, classType: " + parentId);
         }

@@ -34,7 +34,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
-import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
@@ -62,14 +61,14 @@ public class FormDesignerModel {
 
     public FormClass registerNewSubform(ResourceId formFieldId) {
         final FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setOwnerId(rootFormClass.getId());
 
-        FormField type = formClass.addField(SubformConstants.TYPE_FIELD_ID);
-        type.setVisible(false);
-        type.setType(new ReferenceType()
-                        .setCardinality(Cardinality.SINGLE)
-                        .setRange(PredefinedPeriods.MONTHLY.getResourceId())
-        );
+        formClass.setOwnerId(rootFormClass.getId());
+        formClass.setKeyField(new FormField(ResourceId.generateId())
+                .setVisible(false)
+                .setType(new ReferenceType()
+                                .setCardinality(Cardinality.SINGLE)
+                                .setRange(PredefinedPeriods.MONTHLY.getResourceId())
+                ));
 
         registerSubform(formFieldId, formClass);
         return formClass;

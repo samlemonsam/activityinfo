@@ -1692,4 +1692,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Collection")
     String collection();
+
+    @DefaultStringValue("+ Add another")
+    String addAnother();
 }

@@ -7,6 +7,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -217,22 +218,32 @@ public class FormField extends FormElement {
         return record;
     }
 
-    public static FormField fromRecord(Record record) {
+    @Nullable
+    public static FormField fromNullableRecord(@Nullable Record record) {
+        if (record == null) {
+            return null;
+        }
+
+        return fromRecord(record);
+    }
+
+
+    public static FormField fromRecord(@Nonnull Record record) {
         FormField formField = new FormField(ResourceId.valueOf(record.getString("id")))
-            .setDescription(record.isString("description"))
-            .setLabel(Strings.nullToEmpty(record.isString("label")))
-            .setType(typeFromRecord(record.getRecord("type")))
-            .setVisible(record.getBoolean("visible", true))
-            .setRequired(record.getBoolean("required", false));
+                .setDescription(record.isString("description"))
+                .setLabel(Strings.nullToEmpty(record.isString("label")))
+                .setType(typeFromRecord(record.getRecord("type")))
+                .setVisible(record.getBoolean("visible", true))
+                .setRequired(record.getBoolean("required", false));
 
         if (record.has("relevanceConditionExpression")) {
             formField.setRelevanceConditionExpression(record.getString("relevanceConditionExpression"));
         }
-        if(record.has("superProperties")) {
+        if (record.has("superProperties")) {
             ReferenceValue superProperties = ReferenceValue.fromRecord(record.getRecord("superProperties"));
             formField.setSuperProperties(superProperties.getResourceIds());
         }
-        if(record.has("code")) {
+        if (record.has("code")) {
             formField.setCode(record.getString("code"));
         }
 

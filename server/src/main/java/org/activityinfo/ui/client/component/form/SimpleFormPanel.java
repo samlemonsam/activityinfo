@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -21,8 +22,11 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
+import org.activityinfo.ui.client.widget.ButtonWithIcon;
 import org.activityinfo.ui.client.widget.DisplayWidget;
+import org.activityinfo.ui.icons.Icons;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -42,6 +46,12 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final FormActions formActions;
     private final ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
+    private Optional<Button> deleteButton = Optional.absent();
+
+    public SimpleFormPanel(ResourceLocator resourceLocator) {
+        this(resourceLocator, new VerticalFieldContainer.Factory(),
+                new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.NORMAL));
+    }
 
     public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory) {
@@ -66,6 +76,21 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.panel.setStyleName(FormPanelStyles.INSTANCE.formPanel());
         this.scrollPanel = new ScrollPanel(panel);
         this.formActions = new FormActions(locator, this);
+    }
+
+    public Button addDeleteButton() { // used for collection subforms
+        deleteButton = Optional.of(new Button());
+        deleteButton.get().setHTML(ButtonWithIcon.TEMPLATES.withIcon(Icons.INSTANCE.remove()));
+        deleteButton.get().setStyleName("btn btn-default btn-xs pull-right");
+
+        FlowPanel buttonContainer = new FlowPanel();
+        buttonContainer.addStyleName("hide-button-on-over");
+        this.panel.add(buttonContainer);
+        return deleteButton.get();
+    }
+
+    public Optional<Button> getDeleteButton() {
+        return deleteButton;
     }
 
     public FormModel getModel() {
