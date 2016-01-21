@@ -148,12 +148,13 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testSiteSimple() {
         query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner", 
-                "partner.label", "location.label", "BENE", "cause", "project", "project.name");
+                "partner.label", "location.label", "location.visible", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
         assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
+        assertThat(column("location.visible"), hasValues(true, true, true));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
         assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));
@@ -244,7 +245,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         // Query again to verify that memcache works....
         query(CuidAdapter.reportingPeriodFormClass(3), columns);
-        
     }
 
     @Test

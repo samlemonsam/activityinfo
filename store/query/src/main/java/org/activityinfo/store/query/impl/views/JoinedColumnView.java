@@ -61,7 +61,11 @@ public class JoinedColumnView implements ColumnView {
 
     @Override
     public int getBoolean(int row) {
-        throw new UnsupportedOperationException();
+        int right = joinMap[row];
+        if(right != -1) {
+            return columnView.getBoolean(row);
+        }
+        return ColumnView.NA;
     }
 
     @Override
