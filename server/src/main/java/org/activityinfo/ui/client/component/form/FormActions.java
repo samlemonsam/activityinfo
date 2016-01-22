@@ -48,7 +48,7 @@ public class FormActions {
 
         List<IsResource> toPersist = Lists.newArrayList();
         toPersist.addAll(panel.getModel().getSubformPresentTabs()); // tab instances
-        toPersist.addAll(panel.getModel().getSubFormInstances().values()); // subform values (binded to tab instances)
+        toPersist.addAll(panel.getModel().getSubFormInstances().values());
         toPersist.add(panel.getModel().getWorkingRootInstance()); // root instance
         return locator.persist(toPersist);
     }

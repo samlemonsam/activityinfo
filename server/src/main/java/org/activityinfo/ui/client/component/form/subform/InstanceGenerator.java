@@ -28,9 +28,9 @@ import org.activityinfo.model.resource.ResourceId;
 /**
  * @author yuriyz on 01/20/2016.
  */
-public class InstanceIdGenerator {
+public class InstanceGenerator {
 
-    private InstanceIdGenerator() {
+    private InstanceGenerator() {
     }
 
     public static ResourceId periodId(DateRange range) {
@@ -41,15 +41,11 @@ public class InstanceIdGenerator {
         return ResourceId.generateId();
     }
 
-    public static ResourceId keyId(ResourceId subFormId) {
-        return ResourceId.valueOf("_key_" + subFormId.asString());
-    }
-
     public static FormInstance newUnkeyedInstance(ResourceId subFormId) {
-        return new FormInstance(newCollectionId(), keyId(subFormId));
+        return new FormInstance(newCollectionId(), subFormId);
     }
 
     public static FormInstance newKeyedInstance(DateRange dateRange, ResourceId subFormId) {
-        return new FormInstance(periodId(dateRange), keyId(subFormId));
+        return new FormInstance(periodId(dateRange), subFormId);
     }
 }

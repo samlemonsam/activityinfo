@@ -21,8 +21,9 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -36,18 +37,23 @@ import org.activityinfo.ui.client.component.form.SimpleFormPanel;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.Button;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author yuriyz on 01/18/2016.
  */
 public class SubFormCollectionManipulator {
 
+    public static final ResourceId SORT_FIELD_ID = ResourceId.valueOf("sort");
+
     private final FormClass subForm;
     private final FormModel formModel;
     private final FlowPanel rootPanel;
     private final Button addButton;
+    private final SubFormInstanceLoader loader;
 
     private final Map<FormModel.SubformValueKey, SimpleFormPanel> forms = Maps.newHashMap();
 
@@ -55,6 +61,7 @@ public class SubFormCollectionManipulator {
         this.subForm = subForm;
         this.formModel = formModel;
         this.rootPanel = rootPanel;
+        this.loader = new SubFormInstanceLoader(formModel);
 
         addButton = new Button(ElementStyle.LINK);
         addButton.setLabel(I18N.CONSTANTS.addAnother());
@@ -68,8 +75,30 @@ public class SubFormCollectionManipulator {
     }
 
     public void show() {
+        loader.loadCollectionInstances(subForm).then(new Function<List<FormInstance>, Object>() {
+            @Override
+            public Object apply(List<FormInstance> instanceList) {
+                render();
+                return null;
+            }
+        });
+    }
 
-        Set<FormModel.SubformValueKey> keys = Sets.newHashSet(formModel.getKeysBySubForm(subForm));
+    private void render() {
+        List<FormModel.SubformValueKey> keys = Lists.newArrayList(formModel.getKeysBySubForm(subForm));
+
+        Collections.sort(keys, new Comparator<FormModel.SubformValueKey>() {
+            @Override
+            public int compare(FormModel.SubformValueKey o1, FormModel.SubformValueKey o2) {
+                Double d1 = o1.getInstance().getDouble(SORT_FIELD_ID);
+                Double d2 = o2.getInstance().getDouble(SORT_FIELD_ID);
+                if (d1 != null && d2 != null) {
+                    return d1.compareTo(d2);
+                }
+                return 0;
+            }
+        });
+
         if (keys.isEmpty()) {
             keys.add(newKey()); // generate new key if we don't have any existing data yets
         }
@@ -79,11 +108,13 @@ public class SubFormCollectionManipulator {
         }
 
         rootPanel.add(addButton);
+
     }
 
     private FormModel.SubformValueKey newKey() {
-        FormModel.SubformValueKey newKey = new FormModel.SubformValueKey(subForm, InstanceIdGenerator.newUnkeyedInstance(subForm.getId()));
+        FormModel.SubformValueKey newKey = new FormModel.SubformValueKey(subForm, InstanceGenerator.newUnkeyedInstance(subForm.getId()));
         FormInstance instance = new FormInstance(ResourceId.generateId(), subForm.getId());
+
         formModel.getSubFormInstances().put(newKey, instance);
         return newKey;
     }
@@ -117,6 +148,9 @@ public class SubFormCollectionManipulator {
         } else {
             rootPanel.insert(formPanel, panelIndex);
         }
+
+        // set sort field
+        formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, rootPanel.getWidgetIndex(formPanel));
     }
 
     private void setDeleteButtonsState() {

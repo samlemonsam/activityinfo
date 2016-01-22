@@ -41,6 +41,30 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 1. Single form model:
+ * a) definition : rootFormClass
+ * b) instance level: workingRootInstance
+ * <p/>
+ * <p/>
+ * 2. Subform model:
+ * <p/>
+ * a) definition:
+ * rootFormClass:
+ * - FormField -> SubFormType -> Sub FormClass
+ *
+ * subFormClass:
+ * - key field - references subFormClass type : Collection, Partner, LocationType, Period
+ * b) each subform can have multiple instances:
+ * <p/>
+ * b.1) valueInstance - instance that keeps values for sub form
+ * valueInstance.id - generated id
+ * valueInstance.classId - references subFormClass
+ * valueInstance.ownerId - referenced key instance
+ * <p/>
+ * b.2) keyInstance - instance that keeps values for key, like period value or partner
+ * keyInstance.id - generated
+ * keyInstance.classId - definition class id : ClassType.getDefinition().getId();
+ *
  * @author yuriyz on 02/13/2015.
  */
 public class FormModel {
@@ -51,19 +75,19 @@ public class FormModel {
     public static class SubformValueKey {
 
         private final FormClass subForm;
-        private final FormInstance selectedTab;
+        private final FormInstance instance;
 
-        public SubformValueKey(FormClass subForm, FormInstance selectedTab) {
+        public SubformValueKey(FormClass subForm, FormInstance instance) {
             this.subForm = subForm;
-            this.selectedTab = selectedTab;
+            this.instance = instance;
         }
 
         public FormClass getSubForm() {
             return subForm;
         }
 
-        public FormInstance getSelectedTab() {
-            return selectedTab;
+        public FormInstance getInstance() {
+            return instance;
         }
     }
 
@@ -236,7 +260,7 @@ public class FormModel {
         List<FormInstance> result = Lists.newArrayList();
 
         for (SubformValueKey key : subFormInstances.keySet()) {
-            result.add(key.getSelectedTab());
+            result.add(key.getInstance());
         }
         return result;
     }
@@ -260,7 +284,7 @@ public class FormModel {
 
     private FormInstance createSubFormInstanceValue(SubformValueKey key) {
         FormInstance instance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
-        instance.setOwnerId(key.getSelectedTab().getId());
+        instance.setOwnerId(key.getInstance().getId());
         subFormInstances.put(key, instance);
         return instance;
     }

@@ -170,7 +170,7 @@ public class InstanceKeyedGenerator {
     }
 
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        FormInstance instance = InstanceIdGenerator.newKeyedInstance(range, classId);
+        FormInstance instance = InstanceGenerator.newKeyedInstance(range, classId);
         instance.set(PERIOD_START_DATE_ID, range.getStart());
         instance.set(PERIOD_END_DATE_ID, range.getEnd());
         FormInstanceLabeler.setLabel(instance, getLabel(range, period, direction));
