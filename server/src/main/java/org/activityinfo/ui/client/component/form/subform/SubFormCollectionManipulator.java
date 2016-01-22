@@ -31,6 +31,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.FormModel;
+import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.SimpleFormPanel;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.Button;
@@ -46,6 +47,7 @@ public class SubFormCollectionManipulator {
     private final FormClass subForm;
     private final FormModel formModel;
     private final FlowPanel rootPanel;
+    private final Button addButton;
 
     private final Map<FormModel.SubformValueKey, SimpleFormPanel> forms = Maps.newHashMap();
 
@@ -53,10 +55,19 @@ public class SubFormCollectionManipulator {
         this.subForm = subForm;
         this.formModel = formModel;
         this.rootPanel = rootPanel;
+
+        addButton = new Button(ElementStyle.LINK);
+        addButton.setLabel(I18N.CONSTANTS.addAnother());
+        addButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                addForm(newKey(), SubFormCollectionManipulator.this.rootPanel.getWidgetIndex(addButton));
+                setDeleteButtonsState();
+            }
+        });
     }
 
     public void show() {
-        rootPanel.add(createAddButton());
 
         Set<FormModel.SubformValueKey> keys = Sets.newHashSet(formModel.getKeysBySubForm(subForm));
         if (keys.isEmpty()) {
@@ -66,6 +77,8 @@ public class SubFormCollectionManipulator {
         for (FormModel.SubformValueKey key : keys) {
             addForm(key);
         }
+
+        rootPanel.add(addButton);
     }
 
     private FormModel.SubformValueKey newKey() {
@@ -75,22 +88,14 @@ public class SubFormCollectionManipulator {
         return newKey;
     }
 
-    private Button createAddButton() {
-        final Button button = new Button(ElementStyle.LINK);
-        button.setLabel(I18N.CONSTANTS.addAnother());
-        button.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addForm(newKey());
-                setDeleteButtonsState();
-            }
-        });
-        return button;
+    private void addForm(final FormModel.SubformValueKey key) {
+        addForm(key, -1);
     }
 
-    private void addForm(final FormModel.SubformValueKey key) {
+    private void addForm(final FormModel.SubformValueKey key, int panelIndex) {
 
         final SimpleFormPanel formPanel = new SimpleFormPanel(formModel.getLocator());
+        formPanel.asWidget().addStyleName(FormPanelStyles.INSTANCE.subformPanel());
 
         formPanel.addDeleteButton().addClickHandler(new ClickHandler() {
             @Override
@@ -107,8 +112,11 @@ public class SubFormCollectionManipulator {
 
         forms.put(key, formPanel);
 
-        rootPanel.add(formPanel);
-
+        if (panelIndex == -1) {
+            rootPanel.add(formPanel);
+        } else {
+            rootPanel.insert(formPanel, panelIndex);
+        }
     }
 
     private void setDeleteButtonsState() {

@@ -74,6 +74,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
 
         this.panel = new FlowPanel();
         this.panel.setStyleName(FormPanelStyles.INSTANCE.formPanel());
+        this.panel.addStyleName("hide-button-on-over");
         this.scrollPanel = new ScrollPanel(panel);
         this.formActions = new FormActions(locator, this);
     }
@@ -83,9 +84,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         deleteButton.get().setHTML(ButtonWithIcon.TEMPLATES.withIcon(Icons.INSTANCE.remove()));
         deleteButton.get().setStyleName("btn btn-default btn-xs pull-right");
 
-        FlowPanel buttonContainer = new FlowPanel();
-        buttonContainer.addStyleName("hide-button-on-over");
-        this.panel.add(buttonContainer);
+        this.panel.add(deleteButton.get());
         return deleteButton.get();
     }
 

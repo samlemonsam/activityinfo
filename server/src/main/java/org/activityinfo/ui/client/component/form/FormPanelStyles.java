@@ -46,4 +46,6 @@ public interface FormPanelStyles extends Stylesheet {
     String dropFile();
 
     String dropFileUpload();
+
+    String subformPanel();
 }
