@@ -22,16 +22,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-class MySqlSession implements CollectionCatalog {
+public class MySqlSession implements CollectionCatalog {
 
     private static Logger LOGGER = Logger.getLogger(MySqlSession.class.getName());
     
     private List<CollectionProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
     private LoadingCache<ResourceId, Optional<ResourceCollection>> sessionCache;
+    private final ActivityLoader activityLoader;
 
     public MySqlSession(final QueryExecutor executor) {
-        
+
+        activityLoader = new ActivityLoader(executor);
+
         providers.add(new SimpleTableCollectionProvider(new DatabaseTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new UserTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new CountryTable(), CollectionPermissions.readonly()));
@@ -39,7 +42,7 @@ class MySqlSession implements CollectionCatalog {
         providers.add(new SimpleTableCollectionProvider(new PartnerTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new ProjectTable(), CollectionPermissions.readonly()));
         providers.add(new TargetCollectionProvider());
-        providers.add(new ActivityCollectionProvider(new ActivityLoader(executor)));
+        providers.add(new ActivityCollectionProvider(activityLoader));
         providers.add(new LocationCollectionProvider());
 
         this.executor = executor;
@@ -66,6 +69,9 @@ class MySqlSession implements CollectionCatalog {
         });
     }
 
+    public ActivityLoader getActivityLoader() {
+        return activityLoader;
+    }
 
     @Override
     public Optional<ResourceCollection> getCollection(ResourceId resourceId) {

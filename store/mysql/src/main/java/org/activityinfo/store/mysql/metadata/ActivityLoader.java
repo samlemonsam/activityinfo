@@ -2,8 +2,12 @@ package org.activityinfo.store.mysql.metadata;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
@@ -27,58 +31,125 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 
+/**
+ * Loads metadata about Activities from MySQL, caching as aggressively as possible
+ *
+ */
 public class ActivityLoader {
 
     private static final Logger LOGGER = Logger.getLogger(ActivityLoader.class.getName());
-    
+
+    /**
+     * An indicator can never be moved to another activity, the mapping from indicator to 
+     * activity is immutable, and we can safely cache the relationship on a per-instance basis.
+     */
+    private static final Cache<Integer, Integer> INDICATOR_TO_ACTIVITY_CACHE = CacheBuilder.newBuilder().build();
+
     private final QueryExecutor executor;
+
     private Map<Integer, Activity> activityMap = new HashMap<>();
 
     public ActivityLoader(QueryExecutor executor) {
         this.executor = executor;
     }
 
+    public Map<Integer, Activity> loadForIndicators(Set<Integer> indicatorIds) throws SQLException {
+
+
+        // Fetch as many indicators as we can from the instance-level cache
+        ImmutableMap<Integer, Integer> cachedMap = INDICATOR_TO_ACTIVITY_CACHE.getAllPresent(indicatorIds);
+
+        // Setup our result set
+        Set<Integer> activityIds = Sets.newHashSet(cachedMap.values());
+        
+        // Query the database for any remaining indicators
+        Set<Integer> toFetch = Sets.difference(indicatorIds, cachedMap.keySet());
+        if(!toFetch.isEmpty()) {
+
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT indicatorId, activityId FROM indicator WHERE indicatorId IN (");
+            Joiner.on(',').appendTo(sql, toFetch);
+            sql.append(")");
+
+            try (ResultSet rs = executor.query(sql.toString())) {
+                while (rs.next()) {
+                    int indicatorId = rs.getInt(1);
+                    int activityId = rs.getInt(2);
+                    activityIds.add(activityId);
+                    INDICATOR_TO_ACTIVITY_CACHE.put(indicatorId, activityId);
+                }
+            }
+        }
+        return load(activityIds);
+    }
+    
+    public Map<Integer, Activity> loadForDatabases(Set<Integer> databaseIds) throws SQLException {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT a.activityId FROM activity a WHERE databaseId IN (");
+        Joiner.on(", ").appendTo(sql, databaseIds);
+        sql.append(")");
+
+        Set<Integer> activityIds = Sets.newHashSet();
+
+        try(ResultSet rs = executor.query(sql.toString())) {
+            while(rs.next()) {
+                activityIds.add(rs.getInt(1));
+            }
+        }
+        
+        return load(activityIds);
+    }
+    
     public Map<Integer, Activity> load(Set<Integer> activityIds) throws SQLException {
 
+        if(activityIds.size() > 5) {
+            LOGGER.warning("Loading " + activityIds.size() + " activities...");
+        }
+        
         if(!activityIds.isEmpty()) {
-            FormClass serializedFormClass = null;
+            FormClass serializedFormClass;
 
             Set<Integer> classicActivityIds = new HashSet<>();
 
             try (ResultSet rs = executor.query(
                     "SELECT " +
-                            "A.ActivityId, " +
-                            "A.category, " +
-                            "A.Name, " +
-                            "A.ReportingFrequency, " +
-                            "A.DatabaseId, " +
-                            "A.LocationTypeId, " +
-                            "L.Name locationTypeName, " +
-                            "L.BoundAdminLevelId, " +
-                            "A.formClass, " +
-                            "A.gzFormClass, " +
-                            "d.ownerUserId, " +
-                            "A.published, " +
-                            "A.version " +
-                            "FROM activity A " +
+                            "A.ActivityId, " +              // (1)
+                            "A.category, " +                // (2)
+                            "A.Name, " +                    // (3)
+                            "A.ReportingFrequency, " +      // (4)
+                            "A.SortOrder, " +               // (5)
+                            "A.DatabaseId, " +              // (6)
+                            "d.Name, " +                    // (7)
+                            "A.LocationTypeId, " +          // (8)
+                            "L.Name locationTypeName, " +   // (9)
+                            "L.BoundAdminLevelId, " +       // (10)
+                            "A.formClass, " +               // (11)
+                            "A.gzFormClass, " +             // (12)
+                            "d.ownerUserId, " +             // (13)
+                            "A.published, " +               // (14)
+                            "A.version " +                  // (15)
+                            "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
                             "WHERE A.ActivityId IN " + idList(activityIds))) {
 
                 while (rs.next()) {
                     Activity activity = new Activity();
-                    activity.activityId = rs.getInt("ActivityId");
-                    activity.databaseId = rs.getInt("DatabaseId");
-                    activity.category = rs.getString("category");
-                    activity.name = rs.getString("name");
-                    activity.reportingFrequency = rs.getInt("reportingFrequency");
-                    activity.locationTypeId = rs.getInt("locationTypeId");
+                    activity.activityId = rs.getInt(1);
+                    activity.category = rs.getString(2);
+                    activity.name = rs.getString(3);
+                    activity.reportingFrequency = rs.getInt(4);
+                    activity.sortOrder = rs.getInt(5);
+                    activity.databaseId = rs.getInt(6);
+                    activity.databaseName = rs.getString(7);
+                    activity.locationTypeId = rs.getInt(8);
                     activity.locationTypeIds.add(activity.locationTypeId);
-                    activity.locationTypeName = rs.getString("locationTypeName");
-                    activity.adminLevelId = rs.getInt("boundAdminLevelId");
-                    activity.ownerUserId = rs.getInt("ownerUserId");
-                    activity.published = rs.getInt("published") > 0;
-                    activity.version = rs.getLong("version");
+                    activity.locationTypeName = rs.getString(9);
+                    activity.adminLevelId = rs.getInt(10);
+                    activity.ownerUserId = rs.getInt(13);
+                    activity.published = rs.getInt(14) > 0;
+                    activity.version = rs.getLong(15);
 
                     serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
 
@@ -147,19 +218,21 @@ public class ActivityLoader {
     }
 
     private void addFields(Activity activity, FormClass formClass) {
+        int sortOrder = 1;
         for (FormField formField : formClass.getFields()) {
             switch (formField.getId().getDomain()) {
                 case CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN:
                 case CuidAdapter.INDICATOR_DOMAIN:
                     int fieldId = CuidAdapter.getLegacyIdFromCuid(formField.getId());
-                    activity.fields.add(new ActivityField(fieldId, null, formField));
+                    activity.fields.add(new ActivityField(fieldId, null, formField, sortOrder++));
                     break;
             }
         }
     }
 
     private void loadFields(Map<Integer, Activity> activityMap, Set<Integer> activityIds) throws SQLException {
-
+        
+        
         Map<Integer, List<EnumItem>> attributes = loadAttributes(activityIds);
 
         String indicatorQuery = "(SELECT " +
@@ -250,8 +323,10 @@ public class ActivityLoader {
                     break;
             }
         }
-
-        activity.fields.add(new ActivityField(id, rs.getString("category"), formField));
+        ActivityField field = new ActivityField(id, rs.getString("category"), formField, rs.getInt("sortOrder"));
+        field.aggregation = rs.getInt("aggregation");
+        
+        activity.fields.add(field);
     }
 
     private boolean getMandatory(ResultSet rs) throws SQLException {

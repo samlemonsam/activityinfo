@@ -13,6 +13,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,7 +62,7 @@ public class AdminDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(Activity activity, ColumnSet columnSet) {
         DimensionCategory[] c = new DimensionCategory[columnSet.getNumRows()];
         if(columnSet.getColumns().containsKey(labelColumn)) {
             ColumnView idView = columnSet.getColumnView(idColumn);

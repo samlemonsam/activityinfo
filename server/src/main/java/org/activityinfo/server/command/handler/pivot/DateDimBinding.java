@@ -10,6 +10,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.mysql.metadata.Activity;
 import org.joda.time.LocalDate;
 
 import java.util.Collections;
@@ -48,7 +49,7 @@ public class DateDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(Activity activity, ColumnSet columnSet) {
 
         ColumnView column = columnSet.getColumnView(DATE_COLUMN_ID);
 
@@ -60,7 +61,7 @@ public class DateDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+    public DimensionCategory extractTargetCategory(Activity activity, ColumnSet columnSet, int rowIndex) {
         return categoryOf(columnSet.getColumnView(DATE_COLUMN_ID).getString(rowIndex));
     }
 

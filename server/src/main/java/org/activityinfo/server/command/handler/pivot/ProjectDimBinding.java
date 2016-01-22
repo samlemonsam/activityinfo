@@ -9,6 +9,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,12 +50,12 @@ public class ProjectDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(Activity activity, ColumnSet columnSet) {
         return extractEntityCategories(columnSet, PROJECT_ID_COLUMN, PROJECT_LABEL_COLUMN);
     }
 
     @Override
-    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+    public DimensionCategory extractTargetCategory(Activity activity, ColumnSet columnSet, int rowIndex) {
         return extractEntityCategory(
                 columnSet.getColumnView(PROJECT_ID_COLUMN),
                 columnSet.getColumnView(PROJECT_LABEL_COLUMN), rowIndex);

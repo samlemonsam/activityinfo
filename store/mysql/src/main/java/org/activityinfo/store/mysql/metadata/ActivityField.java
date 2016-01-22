@@ -16,10 +16,12 @@ import java.io.Serializable;
 public class ActivityField implements Serializable {
     
     int id;
+    int sortOrder;
+    int aggregation = 0;
     private final String category;
     private final FormField formField;
 
-    public ActivityField(int id, String category, FormField formField) {
+    public ActivityField(int id, String category, FormField formField, int sortOrder) {
         this.id = id;
         this.category = category;
         this.formField = formField;
@@ -76,4 +78,11 @@ public class ActivityField implements Serializable {
         return formField.getId();
     }
 
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+    public int getAggregation() {
+        return aggregation;
+    }
 }

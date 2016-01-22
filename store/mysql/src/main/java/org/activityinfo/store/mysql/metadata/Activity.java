@@ -1,6 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -21,8 +22,11 @@ public class Activity implements Serializable {
 
     int activityId;
     int databaseId;
+    String databaseName;
     int reportingFrequency;
     int locationTypeId;
+    
+    int sortOrder;
 
     /**
      * Because it currently possible to change location type, it's possible that a single
@@ -150,4 +154,38 @@ public class Activity implements Serializable {
             return Collections.singleton(CuidAdapter.locationFormClass(locationTypeId));
         }
     }
+
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+
+    public boolean hasCategory() {
+        return !Strings.isNullOrEmpty(category);
+    }
+
+    public ResourceId getSiteFormClassId() {
+        return CuidAdapter.activityFormClass(activityId);
+    }
+
+    public ResourceId getLeafFormClassId() {
+        if(reportingFrequency == 0) {
+            return getSiteFormClassId();
+        } else {
+            return CuidAdapter.reportingPeriodFormClass(activityId);
+        }
+    }
+
+    public Collection<Activity> getLinkedActivities() {
+        return Collections.emptySet();
+    }
+
+    public boolean isMonthly() {
+        return reportingFrequency == 1;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
 }

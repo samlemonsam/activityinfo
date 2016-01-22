@@ -9,6 +9,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,7 @@ public class LocationDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(Activity activity, ColumnSet columnSet) {
         return extractEntityCategories(columnSet, ID_COLUMN, LABEL_COLUMN);
     }
 }

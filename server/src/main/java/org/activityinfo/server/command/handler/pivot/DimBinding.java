@@ -9,6 +9,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,9 +27,9 @@ public abstract class DimBinding {
 
     public abstract Dimension getModel();
     
-    public abstract DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet);
+    public abstract DimensionCategory[] extractCategories(Activity activity, ColumnSet columnSet);
     
-    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+    public DimensionCategory extractTargetCategory(Activity activity, ColumnSet columnSet, int rowIndex) {
         return null;
     }
     

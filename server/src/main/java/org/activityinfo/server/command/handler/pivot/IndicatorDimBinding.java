@@ -4,6 +4,7 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 
 public class IndicatorDimBinding {
     
@@ -13,10 +14,10 @@ public class IndicatorDimBinding {
         return model;
     }
     
-    public DimensionCategory category(IndicatorMetadata indicator) {
+    public DimensionCategory category(ActivityField indicator) {
         return new EntityCategory(
-                indicator.getDestinationId(), 
-                indicator.getName(), 
+                indicator.getId(), 
+                indicator.getFormField().getLabel(), 
                 indicator.getSortOrder());
     }
 

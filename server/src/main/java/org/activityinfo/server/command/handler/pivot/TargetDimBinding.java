@@ -5,6 +5,7 @@ import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.TargetCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
 
@@ -20,7 +21,7 @@ public class TargetDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory[] extractCategories(ActivityMetadata activity, ColumnSet columnSet) {
+    public DimensionCategory[] extractCategories(Activity activity, ColumnSet columnSet) {
         
         DimensionCategory categories[] = new DimensionCategory[columnSet.getNumRows()];
         Arrays.fill(categories, TargetCategory.REALIZED);
@@ -29,7 +30,7 @@ public class TargetDimBinding extends DimBinding {
     }
 
     @Override
-    public DimensionCategory extractTargetCategory(ActivityMetadata activity, ColumnSet columnSet, int rowIndex) {
+    public DimensionCategory extractTargetCategory(Activity activity, ColumnSet columnSet, int rowIndex) {
         return TargetCategory.TARGETED;
     }
 }
