@@ -14,6 +14,7 @@ import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
+import org.activityinfo.store.mysql.metadata.DatabaseCache;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -34,13 +35,14 @@ public class MySqlSession implements CollectionCatalog {
     public MySqlSession(final QueryExecutor executor) {
 
         activityLoader = new ActivityLoader(executor);
+        DatabaseCache databaseCache = new DatabaseCache(executor);
 
         providers.add(new SimpleTableCollectionProvider(new DatabaseTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new UserTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new CountryTable(), CollectionPermissions.readonly()));
         providers.add(new SimpleTableCollectionProvider(new AdminEntityTable(), CollectionPermissions.readonly()));
-        providers.add(new SimpleTableCollectionProvider(new PartnerTable(), CollectionPermissions.readonly()));
-        providers.add(new SimpleTableCollectionProvider(new ProjectTable(), CollectionPermissions.readonly()));
+        providers.add(new SimpleTableCollectionProvider(new PartnerTable(databaseCache), CollectionPermissions.readonly()));
+        providers.add(new SimpleTableCollectionProvider(new ProjectTable(databaseCache), CollectionPermissions.readonly()));
         providers.add(new TargetCollectionProvider());
         providers.add(new ActivityCollectionProvider(activityLoader));
         providers.add(new LocationCollectionProvider());

@@ -1,5 +1,7 @@
-package org.activityinfo.store.mysql.collections;
+package org.activityinfo.store.mysql.metadata;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -7,11 +9,21 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Stores metadata on a Country's admin levels
  */
 public class CountryStructure {
+
+    /**
+     * Admin levels change quite rarely, so unconditionally retain them at the instance level for up to 10 minutes.
+     */
+    private static final Cache<Integer, CountryStructure> INSTANCE_CACHE = CacheBuilder
+            .newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
+    
     
     private Set<Integer> adminLevels = new HashSet<>();
     private Map<Integer, Integer> parentMap = new HashMap<>();
@@ -19,9 +31,16 @@ public class CountryStructure {
     private CountryStructure() {}
     
     public static CountryStructure query(QueryExecutor executor, int countryId) throws SQLException {
-
-        CountryStructure country = new CountryStructure();
         
+        // Try first to fetch from the instance-level cache        
+        CountryStructure country = INSTANCE_CACHE.getIfPresent(countryId);
+        if(country != null) {
+            return country;
+        }
+        
+        // Otherwise we have to hit the database
+        country = new CountryStructure();
+
         String sql =
                 "SELECT adminLevelId, parentId " +
                         "FROM adminlevel L " +
@@ -38,6 +57,8 @@ public class CountryStructure {
                 }
             }
         }
+        
+        INSTANCE_CACHE.put(countryId, country);
         
         return country;
     }

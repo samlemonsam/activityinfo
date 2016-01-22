@@ -9,6 +9,7 @@ import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.mysql.side.AdminColumnBuilder;
 
 import java.io.IOException;

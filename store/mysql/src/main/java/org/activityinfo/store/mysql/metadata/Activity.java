@@ -39,6 +39,7 @@ public class Activity implements Serializable {
     String name;
     int ownerUserId;
     boolean published;
+    long schemaVersion;
     long version;
     
     List<ActivityField> fields = Lists.newArrayList();
@@ -186,6 +187,10 @@ public class Activity implements Serializable {
 
     public String getDatabaseName() {
         return databaseName;
+    }
+    
+    public ActivityVersion getActivityVersion() {
+        return new ActivityVersion(this.getId(), schemaVersion, version);
     }
 
 }

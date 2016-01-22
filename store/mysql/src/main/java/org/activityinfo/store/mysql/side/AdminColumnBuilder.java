@@ -5,8 +5,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.store.mysql.collections.CountryStructure;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.CountryStructure;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

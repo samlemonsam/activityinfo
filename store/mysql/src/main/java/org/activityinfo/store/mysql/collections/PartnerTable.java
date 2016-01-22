@@ -9,6 +9,7 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
+import org.activityinfo.store.mysql.metadata.DatabaseCache;
 
 import java.sql.SQLException;
 
@@ -17,6 +18,11 @@ import static org.activityinfo.model.legacy.CuidAdapter.*;
 
 public class PartnerTable implements SimpleTable {
 
+    private final DatabaseCache databaseVersionMap;
+
+    public PartnerTable(DatabaseCache databaseVersionMap) {
+        this.databaseVersionMap = databaseVersionMap;
+    }
 
     @Override
     public boolean accept(ResourceId formClassId) {
@@ -33,7 +39,8 @@ public class PartnerTable implements SimpleTable {
         mapping.setPrimaryKeyMapping(CuidAdapter.PARTNER_DOMAIN, "partnerId");
         mapping.setFromClause("partnerindatabase pd LEFT JOIN partner base ON (pd.partnerId=base.partnerId)");
         mapping.setBaseFilter("pd.databaseId=" + databaseId);
-
+        mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
+        
         FormField nameField = new FormField(field(classId, NAME_FIELD))
                 .setRequired(true)
                 .setLabel("Name")

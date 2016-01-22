@@ -25,6 +25,7 @@ import org.activityinfo.store.mysql.mapping.FieldMapping;
 import org.activityinfo.store.mysql.mapping.FieldValueConverter;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
+import org.activityinfo.store.mysql.metadata.CountryStructure;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,10 +1,9 @@
 package org.activityinfo.store.mysql.metadata;
 
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -27,81 +26,154 @@ import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 
 /**
- * Loads metadata about Activities from MySQL, caching as aggressively as possible
+ * Loads metadata about Activities from MySQL.
+ * 
+ * 
+ * 
+ * 
  *
  */
 public class ActivityLoader {
 
     private static final Logger LOGGER = Logger.getLogger(ActivityLoader.class.getName());
 
-    /**
-     * An indicator can never be moved to another activity, the mapping from indicator to 
-     * activity is immutable, and we can safely cache the relationship on a per-instance basis.
-     */
-    private static final Cache<Integer, Integer> INDICATOR_TO_ACTIVITY_CACHE = CacheBuilder.newBuilder().build();
+    private static final String MEMCACHE_KEY_PREFIX = "activity:metadata:";
 
+    private final MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
     private final QueryExecutor executor;
+    private final ParentKeyCache parentKeys;
 
     private Map<Integer, Activity> activityMap = new HashMap<>();
 
     public ActivityLoader(QueryExecutor executor) {
         this.executor = executor;
+        this.parentKeys = new ParentKeyCache(executor);
     }
-
+    
     public Map<Integer, Activity> loadForIndicators(Set<Integer> indicatorIds) throws SQLException {
 
-
-        // Fetch as many indicators as we can from the instance-level cache
-        ImmutableMap<Integer, Integer> cachedMap = INDICATOR_TO_ACTIVITY_CACHE.getAllPresent(indicatorIds);
-
-        // Setup our result set
-        Set<Integer> activityIds = Sets.newHashSet(cachedMap.values());
+        Set<Integer> distinctActivityIds = new HashSet<>(
+                parentKeys.lookupActivityByIndicator(indicatorIds).values());
         
-        // Query the database for any remaining indicators
-        Set<Integer> toFetch = Sets.difference(indicatorIds, cachedMap.keySet());
-        if(!toFetch.isEmpty()) {
-
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT indicatorId, activityId FROM indicator WHERE indicatorId IN (");
-            Joiner.on(',').appendTo(sql, toFetch);
-            sql.append(")");
-
-            try (ResultSet rs = executor.query(sql.toString())) {
-                while (rs.next()) {
-                    int indicatorId = rs.getInt(1);
-                    int activityId = rs.getInt(2);
-                    activityIds.add(activityId);
-                    INDICATOR_TO_ACTIVITY_CACHE.put(indicatorId, activityId);
-                }
-            }
-        }
-        return load(activityIds);
+        return load(distinctActivityIds);
     }
     
-    public Map<Integer, Activity> loadForDatabases(Set<Integer> databaseIds) throws SQLException {
+    public Map<Integer, Activity> loadForDatabaseIds(Set<Integer> databaseIds) throws SQLException {
+        return load(parentKeys.queryActivitiesForDatabase(databaseIds));
+    }   
 
+    public Map<Integer, Activity> load(Set<Integer> activityIds) throws SQLException {
+        
+        Map<Integer, Activity> loaded = Maps.newHashMap();
+        
+        // first see what has already been loaded during this transaction
+        for (Integer activityId : activityIds) {
+            if(activityMap.containsKey(activityId)) {
+                loaded.put(activityId, activityMap.get(activityId));
+            }
+        }
+
+        // For any remaining activities, we need to hit the database to get the latest 
+        // schema version and data version
+        // This should be super fast
+        Set<Integer> toFetch = Sets.newHashSet(Sets.difference(activityIds, loaded.keySet()));
+        if(!toFetch.isEmpty()) {
+            List<ActivityVersion> versions = queryVersions(toFetch);
+
+            // Retrieve the schemas that we can from memcache using the schemaCacheKeys
+            Map<Integer, Activity> cached = loadFromMemcache(versions);
+            loaded.putAll(cached);
+            toFetch.removeAll(cached.keySet());
+
+            // If anything remains, need to hit the database
+            // <sigh>
+            if(!toFetch.isEmpty()) {
+                Map<Integer, Activity> fetched = loadFromMySql(activityIds);
+                loaded.putAll(fetched);
+                cacheToMemcache(fetched);
+            }
+        }
+
+        return loaded;
+    }
+
+    /**
+     * Queries the current versions of each of given activities from the MySQL database.
+     * 
+     * <p>We use these versions number as part of our memcache keys, ensuring that we 
+     * always get data from the cache that is consistent with the current transaction.</p>
+     */
+    private List<ActivityVersion> queryVersions(Set<Integer> activityId) throws SQLException {
+        
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT a.activityId FROM activity a WHERE databaseId IN (");
-        Joiner.on(", ").appendTo(sql, databaseIds);
+        sql.append("SELECT activityid, schemaVersion, siteVersion FROM activity WHERE activityId IN (");
+        Joiner.on(',').appendTo(sql, activityId);
         sql.append(")");
-
-        Set<Integer> activityIds = Sets.newHashSet();
-
+        
+        List<ActivityVersion> versions = Lists.newArrayList();
+        
         try(ResultSet rs = executor.query(sql.toString())) {
             while(rs.next()) {
-                activityIds.add(rs.getInt(1));
+                versions.add(new ActivityVersion(
+                        rs.getInt(1),    // activityId
+                        rs.getLong(2),   // schema version
+                        rs.getLong(3))); // site (data) versions
             }
         }
-        
-        return load(activityIds);
+        return versions;
     }
-    
-    public Map<Integer, Activity> load(Set<Integer> activityIds) throws SQLException {
+
+
+    /**
+     * Loads a set of activity schemas from the cache.
+     */
+    private Map<Integer, Activity> loadFromMemcache(List<ActivityVersion> activityVersions) {
+        Map<Integer, Activity> loaded = new HashMap<>();
+        try {
+            Set<String> memcacheKeys = Sets.newHashSet();
+            for (ActivityVersion activity : activityVersions) {
+                memcacheKeys.add(activity.getSchemaCacheKey());
+            }
+            Map<String, Object> cached = memcacheService.getAll(memcacheKeys);
+            for (ActivityVersion activityVersion : activityVersions) {
+                Activity activity = (Activity) cached.get(activityVersion.getSchemaCacheKey());
+                
+                if(activity != null) {
+                    
+                    // Update the cached activity with the data version number,
+                    // which is version seperately from the schema itself.
+                    activity.version = activityVersion.getSiteVersion();
+                    
+                    loaded.put(activityVersion.getId(), activity);
+                }
+            }
+        } catch (Exception e) {
+            // Log but otherwise ignore memcache failure
+            LOGGER.log(Level.SEVERE, "Exception loading activities from memcache", e);
+        }
+        return loaded;
+    }
+
+
+    private void cacheToMemcache(Map<Integer, Activity> loadedFromDatabase) {
+        try {
+            Map<String, Activity> toCache = new HashMap<>();
+            for (Activity activity : loadedFromDatabase.values()) {
+                toCache.put(activity.getActivityVersion().getSchemaCacheKey(), activity);                
+            }
+            memcacheService.putAll(toCache);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception caching activities to memcache", e);
+        }
+    }
+
+    public Map<Integer, Activity> loadFromMySql(Set<Integer> activityIds) throws SQLException {
 
         if(activityIds.size() > 5) {
             LOGGER.warning("Loading " + activityIds.size() + " activities...");
@@ -128,7 +200,8 @@ public class ActivityLoader {
                             "A.gzFormClass, " +             // (12)
                             "d.ownerUserId, " +             // (13)
                             "A.published, " +               // (14)
-                            "A.version " +                  // (15)
+                            "A.siteVersion, " +             // (15)
+                            "A.schemaVersion " +             // (16)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -150,6 +223,7 @@ public class ActivityLoader {
                     activity.ownerUserId = rs.getInt(13);
                     activity.published = rs.getInt(14) > 0;
                     activity.version = rs.getLong(15);
+                    activity.schemaVersion = rs.getLong(16);
 
                     serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
 

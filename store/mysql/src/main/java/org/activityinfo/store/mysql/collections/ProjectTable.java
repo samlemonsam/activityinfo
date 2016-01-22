@@ -10,12 +10,20 @@ import org.activityinfo.store.mysql.mapping.DeleteMethod;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
+import org.activityinfo.store.mysql.metadata.DatabaseCache;
 
 import java.sql.SQLException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 
 public class ProjectTable implements SimpleTable {
+    
+    private final DatabaseCache databaseVersionMap;
+
+    public ProjectTable(DatabaseCache databaseVersionMap) {
+        this.databaseVersionMap = databaseVersionMap;
+    }
+
     @Override
     public boolean accept(ResourceId formClassId) {
         return formClassId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
@@ -32,7 +40,8 @@ public class ProjectTable implements SimpleTable {
         mapping.setFromClause("project base");
         mapping.setBaseFilter("dateDeleted IS NULL AND databaseId=" + databaseId);
         mapping.setDeleteMethod(DeleteMethod.SOFT_BY_DATE);
-
+        mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
+        
         FormField nameField = new FormField(field(classId, NAME_FIELD))
                 .setRequired(true)
                 .setLabel("Name")

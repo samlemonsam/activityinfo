@@ -120,7 +120,7 @@ public class PivotAdapter {
         if(filter.isRestricted(DimensionType.Activity)) {
             return session.getActivityLoader().load(filter.getRestrictions(DimensionType.Activity));
         } else if(filter.isRestricted(DimensionType.Database)) {
-            return session.getActivityLoader().loadForDatabases(filter.getRestrictions(DimensionType.Database));
+            return session.getActivityLoader().loadForDatabaseIds(filter.getRestrictions(DimensionType.Database));
         } else if(filter.isRestricted(DimensionType.Indicator)) {
             return session.getActivityLoader().loadForIndicators(filter.getRestrictions(DimensionType.Indicator));
         }
