@@ -39,6 +39,9 @@
             <column name="formInstanceOwnerId" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
+            <column name="formInstanceKeyId" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
             <column name="json" type="longtext">
                 <constraints nullable="true"/>
             </column>

@@ -104,10 +104,15 @@ public class SubFormCollectionManipulator {
 
     private void removeEmptyInstances() {
         for (FormModel.SubformValueKey key : forms.keySet()) {
-            if (formModel.getSubFormInstances().get(key).isEmpty()) {
+            if (isEmpty(formModel.getSubFormInstances().get(key))) {
                 formModel.getSubFormInstances().remove(key);
             }
         }
+    }
+
+    private static boolean isEmpty(FormInstance instance) {
+        return instance.isEmpty() ||
+                instance.size() == 2 && instance.get(ResourceId.valueOf("sort")) != null;
     }
 
     public void show() {
@@ -178,6 +183,11 @@ public class SubFormCollectionManipulator {
             public void onClick(ClickEvent event) {
                 rootPanel.remove(formPanel);
                 forms.remove(key);
+
+                if (loader.isPersisted(formModel.getSubFormInstances().get(key))) { // schedule deletion only if instance is persisted
+                    formModel.getPersistedInstanceToRemoveByLocator().add(formModel.getSubFormInstances().get(key).getId());
+                }
+
                 formModel.getSubFormInstances().remove(key);
 
                 setDeleteButtonsState();
@@ -203,5 +213,9 @@ public class SubFormCollectionManipulator {
         for (SimpleFormPanel form : forms.values()) {
             form.getDeleteButton().get().setEnabled(moreThanOne);
         }
+    }
+
+    public Map<FormModel.SubformValueKey, SimpleFormPanel> getForms() {
+        return forms;
     }
 }

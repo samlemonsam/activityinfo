@@ -59,7 +59,8 @@ import java.util.Set;
  * b.1) valueInstance - instance that keeps values for sub form
  * valueInstance.id - generated id
  * valueInstance.classId - references subFormClass
- * valueInstance.ownerId - referenced key instance
+ * valueInstance.ownerId - referenced root working instance
+ * valueInstance.keyId - referenced key instance
  * <p/>
  * b.2) keyInstance - instance that keeps values for key, like period value or partner
  * keyInstance.id - generated
@@ -108,6 +109,8 @@ public class FormModel {
      * Keeps selected instance (tab) for given sub form class.
      */
     private final BiMap<FormClass, FormInstance> selectedInstances = HashBiMap.create();
+
+    private final Set<ResourceId> persistedInstanceToRemoveByLocator = Sets.newHashSet();
 
     private FormClass rootFormClass;
 
@@ -284,7 +287,8 @@ public class FormModel {
 
     private FormInstance createSubFormInstanceValue(SubformValueKey key) {
         FormInstance instance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
-        instance.setOwnerId(key.getInstance().getId());
+        instance.setOwnerId(getWorkingRootInstance().getId());
+        instance.setKeyId(key.getInstance().getId());
         subFormInstances.put(key, instance);
         return instance;
     }
@@ -305,5 +309,9 @@ public class FormModel {
 
     public FormInstance getOriginalRootInstance() {
         return originalRootInstance;
+    }
+
+    public Set<ResourceId> getPersistedInstanceToRemoveByLocator() {
+        return persistedInstanceToRemoveByLocator;
     }
 }

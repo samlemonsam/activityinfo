@@ -46,6 +46,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final FormActions formActions;
     private final ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
+    private final SubFormsHandler subFormsHandler;
     private Optional<Button> deleteButton = Optional.absent();
 
     public SimpleFormPanel(ResourceLocator resourceLocator) {
@@ -70,6 +71,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.model = new FormModel(locator);
         this.withScroll = withScroll;
         this.relevanceHandler = new RelevanceHandler(this);
+        this.subFormsHandler = new SubFormsHandler();
         this.widgetCreator = new FormWidgetCreator(model, containerFactory, widgetFactory);
 
         this.panel = new FlowPanel();
@@ -237,6 +239,12 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 valid = false;
             }
         }
+
+        boolean isSubFormValid = subFormsHandler.validate();
+        if (!valid) {
+            valid = isSubFormValid;
+        }
+
         return valid;
     }
 
@@ -265,4 +273,5 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     public RelevanceHandler getRelevanceHandler() {
         return relevanceHandler;
     }
+
 }

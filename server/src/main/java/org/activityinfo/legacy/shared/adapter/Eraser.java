@@ -50,6 +50,8 @@ public class Eraser {
     public Promise<Void> execute() {
 
         List<Command> commands = Lists.newArrayList();
+        List<ResourceId> instanceWithoutMapping = Lists.newArrayList();
+
         for (ResourceId instanceId : instanceIds) {
 
             char domain = instanceId.getDomain();
@@ -76,7 +78,14 @@ public class Eraser {
             } else if (domain == CuidAdapter.DATABASE_DOMAIN) {
 
                 commands.add(new Delete("UserDatabase", CuidAdapter.getLegacyIdFromCuid(instanceId)));
+            } else if (domain == ResourceId.GENERATED_ID_DOMAIN) {
+
+                instanceWithoutMapping.add(instanceId);
             }
+        }
+
+        if (!instanceWithoutMapping.isEmpty()) {
+            commands.add(new DeleteFormInstance().setInstanceIdList(instanceWithoutMapping));
         }
 
         if (commands.isEmpty()) {

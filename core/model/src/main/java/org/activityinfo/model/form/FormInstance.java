@@ -21,6 +21,7 @@ package org.activityinfo.model.form;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.*;
@@ -51,6 +52,7 @@ public class FormInstance implements IsResource {
     private ResourceId id;
     private ResourceId classId;
     private ResourceId ownerId;
+    private Optional<ResourceId> keyId = Optional.absent();
     private PropertyBag propertyBag;
 
     /**
@@ -103,6 +105,7 @@ public class FormInstance implements IsResource {
         resource.setId(id);
         resource.setOwnerId(ownerId);
         resource.set("classId", classId);
+        resource.set("keyId", keyId);
         resource.setAll(propertyBag);
         return resource;
     }
@@ -119,6 +122,15 @@ public class FormInstance implements IsResource {
 
     public ResourceId getOwnerId() {
         return ownerId;
+    }
+
+    public FormInstance setKeyId(ResourceId keyId) {
+        this.keyId = Optional.fromNullable(keyId);
+        return this;
+    }
+
+    public Optional<ResourceId> getKeyId() {
+        return keyId;
     }
 
     public Map<ResourceId, Object> getValueMap() {
@@ -317,17 +329,26 @@ public class FormInstance implements IsResource {
         return null;
     }
 
+    public int size() {
+        return propertyBag.size();
+    }
+
     @Override
     public String toString() {
         return "FormInstance{" +
                 "id=" + id +
                 ", classId=" + classId +
                 ", ownerId=" + ownerId +
+                ", keyId=" + keyId +
                 ", propertyBag=" + propertyBag +
                 '}';
     }
 
     public boolean isEmpty() {
-        return propertyBag.isEmpty();
+        boolean hasClassId = propertyBag.isResourceId("classId") != null;
+        boolean hasKeyId = propertyBag.isResourceId("keyId") != null;
+        return propertyBag.isEmpty() ||
+                (propertyBag.size() == 1 && (hasClassId || hasKeyId)) || // hack, we keep class id in property bag
+                (propertyBag.size() == 2 && hasClassId && hasKeyId);
     }
 }

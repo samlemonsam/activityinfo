@@ -97,10 +97,7 @@ public class QueryExecutor {
             } else if (ClassType.isClassType(parentId)) {
                 return instancesByClassType(parent);
             } else {
-                GetFormInstance command = new GetFormInstance()
-                        .setOwnerId(parentId.asString())
-                        .setType(GetFormInstance.Type.OWNER);
-                return dispatcher.execute(command).then(FormInstanceListAdapter.getInstance());
+                return queryByOwner(parent);
             }
         } else {
             throw new UnsupportedOperationException("queries must have either class criteria or parent criteria");
@@ -117,10 +114,17 @@ public class QueryExecutor {
         } else if (parentId.equals(ClassType.PARTNER.getResourceId())) {
             return partner(parent);
         } else if (parentId.equals(ClassType.COLLECTION.getResourceId())) {
-            return queryByClassId(parent.getRestrictedBy());
+            return queryByOwner(parent);
         } else {
             throw new UnsupportedOperationException("ClassType is not supported, classType: " + parentId);
         }
+    }
+
+    private Promise<List<FormInstance>> queryByOwner(final ParentCriteria.Parent parent) {
+        GetFormInstance command = new GetFormInstance()
+                .setOwnerId(parent.getRestrictedBy().asString())
+                .setType(GetFormInstance.Type.OWNER);
+        return dispatcher.execute(command).then(FormInstanceListAdapter.getInstance());
     }
 
     private Promise<List<FormInstance>> partner(final ParentCriteria.Parent parent) {

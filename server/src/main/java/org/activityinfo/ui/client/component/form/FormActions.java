@@ -21,15 +21,19 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.IsResource;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 02/18/2015.
@@ -48,13 +52,29 @@ public class FormActions {
 
         panel.getModel().getEventBus().fireEvent(new BeforeSaveEvent());
 
+        BiMap<FormModel.SubformValueKey, FormInstance> subformInstances = panel.getModel().getSubFormInstances();
+
         List<IsResource> toPersist = Lists.newArrayList();
-        toPersist.addAll(panel.getModel().getSubformPresentTabs()); // tab instances
-        toPersist.addAll(panel.getModel().getSubFormInstances().values());
         toPersist.add(panel.getModel().getWorkingRootInstance()); // root instance
 
-        Promise<Void> promise = locator.persist(toPersist);
-        promise.then(new AsyncCallback<Void>() {
+        for (Map.Entry<FormModel.SubformValueKey, FormInstance> entry : subformInstances.entrySet()) { // sub form instances
+            if (!ClassType.isCollection(entry.getKey().getSubForm())) {
+                toPersist.add(entry.getKey().getInstance()); // keyes
+            }
+            toPersist.add(entry.getValue()); // values
+
+        }
+
+        Promise<Void> persist = locator.persist(toPersist);
+        Promise<Void> remove = Promise.done();
+
+        if (!panel.getModel().getPersistedInstanceToRemoveByLocator().isEmpty()) {
+            remove = locator.remove(panel.getModel().getPersistedInstanceToRemoveByLocator());
+        }
+
+        Promise<Void> waitAll = Promise.waitAll(persist, remove);
+
+        waitAll.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 panel.getModel().getEventBus().fireEvent(new SaveFailedEvent(caught));
@@ -62,10 +82,11 @@ public class FormActions {
 
             @Override
             public void onSuccess(Void result) {
-
+                panel.getModel().getPersistedInstanceToRemoveByLocator().clear();
             }
         });
-        return promise;
+
+        return waitAll;
     }
 
 

@@ -22,13 +22,16 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Function;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
+import com.google.common.collect.Sets;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yuriyz on 01/22/2016.
@@ -37,21 +40,29 @@ public class SubFormInstanceLoader {
 
     private final FormModel model;
 
+    // keep copy of persisted instances, we need to track persisted instance to remove them on save if they were deleted by user.
+    private final Set<FormInstance> persisted = Sets.newHashSet();
+
     public SubFormInstanceLoader(FormModel model) {
         this.model = model;
     }
 
     public Promise<List<FormInstance>> loadCollectionInstances(final FormClass subForm) {
-        return model.getLocator().queryInstances(new ClassCriteria(subForm.getId()))
+        return model.getLocator().queryInstances(ParentCriteria.isChildOf(ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId()))
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override
                     public List<FormInstance> apply(List<FormInstance> instanceList) {
                         for (FormInstance instance : instanceList) {
                             model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, instance), instance);
+                            persisted.add(instance);
                         }
 
                         return instanceList;
                     }
                 });
+    }
+
+    public boolean isPersisted(FormInstance instance) {
+        return persisted.contains(instance);
     }
 }

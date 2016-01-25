@@ -13,6 +13,7 @@ public class FormInstanceEntity implements Serializable, HasJson {
     private String id;
     private String classId;
     private String ownerId;
+    private String keyId;
     private String json;
     private byte[] gzJson;
 
@@ -49,6 +50,15 @@ public class FormInstanceEntity implements Serializable, HasJson {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    @Column(name = "formInstanceKeyId", nullable = true)
+    public String getKeyId() {
+        return this.keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
     }
 
     @Lob
