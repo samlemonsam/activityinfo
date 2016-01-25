@@ -104,15 +104,10 @@ public class SubFormCollectionManipulator {
 
     private void removeEmptyInstances() {
         for (FormModel.SubformValueKey key : forms.keySet()) {
-            if (isEmpty(formModel.getSubFormInstances().get(key))) {
+            if (formModel.getSubFormInstances().get(key).isEmpty("classId", "keyId", "sort")) {
                 formModel.getSubFormInstances().remove(key);
             }
         }
-    }
-
-    private static boolean isEmpty(FormInstance instance) {
-        return instance.isEmpty() ||
-                instance.size() == 2 && instance.get(ResourceId.valueOf("sort")) != null;
     }
 
     public void show() {

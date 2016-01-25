@@ -345,10 +345,14 @@ public class FormInstance implements IsResource {
     }
 
     public boolean isEmpty() {
-        boolean hasClassId = propertyBag.isResourceId("classId") != null;
-        boolean hasKeyId = propertyBag.isResourceId("keyId") != null;
-        return propertyBag.isEmpty() ||
-                (propertyBag.size() == 1 && (hasClassId || hasKeyId)) || // hack, we keep class id in property bag
-                (propertyBag.size() == 2 && hasClassId && hasKeyId);
+        return propertyBag.isEmpty();
+    }
+
+    public boolean isEmpty(String... builtInFields) {
+        PropertyBag copy = propertyBag.copy();
+        for (String field : builtInFields) {
+            copy.remove(field);
+        }
+        return copy.isEmpty();
     }
 }
