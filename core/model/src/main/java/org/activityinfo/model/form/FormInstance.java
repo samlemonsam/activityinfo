@@ -105,7 +105,7 @@ public class FormInstance implements IsResource {
         resource.setId(id);
         resource.setOwnerId(ownerId);
         resource.set("classId", classId);
-        resource.set("keyId", keyId);
+        resource.set("keyId", keyId.isPresent() ? keyId.get() : null);
         resource.setAll(propertyBag);
         return resource;
     }
