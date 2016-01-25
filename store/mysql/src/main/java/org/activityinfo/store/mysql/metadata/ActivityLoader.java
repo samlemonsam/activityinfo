@@ -34,9 +34,6 @@ import java.util.zip.GZIPInputStream;
 /**
  * Loads metadata about Activities from MySQL.
  * 
- * 
- * 
- * 
  *
  */
 public class ActivityLoader {
@@ -263,9 +260,15 @@ public class ActivityLoader {
                 loadFields(activityMap, classicActivityIds);
             }
             
+            /*
+             * Finally we need metadata on linked indicators here.
+             */
+            loadLinkedIndicators(activityMap, activityIds);
+            
         }
         return activityMap;
     }
+
 
     private String idList(Set<Integer> activityIds) {
         return "(" + Joiner.on(",").join(activityIds) + ")";
@@ -453,4 +456,34 @@ public class ActivityLoader {
 
         return attributes;
     }
+
+    private void loadLinkedIndicators(Map<Integer, Activity> activityMap, Set<Integer> activityIds) throws SQLException {
+
+        String sql = "SELECT " +
+                        "k.sourceIndicatorId, " +
+                        "si.activityId, " +
+                        "sa.reportingFrequency, " + 
+                        "k.destinationIndicatorId, " +
+                        "di.activityId " +
+                     "FROM indicatorlink k " +
+                     "INNER JOIN indicator si ON (si.indicatorId = k.sourceIndicatorId) " +
+                     "INNER JOIN activity sa ON (sa.activityid = si.activityid) " + 
+                     "INNER JOIN indicator di ON (di.indicatorId = k.destinationIndicatorId) " +
+                     "WHERE di.activityId IN " + idList(activityIds);
+
+
+        try(ResultSet rs = executor.query(sql)) {
+            while(rs.next()) {
+                int sourceIndicatorId = rs.getInt(1);
+                int sourceActivityId =  rs.getInt(2);
+                int sourceReportingFrequency = rs.getInt(3);
+                int destinationIndicatorId = rs.getInt(4);
+                int destinationActivityId = rs.getInt(5);
+
+                Activity destinationActivity = activityMap.get(destinationActivityId);
+                destinationActivity.addLink(destinationIndicatorId, sourceActivityId, sourceReportingFrequency, sourceIndicatorId);
+            }   
+        }
+    }
+
 }

@@ -2,18 +2,13 @@ package org.activityinfo.store.mysql.metadata;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.collections.BETA;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Activity implements Serializable {
 
@@ -43,6 +38,13 @@ public class Activity implements Serializable {
     long version;
     
     List<ActivityField> fields = Lists.newArrayList();
+
+    /**
+     * Map from destination indicator to it source indicators
+     */
+    Multimap<Integer, Integer> linkedIndicators = HashMultimap.create();
+    
+    Map<Integer, LinkedActivity> linkedActivities = Maps.newHashMap();
     
     public int getId() {
         return activityId;
@@ -177,8 +179,8 @@ public class Activity implements Serializable {
         }
     }
 
-    public Collection<Activity> getLinkedActivities() {
-        return Collections.emptySet();
+    public Collection<LinkedActivity> getLinkedActivities() {
+        return linkedActivities.values();
     }
 
     public boolean isMonthly() {
@@ -188,9 +190,47 @@ public class Activity implements Serializable {
     public String getDatabaseName() {
         return databaseName;
     }
+
+
+    public ActivityField getIndicatorField(Integer indicatorId) {
+        for (ActivityField field : fields) {
+            if(field.getId() == indicatorId) {
+                return field;
+            }
+        }
+
+        throw new IllegalArgumentException("No such indicator " + indicatorId + " in activity " + activityId);
+    }
     
     public ActivityVersion getActivityVersion() {
         return new ActivityVersion(this.getId(), schemaVersion, version);
+    }
+    
+    void addLink(int destinationIndicatorId, int sourceActivityId, int sourceReportingFrequency, int sourceIndicatorId) {
+        if(sourceActivityId == this.activityId) {
+            linkedIndicators.put(destinationIndicatorId, sourceIndicatorId);
+        } else {
+            LinkedActivity linkedActivity = linkedActivities.get(sourceActivityId);
+            if(linkedActivity == null) {
+                linkedActivity = new LinkedActivity();
+                linkedActivity.activityId = sourceActivityId;
+                linkedActivity.reportingFrequency = reportingFrequency;
+                linkedActivities.put(sourceActivityId, linkedActivity);
+            }
+            linkedActivity.linkMap.put(destinationIndicatorId, sourceIndicatorId);
+
+        }
+    }
+    
+    public LinkedActivity getSelfLink() {
+        LinkedActivity linked = new LinkedActivity();
+        linked.activityId = this.activityId;
+        linked.reportingFrequency = this.reportingFrequency;
+        for (ActivityField indicatorField : getIndicatorFields()) {
+            linked.linkMap.put(indicatorField.getId(), indicatorField.getId());
+        }
+        linked.linkMap.putAll(linkedIndicators);
+        return linked;
     }
 
 }
