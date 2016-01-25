@@ -35,6 +35,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.SimpleFormPanel;
+import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
+import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.Button;
 
@@ -73,6 +75,39 @@ public class SubFormCollectionManipulator {
                 setDeleteButtonsState();
             }
         });
+
+        bindEvents();
+    }
+
+    private void bindEvents() {
+        formModel.getEventBus().addHandler(BeforeSaveEvent.TYPE, new BeforeSaveEvent.Handler() {
+            @Override
+            public void handle(BeforeSaveEvent event) {
+                removeEmptyInstances();
+            }
+        });
+        formModel.getEventBus().addHandler(SaveFailedEvent.TYPE, new SaveFailedEvent.Handler() {
+            @Override
+            public void handle(SaveFailedEvent event) {
+                putEmptyInstanceIfAbsent();
+            }
+        });
+    }
+
+    private void putEmptyInstanceIfAbsent() {
+        for (FormModel.SubformValueKey key : forms.keySet()) {
+            if (formModel.getSubFormInstances().get(key) == null) {
+                formModel.getSubFormInstances().put(key, new FormInstance(ResourceId.generateId(), subForm.getId()));
+            }
+        }
+    }
+
+    private void removeEmptyInstances() {
+        for (FormModel.SubformValueKey key : forms.keySet()) {
+            if (formModel.getSubFormInstances().get(key).isEmpty()) {
+                formModel.getSubFormInstances().remove(key);
+            }
+        }
     }
 
     public void show() {

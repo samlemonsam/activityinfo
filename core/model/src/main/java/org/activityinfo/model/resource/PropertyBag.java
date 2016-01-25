@@ -382,4 +382,8 @@ public class PropertyBag<T extends PropertyBag> {
     public String toString() {
         return properties.toString();
     }
+
+    public boolean isEmpty() {
+        return properties.isEmpty();
+    }
 }

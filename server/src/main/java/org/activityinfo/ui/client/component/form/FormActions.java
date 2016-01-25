@@ -22,10 +22,12 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.collect.Lists;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
+import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
 
 import java.util.List;
 
@@ -50,7 +52,20 @@ public class FormActions {
         toPersist.addAll(panel.getModel().getSubformPresentTabs()); // tab instances
         toPersist.addAll(panel.getModel().getSubFormInstances().values());
         toPersist.add(panel.getModel().getWorkingRootInstance()); // root instance
-        return locator.persist(toPersist);
+
+        Promise<Void> promise = locator.persist(toPersist);
+        promise.then(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                panel.getModel().getEventBus().fireEvent(new SaveFailedEvent(caught));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+
+            }
+        });
+        return promise;
     }
 
 

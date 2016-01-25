@@ -241,7 +241,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     private FieldValue getCurrentValue(FormField field) {
-        return model.getWorkingInstance(field.getId()).get().get(field.getId());
+        Optional<FormInstance> instance = model.getWorkingInstance(field.getId());
+        return instance.isPresent() ? instance.get().get(field.getId()) : null;
     }
 
     @Override

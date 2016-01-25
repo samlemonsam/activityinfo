@@ -327,4 +327,7 @@ public class FormInstance implements IsResource {
                 '}';
     }
 
+    public boolean isEmpty() {
+        return propertyBag.isEmpty();
+    }
 }
