@@ -14,13 +14,14 @@ public class GetFormInstance implements Command<FormInstanceListResult> {
 
     // todo : code it via type, need criteria but a lot of model classes are not serializable
     // have to ask Alex why
-    public static enum Type {
-        ID, OWNER
+    public enum Type {
+        ID, OWNER, CLASS
     }
 
     // todo : revisit with Criteria
     private Type type = Type.ID;
     private List<String> instanceIds = Lists.newArrayList();
+    private String classId = null;
     private String ownerId = null;
 
     public GetFormInstance() {
@@ -53,6 +54,15 @@ public class GetFormInstance implements Command<FormInstanceListResult> {
 
     public GetFormInstance setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+        return this;
+    }
+
+    public String getClassId() {
+        return classId;
+    }
+
+    public GetFormInstance setClassId(String classId) {
+        this.classId = classId;
         return this;
     }
 

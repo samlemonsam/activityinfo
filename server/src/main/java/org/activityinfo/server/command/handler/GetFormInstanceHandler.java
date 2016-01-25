@@ -31,11 +31,21 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
         switch (cmd.getType()) {
             case ID:
                 return fecthById(cmd);
+            case CLASS:
+                return fetchByClass(cmd);
             case OWNER:
                 return fetchByOwner(cmd);
         }
         throw new CommandException("Unsupported GetFormInstance type:" + cmd.getType());
 
+    }
+
+    private CommandResult fetchByClass(GetFormInstance cmd) {
+        List<FormInstanceEntity> entities = entityManager.get().createQuery(
+                "SELECT d FROM FormInstanceEntity d WHERE formInstanceClassId = :ownerId")
+                .setParameter("ownerId", cmd.getClassId())
+                .getResultList();
+        return new FormInstanceListResult(JsonHelper.readJsons(entities));
     }
 
     private CommandResult fetchByOwner(GetFormInstance cmd) {

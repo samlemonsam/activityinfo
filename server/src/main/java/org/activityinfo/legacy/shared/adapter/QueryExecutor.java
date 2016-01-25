@@ -249,8 +249,10 @@ public class QueryExecutor {
                         .then(new ProjectListExtractor(criteria))
                         .then(concatMap(new ProjectInstanceAdapter(formClassId)));
             default:
-                return Promise.rejected(new UnsupportedOperationException(
-                        "domain not yet implemented: " + formClassId.getDomain()));
+                GetFormInstance command = new GetFormInstance()
+                        .setClassId(formClassId.asString())
+                        .setType(GetFormInstance.Type.CLASS);
+                return dispatcher.execute(command).then(FormInstanceListAdapter.getInstance());
         }
     }
 

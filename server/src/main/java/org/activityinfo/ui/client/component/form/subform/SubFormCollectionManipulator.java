@@ -21,13 +21,14 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -75,16 +76,20 @@ public class SubFormCollectionManipulator {
     }
 
     public void show() {
-        loader.loadCollectionInstances(subForm).then(new Function<List<FormInstance>, Object>() {
+        loader.loadCollectionInstances(subForm).then(new AsyncCallback<List<FormInstance>>() {
             @Override
-            public Object apply(List<FormInstance> instanceList) {
+            public void onFailure(Throwable caught) {
+                Log.error(caught.getMessage(), caught);
+            }
+
+            @Override
+            public void onSuccess(List<FormInstance> result) {
                 render();
-                return null;
             }
         });
     }
 
-    private void render() {
+    private List<FormModel.SubformValueKey> getSortedKeys() {
         List<FormModel.SubformValueKey> keys = Lists.newArrayList(formModel.getKeysBySubForm(subForm));
 
         Collections.sort(keys, new Comparator<FormModel.SubformValueKey>() {
@@ -98,6 +103,11 @@ public class SubFormCollectionManipulator {
                 return 0;
             }
         });
+        return keys;
+    }
+
+    private void render() {
+        List<FormModel.SubformValueKey> keys = getSortedKeys();
 
         if (keys.isEmpty()) {
             keys.add(newKey()); // generate new key if we don't have any existing data yets
