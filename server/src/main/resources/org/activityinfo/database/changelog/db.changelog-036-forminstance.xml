@@ -39,9 +39,6 @@
             <column name="formInstanceOwnerId" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
-            <column name="formInstanceKeyId" type="VARCHAR(255)">
-                <constraints nullable="true"/>
-            </column>
             <column name="json" type="longtext">
                 <constraints nullable="true"/>
             </column>
@@ -49,5 +46,15 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
+    </changeSet>
+    <changeSet author="yuriyz" id="036-02">
+      <comment>
+        added keyId to forminstance table
+      </comment>
+      <addColumn tableName="forminstance">
+        <column name="formInstanceKeyId" type="VARCHAR(255)">
+          <constraints nullable="true"/>
+        </column>
+      </addColumn>
     </changeSet>
 </databaseChangeLog>
