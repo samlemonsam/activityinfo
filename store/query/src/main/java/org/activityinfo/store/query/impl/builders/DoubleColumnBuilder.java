@@ -9,15 +9,17 @@ import org.activityinfo.store.query.impl.PendingSlot;
 
 import java.util.List;
 
-public class DoubleColumnBuilder implements ColumnViewBuilder, CursorObserver<FieldValue> {
+public class DoubleColumnBuilder implements CursorObserver<FieldValue> {
+
+    private final PendingSlot<ColumnView> result;
 
     private final List<Double> values = Lists.newArrayList();
 
     private DoubleReader reader;
 
-    private PendingSlot<ColumnView> result = new PendingSlot<>();
 
-    public DoubleColumnBuilder(DoubleReader reader) {
+    public DoubleColumnBuilder(PendingSlot<ColumnView> result, DoubleReader reader) {
+        this.result = result;
         this.reader = reader;
     }
 
@@ -34,15 +36,5 @@ public class DoubleColumnBuilder implements ColumnViewBuilder, CursorObserver<Fi
             array[i] = values.get(i);
         }
         result.set(new DoubleArrayColumnView(array));
-    }
-
-    @Override
-    public ColumnView get() {
-        return result.get();
-    }
-
-    @Override
-    public void setFromCache(ColumnView view) {
-        result.set(view);
     }
 }

@@ -7,15 +7,18 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
-import org.activityinfo.store.query.impl.Slot;
 
 
-public class ForeignKeyBuilder implements CursorObserver<FieldValue>, Slot<ForeignKeyMap> {
+public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
 
+    private final PendingSlot<ForeignKeyMap> result;
+    
     private int rowIndex = 0;
     private Multimap<Integer, ResourceId> keys = HashMultimap.create();
 
-    private PendingSlot<ForeignKeyMap> result = new PendingSlot<>();
+    public ForeignKeyBuilder(PendingSlot<ForeignKeyMap> result) {
+        this.result = result;
+    }
 
     @Override
     public void onNext(FieldValue fieldValue) {
@@ -33,11 +36,4 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue>, Slot<Forei
         result.set(new ForeignKeyMap(rowIndex, keys));
     }
 
-    public ForeignKeyMap get() {
-        return result.get();
-    }
-    
-    public void setFromCache(ForeignKeyMap cached) {
-        result.set(cached);
-    }
 }

@@ -12,20 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class GeoColumnBuilder implements ColumnViewBuilder, CursorObserver<FieldValue> {
+public class GeoColumnBuilder implements CursorObserver<FieldValue> {
+
+    private final PendingSlot<ColumnView> result;
     
     private List<Double> coordinates = new ArrayList<>();
 
-    private PendingSlot<ColumnView> result = new PendingSlot<>();
-    
-    @Override
-    public void setFromCache(ColumnView view) {
-        result.set(view);
-    }
-
-    @Override
-    public ColumnView get() {
-        return result.get();
+    public GeoColumnBuilder(PendingSlot<ColumnView> result) {
+        this.result = result;
     }
 
     @Override

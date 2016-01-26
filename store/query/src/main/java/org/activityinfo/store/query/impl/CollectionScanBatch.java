@@ -1,5 +1,9 @@
 package org.activityinfo.store.query.impl;
 
+import com.google.appengine.api.memcache.AsyncMemcacheService;
+import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
@@ -18,8 +22,12 @@ import org.activityinfo.store.query.impl.join.JoinLink;
 import org.activityinfo.store.query.impl.join.JoinedColumnViewSlot;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Build a batch of {@code CollectionScans} needed for a column set query.
@@ -28,6 +36,10 @@ import java.util.Map;
  * to run the table scans in parallel.
  */
 public class CollectionScanBatch {
+
+    private static final Logger LOGGER = Logger.getLogger(CollectionScanBatch.class.getName());
+    
+    private AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
 
     private final CollectionCatalog store;
 
@@ -143,14 +155,6 @@ public class CollectionScanBatch {
         return getTable(formClass.getId()).addField(fieldExpr);
     }
 
-    /**
-     * Executes the batch
-     */
-    public void execute() throws Exception {
-        for(CollectionScan scan : tableMap.values()) {
-            scan.execute();
-        }
-    }
 
     /**
      * Adds a request for a "constant" column to the query batch. We don't actually need any data from
@@ -184,4 +188,72 @@ public class CollectionScanBatch {
         return getTable(formClass.getId()).addCount();
     }
 
+    /**
+     * Executes the batch
+     */
+    public void execute() throws Exception {
+        
+        // Before hitting the database, retrieve what we can from the cache
+        resolveFromCache();
+        
+        // Now hit the database for anything remaining...
+        for(CollectionScan scan : tableMap.values()) {
+            scan.execute();
+        }
+        
+        // And of course save the results to the cache
+        cacheResult();
+    }
+
+
+
+    /**
+     *
+     * Attempts to retrieve as many of the required columns from MemCache as possible
+     */
+    public void resolveFromCache() {
+
+
+        // Otherwise, try to retrieve all of the ColumnView and ForeignKeyMaps we need 
+        // from the Memcache service
+        try {
+            Set<String> toFetch = new HashSet<>();
+
+            // Collect the keys we need from all enqueued tables
+            for (CollectionScan collectionScan : tableMap.values()) {
+                toFetch.addAll(collectionScan.getCacheKeys());
+            }
+            
+            if(!toFetch.isEmpty()) {
+                // Do a big giant memcache call and rely on appengine to parallelize as
+                // needed
+                Map<String, Object> cached = memcacheService.getAll(toFetch).get();
+
+                LOGGER.info("Retrieved " + cached.size() + "/" + toFetch.size() + " requested keys from memcache.");
+
+                // Now populate the individual collection scans with what we got back from memcache 
+                // with a little luck nothing will be left to query directly from the database
+                for (CollectionScan collectionScan : tableMap.values()) {
+                    collectionScan.updateFromCache(cached);
+                }
+            }
+            
+        } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Exception while retrieving columns from cache" , e);
+        }
+    }
+
+
+    private void cacheResult() {
+        Map<String, Object> toPut = Maps.newHashMap();
+
+        for (CollectionScan collectionScan : tableMap.values()) {
+            toPut.putAll(collectionScan.getValuesToCache());
+        }
+        
+        if(!toPut.isEmpty()) {
+            // put asynchronously
+            memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600), MemcacheService.SetPolicy.SET_ALWAYS);
+        }
+    }
 }

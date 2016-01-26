@@ -88,7 +88,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("visible"), hasValues(true, true, true, true));
     }
 
-    @Ignore
     @Test
     public void testLocationPoints() {
         query(CuidAdapter.locationFormClass(1), "label", "point.latitude", "point.longitude");

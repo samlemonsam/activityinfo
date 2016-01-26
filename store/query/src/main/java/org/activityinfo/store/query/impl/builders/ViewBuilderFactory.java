@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl.builders;
 
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -14,8 +15,9 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.query.impl.PendingSlot;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ViewBuilderFactory {
@@ -26,30 +28,29 @@ public class ViewBuilderFactory {
     private ViewBuilderFactory() {}
 
 
-    public static ColumnViewBuilder get(FieldType type) {
+    public static CursorObserver<FieldValue> get(PendingSlot<ColumnView> result, FieldType type) {
         if(type instanceof TextType) {
-            return new StringColumnBuilder(new TextFieldReader());
+            return new StringColumnBuilder(result, new TextFieldReader());
         } else if(type instanceof NarrativeType) {
-            return new StringColumnBuilder(new NarrativeFieldReader());
+            return new StringColumnBuilder(result, new NarrativeFieldReader());
         } else if(type instanceof QuantityType) {
-            return new DoubleColumnBuilder(new QuantityReader());
+            return new DoubleColumnBuilder(result, new QuantityReader());
         } else if(type instanceof BarcodeType) {
-            return new StringColumnBuilder(new BarcodeReader());
+            return new StringColumnBuilder(result, new BarcodeReader());
         } else if(type instanceof ReferenceType) {
-            return new StringColumnBuilder(new ReferenceIdReader());
+            return new StringColumnBuilder(result, new ReferenceIdReader());
         } else if(type instanceof EnumType) {
-            return new EnumColumnBuilder((EnumType) type);
+            return new EnumColumnBuilder(result, (EnumType) type);
         } else if(type instanceof BooleanType) {
-            return new BooleanColumnBuilder();
+            return new BooleanColumnBuilder(result);
         } else if(type instanceof LocalDateType) {
-            return new StringColumnBuilder(new LocalDateReader());
+            return new StringColumnBuilder(result, new LocalDateReader());
         } else if(type instanceof AttachmentType) {
-            return new StringColumnBuilder(new AttachmentBlobIdReader());
+            return new StringColumnBuilder(result, new AttachmentBlobIdReader());
         } else if(type instanceof GeoAreaType) {
-            return new GeoColumnBuilder();
+            return new GeoColumnBuilder(result);
         } else {
-            LOGGER.log(Level.SEVERE, "Unsupported type: " + type);
-            return null;
+            throw new UnsupportedOperationException("Unsupported type: " + type);
         }
     }
 
@@ -119,28 +120,6 @@ public class ViewBuilderFactory {
         }
     }
     
-//
-//    private static class YearReader implements DoubleReader {
-//        @Override
-//        public double read(FieldValue value) {
-//            if(value instanceof YearValue) {
-//                return ((YearValue)value).getYear();
-//            } else {
-//                return Double.NaN;
-//            }
-//        }
-//    }
-//
-//    private static class MonthReader implements DateReader {
-//        @Override
-//        public Date readDate(FieldValue value) {
-//            if(value instanceof TemporalValue) {
-//                return ((TemporalValue) value).asInterval().getEndDate().atMidnightInMyTimezone();
-//            }
-//            return null;
-//        }
-//    }
-
     private static class AttachmentBlobIdReader implements StringReader {
         @Override
         public String readString(FieldValue value) {

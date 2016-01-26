@@ -14,7 +14,7 @@ import java.util.List;
  * Supplies a Column that is combined from several source columns.
  *
  */
-public class ColumnCombiner implements ColumnViewBuilder {
+public class ColumnCombiner implements Slot<ColumnView> {
 
     private List<Slot<ColumnView>> sources;
 
@@ -110,10 +110,5 @@ public class ColumnCombiner implements ColumnViewBuilder {
             }
         }
         return new BooleanColumnView(values);
-    }
-
-    @Override
-    public void setFromCache(ColumnView view) {
-        result = view;
     }
 }
