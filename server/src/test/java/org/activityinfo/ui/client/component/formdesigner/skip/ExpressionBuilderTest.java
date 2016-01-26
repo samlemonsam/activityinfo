@@ -30,9 +30,9 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.junit.Before;
@@ -80,21 +80,21 @@ public class ExpressionBuilderTest {
         row2.setValue(new EnumValue(Sets.newHashSet(enumValue(PREGNANT_FIELD_ID, "No").getId())));
         row2.setJoinFunction(BooleanFunctions.OR);
 
-        assertCorrectRoundTripTranslation("{test_f1}=={test_ev1}", row);
-        assertCorrectRoundTripTranslation("({test_f1}=={test_ev1})||({test_f2}!={test_ev4})", row, row2);
+        assertCorrectRoundTripTranslation("test_f1==test_ev1", row);
+        assertCorrectRoundTripTranslation("(test_f1==test_ev1)||(test_f2!=test_ev4)", row, row2);
 
         row2.setJoinFunction(BooleanFunctions.AND);
-        assertCorrectRoundTripTranslation("({test_f1}=={test_ev1})&&({test_f2}!={test_ev4})", row, row2);
+        assertCorrectRoundTripTranslation("(test_f1==test_ev1)&&(test_f2!=test_ev4)", row, row2);
 
         row2.setValue(new EnumValue(Sets.newHashSet(
                 enumValue(PREGNANT_FIELD_ID, "Yes").getId(),
                 enumValue(PREGNANT_FIELD_ID, "No").getId())));
-        assertCorrectRoundTripTranslation("(({test_f2}!={test_ev3})&&({test_f2}!={test_ev4}))", row2);
-        assertCorrectRoundTripTranslation("({test_f1}=={test_ev1})&&(({test_f2}!={test_ev3})&&({test_f2}!={test_ev4}))", row, row2);
+        assertCorrectRoundTripTranslation("((test_f2!=test_ev3)&&(test_f2!=test_ev4))", row2);
+        assertCorrectRoundTripTranslation("(test_f1==test_ev1)&&((test_f2!=test_ev3)&&(test_f2!=test_ev4))", row, row2);
 
         // containsAll/containsAny
         row.setFunction(ContainsAllFunction.INSTANCE);
-        assertCorrectRoundTripTranslation("containsAll({test_f1},{test_ev1})", row);
+        assertCorrectRoundTripTranslation("containsAll(test_f1,test_ev1)", row);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ExpressionBuilderTest {
         row.setValue(TextValue.valueOf("val"));
         row.setJoinFunction(BooleanFunctions.AND);
 
-        assertCorrectRoundTripTranslation("{test_text}==\"val\"", row);
+        assertCorrectRoundTripTranslation("test_text==\"val\"", row);
     }
 
     private void assertCorrectRoundTripTranslation(String expectedExpression, RowData... rows) {
