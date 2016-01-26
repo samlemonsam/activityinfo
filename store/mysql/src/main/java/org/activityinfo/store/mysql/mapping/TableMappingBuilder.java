@@ -122,7 +122,7 @@ public class TableMappingBuilder {
     }
 
     public void addGeoPoint(FormField field) {
-        add(new FieldMapping(field, Arrays.asList("x1", "y1"), new FieldValueConverter() {
+        add(new FieldMapping(field, Arrays.asList("x", "y"), new FieldValueConverter() {
             @Override
             public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
 

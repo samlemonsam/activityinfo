@@ -14,10 +14,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
-import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
-import org.activityinfo.store.query.impl.builders.RowCountBuilder;
-import org.activityinfo.store.query.impl.builders.ViewBuilderFactory;
+import org.activityinfo.store.query.impl.builders.*;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
@@ -237,7 +234,6 @@ public class CollectionScan {
            !rowCount.isPresent()) {
             return;
         }
-    
 
         // Build the query
         ColumnQueryBuilder queryBuilder = collection.newColumnQuery();
@@ -252,6 +248,16 @@ public class CollectionScan {
 
                     queryBuilder.addField(ResourceId.valueOf(symbol.getName()), ViewBuilderFactory.get(column.getValue(), field.getType()));
 
+                } else if(column.getKey() instanceof CompoundExpr) {
+                    // Special case for single depth
+                    // latitude and longitude
+                    // TODO: expand properly
+                    CompoundExpr compoundExpr = (CompoundExpr) column.getKey();
+                    SymbolExpr baseField = (SymbolExpr) compoundExpr.getValue();
+                    
+                    queryBuilder.addField(baseField.asResourceId(), new DoubleColumnBuilder(column.getValue(), 
+                            new CoordinateReader(compoundExpr.getField())));
+                    
                 } else {
                     throw new UnsupportedOperationException("TODO: " + column.getKey());
                 }
@@ -319,6 +325,4 @@ public class CollectionScan {
     private String fkCacheKey(String fieldId) {
         return collectionId.asString() + "@" + cacheVersion + ".fk." + fieldId;
     }
-
-
 }

@@ -80,6 +80,10 @@ public class SymbolExpr extends ExprNode {
         return name.hashCode();
     }
 
+    public ResourceId asResourceId() {
+        return ResourceId.valueOf(name);
+    }
+    
     public String asExpression() {
         if(needsEscaping(name)) {
             return "[" + name + "]";
