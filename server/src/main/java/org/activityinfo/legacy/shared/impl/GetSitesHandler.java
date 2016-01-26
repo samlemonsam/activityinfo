@@ -796,6 +796,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 .appendColumn("I.Expression", "expression")
                 .appendColumn("I.nameInExpression", "code")
                 .appendColumn("I.calculatedAutomatically", "calculatedAutomatically")
+                .appendColumn("I.typeJson", "typeJson")
                 .from(Tables.INDICATOR, "I")
                 .where("I.ActivityId")
                 .in(activityIds)
@@ -845,6 +846,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         indicator.setNameInExpression(rs.getString("code"));
         indicator.setCalculatedAutomatically(rs.getBoolean("calculatedAutomatically"));
         indicator.setUnits(rs.getString("units"));
+        indicator.setTypeJson(rs.getString("typeJson"));
         return indicator.asFormField();
     }
 
