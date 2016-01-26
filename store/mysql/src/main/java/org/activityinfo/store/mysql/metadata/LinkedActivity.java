@@ -2,16 +2,16 @@ package org.activityinfo.store.mysql.metadata;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * Stores information on activities that are linked to this activity
  */
-public class LinkedActivity {
+public class LinkedActivity implements Serializable {
     
     int activityId;
 
@@ -45,10 +45,8 @@ public class LinkedActivity {
     public Collection<Integer> getSourceIndicatorIdsFor(int destinationIndicatorId) {
         return linkMap.get(destinationIndicatorId);
     }
-    
-    public Multimap<Integer, Integer> getSourceMap() {
-        Multimap<Integer, Integer> inverse = HashMultimap.create();
-        Multimaps.invertFrom(linkMap, inverse);
-        return inverse;
+
+    public ResourceId getSiteFormClassId() {
+        return CuidAdapter.activityFormClass(activityId);
     }
 }

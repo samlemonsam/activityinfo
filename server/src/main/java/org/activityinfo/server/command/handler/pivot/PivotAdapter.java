@@ -236,10 +236,10 @@ public class PivotAdapter {
                     }
                     break;
                 case TOTAL_SITES:
-                    executeSiteCountQuery(activity);
-//                    for (Activity linkedActivity : activity.getLinkedActivities()) {
-//                        executeSiteCountQuery(linkedActivity);
-//                    }
+                    executeSiteCountQuery(activity, activity.getSelfLink());
+                    for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
+                        executeSiteCountQuery(activity, linkedActivity);
+                    }
                     break;
             }
         }
@@ -320,7 +320,7 @@ public class PivotAdapter {
         addSiteIdToQuery(activity, queryModel);
 
         // declare the filter
-        queryModel.setFilter(composeFilter(activity));
+        queryModel.setFilter(composeFilter(formTree));
 
         // Query the table 
         ColumnSet columnSet = executeQuery(queryModel);
@@ -488,14 +488,14 @@ public class PivotAdapter {
     /**
      * Queries the count of distinct sites (not monthly reports) that match the filter
      */
-    private void executeSiteCountQuery(Activity activity) {
+    private void executeSiteCountQuery(Activity activity, LinkedActivity linkedActivity) {
         
         if(command.isPivotedBy(DimensionType.Indicator) ||
            command.getFilter().isRestricted(DimensionType.Indicator)) {
             
             // only count sites which have non-empty values for the given
             // indicators
-            executeIndicatorValuesQuery(activity, activity.getSelfLink());
+            executeIndicatorValuesQuery(activity, linkedActivity);
         
         } else if(activity.isMonthly() && 
                 (command.isPivotedBy(DimensionType.Date) ||
@@ -504,21 +504,21 @@ public class PivotAdapter {
             // if we are pivoting or filtering by date, then we need
             // to query the actual reporting periods and count distinct sites
                 
-            executeSiteCountQueryOnReportingPeriod(activity);
+            executeSiteCountQueryOnReportingPeriod(activity, linkedActivity);
         
         } else {
             
             // Otherwise, we only need to query the sites add up the total rows
-            executeSiteCountQueryOnSite(activity);
+            executeSiteCountQueryOnSite(activity, linkedActivity);
         }
     }
 
-    private void executeSiteCountQueryOnSite(Activity activity) {
+    private void executeSiteCountQueryOnSite(Activity activity, LinkedActivity linkedActivity) {
         Preconditions.checkState(!indicatorDimension.isPresent());
 
-        FormTree formTree = formTrees.get(activity.getSiteFormClassId());
-        QueryModel queryModel = new QueryModel(activity.getSiteFormClassId());
-        queryModel.setFilter(composeFilter(activity));
+        FormTree formTree = formTrees.get(linkedActivity.getSiteFormClassId());
+        QueryModel queryModel = new QueryModel(linkedActivity.getSiteFormClassId());
+        queryModel.setFilter(composeFilter(formTree));
 
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
@@ -545,12 +545,14 @@ public class PivotAdapter {
         aggregateTime.stop();
     }
 
-    private void executeSiteCountQueryOnReportingPeriod(Activity activity) {
+    private void executeSiteCountQueryOnReportingPeriod(Activity activity, LinkedActivity linkedActivity) {
         Preconditions.checkArgument(activity.isMonthly());
 
-        FormTree formTree = formTrees.get(activity.getLeafFormClassId());
+        // Query the linked activity
+        FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
         QueryModel queryModel = new QueryModel(activity.getLeafFormClassId());
-        queryModel.setFilter(composeFilter(activity));
+        
+        queryModel.setFilter(composeFilter(formTree));
 
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
@@ -617,13 +619,13 @@ public class PivotAdapter {
         return list;
     }
 
-    private ExprNode composeFilter(Activity activity) {
+    private ExprNode composeFilter(FormTree formTree) {
         List<ExprNode> conditions = Lists.newArrayList();
         conditions.addAll(filterExpr(ColumnModel.ID_SYMBOL, CuidAdapter.SITE_DOMAIN, DimensionType.Site));
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
         conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
         conditions.addAll(filterExpr("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location));
-        conditions.addAll(adminFilter(activity));
+        conditions.addAll(adminFilter(formTree));
         conditions.addAll(attributeFilters());
         conditions.addAll(dateFilter("date2"));
 
@@ -655,13 +657,13 @@ public class PivotAdapter {
     }
     
 
-    private Set<ExprNode> adminFilter(Activity activity) {
+    private Set<ExprNode> adminFilter(FormTree formTree) {
         if (this.filter.isRestricted(DimensionType.AdminLevel)) {
 
             List<ExprNode> conditions = Lists.newArrayList();
 
             // we don't know which adminlevel this belongs to so we have construct a giant OR statement
-            List<ExprNode> adminIdExprs = findAdminIdExprs(formTrees.get(activity.getLeafFormClassId()));
+            List<ExprNode> adminIdExprs = findAdminIdExprs(formTree);
 
             for(ExprNode adminIdExpr : adminIdExprs) {
                 for (Integer adminEntityId : this.filter.getRestrictions(DimensionType.AdminLevel)) {
