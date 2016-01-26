@@ -85,7 +85,7 @@ public class CollectionScanBatch {
 
         } else {
             // simple root column or embedded form
-            return getDataColumn(match.getField().getRootFormClass(), match.getField());
+            return getDataColumn(match.getFormClass(), match.getField());
         }
     }
 
@@ -130,17 +130,17 @@ public class CollectionScanBatch {
     }
 
     private JoinLink addJoinLink(JoinNode node) {
-        CollectionScan left = getTable(node.getReferenceField());
+        CollectionScan left = getTable(node.getLeftFormId());
         CollectionScan right = getTable(node.getFormClassId());
 
-        Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField().getFieldId().asString());
+        Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField());
         Slot<PrimaryKeyMap> primaryKey = right.addPrimaryKey();
 
         return new JoinLink(foreignKey, primaryKey);
     }
 
-    public Slot<ColumnView> getDataColumn(FormClass formClass, FormTree.Node node) {
-        return getTable(formClass.getId()).addField(node.getField());
+    public Slot<ColumnView> getDataColumn(FormClass formClass, ExprNode fieldExpr) {
+        return getTable(formClass.getId()).addField(fieldExpr);
     }
 
     /**

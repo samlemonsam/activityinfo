@@ -81,7 +81,26 @@ public class SymbolExpr extends ExprNode {
     }
 
     public String asExpression() {
-        return "{" + name + "}";
+        if(needsEscaping(name)) {
+            return "[" + name + "]";
+        } else {
+            return name;
+        }
+    }
+    
+    public static boolean needsEscaping(String name) {
+        assert name.length() != 0;
+        
+        if(!Character.isLetter(name.charAt(0))) {
+            return true;
+        }
+        for(int i=0;i<name.length();++i) {
+            char c = name.charAt(i);
+            if(!Character.isLetterOrDigit(c) && c != '_') {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

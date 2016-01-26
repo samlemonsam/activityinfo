@@ -8,11 +8,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.service.store.ResourceCollection;
@@ -35,7 +39,7 @@ import java.util.logging.Logger;
 public class CollectionScan {
 
     private static final Logger LOGGER = Logger.getLogger(CollectionScan.class.getName());
-    private static final String PK_COLUMN_KEY = "__id";
+    private static final SymbolExpr PK_COLUMN_KEY = new SymbolExpr("@id");
 
     private final ResourceCollection collection;
     private final ResourceId collectionId;
@@ -43,7 +47,7 @@ public class CollectionScan {
     
     private MemcacheService memcacheService;
 
-    private Map<String, ColumnViewBuilder> columnMap = Maps.newHashMap();
+    private Map<ExprNode, ColumnViewBuilder> columnMap = Maps.newHashMap();
     private Map<String, ForeignKeyBuilder> foreignKeyMap = Maps.newHashMap();
 
     private Optional<PendingSlot<Integer>> rowCount = Optional.absent();
@@ -96,31 +100,48 @@ public class CollectionScan {
      *
      * @return a slot where the value can be found after the query completes
      */
-    public Slot<ColumnView> addField(FormField field) {
-
-        // ensure that we don't deal with calculated fields at this level
-        Preconditions.checkArgument(!(field.getType() instanceof CalculatedFieldType),
-                "CollectionScan does not handle calculated fields. This should be taken care of" +
-                        "by " + CollectionScan.class.getName());
+    public Slot<ColumnView> addField(ExprNode fieldExpr) {
 
         // compose a unique key for this column (we don't want to fetch twice!)
-        String columnKey = field.getId().asString();
+        String columnKey = fieldExpr.toString();
 
         // if the column's already been added, just return
-        if(columnMap.containsKey(columnKey)) {
-            return columnMap.get(columnKey);
+        if(columnMap.containsKey(fieldExpr)) {
+            return columnMap.get(fieldExpr);
         }
 
         // Otherwise create a column builder
+        FormField field = resolveField(collection.getFormClass(), fieldExpr);
         ColumnViewBuilder builder = ViewBuilderFactory.get(field.getType());
 
         Preconditions.checkNotNull(builder,
                 "Column " + columnKey + " has unsupported type: " + field.getType());
 
-
-        columnMap.put(columnKey, builder);
+        columnMap.put(fieldExpr, builder);
         return builder;
     }
+
+    private FormField resolveField(FormClass formClass, ExprNode fieldExpr) {
+        if(fieldExpr instanceof SymbolExpr) {
+            SymbolExpr symbol = (SymbolExpr) fieldExpr;
+            ResourceId fieldId = ResourceId.valueOf(symbol.getName());
+            return formClass.getField(fieldId);
+        
+        } else if(fieldExpr instanceof CompoundExpr) {
+            CompoundExpr compound = (CompoundExpr) fieldExpr;
+            FormField parent = resolveField(formClass, compound.getValue());
+            if(!(parent.getType() instanceof RecordFieldType)) {
+                throw new IllegalArgumentException("Cannot resolve " + compound + ": field " + parent.getId() + 
+                    " is not record-valued.");
+            }
+            FormClass parentFormClass = ((RecordFieldType) parent.getType()).getFormClass();
+            return resolveField(parentFormClass, compound.getField());
+        
+        } else {
+            throw new UnsupportedOperationException("fieldExpr: " + fieldExpr);
+        }
+    }
+
 
     /**
      * Includes the given foreign key in the table scan
@@ -138,6 +159,15 @@ public class CollectionScan {
         return builder;
     }
 
+
+    public Slot<ForeignKeyMap> addForeignKey(ExprNode referenceField) {
+        if(referenceField instanceof SymbolExpr) {
+            return addForeignKey(((SymbolExpr) referenceField).getName());
+        } else {
+            throw new UnsupportedOperationException("TODO: " + referenceField);
+        }
+    }
+
     /**
      * Executes the tables scan
      */
@@ -149,12 +179,18 @@ public class CollectionScan {
             // Build the query
             ColumnQueryBuilder queryBuilder = collection.newColumnQuery();
 
-            for (Map.Entry<String, ColumnViewBuilder> column : columnMap.entrySet()) {
+            for (Map.Entry<ExprNode, ColumnViewBuilder> column : columnMap.entrySet()) {
                 if(column.getKey().equals(PK_COLUMN_KEY)) {
                     queryBuilder.addResourceId((IdColumnBuilder)column.getValue());
                 } else {
-                    queryBuilder.addField(ResourceId.valueOf(column.getKey()), 
-                            (CursorObserver<FieldValue>)column.getValue());
+                    if(column.getKey() instanceof SymbolExpr) {
+                        SymbolExpr symbol = (SymbolExpr) column.getKey();
+                        queryBuilder.addField(ResourceId.valueOf(symbol.getName()),
+                                (CursorObserver<FieldValue>) column.getValue());
+
+                    } else {
+                        throw new UnsupportedOperationException("TODO: " + column.getKey());
+                    }
                 }
             }
 
@@ -207,7 +243,7 @@ public class CollectionScan {
             // from the Memcache service
             try {
                 Set<String> toFetch = new HashSet<>();
-                for (String fieldId : columnMap.keySet()) {
+                for (ExprNode fieldId : columnMap.keySet()) {
                     toFetch.add(fieldCacheKey(fieldId));
                 }
                 for (String fieldId : foreignKeyMap.keySet()) {
@@ -223,7 +259,7 @@ public class CollectionScan {
                 LOGGER.log(Level.INFO, "Loaded " + cached.size() + " columns from cache");
 
                 // See which columns we could retrieve from cache
-                for (String fieldId : Lists.newArrayList(columnMap.keySet())) {
+                for (ExprNode fieldId : Lists.newArrayList(columnMap.keySet())) {
                     ColumnView view = (ColumnView) cached.get(fieldCacheKey(fieldId));
                     if (view != null) {
                         // populate the pending result slot with the view from the cache
@@ -269,7 +305,7 @@ public class CollectionScan {
     private void putToCache() {
         try {
             Map<String, Object> toPut = new HashMap<>();
-            for (Map.Entry<String, ColumnViewBuilder> column : columnMap.entrySet()) {
+            for (Map.Entry<ExprNode, ColumnViewBuilder> column : columnMap.entrySet()) {
                 toPut.put(fieldCacheKey(column.getKey()), column.getValue().get());
             }
             for (Map.Entry<String, ForeignKeyBuilder> fk : foreignKeyMap.entrySet()) {
@@ -289,7 +325,7 @@ public class CollectionScan {
         }
     }
 
-    private int rowCountFromColumn(Map<String, ColumnViewBuilder> columnMap) {
+    private int rowCountFromColumn(Map<ExprNode, ColumnViewBuilder> columnMap) {
         return columnMap.values().iterator().next().get().numRows();
     }
 
@@ -298,7 +334,7 @@ public class CollectionScan {
         return collectionId.asString() + "@" + cacheVersion + "#COUNT";
     }
     
-    private String fieldCacheKey(String fieldId) {
+    private String fieldCacheKey(ExprNode fieldId) {
         return collectionId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 

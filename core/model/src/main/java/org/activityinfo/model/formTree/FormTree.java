@@ -6,11 +6,13 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.UnmodifiableIterator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -48,8 +50,6 @@ public class FormTree {
         }
 
         public Node addChild(FormClass declaringClass, FormField field) {
-            assert isReference() : "only reference fields can have children";
-
             FormTree.Node childNode = new FormTree.Node();
             childNode.parent = this;
             childNode.field = field;
@@ -113,6 +113,8 @@ public class FormTree {
         public Set<ResourceId> getRange() {
             if(field.getType() instanceof ReferenceType) {
                 return ((ReferenceType) field.getType()).getRange();
+            } else if(field.getType() instanceof RecordFieldType) {
+                return Collections.singleton(((RecordFieldType) field.getType()).getFormClass().getId());
             } else {
                 return Collections.emptySet();
             }
@@ -219,6 +221,24 @@ public class FormTree {
             return getType() instanceof ExprFieldType || getType() instanceof CalculatedFieldType;
         }
 
+        public Iterator<Node> selfAndAncestors() {
+            return new UnmodifiableIterator<Node>() {
+                
+                private Node next = Node.this;
+                
+                @Override
+                public boolean hasNext() {
+                    return next != null;
+                }
+
+                @Override
+                public Node next() {
+                    Node toReturn = next;
+                    next = next.getParent();
+                    return toReturn;
+                }
+            };
+        }
 
     }
 

@@ -1,6 +1,6 @@
 package org.activityinfo.store.query.impl.eval;
 
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -8,15 +8,21 @@ import org.activityinfo.model.resource.ResourceId;
  */
 public class JoinNode {
     
-    private FormTree.Node referenceField;
+    private ResourceId leftFormId;
+    private ExprNode referenceField;
     private ResourceId formClassId;
 
-    public JoinNode(FormTree.Node referenceField, ResourceId formClassId) {
+    public JoinNode(ResourceId leftFormId, ExprNode referenceField, ResourceId rightFormId) {
+        this.leftFormId = leftFormId;
         this.referenceField = referenceField;
-        this.formClassId = formClassId;
+        this.formClassId = rightFormId;
     }
 
-    public FormTree.Node getReferenceField() {
+    public ResourceId getLeftFormId() {
+        return leftFormId;
+    }
+
+    public ExprNode getReferenceField() {
         return referenceField;
     }
 
@@ -26,6 +32,6 @@ public class JoinNode {
 
     @Override
     public String toString() {
-        return referenceField.getFieldId() + "->" + formClassId;
+        return referenceField + "->" + formClassId;
     }
 }

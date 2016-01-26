@@ -12,7 +12,7 @@ import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -95,7 +95,7 @@ public class LocationCollection implements ResourceCollection {
         pointField.setCode("point");
         pointField.setLabel(I18N.CONSTANTS.geographicCoordinatesFieldLabel());
         pointField.setRequired(false);
-        pointField.setType(GeoAreaType.INSTANCE);
+        pointField.setType(GeoPointType.INSTANCE);
         
         FormField visible = new FormField(VISIBLE_FIELD_ID);
         visible.setCode("visible");

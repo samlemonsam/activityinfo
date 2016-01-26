@@ -1,10 +1,16 @@
 package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +28,8 @@ public class NodeMatch {
 
     private List<JoinNode> joins;
     private FormClass formClass;
-    private FormTree.Node field;
+    private ExprNode fieldExpr;
+    private FormTree.Node fieldNode;
     private Type type;
 
     private NodeMatch() {}
@@ -33,25 +40,70 @@ public class NodeMatch {
      */
     public static NodeMatch forField(FormTree.Node fieldNode) {
         Preconditions.checkNotNull(fieldNode, "fieldNode");
+
+        List<List<FormTree.Node>> partitions = partitionOnJoins(fieldNode);
+        List<FormTree.Node> leaf = partitions.get(partitions.size() - 1);
         
         NodeMatch match = new NodeMatch();
-        match.joins = joinsTo(fieldNode);
+        match.joins = joinsTo(partitions);
         match.type = Type.FIELD;
-        match.formClass = fieldNode.getDefiningFormClass();
-        match.field = fieldNode;
+        match.formClass = leaf.get(0).getDefiningFormClass();
+        match.fieldExpr = toExpr(leaf);
+        match.fieldNode = fieldNode;
         return match;
     }
 
     public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
+
+        List<List<FormTree.Node>> partitions = partitionOnJoins(parent);
+        
+        List<FormTree.Node> leaf = partitions.get(partitions.size() - 1);
+        
+        // Embedded records are not independent resources, and so 
+        // do not have their own ID. So the leaf field MUST be a reference field
+        Preconditions.checkArgument(leaf.get(0).isReference());
+        
         NodeMatch match = new NodeMatch();
-        match.joins = joinsTo(parent);
-        match.joins.add(new JoinNode(parent, formClass.getId()));
+        match.joins = joinsTo(partitions);
+        match.joins.add(new JoinNode(leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
         match.formClass = formClass;
         match.type = Type.ID;
         return match;
     }
 
-    private static List<JoinNode> joinsTo(FormTree.Node node) {
+    /**
+     * For a compound expression like A.B, A can <em>either</em> to a reference field or 
+     * a record-valued field like a geographic point. However, we need to join <em>only</em> on 
+     * reference fields. 
+     * 
+     * <p>This routine partitions a field path on the links for which joins must be made, that is,
+     * across reference fields.</p>
+     * 
+     * <p>So if you have the expression Site.Village.Point.Latitude, where Site and Village are reference
+     * fields, but Point is an embedded record field, then the result would be {Site, Village, Point.Latitude}</p>
+     */
+    private static List<List<FormTree.Node>> partitionOnJoins(FormTree.Node node) {
+        LinkedList<List<FormTree.Node>> partitions = Lists.newLinkedList();
+        
+        while(node != null) {
+
+            LinkedList<FormTree.Node> current = Lists.newLinkedList();
+            current.add(node);
+            
+            // include all non-reference ancestors in this partition
+            while(node.getParent() != null && !node.getParent().isReference()) {
+                current.addFirst(node.getParent());
+                node = node.getParent();
+            }
+            
+            partitions.addFirst(current);
+            
+            node = node.getParent();
+        }
+        return partitions;
+    }
+
+    private static List<JoinNode> joinsTo(List<List<FormTree.Node>> partitions) {
         /*
          *  Given a parent: "Site.Location.Territoire.District"
          *  This is represented as a tree of nodes:
@@ -63,15 +115,32 @@ public class NodeMatch {
          *      (field territoire -> form Territoire)
          *      (field district -> form District)
          */
-        
+
         LinkedList<JoinNode> joins = new LinkedList<>();
-        while(node.getParent() != null) {
-            joins.addFirst(new JoinNode(
-                    node.getParent(),                         // Parent Field ->
-                    node.getDefiningFormClass().getId()));     // This Field's FormClass
-            node = node.getParent();
+        for(int i = 0; i < partitions.size() - 1; i++) {
+            // Reference field that functions as a foreign key
+            List<FormTree.Node> left = partitions.get(i);
+            ResourceId leftFormId = left.get(0).getDefiningFormClass().getId();
+            ExprNode leftFieldExpr = toExpr(left);
+
+            // "RIGHT" side
+            // Joining fom left to right using resource ids (primary key)
+            List<FormTree.Node> right = partitions.get(i+1);
+            ResourceId rightFormId = right.get(0).getDefiningFormClass().getId();
+
+            joins.add(new JoinNode(leftFormId, leftFieldExpr, rightFormId));
         }
+        
         return joins;
+    }
+
+    private static ExprNode toExpr(List<FormTree.Node> partition) {
+        Iterator<FormTree.Node> it = partition.iterator();
+        ExprNode expr = new SymbolExpr(it.next().getFieldId());
+        while(it.hasNext()) {
+            expr = new CompoundExpr(expr, new SymbolExpr(it.next().getFieldId()));
+        }
+        return expr;
     }
 
     public List<JoinNode> getJoins() {
@@ -79,12 +148,12 @@ public class NodeMatch {
     }
 
     public boolean isRoot() {
-        return field.isRoot();
+        return fieldNode.isRoot();
     }
 
-    public FormTree.Node getField() {
-        Preconditions.checkArgument(type == Type.FIELD);
-        return field;
+    public ExprNode getField() {
+        Preconditions.checkArgument(type == Type.FIELD, NodeMatch.class.getName() + " is of type " + type);
+        return fieldExpr;
     }
 
     public Type getType() {
@@ -92,14 +161,14 @@ public class NodeMatch {
     }
 
     public boolean isCalculated() {
-        return type == Type.FIELD && field.isCalculated();
+        return type == Type.FIELD && fieldNode.isCalculated();
     }
 
     public String getCalculation() {
         if(!isCalculated()) {
-            throw new UnsupportedOperationException(field + " is not a calculated field");
+            throw new UnsupportedOperationException(fieldExpr + " is not a calculated field");
         }
-        CalculatedFieldType type = (CalculatedFieldType) field.getField().getType();
+        CalculatedFieldType type = (CalculatedFieldType) fieldNode.getField().getType();
         return type.getExpressionAsString();
     }
 
@@ -115,8 +184,8 @@ public class NodeMatch {
     public String toDebugString() {
         StringBuilder s = new StringBuilder();
         for (JoinNode join : joins) {
-            s.append(join.getReferenceField().getFieldId());
-            s.append('.');
+            s.append(join.getReferenceField());
+            s.append('>');
         }
         switch (type) {
             case ID:
@@ -128,7 +197,7 @@ public class NodeMatch {
                 s.append("@class");
                 break;
             case FIELD:
-                s.append(field.getField().getId());
+                s.append(fieldExpr.toString());
                 break;
         }
         return s.toString();
@@ -136,10 +205,10 @@ public class NodeMatch {
     
     @Override
     public String toString() {
-        String s = field.debugPath();
         if(type == Type.ID) {
-            s += "." + formClass.getId() + ":" + "@id";
+            return formClass.getId() + ":" + "@id";
+        } else {
+            return fieldNode.debugPath();
         }
-        return s;
     }
 }

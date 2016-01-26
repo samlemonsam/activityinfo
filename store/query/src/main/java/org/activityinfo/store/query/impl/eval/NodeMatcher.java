@@ -52,14 +52,6 @@ public class NodeMatcher {
         }
     }
 
-    private List<String> next(List<String> queryPath) {
-        return queryPath.subList(1, queryPath.size());
-    }
-
-    private String head(List<String> queryPath) {
-        return queryPath.get(0);
-    }
-
     private Collection<NodeMatch> matchReferenceField(QueryPath queryPath, Iterable<FormTree.Node> fields) {
 
         List<Collection<NodeMatch>> matches = Lists.newArrayList();
@@ -149,38 +141,6 @@ public class NodeMatcher {
             children.addAll(field.getChildren());
         }
         return children;
-    }
-
-    private boolean matches(FormTree.Node fieldNode, String symbolName) {
-
-        // Match against label and code case insensitively
-        if (symbolName.equalsIgnoreCase(fieldNode.getField().getCode()) ||
-                symbolName.equalsIgnoreCase(fieldNode.getField().getLabel())) {
-            return true;
-        }
-        // Require exact match with the field id
-        if (symbolName.equals(fieldNode.getFieldId().asString())) {
-            return true;
-        }
-
-        // Check for super properties defined on the FormClass
-        for (ResourceId superProperty : fieldNode.getField().getSuperProperties()) {
-            if (symbolName.equals(superProperty.asString())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean matches(FormClass formClass, String symbolName) {
-
-        // The field can also be matched against the _range_ of a field: for example,
-        // we might be interested in "Province.Name", where "Province" is a form class.
-        // In this event, match any reference field which includes in its range a form class with
-        // the id or label of "Province"
-        return formClass.getLabel().equalsIgnoreCase(symbolName) ||
-                formClass.getId().asString().equals(symbolName);
     }
 
 }

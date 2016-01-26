@@ -3,6 +3,7 @@ package org.activityinfo.model.formTree;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 
 import java.util.Set;
@@ -31,11 +32,9 @@ public class FormTreeBuilder {
             if(field.getType() instanceof ReferenceType) {
                 ReferenceType referenceType = (ReferenceType) field.getType();
                 fetchChildren(node, referenceType.getRange());
+            } else if(field.getType() instanceof RecordFieldType) {
+                addChildren(node, ((RecordFieldType) field.getType()).getFormClass());
             }
-//            } else if(field.getType() instanceof RecordFieldType) {
-//                RecordFieldType recordFieldType = (RecordFieldType) field.getType();
-//                fetchChildren(node, Collections.singleton(recordFieldType.getClassId()));
-//            }
         }
         return tree;
     }
@@ -49,11 +48,17 @@ public class FormTreeBuilder {
         for(ResourceId childClassId : formClassIds) {
             FormClass childClass = store.getFormClass(childClassId);
             assert childClass != null;
-            for(FormField field : childClass.getFields()) {
-                FormTree.Node childNode = parent.addChild(childClass, field);
-                if(childNode.isReference()) {
-                   fetchChildren(childNode, childNode.getRange());
-                }
+            addChildren(parent, childClass);
+        }
+    }
+
+    private void addChildren(FormTree.Node parent, FormClass childClass) {
+        for(FormField field : childClass.getFields()) {
+            FormTree.Node childNode = parent.addChild(childClass, field);
+            if(childNode.isReference()) {
+               fetchChildren(childNode, childNode.getRange());
+            } else if(childNode.getType() instanceof RecordFieldType) {
+                addChildren(childNode, ((RecordFieldType) childNode.getType()).getFormClass());
             }
         }
     }

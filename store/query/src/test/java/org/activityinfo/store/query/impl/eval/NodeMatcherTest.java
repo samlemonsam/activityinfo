@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -16,13 +17,16 @@ import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.hamcrest.Matchers;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.*;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 public class NodeMatcherTest {
@@ -30,6 +34,11 @@ public class NodeMatcherTest {
     private FormClass rootFormClass;
     private Map<ResourceId, FormClass> formClasses = Maps.newHashMap();
     private NodeMatcher symbolTable;
+    
+    @BeforeClass
+    public static void setupI18N() {
+        LocaleProxy.initialize();
+    }
     
     
     @Test
@@ -65,8 +74,8 @@ public class NodeMatcherTest {
         
         
         assertThat(resolve("Name"), contains("A"));
-        assertThat(resolve("Location.Name"), contains("B.LA"));
-        assertThat(resolve("Population"), contains("B.LB"));
+        assertThat(resolve("Location.Name"), contains("B>LA"));
+        assertThat(resolve("Population"), contains("B>LB"));
     }
     
     @Test
@@ -82,8 +91,8 @@ public class NodeMatcherTest {
         prettyPrintTree();
         
         assertThat(resolve("Name"), contains("A"));
-        assertThat(resolve("Location.Name"), Matchers.containsInAnyOrder("B.VA", "B.HA"));
-        assertThat(resolve("Location.Population"), contains("B.VB"));
+        assertThat(resolve("Location.Name"), Matchers.containsInAnyOrder("B>VA", "B>HA"));
+        assertThat(resolve("Location.Population"), contains("B>VB"));
     }
 
     @Test
@@ -97,7 +106,7 @@ public class NodeMatcherTest {
         
         prettyPrintTree();
         
-        assertThat(resolve("Province._id"), contains("B.Province@id", "B.TP.Province@id"));
+        assertThat(resolve("Province._id"), contains("B>Province@id", "B>TP>Province@id"));
     }
     
     @Test
@@ -112,11 +121,18 @@ public class NodeMatcherTest {
         
         
         assertThat(resolve("Name"), contains("SN"));
-        assertThat(resolve("Province.Name"), Matchers.containsInAnyOrder("SL.TP.PN", "SL.PN"));
+        assertThat(resolve("Province.Name"), Matchers.containsInAnyOrder("SL>TP>PN", "SL>PN"));
         
     }
     
-    
+    @Test
+    public void embeddedField() {
+       givenRootForm("village", field("VN", "name"), pointField("P", "location"));
+        
+        assertThat(resolve("P.latitude"), containsInAnyOrder("P.latitude"));
+    }
+
+
     private void prettyPrintTree() {
         FormTreePrettyPrinter prettyPrinter = new FormTreePrettyPrinter();
         prettyPrinter.printTree(tree());
@@ -165,6 +181,14 @@ public class NodeMatcherTest {
         }
         
         return referenceField(id, label, rangeIds);
+    }
+
+
+    private FormField pointField(String id, String label) {
+        FormField field = new FormField(ResourceId.valueOf(id));
+        field.setLabel(label);
+        field.setType(GeoPointType.INSTANCE);
+        return field;
     }
     
     private FormField referenceField(String id, String label, String... formClasses) {
