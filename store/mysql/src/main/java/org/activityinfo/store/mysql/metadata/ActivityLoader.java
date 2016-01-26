@@ -402,6 +402,7 @@ public class ActivityLoader {
         }
         ActivityField field = new ActivityField(id, rs.getString("category"), formField, rs.getInt("sortOrder"));
         field.aggregation = rs.getInt("aggregation");
+        field.sortOrder = rs.getInt("sortOrder");
         
         activity.fields.add(field);
     }
