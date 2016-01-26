@@ -97,7 +97,7 @@ public class SubFormCollectionManipulator {
     private void putEmptyInstanceIfAbsent() {
         for (FormModel.SubformValueKey key : forms.keySet()) {
             if (formModel.getSubFormInstances().get(key) == null) {
-                formModel.getSubFormInstances().put(key, new FormInstance(ResourceId.generateId(), subForm.getId()));
+                formModel.getSubFormInstances().put(key, newValueInstance());
             }
         }
     }
@@ -158,14 +158,19 @@ public class SubFormCollectionManipulator {
 
     private FormModel.SubformValueKey newKey() {
         FormModel.SubformValueKey newKey = new FormModel.SubformValueKey(subForm, InstanceGenerator.newUnkeyedInstance(subForm.getId()));
-        FormInstance instance = new FormInstance(ResourceId.generateId(), subForm.getId());
 
-        formModel.getSubFormInstances().put(newKey, instance);
+        formModel.getSubFormInstances().put(newKey, newValueInstance());
         return newKey;
     }
 
     private void addForm(final FormModel.SubformValueKey key) {
         addForm(key, -1);
+    }
+
+    private FormInstance newValueInstance() {
+        FormInstance instance = new FormInstance(ResourceId.generateId(), subForm.getId());
+        instance.setOwnerId(formModel.getWorkingRootInstance().getId());
+        return instance;
     }
 
     private void addForm(final FormModel.SubformValueKey key, int panelIndex) {
@@ -198,6 +203,8 @@ public class SubFormCollectionManipulator {
         } else {
             rootPanel.insert(formPanel, panelIndex);
         }
+
+        setDeleteButtonsState();
 
         // set sort field
         formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, rootPanel.getWidgetIndex(formPanel));

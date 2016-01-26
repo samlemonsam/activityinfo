@@ -245,7 +245,7 @@ public class FormModel {
         SubformValueKey key = new SubformValueKey(classByField, selectedTab);
         FormInstance subFormInstance = subFormInstances.get(key);
         if (subFormInstance == null) {
-            return Optional.of(createSubFormInstanceValue(key));
+            return Optional.of(createSubFormValueInstance(key));
         }
         return Optional.of(subFormInstance);
     }
@@ -282,15 +282,15 @@ public class FormModel {
 
     public void setSelectedInstance(FormInstance tabInstance, FormClass subForm) {
         selectedInstances.put(subForm, tabInstance);
-        createSubFormInstanceValue(new SubformValueKey(subForm, tabInstance));
+        createSubFormValueInstance(new SubformValueKey(subForm, tabInstance));
     }
 
-    private FormInstance createSubFormInstanceValue(SubformValueKey key) {
-        FormInstance instance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
-        instance.setOwnerId(getWorkingRootInstance().getId());
-        instance.setKeyId(key.getInstance().getId());
-        subFormInstances.put(key, instance);
-        return instance;
+    private FormInstance createSubFormValueInstance(SubformValueKey key) {
+        FormInstance valueInstance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
+        valueInstance.setOwnerId(getWorkingRootInstance().getId());
+        valueInstance.setKeyId(key.getInstance().getId());
+        subFormInstances.put(key, valueInstance);
+        return valueInstance;
     }
 
     public Set<FieldContainer> getContainersOfClass(ResourceId classId) {
