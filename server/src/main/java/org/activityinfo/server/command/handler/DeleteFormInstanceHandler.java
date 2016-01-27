@@ -56,7 +56,8 @@ public class DeleteFormInstanceHandler implements CommandHandler<DeleteFormInsta
 
     private void deleteInstance(String resourceId) {
         entityManager.get().createQuery(
-                "DELETE FROM FormInstanceEntity WHERE formInstanceId = :formInstanceId")
-                .setParameter("formInstanceId", resourceId);
+                "DELETE FROM FormInstanceEntity f WHERE f.id = ?1")
+                .setParameter(1, resourceId)
+                .executeUpdate();
     }
 }

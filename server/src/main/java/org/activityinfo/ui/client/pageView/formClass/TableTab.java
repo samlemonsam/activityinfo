@@ -11,6 +11,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTableView;
@@ -76,6 +77,11 @@ public class TableTab implements DisplayWidget<FormInstance> {
 
     private void enumerateColumns(List<FormTree.Node> fields) {
         for (FormTree.Node node : fields) {
+
+            if (node.getType() instanceof SubFormType) { // skip subForm fields
+                continue;
+            }
+
             if (node.isReference()) {
                 enumerateColumns(node.getChildren());
             } else {

@@ -40,6 +40,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -125,11 +126,13 @@ public class RelevanceRowPresenter {
     private void initFormFieldBox() {
         view.getFormfield().clear();
 
-        List<FormField> formFields = fieldWidgetContainer.getFormDesigner().getModel().getAllFormsFields();
+        FormClass fieldFormClass = fieldWidgetContainer.getFormDesigner().getModel().getFormClassByElementId(fieldWidgetContainer.getFormField().getId());
+        List<FormField> formFields = fieldFormClass.getFields();
         formFields.remove(fieldWidgetContainer.getFormField()); // remove selected field
 
         for (FormField formField : formFields) {
-            if (formField.getType() instanceof AttachmentType) {
+            if (formField.getType() instanceof AttachmentType ||
+                    formField.getType() instanceof SubFormType) {
                 continue;
             }
             view.getFormfield().addItem(formField.getLabel(), formField.getId().asString());
@@ -148,7 +151,7 @@ public class RelevanceRowPresenter {
 
     public FormField getSelectedFormField() {
         String formFieldId = view.getFormfield().getValue(view.getFormfield().getSelectedIndex());
-        return fieldWidgetContainer.getFormDesigner().getRootFormClass().getField(ResourceId.valueOf(formFieldId));
+        return fieldWidgetContainer.getFormDesigner().getModel().getFieldById(ResourceId.valueOf(formFieldId));
     }
 
     // depends on selected field type

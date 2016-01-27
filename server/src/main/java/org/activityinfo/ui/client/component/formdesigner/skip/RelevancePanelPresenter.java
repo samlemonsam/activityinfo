@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 
 import java.util.List;
@@ -45,7 +44,7 @@ public class RelevancePanelPresenter {
         this.fieldWidgetContainer = fieldWidgetContainer;
 
         // todo this will not work with subforms!!!
-        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getRootFormClass());
+        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getModel());
 
         if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {
             List<RowData> build = rowDataBuilder.build(fieldWidgetContainer.getFormField().getRelevanceConditionExpression());
@@ -107,11 +106,10 @@ public class RelevancePanelPresenter {
     private List<RowData> createRowDataList() {
         final List<RowData> result = Lists.newArrayList();
         final int widgetCount = view.getRootPanel().getWidgetCount();
-        final FormClass formClass = fieldWidgetContainer.getFormDesigner().getRootFormClass();
 
         for (int i = 0; i < widgetCount; i++) {
             RelevanceRow row = (RelevanceRow) view.getRootPanel().getWidget(i);
-            result.add(RowDataFactory.create(row, map.get(row).getValue(), formClass));
+            result.add(RowDataFactory.create(row, map.get(row).getValue(), fieldWidgetContainer.getFormDesigner().getModel()));
         }
         return result;
     }

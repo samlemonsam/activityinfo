@@ -35,6 +35,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerModel;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -116,7 +117,7 @@ public class ExpressionBuilderTest {
                 builtExpression, equalTo(expectedExpression));
 
         // And that we can go from expression -> rows
-        RowDataBuilder builder = new RowDataBuilder(formClass);
+        RowDataBuilder builder = new RowDataBuilder(new FormDesignerModel(formClass));
         List<RowData> createRows = builder.build(builtExpression);
         assertEquals(builtExpression, rowList, createRows);
     }

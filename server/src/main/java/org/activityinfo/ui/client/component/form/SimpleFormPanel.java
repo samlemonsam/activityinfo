@@ -128,7 +128,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 @Nullable
                 @Override
                 public Void apply(Void input) {
-                    PanelFiller filler = new PanelFiller(panel, model, widgetCreator);
+                    PanelFiller filler = new PanelFiller(panel, model, widgetCreator, subFormsHandler);
                     filler.add(formClass, 0);
                     return null;
                 }
@@ -241,7 +241,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         }
 
         boolean isSubFormValid = subFormsHandler.validate();
-        if (!valid) {
+        if (valid) {
             valid = isSubFormValid;
         }
 

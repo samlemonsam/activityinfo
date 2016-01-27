@@ -26,15 +26,15 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.functions.BooleanFunctions;
 import org.activityinfo.model.expr.functions.ExprFunction;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.HasSetFieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerModel;
 
 import java.util.List;
 import java.util.Set;
@@ -51,10 +51,10 @@ public class RowDataBuilder {
     public static final ExprFunction DEFAULT_JOIN_FUNCTION = BooleanFunctions.AND;
 
     private List<RowData> rows = Lists.newArrayList(); // keep list, order is important!
-    private FormClass formClass;
+    private FormDesignerModel model;
 
-    public RowDataBuilder(FormClass formClass) {
-        this.formClass = formClass;
+    public RowDataBuilder(FormDesignerModel model) {
+        this.model = model;
     }
 
     public List<RowData> build(String relevanceExpression) {
@@ -83,7 +83,7 @@ public class RowDataBuilder {
             final FunctionCallNode functionCallNode = (FunctionCallNode) node;
 
             if (ExprParser.FUNCTIONS.contains(functionCallNode.getFunction().getId())) {
-                FormField field = formClass.getField(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
+                FormField field = model.getFieldById(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
                 parseRowWithFunction(joinFunction, functionCallNode, field);
                 return;
 
@@ -95,7 +95,7 @@ public class RowDataBuilder {
                 if (arg1 instanceof SymbolExpr) {
 
                     if (isFieldFunction(functionCallNode.getFunction())) {
-                        FormField field = formClass.getField(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
+                        FormField field = model.getFieldById(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
 
                         final RowData row = getOrCreateRow(field);
                         row.setFunction(functionCallNode.getFunction());
@@ -134,7 +134,7 @@ public class RowDataBuilder {
                             ExprNode unwrappedArg1 = unwrappedNode.getArguments().get(0);
                             ExprNode unwrappedArg2 = unwrappedNode.getArguments().get(1);
 
-                            final FormField field = formClass.getField(ResourceId.valueOf(placeholder(unwrappedArg1)));
+                            final FormField field = model.getFieldById(ResourceId.valueOf(placeholder(unwrappedArg1)));
 
                             final RowData row = getOrCreateRow(field);
                             row.setFunction(unwrappedNode.getFunction());

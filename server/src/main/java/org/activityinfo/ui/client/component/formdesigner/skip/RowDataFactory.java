@@ -22,9 +22,9 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
  */
 
 import org.activityinfo.model.expr.functions.ExprFunctions;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerModel;
 
 /**
  * @author yuriyz on 7/25/14.
@@ -34,11 +34,11 @@ public class RowDataFactory {
     private RowDataFactory() {
     }
 
-    public static RowData create(RelevanceRow skipRow, FieldValue value, FormClass formClass) {
+    public static RowData create(RelevanceRow skipRow, FieldValue value, FormDesignerModel model) {
         final ResourceId fieldId = ResourceId.valueOf(skipRow.getFormfield().getValue(skipRow.getFormfield().getSelectedIndex()));
 
         final RowData rowData = new RowData();
-        rowData.setFormField(formClass.getField(fieldId));
+        rowData.setFormField(model.getFieldById(fieldId));
         rowData.setJoinFunction(ExprFunctions.get(skipRow.getJoinFunction()
                 .getValue(skipRow.getJoinFunction().getSelectedIndex())));
         rowData.setFunction(ExprFunctions.get(skipRow.getFunction().getValue(skipRow.getFunction().getSelectedIndex())));

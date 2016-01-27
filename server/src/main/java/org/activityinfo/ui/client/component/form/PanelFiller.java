@@ -39,11 +39,13 @@ public class PanelFiller {
     private final FlowPanel panel;
     private final FormModel model;
     private final FormWidgetCreator widgetCreator;
+    private final SubFormsHandler subFormsHandler;
 
-    public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator) {
+    public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator, SubFormsHandler subFormsHandler) {
         this.panel = panel;
         this.model = model;
         this.widgetCreator = widgetCreator;
+        this.subFormsHandler = subFormsHandler;
     }
 
     public void add(FormElementContainer container, int depth) {
@@ -57,13 +59,16 @@ public class PanelFiller {
                     if (formField.getType() instanceof SubFormType) {
                         FormClass subForm = model.getSubFormByOwnerFieldId(formField.getId());
 
-                        panel.add(createHeader(depth, subForm.getLabel()));
 
                         if (ClassType.isCollection(subForm)) { // unkeyed subforms -> simple collection
-                            new SubFormCollectionManipulator(subForm, model, panel).show();
+                            SubFormCollectionManipulator collectionManipulator = new SubFormCollectionManipulator(subForm, model, panel, depth + 1);
+                            collectionManipulator.show();
+
+                            subFormsHandler.getSubForms().put(subForm, collectionManipulator);
                         } else { // keyed subforms
                             final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator());
 
+                            panel.add(createHeader(depth + 1, subForm.getLabel()));
                             panel.add(subFormTabsManipulator.getPresenter().getView());
 
                             subFormTabsManipulator.show(subForm, model);
@@ -77,7 +82,7 @@ public class PanelFiller {
         }
     }
 
-    private static Widget createHeader(int depth, String header) {
+    public static Widget createHeader(int depth, String header) {
         String hn = "h" + (3 + depth);
         return new HTML("<" + hn + ">" + SafeHtmlUtils.htmlEscape(header) + "</" + hn + ">");
     }

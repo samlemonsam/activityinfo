@@ -34,6 +34,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
+import org.activityinfo.ui.client.component.form.PanelFiller;
 import org.activityinfo.ui.client.component.form.SimpleFormPanel;
 import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
@@ -57,14 +58,16 @@ public class SubFormCollectionManipulator {
     private final FlowPanel rootPanel;
     private final Button addButton;
     private final SubFormInstanceLoader loader;
+    private final int depth;
 
     private final Map<FormModel.SubformValueKey, SimpleFormPanel> forms = Maps.newHashMap();
 
-    public SubFormCollectionManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel) {
+    public SubFormCollectionManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel, int depth) {
         this.subForm = subForm;
         this.formModel = formModel;
         this.rootPanel = rootPanel;
         this.loader = new SubFormInstanceLoader(formModel);
+        this.depth = depth;
 
         addButton = new Button(ElementStyle.LINK);
         addButton.setLabel(I18N.CONSTANTS.addAnother());
@@ -147,6 +150,8 @@ public class SubFormCollectionManipulator {
         if (keys.isEmpty()) {
             keys.add(newKey()); // generate new key if we don't have any existing data yets
         }
+
+        rootPanel.add(PanelFiller.createHeader(depth, subForm.getLabel()));
 
         for (FormModel.SubformValueKey key : keys) {
             addForm(key);

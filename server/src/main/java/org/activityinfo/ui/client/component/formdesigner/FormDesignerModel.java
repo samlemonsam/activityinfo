@@ -105,6 +105,10 @@ public class FormDesignerModel {
         return (FormClass) getElementContainer(formClassId);
     }
 
+    public FormField getFieldById(ResourceId fieldId) {
+        return getFormClassByElementId(fieldId).getField(fieldId);
+    }
+
     public FormClass getFormClassByElementId(ResourceId elementId) {
         FormElementContainer rootContainer = getRootFormClass().getElementContainer(elementId); // try root first
         if (rootContainer != null) {

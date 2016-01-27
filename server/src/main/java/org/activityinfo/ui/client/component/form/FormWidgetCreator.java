@@ -75,8 +75,7 @@ public class FormWidgetCreator {
         List<Promise<Void>> promises = Lists.newArrayList();
         for (final FormField field : formClass.getFields()) {
             if (field.getType() instanceof SubFormType) {
-                Promise<Void> subFormWidgetsPromise = createWidgets(model.getSubFormByOwnerFieldId(field.getId()), fieldUpdated);
-                promises.add(subFormWidgetsPromise);
+                // ignore, widgets for subform is created internally in sub SimpleFormPanel
             } else {
                 Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
                     @Override
