@@ -37,6 +37,8 @@ public class Activity implements Serializable {
     long schemaVersion;
     long version;
     
+    boolean deleted;
+    
     List<ActivityField> fields = Lists.newArrayList();
 
     /**
@@ -220,6 +222,10 @@ public class Activity implements Serializable {
             linkedActivity.linkMap.put(destinationIndicatorId, sourceIndicatorId);
 
         }
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
     }
     
     public LinkedActivity getSelfLink() {

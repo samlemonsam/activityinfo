@@ -41,11 +41,12 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
         PivotAdapter adapter;
         try {
             adapter = new PivotAdapter(catalog.get(), cmd);
+            return adapter.execute();
+
         } catch (InterruptedException e) {
             throw new CommandException("Interrupted");
         } catch (SQLException e) {
             throw new UnexpectedCommandException(e);
         }
-        return adapter.execute();
     }
 }

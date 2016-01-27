@@ -33,7 +33,6 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Loads metadata about Activities from MySQL.
- * 
  *
  */
 public class ActivityLoader {
@@ -63,7 +62,21 @@ public class ActivityLoader {
     
     public Map<Integer, Activity> loadForDatabaseIds(Set<Integer> databaseIds) throws SQLException {
         return load(parentKeys.queryActivitiesForDatabase(databaseIds));
-    }   
+    }
+
+
+    public Activity load(int activityId) throws SQLException {
+        if(activityMap.containsKey(activityId)) {
+            return activityMap.get(activityId);
+        }
+
+        Map<Integer, Activity> result = load(Collections.singleton(activityId));
+        if(!result.containsKey(activityId)) {
+            throw new IllegalArgumentException("No such activity " + activityId);
+        }
+        
+        return result.get(activityId);
+    }
 
     public Map<Integer, Activity> load(Set<Integer> activityIds) throws SQLException {
         
@@ -126,7 +139,6 @@ public class ActivityLoader {
         return versions;
     }
 
-
     /**
      * Loads a set of activity schemas from the cache.
      */
@@ -170,7 +182,7 @@ public class ActivityLoader {
         }
     }
 
-    public Map<Integer, Activity> loadFromMySql(Set<Integer> activityIds) throws SQLException {
+    private Map<Integer, Activity> loadFromMySql(Set<Integer> activityIds) throws SQLException {
 
         if(activityIds.size() > 5) {
             LOGGER.warning("Loading " + activityIds.size() + " activities...");
@@ -198,7 +210,9 @@ public class ActivityLoader {
                             "d.ownerUserId, " +             // (13)
                             "A.published, " +               // (14)
                             "A.siteVersion, " +             // (15)
-                            "A.schemaVersion " +             // (16)
+                            "A.schemaVersion, " +           // (16)
+                            "(A.dateDeleted IS NOT NULL OR " +
+                            " d.dateDeleted IS NOT NULL) " + // (17)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -221,6 +235,7 @@ public class ActivityLoader {
                     activity.published = rs.getInt(14) > 0;
                     activity.version = rs.getLong(15);
                     activity.schemaVersion = rs.getLong(16);
+                    activity.deleted = rs.getBoolean(17);
 
                     serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
 

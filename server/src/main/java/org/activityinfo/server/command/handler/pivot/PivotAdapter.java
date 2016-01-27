@@ -225,7 +225,7 @@ public class PivotAdapter {
         throw new UnsupportedOperationException("Unsupported dimension " + dimension);
     }
 
-    public PivotSites.PivotResult execute() {
+    public PivotSites.PivotResult execute() throws SQLException {
 
         for (Activity activity : activities) {
             switch (command.getValueType()) {
@@ -285,8 +285,12 @@ public class PivotAdapter {
         return matching;
     }
 
-    private void executeIndicatorValuesQuery(Activity activity, LinkedActivity linkedActivity) {
+    private void executeIndicatorValuesQuery(Activity activity, LinkedActivity linkedActivity) throws SQLException {
         
+        // Double check that this activity has not been deleted
+        if(isDeleted(activity, linkedActivity)) {
+            return;
+        }
         
         // Query the SOURCE form tree
         FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
@@ -368,6 +372,18 @@ public class PivotAdapter {
         }
         aggregateTime.stop();
 
+    }
+
+    private boolean isDeleted(Activity activity, LinkedActivity linkedActivity) throws SQLException {
+        if(activity.isDeleted()) {
+            return true;
+        }
+        if(activity.getId() != linkedActivity.getActivityId()) {
+            // Should already be in session cache
+            return session.getActivityLoader().load(linkedActivity.getActivityId()).isDeleted();
+        }
+        
+        return false;
     }
 
     private String alias(ActivityField indicator) {
@@ -488,8 +504,13 @@ public class PivotAdapter {
     /**
      * Queries the count of distinct sites (not monthly reports) that match the filter
      */
-    private void executeSiteCountQuery(Activity activity, LinkedActivity linkedActivity) {
+    private void executeSiteCountQuery(Activity activity, LinkedActivity linkedActivity) throws SQLException {
         
+        // Check first that this activity hasn't been deleted
+        if(isDeleted(activity, linkedActivity)) {
+            return;
+        }
+
         if(command.isPivotedBy(DimensionType.Indicator) ||
            command.getFilter().isRestricted(DimensionType.Indicator)) {
             
