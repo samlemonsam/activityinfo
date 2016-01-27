@@ -136,7 +136,6 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
             return textArea;
         } else if (type == FieldTypeClass.QUANTITY) {
             NumberField numberField = new NumberField();
-
             numberField.setFormat(IndicatorNumberFormat.INSTANCE);
             numberField.setWidth(NUMBER_FIELD_WIDTH);
             numberField.setStyleAttribute("textAlign", "right");

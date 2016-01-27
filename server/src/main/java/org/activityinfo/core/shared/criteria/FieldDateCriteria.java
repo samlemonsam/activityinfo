@@ -64,6 +64,11 @@ public class FieldDateCriteria implements Criteria {
         return match(input.getValue(fieldPath));
     }
 
+    @Override
+    public Criteria copy() {
+        return new FieldDateCriteria(fieldPath, range);
+    }
+
     private boolean match(FieldValue value) {
         if (range != null) {
             return value instanceof LocalDate && range.isIn((LocalDate) value);

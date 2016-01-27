@@ -45,4 +45,9 @@ public class IdCriteria implements Criteria {
     public boolean apply(@Nonnull Projection projection) {
         return instanceIds.contains(projection.getRootInstanceId());
     }
+
+    @Override
+    public Criteria copy() {
+        return new IdCriteria(instanceIds);
+    }
 }

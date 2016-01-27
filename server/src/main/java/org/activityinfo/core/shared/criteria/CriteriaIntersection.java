@@ -46,6 +46,15 @@ public class CriteriaIntersection implements Criteria, Iterable<Criteria> {
     }
 
     @Override
+    public Criteria copy() {
+        List<Criteria> copy = Lists.newArrayList();
+        for (Criteria criteria : members) {
+            copy.add(criteria.copy());
+        }
+        return new CriteriaIntersection(copy);
+    }
+
+    @Override
     public void accept(CriteriaVisitor visitor) {
         visitor.visitIntersection(this);
     }

@@ -87,7 +87,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
                 forcePopupToBeVisible();
 
-                filterContent = FilterContentFactory.create(column, table);
+                filterContent = FilterContentFactory.create(column, table, FilterPanel.this);
                 loadingPanel.setDisplayWidget(new DisplayWidget() {
                     @Override
                     public Promise<Void> show(Object value) {
@@ -113,8 +113,17 @@ public class FilterPanel extends Composite implements HasCriteria {
         });
     }
 
-    private void forcePopupToBeVisible() {
-        final Rectangle bsContainerRectangle = GwtUtil.getBsContainerRectangle(okButton.getElement());
+    public void forcePopupToBeVisibleLater() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                forcePopupToBeVisible();
+            }
+        });
+    }
+
+    public void forcePopupToBeVisible() {
+        final Rectangle bsContainerRectangle = GwtUtil.getBsContainerRectangle(table.getTable().getElement());
         final Rectangle elementRectangle = GwtUtil.getRectangle(okButton.getElement());
 
         //GWT.log("element: " + elementRectangle + ", bs container: " + bsContainerRectangle);
@@ -125,8 +134,10 @@ public class FilterPanel extends Composite implements HasCriteria {
             popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
-                    int bottomDifference = -(bsContainerRectangle.getBottom() - elementRectangle.getBottom());
-                    popup.setPopupPosition(popup.getAbsoluteLeft(), popup.getPopupTop() - bottomDifference);
+                    int bottomDifference = elementRectangle.getBottom() - bsContainerRectangle.getBottom();
+                    int leftDifference = elementRectangle.getRight() > bsContainerRectangle.getRight() ?
+                            elementRectangle.getRight() - bsContainerRectangle.getRight() + 20 : 0;
+                    popup.setPopupPosition(popup.getAbsoluteLeft() - leftDifference, popup.getPopupTop() - bottomDifference);
                 }
             });
         }

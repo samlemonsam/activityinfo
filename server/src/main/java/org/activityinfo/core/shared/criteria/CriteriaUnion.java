@@ -49,6 +49,15 @@ public class CriteriaUnion implements Criteria, Iterable<Criteria>  {
         return false;
     }
 
+    @Override
+    public Criteria copy() {
+        List<Criteria> copy = Lists.newArrayList();
+        for (Criteria criteria : elements) {
+            copy.add(criteria.copy());
+        }
+        return new CriteriaUnion(copy);
+    }
+
     public Collection<Criteria> getElements() {
         return elements;
     }

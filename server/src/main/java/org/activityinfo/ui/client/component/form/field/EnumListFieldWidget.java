@@ -85,6 +85,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     private final List<CheckBox> controls;
     private final FieldWidgetMode fieldWidgetMode;
     private final ValueUpdater<EnumValue> valueUpdater;
+    private final Button clearButton = createClearButton();
 
     public EnumListFieldWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.enumType = enumType;
@@ -107,8 +108,9 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
         }
 
         panel = new FlowPanel();
+        panel.addStyleName("hide-button-on-over");
         if (enumType.getCardinality() == Cardinality.SINGLE) {
-            panel.add(createClearButton());
+            panel.add(clearButton);
         }
         panel.add(boxPanel);
         if (this.fieldWidgetMode == FieldWidgetMode.DESIGN) {
@@ -144,11 +146,18 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
                 }
             }
         });
+        clearButton.setVisible(false);
         return clearButton;
     }
 
+    private void setClearButtonState(EnumValue enumValue) {
+        clearButton.setVisible(enumValue != null && !enumValue.getResourceIds().isEmpty());
+    }
+
     public void fireValueChanged() {
-        valueUpdater.update(updatedValue());
+        EnumValue value = updatedValue();
+        valueUpdater.update(value);
+        setClearButtonState(value);
     }
 
     private void onClick(MouseUpEvent event) {
@@ -259,6 +268,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
         for (CheckBox entry : controls) {
             entry.setValue(containsIgnoreCase(value.getResourceIds(), entry.getFormValue()));
         }
+        setClearButtonState(value);
         return Promise.done();
     }
 

@@ -23,8 +23,10 @@ package org.activityinfo.ui.client.page.entry.form;
  */
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.event.*;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.event.ButtonEvent;
+import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
+import com.extjs.gxt.ui.client.event.SelectionChangedListener;
+import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Window;
@@ -32,22 +34,13 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.CardLayout;
-import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Label;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.CreateSite;
-import org.activityinfo.legacy.shared.command.UpdateEntity;
 import org.activityinfo.legacy.shared.command.UpdateSite;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
@@ -55,16 +48,12 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.ui.client.Beta;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.List;
-import java.util.Map;
 
 public class SiteDialog extends Window {
 
@@ -230,9 +219,10 @@ public class SiteDialog extends Window {
         for (FormSectionModel<SiteDTO> section : navigationListView.getStore().getModels()) {
             if (!section.getSection().validate()) {
                 navigationListView.getSelectionModel().select(section, false);
-                section.getSection().validate(); // validate after render to enable validation-error styling
-                MessageBox.alert(getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
-                return false;
+                if (!section.getSection().validate()) { // validate after render to enable validation-error styling
+                    MessageBox.alert(getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
+                    return false;
+                }
             }
         }
         return true;

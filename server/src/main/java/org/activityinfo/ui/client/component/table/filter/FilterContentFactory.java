@@ -40,14 +40,14 @@ public class FilterContentFactory {
     private FilterContentFactory() {
     }
 
-    public static FilterContent create(FieldColumn column, InstanceTable table) {
+    public static FilterContent create(FieldColumn column, InstanceTable table, FilterPanel popup) {
         FieldType type = column.getNode().getField().getType();
         if (type == LocalDateType.INSTANCE) {
             return new FilterContentDate(column);
         } else if (type instanceof AttachmentType) {
             return blankPanel();
         }
-        return new FilterContentExistingItems(column, table);
+        return new FilterContentExistingItems(column, table, popup);
     }
 
     private static FilterContent blankPanel() {

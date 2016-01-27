@@ -38,12 +38,13 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.util.GwtUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -132,6 +133,9 @@ public class RelevanceRowPresenter {
             }
             view.getFormfield().addItem(formField.getLabel(), formField.getId().asString());
         }
+
+        GwtUtil.addTooltipToOptions(view.getFormfield().getElement(), 100, formFields);
+
         view.getFormfield().addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
