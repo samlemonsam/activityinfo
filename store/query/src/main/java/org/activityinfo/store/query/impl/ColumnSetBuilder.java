@@ -33,8 +33,6 @@ public class ColumnSetBuilder {
 
     public ColumnSet build(QueryModel table) {
 
-        LOGGER.info("TableBuilder starting.");
-
         ResourceId classId = table.getRowSources().get(0).getRootFormClass();
         FormTree tree = formTreeService.queryTree(classId);
 
@@ -69,8 +67,6 @@ public class ColumnSetBuilder {
 
         }
 
-        LOGGER.info("Request defined, execution starting...");
-
         // Now execute the batch
         try {
             batch.execute();
@@ -102,7 +98,6 @@ public class ColumnSetBuilder {
             }
         }
         
-        LOGGER.info("TableBuilder complete");
         return new ColumnSet(numRows, dataMap);
     }
 

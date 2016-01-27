@@ -253,7 +253,11 @@ public class CollectionScanBatch {
         
         if(!toPut.isEmpty()) {
             // put asynchronously
-            memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600), MemcacheService.SetPolicy.SET_ALWAYS);
+            try {
+                memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600), MemcacheService.SetPolicy.SET_ALWAYS);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Failed to start memcache put: " + e.getMessage(), e);
+            }
         }
     }
 }

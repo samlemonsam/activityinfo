@@ -1,8 +1,10 @@
 package org.activityinfo.store.query.impl.join;
 
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.views.JoinedColumnView;
+import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 
 import java.util.List;
 
@@ -53,6 +55,40 @@ public class JoinedColumnViewSlot implements Slot<ColumnView> {
             }
         }
 
+        switch (nestedColumn.get().getType()) {
+            case STRING:
+                return joinStringColumn(nestedColumn.get(), left);
+            case NUMBER:
+                return joinDoubleColumn(nestedColumn.get(), left);
+            case BOOLEAN:
+                break;
+            case GEOGRAPHIC:
+                break;
+        }
+        
         return new JoinedColumnView(nestedColumn.get(), left);
+    }
+    private ColumnView joinStringColumn(ColumnView columnView, int[] joinMap) {
+        int numRows = joinMap.length;
+        String[] array = new String[numRows];
+        for(int row=0;row< numRows;++row) {
+            int right = joinMap[row];
+            if(right != -1) {
+                array[row] = columnView.getString(right);
+            }
+        }
+        return new StringArrayColumnView(array);        
+    }
+    
+    private ColumnView joinDoubleColumn(ColumnView columnView, int[] joinMap) {
+        int numRows = joinMap.length;
+        double[] array = new double[numRows];
+        for(int row=0;row< numRows;++row) {
+            int right = joinMap[row];
+            if(right != -1) {
+                array[row] = columnView.getDouble(right);
+            }
+        }
+        return new DoubleArrayColumnView(array);    
     }
 }
