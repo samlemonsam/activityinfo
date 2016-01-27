@@ -162,10 +162,9 @@ public class CollectionScan {
 
         // If the collection cannot provide a cache version, then it is not safe to cache columns 
         // from this collection
-        if (cacheVersion != 0) {
+        if (cacheVersion == 0) {
             return Collections.emptySet();
         }
-
 
         // Otherwise, try to retrieve all of the ColumnView and ForeignKeyMaps we need 
         // from the Memcache service

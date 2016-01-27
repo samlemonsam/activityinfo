@@ -99,6 +99,7 @@ public class ActivityLoader {
             // Retrieve the schemas that we can from memcache using the schemaCacheKeys
             Map<Integer, Activity> cached = loadFromMemcache(versions);
             loaded.putAll(cached);
+            activityMap.putAll(cached);
             toFetch.removeAll(cached.keySet());
 
             // If anything remains, need to hit the database
