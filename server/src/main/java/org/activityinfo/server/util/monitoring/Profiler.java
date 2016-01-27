@@ -13,7 +13,7 @@ public class Profiler {
     private String kind;
 
     public Profiler(String metric, String kind) {
-        this.metric = "custom.cloudmonitoring.googleapis.com/" + metric;
+        this.metric = metric;
         this.kind = kind;
         this.started = System.nanoTime();
         MetricsRegistry.INSTANCE.meter(this.metric + "/count", kind).mark();
