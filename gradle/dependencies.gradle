@@ -36,7 +36,7 @@ ext {
             core:           'io.dropwizard.metrics:metrics-core:3.1.1'
         ],
             
-        appengineMetrics:   'com.bedatadriven.appengine:appengine-metrics:0.4-SNAPSHOT',
+        appengineMetrics:   'com.bedatadriven.appengine:appengine-metrics:0.4.2',
             
         gwt:[
             user:           "com.google.gwt:gwt-user:${gwtVersion}", 
