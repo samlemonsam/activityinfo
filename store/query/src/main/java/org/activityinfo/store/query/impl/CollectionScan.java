@@ -279,7 +279,8 @@ public class CollectionScan {
         Stopwatch stopwatch = Stopwatch.createStarted();
         queryBuilder.execute();
 
-        if(rowCount.isPresent()) {
+        // Update the row count if hasn't been already loaded from the cache
+        if(rowCount.isPresent() && !rowCount.get().isSet()) {
             if(rowCountBuilder != null) {
                 rowCount.get().set(rowCountBuilder.getCount());
             } else {

@@ -26,7 +26,11 @@ public class PendingSlot<T> implements Slot<T> {
 
         this.value = value;
     }
-
+    
+    public boolean isSet() {
+        return value != null;
+    }
+    
     @Override
     public T get() {
         Preconditions.checkState(this.value != null, "Slot value has not been set.");
