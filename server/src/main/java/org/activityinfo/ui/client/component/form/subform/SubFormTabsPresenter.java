@@ -157,7 +157,7 @@ public class SubFormTabsPresenter {
 
         String firstButtonId = keySet.iterator().next();
         if (Document.get().getElementById(appendIdSuffix(firstButtonId)) == null) {
-            if (retry > 3) { // not yet in DOM ? retry one time
+            if (retry < 3) { // not yet in DOM ? retry one time
                 Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
                     @Override
                     public boolean execute() {
