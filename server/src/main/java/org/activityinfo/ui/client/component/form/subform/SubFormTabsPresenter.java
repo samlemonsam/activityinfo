@@ -31,6 +31,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
@@ -42,6 +43,7 @@ import org.activityinfo.ui.client.widget.ClickHandler;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 02/04/2015.
@@ -129,7 +131,7 @@ public class SubFormTabsPresenter {
             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    bindClickHandlers();
+                    tryToBindClickHandlers(1);
                 }
             });
         } catch (Exception e) {
@@ -146,7 +148,28 @@ public class SubFormTabsPresenter {
         return label;
     }
 
-    private void bindClickHandlers() {
+    private void tryToBindClickHandlers(final int retry) {
+
+        Set<String> keySet = instancesMap.keySet();
+        if (keySet.isEmpty()) {
+            return; // nothing to bind
+        }
+
+        String firstButtonId = keySet.iterator().next();
+        if (Document.get().getElementById(appendIdSuffix(firstButtonId)) == null) {
+            if (retry > 3) { // not yet in DOM ? retry one time
+                Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        tryToBindClickHandlers(retry + 1);
+                        return false;
+                    }
+                }, 3000);
+            } else {
+                Log.error("Failed to bind subform tab button handlers.");
+                throw new RuntimeException("Failed to bind subform tab button handlers.");
+            }
+        }
 
         // predefined buttons
         for (ButtonType buttonType : ButtonType.values()) {
@@ -161,7 +184,7 @@ public class SubFormTabsPresenter {
         }
 
         // tabs
-        for (String id : instancesMap.keySet()) {
+        for (String id : keySet) {
             addClickHandlerToElementById(appendIdSuffix(id));
         }
     }
@@ -172,6 +195,7 @@ public class SubFormTabsPresenter {
 
     private void addClickHandlerToElementById(final String elementId) {
         com.google.gwt.dom.client.Element elementById = Document.get().getElementById(elementId);
+
         Event.sinkEvents(elementById, Event.ONCLICK);
         Event.setEventListener(elementById, new EventListener() {
             @Override
