@@ -21,6 +21,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -174,6 +175,12 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 relevanceHandler.onValueChange(); // skip handler must be applied after workingInstance is updated
             }
             validateField(widgetCreator.get(field.getId()));
+        } else {
+            FormClass formClass = model.getClassByField(field.getId());
+            if (formClass.getKeyField().isPresent()) {
+                widgetCreator.get(field.getId()).setInvalid(I18N.CONSTANTS.subFormTabNotSelected());
+                widgetCreator.get(field.getId()).getFieldWidget().clearValue();
+            }
         }
     }
 

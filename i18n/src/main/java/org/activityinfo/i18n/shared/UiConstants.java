@@ -1695,4 +1695,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("+ Add another")
     String addAnother();
+
+    @DefaultStringValue("Tab is not selected.")
+    String subFormTabNotSelected();
 }

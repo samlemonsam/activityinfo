@@ -21,12 +21,14 @@ package org.activityinfo.model.type.subform;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -113,7 +115,18 @@ public enum ClassType {
         return byId(resourceId) != null;
     }
 
+    public static Optional<ClassType> byFormClass(@Nullable FormClass subForm) {
+        if (subForm == null || !subForm.getKeyField().isPresent()) {
+            return Optional.absent();
+        }
+        return Optional.fromNullable(ClassType.byId(subForm.getKeyFieldType().get().getRange().iterator().next()));
+    }
+
     public static boolean isCollection(FormClass formClass) {
-        return ClassType.byId(formClass.getKeyFieldType().get().getRange().iterator().next()) == ClassType.COLLECTION;
+        Optional<ClassType> classType = byFormClass(formClass);
+        if (!classType.isPresent()) {
+            return false;
+        }
+        return classType.get() == ClassType.COLLECTION;
     }
 }
