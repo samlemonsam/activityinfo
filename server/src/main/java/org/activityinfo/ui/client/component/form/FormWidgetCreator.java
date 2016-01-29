@@ -29,6 +29,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
@@ -75,7 +76,11 @@ public class FormWidgetCreator {
         List<Promise<Void>> promises = Lists.newArrayList();
         for (final FormField field : formClass.getFields()) {
             if (field.getType() instanceof SubFormType) {
-                // ignore, widgets for subform is created internally in sub SimpleFormPanel
+                FormClass subForm = model.getSubFormByOwnerFieldId(field.getId());
+                if (!ClassType.isCollection(subForm)) { // for collection we create it internally in sub SimpleFormPanel
+                    Promise<Void> subFormWidgetsPromise = createWidgets(subForm, fieldUpdated);
+                    promises.add(subFormWidgetsPromise);
+                }
             } else {
                 Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
                     @Override
