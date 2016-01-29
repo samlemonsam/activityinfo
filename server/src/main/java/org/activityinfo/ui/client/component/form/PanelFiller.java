@@ -49,6 +49,10 @@ public class PanelFiller {
     }
 
     public void add(FormElementContainer container, int depth) {
+        add(container, depth, panel);
+    }
+
+    public void add(FormElementContainer container, int depth, FlowPanel panel) {
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 panel.add(createHeader(depth, element.getLabel()));
@@ -68,11 +72,18 @@ public class PanelFiller {
                         } else { // keyed subforms
                             final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator());
 
+                            final FlowPanel subformPanel = new FlowPanel();
+                            subformPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
+
                             panel.add(createHeader(depth + 1, subForm.getLabel()));
-                            panel.add(subFormTabsManipulator.getPresenter().getView());
+                            panel.add(subformPanel);
+
+                            subformPanel.add(subFormTabsManipulator.getPresenter().getView());
+                            subFormTabsManipulator.getPresenter().getView().addStyleName(FormPanelStyles.INSTANCE.subformTabs());
 
                             subFormTabsManipulator.show(subForm, model);
-                            add(subForm, depth + 1);
+
+                            add(subForm, depth + 1, subformPanel);
                         }
                     } else {
                         panel.add(widgetCreator.get(formField.getId()));
