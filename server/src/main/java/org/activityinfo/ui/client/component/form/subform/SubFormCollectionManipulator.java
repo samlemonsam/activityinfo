@@ -162,7 +162,7 @@ public class SubFormCollectionManipulator {
     }
 
     private FormModel.SubformValueKey newKey() {
-        FormModel.SubformValueKey newKey = new FormModel.SubformValueKey(subForm, InstanceGenerator.newUnkeyedInstance(subForm.getId()));
+        FormModel.SubformValueKey newKey = new FormModel.SubformValueKey(subForm, KeyInstanceGenerator.newUnkeyedInstance(subForm.getId()));
 
         formModel.getSubFormInstances().put(newKey, newValueInstance());
         return newKey;

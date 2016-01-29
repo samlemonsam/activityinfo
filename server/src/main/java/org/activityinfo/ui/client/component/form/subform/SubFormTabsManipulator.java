@@ -110,9 +110,9 @@ public class SubFormTabsManipulator {
     private void generateFormInstanceForPeriod(FormClass subForm, ResourceId typeClassId) {
         this.periodValue = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
 
-        final InstanceKeyedGenerator instanceGenerator = new InstanceKeyedGenerator(subForm.getId());
+        final PeriodInstanceKeyedGenerator instanceGenerator = new PeriodInstanceKeyedGenerator(subForm.getId());
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
-        presenter.set(instanceGenerator.generate(periodValue, new Date(), InstanceKeyedGenerator.Direction.BACK, presenter.getTabCount()));
+        presenter.set(instanceGenerator.generate(periodValue, new Date(), PeriodInstanceKeyedGenerator.Direction.BACK, presenter.getTabCount()));
 
         presenter.setShowNextButtons(true);
         presenter.setShowPreviousButtons(true);
@@ -135,7 +135,7 @@ public class SubFormTabsManipulator {
         formModel.setSelectedInstance(instance, subForm);
     }
 
-    private void onPeriodMoveButtonClick(SubFormTabsPresenter.ButtonType buttonType, InstanceKeyedGenerator instanceGenerator) {
+    private void onPeriodMoveButtonClick(SubFormTabsPresenter.ButtonType buttonType, PeriodInstanceKeyedGenerator instanceGenerator) {
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
         switch (buttonType) {
             case NEXT:

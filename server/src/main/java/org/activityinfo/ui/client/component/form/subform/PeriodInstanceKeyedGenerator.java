@@ -43,7 +43,7 @@ import java.util.List;
 /**
  * @author yuriyz on 02/05/2015.
  */
-public class InstanceKeyedGenerator {
+public class PeriodInstanceKeyedGenerator {
 
     private static final int MAXIMUM_SIZE = 100000;
 
@@ -67,7 +67,7 @@ public class InstanceKeyedGenerator {
     private int lastCount = 1;
 
 
-    public InstanceKeyedGenerator(ResourceId classId) {
+    public PeriodInstanceKeyedGenerator(ResourceId classId) {
         this(classId, new Formatter() {
             @Override
             public String format(String pattern, Date date) {
@@ -76,11 +76,11 @@ public class InstanceKeyedGenerator {
         });
     }
 
-    public InstanceKeyedGenerator(ResourceId classId, Formatter formatter) {
+    public PeriodInstanceKeyedGenerator(ResourceId classId, Formatter formatter) {
         this(classId, formatter, CalendarUtils.GWT_DAY_OF_WEEK_PROVIDER);
     }
 
-    public InstanceKeyedGenerator(ResourceId classId, Formatter formatter, CalendarUtils.DayOfWeekProvider dayOfWeekProvider) {
+    public PeriodInstanceKeyedGenerator(ResourceId classId, Formatter formatter, CalendarUtils.DayOfWeekProvider dayOfWeekProvider) {
         this.classId = classId;
         this.formatter = formatter;
         this.dayOfWeekProvider = dayOfWeekProvider;
@@ -170,7 +170,7 @@ public class InstanceKeyedGenerator {
     }
 
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        FormInstance instance = InstanceGenerator.newKeyedInstance(range, classId);
+        FormInstance instance = KeyInstanceGenerator.newKeyedInstance(range, classId);
         instance.set(PERIOD_START_DATE_ID, range.getStart());
         instance.set(PERIOD_END_DATE_ID, range.getEnd());
         FormInstanceLabeler.setLabel(instance, getLabel(range, period, direction));

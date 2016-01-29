@@ -140,7 +140,7 @@ public class SubFormTabsPresenter {
     private String tooltip(FormInstance instance, String label) {
         if (periodType == PredefinedPeriods.MONTHLY || periodType == PredefinedPeriods.WEEKLY ||
                 periodType == PredefinedPeriods.BI_WEEKLY) {
-            DateRange range = InstanceKeyedGenerator.getDateRangeFromInstance(instance);
+            DateRange range = PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance);
             return I18N.MESSAGES.subformTabButtonTooltip(range.getStart(), range.getEnd());
         }
         return label;

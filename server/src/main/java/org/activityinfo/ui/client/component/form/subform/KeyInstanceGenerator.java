@@ -28,9 +28,9 @@ import org.activityinfo.model.resource.ResourceId;
 /**
  * @author yuriyz on 01/20/2016.
  */
-public class InstanceGenerator {
+public class KeyInstanceGenerator {
 
-    private InstanceGenerator() {
+    private KeyInstanceGenerator() {
     }
 
     public static ResourceId periodId(DateRange range) {
