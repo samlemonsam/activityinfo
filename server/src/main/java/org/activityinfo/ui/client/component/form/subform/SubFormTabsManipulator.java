@@ -138,7 +138,7 @@ public class SubFormTabsManipulator {
         formModel.setSelectedInstance(instance, subForm);
 
         if (!designMode) {
-            applyInstanceValues(instance);
+            applyInstanceValues(formModel.getSubFormInstances().get(new FormModel.SubformValueKey(subForm, instance)));
 
             relevanceHandler.get().onValueChange();
         }

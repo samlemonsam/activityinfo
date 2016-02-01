@@ -260,12 +260,7 @@ public class FormModel {
             return Optional.absent(); // on initial form creation we may have nothing selected
         }
 
-        SubformValueKey key = new SubformValueKey(classByField, selectedTab);
-        FormInstance subFormInstance = subFormInstances.get(key);
-        if (subFormInstance == null) {
-            return Optional.of(createSubFormValueInstance(key));
-        }
-        return Optional.of(subFormInstance);
+        return Optional.of(createSubFormValueInstanceIfAbsent(new SubformValueKey(classByField, selectedTab)));
     }
 
     public BiMap<SubformValueKey, FormInstance> getSubFormInstances() {
@@ -300,14 +295,17 @@ public class FormModel {
 
     public void setSelectedInstance(FormInstance tabInstance, FormClass subForm) {
         selectedInstances.put(subForm, tabInstance);
-        createSubFormValueInstance(new SubformValueKey(subForm, tabInstance));
+        createSubFormValueInstanceIfAbsent(new SubformValueKey(subForm, tabInstance));
     }
 
-    private FormInstance createSubFormValueInstance(SubformValueKey key) {
-        FormInstance valueInstance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
-        valueInstance.setOwnerId(getWorkingRootInstance().getId());
-        valueInstance.setKeyId(key.getInstance().getId());
-        subFormInstances.put(key, valueInstance);
+    private FormInstance createSubFormValueInstanceIfAbsent(SubformValueKey key) {
+        FormInstance valueInstance = subFormInstances.get(key);
+        if (valueInstance == null) {
+            valueInstance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
+            valueInstance.setOwnerId(getWorkingRootInstance().getId());
+            valueInstance.setKeyId(key.getInstance().getId());
+            subFormInstances.put(key, valueInstance);
+        }
         return valueInstance;
     }
 
