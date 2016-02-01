@@ -21,14 +21,18 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 import java.util.Set;
@@ -60,7 +64,9 @@ public class RelevanceHandler {
                 ExprNode expr = parser.parse();
                 FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
                 if (fieldContainer != null) {
-                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getModel().getRootFormClass(), simpleFormPanel.getModel().getWorkingRootInstance()));
+                    Optional<FormInstance> instance = simpleFormPanel.getModel().getWorkingInstance(field.getId());
+                    FormClass formClass = simpleFormPanel.getModel().getClassByField(field.getId());
+                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(formClass, instance.isPresent() ? instance.get() : new FormInstance(ResourceId.generateId(), formClass.getId())));
                     fieldContainer.getFieldWidget().setReadOnly(!relevant);
 
                     if (!relevant) {

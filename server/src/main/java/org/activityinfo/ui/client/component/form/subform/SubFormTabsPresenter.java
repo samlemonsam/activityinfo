@@ -165,6 +165,7 @@ public class SubFormTabsPresenter {
                         return false;
                     }
                 }, 3000);
+                return;
             } else {
                 Log.error("Failed to bind subform tab button handlers.");
                 throw new RuntimeException("Failed to bind subform tab button handlers.");
