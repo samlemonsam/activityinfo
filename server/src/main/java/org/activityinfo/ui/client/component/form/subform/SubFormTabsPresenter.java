@@ -75,6 +75,10 @@ public class SubFormTabsPresenter {
             }
             return null;
         }
+
+        public static boolean isPredefinedButton(String value) {
+            return fromValue(value) != null;
+        }
     }
 
     private static String cutOffIdSuffix(String value) {
@@ -99,6 +103,7 @@ public class SubFormTabsPresenter {
     private ClickHandler<ButtonType> moveButtonClickHandler;
     private ClickHandler<FormInstance> instanceTabClickHandler;
     private PredefinedPeriods periodType;
+    private String activeTabId = null;
 
     public SubFormTabsPresenter(@Nonnull SubFormTabs view) {
         this.view = view;
@@ -106,6 +111,7 @@ public class SubFormTabsPresenter {
 
     public void clear() {
         set(Lists.<FormInstance>newArrayList());
+        activeTabId = null;
     }
 
     public void set(List<FormInstance> instances) {
@@ -172,6 +178,8 @@ public class SubFormTabsPresenter {
             }
         }
 
+        selectActive();
+
         // predefined buttons
         for (ButtonType buttonType : ButtonType.values()) {
             if (!showNextButtons && (buttonType == ButtonType.NEXT || buttonType == ButtonType.FULL_NEXT)) {
@@ -194,8 +202,26 @@ public class SubFormTabsPresenter {
         return id + "_" + idSuffix.asString();
     }
 
+    private void deselectActive() {
+        if (activeTabId != null) {
+            final com.google.gwt.dom.client.Element elementById = Document.get().getElementById(activeTabId);
+            if (elementById != null) {
+                elementById.getParentElement().removeClassName("active");
+            }
+        }
+    }
+
+    private void selectActive() {
+        if (activeTabId != null) {
+            final com.google.gwt.dom.client.Element elementById = Document.get().getElementById(activeTabId);
+            if (elementById != null) {
+                elementById.getParentElement().addClassName("active");
+            }
+        }
+    }
+
     private void addClickHandlerToElementById(final String elementId) {
-        com.google.gwt.dom.client.Element elementById = Document.get().getElementById(elementId);
+        final com.google.gwt.dom.client.Element elementById = Document.get().getElementById(elementId);
 
         Event.sinkEvents(elementById, Event.ONCLICK);
         Event.setEventListener(elementById, new EventListener() {
@@ -203,6 +229,13 @@ public class SubFormTabsPresenter {
             public void onBrowserEvent(Event event) {
                 if (Event.ONCLICK == event.getTypeInt()) {
                     onButtonClick(elementId);
+
+                    deselectActive();
+
+                    if (!ButtonType.isPredefinedButton(elementId)) {
+                        activeTabId = elementId;
+                        selectActive();
+                    }
                 }
             }
         });
