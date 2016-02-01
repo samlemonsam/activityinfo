@@ -90,6 +90,24 @@ public class FormModel {
         public FormInstance getInstance() {
             return instance;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SubformValueKey that = (SubformValueKey) o;
+
+            return !(subForm != null ? !subForm.equals(that.subForm) : that.subForm != null) && !(instance != null ? !instance.equals(that.instance) : that.instance != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = subForm != null ? subForm.hashCode() : 0;
+            result = 31 * result + (instance != null ? instance.hashCode() : 0);
+            return result;
+        }
     }
 
     private final ResourceLocator locator;
