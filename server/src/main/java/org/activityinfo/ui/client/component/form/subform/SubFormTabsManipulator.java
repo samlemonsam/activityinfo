@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
@@ -41,6 +42,7 @@ import org.activityinfo.model.type.subform.SubFormKindRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.form.FieldContainer;
 import org.activityinfo.ui.client.component.form.FormModel;
+import org.activityinfo.ui.client.component.form.RelevanceHandler;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.widget.ClickHandler;
 
@@ -57,6 +59,7 @@ public class SubFormTabsManipulator {
     private final SubFormTabsPresenter presenter;
     private final ResourceLocator resourceLocator;
     private final boolean designMode;
+    private Optional<RelevanceHandler> relevanceHandler = Optional.absent();
 
     @Nullable
     private PeriodValue periodValue = null; // if not null then period instance generator is in use
@@ -64,12 +67,12 @@ public class SubFormTabsManipulator {
     private FormClass subForm;
     private FormModel formModel;
     private FormDesigner formDesigner;
-    private FormInstance selectedInstance;
 
-    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator) {
+    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator, RelevanceHandler relevanceHandler) {
         this.resourceLocator = resourceLocator;
         this.presenter = new SubFormTabsPresenter(new SubFormTabs());
         this.designMode = false;
+        this.relevanceHandler = Optional.of(relevanceHandler);
     }
 
     public SubFormTabsManipulator(@Nonnull FormDesigner formDesigner, @Nonnull SubFormTabs tabs) {
@@ -126,13 +129,19 @@ public class SubFormTabsManipulator {
         presenter.setInstanceTabClickHandler(new ClickHandler<FormInstance>() {
             @Override
             public void onClick(FormInstance instance) {
-                onPeriodInstanceTabClick(instance);
+                onInstanceTabClick(instance);
             }
         });
     }
 
-    private void onPeriodInstanceTabClick(FormInstance instance) {
+    private void onInstanceTabClick(FormInstance instance) {
         formModel.setSelectedInstance(instance, subForm);
+
+        if (!designMode) {
+            applyInstanceValues(instance);
+
+            relevanceHandler.get().onValueChange();
+        }
     }
 
     private void onPeriodMoveButtonClick(SubFormTabsPresenter.ButtonType buttonType, PeriodInstanceKeyedGenerator instanceGenerator) {
@@ -178,17 +187,9 @@ public class SubFormTabsManipulator {
         presenter.setInstanceTabClickHandler(new ClickHandler<FormInstance>() {
             @Override
             public void onClick(FormInstance instance) {
-                onInstanceSelection(instance);
+                onInstanceTabClick(instance);
             }
         });
-    }
-
-    private void onInstanceSelection(FormInstance instance) {
-        this.selectedInstance = instance;
-
-        if (!designMode) {
-            applyInstanceValues(instance);
-        }
     }
 
     private void applyInstanceValues(FormInstance instance) {
@@ -239,15 +240,6 @@ public class SubFormTabsManipulator {
 
     public SubFormTabsPresenter getPresenter() {
         return presenter;
-    }
-
-    public FormInstance getSelectedInstance() {
-        return selectedInstance;
-    }
-
-    public void setSelectedInstance(FormInstance selectedInstance) {
-        this.selectedInstance = selectedInstance;
-        onInstanceSelection(selectedInstance);
     }
 
     public boolean isDesignMode() {

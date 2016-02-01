@@ -129,7 +129,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 @Nullable
                 @Override
                 public Void apply(Void input) {
-                    PanelFiller filler = new PanelFiller(panel, model, widgetCreator, subFormsHandler);
+                    PanelFiller filler = new PanelFiller(panel, model, widgetCreator, subFormsHandler, relevanceHandler);
                     filler.add(formClass, 0);
                     return null;
                 }

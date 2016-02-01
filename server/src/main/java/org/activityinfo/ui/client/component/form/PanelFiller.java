@@ -40,12 +40,14 @@ public class PanelFiller {
     private final FormModel model;
     private final FormWidgetCreator widgetCreator;
     private final SubFormsHandler subFormsHandler;
+    private final RelevanceHandler relevanceHandler;
 
-    public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator, SubFormsHandler subFormsHandler) {
+    public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator, SubFormsHandler subFormsHandler, RelevanceHandler relevanceHandler) {
         this.panel = panel;
         this.model = model;
         this.widgetCreator = widgetCreator;
         this.subFormsHandler = subFormsHandler;
+        this.relevanceHandler = relevanceHandler;
     }
 
     public void add(FormElementContainer container, int depth) {
@@ -70,7 +72,7 @@ public class PanelFiller {
 
                             subFormsHandler.getSubForms().put(subForm, collectionManipulator);
                         } else { // keyed subforms
-                            final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator());
+                            final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator(), relevanceHandler);
 
                             final FlowPanel subformPanel = new FlowPanel();
                             subformPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
