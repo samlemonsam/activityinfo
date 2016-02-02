@@ -76,7 +76,11 @@ public class SubFormInstanceLoader {
                 final List<Promise<FormInstance>> keyPromises = Lists.newArrayList();
 
                 for (FormInstance instance : instanceList) {
-                    keyPromises.add(model.getLocator().getFormInstance(instance.getKeyId().get()));
+                    if (instance.getKeyId().isPresent()) {
+                        keyPromises.add(model.getLocator().getFormInstance(instance.getKeyId().get()));
+                    } else {
+                        Log.error("Key is not found for instance: " + instance.getId());
+                    }
                 }
 
                 return Promise.waitAll(keyPromises).then(new Function<Void, List<FormInstance>>() {

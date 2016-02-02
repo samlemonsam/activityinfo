@@ -42,6 +42,7 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
         entity.setId(formInstance.getId().asString());
         entity.setClassId(formInstance.getClassId().asString());
         entity.setOwnerId(formInstance.getOwnerId() != null ? formInstance.getOwnerId().asString() : null);
+        entity.setKeyId(formInstance.getKeyId().isPresent() ? formInstance.getKeyId().get().asString() : null);
 
         JsonHelper.updateWithJson(entity, cmd.getJson());
 
