@@ -1698,4 +1698,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Tab is not selected.")
     String subFormTabNotSelected();
+
+    @DefaultStringValue("Failed to load subform instances.")
+    String failedToLoadSubformInstances();
 }

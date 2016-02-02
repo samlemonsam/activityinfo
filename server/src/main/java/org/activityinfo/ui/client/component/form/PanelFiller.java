@@ -22,14 +22,21 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipulator;
+import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 01/18/2016.
@@ -54,7 +61,7 @@ public class PanelFiller {
         add(container, depth, panel);
     }
 
-    public void add(FormElementContainer container, int depth, FlowPanel panel) {
+    public void add(FormElementContainer container, final int depth, final FlowPanel panel) {
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 panel.add(createHeader(depth, element.getLabel()));
@@ -63,7 +70,7 @@ public class PanelFiller {
                 FormField formField = (FormField) element;
                 if (formField.isVisible()) {
                     if (formField.getType() instanceof SubFormType) {
-                        FormClass subForm = model.getSubFormByOwnerFieldId(formField.getId());
+                        final FormClass subForm = model.getSubFormByOwnerFieldId(formField.getId());
 
 
                         if (ClassType.isCollection(subForm)) { // unkeyed subforms -> simple collection
@@ -78,14 +85,26 @@ public class PanelFiller {
                             subformPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
 
                             panel.add(createHeader(depth + 1, subForm.getLabel()));
-                            panel.add(subformPanel);
 
-                            subformPanel.add(subFormTabsManipulator.getPresenter().getView());
-                            subFormTabsManipulator.getPresenter().getView().addStyleName(FormPanelStyles.INSTANCE.subformTabs());
+                            new SubFormInstanceLoader(model).loadKeyedSubformInstances(subForm).then(new AsyncCallback<List<FormInstance>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Log.error(caught.getMessage(), caught);
+                                    panel.add(new Label(I18N.CONSTANTS.failedToLoadSubformInstances()));
+                                }
 
-                            subFormTabsManipulator.show(subForm, model);
+                                @Override
+                                public void onSuccess(List<FormInstance> result) {
+                                    panel.add(subformPanel);
 
-                            add(subForm, depth + 1, subformPanel);
+                                    subformPanel.add(subFormTabsManipulator.getPresenter().getView());
+                                    subFormTabsManipulator.getPresenter().getView().addStyleName(FormPanelStyles.INSTANCE.subformTabs());
+
+                                    subFormTabsManipulator.show(subForm, model);
+
+                                    add(subForm, depth + 1, subformPanel);
+                                }
+                            });
                         }
                     } else {
                         panel.add(widgetCreator.get(formField.getId()));

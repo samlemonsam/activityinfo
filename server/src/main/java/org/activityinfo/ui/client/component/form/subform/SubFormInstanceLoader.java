@@ -22,15 +22,20 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -60,6 +65,63 @@ public class SubFormInstanceLoader {
                         return instanceList;
                     }
                 });
+    }
+
+    public Promise<List<FormInstance>> loadKeyedSubformInstances(final FormClass subForm) {
+
+        final Promise<List<FormInstance>> promise = model.getLocator().queryInstances(ParentCriteria.isChildOf(ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId()));
+        final Promise<List<FormInstance>> keys = promise.then(new Function<List<FormInstance>, List<FormInstance>>() {
+            @Override
+            public List<FormInstance> apply(List<FormInstance> instanceList) {
+                final List<Promise<FormInstance>> keyPromises = Lists.newArrayList();
+
+                for (FormInstance instance : instanceList) {
+                    keyPromises.add(model.getLocator().getFormInstance(instance.getKeyId().get()));
+                }
+
+                return Promise.waitAll(keyPromises).then(new Function<Void, List<FormInstance>>() {
+                    @Override
+                    public List<FormInstance> apply(Void input) {
+                        List<FormInstance> list = Lists.newArrayList();
+                        for (Promise<FormInstance> key : keyPromises) {
+                            list.add(key.get());
+                        }
+                        return list;
+                    }
+                }).get();
+            }
+        });
+        return Promise.waitAll(promise, keys).then(new Function<Void, List<FormInstance>>() {
+            @Override
+            public List<FormInstance> apply(Void input) {
+
+                Map<ResourceId, FormInstance> keyMap = asMap(keys.get());
+
+                for (FormInstance instance : promise.get()) {
+
+                    if (instance.getKeyId().isPresent()) {
+                        FormInstance keyInstance = keyMap.get(instance.getKeyId().get());
+                        if (keyInstance != null) {
+                            model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, keyInstance), instance);
+                            persisted.add(instance);
+                        } else {
+                            Log.error("Key instance is not found for keyed instance: " + instance.getId() + ", keyId: " + instance.getKeyId().get());
+                        }
+                    } else {
+                        Log.error("Key is not found for keyed instance: " + instance.getId());
+                    }
+                }
+                return promise.get();
+            }
+        });
+    }
+
+    private static Map<ResourceId, FormInstance> asMap(List<FormInstance> list) {
+        Map<ResourceId, FormInstance> map = Maps.newHashMap();
+        for (FormInstance instance : list) {
+            map.put(instance.getId(), instance);
+        }
+        return map;
     }
 
     public boolean isPersisted(FormInstance instance) {
