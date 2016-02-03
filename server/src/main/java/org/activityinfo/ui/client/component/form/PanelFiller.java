@@ -36,8 +36,6 @@ import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipu
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 
-import java.util.List;
-
 /**
  * @author yuriyz on 01/18/2016.
  */
@@ -86,7 +84,7 @@ public class PanelFiller {
 
                             panel.add(createHeader(depth + 1, subForm.getLabel()));
 
-                            new SubFormInstanceLoader(model).loadKeyedSubformInstances(subForm).then(new AsyncCallback<List<FormInstance>>() {
+                            new SubFormInstanceLoader(model).loadKeyedSubformInstances(subForm).then(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Log.error(caught.getMessage(), caught);
@@ -94,7 +92,7 @@ public class PanelFiller {
                                 }
 
                                 @Override
-                                public void onSuccess(List<FormInstance> result) {
+                                public void onSuccess(Void result) {
                                     panel.add(subformPanel);
 
                                     subformPanel.add(subFormTabsManipulator.getPresenter().getView());
