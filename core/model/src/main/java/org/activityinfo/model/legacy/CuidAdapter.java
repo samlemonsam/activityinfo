@@ -116,6 +116,10 @@ public class CuidAdapter {
         }
     }
 
+    public static boolean isSubformGenerated(ResourceId id) {
+        return id.asString().startsWith("c_");
+    }
+
     public static ResourceId partnerInstanceId(int partnerId) {
         return cuid(PARTNER_DOMAIN, partnerId);
     }

@@ -57,6 +57,11 @@ public class CriteriaAnalysis extends CriteriaVisitor {
         // separate the instances out into domains
         for (ResourceId id : criteria.getInstanceIds()) {
             Preconditions.checkNotNull(id, "ids cannot be null");
+
+            if (CuidAdapter.isSubformGenerated(id)) {
+                idsWithoutLegacyModel.add(id.asString());
+                continue;
+            }
   
             if (criteria.isMappedToLegacyModel()) {
                 if (id.getDomain() == CuidAdapter.SITE_DOMAIN) {
