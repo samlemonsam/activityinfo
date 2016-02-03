@@ -356,4 +356,20 @@ public class FormInstance implements IsResource {
         }
         return copy.isEmpty();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FormInstance instance = (FormInstance) o;
+
+        return !(id != null ? !id.equals(instance.id) : instance.id != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

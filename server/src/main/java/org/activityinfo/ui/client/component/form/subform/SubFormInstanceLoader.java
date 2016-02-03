@@ -76,6 +76,11 @@ public class SubFormInstanceLoader {
             @Override
             public Void apply(final List<FormInstance> instanceList) {
 
+                if (instanceList.isEmpty()) {
+                    result.onSuccess(null);
+                    return null;
+                }
+
                 final List<Integer> counter = Lists.newArrayList();
 
                 for (final FormInstance valueInstance : instanceList) {
