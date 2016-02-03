@@ -53,13 +53,15 @@ public class SubFormInstanceLoader {
     }
 
     public Promise<List<FormInstance>> loadCollectionInstances(final FormClass subForm) {
-        return model.getLocator().queryInstances(ParentCriteria.isChildOf(ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId()))
+        ParentCriteria criteria = ParentCriteria.isChildOf(
+                ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
+        return model.getLocator().queryInstances(criteria)
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override
                     public List<FormInstance> apply(List<FormInstance> instanceList) {
                         for (FormInstance instance : instanceList) {
-                            model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, instance), instance);
-                            persisted.add(instance);
+                             model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, instance), instance);
+                             persisted.add(instance);
                         }
 
                         return instanceList;
@@ -69,7 +71,8 @@ public class SubFormInstanceLoader {
 
     public Promise<List<FormInstance>> loadKeyedSubformInstances(final FormClass subForm) {
 
-        final Promise<List<FormInstance>> promise = model.getLocator().queryInstances(ParentCriteria.isChildOf(ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId()));
+        ParentCriteria criteria = ParentCriteria.isChildOf(ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
+        final Promise<List<FormInstance>> promise = model.getLocator().queryInstances(criteria);
         final Promise<List<FormInstance>> keys = promise.then(new Function<List<FormInstance>, List<FormInstance>>() {
             @Override
             public List<FormInstance> apply(List<FormInstance> instanceList) {

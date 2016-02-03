@@ -95,7 +95,7 @@ public class FormInstance implements IsResource {
         if (resource.getOwnerId() != null) { // owner may be null for FieldTypes
             instance.setOwnerId(resource.getOwnerId());
         }
-        instance.setKeyId(resource.isResourceId("keyId"));
+        instance.setKeyId(ResourceId.valueOf(resource.isString("keyId")));
         instance.propertyBag.setAll(resource);
         return instance;
     }
@@ -106,7 +106,7 @@ public class FormInstance implements IsResource {
         resource.setId(id);
         resource.setOwnerId(ownerId);
         resource.set("classId", classId);
-        resource.set("keyId", keyId.isPresent() ? keyId.get() : null);
+        resource.set("keyId", keyId.isPresent() ? keyId.get().asString() : null);
         resource.setAll(propertyBag);
         return resource;
     }

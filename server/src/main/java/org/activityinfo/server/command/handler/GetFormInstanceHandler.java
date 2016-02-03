@@ -1,5 +1,6 @@
 package org.activityinfo.server.command.handler;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetFormInstance;
@@ -42,17 +43,26 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
 
     private CommandResult fetchByClass(GetFormInstance cmd) {
         List<FormInstanceEntity> entities = entityManager.get().createQuery(
-                "SELECT d FROM FormInstanceEntity d WHERE formInstanceClassId = :ownerId")
-                .setParameter("ownerId", cmd.getClassId())
+                "SELECT d FROM FormInstanceEntity d WHERE formInstanceClassId = :classId")
+                .setParameter("classId", cmd.getClassId())
                 .getResultList();
         return new FormInstanceListResult(JsonHelper.readJsons(entities));
     }
 
     private CommandResult fetchByOwner(GetFormInstance cmd) {
-        List<FormInstanceEntity> entities = entityManager.get().createQuery(
-                "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId")
-                .setParameter("ownerId", cmd.getOwnerId())
-                .getResultList();
+        final List<FormInstanceEntity> entities;
+        if (Strings.isNullOrEmpty(cmd.getClassId())) {
+            entities = entityManager.get().createQuery(
+                    "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId")
+                    .setParameter("ownerId", cmd.getOwnerId())
+                    .getResultList();
+        } else {
+            entities = entityManager.get().createQuery(
+                    "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId AND formInstanceClassId = :classId")
+                    .setParameter("ownerId", cmd.getOwnerId())
+                    .setParameter("classId", cmd.getClassId())
+                    .getResultList();
+        }
         return new FormInstanceListResult(JsonHelper.readJsons(entities));
     }
 

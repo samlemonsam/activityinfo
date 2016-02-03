@@ -16,6 +16,7 @@ public class ParentCriteria implements Criteria {
 
         private final ResourceId parentId;
         private ResourceId restrictedBy;
+        private ResourceId classId;
 
         public Parent(ResourceId parentId) {
             this.parentId = parentId;
@@ -24,6 +25,15 @@ public class ParentCriteria implements Criteria {
         public Parent(ResourceId parentId, ResourceId restrictedBy) {
             this.parentId = parentId;
             this.restrictedBy = restrictedBy;
+        }
+
+        public ResourceId getClassId() {
+            return classId;
+        }
+
+        public Parent setClassId(ResourceId classId) {
+            this.classId = classId;
+            return this;
         }
 
         public ResourceId getParentId() {
@@ -46,8 +56,8 @@ public class ParentCriteria implements Criteria {
 
             Parent parent = (Parent) o;
 
-            return !(parentId != null ? !parentId.equals(parent.parentId) : parent.parentId != null) && !(restrictedBy != null ?
-                    !restrictedBy.equals(parent.restrictedBy) : parent.restrictedBy != null);
+            if (parentId != null ? !parentId.equals(parent.parentId) : parent.parentId != null) return false;
+            return !(restrictedBy != null ? !restrictedBy.equals(parent.restrictedBy) : parent.restrictedBy != null) && !(classId != null ? !classId.equals(parent.classId) : parent.classId != null);
 
         }
 
@@ -55,6 +65,7 @@ public class ParentCriteria implements Criteria {
         public int hashCode() {
             int result = parentId != null ? parentId.hashCode() : 0;
             result = 31 * result + (restrictedBy != null ? restrictedBy.hashCode() : 0);
+            result = 31 * result + (classId != null ? classId.hashCode() : 0);
             return result;
         }
 
@@ -63,6 +74,7 @@ public class ParentCriteria implements Criteria {
             return "Parent{" +
                     "parentId=" + parentId +
                     ", restrictedBy=" + restrictedBy +
+                    ", classId=" + classId +
                     '}';
         }
     }
@@ -116,5 +128,9 @@ public class ParentCriteria implements Criteria {
 
     public static ParentCriteria isChildOf(ResourceId parentId, ResourceId restrictedBy) {
         return new ParentCriteria(new Parent(parentId, restrictedBy));
+    }
+
+    public static ParentCriteria isChildOf(ResourceId parentId, ResourceId restrictedBy, ResourceId classId) {
+        return new ParentCriteria(new Parent(parentId, restrictedBy).setClassId(classId));
     }
 }
