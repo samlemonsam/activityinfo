@@ -109,7 +109,7 @@ public class CuidAdapter {
     }
 
     public static int getLegacyIdFromCuid(ResourceId id) {
-        if(id.getDomain() == '_') {
+        if(id.getDomain() == '_' || id.asString().startsWith(ResourceId.GENERATED_ID_DOMAIN + "_")) {
             return 0;
         } else {
             return getLegacyIdFromCuid(id.asString());
