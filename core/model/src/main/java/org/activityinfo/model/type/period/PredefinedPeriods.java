@@ -21,6 +21,7 @@ package org.activityinfo.model.type.period;
  * #L%
  */
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 
@@ -29,19 +30,17 @@ import org.activityinfo.model.resource.ResourceIdPrefixType;
  */
 public enum PredefinedPeriods {
 
-    YEARLY(new PeriodValue().setYear(1), "Yearly"),
-    MONTHLY(new PeriodValue().setMonth(1), "Monthly"),
-    BI_WEEKLY(new PeriodValue().setWeek(2), "Each two weeks"),
-    WEEKLY(new PeriodValue().setWeek(1), "Weekly"),
-    DAILY(new PeriodValue().setDay(1), "Daily"),
-    HOURLY(new PeriodValue().setHour(1), "Hourly");
+    YEARLY(new PeriodValue().setYear(1)),
+    MONTHLY(new PeriodValue().setMonth(1)),
+    BI_WEEKLY(new PeriodValue().setWeek(2)),
+    WEEKLY(new PeriodValue().setWeek(1)),
+    DAILY(new PeriodValue().setDay(1)),
+    HOURLY(new PeriodValue().setHour(1));
 
     private final PeriodValue period;
-    private final String label;
 
-    PredefinedPeriods(PeriodValue period, String label) {
+    PredefinedPeriods(PeriodValue period) {
         this.period = period;
-        this.label = label;
     }
 
     public PeriodValue getPeriod() {
@@ -49,7 +48,21 @@ public enum PredefinedPeriods {
     }
 
     public String getLabel() {
-        return label;
+        switch(this) {
+            case YEARLY:
+                return I18N.CONSTANTS.yearly();
+            case BI_WEEKLY:
+                return I18N.CONSTANTS.fortnightly();
+            case DAILY:
+                return I18N.CONSTANTS.daily();
+            case HOURLY:
+                return I18N.CONSTANTS.hourly();
+            case MONTHLY:
+                return I18N.CONSTANTS.monthly();
+            case WEEKLY:
+                return I18N.CONSTANTS.weekly();
+        }
+        return "";
     }
 
     public ResourceId getResourceId() {

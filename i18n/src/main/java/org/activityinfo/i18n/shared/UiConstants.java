@@ -1701,4 +1701,16 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Failed to load subform instances.")
     String failedToLoadSubformInstances();
+
+    @DefaultStringValue("Yearly")
+    String yearly();
+
+    @DefaultStringValue("Fortnightly")
+    String fortnightly();
+
+    @DefaultStringValue("Daily")
+    String daily();
+
+    @DefaultStringValue("Hourly")
+    String hourly();
 }

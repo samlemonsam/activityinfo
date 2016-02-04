@@ -39,14 +39,15 @@ public class SubFormKindRegistry {
     private final Map<ResourceId, SubFormKind> kinds = Maps.newLinkedHashMap();
 
     private SubFormKindRegistry() {
+
+        register(ClassType.REPEATING.createSubformKind());
+
         register(new PeriodSubFormKind(PredefinedPeriods.YEARLY));
         register(new PeriodSubFormKind(PredefinedPeriods.MONTHLY));
+        register(new PeriodSubFormKind(PredefinedPeriods.BI_WEEKLY));
         register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
         register(new PeriodSubFormKind(PredefinedPeriods.DAILY));
 
-        for (ClassType type : ClassType.values()) {
-            register(type.createSubformKind());
-        }
     }
 
     private void register(SubFormKind kind) {
