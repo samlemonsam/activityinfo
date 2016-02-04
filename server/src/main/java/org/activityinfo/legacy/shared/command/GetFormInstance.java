@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * TODO Revise this class! Implementation must be based on Criteria and Cloud Storage
+ *
  * Created by yuriy on 3/1/2015.
  */
 public class GetFormInstance implements Command<FormInstanceListResult> {
@@ -22,7 +24,7 @@ public class GetFormInstance implements Command<FormInstanceListResult> {
     private Type type = Type.ID;
     private List<String> instanceIds = Lists.newArrayList();
     private String classId = null;
-    private String ownerId = null;
+    private Collection<String> ownerIds = Lists.newArrayList();
 
     public GetFormInstance() {
     }
@@ -41,19 +43,29 @@ public class GetFormInstance implements Command<FormInstanceListResult> {
     }
 
     public GetFormInstance setInstanceIdList(List<ResourceId> instanceIdList) {
-        instanceIds = Lists.newArrayList();
-        for (ResourceId id : instanceIdList) {
-            instanceIds.add(id.asString());
-        }
+        instanceIds = asStrings(instanceIdList);
         return this;
     }
 
-    public String getOwnerId() {
-        return ownerId;
+    public static List<String> asStrings(Collection<ResourceId> instanceIdList) {
+        List<String> result = Lists.newArrayList();
+        for (ResourceId id : instanceIdList) {
+            result.add(id.asString());
+        }
+        return result;
     }
 
-    public GetFormInstance setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
+    public Collection<String> getOwnerIds() {
+        return ownerIds;
+    }
+
+    public GetFormInstance setOwnerIds(Collection<String> ownerIds) {
+        this.ownerIds = ownerIds;
+        return this;
+    }
+
+    public GetFormInstance setOwnerIdList(Collection<ResourceId> ownerIds) {
+        this.ownerIds = asStrings(ownerIds);
         return this;
     }
 

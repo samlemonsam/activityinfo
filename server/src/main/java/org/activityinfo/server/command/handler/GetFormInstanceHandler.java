@@ -16,6 +16,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 /**
+ * TODO Revise this class! Implementation must be based on Criteria and Cloud Storage
+ *
  * Created by yuriy on 3/1/2015.
  */
 public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
@@ -50,18 +52,21 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
     }
 
     private CommandResult fetchByOwner(GetFormInstance cmd) {
-        final List<FormInstanceEntity> entities;
-        if (Strings.isNullOrEmpty(cmd.getClassId())) {
-            entities = entityManager.get().createQuery(
-                    "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId")
-                    .setParameter("ownerId", cmd.getOwnerId())
-                    .getResultList();
-        } else {
-            entities = entityManager.get().createQuery(
-                    "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId AND formInstanceClassId = :classId")
-                    .setParameter("ownerId", cmd.getOwnerId())
-                    .setParameter("classId", cmd.getClassId())
-                    .getResultList();
+        final List<FormInstanceEntity> entities = Lists.newArrayList();
+
+        for (String ownerId : cmd.getOwnerIds()) {
+            if (Strings.isNullOrEmpty(cmd.getClassId())) {
+                entities.addAll(entityManager.get().createQuery(
+                        "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId")
+                        .setParameter("ownerId", ownerId)
+                        .getResultList());
+            } else {
+                entities.addAll(entityManager.get().createQuery(
+                        "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId AND formInstanceClassId = :classId")
+                        .setParameter("ownerId", ownerId)
+                        .setParameter("classId", cmd.getClassId())
+                        .getResultList());
+            }
         }
         return new FormInstanceListResult(JsonHelper.readJsons(entities));
     }

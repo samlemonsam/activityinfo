@@ -122,7 +122,7 @@ public class QueryExecutor {
 
     private Promise<List<FormInstance>> queryByOwner(final ParentCriteria.Parent parent) {
         GetFormInstance command = new GetFormInstance()
-                .setOwnerId(parent.getRestrictedBy().asString())
+                .setOwnerIds(Lists.newArrayList(parent.getRestrictedBy().asString()))
                 .setType(GetFormInstance.Type.OWNER)
                 .setClassId(parent.getClassId().asString());
         return dispatcher.execute(command).then(FormInstanceListAdapter.getInstance());
