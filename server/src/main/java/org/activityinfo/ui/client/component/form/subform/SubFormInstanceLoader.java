@@ -52,7 +52,7 @@ public class SubFormInstanceLoader {
 
     public Promise<List<FormInstance>> loadCollectionInstances(final FormClass subForm) {
         ParentCriteria criteria = ParentCriteria.isChildOf(
-                ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
+                ClassType.REPEATING.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
         return model.getLocator().queryInstances(criteria)
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override
@@ -70,7 +70,7 @@ public class SubFormInstanceLoader {
     public Promise<Void> loadKeyedSubformInstances(final FormClass subForm) {
         final Promise<Void> result = new Promise<>();
 
-        ParentCriteria criteria = ParentCriteria.isChildOf(ClassType.COLLECTION.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
+        ParentCriteria criteria = ParentCriteria.isChildOf(ClassType.REPEATING.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
 
         model.getLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Void>() {
             @Override

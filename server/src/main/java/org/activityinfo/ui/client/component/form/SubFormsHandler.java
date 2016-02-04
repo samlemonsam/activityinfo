@@ -23,7 +23,7 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipulator;
+import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
 
 import java.util.Map;
 
@@ -32,18 +32,18 @@ import java.util.Map;
  */
 public class SubFormsHandler {
 
-    private final Map<FormClass, SubFormCollectionManipulator> subForms = Maps.newHashMap();
+    private final Map<FormClass, SubFormRepeatingManipulator> subForms = Maps.newHashMap();
 
     public SubFormsHandler() {
     }
 
-    public Map<FormClass, SubFormCollectionManipulator> getSubForms() {
+    public Map<FormClass, SubFormRepeatingManipulator> getSubForms() {
         return subForms;
     }
 
     public boolean validate() {
         boolean valid = true;
-        for (SubFormCollectionManipulator manipulator : subForms.values()) {
+        for (SubFormRepeatingManipulator manipulator : subForms.values()) {
             for (SimpleFormPanel subFormPanel : manipulator.getForms().values()) {
                 if (!subFormPanel.validate()) {
                     valid = false;

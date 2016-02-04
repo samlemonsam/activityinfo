@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public enum ClassType {
 
-    COLLECTION,
+    REPEATING,
 
     LOCATION_TYPE,
     PARTNER,
@@ -64,8 +64,8 @@ public enum ClassType {
 
     public String getLabel() {
         switch (this) {
-            case COLLECTION:
-                return I18N.CONSTANTS.collection();
+            case REPEATING:
+                return I18N.CONSTANTS.repeating();
             case LOCATION_TYPE:
                 return I18N.CONSTANTS.locationType();
             case PARTNER:
@@ -93,7 +93,7 @@ public enum ClassType {
             case CuidAdapter.PROJECT_CLASS_DOMAIN:
                 return PROJECT;
             case CuidAdapter.COLLECTION_DOMAIN:
-                return COLLECTION;
+                return REPEATING;
         }
         return null;
     }
@@ -122,11 +122,11 @@ public enum ClassType {
         return Optional.fromNullable(ClassType.byId(subForm.getKeyFieldType().get().getRange().iterator().next()));
     }
 
-    public static boolean isCollection(FormClass formClass) {
+    public static boolean isRepeating(FormClass formClass) {
         Optional<ClassType> classType = byFormClass(formClass);
         if (!classType.isPresent()) {
             return false;
         }
-        return classType.get() == ClassType.COLLECTION;
+        return classType.get() == ClassType.REPEATING;
     }
 }

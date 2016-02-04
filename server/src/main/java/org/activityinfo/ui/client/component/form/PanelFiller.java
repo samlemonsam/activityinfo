@@ -32,7 +32,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormType;
-import org.activityinfo.ui.client.component.form.subform.SubFormCollectionManipulator;
+import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 
@@ -71,11 +71,11 @@ public class PanelFiller {
                         final FormClass subForm = model.getSubFormByOwnerFieldId(formField.getId());
 
 
-                        if (ClassType.isCollection(subForm)) { // unkeyed subforms -> simple collection
-                            SubFormCollectionManipulator collectionManipulator = new SubFormCollectionManipulator(subForm, model, panel, depth + 1);
-                            collectionManipulator.show();
+                        if (ClassType.isRepeating(subForm)) { // unkeyed subforms -> simple repeating
+                            SubFormRepeatingManipulator manipulator = new SubFormRepeatingManipulator(subForm, model, panel, depth + 1);
+                            manipulator.show();
 
-                            subFormsHandler.getSubForms().put(subForm, collectionManipulator);
+                            subFormsHandler.getSubForms().put(subForm, manipulator);
                         } else { // keyed subforms
                             final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator(), relevanceHandler);
 

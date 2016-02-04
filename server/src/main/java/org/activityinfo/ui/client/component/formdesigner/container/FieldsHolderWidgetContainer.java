@@ -104,7 +104,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass subForm, ResourceId parentId) {
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, subForm, parentId);
         container.isSubform = true;
-        container.getPanel().getPanel().getSubformTabs().setVisible(!ClassType.isCollection(subForm));
+        container.getPanel().getPanel().getSubformTabs().setVisible(!ClassType.isRepeating(subForm));
         container.getPanel().getPanel().setOnRemoveConfirmationCallback(new ClickHandler() {
             @Override
             public void onClick(final ClickEvent event) {
@@ -139,8 +139,8 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             final FormClass subForm = (FormClass) elementContainer;
             final FormModel formModel = new FormModel(formDesigner.getResourceLocator());
 
-            panel.getPanel().getSubformTabs().setVisible(!ClassType.isCollection(subForm));
-            if (!ClassType.isCollection(subForm)) { // keyed subforms
+            panel.getPanel().getSubformTabs().setVisible(!ClassType.isRepeating(subForm));
+            if (!ClassType.isRepeating(subForm)) { // keyed subforms
                 final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner, panel.getPanel().getSubformTabs());
 
                 if (panel.getPanel().getSubformTabs().isAttached()) {

@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * @author yuriyz on 01/18/2016.
  */
-public class SubFormCollectionManipulator {
+public class SubFormRepeatingManipulator {
 
     public static final ResourceId SORT_FIELD_ID = ResourceId.valueOf("sort");
 
@@ -62,7 +62,7 @@ public class SubFormCollectionManipulator {
 
     private final Map<FormModel.SubformValueKey, SimpleFormPanel> forms = Maps.newHashMap();
 
-    public SubFormCollectionManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel, int depth) {
+    public SubFormRepeatingManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel, int depth) {
         this.subForm = subForm;
         this.formModel = formModel;
         this.rootPanel = rootPanel;
@@ -74,7 +74,7 @@ public class SubFormCollectionManipulator {
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addForm(newKey(), SubFormCollectionManipulator.this.rootPanel.getWidgetIndex(addButton));
+                addForm(newKey(), SubFormRepeatingManipulator.this.rootPanel.getWidgetIndex(addButton));
                 setDeleteButtonsState();
             }
         });

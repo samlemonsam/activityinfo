@@ -58,7 +58,7 @@ public class FormActions {
         toPersist.add(panel.getModel().getWorkingRootInstance()); // root instance
 
         for (Map.Entry<FormModel.SubformValueKey, FormInstance> entry : subformInstances.entrySet()) { // sub form instances
-            if (!ClassType.isCollection(entry.getKey().getSubForm())) {
+            if (!ClassType.isRepeating(entry.getKey().getSubForm())) {
                 toPersist.add(entry.getKey().getInstance()); // keyes
             }
             toPersist.add(entry.getValue()); // values

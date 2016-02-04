@@ -77,7 +77,7 @@ public class FormWidgetCreator {
         for (final FormField field : formClass.getFields()) {
             if (field.getType() instanceof SubFormType) {
                 FormClass subForm = model.getSubFormByOwnerFieldId(field.getId());
-                if (!ClassType.isCollection(subForm)) { // for collection we create it internally in sub SimpleFormPanel
+                if (!ClassType.isRepeating(subForm)) { // for repeating we create it internally in sub SimpleFormPanel
                     Promise<Void> subFormWidgetsPromise = createWidgets(subForm, fieldUpdated);
                     promises.add(subFormWidgetsPromise);
                 }

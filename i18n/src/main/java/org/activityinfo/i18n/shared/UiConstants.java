@@ -1690,8 +1690,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
-    @DefaultStringValue("Collection")
-    String collection();
+    @DefaultStringValue("Repeating")
+    String repeating();
 
     @DefaultStringValue("+ Add another")
     String addAnother();
