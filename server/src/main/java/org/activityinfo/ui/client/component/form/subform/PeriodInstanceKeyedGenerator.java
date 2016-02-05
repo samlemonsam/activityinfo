@@ -124,7 +124,7 @@ public class PeriodInstanceKeyedGenerator {
         int size = lastGeneratedList.size();
         FormInstance lastInstance = lastGeneratedList.get(size - 1);
         DateRange lastDateRange = getDateRangeFromInstance(lastInstance);
-        Date point = lastDateRange.midDate();
+        Date point = PredefinedPeriods.DAILY.getPeriod().equals(lastPeriod) ? lastDateRange.getEnd() : lastDateRange.midDate();
         List<FormInstance> next = generate(lastPeriod, point, Direction.FORWARD, 1, false);
         lastGeneratedList.remove(0); // remove first
         lastGeneratedList.add(size - 1, next.get(0)); // add next at the end

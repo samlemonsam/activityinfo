@@ -406,6 +406,88 @@ public class InstanceGeneratorTest {
 
     }
 
+    @Test
+    public void daily() {
+        PeriodInstanceKeyedGenerator generator = jvmGenerator();
+
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.DAILY.getPeriod(), fixedDate(4, Calendar.FEBRUARY, 2016), PeriodInstanceKeyedGenerator.Direction.BACK, 4);
+
+        print(instances, "Daily BACK 4");
+
+        Assert.assertEquals(instances.size(), 4);
+        assertLabel(instances.get(0), "31 Jan 2016");
+        assertLabel(instances.get(1), "01 Feb 2016");
+        assertLabel(instances.get(2), "02 Feb 2016");
+        assertLabel(instances.get(3), "03 Feb 2016");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "30 Jan 2016");
+        assertLabel(instances.get(1), "31 Jan 2016");
+        assertLabel(instances.get(2), "01 Feb 2016");
+        assertLabel(instances.get(3), "02 Feb 2016");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "29 Jan 2016");
+        assertLabel(instances.get(1), "30 Jan 2016");
+        assertLabel(instances.get(2), "31 Jan 2016");
+        assertLabel(instances.get(3), "01 Feb 2016");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "28 Jan 2016");
+        assertLabel(instances.get(1), "29 Jan 2016");
+        assertLabel(instances.get(2), "30 Jan 2016");
+        assertLabel(instances.get(3), "31 Jan 2016");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "27 Jan 2016");
+        assertLabel(instances.get(1), "28 Jan 2016");
+        assertLabel(instances.get(2), "29 Jan 2016");
+        assertLabel(instances.get(3), "30 Jan 2016");
+
+        instances = generator.next();
+
+        print(instances, "Daily NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "28 Jan 2016");
+        assertLabel(instances.get(1), "29 Jan 2016");
+        assertLabel(instances.get(2), "30 Jan 2016");
+        assertLabel(instances.get(3), "31 Jan 2016");
+
+        instances = generator.next();
+
+        print(instances, "Daily NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "29 Jan 2016");
+        assertLabel(instances.get(1), "30 Jan 2016");
+        assertLabel(instances.get(2), "31 Jan 2016");
+        assertLabel(instances.get(3), "01 Feb 2016");
+
+    }
+
     private PeriodInstanceKeyedGenerator jvmGenerator() {
         return new PeriodInstanceKeyedGenerator(ResourceId.generateId(), new PeriodInstanceKeyedGenerator.Formatter() {
             @Override
@@ -431,15 +513,19 @@ public class InstanceGeneratorTest {
     }
 
     private Date fixedDate(int month, int year) {
+        return fixedDate(1, month, year);
+    }
+
+    private Date fixedDate(int day, int month, int year) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         System.out.println(calendar.getTime());
         return calendar.getTime();
     }
 
-    private void assertLabel(FormInstance instance, String expectedLabel) {
+    private static void assertLabel(FormInstance instance, String expectedLabel) {
         Assert.assertEquals(FormInstanceLabeler.getLabel(instance), expectedLabel);
     }
 
