@@ -253,7 +253,7 @@ public class Filter implements Serializable {
             }
             sb.append(" }");
         }
-        if (dateRange.getMinDate() != null || dateRange.getMaxDate() != null) {
+        if (dateRange != null && (dateRange.getMinDate() != null || dateRange.getMaxDate() != null)) {
             if (sb.length() != 0) {
                 sb.append(", ");
             }

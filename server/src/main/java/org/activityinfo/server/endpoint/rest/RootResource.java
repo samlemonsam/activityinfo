@@ -35,6 +35,7 @@ import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
@@ -62,18 +63,20 @@ public class RootResource {
     private DeploymentConfiguration config;
     private Provider<CollectionCatalog> catalog;
     private Provider<AuthenticatedUser> userProvider;
+    private ServerSideAuthProvider authProvider;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
                         Provider<CollectionCatalog> catalog,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider) {
+                        DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider, ServerSideAuthProvider authProvider) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.catalog = catalog;
         this.config = config;
         this.userProvider = userProvider;
+        this.authProvider = authProvider;
     }
 
     @Path("/adminEntity/{id}")
@@ -200,4 +203,11 @@ public class RootResource {
     public UsageResource getUsage() {
         return new UsageResource(entityManager, config);
     }
+    
+    @Path("/testPivot")
+    public PivotTestResource getPivotTestResource() {
+        return new PivotTestResource( dispatcher, authProvider);
+    }
+    
+    
 }

@@ -67,6 +67,6 @@ public class AttributeGroupDimension extends Dimension {
 
     @Override
     public String toString() {
-        return "AttributeGroupDimension[" + attributeGroupId + "]";
+        return "AttributeGroupDimension." + attributeGroupId;
     }
 }
