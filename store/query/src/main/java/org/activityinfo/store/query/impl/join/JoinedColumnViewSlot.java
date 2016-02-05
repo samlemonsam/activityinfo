@@ -87,6 +87,8 @@ public class JoinedColumnViewSlot implements Slot<ColumnView> {
             int right = joinMap[row];
             if(right != -1) {
                 array[row] = columnView.getDouble(right);
+            } else {
+                array[row] = Double.NaN;
             }
         }
         return new DoubleArrayColumnView(array);    

@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl.builders;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnType;
@@ -72,7 +73,8 @@ public class ColumnCombiner implements Slot<ColumnView> {
         return new StringArrayColumnView(values);
     }
 
-    private ColumnView combineDouble(ColumnView[] cols) {
+    @VisibleForTesting
+    static ColumnView combineDouble(ColumnView[] cols) {
         int numRows = cols[0].numRows();
         int numCols = cols.length;
 
@@ -81,7 +83,7 @@ public class ColumnCombiner implements Slot<ColumnView> {
         for(int i=0;i!=numRows;++i) {
             values[i] = Double.NaN;
             for(int j=0;j!=numCols;++j) {
-                double value = cols[j].getDouble(j);
+                double value = cols[j].getDouble(i);
                 if(!Double.isNaN(value)) {
                     values[i] = value;
                     break;

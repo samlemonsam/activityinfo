@@ -321,7 +321,6 @@ public class CollectionScan {
         return collectionId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 
-
     private String fkCacheKey(String fieldId) {
         return collectionId.asString() + "@" + cacheVersion + ".fk." + fieldId;
     }
