@@ -57,12 +57,14 @@ execute <- function(reportId, userId, engine) {
 
 #' Profiles the new query engine, sampling from the list of all saved reports.
 #' @return a data frame with performance and comparison data for each sampled report
-profile.new.old <- function(n = 100, report.id) {
+profile.new.old <- function(n, report.id) {
   reports <- queryReports()
-  if(missing(report.id)) {
+  if(!missing(report.id)) {
+    rows <- which(reports$id == report.id)
+  } else if(!missing(n)) {
     rows <- sample(x = nrow(reports), size = n)
   } else {
-    rows <- which(reports$id == report.id)
+    rows <- 1:nrow(reports)
   }
   for(i in rows) {
     report <- reports[i, ]
@@ -90,11 +92,22 @@ compareResults <- function(report.id, old, nqe) {
   if(length(old) == 0) {
     return(NA)
   }
-  matching <- sapply(1:length(old), function(i) {
-    compareBuckets( report.id, i, old[[i]]$buckets, nqe[[i]]$buckets)
+  tryCatch({
+    matching <- sapply(1:length(old), function(i) {
+      compareBuckets( report.id, i, old[[i]]$buckets, nqe[[i]]$buckets)
+    })
+    return(all(matching))
+  }, error = function(e) {
+    cat("  -> ERROR!\n")
+    capture.output({ 
+      print(e)
+      cat("old:\n")
+      str(old)
+      cat("new:\n")
+      str(nqe)
+    }, file = sprintf("logs/%d.error.log", report.id))
+    return(NA)
   })
-  
-  all(matching)
 }
 
 #' Convert a PivotResult object into an R dataframe
@@ -109,8 +122,6 @@ as.data.frame.buckets <- function(buckets, value.column = "value") {
   # AdminLevel, Activity, Indicator, etc
   dims <- sort(unique(unlist(lapply(buckets, function(bucket) names(bucket$key)))))
  
-  # Sanitize names
-  
   
   for(dim in dims) {
     dim.id <- sapply(buckets, dimId, dim)
@@ -118,7 +129,7 @@ as.data.frame.buckets <- function(buckets, value.column = "value") {
     if(!all(is.na(dim.id))) {
       df[[dim]] <- dim.id
       df[[paste(dim, "label", sep=".")]] <- dim.label
-    } else {
+    } else if(!all(is.na(dim.label))) {
       df[[dim]] <- dim.label
     }
   }
@@ -155,7 +166,7 @@ dimId <- function(bucket, dim) {
 dimLabel <- function(bucket, dim) {
   key <- bucket$key[[dim]]
   if(is.character(key)) {
-    key
+    as.character(key[1])
   } else if(is.null(key$label)) {
     NA
   } else {
@@ -166,11 +177,23 @@ dimLabel <- function(bucket, dim) {
 
 bucketValue <- function(bucket) {
   if(bucket$aggregationMethod == 0) {
-    bucket$sum
+    if(is.numeric(bucket$sum)) {
+      bucket$sum
+    } else {
+      NA
+    }
   } else if(bucket$aggregationMethod == 1) {
-    bucket$sum / bucket$count
+    if(is.numeric(bucket$sum) && is.numeric(bucket$count)) {
+      bucket$sum / bucket$count
+    } else {
+      NA
+    }
   } else {
-    bucket$count
+    if(is.numeric(bucket$count)) {
+      bucket$count
+    } else {
+      NA
+    }
   }
 }
 
@@ -207,3 +230,4 @@ compareBuckets <- function(report.id, user.id, old, nqe) {
     return(FALSE)
   }
 }
+
