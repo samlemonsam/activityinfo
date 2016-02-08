@@ -229,11 +229,16 @@ public class DesignSteps {
 
             dropPanel.dragAndDrop(dropLabel);
 
-//            page.fields().dropNewField(entry.getValue());
-//            page.selectFieldByLabel(entry.getValue());
-//
-//            String label = driver.getAliasTable().createAlias(entry.getKey());
-//            page.fieldProperties().setLabel(label);
+            if ("root".equalsIgnoreCase(containerLabel) && (
+                    fieldType.equalsIgnoreCase("Section") || fieldType.equalsIgnoreCase("Sub Form"))) {
+                dropPanel.getContainer().clickWhenReady();
+
+                page.containerProperties().setLabel(label);
+
+            } else {
+                page.selectFieldByLabel(fieldType);
+                page.fieldProperties().setLabel(driver.getAliasTable().createAlias(label));
+            }
         }
 
         page.save();

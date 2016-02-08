@@ -11,14 +11,15 @@ Feature: Subforms
     Given I open the form designer for "NFI Distribution" in database "Subforms"
     And drop field in:
       | label         | type    | container |
-      | Section     | Section | root      |
+      | MySection     | Section | root      |
       | Root Field    | Text    | root      |
-      | Section Field | Text    | Section |
+      | Section Field | Text    | MySection |
     And I submit a "NFI Distribution" form with:
       | field         | value        |
       | partner       | NRC          |
       | Root Field    | root test    |
       | Section Field | section test |
+    And open table for the "NFI Distribution" form in the database "Subforms"
     Then table has rows with hidden built-in columns:
       | Root Field | Section Field |
       | text       | text          |

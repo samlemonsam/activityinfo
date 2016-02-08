@@ -72,10 +72,22 @@ public class FormDesignerPage {
     }
 
     public PropertiesPanel fieldProperties() {
-        return new PropertiesPanel(container.find().div(withClass("panel-heading")).
-                ancestor().div(withClass("panel")).first());
+        selectTab("Field");
+        List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
+        return new PropertiesPanel(panels.get(0));
+
     }
-    
+
+    public PropertiesPanel containerProperties() {
+        selectTab("Container");
+        List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
+        return new PropertiesPanel(panels.get(1));
+    }
+
+    private void selectTab(String tabText) {
+        container.find().b(withText(tabText)).first().clickWhenReady();
+    }
+
     public FieldPalette fields() {
         return new FieldPalette(container.find()
                 .h4(withText(I18N.CONSTANTS.fields()))
