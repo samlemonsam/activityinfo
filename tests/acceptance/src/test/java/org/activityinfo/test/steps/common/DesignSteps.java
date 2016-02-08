@@ -27,9 +27,12 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
+import org.activityinfo.test.pageobject.web.design.designer.DropLabel;
+import org.activityinfo.test.pageobject.web.design.designer.DropPanel;
 import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
 import org.openqa.selenium.support.ui.Select;
 
@@ -190,7 +193,7 @@ public class DesignSteps {
             page.selectFieldByLabel(entry.getValue());
 
             String label = driver.getAliasTable().createAlias(entry.getKey());
-            page.properties().setLabel(label);
+            page.fieldProperties().setLabel(label);
         }
 
         page.save();
@@ -201,6 +204,38 @@ public class DesignSteps {
     public void set_relevance_for_field(String fieldName, DataTable dataTable) throws Throwable {
         FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
         page.setRelevance(driver.getAliasTable().getAlias(fieldName), dataTable, driver.getAliasTable());
+        page.save();
+    }
+
+    // accepts table :
+    //| label        | type        | container  |
+    //| MySection    | Section     | root       |
+    //| MyText       | Text        | MySection  |
+    @And("^drop field in:$")
+    public void drop_field_in(DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        for (int i = 1; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+
+            List<String> cells = row.getCells();
+
+            String label = cells.get(0);
+            String fieldType = cells.get(1);
+            String containerLabel = cells.get(2);
+
+            DropLabel dropLabel = page.fields().dropLabel(fieldType);
+            DropPanel dropPanel = page.dropPanel(containerLabel);
+
+            dropPanel.dragAndDrop(dropLabel);
+
+//            page.fields().dropNewField(entry.getValue());
+//            page.selectFieldByLabel(entry.getValue());
+//
+//            String label = driver.getAliasTable().createAlias(entry.getKey());
+//            page.fieldProperties().setLabel(label);
+        }
+
         page.save();
     }
 }

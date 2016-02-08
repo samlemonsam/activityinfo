@@ -833,7 +833,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     public void assertDesignerFieldVisible(String fieldLabel) {
         assertNotNull("Failed to find designer field with label: " + fieldLabel,
-                formDesigner().dropTarget().fieldByLabel(fieldLabel));
+                formDesigner().rootDropTarget().fieldByLabel(fieldLabel));
     }
 
     private FormDesignerPage formDesigner() {
@@ -843,15 +843,15 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     public void assertDesignerFieldIsNotDeletable(String fieldLabel) {
-        Preconditions.checkState(!formDesigner().dropTarget().fieldByLabel(fieldLabel).isDeletable(),
+        Preconditions.checkState(!formDesigner().rootDropTarget().fieldByLabel(fieldLabel).isDeletable(),
                 "Field with label '" + fieldLabel +"' is deletable.");
     }
 
     @Override
     public void assertDesignerFieldHasProperty(String fieldLabel, DesignerFieldPropertyType fieldPropertyType, boolean enabled) {
-        DesignerField designerField = formDesigner().dropTarget().fieldByLabel(fieldLabel);
+        DesignerField designerField = formDesigner().rootDropTarget().fieldByLabel(fieldLabel);
         designerField.element().clickWhenReady();
-        PropertiesPanel propertiesPanel = formDesigner().properties();
+        PropertiesPanel propertiesPanel = formDesigner().fieldProperties();
 
         final boolean actualValue;
         switch (fieldPropertyType) {
@@ -878,19 +878,19 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     public DesignerField getDesignerField(String fieldLabel) {
-        return formDesigner().dropTarget().fieldByLabel(fieldLabel);
+        return formDesigner().rootDropTarget().fieldByLabel(fieldLabel);
     }
 
     public void changeDesignerField(String fieldLabel, List<FieldValue> values) {
-        formDesigner().dropTarget().fieldByLabel(fieldLabel).element().clickWhenReady();
-        formDesigner().properties().setValues(values);
+        formDesigner().rootDropTarget().fieldByLabel(fieldLabel).element().clickWhenReady();
+        formDesigner().fieldProperties().setValues(values);
     }
 
     public void assertDesignerFieldReorder(String fieldLabel, int positionOnPanel) {
-        int positionBeforeReorder = formDesigner().dropTarget().fieldPosition(fieldLabel);
-        formDesigner().dropTarget().dragAndDrop(fieldLabel, positionOnPanel);
+        int positionBeforeReorder = formDesigner().rootDropTarget().fieldPosition(fieldLabel);
+        formDesigner().rootDropTarget().dragAndDrop(fieldLabel, positionOnPanel);
 
-        int positionAfterReorder = formDesigner().dropTarget().fieldPosition(fieldLabel);
+        int positionAfterReorder = formDesigner().rootDropTarget().fieldPosition(fieldLabel);
         assertEquals(positionAfterReorder, positionOnPanel);
         assertNotEquals(positionBeforeReorder, positionAfterReorder); // make sure field is really reordered
     }

@@ -18,14 +18,14 @@ Feature: New table (based on new form)
   Scenario: Deletion
     When open table for the "Medical Activities" form in the database "Patient Registration"
     And delete rows with text:
-      | 230  |
-      | 51   |
+      | 230 |
+      | 51  |
     Then table has rows with hidden built-in columns:
-      | Number of patients | Donor   | Diseases treated this month    |
-      | quantity           | enum    | enum                           |
-      | 1                  | ECHO    | cholera                        |
-      | 13                 | USAID   | cholera, malaria               |
-      | 11                 | ECHO   | cholera                        |
+      | Number of patients | Donor | Diseases treated this month |
+      | quantity           | enum  | enum                        |
+      | 1                  | ECHO  | cholera                     |
+      | 13                 | USAID | cholera, malaria            |
+      | 11                 | ECHO  | cholera                     |
 
   @AI-1132
   Scenario: Updating enum values
