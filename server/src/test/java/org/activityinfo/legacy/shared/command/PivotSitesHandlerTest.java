@@ -846,7 +846,40 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
                 (26.8106418 + 28.37725848) / 2.0,
                 (-4.022388142 + -1.991221064) / 2.0);
     }
-
+    
+    @Test
+    public void noVisibility() {
+        
+        // Christian's access has been revoked
+        int christian = 5;
+        
+        filteringOnDatabases(1);
+        dimensions.add(new Dimension(DimensionType.Database));
+        withIndicatorAsDimension();
+        
+        execute(christian);
+        
+        assertBucketCount(0);
+    }
+    
+    @Test
+    public void partnerLimitedVisibility() {
+        // Bavon can only view NRC
+        int bavon = 2;
+        int nrc = 1;
+        int solidarite = 2;
+        
+        filteringOnDatabases(1);
+        withIndicatorAsDimension();
+        withPartnerAsDimension();
+        
+        execute(bavon);
+        
+        assertThat().forPartner(solidarite).thereAre(0);
+        assertThat().forPartner(nrc).thereAre(4);
+        assertBucketCount(4);
+    }
+    
     private void filteringOnDatabases(Integer... databaseIds) {
         filter.addRestriction(DimensionType.Database, asList(databaseIds));
     }
@@ -920,8 +953,10 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     private void execute() {
-
-        setUser(OWNER_USER_ID);
+        execute(OWNER_USER_ID);
+    }
+    private void execute(int userId) {
+        setUser(userId);
         try {
             PivotSites pivot = new PivotSites(dimensions, filter);
             pivot.setValueType(valueType);
