@@ -31,6 +31,7 @@ import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
+import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.ui.ImagePathProvider;
 import org.joda.time.LocalDate;
@@ -67,6 +68,32 @@ public class BsFormPanel extends Form {
         }
 
         throw new AssertionError(String.format("The form panel has no field with label %s", labelText));
+    }
+
+    /**
+     * Useful for repeating subforms where we may have many fields with the same label.
+     *
+     * @param labelText label text
+     * @return all fields by label
+     */
+    public List<BsField> findFieldsByLabel(String labelText) {
+        List<BsField> result = Lists.newArrayList();
+
+        XPathBuilder div = form.find().label(withText(labelText)).ancestor().div(withClass("form-group"));
+        if (div.firstIfPresent().isPresent()) {
+            for (FluentElement element : div.waitForList().list()) {
+                result.add(new BsField(element));
+            }
+            return result;
+        }
+
+        XPathBuilder label = form.find().label(withText(labelText)).ancestor().span(withClass("radio"));
+        if (label.firstIfPresent().isPresent()) {
+            for (FluentElement element : label.waitForList().list()) {
+                result.add(new BsField(element));
+            }
+        }
+        return result;
     }
 
     @Override

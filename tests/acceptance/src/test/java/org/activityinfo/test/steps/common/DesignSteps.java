@@ -28,6 +28,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
@@ -231,7 +232,8 @@ public class DesignSteps {
 
             if ("root".equalsIgnoreCase(containerLabel) && (
                     fieldType.equalsIgnoreCase("Section") || fieldType.equalsIgnoreCase("Sub Form"))) {
-                dropPanel.getContainer().clickWhenReady();
+                DropPanel containerDropPanel = page.dropPanel(fieldType);
+                containerDropPanel.getContainer().clickWhenReady();
 
                 page.containerProperties().setLabel(label);
 
@@ -241,6 +243,17 @@ public class DesignSteps {
             }
         }
 
+        page.save();
+    }
+
+    @And("^set \"([^\"]*)\" subform to \"([^\"]*)\"$")
+    public void set_subform_to(String subformName, String subformType) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        DropPanel dropPanel = page.dropPanel(subformName);
+
+        dropPanel.getContainer().clickWhenReady();
+        page.containerProperties().selectProperty(I18N.CONSTANTS.type(), subformType);
         page.save();
     }
 }

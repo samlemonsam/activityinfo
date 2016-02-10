@@ -73,6 +73,10 @@ public class PropertiesPanel {
         form().findFieldByLabel(fieldLabel).fill(value);
     }
 
+    public void selectProperty(String fieldLabel, String value) {
+        form().findFieldByLabel(fieldLabel).select(value);
+    }
+
     public void setLabel(String label) {
         setProperty(I18N.CONSTANTS.labelFieldLabel(), label);
     }

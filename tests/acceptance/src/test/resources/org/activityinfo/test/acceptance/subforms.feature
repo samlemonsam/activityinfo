@@ -24,3 +24,28 @@ Feature: Subforms
       | Root Field | Section Field |
       | text       | text          |
       | root test  | section test  |
+
+  Scenario: Repeating subform
+    Given I open the form designer for "NFI Distribution" in database "Subforms"
+    And drop field in:
+      | label               | type     | container           |
+      | Root Field          | Text     | root                |
+      | Repeating subform 1 | Sub Form | root                |
+      | Repeating subform 2 | Sub Form | root                |
+      | Subform Field 1     | Text     | Repeating subform 1 |
+      | Subform Field 2     | Quantity | Repeating subform 1 |
+      | Subform Field 3     | Text     | Repeating subform 2 |
+      | Subform Field 4     | Quantity | Repeating subform 2 |
+    And set "Repeating subform 1" subform to "Repeating"
+    And set "Repeating subform 2" subform to "Repeating"
+    And open table for the "NFI Distribution" form in the database "Subforms"
+    And I open a new form submission on table page
+    And I enter "Repeating subform 1" repeating subform values:
+      | Subform Field 1 | Subform Field 2 |
+      | value 1         | 1               |
+      | value 2         | 2               |
+    And I enter "Repeating subform 2" repeating subform values:
+      | Subform Field 3 | Subform Field 4 |
+      | value 3         | 3               |
+      | value 4         | 4               |
+    And I save submission

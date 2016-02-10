@@ -20,6 +20,7 @@ import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.TableDataParser;
+import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
 import org.activityinfo.test.pageobject.bootstrap.BsTable;
@@ -42,6 +43,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -489,5 +491,47 @@ public class DataEntrySteps {
     @Then("^\"([^\"]*)\" field should be with an empty value$")
     public void field_should_be_with_an_empty_value(String fieldLabel) throws Throwable {
         assertTrue(driver.getCurrentModal().form().findFieldByLabel(driver.getAliasTable().getAlias(fieldLabel)).isEmpty());
+    }
+
+    @And("^I open a new form submission on table page$")
+    public void I_open_a_new_form_submission_on_table_page() throws Throwable {
+        driver.tablePage().table().newSubmission();
+    }
+
+    @And("^I enter \"([^\"]*)\" repeating subform values:$")
+    public void I_enter_repeating_subform_values(String repeatingSubformName, DataTable subformValues) throws Throwable {
+        BsModal modal = BsModal.find(driver.tablePage().getPage().root());
+
+        DataTableRow header = subformValues.getGherkinRows().get(0);
+
+        addRepetitiveFormsIfNeeded(repeatingSubformName, modal, driver.getAliasTable().getAlias(header.getCells().get(0)), subformValues.getGherkinRows().size() - 1);
+
+        for (int i = 1; i < subformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = subformValues.getGherkinRows().get(i);
+            for (int j = 0; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+                modal.form().findFieldsByLabel(label).get(i - 1).fill(row.getCells().get(j));
+            }
+        }
+    }
+
+    private void addRepetitiveFormsIfNeeded(String subformName, BsModal modal, String firstSubformField, int numberOfRequiredForms) {
+        BsFormPanel form = modal.form();
+
+        int numberOfRepetitiveForms = form.findFieldsByLabel(firstSubformField).size();
+        FluentElement buttonElement = form.getForm().find().h4(withText(subformName)).
+                ancestor().div().followingSibling().button(withText(I18N.CONSTANTS.addAnother())).first();
+
+        for (int i = numberOfRepetitiveForms; i < numberOfRequiredForms; i++) {
+            buttonElement.clickWhenReady();
+            Sleep.sleepMillis(100);
+        }
+
+    }
+
+    @And("^I save submission$")
+    public void I_save_submission() throws Throwable {
+        BsModal modal = BsModal.find(driver.tablePage().getPage().root());
+        modal.save();
     }
 }
