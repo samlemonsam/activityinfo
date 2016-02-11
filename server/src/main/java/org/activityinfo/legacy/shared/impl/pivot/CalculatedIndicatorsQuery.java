@@ -200,7 +200,9 @@ public class CalculatedIndicatorsQuery implements WorkItem {
         // databases we own
         .append("db.OwnerUserId = ").append(userId).append(" ")
 
-        // databases with allow view all
+        // databases with allow view
+        // Note this we're not considering partner visiblity here 
+        // because this just checks INDICATOR visibility, not SITE visibility
         .append("OR ")
         .append("db.DatabaseId IN (")
         .append(" SELECT ")
@@ -210,7 +212,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
         .append(" WHERE ")
         .append("  p.UserId = ")
         .append(userId)
-        .append("  AND p.AllowViewAll").append(") ")
+        .append("  AND p.AllowView").append(") ")
 
        // or activities that are published
 
