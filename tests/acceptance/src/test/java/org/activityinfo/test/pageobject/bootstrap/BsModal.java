@@ -106,6 +106,10 @@ public class BsModal extends ModalDialog {
         return new BsFormPanel(windowElement.find().div(withClass("modal-body")).first());
     }
 
+    public SubformContainer subform(String subformName) {
+        return new SubformContainer(form(), subformName);
+    }
+
     public BsModal fill(List<FieldValue> fieldValues) {
         BsFormPanel form = form();
         for (FieldValue value : fieldValues) {

@@ -41,7 +41,7 @@ Feature: New form
     Then field "7 items multiple" represented by "checkboxes"
     Then field "17 items multiple" represented by "dropdown"
     Then field "27 items multiple" represented by "dropdown"
-    Then field "7 items single" represented by "radiobuttons"
+    Then field "7 items single" represented by "radio"
     Then field "17 items single" represented by "dropdown"
     Then field "27 items single" represented by "suggestbox"
 

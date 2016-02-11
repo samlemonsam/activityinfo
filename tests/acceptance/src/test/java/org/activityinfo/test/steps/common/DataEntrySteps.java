@@ -16,14 +16,8 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.Sleep;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.DataEntryDriver;
-import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.TableDataParser;
-import org.activityinfo.test.pageobject.api.FluentElement;
-import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
-import org.activityinfo.test.pageobject.bootstrap.BsModal;
-import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.bootstrap.*;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
@@ -43,7 +37,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -499,11 +492,11 @@ public class DataEntrySteps {
 
     @And("^I enter \"([^\"]*)\" repeating subform values:$")
     public void I_enter_repeating_subform_values(String repeatingSubformName, DataTable subformValues) throws Throwable {
-        BsModal modal = BsModal.find(driver.tablePage().getPage().root());
+        BsModal modal = currentOpenedForm();
 
         DataTableRow header = subformValues.getGherkinRows().get(0);
 
-        addRepetitiveFormsIfNeeded(repeatingSubformName, modal, driver.getAliasTable().getAlias(header.getCells().get(0)), subformValues.getGherkinRows().size() - 2);
+        addRepetitiveFormsIfNeeded(repeatingSubformName, modal, subformValues.getGherkinRows().size() - 2);
 
         for (int i = 2; i < subformValues.getGherkinRows().size(); i++) {
             DataTableRow row = subformValues.getGherkinRows().get(i);
@@ -514,15 +507,12 @@ public class DataEntrySteps {
         }
     }
 
-    private void addRepetitiveFormsIfNeeded(String subformName, BsModal modal, String firstSubformField, int numberOfRequiredForms) {
-        BsFormPanel form = modal.form();
-
-        int numberOfRepetitiveForms = form.findFieldsByLabel(firstSubformField).size();
-        FluentElement buttonElement = form.getForm().find().h4(withText(subformName)).
-                ancestor().div().followingSibling().button(withText(I18N.CONSTANTS.addAnother())).first();
+    private void addRepetitiveFormsIfNeeded(String subformName, BsModal modal, int numberOfRequiredForms) {
+        SubformContainer subform = modal.subform(subformName);
+        int numberOfRepetitiveForms = subform.getRepeatingPanelsCount();
 
         for (int i = numberOfRepetitiveForms; i < numberOfRequiredForms; i++) {
-            buttonElement.clickWhenReady();
+            subform.addAnother();
             Sleep.sleepMillis(100);
         }
 
@@ -530,13 +520,13 @@ public class DataEntrySteps {
 
     @And("^I save submission$")
     public void I_save_submission() throws Throwable {
-        BsModal modal = BsModal.find(driver.tablePage().getPage().root());
+        BsModal modal = currentOpenedForm();
         modal.save();
     }
 
     @And("^I enter values:$")
     public void I_enter_values(DataTable table) throws Throwable {
-        BsModal modal = BsModal.find(driver.tablePage().getPage().root());
+        BsModal modal = currentOpenedForm();
 
         DataTableRow header = table.getGherkinRows().get(0);
         DataTableRow type = table.getGherkinRows().get(1);
@@ -558,5 +548,44 @@ public class DataEntrySteps {
                 modal.form().findFieldByLabel(label).fill(value, type.getCells().get(j));
             }
         }
+    }
+
+    private BsModal currentOpenedForm() {
+        return BsModal.find(driver.tablePage().getPage().root());
+    }
+
+    @And("^open edit dialog for entry in new table with field value \"([^\"]*)\"$")
+    public void open_edit_dialog_for_entry_in_new_table_with_field_name_and_value(String fieldValue) throws Throwable {
+        TablePage tablePage = driver.tablePage();
+        tablePage.table().showAllColumns();//.waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
+
+        tablePage.table().editSubmission();
+    }
+
+    @Then("^opened form has repeating subform values:$")
+    public void opened_form_has_repeating_subform_values(DataTable expectedSubformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = expectedSubformValues.getGherkinRows().get(0);
+        DataTableRow type = expectedSubformValues.getGherkinRows().get(1);
+
+        for (int i = 2; i < expectedSubformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = expectedSubformValues.getGherkinRows().get(i);
+            for (int j = 0; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+                String currentValue = modal.form().findFieldsByLabel(label).get(i - 2).getValue(ControlType.fromValue(type.getCells().get(j)));
+                assertEquals(row.getCells().get(j), currentValue);
+            }
+        }
+    }
+
+    @And("^delete item (\\d+) of \"([^\"]*)\" repeating subform$")
+    public void delete_item_of_repeating_subform(int itemIndex, String subformName) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        List<SubformPanel> panels = modal.subform(subformName).getPanels();
+        panels.get(itemIndex - 1).delete();
+
     }
 }

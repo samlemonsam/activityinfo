@@ -379,5 +379,15 @@ public class BsFormPanel extends Form {
         public String getFirstBlobLink() {
             return getBlobLinks().get(0);
         }
+
+        public String getValue(ControlType controlType) {
+            switch (controlType) {
+                case TEXT:
+                case QUANTITY:
+                case DATE:
+                    return input().attribute("value");
+            }
+            throw new RuntimeException("Unsupported control type: " + controlType);
+        }
     }
 }

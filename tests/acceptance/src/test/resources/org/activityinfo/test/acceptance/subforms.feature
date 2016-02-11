@@ -59,3 +59,26 @@ Feature: Subforms
       | Root Field       |
       | text             |
       | root_field_value |
+    And open edit dialog for entry in new table with field value "root_field_value"
+    Then opened form has repeating subform values:
+      | Subform Field 1 | Subform Field 2 |
+      | text            | quantity        |
+      | value 1         | 1               |
+      | value 2         | 2               |
+    Then opened form has repeating subform values:
+      | Subform Field 3 | Subform Field 4 |
+      | text            | quantity        |
+      | value 3         | 3               |
+      | value 4         | 4               |
+    And delete item 1 of "Repeating subform 1" repeating subform
+    And delete item 2 of "Repeating subform 2" repeating subform
+    And I save submission
+    And open edit dialog for entry in new table with field value "root_field_value"
+    Then opened form has repeating subform values:
+      | Subform Field 1 | Subform Field 2 |
+      | text            | quantity        |
+      | value 2         | 2               |
+    Then opened form has repeating subform values:
+      | Subform Field 3 | Subform Field 4 |
+      | text            | quantity        |
+      | value 3         | 3               |

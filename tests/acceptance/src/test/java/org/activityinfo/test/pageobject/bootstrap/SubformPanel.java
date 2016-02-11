@@ -1,4 +1,4 @@
-package org.activityinfo.test.driver;
+package org.activityinfo.test.pageobject.bootstrap;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,34 +21,23 @@ package org.activityinfo.test.driver;
  * #L%
  */
 
+import org.activityinfo.test.pageobject.api.FluentElement;
+
+import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
+
 /**
- * @author yuriyz on 06/09/2015.
+ * @author yuriyz on 02/11/2016.
  */
-public enum ControlType {
-    TEXT("text"),
-    QUANTITY("quantity"),
-    DATE("date"),
-    RADIO_BUTTONS("radio"),
-    CHECK_BOXES("checkboxes"),
-    SUGGEST_BOX("suggestbox"),
-    DROP_DOWN("dropdown");
+public class SubformPanel {
 
-    private final String value;
+    private FluentElement element;
 
-    ControlType(String value) {
-        this.value = value;
+    public SubformPanel(FluentElement element) {
+        this.element = element;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public static ControlType fromValue(String value) {
-        for (ControlType type : values()) {
-            if (type.getValue().equalsIgnoreCase(value)) {
-                return type;
-            }
-        }
-        throw new RuntimeException("Failed to identify control type for value: " + value);
+    public void delete() {
+        FluentElement deleteElement = element.find().span(withClass("icon_remove")).first();
+        deleteElement.moveOver().clickWhenReady();
     }
 }
