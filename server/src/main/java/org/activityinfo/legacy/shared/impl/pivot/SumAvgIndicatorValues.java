@@ -61,6 +61,9 @@ public class SumAvgIndicatorValues extends BaseTable {
         query.groupBy("Indicator.IndicatorId");
         query.groupBy("Indicator.Aggregation");
         query.whereTrue(" (Indicator.Aggregation=0 or Indicator.Aggregation=1) ");
+        
+        // Ensure that we don't get values erroneously associated with calculated indicators
+        query.whereTrue(" (Indicator.calculatedAutomatically=0 OR Indicator.expression IS NULL)");
     }
 
     @Override
