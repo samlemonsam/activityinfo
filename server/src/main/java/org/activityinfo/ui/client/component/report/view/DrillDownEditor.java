@@ -149,14 +149,13 @@ public class DrillDownEditor implements Shutdownable {
 
     private ColumnModel buildColumnModel() {
         List<ColumnConfig> config = new ArrayList<>();
+        config.add(new ColumnConfig("database", I18N.CONSTANTS.database(), 100));
+        config.add(new ColumnConfig("activity", I18N.CONSTANTS.activity(), 100));
         config.add(new ColumnConfig("partner", I18N.CONSTANTS.partner(), 100));
         config.add(new ColumnConfig("location", I18N.CONSTANTS.location(), 100));
         config.add(new ColumnConfig("date", I18N.CONSTANTS.date(), 100));
-
-        ColumnConfig indicatorNameColumn = new ColumnConfig("indicator", I18N.CONSTANTS.indicator(), 100);
-        indicatorNameColumn.setHidden(true);
-        config.add(indicatorNameColumn);
-
+        config.add(new ColumnConfig("indicator", I18N.CONSTANTS.indicator(), 100));
+        
         ColumnConfig valueColumn = new ColumnConfig("value", I18N.CONSTANTS.value(), 100);
         valueColumn.setNumberFormat(IndicatorNumberFormat.INSTANCE);
         valueColumn.setAlignment(Style.HorizontalAlignment.RIGHT);

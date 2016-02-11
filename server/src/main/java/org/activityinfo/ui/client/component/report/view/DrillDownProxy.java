@@ -30,6 +30,8 @@ public class DrillDownProxy extends RpcProxy<List<DrillDownRow>> {
     private final Dimension partnerDimension = new Dimension(DimensionType.Partner);
     private final Dimension locationDimension = new Dimension(DimensionType.Location);
     private final DateDimension dateDimension = new DateDimension(DateUnit.DAY);
+    private final Dimension databaseDimension = new Dimension(DimensionType.Database);
+    private final Dimension actvitiyDimension = new Dimension(DimensionType.Activity);
     private final Dimension indicatorDimension = new Dimension(DimensionType.Indicator);
     private final Set<Dimension> dims;
 
@@ -42,6 +44,8 @@ public class DrillDownProxy extends RpcProxy<List<DrillDownRow>> {
         dims.add(locationDimension);
         dims.add(dateDimension);
         dims.add(indicatorDimension);
+        dims.add(databaseDimension);
+        dims.add(actvitiyDimension);
     }
 
     public void setFilter(Filter filter) {
@@ -80,6 +84,8 @@ public class DrillDownProxy extends RpcProxy<List<DrillDownRow>> {
                 row.set("location", location.getLabel());
             }
             row.set("date", getDate(bucket));
+            row.set("database", getEntity(bucket, databaseDimension).getLabel());
+            row.set("activity", getEntity(bucket, actvitiyDimension).getLabel());
             row.set("indicator", getEntity(bucket, indicatorDimension).getLabel());
             row.set("value", bucket.doubleValue());
             rows.add(row);
