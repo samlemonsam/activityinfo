@@ -81,7 +81,9 @@ public class QueryEvaluator {
                 return batch.addConstantColumn(rootFormClass, rootFormClass.getId().asString());
             }
 
-            return addColumn(resolver.resolveSymbol(symbolExpr));
+            Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
+            LOGGER.info(symbolExpr + " matched to " + nodes);
+            return addColumn(nodes);
         }
 
         @Override

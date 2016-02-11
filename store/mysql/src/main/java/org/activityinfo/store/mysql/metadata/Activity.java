@@ -17,6 +17,7 @@ public class Activity implements Serializable {
 
     int activityId;
     int databaseId;
+    int databaseOwnerId;
     String databaseName;
     int reportingFrequency;
     int locationTypeId;

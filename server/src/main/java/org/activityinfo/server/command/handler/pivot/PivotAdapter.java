@@ -43,6 +43,7 @@ import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
+import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
 import javax.annotation.Nullable;
@@ -52,6 +53,7 @@ import java.util.logging.Logger;
 
 import static java.util.Collections.*;
 import static org.activityinfo.model.expr.Exprs.*;
+import static org.activityinfo.model.legacy.CuidAdapter.partnerInstanceId;
 
 /**
  * Executes a legacy PivotSites query against the new API
@@ -64,6 +66,7 @@ public class PivotAdapter {
     private final MySqlSession session;
     private final PivotSites command;
     private final Filter filter;
+    private final int userId;
 
     /**
      * Maps indicator ids to form class ids
@@ -87,10 +90,11 @@ public class PivotAdapter {
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
 
 
-    public PivotAdapter(CollectionCatalog catalog, PivotSites command) throws InterruptedException, SQLException {
+    public PivotAdapter(CollectionCatalog catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
         this.session = (MySqlSession) catalog;
         this.command = command;
         this.filter = command.getFilter();
+        this.userId = userId;
 
 
         // Mapping from indicator id -> activityId
@@ -228,19 +232,23 @@ public class PivotAdapter {
     public PivotSites.PivotResult execute() throws SQLException {
 
         for (Activity activity : activities) {
-            switch (command.getValueType()) {
-                case INDICATOR:
-                    executeIndicatorValuesQuery(activity, activity.getSelfLink());
-                    for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
-                        executeIndicatorValuesQuery(activity, linkedActivity);
-                    }
-                    break;
-                case TOTAL_SITES:
-                    executeSiteCountQuery(activity, activity.getSelfLink());
-                    for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
-                        executeSiteCountQuery(activity, linkedActivity);
-                    }
-                    break;
+            UserPermission userPermission = session.getActivityLoader().getPermission(activity.getId(), userId);
+            if(userPermission.isView()) {
+                Optional<ExprNode> permissionFilter = permissionFilter(userPermission);
+                switch (command.getValueType()) {
+                    case INDICATOR:
+                        executeIndicatorValuesQuery(activity, activity.getSelfLink(), permissionFilter);
+                        for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
+                            executeIndicatorValuesQuery(activity, linkedActivity, permissionFilter);
+                        }
+                        break;
+                    case TOTAL_SITES:
+                        executeSiteCountQuery(activity, activity.getSelfLink(), permissionFilter);
+                        for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
+                            executeSiteCountQuery(activity, linkedActivity, permissionFilter);
+                        }
+                        break;
+                }
             }
         }
 
@@ -257,6 +265,18 @@ public class PivotAdapter {
 
 
         return new PivotSites.PivotResult(createBuckets());
+    }
+
+    private Optional<ExprNode> permissionFilter(UserPermission userPermission) {
+        if(userPermission.isViewAll()) {
+            return Optional.absent();
+        } else {
+            ExprNode partnerFilter = Exprs.equals(
+                    new SymbolExpr("partner"), 
+                    new ConstantExpr(partnerInstanceId(userPermission.getPartnerId()).asString()));
+            
+            return Optional.of(partnerFilter);
+        }
     }
 
 
@@ -285,7 +305,9 @@ public class PivotAdapter {
         return matching;
     }
 
-    private void executeIndicatorValuesQuery(Activity activity, LinkedActivity linkedActivity) throws SQLException {
+    private void executeIndicatorValuesQuery(Activity activity, 
+                                             LinkedActivity linkedActivity, 
+                                             Optional<ExprNode> permissionFilter) throws SQLException {
         
         // Double check that this activity has not been deleted
         if(isDeleted(activity, linkedActivity)) {
@@ -324,7 +346,7 @@ public class PivotAdapter {
         addSiteIdToQuery(activity, queryModel);
 
         // declare the filter
-        queryModel.setFilter(composeFilter(formTree));
+        queryModel.setFilter(composeFilter(formTree, permissionFilter));
 
         // Query the table 
         ColumnSet columnSet = executeQuery(queryModel);
@@ -504,7 +526,9 @@ public class PivotAdapter {
     /**
      * Queries the count of distinct sites (not monthly reports) that match the filter
      */
-    private void executeSiteCountQuery(Activity activity, LinkedActivity linkedActivity) throws SQLException {
+    private void executeSiteCountQuery(Activity activity, 
+                                       LinkedActivity linkedActivity, 
+                                       Optional<ExprNode> permissionFilter) throws SQLException {
         
         // Check first that this activity hasn't been deleted
         if(isDeleted(activity, linkedActivity)) {
@@ -516,7 +540,7 @@ public class PivotAdapter {
             
             // only count sites which have non-empty values for the given
             // indicators
-            executeIndicatorValuesQuery(activity, linkedActivity);
+            executeIndicatorValuesQuery(activity, linkedActivity, permissionFilter);
         
         } else if(activity.isMonthly() && 
                 (command.isPivotedBy(DimensionType.Date) ||
@@ -525,21 +549,21 @@ public class PivotAdapter {
             // if we are pivoting or filtering by date, then we need
             // to query the actual reporting periods and count distinct sites
                 
-            executeSiteCountQueryOnReportingPeriod(activity, linkedActivity);
+            executeSiteCountQueryOnReportingPeriod(activity, linkedActivity, permissionFilter);
         
         } else {
             
             // Otherwise, we only need to query the sites add up the total rows
-            executeSiteCountQueryOnSite(activity, linkedActivity);
+            executeSiteCountQueryOnSite(activity, linkedActivity, permissionFilter);
         }
     }
 
-    private void executeSiteCountQueryOnSite(Activity activity, LinkedActivity linkedActivity) {
+    private void executeSiteCountQueryOnSite(Activity activity, LinkedActivity linkedActivity, Optional<ExprNode> permissionFilter) {
         Preconditions.checkState(!indicatorDimension.isPresent());
 
         FormTree formTree = formTrees.get(linkedActivity.getSiteFormClassId());
         QueryModel queryModel = new QueryModel(linkedActivity.getSiteFormClassId());
-        queryModel.setFilter(composeFilter(formTree));
+        queryModel.setFilter(composeFilter(formTree, permissionFilter));
 
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
@@ -566,14 +590,16 @@ public class PivotAdapter {
         aggregateTime.stop();
     }
 
-    private void executeSiteCountQueryOnReportingPeriod(Activity activity, LinkedActivity linkedActivity) {
+    private void executeSiteCountQueryOnReportingPeriod(Activity activity, 
+                                                        LinkedActivity linkedActivity, 
+                                                        Optional<ExprNode> permissionFilter) {
         Preconditions.checkArgument(activity.isMonthly());
 
         // Query the linked activity
         FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
         QueryModel queryModel = new QueryModel(activity.getLeafFormClassId());
         
-        queryModel.setFilter(composeFilter(formTree));
+        queryModel.setFilter(composeFilter(formTree, permissionFilter));
 
         // Add dimensions columns as needed
         for (DimBinding dimension : groupBy) {
@@ -640,7 +666,7 @@ public class PivotAdapter {
         return list;
     }
 
-    private ExprNode composeFilter(FormTree formTree) {
+    private ExprNode composeFilter(FormTree formTree, Optional<ExprNode> permissionFilter) {
         List<ExprNode> conditions = Lists.newArrayList();
         conditions.addAll(filterExpr(ColumnModel.ID_SYMBOL, CuidAdapter.SITE_DOMAIN, DimensionType.Site));
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
@@ -649,6 +675,10 @@ public class PivotAdapter {
         conditions.addAll(adminFilter(formTree));
         conditions.addAll(attributeFilters());
         conditions.addAll(dateFilter("date2"));
+        
+        if(permissionFilter.isPresent()) {
+            conditions.add(permissionFilter.get());
+        }
 
         if(conditions.size() > 0) {
             ExprNode filterExpr = Exprs.allTrue(conditions);

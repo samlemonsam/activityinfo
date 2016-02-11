@@ -877,7 +877,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         
         assertThat().forPartner(solidarite).thereAre(0);
         assertThat().forPartner(nrc).thereAre(4);
-        assertBucketCount(4);
+        assertBucketCount(5);
     }
     
     private void filteringOnDatabases(Integer... databaseIds) {

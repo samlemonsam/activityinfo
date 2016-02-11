@@ -19,12 +19,9 @@ import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
 import org.activityinfo.store.mysql.update.IndicatorValueTableUpdater;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
-
-import static java.lang.String.format;
 
 /**
  * Collection of Sites
@@ -48,38 +45,7 @@ public class SiteCollection implements ResourceCollection {
         } else {
             CollectionPermissions permissions = new CollectionPermissions();
             
-            try(ResultSet rs = queryExecutor.query(format("select * from userpermission where databaseId=%d and UserId = %d",
-                    activity.getDatabaseId(),
-                    userId))) {
-                
-                if(rs.next()) {
-                    int partnerId = rs.getInt("partnerId");
-                    String partnerFilter = format("%s=%s",
-                            CuidAdapter.partnerField(activity.getId()),
-                            CuidAdapter.partnerInstanceId(partnerId));
-                    
-                    if(rs.getBoolean("AllowViewAll")) {
-                        permissions.setVisible(true);
-                        
-                    } else if(rs.getBoolean("AllowView")) {
-                        permissions.setVisible(true);
-                        permissions.setVisibilityFilter(partnerFilter);
-
-                    }
-                    if(rs.getBoolean("AllowEditAll")) {
-                        permissions.setEditAllowed(true);
-                    } else if(rs.getBoolean("AllowEdit")) {
-                        permissions.setEditAllowed(true);
-                        permissions.setEditFilter(partnerFilter);
-                    }
-                }
-
-                
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
-
+       
             // published property of activity overrides user permissions
             if(activity.isPublished()) {
                 permissions.setVisible(true);

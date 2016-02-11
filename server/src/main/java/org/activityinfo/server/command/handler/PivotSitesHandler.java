@@ -40,7 +40,7 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
         
         PivotAdapter adapter;
         try {
-            adapter = new PivotAdapter(catalog.get(), cmd);
+            adapter = new PivotAdapter(catalog.get(), cmd, user.getId());
             return adapter.execute();
 
         } catch (InterruptedException e) {

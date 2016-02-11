@@ -44,12 +44,14 @@ public class ActivityLoader {
     private final MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
     private final QueryExecutor executor;
     private final ParentKeyCache parentKeys;
-
+    private final PermissionsCache permissionCache;
+    
     private Map<Integer, Activity> activityMap = new HashMap<>();
 
     public ActivityLoader(QueryExecutor executor) {
         this.executor = executor;
         this.parentKeys = new ParentKeyCache(executor);
+        this.permissionCache = new PermissionsCache(executor);
     }
     
     public Map<Integer, Activity> loadForIndicators(Set<Integer> indicatorIds) throws SQLException {
@@ -64,6 +66,20 @@ public class ActivityLoader {
         return load(parentKeys.queryActivitiesForDatabase(databaseIds));
     }
 
+    public PermissionsCache getPermissionCache() {
+        return permissionCache;
+    }
+    
+    public UserPermission getPermission(int activityId, int userId) throws SQLException {
+        Activity activity = load(activityId);
+        if(activity.isPublished()) {
+            return UserPermission.viewAll();
+        }
+        if(activity.getOwnerUserId() == userId) {
+            return UserPermission.viewAll();
+        }
+        return permissionCache.getPermission(userId, activity.getDatabaseId());
+    }
 
     public Activity load(int activityId) throws SQLException {
         if(activityMap.containsKey(activityId)) {
@@ -213,7 +229,8 @@ public class ActivityLoader {
                             "A.siteVersion, " +             // (15)
                             "A.schemaVersion, " +           // (16)
                             "(A.dateDeleted IS NOT NULL OR " +
-                            " d.dateDeleted IS NOT NULL) " + // (17)
+                            " d.dateDeleted IS NOT NULL), " + // (17)
+                            "d.ownerUserId " +               // (18)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -237,6 +254,7 @@ public class ActivityLoader {
                     activity.version = rs.getLong(15);
                     activity.schemaVersion = rs.getLong(16);
                     activity.deleted = rs.getBoolean(17);
+                    activity.ownerUserId = rs.getInt(18);
 
                     serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
 
