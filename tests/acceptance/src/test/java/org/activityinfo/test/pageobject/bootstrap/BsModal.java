@@ -166,7 +166,7 @@ public class BsModal extends ModalDialog {
         }
     }
 
-    private static boolean isBuiltinLabel(String label) {
+    public static boolean isBuiltinLabel(String label) {
         return label.equalsIgnoreCase("partner") || label.equalsIgnoreCase("comments") ||
                 label.equalsIgnoreCase("start date") || label.equalsIgnoreCase("end date") ||
                 label.equalsIgnoreCase("project");

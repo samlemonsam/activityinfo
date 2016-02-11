@@ -115,10 +115,9 @@ public class DataEntrySteps {
     }
 
 
-
     private void dumpChanges(List<HistoryEntry> entries) {
         StringBuilder s = new StringBuilder();
-        for(HistoryEntry entry: entries) {
+        for (HistoryEntry entry : entries) {
             entry.appendTo(s);
         }
         System.out.print(s);
@@ -172,16 +171,16 @@ public class DataEntrySteps {
         List<String> columns = table.getGherkinRows().get(0).getCells();
         List<Integer> columnIndexes = new ArrayList<>();
         List<String> missingColumns = new ArrayList<>();
-        for(String expectedColumn : expectedColumns) {
+        for (String expectedColumn : expectedColumns) {
             int index = columns.indexOf(expectedColumn);
-            if(index == -1) {
+            if (index == -1) {
                 missingColumns.add(expectedColumn);
             } else {
                 columnIndexes.add(index);
             }
         }
 
-        if(!missingColumns.isEmpty()) {
+        if (!missingColumns.isEmpty()) {
             throw new AssertionError("Missing expected columns " + missingColumns + " in table:\n" + table.toString());
         }
 
@@ -338,8 +337,8 @@ public class DataEntrySteps {
     public void new_form_dialog_for_form_has_following_items_for_partner_field(String formName, List<String> expectedPartnerValues) throws Throwable {
         DataEntryDriver dataEntryDriver = driver.startNewSubmission(formName);
         boolean foundPartnerField = false;
-        while(dataEntryDriver.nextField()) {
-            switch(dataEntryDriver.getLabel()) {
+        while (dataEntryDriver.nextField()) {
+            switch (dataEntryDriver.getLabel()) {
                 case "Partner":
                     foundPartnerField = true;
                     List<String> items = Lists.newArrayList(dataEntryDriver.availableValues());
@@ -419,7 +418,7 @@ public class DataEntrySteps {
         String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
 
         URL url = new URL(blobLink);
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.connect();
 
@@ -504,13 +503,13 @@ public class DataEntrySteps {
 
         DataTableRow header = subformValues.getGherkinRows().get(0);
 
-        addRepetitiveFormsIfNeeded(repeatingSubformName, modal, driver.getAliasTable().getAlias(header.getCells().get(0)), subformValues.getGherkinRows().size() - 1);
+        addRepetitiveFormsIfNeeded(repeatingSubformName, modal, driver.getAliasTable().getAlias(header.getCells().get(0)), subformValues.getGherkinRows().size() - 2);
 
-        for (int i = 1; i < subformValues.getGherkinRows().size(); i++) {
+        for (int i = 2; i < subformValues.getGherkinRows().size(); i++) {
             DataTableRow row = subformValues.getGherkinRows().get(i);
             for (int j = 0; j < header.getCells().size(); j++) {
                 String label = driver.getAliasTable().getAlias(header.getCells().get(j));
-                modal.form().findFieldsByLabel(label).get(i - 1).fill(row.getCells().get(j));
+                modal.form().findFieldsByLabel(label).get(i - 2).fill(row.getCells().get(j));
             }
         }
     }
@@ -533,5 +532,31 @@ public class DataEntrySteps {
     public void I_save_submission() throws Throwable {
         BsModal modal = BsModal.find(driver.tablePage().getPage().root());
         modal.save();
+    }
+
+    @And("^I enter values:$")
+    public void I_enter_values(DataTable table) throws Throwable {
+        BsModal modal = BsModal.find(driver.tablePage().getPage().root());
+
+        DataTableRow header = table.getGherkinRows().get(0);
+        DataTableRow type = table.getGherkinRows().get(1);
+
+        for (int i = 2; i < table.getGherkinRows().size(); i++) {
+            DataTableRow row = table.getGherkinRows().get(i);
+            for (int j = 0; j < row.getCells().size(); j++) {
+
+                String label = header.getCells().get(j);
+                if (!BsModal.isBuiltinLabel(label)) {
+                    label = driver.getAliasTable().getAlias(label);
+                }
+
+                String value = row.getCells().get(j);
+                if (label.equalsIgnoreCase(I18N.CONSTANTS.partner())) {
+                    value = driver.getAliasTable().getAlias(value);
+                }
+
+                modal.form().findFieldByLabel(label).fill(value, type.getCells().get(j));
+            }
+        }
     }
 }

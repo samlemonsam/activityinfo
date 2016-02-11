@@ -172,8 +172,10 @@ public class BsFormPanel extends Form {
         }
 
         public void fill(String value, String controlType) {
-            if ("radio".equals(controlType)) {
+            if ("radio".equalsIgnoreCase(controlType) || "dropdown".equalsIgnoreCase(controlType)) {
                 select(value);
+            } else if ("date".equalsIgnoreCase(controlType)) {
+                fill(org.joda.time.LocalDate.parse(value));
             } else {
                 fill(value);
             }

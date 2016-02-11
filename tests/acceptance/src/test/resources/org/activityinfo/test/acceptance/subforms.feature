@@ -42,10 +42,20 @@ Feature: Subforms
     And I open a new form submission on table page
     And I enter "Repeating subform 1" repeating subform values:
       | Subform Field 1 | Subform Field 2 |
+      | text            | quantity        |
       | value 1         | 1               |
       | value 2         | 2               |
     And I enter "Repeating subform 2" repeating subform values:
       | Subform Field 3 | Subform Field 4 |
+      | text            | quantity        |
       | value 3         | 3               |
       | value 4         | 4               |
+    And I enter values:
+      | Partner | Start Date | End Date   | Root Field       |
+      | radio   | date       | date       | text             |
+      | NRC     | 2016-02-10 | 2016-02-10 | root_field_value |
     And I save submission
+    Then table has rows with hidden built-in columns:
+      | Root Field       |
+      | text             |
+      | root_field_value |
