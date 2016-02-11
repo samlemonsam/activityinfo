@@ -470,6 +470,33 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         execute();
 
     }
+    
+    @Test
+    public void testMixedSumAndAvgIndicators() {
+        // The rule is, whenever sum-indicators and avg-indicators are combineed,
+        // sum all values together (ignoring the average value)
+        filter.addRestriction(DimensionType.Indicator, 5);
+        filter.addRestriction(DimensionType.Indicator, 1);
+        execute();
+        
+        assertThat().thereIsOneBucketWithValue(15100.8);
+    }
+
+    @Test
+    @OnDataSet("/dbunit/sum-avg-mix.db.xml")
+    public void testMixedSumAndAvgIndicators2() {
+        // The rule is, whenever sum-indicators and avg-indicators are combineed,
+        // sum all values together (ignoring the average value)
+        filter.addRestriction(DimensionType.Indicator, 5);
+        filter.addRestriction(DimensionType.Indicator, 1000);
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(15100.8);
+    }
+
+
+
+
 
     @Test
     public void testIndicatorOrder() {
