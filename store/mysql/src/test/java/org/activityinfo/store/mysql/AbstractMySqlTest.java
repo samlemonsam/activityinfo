@@ -55,7 +55,7 @@ public abstract class AbstractMySqlTest {
         dbunit = new DbUnit();
         dbunit.openDatabase();
         dbunit.dropAllRows();
-        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "sites-simple1.db.xml"));
+        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "catalog-test.db.xml"));
         catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
         executor = new ColumnSetBuilder(catalogProvider);
     }

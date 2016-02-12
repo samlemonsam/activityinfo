@@ -1,21 +1,23 @@
 package org.activityinfo.store.mysql.side;
 
+import com.google.common.collect.Lists;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
-/**
-* Created by alex on 1/20/15.
-*/
+
 class TextBuffer implements ValueBuffer {
     private TextValue value = null;
-    private CursorObserver<FieldValue> observer;
+    private final List<CursorObserver<FieldValue>> observers = Lists.newArrayList();
 
-    public TextBuffer(CursorObserver<FieldValue> observer) {
-        this.observer = observer;
+
+    @Override
+    public void add(CursorObserver<FieldValue> observer) {
+        observers.add(observer);
     }
 
     @Override
@@ -25,12 +27,16 @@ class TextBuffer implements ValueBuffer {
 
     @Override
     public void next() {
-        observer.onNext(value);
+        for (CursorObserver<FieldValue> observer : observers) {
+            observer.onNext(value);
+        }
         value = null;
     }
 
     @Override
     public void done() {
-        observer.done();
+        for (CursorObserver<FieldValue> observer : observers) {
+            observer.done();
+        }
     }
 }

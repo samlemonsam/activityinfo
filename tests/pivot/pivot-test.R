@@ -60,7 +60,7 @@ execute <- function(reportId, userId, engine) {
 profile.new.old <- function(n, report.id) {
   reports <- queryReports()
   if(!missing(report.id)) {
-    rows <- which(reports$id == report.id)
+    rows <- which(reports$id %in% report.id)
   } else if(!missing(n)) {
     rows <- sample(x = nrow(reports), size = n)
   } else {
@@ -202,7 +202,7 @@ bucketValue <- function(bucket) {
 #' Writes the results out to a 'logs' folder for later examination
 #' 
 #' @return TRUE if the results match exactly
-compareBuckets <- function(report.id, user.id, old, nqe) {
+compareBuckets <- function(report.id, report.index, old, nqe) {
   od <- as.data.frame.buckets(old, value.column = "old.value")
   nd <- as.data.frame.buckets(nqe, value.column = "new.value")
   
@@ -213,8 +213,8 @@ compareBuckets <- function(report.id, user.id, old, nqe) {
   }
   
   # Logs the results for subsequent debugging if anything is wrong
-  write.csv(od, file = sprintf("logs/%d-%d.old.csv", report.id, user.id))
-  write.csv(nd, file = sprintf("logs/%d-%d.new.csv", report.id, user.id))
+  write.csv(od, file = sprintf("logs/%d-%d.old.csv", report.id, report.index))
+  write.csv(nd, file = sprintf("logs/%d-%d.new.csv", report.id, report.index))
   
   old.dims <- names(od)[-1] 
   new.dims <- names(nd)[-1]    
@@ -222,9 +222,14 @@ compareBuckets <- function(report.id, user.id, old, nqe) {
   # If the dimensions are the same, we can compare values for values
   if(setequal(old.dims, new.dims)) {
     md <- merge(od, nd, by = unique(old.dims, new.dims), all = TRUE)
-    write.csv(md, file = sprintf("logs/%d-%d.merged.csv", report.id, user.id))
+    md$diff <- md$old.value - md$new.value
+    write.csv(md, file = sprintf("logs/%d-%d.merged.csv", report.id, report.index))
     
-    return(identical(md$old.value, md$new.value))
+    matches <- identical(md$old.value, md$new.value)
+    if(!matches) {
+      cat(sprintf("MISMATCH: %d-%d.csv\n", report.id, report.index))
+    }
+    return(matches)
     
   } else {
     return(FALSE)

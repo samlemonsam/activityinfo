@@ -1,5 +1,8 @@
 package org.activityinfo.store.mysql.side;
 
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.service.store.CursorObserver;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -16,6 +19,8 @@ interface ValueBuffer {
     public static final int ATTRIBUTE_ID_COLUMN = 3;
     public static final int ATTRIBUTE_VALUE_COLUMN = 4;
 
+    void add(CursorObserver<FieldValue> observer);
+    
     void set(ResultSet rs) throws SQLException;
     void next();
     void done();

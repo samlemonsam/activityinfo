@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr.eval;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -73,9 +74,18 @@ public class FormSymbolTable {
     }
 
     public FormField resolveSymbol(String name) {
+        Optional<FormField> match = tryResolveSymbol(name);
+        if (match.isPresent()) {
+            return match.get();
+        } else {
+            throw new SymbolNotFoundException(name);
+        }
+    }
+    
+    public Optional<FormField> tryResolveSymbol(String name) {
         FormField field = idMap.get(name);
         if(field != null) {
-            return field;
+            return Optional.of(field);
         }
         Collection<FormField> matching = codeMap.get(name.toLowerCase());
         if(matching.isEmpty()) {
@@ -86,9 +96,13 @@ public class FormSymbolTable {
         if (matching.size() > 1) {
             throw new AmbiguousSymbolException(name);
         } else if (matching.isEmpty()) {
-            throw new SymbolNotFoundException(name);
+           return Optional.absent();
+        } else {
+            return Optional.of(Iterables.getOnlyElement(matching));
         }
+    }
 
-        return Iterables.getOnlyElement(matching);
+    public Optional<FormField> tryResolveSymbol(SymbolExpr value) {
+        return tryResolveSymbol(value.getName());
     }
 }

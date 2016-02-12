@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.side;
 
+import com.google.common.collect.Lists;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
@@ -7,15 +8,20 @@ import org.activityinfo.service.store.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 class QuantityBuffer implements ValueBuffer {
     private String units;
     private Quantity value;
-    private CursorObserver<FieldValue> observer;
+    private List<CursorObserver<FieldValue>> observers = Lists.newArrayList();
 
-    public QuantityBuffer(QuantityType type, CursorObserver<FieldValue> observer) {
+    public QuantityBuffer(QuantityType type) {
         this.units = type.getUnits();
-        this.observer = observer;
+    }
+
+    @Override
+    public void add(CursorObserver<FieldValue> observer) {
+        observers.add(observer);
     }
 
     @Override
@@ -30,12 +36,16 @@ class QuantityBuffer implements ValueBuffer {
 
     @Override
     public void next() {
-        observer.onNext(value);
+        for (CursorObserver<FieldValue> observer : observers) {
+            observer.onNext(value);
+        }
         value = null;
     }
 
     @Override
     public void done() {
-        observer.done();
+        for (CursorObserver<FieldValue> observer : observers) {
+            observer.done();
+        }
     }
 }

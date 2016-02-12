@@ -97,7 +97,7 @@ public class CollectionScanBatch {
 
         } else {
             // simple root column or embedded form
-            return getDataColumn(match.getFormClass(), match.getField());
+            return getDataColumn(match.getFormClass(), match.getExpr());
         }
     }
 
@@ -129,7 +129,7 @@ public class CollectionScanBatch {
         Slot<ColumnView> column;
         switch (match.getType()) {
             case FIELD:
-                column = getDataColumn(match.getFormClass(), match.getField());
+                column = getDataColumn(match.getFormClass(), match.getExpr());
                 break;
             case ID:
                 column = getTable(match.getFormClass()).addResourceId();
@@ -180,8 +180,7 @@ public class CollectionScanBatch {
 
 
     public Slot<ColumnView> addExpression(FormClass formClassId, ExprNode node) {
-        //   return getTable(formClassId).addExpression(node);
-        throw new UnsupportedOperationException();
+        return getTable(formClassId).addField(node);
     }
 
     public Slot<Integer> addRowCount(FormClass formClass) {

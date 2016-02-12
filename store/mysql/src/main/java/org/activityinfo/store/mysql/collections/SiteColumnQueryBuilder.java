@@ -57,7 +57,7 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
-        if(tableMapping.getMapping(fieldId) != null) {
+        if(tableMapping.getMapping(fieldId) != null) {  
             baseCursor.addField(fieldId, observer);
         } else {
             ActivityField field = fieldMap.get(fieldId);

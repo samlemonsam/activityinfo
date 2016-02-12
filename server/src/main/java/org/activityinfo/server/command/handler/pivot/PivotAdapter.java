@@ -746,7 +746,7 @@ public class PivotAdapter {
         for (String field : attributeFilters.keySet()) {
             List<ExprNode> valueConditions = Lists.newArrayList();
             for (String value : attributeFilters.get(field)) {
-                valueConditions.add(Exprs.equals(new SymbolExpr(field), new ConstantExpr(value)));
+                valueConditions.add(new CompoundExpr(new SymbolExpr(field), new SymbolExpr(value)));
             }
             conditions.add(Exprs.anyTrue(valueConditions));
         }

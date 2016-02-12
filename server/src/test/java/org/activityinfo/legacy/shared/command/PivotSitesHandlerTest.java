@@ -907,6 +907,21 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         assertBucketCount(5);
     }
     
+    @Test
+    @OnDataSet("/dbunit/attrib-multi.db.xml")
+    public void filterOnMultiAttribute() {
+        int soap = 5;
+        int numBeneficiares = 1;
+
+        filter.addRestriction(DimensionType.Indicator, numBeneficiares);
+        filter.addRestriction(DimensionType.Attribute, soap);
+        
+        execute();
+        
+        assertThat().thereIsOneBucketWithValue(1500);
+        
+    }
+    
     private void filteringOnDatabases(Integer... databaseIds) {
         filter.addRestriction(DimensionType.Database, asList(databaseIds));
     }

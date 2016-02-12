@@ -47,7 +47,8 @@ public class ActivityCollectionProvider implements CollectionProvider {
         if(activity == null) {
             throw new ResourceNotFound(formClassId);
         }
-        return new SiteCollection(activity, buildMapping(activity, formClassId), executor);
+        return new SiteCollection(activity, buildMapping(activity, formClassId), executor, 
+                activityLoader.getPermissionCache());
     }
     
     
@@ -94,7 +95,8 @@ public class ActivityCollectionProvider implements CollectionProvider {
                     Activity activity = activityMap.get(CuidAdapter.getLegacyIdFromCuid(collectionId));
                     if (activity != null) {
                         collectionMap.put(collectionId,
-                                new SiteCollection(activity, buildMapping(activity, collectionId), executor));
+                                new SiteCollection(activity, buildMapping(activity, collectionId), executor, 
+                                        activityLoader.getPermissionCache()));
                     }
                 }
             }

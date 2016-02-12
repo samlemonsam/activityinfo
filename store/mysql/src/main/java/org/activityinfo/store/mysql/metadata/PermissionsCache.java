@@ -42,13 +42,19 @@ public class PermissionsCache {
                 userId))) {
 
             if(rs.next()) {
+                permission.partnerId = rs.getInt("partnerId");
 
                 if(rs.getBoolean("AllowViewAll")) {
                     permission.viewAll = true;
 
                 } else if(rs.getBoolean("AllowView")) {
                     permission.view = true;
-                    permission.partnerId = rs.getInt("partnerId");
+                }
+                if(rs.getBoolean("AllowEditAll")) {
+                    permission.editAll = true;
+                    permission.edit = true;
+                } else if(rs.getBoolean("AllowEdit")) {
+                    permission.edit = true;
                 }
             }
 

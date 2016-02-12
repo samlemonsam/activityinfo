@@ -2,14 +2,17 @@ package org.activityinfo.model.type.geo;
 
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.RecordFieldValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NullFieldValue;
+import org.activityinfo.model.type.number.Quantity;
 
 /**
  * A Field Value containing a geographic point in the WGS84 geographic
  * reference system.
  */
-public class GeoPoint implements GeoFieldValue, IsRecord {
+public class GeoPoint implements GeoFieldValue, IsRecord, RecordFieldValue {
 
     private double latitude;
     private double longitude;
@@ -76,5 +79,16 @@ public class GeoPoint implements GeoFieldValue, IsRecord {
     @Override
     public Extents getEnvelope() {
         return Extents.fromLatLng(latitude, longitude);
+    }
+
+    @Override
+    public FieldValue getField(String id) {
+        switch (id) {
+            case "latitude":
+                return new Quantity(latitude, "degrees");
+            case "longitude":
+                return new Quantity(longitude, "degrees");
+        }
+        return NullFieldValue.INSTANCE;
     }
 }

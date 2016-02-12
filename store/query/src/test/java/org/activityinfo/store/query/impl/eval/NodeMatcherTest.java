@@ -17,6 +17,8 @@ import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.hamcrest.Matchers;
@@ -132,6 +134,14 @@ public class NodeMatcherTest {
         assertThat(resolve("P.latitude"), containsInAnyOrder("P.latitude"));
     }
 
+    @Test
+    public void enumField() {
+        givenRootForm("distribution", multiEnum("KC", "Kit Contents", "Blankets", "Cookware", "Tent"));
+        
+        assertThat(resolve("[Kit Contents].Blankets"), Matchers.contains("KC.Blankets"));
+        
+    }
+    
 
     private void prettyPrintTree() {
         FormTreePrettyPrinter prettyPrinter = new FormTreePrettyPrinter();
@@ -199,6 +209,20 @@ public class NodeMatcherTest {
         ReferenceType type = new ReferenceType();
         type.setCardinality(Cardinality.SINGLE);
         type.setRange(range);
+        
+        FormField field = new FormField(ResourceId.valueOf(id));
+        field.setLabel(label);
+        field.setType(type);
+        
+        return field;
+    }
+    
+    private FormField multiEnum(String id, String label, String... values) {
+        List<EnumItem> enumValues = Lists.newArrayList();
+        for (String value : values) {
+            enumValues.add(new EnumItem(ResourceId.valueOf(value), value));
+        }
+        EnumType type = new EnumType(Cardinality.MULTIPLE, enumValues);
         
         FormField field = new FormField(ResourceId.valueOf(id));
         field.setLabel(label);

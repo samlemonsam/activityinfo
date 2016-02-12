@@ -1,11 +1,12 @@
 package org.activityinfo.model.expr.functions;
 
+import com.google.common.base.Function;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 
 import java.util.List;
 
-public abstract class ExprFunction {
+public abstract class ExprFunction implements Function<List<FieldValue>, FieldValue> {
 
     /**
      * Returns string representation of function (as it is used in expression, e.g. + - ||)

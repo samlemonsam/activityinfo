@@ -8,6 +8,7 @@ import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 
 import java.util.Iterator;
@@ -53,6 +54,13 @@ public class NodeMatch {
         return match;
     }
 
+    public static NodeMatch forEnumItem(FormTree.Node fieldNode, EnumItem item) {
+        NodeMatch match = forField(fieldNode);
+        match.fieldExpr = new CompoundExpr(match.fieldExpr, new SymbolExpr(item.getId()));
+        
+        return match;
+    }
+    
     public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
 
         List<List<FormTree.Node>> partitions = partitionOnJoins(parent);

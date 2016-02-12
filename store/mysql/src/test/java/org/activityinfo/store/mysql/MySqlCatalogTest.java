@@ -99,7 +99,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");
         assertThat(column("name"),          hasValues("Bukavu",   "Walungu",  "Shabunda", "Kalehe",   "Irumu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
-        assertThat(column("code"), hasValues( "203", "201", "202", "203", "203"));
+        assertThat(column("code"), hasValues("203", "201", "202", "203", "203"));
     }
     
     @Test
@@ -157,6 +157,15 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
         assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));
+    }
+    
+    @Test
+    public void testAttributeBoolean() {
+        query(CuidAdapter.activityFormClass(1), "_id", "[Contenu du Kit].Casserole", "[Contenu du Kit].Soap");
+        
+        assertThat(column("[Contenu du Kit].Casserole"), hasValues(true, false, false));
+        assertThat(column("[Contenu du Kit].Soap"), hasValues(true, true, false));
+
     }
     
     @Ignore

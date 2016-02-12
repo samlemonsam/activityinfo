@@ -12,9 +12,10 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
-import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.query.impl.builders.*;
+import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
+import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
+import org.activityinfo.store.query.impl.builders.RowCountBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
@@ -235,31 +236,13 @@ public class CollectionScan {
         }
 
         // Build the query
-        ColumnQueryBuilder queryBuilder = collection.newColumnQuery();
+        ExprQueryBuilder queryBuilder = new ExprQueryBuilder(collection);
 
         for (Map.Entry<ExprNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             if (column.getKey().equals(PK_COLUMN_KEY)) {
                 queryBuilder.addResourceId(new IdColumnBuilder(column.getValue()));
             } else {
-                if (column.getKey() instanceof SymbolExpr) {
-                    SymbolExpr symbol = (SymbolExpr) column.getKey();
-                    FormField field = resolveField(this.collection.getFormClass(), column.getKey());
-
-                    queryBuilder.addField(ResourceId.valueOf(symbol.getName()), ViewBuilderFactory.get(column.getValue(), field.getType()));
-
-                } else if(column.getKey() instanceof CompoundExpr) {
-                    // Special case for single depth
-                    // latitude and longitude
-                    // TODO: expand properly
-                    CompoundExpr compoundExpr = (CompoundExpr) column.getKey();
-                    SymbolExpr baseField = (SymbolExpr) compoundExpr.getValue();
-                    
-                    queryBuilder.addField(baseField.asResourceId(), new DoubleColumnBuilder(column.getValue(), 
-                            new CoordinateReader(compoundExpr.getField())));
-                    
-                } else {
-                    throw new UnsupportedOperationException("TODO: " + column.getKey());
-                }
+                queryBuilder.addExpr(column.getKey(), column.getValue());
             }
         }
 
@@ -294,7 +277,13 @@ public class CollectionScan {
     public Map<String, Object> getValuesToCache() {
         Map<String, Object> toPut = new HashMap<>();
         for (Map.Entry<ExprNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
-            toPut.put(fieldCacheKey(column.getKey()), column.getValue().get());
+            ColumnView value;
+            try {
+                value = column.getValue().get();
+            } catch (IllegalStateException e) {
+                throw new IllegalStateException(column.getKey().toString(), e);
+            }
+            toPut.put(fieldCacheKey(column.getKey()), value);
         }
         for (Map.Entry<String, PendingSlot<ForeignKeyMap>> fk : foreignKeyMap.entrySet()) {
             toPut.put(fkCacheKey(fk.getKey()), fk.getValue().get());

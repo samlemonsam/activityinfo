@@ -14,6 +14,8 @@ import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.PermissionsCache;
+import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.AttributeValueTableUpdater;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
@@ -31,11 +33,15 @@ public class SiteCollection implements ResourceCollection {
     private final Activity activity;
     private final TableMapping baseMapping;
     private final QueryExecutor queryExecutor;
+    private final PermissionsCache permissionsCache;
 
-    public SiteCollection(Activity activity, TableMapping baseMapping, QueryExecutor queryExecutor) {
+    public SiteCollection(Activity activity, TableMapping baseMapping, 
+                          QueryExecutor queryExecutor, 
+                          PermissionsCache permissionsCache) {
         this.activity = activity;
         this.baseMapping = baseMapping;
         this.queryExecutor = queryExecutor;
+        this.permissionsCache = permissionsCache;
     }
 
     @Override
@@ -43,15 +49,35 @@ public class SiteCollection implements ResourceCollection {
         if(activity.getOwnerUserId() == userId) {
            return CollectionPermissions.full(); 
         } else {
+
+            UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
+
             CollectionPermissions permissions = new CollectionPermissions();
-            
+
+            String partnerFilter = String.format("%s=%s",
+                    CuidAdapter.partnerField(activity.getId()),
+                    CuidAdapter.partnerInstanceId(databasePermission.getPartnerId()));
+
+            if(databasePermission.isViewAll()) {
+                permissions.setVisible(true);
+
+            } else if(databasePermission.isView()) {
+                permissions.setVisible(true);
+                permissions.setVisibilityFilter(partnerFilter);
+
+            }
+            if(databasePermission.isEditAll()) {
+                permissions.setEditAllowed(true);
+            } else if(databasePermission.isEdit()) {
+                permissions.setEditAllowed(true);
+                permissions.setEditFilter(partnerFilter);
+            }
        
             // published property of activity overrides user permissions
             if(activity.isPublished()) {
                 permissions.setVisible(true);
                 permissions.setVisibilityFilter(null);
             }
-
 
             return permissions;
 

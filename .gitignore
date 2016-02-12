@@ -26,3 +26,4 @@ build.log
 build
 .gradle
 node_modules
+.Rproj.user

@@ -51,22 +51,27 @@ public class SideColumnBuilder {
     }
     
     public void add(ActivityField field, final CursorObserver<FieldValue> observer) {
-        ValueBuffer buffer = createBuffer(field.getFormField().getType(), observer);
-        
-        fieldMap.put(field.getId(), buffer);
+        ValueBuffer buffer = fieldMap.get(field.getId());
+
+        if (buffer == null) {
+            buffer = createBuffer(field.getFormField().getType(), observer);
+            fieldMap.put(field.getId(), buffer);
+        }
+    
+        buffer.add(observer);
     }
 
     private ValueBuffer createBuffer(FieldType type, CursorObserver<FieldValue> observer) {
 
         if(type instanceof QuantityType) {
-            return new QuantityBuffer((QuantityType) type, observer);
+            return new QuantityBuffer((QuantityType) type);
 
         } else if(type instanceof TextType || 
                   type instanceof BarcodeType) {
-            return new TextBuffer(observer);
+            return new TextBuffer();
 
         } else if(type instanceof EnumType) {
-            return new AttributeBuffer((EnumType) type, observer);
+            return new AttributeBuffer((EnumType) type);
 
         } else {
             throw new IllegalArgumentException("type: " + type);
@@ -121,7 +126,7 @@ public class SideColumnBuilder {
         sql.append("SELECT site.siteId, a.attributeGroupId, av.attributeId, av.value").append(newLine);
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
-        sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId)").append(newLine);
+        sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId and av.value=1)").append(newLine);
         sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
         sql.append("ORDER BY site.siteId");
         
