@@ -159,7 +159,7 @@ public class NodeMatch {
         return fieldNode.isRoot();
     }
 
-    public ExprNode getField() {
+    public ExprNode getExpr() {
         Preconditions.checkArgument(type == Type.FIELD, NodeMatch.class.getName() + " is of type " + type);
         return fieldExpr;
     }

@@ -126,7 +126,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
         assertThat().forIndicator(1).thereIsOneBucketWithValue(1500);
     }
-
+    
     @Test
     public void testBasicWithCalculatedIndicators() {
         withIndicatorAsDimension();
@@ -712,6 +712,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         withAttributeGroupDim(1);
         withIndicatorAsDimension();
         execute();
+        assertThat().thereIsOneBucketWithValue(1500);
     }
 
     @Test
@@ -723,6 +724,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         withAttributeGroupDim(1);
         withIndicatorAsDimension();
         execute();
+        assertThat().thereAre(0);
     }
     
     @Test
@@ -921,6 +923,24 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         assertThat().thereIsOneBucketWithValue(1500);
         
     }
+
+    @Test
+    @OnDataSet("/dbunit/attrib-multi.db.xml")
+    public void pivotOnMultiAttribute() {
+        int contenuDuKit = 2;
+        int casserole = 4;
+        int soap = 5;
+        int numBeneficiares = 1;
+
+        filter.addRestriction(DimensionType.Indicator, numBeneficiares);
+        withAttributeGroupDim(contenuDuKit);
+        
+        execute();
+        
+        assertThat().forAttributeGroupLabeled(contenuDuKit, "Casserole").thereIsOneBucketWithValue(1500);
+        
+    }
+    
     
     private void filteringOnDatabases(Integer... databaseIds) {
         filter.addRestriction(DimensionType.Database, asList(databaseIds));
