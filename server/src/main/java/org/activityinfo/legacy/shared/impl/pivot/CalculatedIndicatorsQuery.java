@@ -323,7 +323,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
             for (EntityCategory indicator : indicatorMap.values()) {
                 Double value = site.getIndicatorDoubleValue(indicator.getId());
 
-                if (value != null) {
+                if (value != null && !Double.isNaN(value)) {
 
                     Bucket bucket = new Bucket(value);
                     bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));
