@@ -16,6 +16,9 @@ sourceSets {
     tool {
         java {
             srcDir 'src/tool/java'
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+
         }
         resources {
             srcDir 'src/tool/resources'
@@ -67,8 +70,7 @@ check.dependsOn checkMessages
 
 task pullTranslations(type: JavaExec) {
     group = "I18N"
-    description = 'Fetches translations from PoEditor.com'
-
+    description = 'Fetches translations from PoEditor.com' 
     dependsOn 'toolClasses'
 
     main = 'org.activityinfo.i18n.tools.Pull'

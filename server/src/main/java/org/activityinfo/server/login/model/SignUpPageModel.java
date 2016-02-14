@@ -23,6 +23,11 @@ package org.activityinfo.server.login.model;
  * #L%
  */
 
+import org.activityinfo.i18n.shared.ApplicationLocale;
+
+import java.util.Arrays;
+import java.util.List;
+
 public class SignUpPageModel extends PageModel {
     // used for form population after a continuable message
     private String email = "";
@@ -96,5 +101,9 @@ public class SignUpPageModel extends PageModel {
         SignUpPageModel model = new SignUpPageModel();
         model.confirmationEmailSent = true;
         return model;
+    }
+    
+    public List<ApplicationLocale> getAvailableLocales() {
+        return Arrays.asList(ApplicationLocale.values());
     }
 }
