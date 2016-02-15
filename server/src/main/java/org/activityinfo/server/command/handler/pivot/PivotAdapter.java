@@ -377,7 +377,7 @@ public class PivotAdapter {
 
                     } else {
                         double value = measureView.getDouble(i);
-                        if (!Double.isNaN(value)) {
+                        if (!Double.isNaN(value) && !Double.isInfinite(value)) {
                             Map<Dimension, DimensionCategory> key = bucketKey(i, categories, indicatorCategory);
 
                             if (command.getValueType() == PivotSites.ValueType.INDICATOR) {
@@ -466,7 +466,7 @@ public class PivotAdapter {
                 }
                 for (int i = 0; i < columnSet.getNumRows(); i++) {
                     double value = measureView.getDouble(i);
-                    if (!Double.isNaN(value)) {
+                    if (!Double.isNaN(value) && !Double.isInfinite(value)) {
                         Map<Dimension, DimensionCategory> key = new HashMap<>();
                         for (DimBinding dim : groupBy) {
                             DimensionCategory category = dim.extractTargetCategory(activity, columnSet, i);
