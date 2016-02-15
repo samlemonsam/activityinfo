@@ -503,6 +503,7 @@ public class DataEntrySteps {
             for (int j = 0; j < header.getCells().size(); j++) {
                 String label = driver.getAliasTable().getAlias(header.getCells().get(j));
                 modal.form().findFieldsByLabel(label).get(i - 2).fill(row.getCells().get(j));
+                Sleep.sleepMillis(100);
             }
         }
     }

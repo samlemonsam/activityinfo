@@ -87,9 +87,10 @@ public class SubformContainer {
     public SubformContainer selectKey(String keyLabel) {
         for (int i = 0; i < 10; i++) {
             Optional<FluentElement> key = navButtonByLabel(keyLabel);
+            Sleep.sleepSeconds(1);
+
             if (key.isPresent()) {
                 key.get().clickWhenReady();
-                Sleep.sleepSeconds(1);
                 return this;
             } else {
                 clickPreviousFull();

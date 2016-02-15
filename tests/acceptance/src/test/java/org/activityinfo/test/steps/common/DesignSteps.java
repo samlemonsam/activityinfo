@@ -29,6 +29,7 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
@@ -229,6 +230,7 @@ public class DesignSteps {
             DropPanel dropPanel = page.dropPanel(containerLabel);
 
             dropPanel.dragAndDrop(dropLabel);
+            Sleep.sleepMillis(100);
 
             if ("root".equalsIgnoreCase(containerLabel) && (
                     fieldType.equalsIgnoreCase("Section") || fieldType.equalsIgnoreCase("Sub Form"))) {
