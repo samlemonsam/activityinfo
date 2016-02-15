@@ -7,6 +7,7 @@ import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -32,13 +33,22 @@ public class SiteDimBinding extends DimBinding {
         // the closest thing to a unique label for sites, which is their
         // location name
         
+        
         return Arrays.asList(
-                new ColumnModel().setExpression(ColumnModel.ID_SYMBOL).as(ID_COLUMN),
+                new ColumnModel().setExpression(siteId(formTree)).as(ID_COLUMN),
                 new ColumnModel().setExpression(
                         new CompoundExpr(
                                 CuidAdapter.locationField(activityIdOf(formTree)),
                                 "label"))
                         .as(LABEL_COLUMN));
+    }
+
+    private SymbolExpr siteId(FormTree formTree) {
+        if(formTree.getRootFormClass().getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            return new SymbolExpr(ColumnModel.ID_SYMBOL);
+        } else {
+            return new SymbolExpr("site");
+        }
     }
 
     @Override
