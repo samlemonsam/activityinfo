@@ -588,6 +588,19 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     @Test
+    @OnDataSet("/dbunit/sites-null.db.xml")
+    public void nullValuesExcluded() {
+
+        withIndicatorAsDimension();
+        filter.addRestriction(DimensionType.Indicator, asList(5, 6));
+
+        execute();
+
+        assertBucketCount(0);
+    }
+
+
+    @Test
     @OnDataSet("/dbunit/sites-weeks.db.xml")
     public void testWeeks() {
 

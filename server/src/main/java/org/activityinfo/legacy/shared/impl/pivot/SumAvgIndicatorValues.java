@@ -59,7 +59,10 @@ public class SumAvgIndicatorValues extends BaseTable {
         query.appendColumn("COUNT(V.Value)", ValueFields.COUNT);
 
         query.whereTrue(" (Indicator.Aggregation=0 or Indicator.Aggregation=1) ");
-        
+
+        // Do not include empty values in aggregations EVER
+        query.whereTrue(" (V.VALUE IS NOT NULL)");
+
         // Ensure that we don't get values erroneously associated with calculated indicators
         query.whereTrue(" (Indicator.calculatedAutomatically=0 OR Indicator.expression IS NULL)");
     }

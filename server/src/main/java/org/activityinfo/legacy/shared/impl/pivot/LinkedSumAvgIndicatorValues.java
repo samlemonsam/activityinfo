@@ -60,6 +60,8 @@ public class LinkedSumAvgIndicatorValues extends BaseTable {
         query.where("Activity.dateDeleted").isNull();
         query.where("UserDatabase.dateDeleted").isNull();
 
+        // Do not include empty values in aggregations EVER
+        query.whereTrue(" (V.VALUE IS NOT NULL)");
     }
 
     @Override
