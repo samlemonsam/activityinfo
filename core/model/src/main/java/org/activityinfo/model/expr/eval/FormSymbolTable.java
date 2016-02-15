@@ -13,7 +13,6 @@ import org.activityinfo.model.form.FormField;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +44,7 @@ public class FormSymbolTable {
         }
     }
 
-    public FormSymbolTable(List<FormField> fields) {
+    public FormSymbolTable(Iterable<FormField> fields) {
         for (FormField field : fields) {
 
             // ID has first priority

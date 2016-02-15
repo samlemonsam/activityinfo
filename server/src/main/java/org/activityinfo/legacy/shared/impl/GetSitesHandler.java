@@ -57,10 +57,7 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.promise.Promise;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult> {
 
@@ -807,27 +804,30 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         query.execute(tx, new SqlResultCallback() {
             @Override
             public void onSuccess(SqlTransaction tx, final SqlResultSet results) {
-                List<FormField> fields = Lists.newArrayList();
+                Multimap<Integer, FormField> fields = HashMultimap.create();
                 for(SqlResultSetRow row : results.getRows()) {
-                    fields.add(createField(row));
+                    fields.put(row.getInt("activityId"), createField(row));
                 }
+                // Have to resolve symbols on a per-form basis
+                for (Integer activityId : fields.keySet()) {
+                    Collection<FormField> activityFields = fields.get(activityId);
+                    FormSymbolTable symbolTable = new FormSymbolTable(activityFields);
+                    PartialEvaluator<SiteDTO> evaluator = new PartialEvaluator<>(symbolTable, new SiteFieldReaderFactory());
 
-                FormSymbolTable symbolTable = new FormSymbolTable(fields);
-                PartialEvaluator<SiteDTO> evaluator = new PartialEvaluator<>(symbolTable, new SiteFieldReaderFactory());
-
-                List<CalculatedIndicatorReader> readers = Lists.newArrayList();
-                for(FormField field : fields) {
-                    if(field.getType() instanceof CalculatedFieldType) {
-                        FieldReader<SiteDTO> reader = evaluator.partiallyEvaluate(field);
-                        if(reader.getType() instanceof QuantityType) {
-                            readers.add(new CalculatedIndicatorReader(field, reader));
+                    List<CalculatedIndicatorReader> readers = Lists.newArrayList();
+                    for(FormField field : activityFields) {
+                        if(field.getType() instanceof CalculatedFieldType) {
+                            FieldReader<SiteDTO> reader = evaluator.partiallyEvaluate(field);
+                            if(reader.getType() instanceof QuantityType) {
+                                readers.add(new CalculatedIndicatorReader(field, reader));
+                            }
                         }
                     }
-                }
 
-                for(SiteDTO site : siteMap.values()) {
-                    for(CalculatedIndicatorReader reader : readers) {
-                        reader.read(site);
+                    for(SiteDTO site : siteMap.values()) {
+                        for(CalculatedIndicatorReader reader : readers) {
+                            reader.read(site);
+                        }
                     }
                 }
                 complete.onSuccess(null);
@@ -838,7 +838,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
     private FormField createField(SqlResultSetRow rs) {
         IndicatorDTO indicator = new IndicatorDTO();
         indicator.setId(rs.getInt("indicatorId"));
-        indicator.setName("indicatorName");
+        indicator.setName(rs.getString("indicatorName"));
         indicator.setTypeId(rs.getString("type"));
         indicator.setExpression(rs.getString("expression"));
         indicator.setRelevanceExpression(rs.getString("skipExpression"));
