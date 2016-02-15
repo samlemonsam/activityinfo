@@ -35,6 +35,6 @@
 
     <set-property-fallback name="locale" value="en"/>
 
-    <set-property name="locale" value="en,fr,es,ar"/>
+    <set-property name="locale" value="ar"/>
 
 </module>
