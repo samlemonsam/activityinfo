@@ -8,6 +8,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NullFieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 
@@ -39,8 +40,7 @@ public class SiteFieldReaderFactory implements FieldReaderFactory<SiteDTO> {
             if(value instanceof Number) {
                 return new Quantity(((Number) value).doubleValue(), type.getUnits());
             } else {
-                // TODO: Replace with use of an explicit default value when ready
-                return new Quantity(0, type.getUnits());
+                return NullFieldValue.INSTANCE;
             }
         }
 

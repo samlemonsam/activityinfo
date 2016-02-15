@@ -229,7 +229,9 @@ public class CalculatedIndicatorsQuery implements WorkItem {
         sitesQuery.setFetchAdminEntities( query.isPivotedBy(DimensionType.AdminLevel) );
         sitesQuery.setFetchAttributes(query.isPivotedBy(DimensionType.AttributeGroup));
         sitesQuery.setFetchAllIndicators(true);
-        sitesQuery.setFetchLocation(query.isPivotedBy(DimensionType.Location));
+        sitesQuery.setFetchLocation(
+                query.isPivotedBy(DimensionType.Location) || 
+                query.isPivotedBy(DimensionType.Site));
         sitesQuery.setFetchPartner(query.isPivotedBy(DimensionType.Partner));
         sitesQuery.setFetchComments(false);
         sitesQuery.setFetchDates(query.isPivotedBy(DimensionType.Date));
@@ -323,7 +325,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
             for (EntityCategory indicator : indicatorMap.values()) {
                 Double value = site.getIndicatorDoubleValue(indicator.getId());
 
-                if (value != null && !Double.isNaN(value)) {
+                if (value != null && !Double.isNaN(value) && !Double.isInfinite(value)) {
 
                     Bucket bucket = new Bucket(value);
                     bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));
