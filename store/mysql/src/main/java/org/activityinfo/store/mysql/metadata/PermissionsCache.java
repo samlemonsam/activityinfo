@@ -46,6 +46,7 @@ public class PermissionsCache {
 
                 if(rs.getBoolean("AllowViewAll")) {
                     permission.viewAll = true;
+                    permission.view = true;
 
                 } else if(rs.getBoolean("AllowView")) {
                     permission.view = true;
