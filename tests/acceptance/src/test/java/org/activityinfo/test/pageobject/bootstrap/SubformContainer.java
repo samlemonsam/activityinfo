@@ -21,8 +21,10 @@ package org.activityinfo.test.pageobject.bootstrap;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
 
@@ -37,6 +39,7 @@ public class SubformContainer {
 
     private final BsFormPanel form;
     private final FluentElement headerDiv;
+    private SubformPanel keyedPanel;
 
     public SubformContainer(BsFormPanel form, String subformName) {
         this.form = form;
@@ -73,4 +76,57 @@ public class SubformContainer {
     public List<BsFormPanel.BsField> findFieldsByLabel(String labelText) {
         return form.findFieldsByLabel(labelText);
     }
+
+    private SubformPanel keyedPanel() {
+        if (keyedPanel == null) {
+            keyedPanel = getPanels().get(0); // for keyed subforms we have only one panel
+        }
+        return keyedPanel;
+    }
+
+    public SubformContainer selectKey(String keyLabel) {
+        for (int i = 0; i < 10; i++) {
+            Optional<FluentElement> key = navButtonByLabel(keyLabel);
+            if (key.isPresent()) {
+                key.get().clickWhenReady();
+                Sleep.sleepSeconds(1);
+                return this;
+            } else {
+                clickPreviousFull();
+            }
+        }
+
+        throw new RuntimeException("Failed to find tab with label: " + keyLabel);
+    }
+
+    private Optional<FluentElement> navButtonByLabel(String label) {
+        List<FluentElement> links = keyedPanel().getElement().find().a().waitForList().list();
+        for (FluentElement element : links) {
+            if (label.equals(element.text())) {
+                return Optional.of(element);
+            }
+        }
+        return Optional.absent();
+    }
+
+    public SubformContainer clickPreviousFull() {
+        navButtonByLabel("«").get().clickWhenReady();
+        return this;
+    }
+
+    public SubformContainer clickPrevious() {
+        navButtonByLabel("<").get().clickWhenReady();
+        return this;
+    }
+
+    public SubformContainer clickNext() {
+        navButtonByLabel(">").get().clickWhenReady();
+        return this;
+    }
+
+    public SubformContainer clickNextFull() {
+        navButtonByLabel("»").get().clickWhenReady();
+        return this;
+    }
+
 }

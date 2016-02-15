@@ -520,8 +520,7 @@ public class DataEntrySteps {
 
     @And("^I save submission$")
     public void I_save_submission() throws Throwable {
-        BsModal modal = currentOpenedForm();
-        modal.save();
+        currentOpenedForm().save();
     }
 
     @And("^I enter values:$")
@@ -546,6 +545,7 @@ public class DataEntrySteps {
                 }
 
                 modal.form().findFieldByLabel(label).fill(value, type.getCells().get(j));
+                Sleep.sleepMillis(100);
             }
         }
     }
@@ -587,5 +587,51 @@ public class DataEntrySteps {
         List<SubformPanel> panels = modal.subform(subformName).getPanels();
         panels.get(itemIndex - 1).delete();
 
+    }
+
+    @And("^I enter \"([^\"]*)\" subform values:$")
+    public void I_enter_subform_values(String subformName, DataTable subformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = subformValues.getGherkinRows().get(0);
+
+        SubformContainer subform = modal.subform(subformName);
+
+        for (int i = 2; i < subformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = subformValues.getGherkinRows().get(i);
+
+            String keyLabel = row.getCells().get(0);
+            subform.selectKey(keyLabel);
+
+            for (int j = 1; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+
+                modal.form().findFieldByLabel(label).fill(row.getCells().get(j));
+            }
+        }
+    }
+
+    @Then("^opened form has \"([^\"]*)\" subform keyed values:$")
+    public void opened_form_has_subform_keyed_values(String subformName, DataTable expectedSubformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = expectedSubformValues.getGherkinRows().get(0);
+        DataTableRow type = expectedSubformValues.getGherkinRows().get(1);
+
+        SubformContainer subform = modal.subform(subformName);
+
+        for (int i = 2; i < expectedSubformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = expectedSubformValues.getGherkinRows().get(i);
+
+            String keyLabel = row.getCells().get(0);
+
+            subform.selectKey(keyLabel);
+
+            for (int j = 1; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+                String currentValue = modal.form().findFieldByLabel(label).getValue(ControlType.fromValue(type.getCells().get(j)));
+                assertEquals(row.getCells().get(j), currentValue);
+            }
+        }
     }
 }

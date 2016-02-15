@@ -40,4 +40,8 @@ public class SubformPanel {
         FluentElement deleteElement = element.find().span(withClass("icon_remove")).first();
         deleteElement.moveOver().clickWhenReady();
     }
+
+    public FluentElement getElement() {
+        return element;
+    }
 }

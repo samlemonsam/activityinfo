@@ -82,3 +82,35 @@ Feature: Subforms
       | Subform Field 3 | Subform Field 4 |
       | text            | quantity        |
       | value 3         | 3               |
+
+  Scenario: Monthly subform
+    Given I open the form designer for "NFI Distribution" in database "Subforms"
+    And drop field in:
+      | label             | type     | container         |
+      | Root Field        | Text     | root              |
+      | Monthly subform 1 | Sub Form | root              |
+      | Subform Field 1   | Text     | Monthly subform 1 |
+      | Subform Field 2   | Quantity | Monthly subform 1 |
+    And set "Monthly subform 1" subform to "Monthly"
+    And open table for the "NFI Distribution" form in the database "Subforms"
+    And I open a new form submission on table page
+    And I enter "Monthly subform 1" subform values:
+      | key      | Subform Field 1 | Subform Field 2 |
+      | text     | text            | quantity        |
+      | Feb 2015 | value 1         | 1               |
+      | Jan 2015 | value 2         | 2               |
+    And I enter values:
+      | Partner | Start Date | End Date   | Root Field       |
+      | radio   | date       | date       | text             |
+      | NRC     | 2016-02-10 | 2016-02-10 | root_field_value |
+    And I save submission
+    Then table has rows with hidden built-in columns:
+      | Root Field       |
+      | text             |
+      | root_field_value |
+    And open edit dialog for entry in new table with field value "root_field_value"
+    Then opened form has "Monthly subform 1" subform keyed values:
+      | key      | Subform Field 1 | Subform Field 2 |
+      | text     | text            | quantity        |
+      | Feb 2015 | value 1         | 1               |
+      | Jan 2015 | value 2         | 2               |
