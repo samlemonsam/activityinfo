@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl.join;
 
+import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
@@ -61,7 +62,7 @@ public class JoinedColumnViewSlot implements Slot<ColumnView> {
             case NUMBER:
                 return joinDoubleColumn(nestedColumn.get(), left);
             case BOOLEAN:
-                break;
+                return joinBooleanColumn(nestedColumn.get(), left);
             case GEOGRAPHIC:
                 break;
         }
@@ -92,5 +93,19 @@ public class JoinedColumnViewSlot implements Slot<ColumnView> {
             }
         }
         return new DoubleArrayColumnView(array);    
+    }
+
+    private ColumnView joinBooleanColumn(ColumnView columnView, int[] joinMap) {
+        int numRows = joinMap.length;
+        int[] array = new int[numRows];
+        for(int row=0;row< numRows;++row) {
+            int right = joinMap[row];
+            if(right != -1) {
+                array[row] = columnView.getBoolean(right);
+            } else {
+                array[row] = ColumnView.NA;
+            }
+        }
+        return new BooleanColumnView(array);
     }
 }
