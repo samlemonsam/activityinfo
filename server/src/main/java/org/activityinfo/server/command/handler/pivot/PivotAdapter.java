@@ -327,7 +327,7 @@ public class PivotAdapter {
         for (ActivityField indicator : indicators) {
             Collection<Integer> sourceIndicatorIds = linkedActivity.getSourceIndicatorIdsFor(indicator.getId());
             for (Integer sourceIndicatorId : sourceIndicatorIds) {
-                String alias = alias(indicator);
+                String alias = "I" + sourceIndicatorId;
                 queryModel.selectExpr(fieldExpression(sourceIndicatorId)).as(alias);
                 aliasToIndicator.put(alias, indicator);
             }
