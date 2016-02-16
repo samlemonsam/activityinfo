@@ -54,7 +54,7 @@ public class LinkedSumAvgIndicatorValues extends BaseTable {
 
         query.groupBy("Indicator.IndicatorId");
         query.groupBy("Indicator.Aggregation");
-        query.whereTrue(" ((V.value <> 0 and Indicator.Aggregation=0) or Indicator.Aggregation=1) ");
+        query.whereTrue(" (Indicator.Aggregation=0 or Indicator.Aggregation=1) ");
 
         query.where("Site.dateDeleted").isNull();
         query.where("Activity.dateDeleted").isNull();
