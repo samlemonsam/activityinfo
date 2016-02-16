@@ -63,6 +63,9 @@ public class SumAvgIndicatorValues extends BaseTable {
         // Do not include empty values in aggregations EVER
         query.whereTrue(" (V.VALUE IS NOT NULL)");
 
+        // Exclude values for indicators that have been changed to text
+        query.whereTrue(" Indicator.type = 'quantity' ");
+        
         // Ensure that we don't get values erroneously associated with calculated indicators
         query.whereTrue(" (Indicator.calculatedAutomatically=0 OR Indicator.expression IS NULL)");
     }

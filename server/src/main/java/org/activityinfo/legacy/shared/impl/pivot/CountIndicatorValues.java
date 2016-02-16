@@ -48,6 +48,7 @@ public class CountIndicatorValues extends BaseTable {
         query.appendColumn(Integer.toString(IndicatorDTO.AGGREGATE_SITE_COUNT), ValueFields.AGGREGATION);
 
         query.where("Indicator.Aggregation").equalTo(IndicatorDTO.AGGREGATE_SITE_COUNT);
+        query.whereTrue("Indicator.type = 'QUANTITY'");
         query.where("Indicator.dateDeleted").isNull();
         query.where("Site.dateDeleted").isNull();
     }

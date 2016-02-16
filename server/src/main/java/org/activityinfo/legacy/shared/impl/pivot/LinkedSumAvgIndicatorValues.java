@@ -74,6 +74,11 @@ public class LinkedSumAvgIndicatorValues extends BaseTable {
         
         // Do not include empty values in aggregations EVER
         query.whereTrue(" (V.VALUE IS NOT NULL)");
+
+
+        // Exclude values for indicators that have been changed to text
+        query.whereTrue(" Indicator.type = 'QUANTITY'");
+        query.whereTrue(" SI.type = 'QUANTITY' ");
         
     }
 
