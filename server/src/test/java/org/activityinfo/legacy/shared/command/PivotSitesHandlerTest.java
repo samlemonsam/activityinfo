@@ -658,6 +658,17 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
 
     @Test
+    @OnDataSet("/dbunit/sites-linked-monthly.db.xml")
+    public void testLinkedMonthlyToOnce() {
+        withIndicatorAsDimension();
+        filter.addRestriction(DimensionType.Indicator, 1);
+        execute();
+        assertThat().forIndicator(1).thereIsOneBucketWithValue(1500 + 400 + 35);
+    }
+
+
+
+    @Test
     @OnDataSet("/dbunit/sites-linked.db.xml")
     public void testLinkedValuesAreDuplicated() {
         withIndicatorAsDimension();

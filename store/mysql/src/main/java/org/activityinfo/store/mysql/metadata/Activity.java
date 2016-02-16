@@ -217,7 +217,7 @@ public class Activity implements Serializable {
             if(linkedActivity == null) {
                 linkedActivity = new LinkedActivity();
                 linkedActivity.activityId = sourceActivityId;
-                linkedActivity.reportingFrequency = reportingFrequency;
+                linkedActivity.reportingFrequency = sourceReportingFrequency;
                 linkedActivities.put(sourceActivityId, linkedActivity);
             }
             linkedActivity.linkMap.put(destinationIndicatorId, sourceIndicatorId);
