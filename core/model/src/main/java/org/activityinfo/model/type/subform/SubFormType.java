@@ -26,9 +26,11 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ParametrizedFieldType;
+import org.activityinfo.model.type.ParametrizedFieldTypeClass;
+import org.activityinfo.model.type.RecordFieldTypeClass;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.period.PredefinedPeriods;
 
 /**
  * @author yuriyz on 12/03/2014.
@@ -70,10 +72,13 @@ public class SubFormType implements ParametrizedFieldType {
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
+    /**
+     * Keeps reference to subformFormClass.
+     */
     private ResourceId classId;
 
     public SubFormType() {
-        this(PredefinedPeriods.MONTHLY.getResourceId());
+        this(null);
     }
 
     public SubFormType(ResourceId classId) {

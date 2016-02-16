@@ -53,7 +53,7 @@ import java.util.Set;
  * - FormField -> SubFormType -> Sub FormClass
  *
  * subFormClass:
- * - key field - references subFormClass type : Collection, Partner, LocationType, Period
+ * - key field - references SubFormKind (type of subformFormClass) : Collection, Partner, LocationType, Period
  * b) each subform can have multiple instances:
  * <p/>
  * b.1) valueInstance - instance that keeps values for sub form
