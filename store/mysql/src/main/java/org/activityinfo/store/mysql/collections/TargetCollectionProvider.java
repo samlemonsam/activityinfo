@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.collections;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -29,7 +29,11 @@ public class TargetCollectionProvider implements CollectionProvider {
     @Override
     public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         Map<ResourceId, ResourceCollection> result = openCollections(executor, Collections.singleton(formClassId));
-        return Preconditions.checkNotNull(result.get(formClassId));
+        ResourceCollection collection = result.get(formClassId);
+        if(collection == null) {
+            throw new IllegalArgumentException("no such target collection: " + formClassId);
+        }
+        return collection;
     }
 
     @Override
@@ -55,18 +59,15 @@ public class TargetCollectionProvider implements CollectionProvider {
 
             try (ResultSet rs = executor.query(
                     "SELECT " +
-                            "D.DatabaseId, " +
-                            "D.Name, " +
-                            "I.IndicatorId, " +
-                            "I.Name, " +
-                            "I.Units " +
-                            " FROM userdatabase D " +
-                            " LEFT JOIN activity A ON (D.DatabaseId = A.DatabaseId) " +
-                            " LEFT JOIN indicator I ON (A.ActivityId=I.ActivityId) " +
-                            " WHERE D.dateDeleted IS NULL AND " +
-                            "   A.dateDeleted IS NULL AND " +
-                            "   I.dateDeleted IS NULL AND " +
-                            "   I.Type = 'QUANTITY'")) {
+                        "D.DatabaseId, " +
+                        "D.Name, " +
+                        "I.IndicatorId, " +
+                        "I.Name, " +
+                        "I.Units " +
+                        " FROM userdatabase D " +
+                        " LEFT JOIN activity A ON (D.DatabaseId = A.DatabaseId and A.dateDeleted IS NULL) " +
+                        " LEFT JOIN indicator I ON (A.ActivityId=I.ActivityId and I.dateDeleted IS NULL and I.type = 'QUANTITY') " +
+                        " WHERE D.databaseID IN (" + Joiner.on(',').join(targetIds) + ")")) {
 
                 while (rs.next()) {
                     int databaseId = rs.getInt(1);
@@ -76,7 +77,10 @@ public class TargetCollectionProvider implements CollectionProvider {
                         targetMap.put(databaseId, target);
                     }
 
-                    target.addIndicator(rs.getInt(3), rs.getString(4), rs.getString(5));
+                    int indicatorId = rs.getInt(3);
+                    if(!rs.wasNull()) {
+                        target.addIndicator(indicatorId, rs.getString(4), rs.getString(5));
+                    }
                 }
             }
 
