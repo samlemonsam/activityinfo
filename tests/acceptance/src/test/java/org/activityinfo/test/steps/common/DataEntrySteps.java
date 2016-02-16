@@ -36,12 +36,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @ScenarioScoped
 public class DataEntrySteps {
+
+    public static final Logger LOGGER = Logger.getLogger(DataEntrySteps.class.getName());
 
     @Inject
     private ApplicationDriver driver;
@@ -502,7 +505,11 @@ public class DataEntrySteps {
             DataTableRow row = subformValues.getGherkinRows().get(i);
             for (int j = 0; j < header.getCells().size(); j++) {
                 String label = driver.getAliasTable().getAlias(header.getCells().get(j));
-                modal.form().findFieldsByLabel(label).get(i - 2).fill(row.getCells().get(j));
+                String value = row.getCells().get(j);
+
+                LOGGER.finest("entering repeating subform values: label: " + label + ", value:" + value);
+
+                modal.form().findFieldsByLabel(label).get(i - 2).fill(value);
                 Sleep.sleepMillis(100);
             }
         }

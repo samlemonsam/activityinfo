@@ -22,6 +22,9 @@ package org.activityinfo.model.type.period;
  */
 
 import com.google.common.base.Strings;
+import org.activityinfo.model.type.time.LocalDate;
+
+import java.util.Date;
 
 /**
  * @author yuriyz on 01/27/2015.
@@ -80,5 +83,30 @@ public class Iso8601 {
         }
 
         return result;
+    }
+
+    public static String asString(Date date) {
+        return asString(new LocalDate(date));
+    }
+
+    public static String asString(LocalDate localDate) {
+        String monthOfYear = appendZeroIfNeeded(localDate.getMonthOfYear());
+        String dayOfMonth = appendZeroIfNeeded(localDate.getDayOfMonth());
+        return localDate.getYear() + monthOfYear + dayOfMonth;
+    }
+
+    private static String appendZeroIfNeeded(int integer) {
+        return appendZeroIfNeeded(Integer.toString(integer));
+    }
+
+
+    private static String appendZeroIfNeeded(String str) {
+        if (str.length() == 1) {
+            return "0" + str;
+        } else if (str.length() == 2) {
+            return str;
+        }
+        throw new RuntimeException("Unable to normalize string: " + str);
+
     }
 }

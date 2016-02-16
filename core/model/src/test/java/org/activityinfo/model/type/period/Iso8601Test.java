@@ -21,6 +21,7 @@ package org.activityinfo.model.type.period;
  * #L%
  */
 
+import org.activityinfo.model.type.time.LocalDate;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +52,18 @@ public class Iso8601Test {
         assertPeriod("a", new PeriodValue().setYear(1));
     }
 
-    private void assertPeriod(String periodAsIso8601, PeriodValue periodValue) {
+    @Test
+    public void dateFormatter() {
+        assertFormatting("20150101", new LocalDate(2015, 1, 1));
+        assertFormatting("20151212", new LocalDate(2015, 12, 12));
+        assertFormatting("20160212", new LocalDate(2016, 2, 12));
+    }
+
+    private static void assertFormatting(String expectedString, LocalDate date) {
+        assertEquals(expectedString, Iso8601.asString(date));
+    }
+
+    private static void assertPeriod(String periodAsIso8601, PeriodValue periodValue) {
         PeriodValue parsed = Iso8601.parse(periodAsIso8601);
         assertEquals(parsed, periodValue);
         assertEquals(periodAsIso8601, Iso8601.asIso8601String(periodValue));

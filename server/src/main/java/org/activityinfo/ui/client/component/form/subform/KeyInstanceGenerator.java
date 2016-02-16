@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.form.subform;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.period.Iso8601;
 
 /**
  * @author yuriyz on 01/20/2016.
@@ -34,7 +35,8 @@ public class KeyInstanceGenerator {
     }
 
     public static ResourceId periodId(DateRange range, ResourceId subformId) {
-        return ResourceId.valueOf(ResourceId.GENERATED_ID_DOMAIN + "_period_" + range.getStart().getTime() + "_" + range.getEnd().getTime() + "_" + subformId.asString());
+        return ResourceId.valueOf(ResourceId.GENERATED_ID_DOMAIN + "_period_" +
+                Iso8601.asString(range.getStart()) + "_" + Iso8601.asString(range.getEnd()) + "_" + subformId.asString());
     }
 
     public static ResourceId newCollectionId() {
