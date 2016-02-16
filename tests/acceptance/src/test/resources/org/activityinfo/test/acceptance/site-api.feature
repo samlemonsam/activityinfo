@@ -139,7 +139,7 @@ Feature: Site API
         category: null
         published: 1
         locationType:
-          id: 100000
+          id: $any
           name: Country
           adminLevelId: null
         lockedPeriods: [ ]
