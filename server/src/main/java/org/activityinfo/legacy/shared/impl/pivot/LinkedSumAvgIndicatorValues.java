@@ -80,6 +80,8 @@ public class LinkedSumAvgIndicatorValues extends BaseTable {
         query.whereTrue(" Indicator.type = 'QUANTITY'");
         query.whereTrue(" SI.type = 'QUANTITY' ");
         
+        query.whereTrue(" IndicatorLink.SourceIndicatorId != IndicatorLink.DestinationIndicatorId ");
+        
     }
 
     @Override
