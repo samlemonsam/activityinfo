@@ -9,12 +9,9 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ResizeComposite;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
 import org.activityinfo.core.shared.importing.model.ColumnAction;
 import org.activityinfo.core.shared.importing.model.ImportModel;
@@ -24,6 +21,7 @@ import org.activityinfo.core.shared.importing.strategy.ColumnAccessor;
 import org.activityinfo.core.shared.importing.strategy.ImportTarget;
 import org.activityinfo.core.shared.importing.strategy.TargetSiteId;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.ui.client.component.importDialog.ImportPage;
 import org.activityinfo.ui.client.component.importDialog.PageChangedEvent;
 import org.activityinfo.ui.client.widget.Panel;
@@ -46,7 +44,8 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
             UiBinder<Widget, ColumnMappingPage> {
     }
 
-    public static final int LABEL_LIMIT_IN_MESSAGE = 7;
+    public static final int LABEL_LIMIT_IN_MESSAGE = 5;
+    public static final int LABEL_LENGTH_LIMIT = 20;
 
     @UiField(provided = true)
     ColumnMappingGrid dataGrid;
@@ -59,6 +58,8 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
 
     @UiField
     Panel fieldSelectorPanel;
+    @UiField
+    HTMLPanel helpText;
 
     private final EventBus eventBus;
     private final ImportModel importModel;
@@ -104,6 +105,7 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
                 updateColumnMapping(event.getValue());
             }
         });
+        helpText.add(new HTML("<h5>" + I18N.CONSTANTS.columnMappingHelpLink() + "</h5>"));
     }
 
     private void onColumnChanged(SourceColumn column) {
@@ -163,7 +165,7 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
         if (importTargets.isEmpty()) {
             eventBus.fireEvent(new PageChangedEvent(true, ""));
         } else {
-            eventBus.fireEvent(new PageChangedEvent(false, I18N.MESSAGES.pleaseMapAllMandatoryColumns(columnLabels(importTargets))));
+            eventBus.fireEvent(new PageChangedEvent(false, I18N.MESSAGES.pleaseMapAllMandatoryColumns(importTargets.size(), columnLabels(importTargets))));
         }
     }
 
@@ -174,7 +176,11 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
             size = LABEL_LIMIT_IN_MESSAGE;
         }
         for (int i = 0; i < size; i++) {
-            s += importTargets.get(i).getLabel();
+            String label = importTargets.get(i).getLabel();
+            if (label.length() >= LABEL_LENGTH_LIMIT) {
+                label = label.substring(0, LABEL_LENGTH_LIMIT - 1) + "...";
+            }
+            s += label;
             if (i < (size - 1)) {
                 s += ", ";
             }

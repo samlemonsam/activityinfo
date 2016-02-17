@@ -2,7 +2,11 @@ package org.activityinfo.ui.client.component.importDialog.mapping;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import org.activityinfo.core.shared.importing.model.*;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import org.activityinfo.core.shared.importing.model.ColumnAction;
+import org.activityinfo.core.shared.importing.model.IgnoreAction;
+import org.activityinfo.core.shared.importing.model.ImportModel;
+import org.activityinfo.core.shared.importing.model.MapExistingAction;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.i18n.shared.I18N;
 
@@ -22,16 +26,22 @@ class GridHeaderCell extends AbstractCell<SourceColumn> {
 
     @Override
     public void render(Context context, SourceColumn column, SafeHtmlBuilder sb) {
-        if(context.getIndex() == ColumnMappingGrid.SOURCE_COLUMN_HEADER_ROW) {
+        if (context.getIndex() == ColumnMappingGrid.SOURCE_COLUMN_HEADER_ROW) {
+            sb.append(SafeHtmlUtils.fromTrustedString("<span title='" + column.getHeader() + "'>"));
             sb.appendEscaped(column.getHeader());
+            sb.append(SafeHtmlUtils.fromTrustedString("</span>"));
         } else {
             ColumnAction action = model.getColumnAction(column);
-            if(action == null) {
+            if (action == null) {
                 sb.appendHtmlConstant(I18N.CONSTANTS.chooseFieldHeading());
-            } else if(action == IgnoreAction.INSTANCE) {
+            } else if (action == IgnoreAction.INSTANCE) {
                 sb.appendEscaped(I18N.CONSTANTS.ignoreColumnAction());
-            } else if(action instanceof MapExistingAction) {
-                sb.appendEscaped(((MapExistingAction) action).getTarget().getLabel());
+            } else if (action instanceof MapExistingAction) {
+                String label = ((MapExistingAction) action).getTarget().getLabel();
+
+                sb.append(SafeHtmlUtils.fromTrustedString("<span title='" + label + "'>"));
+                sb.appendEscaped(label);
+                sb.append(SafeHtmlUtils.fromTrustedString("</span>"));
             }
         }
     }
