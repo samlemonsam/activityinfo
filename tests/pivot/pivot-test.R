@@ -27,16 +27,86 @@ queryReports <- function() {
   reports
 }
 
-#' Execute a pivot table query
-execute <- function(reportId, userId, engine) {
+#' Queries databases that have targets defined
+queryDatabases <- function(whereClause = "1") {
+  
+  mydb = dbConnect(MySQL(), user='root', password='root', dbname='activityinfo')
+  dbs <- dbGetQuery(mydb, paste("SELECT d.name, d.databaseId id, u.email owner, d.owneruserid ownerId FROM userdatabase d",
+                                    "LEFT JOIN userlogin u on (u.userid=d.owneruserid) ",
+                                    "WHERE dateDeleted is null AND ", whereClause))
+  
+  dbDisconnect(mydb)
+  
+  dbs
+}
 
-  url <- "http://localhost:8080/resources/testPivot"
+hasLinks <- paste(
+    "databaseId IN ",
+    "(SELECT DA.databaseId FROM indicatorlink K ",
+      "LEFT JOIN indicator DI ON (DI.indicatorId = K.DestinationIndicatorId)",
+      "LEFT JOIN activity DA ON (DA.activityId = DI.activityId))")
+
+#' Creates a new request for a saved report
+savedReport <- function(report.id, user.id) {
+  if(missing(user.id)) {
+    reports <- queryReports()
+    user.id <- reports$ownerId[which(reports$id == report.id)]
+  }
+  list(path = "resources/testPivot/report", 
+       name = sprintf("report%d", report.id),
+       query.params = list(
+         reportId = report.id,
+         userId = user.id))
+}
+
+#' Samples a number of saved reports
+sampleSavedReports <- function(n = 10) {
+  reports <- queryReports()
+  rows <- sample(x = nrow(reports), size = n)
+  
+  lapply(rows, function(row) savedReport(reports$id[row], reports$ownerId[row]))
+}
+
+
+
+#' Creates a new request for pivoting on a whole database
+databasePivot <- function(database.id, user.id, ...) {
+  
+  if(missing(user.id)) {
+    dbs <- queryDatabases()
+    user.id <- dbs$ownerId[which(dbs$id == database.id)]
+  }
+  
+  list(path = "resources/testPivot/database",
+       name = sprintf("db%d-%s", database.id, paste(names(list(...)), collapse="-")),
+       query.params = list(
+         databaseId = database.id,
+         userId = user.id,
+         ...))
+}
+
+allDatabases <- function(n, where, ...) {
+  dbs <- queryDatabases(whereClause = where)
+  if(missing(n)) {
+    rows <- 1:nrow(dbs)
+  } else {
+    rows <- sample(x = nrow(dbs), size = n)
+  }
+  lapply(rows, function(i) databasePivot(dbs$id[i], dbs$ownerId[i], ...))  
+}
+
+
+#' Execute pivot query against test endpoint
+execute <- function(req, engine, ...) {
+  
+  url <- "http://localhost:8080/"
   
   timing <- system.time({ 
     response <- GET(url,
-      query = list(reportId = reportId,
-                   userId=userId,
-                   `new` = identical(engine, "NEW")))
+                    path = req$path,
+                    query = c(req$query.params, 
+                              list(`new` = identical(engine, "NEW")),
+                              list(...)))
     
   })
   
@@ -45,70 +115,90 @@ execute <- function(reportId, userId, engine) {
     json <- content(response, "text", encoding = "UTF-8")
     
     return(list(
-        time = as.double(timing["elapsed"]), 
-        succeeded = TRUE,
-        result = fromJSON(json)))
+      time = as.double(timing["elapsed"]), 
+      succeeded = TRUE,
+      result = fromJSON(json)))
   } else {
     return(list(
-      time = NA, 
+      time = NA,
+      error = content(response, "text", encoding = "UTF-8"),
       succeeded = FALSE))
   }
 }
 
+
 #' Profiles the new query engine, sampling from the list of all saved reports.
 #' @return a data frame with performance and comparison data for each sampled report
-profile.new.old <- function(n, report.id) {
-  reports <- queryReports()
-  if(!missing(report.id)) {
-    rows <- which(reports$id %in% report.id)
-  } else if(!missing(n)) {
-    rows <- sample(x = nrow(reports), size = n)
-  } else {
-    rows <- 1:nrow(reports)
+checkCompare <- function(reqs) {
+  
+  if(!is.null(reqs$name)) {
+    reqs <- list(reqs)
   }
-  for(i in rows) {
-    report <- reports[i, ]
-    cat(sprintf("%d %s (%d) %s\n", report$id, report$owner, report$ownerId, report$title))
-    old <- execute(report$id, report$ownerId, "OLD")
-    new.cold <- execute(report$id, report$ownerId, "NEW")
-    new.warm <- execute(report$id, report$ownerId, "NEW")
+  
+  reports <- data.frame(row.names = 1:length(reqs))
+  
+  for(i in 1:length(reqs)) {
+    req <- reqs[[i]]
+    cat(sprintf("%s %s (%d)\n", req$name, "?", req$query.params$userId))
+    old <- execute(req, engine = "OLD")
+    new.cold <- execute(req, "NEW")
+    new.warm <- execute(req, "NEW")
+    reports[i, "name"] <- req$name
     reports[i, "old"] <- old$time
     reports[i, "new.cold"] <- new.cold$time
     reports[i, "new.warm"] <- new.warm$time
     
     if(!is.null(old$result) && !is.null(new.cold$result)) {
-      reports[i, "match"] <- compareResults(report$id, old$result, new.cold$result)
+      matched <- compareResults(req$name, old$result, new.cold$result)
+      if(identical(matched, FALSE)) {
+        logDetails(req)
+      }
+      reports[i, "match"] <- matched
     }
   }
-  reports[rows,]
+  reports
 }
+
+logDetails <- function(req, engine) {
+  
+  old <- execute(req, engine = "OLD", details=TRUE)
+  nqe <- execute(req, engine = "NEW", details=TRUE)
+  
+  compareResults(paste(req$name, "details", sep="-"), old$result, nqe$result)
+}
+
 
 #' Compares the results of a saved report
 #' 
 #' Each saved report may contain zero or more pivot table / pivot chart queries,
 #' so compare them each in turn
-compareResults <- function(report.id, old, nqe) {
+compareResults <- function(req.name, old, nqe) {
   stopifnot(is.list(old), is.list(nqe))
   if(length(old) == 0) {
     return(NA)
   }
-  tryCatch({
+  
+ # tryCatch({
     matching <- sapply(1:length(old), function(i) {
-      compareBuckets( report.id, i, old[[i]]$buckets, nqe[[i]]$buckets)
+      compareBuckets(req.name, i, old[[i]]$buckets, nqe[[i]]$buckets)
     })
-    return(all(matching))
-  }, error = function(e) {
-    cat("  -> ERROR!\n")
-    capture.output({ 
-      print(e)
-      cat("old:\n")
-      str(old)
-      cat("new:\n")
-      str(nqe)
-    }, file = sprintf("logs/%d.error.log", report.id))
-    return(NA)
-  })
+    return(all(matching, na.rm=TRUE))
+#   }, error = function(e) {
+#     cat("  -> ERROR!\n")
+#     capture.output({ 
+#       print(e)
+#       cat("old:\n")
+#       str(old)
+#       cat("new:\n")
+#       str(nqe)
+#     }, file = sprintf("logs/%s.error.log", req.name))
+#     return(NA)
+#   })
 }
+
+
+
+
 
 #' Convert a PivotResult object into an R dataframe
 as.data.frame.buckets <- function(buckets, value.column = "value") {
@@ -202,7 +292,7 @@ bucketValue <- function(bucket) {
 #' Writes the results out to a 'logs' folder for later examination
 #' 
 #' @return TRUE if the results match exactly
-compareBuckets <- function(report.id, report.index, old, nqe) {
+compareBuckets <- function(req.name, report.index, old, nqe) {
   od <- as.data.frame.buckets(old, value.column = "old.value")
   nd <- as.data.frame.buckets(nqe, value.column = "new.value")
   
@@ -213,8 +303,8 @@ compareBuckets <- function(report.id, report.index, old, nqe) {
   }
   
   # Logs the results for subsequent debugging if anything is wrong
-  write.csv(od, file = sprintf("logs/%d-%d.old.csv", report.id, report.index))
-  write.csv(nd, file = sprintf("logs/%d-%d.new.csv", report.id, report.index))
+  write.csv(od, file = sprintf("logs/%s-%d.old.csv", req.name, report.index))
+  write.csv(nd, file = sprintf("logs/%s-%d.new.csv", req.name, report.index))
   
   old.dims <- names(od)[-1] 
   new.dims <- names(nd)[-1]    
@@ -223,11 +313,11 @@ compareBuckets <- function(report.id, report.index, old, nqe) {
   if(setequal(old.dims, new.dims)) {
     md <- merge(od, nd, by = unique(old.dims, new.dims), all = TRUE)
     md$diff <- md$old.value - md$new.value
-    write.csv(md, file = sprintf("logs/%d-%d.merged.csv", report.id, report.index))
+    write.csv(md, file = sprintf("logs/%s-%d.merged.csv", req.name, report.index))
     
-    matches <- identical(md$old.value, md$new.value)
+    matches <- !any(is.na(md$diff)) && all(abs(md$diff) < 0.001)
     if(!matches) {
-      cat(sprintf("MISMATCH: %d-%d.csv\n", report.id, report.index))
+      cat(sprintf("MISMATCH: %s-%d.csv\n", req.name, report.index))
     }
     return(matches)
     
