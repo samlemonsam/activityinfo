@@ -206,7 +206,6 @@ public class ActivityLoader {
         }
         
         if(!activityIds.isEmpty()) {
-            FormClass serializedFormClass;
 
             Set<Integer> classicActivityIds = new HashSet<>();
 
@@ -230,7 +229,8 @@ public class ActivityLoader {
                             "A.schemaVersion, " +           // (16)
                             "(A.dateDeleted IS NOT NULL OR " +
                             " d.dateDeleted IS NOT NULL), " + // (17)
-                            "d.ownerUserId " +               // (18)
+                            "d.ownerUserId, " +               // (18)
+                            "A.classicView " +                // (19)  
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -256,8 +256,14 @@ public class ActivityLoader {
                     activity.deleted = rs.getBoolean(17);
                     activity.ownerUserId = rs.getInt(18);
 
-                    serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
 
+                    // Only use json form for forms that are explicitly non-classicView,
+                    // otherwise we miss aggregation method.
+                    boolean classicView = rs.getBoolean(19);
+                    FormClass serializedFormClass = null;
+                    if(!classicView) {
+                        serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
+                    }
                     if (serializedFormClass == null) {
                         classicActivityIds.add(activity.getId());
                     } else {
