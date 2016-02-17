@@ -51,6 +51,8 @@ public class CountIndicatorValues extends BaseTable {
         query.whereTrue("Indicator.type = 'QUANTITY'");
         query.where("Indicator.dateDeleted").isNull();
         query.where("Site.dateDeleted").isNull();
+        query.where("Activity.dateDeleted").isNull();
+        query.where("UserDatabase.dateDeleted").isNull();
     }
 
     @Override
