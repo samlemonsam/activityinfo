@@ -231,7 +231,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     String fieldIsMandatory(String fieldLabel);
 
     @DefaultMessage("Please map all mandatory columns, missed mapping for {0} required fields: {1}")
-    String pleaseMapAllMandatoryColumns(int missedColumnCount, String columnLabels);
+    String missedMapping(int missedColumnCount, String columnLabels);
 
     @DefaultMessage("{0} rows are invalid and won''t be imported. Continue?")
     String continueImportWithInvalidRows(int invalidRowsCount);

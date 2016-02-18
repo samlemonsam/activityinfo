@@ -165,7 +165,7 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
         if (importTargets.isEmpty()) {
             eventBus.fireEvent(new PageChangedEvent(true, ""));
         } else {
-            eventBus.fireEvent(new PageChangedEvent(false, I18N.MESSAGES.pleaseMapAllMandatoryColumns(importTargets.size(), columnLabels(importTargets))));
+            eventBus.fireEvent(new PageChangedEvent(false, I18N.MESSAGES.missedMapping(importTargets.size(), columnLabels(importTargets))));
         }
     }
 
