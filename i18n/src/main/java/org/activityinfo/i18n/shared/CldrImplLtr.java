@@ -1,4 +1,4 @@
-package org.activityinfo.i18n.ar;
+package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.impl.CldrImpl;
 

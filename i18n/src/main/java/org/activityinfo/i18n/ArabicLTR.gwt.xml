@@ -6,10 +6,10 @@
     
     <inherits name="com.google.gwt.i18n.I18N"/>
 
-    <replace-with class="org.activityinfo.i18n.ar.CldrImplLtr">
+    <replace-with class="org.activityinfo.i18n.shared.CldrImplLtr">
         <when-type-is class="com.google.gwt.i18n.client.impl.CldrImpl"/>
         <when-property-is name="locale" value="ar" />
     </replace-with>
 
-    <source path="ar"/>
+    <source path="shared"/>
 </module>
