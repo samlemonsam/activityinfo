@@ -60,6 +60,7 @@ class AttributeGroupForm extends AbstractDesignForm {
         nameField.setFieldLabel(I18N.CONSTANTS.name());
         nameField.setMaxLength(AttributeGroupDTO.NAME_MAX_LENGTH);
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
 
         add(nameField);
