@@ -52,7 +52,7 @@ ext {
 
         ],
             
-        gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-13',
+        gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-12',
             
         rebar: [
             time:           "com.bedatadriven.rebar:rebar-time:${rebarVersion}",

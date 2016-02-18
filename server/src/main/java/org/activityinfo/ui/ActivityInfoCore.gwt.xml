@@ -31,6 +31,9 @@
   <inherits name="com.google.gson.Gson"/>
   <inherits name='com.extjs.gxt.ui.GXT'/>
 
+  <!-- Force LTR for Arabic version -->
+  <inherits name="org.activityinfo.i18n.ArabicLTR"/>
+  
   <inherits name="org.discotools.gwt.leaflet.Core"/>
 
   <inherits name="com.google.gwt.gears.Gears"/>
