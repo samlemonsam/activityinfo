@@ -88,7 +88,7 @@ public class ApplicationPage {
     }
 
     public void assertOfflineModeLoads() {
-        assertOfflineModeLoads(5, MINUTES);
+        assertOfflineModeLoads(15, MINUTES);
     }
 
     public void assertOfflineModeLoads(int timeout, TimeUnit timeoutUnits) {
