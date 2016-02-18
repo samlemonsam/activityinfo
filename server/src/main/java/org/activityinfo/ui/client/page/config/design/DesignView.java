@@ -155,7 +155,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
                         return IconImageBundle.ICONS.form();
                     }
                 } else if (model instanceof Folder) {
-                    return GXT.IMAGES.tree_folder_closed();
+                    return AbstractImagePrototype.create(GXT.IMAGES.tree_folder_closed());
                 } else if (model instanceof AttributeGroupDTO) {
                     return IconImageBundle.ICONS.attributeGroup();
                 } else if (model instanceof AttributeDTO) {
