@@ -26,13 +26,14 @@ import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.binding.FieldBinding;
 import com.extjs.gxt.ui.client.binding.FormBinding;
 import com.extjs.gxt.ui.client.data.ModelData;
-import com.extjs.gxt.ui.client.event.*;
-import com.extjs.gxt.ui.client.widget.form.*;
-import com.google.gwt.user.client.ui.Anchor;
+import com.extjs.gxt.ui.client.event.BindingEvent;
+import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.widget.form.NumberField;
+import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.ui.client.page.config.design.dialog.NewFormDialog;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
@@ -64,6 +65,8 @@ class ActivityForm extends AbstractDesignForm {
         nameField.setAllowBlank(false);
         nameField.setFieldLabel(I18N.CONSTANTS.name());
         nameField.setMaxLength(ActivityFormDTO.NAME_MAX_LENGTH);
+        nameField.setValidator(new BlankValidator());
+
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
         this.add(nameField);
 
