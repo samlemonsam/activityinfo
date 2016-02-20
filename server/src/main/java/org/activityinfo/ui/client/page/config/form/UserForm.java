@@ -35,6 +35,7 @@ import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.ui.client.page.config.design.BlankValidator;
 
 public class UserForm extends FormPanel {
 
@@ -55,6 +56,7 @@ public class UserForm extends FormPanel {
         nameField = new TextField<String>();
         nameField.setFieldLabel(constants.name());
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
         this.add(nameField);
 
         emailField = new TextField<String>();

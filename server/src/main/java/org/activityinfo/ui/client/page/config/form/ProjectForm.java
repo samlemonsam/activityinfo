@@ -29,6 +29,7 @@ import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.core.client.GWT;
 import org.activityinfo.i18n.shared.UiConstants;
+import org.activityinfo.ui.client.page.config.design.BlankValidator;
 
 public class ProjectForm extends FormPanel {
 
@@ -47,6 +48,7 @@ public class ProjectForm extends FormPanel {
         nameField.setFieldLabel(constants.name());
         nameField.setMaxLength(PROJECT_MAX_LENGTH);
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
         binding.addFieldBinding(new FieldBinding(nameField, "name"));
         this.add(nameField);
 
