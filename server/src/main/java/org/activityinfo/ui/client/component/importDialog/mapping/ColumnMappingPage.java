@@ -60,6 +60,8 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
     Panel fieldSelectorPanel;
     @UiField
     HTMLPanel helpText;
+    @UiField
+    DockLayoutPanel dockLayout;
 
     private final EventBus eventBus;
     private final ImportModel importModel;
@@ -87,6 +89,7 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
                         if (parentHeight > 0) {
                             actionSelector.getScrollPanel().setHeight(parentHeight - 90 + "px");
                         }
+                        dockLayout.forceLayout(); // IE workaround, AI-1329
                     }
                 });
             }
