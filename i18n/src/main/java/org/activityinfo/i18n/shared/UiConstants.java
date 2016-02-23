@@ -754,7 +754,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Maximum Radius")
     String radiusMaximum();
 
-    @DefaultStringValue("Minimum radius")
+    @DefaultStringValue("Minimum Radius")
     String radiusMinimum();
 
     @DefaultStringValue("Realized")
