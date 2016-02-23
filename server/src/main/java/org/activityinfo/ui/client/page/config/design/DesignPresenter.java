@@ -523,8 +523,9 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
         // in case of activity enable only if reportingFrequency==once (monthly implementation with subforms is on the way...)
         boolean enableTable = selectedItem instanceof IsFormClass;
-        if (getSelectedActivity(selectedItem) != null) {
-            enableTable = ((IsActivityDTO) selectedItem).getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        IsActivityDTO selectedActivity = getSelectedActivity(selectedItem);
+        if (selectedActivity != null) {
+            enableTable = selectedActivity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
         }
         view.setActionEnabled(UIActions.OPEN_TABLE, enableTable);
     }
