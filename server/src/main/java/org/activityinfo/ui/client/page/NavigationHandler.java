@@ -59,6 +59,7 @@ public class NavigationHandler {
             "NavigationAgreed");
 
     private NavigationAttempt activeNavigation;
+    private NavigationAttempt previousActiveNavigation;
 
     @Inject
     public NavigationHandler(final EventBus eventBus, final @Root Frame root) {
@@ -91,6 +92,7 @@ public class NavigationHandler {
     private void onNavigationRequested(NavigationEvent be) {
         if (activeNavigation == null
                 || !activeNavigation.getPlace().equals(be.getPlace())) {
+            previousActiveNavigation = activeNavigation;
             activeNavigation = new NavigationAttempt(be.getPlace());
             activeNavigation.go();
         }
@@ -208,6 +210,7 @@ public class NavigationHandler {
                     } else {
                         Log.debug("Navigation to '" + place.toString()
                                 + "' refused by " + currentPage.toString());
+                        activeNavigation = previousActiveNavigation;
                     }
                 }
             });

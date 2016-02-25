@@ -65,6 +65,8 @@ class ActivityForm extends AbstractDesignForm {
         nameField.setAllowBlank(false);
         nameField.setFieldLabel(I18N.CONSTANTS.name());
         nameField.setMaxLength(ActivityFormDTO.NAME_MAX_LENGTH);
+        nameField.setValidator(new BlankValidator());
+
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
         this.add(nameField);
 

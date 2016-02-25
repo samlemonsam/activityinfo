@@ -97,7 +97,7 @@ public class GeoDigestModelBuilder implements DigestModelBuilder {
 
                 GeneratedResource storage = storageProvider.create("image/png", "map.png");
                 try(OutputStream outputStream = storage.openOutputStream()) {
-                    imageMapRenderer.render(reportModel, storage.openOutputStream());
+                    imageMapRenderer.render(reportModel, outputStream);
                 }
                 databaseModel.setUrl(storage.getDownloadUri());
             }

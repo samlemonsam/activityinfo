@@ -970,15 +970,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Type")
     String type();
 
-    @DefaultStringValue("Tab count")
-    @Key("tabCount")
-    String tabCount();
-
-    /**
-     * Translated "Type to filter".
-     *
-     * @return translated "Type to filter"
-     */
     @DefaultStringValue("Type to filter")
     String typeToFilter();
 
@@ -1713,4 +1704,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Hourly")
     String hourly();
+    
+    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right. <a target=\"_blank\" href=\"http://help.activityinfo.org/m/28175/l/445646-batch-import\" style=\"text-decoration: underline;\">Show me how</a>.")
+    String columnMappingHelpLink();
+
+    @DefaultStringValue("Blank value is not allowed.")
+    String blankValueIsNotAllowed();
 }

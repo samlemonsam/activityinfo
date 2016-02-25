@@ -92,6 +92,8 @@ class IndicatorForm extends AbstractDesignForm {
         TextField<String> nameField = new TextField<>();
         nameField.setFieldLabel(constants.name());
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
+
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
         this.add(nameField);
 

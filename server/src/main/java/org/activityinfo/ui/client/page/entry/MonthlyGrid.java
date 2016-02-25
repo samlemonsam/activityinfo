@@ -61,6 +61,8 @@ class MonthlyGrid extends EditorGrid<IndicatorRowDTO> {
 
         setAutoExpandColumn("indicatorName");
         setLoadMask(true);
+        setStripeRows(true);
+        setColumnLines(true);
         addListener(Events.BeforeEdit, new Listener<GridEvent>() {
             @Override
             public void handleEvent(GridEvent event) {

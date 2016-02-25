@@ -48,6 +48,8 @@ class AttributeForm extends AbstractDesignForm {
         nameField.setFieldLabel(I18N.CONSTANTS.name());
         nameField.setMaxLength(AttributeDTO.NAME_MAX_LENGTH);
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
+
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
 
         add(nameField);

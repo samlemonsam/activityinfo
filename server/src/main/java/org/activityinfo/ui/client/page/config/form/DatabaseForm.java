@@ -41,6 +41,7 @@ import org.activityinfo.legacy.shared.command.GetCountries;
 import org.activityinfo.legacy.shared.command.result.CountryResult;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.widget.legacy.RemoteComboBox;
 
 public class DatabaseForm extends FormPanel {
@@ -53,6 +54,7 @@ public class DatabaseForm extends FormPanel {
         TextField<String> nameField = new TextField<String>();
         nameField.setFieldLabel(I18N.CONSTANTS.name());
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
         nameField.setMaxLength(UserDatabaseDTO.MAX_NAME_LENGTH);
         binding.addFieldBinding(new FieldBinding(nameField, "name"));
         add(nameField);
