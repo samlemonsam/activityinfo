@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
@@ -44,8 +43,8 @@ public class FilterContentFactory {
         FieldType type = column.getNode().getField().getType();
         if (type == LocalDateType.INSTANCE) {
             return new FilterContentDate(column);
-        } else if (type instanceof AttachmentType) {
-            return blankPanel();
+//        } else if (type instanceof AttachmentType) {
+//            return blankPanel();
         }
         return new FilterContentExistingItems(column, table, popup);
     }
