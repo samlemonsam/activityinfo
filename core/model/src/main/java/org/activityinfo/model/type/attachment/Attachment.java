@@ -102,4 +102,20 @@ public class Attachment implements IsRecord {
         rowValue.setWidth(record.getInt("width"));
         return rowValue;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Attachment that = (Attachment) o;
+
+        return !(blobId != null ? !blobId.equals(that.blobId) : that.blobId != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return blobId != null ? blobId.hashCode() : 0;
+    }
 }

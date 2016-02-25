@@ -84,4 +84,20 @@ public class AttachmentValue implements FieldValue, IsRecord {
     public static AttachmentValue fromJson(String json) {
         return fromRecord(Resources.recordFromJson(json));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AttachmentValue that = (AttachmentValue) o;
+
+        return !(values != null ? !values.equals(that.values) : that.values != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return values != null ? values.hashCode() : 0;
+    }
 }
