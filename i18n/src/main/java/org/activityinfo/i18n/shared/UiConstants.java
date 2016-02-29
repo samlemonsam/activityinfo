@@ -1663,4 +1663,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
+    @DefaultStringValue("Expression")
+    String expression();
+    
+    @DefaultStringValue("Example: A+B+(C/D)+[Volume A]")
+    String expressionExample();
 }
