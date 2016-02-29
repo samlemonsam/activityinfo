@@ -22,7 +22,7 @@
 <#-- @ftlvariable name="" type="org.activityinfo.server.login.model.HostPageModel" -->
 <!DOCTYPE html>
 <#if appCacheEnabled>
-<html manifest="ActivityInfo/ActivityInfo.appcache">
+<html manifest="ActivityInfo.appcache">
 <#else>
 <html>
 </#if>
@@ -37,11 +37,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     </#if>
 
-    <link rel="icon" href="ActivityInfo/desktopicons/16x16.png" sizes="16x16"/>
-    <link rel="icon" href="ActivityInfo/desktopicons/32x32.png" sizes="32x32"/>
-    <link rel="icon" href="ActivityInfo/desktopicons/48x48.png" sizes="48x48"/>
-    <link rel="icon" href="ActivityInfo/desktopicons/64x64.png" sizes="64x64"/>
-    <link rel="icon" href="ActivityInfo/desktopicons/128x128.png" sizes="128x128"/>
+    <link rel="icon" href="/ActivityInfo/desktopicons/16x16.png" sizes="16x16"/>
+    <link rel="icon" href="/ActivityInfo/desktopicons/32x32.png" sizes="32x32"/>
+    <link rel="icon" href="/ActivityInfo/desktopicons/48x48.png" sizes="48x48"/>
+    <link rel="icon" href="/ActivityInfo/desktopicons/64x64.png" sizes="64x64"/>
+    <link rel="icon" href="/ActivityInfo/desktopicons/128x128.png" sizes="128x128"/>
 
     <title>${domain.title}</title>
 
@@ -101,9 +101,9 @@
     </script>
 
     <#if loggingEnabled>
-        <script type="text/javascript" language="javascript" src="ActivityInfoLogging/ActivityInfoLogging.nocache.js"></script>
+        <script type="text/javascript" language="javascript" src="/ActivityInfoLogging/ActivityInfoLogging.nocache.js"></script>
     <#else>
-        <script type="text/javascript" language="javascript" src="ActivityInfo/ActivityInfo.nocache.js"></script>
+        <script type="text/javascript" language="javascript" src="ActivityInfo.nocache.js"></script>
     </#if>
     <script type="text/javascript">
 
@@ -140,7 +140,7 @@
 <div id="loading">
     <div id="loading-box">
         <div class="loading-indicator">
-            <img src="ActivityInfo/gxt231/images/default/shared/large-loading.gif" alt=""/>
+            <img src="/ActivityInfo/gxt231/images/default/shared/large-loading.gif" alt=""/>
         ${domain.title} $[display.version]<br/>
             <span id="loading-msg">${label.loading}</span>
 
