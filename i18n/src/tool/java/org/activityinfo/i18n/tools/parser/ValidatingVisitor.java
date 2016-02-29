@@ -3,6 +3,7 @@ package org.activityinfo.i18n.tools.parser;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import org.activityinfo.i18n.tools.model.Message;
+import org.activityinfo.i18n.tools.model.MessageFormatException;
 import org.activityinfo.i18n.tools.model.TranslationSet;
 import org.activityinfo.i18n.tools.output.MessageDecorator;
 
@@ -40,8 +41,12 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
 
     private boolean validateMessage(String key, MethodDeclaration decl, String inputMessage) {
 
-        Message format = new Message(decorator.apply(inputMessage));
-
+        Message format;
+        try {
+            format = new Message(decorator.apply(inputMessage));
+        } catch (MessageFormatException e) {
+            return false;
+        }
         // make sure there are enough arguments for all the placeholders
         for (Message.Chunk chunk : format.getChunks()) {
             if(chunk.isPlaceholder()) {
