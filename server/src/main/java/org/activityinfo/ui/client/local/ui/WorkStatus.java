@@ -60,7 +60,7 @@ public class WorkStatus extends Status {
 
             @Override
             public void handleEvent(SyncErrorEvent event) {
-                warn("Sync error");
+                warn(I18N.CONSTANTS.syncError());
                 lastErrorMessage = formatErrorMessage(event.getErrorType());
             }
         });
@@ -132,13 +132,13 @@ public class WorkStatus extends Status {
         switch (state) {
             case UNINSTALLED:
             case INSTALLING:
-                this.clearStatus("Working online");
+                this.clearStatus(I18N.CONSTANTS.workingOnline());
                 break;
             case CHECKING:
-                this.clearStatus("Loading...");
+                this.clearStatus(I18N.CONSTANTS.loading());
                 break;
             case INSTALLED:
-                this.clearStatus("Working offline");
+                this.clearStatus(I18N.CONSTANTS.workingOffline());
                 break;
         }
     }
@@ -148,7 +148,7 @@ public class WorkStatus extends Status {
         super.onBrowserEvent(event);
 
         if (event.getTypeInt() == Event.ONCLICK && lastErrorMessage != null) {
-            MessageBox.alert("Synchronization Error", lastErrorMessage, new Listener<MessageBoxEvent>() {
+            MessageBox.alert(I18N.CONSTANTS.syncError(), lastErrorMessage, new Listener<MessageBoxEvent>() {
 
                 @Override
                 public void handleEvent(MessageBoxEvent be) {

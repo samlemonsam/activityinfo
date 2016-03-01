@@ -922,6 +922,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("There is a new version of ActivityInfo available. You need to reload the page to load the new version and continue with synchronization.")
     String syncErrorReload();
 
+    @DefaultStringValue("Synchronization Error")
+    String syncError();
+    
     @DefaultStringValue("An unexpected error occurred during synchronization.")
     String syncErrorUnexpected();
 
@@ -1668,4 +1671,11 @@ public interface UiConstants extends Constants {
     
     @DefaultStringValue("Example: A+B+(C/D)+[Volume A]")
     String expressionExample();
+
+    @DefaultStringValue("Working online")
+    String workingOnline();
+
+    @DefaultStringValue("Working offline")
+    String workingOffline();
+    
 }

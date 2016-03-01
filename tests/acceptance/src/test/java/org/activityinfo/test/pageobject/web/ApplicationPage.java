@@ -75,10 +75,10 @@ public class ApplicationPage {
             public OfflineMode apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.className("x-status-text"));
                 for (WebElement element : elements) {
-                    if (element.getText().contains("Working online") || element.getText().contains("Last sync")) {
+                    if (element.getText().contains(I18N.CONSTANTS.workingOnline()) || element.getText().contains("Last sync")) {
                         return OfflineMode.ONLINE;
 
-                    } else if (element.getText().contains("Working offline")) {
+                    } else if (element.getText().contains(I18N.CONSTANTS.workingOffline())) {
                         return OfflineMode.OFFLINE;
                     }
                 }
@@ -100,10 +100,10 @@ public class ApplicationPage {
             public boolean apply(WebDriver driver) {
                 List<WebElement> elements = driver.findElements(By.className("x-status-text"));
                 for (WebElement element : elements) {
-                    if (element.getText().contains("Working offline")) {
+                    if (element.getText().contains(I18N.CONSTANTS.workingOffline())) {
                         return true;
 
-                    } else if (element.getText().contains("Sync error")) {
+                    } else if (element.getText().contains(I18N.CONSTANTS.syncError())) {
                         throw new AssertionError(element.getText());
 
 
