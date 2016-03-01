@@ -29,6 +29,6 @@ import java.util.List;
 
 public interface RemoteCommandServiceAsync {
 
-    void execute(String authToken, List<Command> cmd, AsyncCallback<List<CommandResult>> results);
+    void execute(String authToken, String locale, List<Command> cmd, AsyncCallback<List<CommandResult>> results);
 
 }

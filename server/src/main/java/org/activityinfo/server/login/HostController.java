@@ -23,6 +23,7 @@ package org.activityinfo.server.login;
  */
 
 import com.bedatadriven.rebar.appcache.server.UserAgentProvider;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
@@ -43,13 +44,10 @@ import java.util.HashMap;
 public class HostController {
     public static final String ENDPOINT = "/";
 
-    private final DeploymentConfiguration deployConfig;
     private final ServerSideAuthProvider authProvider;
 
     @Inject
     public HostController(DeploymentConfiguration deployConfig, ServerSideAuthProvider authProvider) {
-        super();
-        this.deployConfig = deployConfig;
         this.authProvider = authProvider;
     }
 
@@ -59,7 +57,9 @@ public class HostController {
                                 @Context HttpServletRequest req,
                                 @QueryParam("redirect") boolean redirect,
                                 @QueryParam("ui") String ui,
-                                @QueryParam("logging") String logging) throws Exception {
+                                @QueryParam("locale") String locale,
+                                @QueryParam("logging") String logging,
+                                @QueryParam("gwt.codesvr") String codeServer) throws Exception {
 
         if (!authProvider.isAuthenticated()) {
             // Otherwise, go to the default ActivityInfo root page
@@ -76,19 +76,26 @@ public class HostController {
         String appUri = uri.getAbsolutePathBuilder().replaceQuery("").build().toString();
 
         HostPageModel model = new HostPageModel(appUri);
-        model.setAppCacheEnabled(checkAppCacheEnabled(req));
-
-        // NEW UI!!
-        if("new".equals(ui)) {
-            model.setAppCacheEnabled(false);
-            model.setNewUI(true);
+        
+        if(!Strings.isNullOrEmpty(codeServer)) {
+            // Running in development mode
+            // Use the default bootstrap script
+            model.setBootstrapScript("/ActivityInfo/ActivityInfo.nocache.js");
+        
+        } else if("true".equalsIgnoreCase(logging)) {
+            // Load a special logging version of the Application
+            model.setBootstrapScript("/ActivityInfoLogging/ActivityInfoLogging.nocache.js");
+            
+        } else {
+            // Load the normal production application, based on the user's preferred 
+            // locale or the one explicitly provided
+            if(Strings.isNullOrEmpty(locale)) {
+                locale = authProvider.get().getUserLocale();
+            }
+            model.setBootstrapScript("/ActivityInfo/" + locale + ".js");
+            model.setAppCacheManifest("/ActivityInfo/" + locale + ".appcache");
         }
-
-        if ("true".equalsIgnoreCase(logging)) {
-            model.setAppCacheEnabled(false);
-            model.setIsLoggingEnabled(true);
-        }
-
+        
         return Response.ok(model.asViewable())
                        .type(MediaType.TEXT_HTML)
                        .cacheControl(CacheControl.valueOf("no-cache"))

@@ -40,6 +40,7 @@ import com.extjs.gxt.ui.client.widget.layout.VBoxLayoutData;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.http.client.*;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -161,7 +162,8 @@ public class ExportDialog extends Dialog {
 
         RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, "/ActivityInfo/export");
         requestBuilder.setHeader("Content-type", "application/x-www-form-urlencoded");
-        requestBuilder.setRequestData("filter=" + FilterUrlSerializer.toUrlFragment(filter));
+        requestBuilder.setRequestData("locale=" + LocaleInfo.getCurrentLocale().getLocaleName() + 
+                "&filter=" + FilterUrlSerializer.toUrlFragment(filter));
         requestBuilder.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {

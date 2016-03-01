@@ -21,8 +21,8 @@
 -->
 <#-- @ftlvariable name="" type="org.activityinfo.server.login.model.HostPageModel" -->
 <!DOCTYPE html>
-<#if appCacheEnabled>
-<html manifest="ActivityInfo.appcache">
+<#if appCacheManifest??>
+<html manifest="${appCacheManifest}">
 <#else>
 <html>
 </#if>
@@ -100,11 +100,7 @@
         };
     </script>
 
-    <#if loggingEnabled>
-        <script type="text/javascript" language="javascript" src="/ActivityInfoLogging/ActivityInfoLogging.nocache.js"></script>
-    <#else>
-        <script type="text/javascript" language="javascript" src="ActivityInfo.nocache.js"></script>
-    </#if>
+    <script type="text/javascript" language="javascript" src="${bootstrapScript}""></script>
     <script type="text/javascript">
 
 
@@ -151,7 +147,6 @@
 
 <#if newUI>
     <section id="root">
-
     </section>
 </#if>
 

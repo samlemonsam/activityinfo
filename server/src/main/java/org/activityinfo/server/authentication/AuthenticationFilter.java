@@ -111,7 +111,12 @@ public class AuthenticationFilter implements Filter {
 
         ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(authProvider.get().getUserLocale()));
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
+        }
     }
 
     private void allowCrossOriginRequests(HttpServletResponse response) {

@@ -22,8 +22,13 @@ package org.activityinfo.ui.client.page.app;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.event.MenuEvent;
+import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.widget.menu.CheckMenuItem;
+import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -32,10 +37,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import org.activityinfo.i18n.shared.ApplicationLocale;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.local.LocalController;
-import org.activityinfo.ui.client.page.NavigationEvent;
-import org.activityinfo.ui.client.page.NavigationHandler;
 
 public class AppBar extends Composite {
 
@@ -44,6 +48,7 @@ public class AppBar extends Composite {
     @UiField SectionTabStrip sectionTabStrip;
 
     @UiField Label logo;
+    @UiField Label localeButton;
 
     private SettingsPopup settingsPopup;
 
@@ -52,6 +57,7 @@ public class AppBar extends Composite {
     private LocalController offlineController;
 
     public static final int HEIGHT = 50;
+    private Menu localeMenu;
 
     interface AppBarUiBinder extends UiBinder<Widget, AppBar> {
     }
@@ -62,6 +68,8 @@ public class AppBar extends Composite {
         this.offlineController = offlineController;
 
         initWidget(uiBinder.createAndBindUi(this));
+        
+        this.localeButton.setText(LocaleInfo.getCurrentLocale().getLocaleName().toUpperCase());
     }
 
     public SectionTabStrip getSectionTabStrip() {
@@ -85,5 +93,36 @@ public class AppBar extends Composite {
     @UiHandler("helpButton")
     void helpClick(ClickEvent e) {
         Window.open("http://help.activityinfo.org", "_blank", null);
+    }
+    
+    @UiHandler("localeButton")
+    void localeClick(ClickEvent e) {
+        if(localeMenu == null) {
+            localeMenu = new Menu();
+            for (final ApplicationLocale applicationLocale : ApplicationLocale.values()) {
+                CheckMenuItem menuItem = new CheckMenuItem(applicationLocale.getLocalizedName());
+                menuItem.setChecked(isCurrent(applicationLocale));
+                menuItem.setGroup("lang");
+                menuItem.addSelectionListener(new SelectionListener<MenuEvent>() {
+                    @Override
+                    public void componentSelected(MenuEvent ce) {
+                        changeLocale(applicationLocale);
+                    }
+                });
+                localeMenu.add(menuItem);
+            }
+        }
+        localeMenu.showAt(e.getClientX(), e.getClientY());
+    }
+
+    private void changeLocale(ApplicationLocale applicationLocale) {
+        if(!isCurrent(applicationLocale)) {
+            String newUrl = Window.Location.createUrlBuilder().setParameter("locale", applicationLocale.getCode()).buildString();
+            Window.Location.assign(newUrl);
+        }
+    }
+
+    private boolean isCurrent(ApplicationLocale applicationLocale) {
+        return applicationLocale.getCode().equals(LocaleInfo.getCurrentLocale().getLocaleName());
     }
 }

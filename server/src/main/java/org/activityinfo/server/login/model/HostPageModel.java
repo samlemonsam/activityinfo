@@ -25,10 +25,10 @@ package org.activityinfo.server.login.model;
 
 public class HostPageModel extends PageModel {
     private String appUrl;
-    private boolean appCacheEnabled;
     private boolean newUI;
-    private boolean isLoggingEnabled;
-
+    private String bootstrapScript;
+    private String appCacheManifest;
+    
     public HostPageModel(String appUrl) {
         this.appUrl = appUrl;
     }
@@ -36,14 +36,7 @@ public class HostPageModel extends PageModel {
     public String getAppUrl() {
         return appUrl;
     }
-
-    public boolean isAppCacheEnabled() {
-        return appCacheEnabled;
-    }
-
-    public void setAppCacheEnabled(boolean appCacheEnabled) {
-        this.appCacheEnabled = appCacheEnabled;
-    }
+    
 
     public boolean isNewUI() {
         return newUI;
@@ -53,11 +46,20 @@ public class HostPageModel extends PageModel {
         this.newUI = newUI;
     }
 
-    public boolean isLoggingEnabled() {
-        return isLoggingEnabled;
+
+    public String getBootstrapScript() {
+        return bootstrapScript;
     }
 
-    public void setIsLoggingEnabled(boolean isLoggingEnabled) {
-        this.isLoggingEnabled = isLoggingEnabled;
+    public void setBootstrapScript(String bootstrapScript) {
+        this.bootstrapScript = bootstrapScript;
+    }
+
+    public String getAppCacheManifest() {
+        return appCacheManifest;
+    }
+
+    public void setAppCacheManifest(String appCacheManifest) {
+        this.appCacheManifest = appCacheManifest;
     }
 }
