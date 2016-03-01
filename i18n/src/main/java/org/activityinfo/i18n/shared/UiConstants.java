@@ -1677,5 +1677,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Working offline")
     String workingOffline();
-    
+
+    @DefaultStringValue("Me")
+    String me();
 }
