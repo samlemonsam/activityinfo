@@ -12,15 +12,13 @@
     <!-- Header -->
     <g:HTMLPanel>
       <h3 ui:field="promptHeading"/>
+      <g:HTMLPanel ui:field="helpText"/>
     </g:HTMLPanel>
 
     <!-- Body -->
-    <g:DockLayoutPanel unit="EM" width="100%" height="100%">
+    <g:DockLayoutPanel unit="EM" width="100%" height="100%" ui:field="dockLayout">
         <g:center>
-          <g:FlowPanel width="100%">
-            <g:HTMLPanel ui:field="helpText"/>
-            <m:ColumnMappingGrid ui:field="dataGrid" width="100%" height="100%"/>
-          </g:FlowPanel>
+           <m:ColumnMappingGrid ui:field="dataGrid" width="100%" height="100%"/>
         </g:center>
 
         <g:east size="20" >
