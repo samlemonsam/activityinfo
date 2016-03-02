@@ -348,9 +348,9 @@ public class FormClass implements IsResource, FormElementContainer {
      * (todo: ask Alex whether it's ok or it's better to put it at the beginning of the list)
      */
     public void reorderFormFields() {
-        List<FormElement> builtInElements = getBuiltInElements();
-        elements.removeAll(builtInElements); // remove
-        elements.addAll(builtInElements); // add to the end
+//        List<FormElement> builtInElements = getBuiltInElements();
+//        elements.removeAll(builtInElements); // remove
+//        elements.addAll(builtInElements); // add to the end
     }
 
 }
