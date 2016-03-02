@@ -82,20 +82,19 @@ public class PanelFiller {
                             final FlowPanel subformPanel = new FlowPanel();
                             subformPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
 
+                            panel.add(createHeader(depth + 1, subForm.getLabel()));
+                            panel.add(subformPanel);
+
                             new SubFormInstanceLoader(model).loadKeyedSubformInstances(subForm).then(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Log.error(caught.getMessage(), caught);
 
-                                    panel.add(createHeader(depth + 1, subForm.getLabel()));
-                                    panel.add(new Label(I18N.CONSTANTS.failedToLoadSubformInstances()));
+                                    subformPanel.add(new Label(I18N.CONSTANTS.failedToLoadSubformInstances()));
                                 }
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    panel.add(createHeader(depth + 1, subForm.getLabel()));
-                                    panel.add(subformPanel);
-
                                     subformPanel.add(subFormTabsManipulator.getPresenter().getView());
                                     subFormTabsManipulator.getPresenter().getView().addStyleName(FormPanelStyles.INSTANCE.subformTabs());
 
