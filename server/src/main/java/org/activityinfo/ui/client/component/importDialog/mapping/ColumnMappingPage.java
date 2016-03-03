@@ -9,7 +9,10 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ResizeComposite;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
@@ -58,8 +61,7 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
 
     @UiField
     Panel fieldSelectorPanel;
-    @UiField
-    HTMLPanel helpText;
+
     @UiField
     DockLayoutPanel dockLayout;
 
@@ -108,7 +110,6 @@ public class ColumnMappingPage extends ResizeComposite implements ImportPage {
                 updateColumnMapping(event.getValue());
             }
         });
-        helpText.add(new HTML("<h5>" + I18N.CONSTANTS.columnMappingHelpLink() + "</h5>"));
     }
 
     private void onColumnChanged(SourceColumn column) {
