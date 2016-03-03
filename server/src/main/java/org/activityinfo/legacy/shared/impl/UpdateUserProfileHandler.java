@@ -24,27 +24,47 @@ package org.activityinfo.legacy.shared.impl;
 
 import com.bedatadriven.rebar.sql.client.query.SqlUpdate;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.i18n.shared.ApplicationLocale;
 import org.activityinfo.legacy.shared.command.UpdateUserProfile;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.UserProfileDTO;
 
+import java.util.logging.Logger;
+
 public class UpdateUserProfileHandler implements CommandHandlerAsync<UpdateUserProfile, VoidResult> {
 
+    private static final Logger LOGGER = Logger.getLogger(UpdateUserProfile.class.getName());
+    
     @Override
     public void execute(final UpdateUserProfile command,
                         ExecutionContext context,
                         final AsyncCallback<VoidResult> callback) {
 
-        UserProfileDTO model = command.getModel();
 
+        // Users can ONLY update their own profile
+        int userId = context.getUser().getId();
+
+        UserProfileDTO model = command.getModel();
+        
         SqlUpdate.update("userlogin")
-                .where("userId", model.getUserId())
-                .value("name", model.getName())
-                .value("organization", model.getOrganization())
-                .value("jobtitle", model.getJobtitle())
-                // .value("locale", model.toString())
-                .value("emailNotification", model.isEmailNotification()).execute(context.getTransaction());
+            .where("userId", userId)
+            .value("name", model.getName())
+            .value("organization", model.getOrganization())
+            .value("jobtitle", model.getJobtitle())
+            .value("locale", validateLocale(model.getLocale()))
+            .value("emailNotification", model.isEmailNotification()).execute(context.getTransaction());
 
         callback.onSuccess(new VoidResult());
+    }
+
+    private String validateLocale(String locale) {
+
+        for (ApplicationLocale applicationLocale : ApplicationLocale.values()) {
+            if(applicationLocale.getCode().equals(locale)) {
+                return applicationLocale.getCode();
+            }
+        }
+        
+        throw new IllegalArgumentException("Invalid locale: " + locale);
     }
 }

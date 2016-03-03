@@ -269,4 +269,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     
     @Messages.DefaultMessage("Logged in as {0}")
     String loggedInAs(String email);
+
+    @DefaultMessage("Switch to {0} now")
+    String switchToLanguageNow(String localeName);
 }

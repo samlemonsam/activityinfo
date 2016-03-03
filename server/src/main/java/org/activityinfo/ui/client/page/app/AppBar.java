@@ -26,6 +26,8 @@ import com.extjs.gxt.ui.client.event.MenuEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.menu.CheckMenuItem;
 import com.extjs.gxt.ui.client.widget.menu.Menu;
+import com.extjs.gxt.ui.client.widget.menu.MenuItem;
+import com.extjs.gxt.ui.client.widget.menu.SeparatorMenuItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -38,8 +40,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.ApplicationLocale;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.LocaleSwitcher;
 import org.activityinfo.ui.client.local.LocalController;
+import org.activityinfo.ui.client.page.NavigationEvent;
+import org.activityinfo.ui.client.page.NavigationHandler;
 
 public class AppBar extends Composite {
 
@@ -101,28 +107,29 @@ public class AppBar extends Composite {
             localeMenu = new Menu();
             for (final ApplicationLocale applicationLocale : ApplicationLocale.values()) {
                 CheckMenuItem menuItem = new CheckMenuItem(applicationLocale.getLocalizedName());
-                menuItem.setChecked(isCurrent(applicationLocale));
+                menuItem.setChecked(LocaleSwitcher.isCurrent(applicationLocale));
                 menuItem.setGroup("lang");
                 menuItem.addSelectionListener(new SelectionListener<MenuEvent>() {
                     @Override
                     public void componentSelected(MenuEvent ce) {
-                        changeLocale(applicationLocale);
+                        LocaleSwitcher.switchLocale(applicationLocale);
                     }
                 });
                 localeMenu.add(menuItem);
             }
+            localeMenu.add(new SeparatorMenuItem());
+
+            MenuItem preferenceItem = new MenuItem(I18N.CONSTANTS.language());
+            preferenceItem.addSelectionListener(new SelectionListener<MenuEvent>() {
+                @Override
+                public void componentSelected(MenuEvent ce) {
+                    eventBus.fireEvent(new NavigationEvent(NavigationHandler.NAVIGATION_REQUESTED, 
+                            new UserProfilePage.State()));
+                }
+            });
+            localeMenu.add(preferenceItem);
         }
-        localeMenu.showAt(e.getClientX(), e.getClientY());
+        localeMenu.show(localeButton.getElement(), "?");
     }
 
-    private void changeLocale(ApplicationLocale applicationLocale) {
-        if(!isCurrent(applicationLocale)) {
-            String newUrl = Window.Location.createUrlBuilder().setParameter("locale", applicationLocale.getCode()).buildString();
-            Window.Location.assign(newUrl);
-        }
-    }
-
-    private boolean isCurrent(ApplicationLocale applicationLocale) {
-        return applicationLocale.getCode().equals(LocaleInfo.getCurrentLocale().getLocaleName());
-    }
 }

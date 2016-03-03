@@ -24,4 +24,8 @@ public enum ApplicationLocale {
     public String getCode() {
         return name().toLowerCase();
     }
+
+    public static ApplicationLocale fromCode(String localeCode) {
+        return valueOf(localeCode.toUpperCase());
+    }
 }
