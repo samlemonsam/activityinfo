@@ -24,6 +24,8 @@ package org.activityinfo.ui.client.page.config;
 
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.store.Store;
+import com.extjs.gxt.ui.client.store.StoreSorter;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
@@ -98,13 +100,26 @@ public class DbListPage extends ContentPanel implements DbListPresenter.View, Pa
     }
 
     private ColumnModel createColumnModel() {
+        presenter.getStore().setStoreSorter(new StoreSorter<UserDatabaseDTO>() {
+            @Override
+            public int compare(Store<UserDatabaseDTO> store, UserDatabaseDTO m1, UserDatabaseDTO m2, String property) {
+                if ("country".equals(property)) {
+                    return comparator.compare(m1.getCountry().getName(), m2.getCountry().getName());
+                }
+                return super.compare(store, m1, m2, property);
+            }
+        });
+
         List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
         columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 100));
         columns.add(new ColumnConfig("fullName", I18N.CONSTANTS.fullName(), 150));
         columns.add(new ColumnConfig("ownerName", I18N.CONSTANTS.ownerName(), 150));
-        ColumnConfig countryColumn = new ColumnConfig();
-        countryColumn.setHeaderText(I18N.CONSTANTS.country());
-        countryColumn.setWidth(150);
+        columns.add(createCountryColumn());
+        return new ColumnModel(columns);
+    }
+
+    private ColumnConfig createCountryColumn() {
+        ColumnConfig countryColumn = new ColumnConfig("country", I18N.CONSTANTS.country(), 150);
         countryColumn.setRenderer(new GridCellRenderer<UserDatabaseDTO>() {
             @Override
             public String render(UserDatabaseDTO model,
@@ -117,8 +132,7 @@ public class DbListPage extends ContentPanel implements DbListPresenter.View, Pa
                 return model.getCountry().getName();
             }
         });
-        columns.add(countryColumn);
-        return new ColumnModel(columns);
+        return countryColumn;
     }
 
     @Override

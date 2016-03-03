@@ -49,6 +49,7 @@ import com.extjs.gxt.ui.client.widget.treegrid.CellTreeGridSelectionModel;
 import com.extjs.gxt.ui.client.widget.treegrid.EditorTreeGrid;
 import com.extjs.gxt.ui.client.widget.treegrid.TreeGrid;
 import com.extjs.gxt.ui.client.widget.treegrid.TreeGridCellRenderer;
+import com.google.common.collect.Lists;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -64,7 +65,6 @@ import org.activityinfo.ui.client.page.common.grid.ImprovedCellTreeGridSelection
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -132,12 +132,29 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         createFormContainer();
     }
 
+    private EditorSupport<ModelData> editorSupport() {
+        return new EditorSupport<ModelData>() {
+            @Override
+            public void startEditing(int row, int col) {
+                final ModelData m = store.getAt(row);
+                if (m instanceof AttributeGroupFolder || m instanceof IndicatorFolder) {
+                    return;
+                }
+                super.startEditing(row, col);
+            }
+        };
+    }
+
     @Override
     protected Grid<ModelData> createGridAndAddToContainer(Store store) {
 
         final TreeStore treeStore = (TreeStore) store;
 
-        tree = new EditorTreeGrid<ModelData>(treeStore, createColumnModel());
+        tree = new EditorTreeGrid<ModelData>(treeStore, createColumnModel()) {
+            protected EditorSupport<ModelData> getEditSupport() {
+                return editorSupport();
+            };
+        };
         tree.setSelectionModel(new ImprovedCellTreeGridSelectionModel<ModelData>());
         tree.setClicksToEdit(EditorGrid.ClicksToEdit.TWO);
         tree.setAutoExpandColumn("name");
@@ -312,8 +329,6 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
 
     private ColumnModel createColumnModel() {
 
-        List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
-
         TextField<String> nameField = new TextField<String>();
         nameField.setAllowBlank(false);
 
@@ -321,9 +336,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         nameColumn.setEditor(new CellEditor(nameField));
         nameColumn.setRenderer(new TreeGridCellRenderer());
 
-        columns.add(nameColumn);
-
-        return new ColumnModel(columns);
+        return new ColumnModel(Lists.newArrayList(nameColumn));
     }
 
     protected Class formClassForSelection(ModelData sel) {
