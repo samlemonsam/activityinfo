@@ -90,7 +90,6 @@
                 event.preventDefault();
                 return;
             }
-
         });
     </script>
     </@scripts>

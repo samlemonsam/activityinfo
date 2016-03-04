@@ -1,5 +1,6 @@
 package org.activityinfo.model.type.number;
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
@@ -25,7 +26,7 @@ public class QuantityType implements ParametrizedFieldType {
         @Override
         public QuantityType createType() {
             return new QuantityType()
-                    .setUnits("households");
+                    .setUnits(I18N.CONSTANTS.defaultQuantityUnits());
         }
 
         @Override

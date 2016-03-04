@@ -45,9 +45,10 @@
   <div>
     <span class="{style.reportTitle}" ui:field="titleSpan"/>
     <span class="{style.changeTitleText}">
-      [
+      <!-- Use Left-to-right mark to preserve LTR orientation of brackets -->
+      &#x200e;[
       <ui:text from='{i18n.changeTitle}'/>
-      ]
+      &#x200e;]
     </span>
   </div>
 </ui:UiBinder>

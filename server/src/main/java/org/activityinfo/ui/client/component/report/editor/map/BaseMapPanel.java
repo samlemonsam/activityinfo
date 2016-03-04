@@ -71,7 +71,7 @@ public class BaseMapPanel extends ContentPanel implements HasValue<String> {
 
         Image icon = new Image(MapResources.INSTANCE.globe());
         label = new LabelWithText();
-        Button button = new Button("Change", new SelectionListener<ButtonEvent>() {
+        Button button = new Button(I18N.CONSTANTS.change(), new SelectionListener<ButtonEvent>() {
 
             @Override
             public void componentSelected(ButtonEvent ce) {
@@ -130,7 +130,7 @@ public class BaseMapPanel extends ContentPanel implements HasValue<String> {
     public void setValue(String value, boolean fireEvents) {
         this.value = value;
         if (MapReportElement.AUTO_BASEMAP.equals(value) || value == null) {
-            label.setText("Default");
+            label.setText(I18N.CONSTANTS.defaultValue());
         } else if (GoogleBaseMap.HYBRID.getId().equals(value)) {
             label.setText(I18N.CONSTANTS.googleHybrid());
         } else if (GoogleBaseMap.ROADMAP.getId().equals(value)) {

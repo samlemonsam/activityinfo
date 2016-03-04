@@ -1689,4 +1689,17 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Me")
     String me();
+
+    @DefaultStringValue("Which options apply?")
+    String defaultCheckboxFieldLabel();
+
+    @DefaultStringValue("Which choice would you choose?")
+    String defaultRadioFieldLabel();
+
+    @DefaultStringValue("Enter a new label for this option")
+    String enterNameForOption();
+
+    @DefaultStringValue("households")
+    String defaultQuantityUnits();
+    
 }

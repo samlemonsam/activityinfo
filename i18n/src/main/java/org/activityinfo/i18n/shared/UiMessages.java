@@ -272,4 +272,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Switch to {0} now")
     String switchToLanguageNow(String localeName);
+
+    @DefaultMessage("Option {0,number}")
+    String defaultEnumItem(int number);
 }
