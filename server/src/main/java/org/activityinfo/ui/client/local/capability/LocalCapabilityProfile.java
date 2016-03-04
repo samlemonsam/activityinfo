@@ -30,19 +30,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * This default implementation is for fully supported browsers: webkit and
  * opera.
  */
-public abstract class LocalCapabilityProfile {
+public class LocalCapabilityProfile {
 
     public boolean isOfflineModeSupported() {
         return false;
-    }
-
-    /**
-     * @return installation instructions for offline mode for this specific
-     * browser, or null if no installation is required to use offline
-     * mode
-     */
-    public String getInstallInstructions() {
-        return null;
     }
 
     /**
@@ -53,9 +44,5 @@ public abstract class LocalCapabilityProfile {
      */
     public void acquirePermission(AsyncCallback<Void> callback) {
         callback.onFailure(new UnsupportedOperationException());
-    }
-
-    public boolean hasPermission() {
-        throw new UnsupportedOperationException("offline mode is not supported");
     }
 }

@@ -673,18 +673,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Not published")
     String notPublished();
 
-    @DefaultStringValue("Did you know? You can use ActivityInfo even when you don't have an internet connection.")
-    String offlineIntro1();
-
-    @DefaultStringValue("Enabling offline mode will allow you to continue working with ActivityInfo even if an internet connection is not available. When a connection becomes available, ActivityInfo will synchronize with the server.")
-    String offlineIntro2();
-
-    @DefaultStringValue("To open ActivityInfo when offline, you can simply type <b>www.activityinfo.org</b> into your browser's address bar.")
-    String offlineIntro3();
-
-    @DefaultStringValue("<b>Note:</b> if you enable offline mode, ActivityInfo will store data locally on your computer, which could be accessible to anyone else using this computer. You should not enable offline mode on public or shared computers.")
-    String offlineIntro4();
-
     @DefaultStringValue("Open")
     String open();
 
@@ -765,9 +753,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Refresh Preview")
     String refreshPreview();
-
-    @DefaultStringValue("Reinstall offline mode")
-    String reinstallOfflineMode();
 
     @DefaultStringValue("A minute ago")
     String relativeTimeMinAgo();
@@ -1701,5 +1686,13 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("households")
     String defaultQuantityUnits();
-    
+
+    @DefaultStringValue("Offline Mode not supported")
+    String offlineNotSupportedTitle();
+
+    @DefaultStringValue("Unfortunately, offline mode is not supported on your browser. To enable offline mode, we recommend using Google Chrome.")
+    String offlineNotSupported();
+
+    @DefaultStringValue("Download Google Chrome")
+    String downloadGoogleChrome();
 }
