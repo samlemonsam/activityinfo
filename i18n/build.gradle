@@ -96,3 +96,22 @@ task pushTranslations(type: JavaExec) {
         systemProperty 'poApiKey', project.property('poApiKey')
     }
 }
+
+
+task purgeUnused(type: JavaExec) {
+    group = "I18N"
+    description = 'Deletes unused translations from PoEditor.com '
+
+    dependsOn 'toolClasses'
+
+    main = 'org.activityinfo.i18n.tools.Push'
+    args 'purge'
+    classpath = sourceSets.tool.runtimeClasspath
+    workingDir = projectDir
+
+    doFirst {
+        systemProperty 'poApiKey', project.property('poApiKey')
+    }
+}
+
+
