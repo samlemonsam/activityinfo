@@ -625,9 +625,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Undo")
     String undo();
 
-    @DefaultStringValue("Redo")
-    String redo();
-
     @DefaultStringValue("Move up")
     String moveUp();
 
@@ -1021,38 +1018,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Ignored")
     String ignored();
 
-    @DefaultStringValue("Import this column as a new field")
-    String importNewColumnAction();
-
-    @DefaultStringValue("Add new section")
-    String addSection();
-
-    @DefaultStringValue("Add new field")
-    String addField();
-
-    @DefaultStringValue("Edit section")
-    String editSection();
-
-    @DefaultStringValue("Section label")
-    String sectionLabel();
-
-    @DefaultStringValue("Unknown Group")
-    String unknownGroup();
-
     @DefaultStringValue("Label")
     String fieldLabel();
 
     @DefaultStringValue("Type")
     String fieldType();
-
-    @DefaultStringValue("Description")
-    String fieldDescription();
-
-    @DefaultStringValue("Unit")
-    String fieldUnit();
-
-    @DefaultStringValue("Reference")
-    String fieldTypeReference();
 
     @DefaultStringValue("Quantity")
     String fieldTypeQuantity();
@@ -1072,20 +1042,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("To begin, select the table you want to import in Excel, copy it to the clipboard, and then paste here")
     String pasteSpreadsheetInstructions();
 
-    @DefaultStringValue("Paste your spreadsheet data here by right-clicking then choosing \"Paste\"")
-    String pastePlaceholder();
-
     @DefaultStringValue("Choose the destination field.")
     String chooseDestinationField();
 
     @DefaultStringValue("Change")
     String change();
-
-    @DefaultStringValue("Change type")
-    String changeType();
-
-    @DefaultStringValue("Type change leads to conversion of all existing data.")
-    String changeTypeWarning();
 
     @DefaultStringValue("Label")
     String label();
@@ -1099,9 +1060,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("home")
     String home();
 
-    @DefaultStringValue("Control is empty")
-    String validationControlIsEmpty();
-
     @DefaultStringValue("Range")
     String range();
 
@@ -1110,12 +1068,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Next »")
     String nextButton();
-
-    @DefaultStringValue("Bulk edit")
-    String bulkEdit();
-
-    @DefaultStringValue("Move right")
-    String moveRight();
 
     @DefaultStringValue("Choose columns")
     String chooseColumns();
@@ -1129,23 +1081,14 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Add instance")
     String addInstance();
 
-    @DefaultStringValue("Remove instance")
-    String removeInstance();
-
     @DefaultStringValue("Add column")
     String addColumn();
-
-    @DefaultStringValue("Failed to create widget.")
-    String failedToCreateWidget();
 
     @DefaultStringValue("Double click")
     String drillDownTipHeading();
 
     @DefaultStringValue("Double-click a value to drill down to the individual sites")
     String drillDownTip();
-
-    @DefaultStringValue("(Locked)")
-    String lockedMonthHeader();
 
     @DefaultStringValue("Edit instance")
     String editInstance();
@@ -1165,17 +1108,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No")
     String no();
 
-    @DefaultStringValue("Failed to remove row(s).")
-    String failedToRemoveRows();
-
     @DefaultStringValue("New Value")
     String changeHeaderMessage();
 
     @DefaultStringValue("Clear filter")
     String clearFilter();
-
-    @DefaultStringValue("Advanced filter")
-    String advancedFilter();
 
     @DefaultStringValue("Select all")
     String selectAll();
@@ -1246,9 +1183,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Allow editing ONLY by users with 'design' privileges")
     String partOfWorkflow();
 
-    @DefaultStringValue("Clustered bar")
-    String clusteredBar();
-
     @DefaultStringValue("Line")
     String line();
 
@@ -1285,9 +1219,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Read only")
     String readonly();
 
-    @DefaultStringValue("Boolean")
-    String fieldTypeBoolean();
-
     @DefaultStringValue("Relevance")
     String relevance();
 
@@ -1308,9 +1239,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Or")
     String or();
-
-    @DefaultStringValue("or")
-    String orWithSpaces();
 
     @DefaultStringValue("Try the new data entry page (BETA)")
     String tryNewDataEntryInterface();
@@ -1354,24 +1282,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Try the new (BETA) form layout")
     String tryNewFormLayout();
 
-    @DefaultStringValue("Modern view")
-    String modernView();
-
-    @DefaultStringValue("Classic view : attributes and indicators appear separately")
-    String classicViewExplanation();
-
-    @DefaultStringValue("Modern view : visual designer and flexible data entry form")
-    String modernViewExplanation();
-
-    @DefaultStringValue("Flexible Data Entry Form")
-    String newFormAsFormDesigner();
-
-    @DefaultStringValue("ActivityInfo Classic")
-    String newFormAsClassic();
-
-    @DefaultStringValue("ActivityInfo Classic - Monthly : attributes and indicators appear separately and users enter indicator results in a monthly grid.")
-    String newFormAsClassicMonthly();
-
     @DefaultStringValue("New Form (Beta)")
     String newForm();
 
@@ -1380,21 +1290,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("What's this?")
     String whatsThis();
-
-    @DefaultStringValue("More about view types")
-    String moreAboutView();
-
-    @DefaultStringValue("View type")
-    String viewType();
-
-    @DefaultStringValue("Want your users to see the new form layout?")
-    String alertAboutModerView();
-
-    @DefaultStringValue("Learn more about the change")
-    String learnMore();
-
-    @DefaultStringValue("Switch to new layout")
-    String switchToNewLayout();
 
     @DefaultStringValue("Create a new database")
     String createNewDatabase();
@@ -1450,9 +1345,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
-    @DefaultStringValue("Unfortunately you do not have design privileges to perform this action.")
-    String noDesignPrivileges();
-
     @DefaultStringValue("New Submission")
     String newSubmission();
 
@@ -1470,12 +1362,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
-
-    @DefaultStringValue("Recommended mode for new users")
-    String recommendedMode();
-
-    @DefaultStringValue("Attributes and indicators appear separately")
-    String newFormAsClassicHelpBlock();
 
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
@@ -1570,9 +1456,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Browse")
     String browse();
 
-    @DefaultStringValue("Control is read only.")
-    String controlIsReadOnly();
-
     @DefaultStringValue("Download")
     String download();
 
@@ -1581,9 +1464,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter is not supported.")
     String filterIsNotSupported();
-
-    @DefaultStringValue("No file selected")
-    String noFileSelected();
 
     @DefaultStringValue("Single")
     String single();

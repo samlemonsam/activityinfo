@@ -22,9 +22,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("There is already data entered for partner {0}. Delete this partner''s data first.")
     String partnerHasDataWarning(String arg0);
 
-    @DefaultMessage("There is already data entered for the project {0}. Before deleting this project, you must delete the project''s data.")
-    String projectHasDataWarning(String arg0);
-
     @DefaultMessage("Projects for database {0}")
     String projectsForDatabase(String arg0);
 
@@ -45,23 +42,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @Key("monthName")
     String month(Date month);
 
-    @DefaultMessage("{0} most recent added sites for search query")
-    String recentlyAddedSites(String arg0);
-
-    @DefaultMessage("{0} most recent edited sites for search query")
-    String recentlyEditedSites(String arg0);
-
     @DefaultMessage("Filter by ''{0}''")
     String filterBy(String arg0);
-
-    @DefaultMessage("Nothing entered to search on: please enter something you want to search for")
-    String searchQueryEmpty();
-
-    @DefaultMessage("Enter a search query with at least 3 characters")
-    String searchQueryTooShort();
-
-    @DefaultMessage("For query \"{0}\", found {1} databases, {2} activities and {3} indicators")
-    String searchResultsFound(String arg0, String arg1, String arg2, String arg3);
 
     @DefaultMessage("Add new entry for form ''{0}''")
     String addNewSiteForActivity(String activityName);
@@ -106,30 +88,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0} days ago")
     String daysAgo(int hours);
 
-    @DefaultMessage("{0}: New {1} at {2} by {3}")
-    String newSiteSubject(String databaseName, String activityName, String locationName, String partnerName);
-
-    @DefaultMessage("{0}: Updated {1} at {2}")
-    String updatedSiteSubject(String databaseName, String activityName, String locationName);
-
-    @DefaultMessage("{0}: Deleted {1} at {2}")
-    String deletedSiteSubject(String databaseName, String activityName, String locationName);
-
-    @DefaultMessage("Hi {0},")
-    String sitechangeGreeting(String userName);
-
-    @DefaultMessage("{0} ({1}) created a new {2} at {3} in the {4} database on {5,date,dd-MM-yyyy ''at'' HH:mm}. Here are the details:")
-    String siteCreateIntro(String userName, String userEmail, String activityName, String locationName, String databaseName, Date date);
-
-    @DefaultMessage("{0} ({1}) updated the {2} at {3} in the {4} database on {5,date,dd-MM-yyyy ''at'' HH:mm}. Here are the details:")
-    String siteChangeIntro(String userName, String userEmail, String activityName, String locationName, String database, Date date);
-
-    @DefaultMessage("{0} ({1}) deleted the {2} at {3} in the {4} database on {5,date,dd-MM-yyyy ''at'' HH:mm}.")
-    String siteDeleteIntro(String userName, String userEmail, String activityName, String locationName, String database, Date date);
-
-    @DefaultMessage("Best regards,<br>The ActivityInfo Team")
-    String sitechangeSignature();
-
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the entry.")
     String siteHistoryCreated(Date date, String userName, String userEmail);
 
@@ -163,9 +121,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Hi {0},")
     String digestGreeting(String userName);
 
-    @DefaultMessage("If you don''t wish to receive this email, please click <a href=\"{0}\" style=\"text-decoration: underline;\">Unsubscribe</a>.")
-    String digestUnsubscribe(String unsubscribeLink);
-
     @DefaultMessage("Best regards,<br>The ActivityInfo Team")
     String digestSignature();
 
@@ -196,17 +151,11 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0} update(s) on {1,date,dd-MM-yyyy}")
     String activityDigestGraphTooltip(int updates, Date date);
 
-    @DefaultMessage("Set all rows to ''{0}''")
-    String updateAllRowsTo(String value);
-
     @DefaultMessage("Are you sure want to delete?")
     String confirmDeleteSite();
 
     @DefaultMessage("Select a site above.")
     String SelectSiteAbove();
-
-    @DefaultMessage("Choose the destination field for the source column \"<i>{0}</i>\".")
-    SafeHtml columnMatchPrompt(String columnName);
 
     @DefaultMessage("Showing {0} of {1} columns.")
     String showColumns(int numberOfColumnsShown, int numberOfColumnsTotal);
