@@ -121,9 +121,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Attachments")
     String attachment();
 
-    @DefaultStringValue("Attribute Types")
-    String attributeTypes();
-
     @DefaultStringValue("Attributes")
     String attributes();
 
@@ -150,9 +147,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Cancel")
     String cancel();
-
-    @DefaultStringValue("Google Maps could not be loaded. Please verify your internet connection.")
-    String cannotLoadMap();
 
     @DefaultStringValue("Category")
     String category();
@@ -327,9 +321,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Discard Changes")
     String discardChanges();
-
-    @DefaultStringValue("Don't ask again")
-    String dontAskAgain();
 
     @DefaultStringValue("Downloading changes from server")
     String downSyncProgress();
@@ -607,9 +598,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("New partner")
     String newPartner();
 
-    @DefaultStringValue("Please enter the new name of the project")
-    String newProjectName();
-
     @DefaultStringValue("New Submission")
     String newSite();
 
@@ -628,20 +616,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S/W/E)")
     String noHemisphere();
 
-    @DefaultStringValue("Warning: no administrative level")
-    String noLevels();
-
-    @DefaultStringValue("No matches")
-    String noMatches();
-
     @DefaultStringValue("Coordinates must have at least one number")
     String noNumber();
 
     @DefaultStringValue("Some administrative levels are disabled because the boundaries are not available or have not yet been loaded.")
     String noPolygonsWarning();
-
-    @DefaultStringValue("No search")
-    String noSearch();
 
     @DefaultStringValue("Undo")
     String undo();
@@ -666,9 +645,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("You are not authorized to make this change: either your access permissions have changed in the last few minutes, or there has been an error on the server.")
     String notAuthorized();
-
-    @DefaultStringValue("Ask me later")
-    String notNow();
 
     @DefaultStringValue("Not published")
     String notPublished();
@@ -763,9 +739,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Remove from Dashboard")
     String removeFromDashboard();
 
-    @DefaultStringValue("Remove")
-    String removeItem();
-
     @DefaultStringValue("Remove partner")
     String removePartner();
 
@@ -805,9 +778,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Search")
     String search();
 
-    @DefaultStringValue("Search for a site")
-    String searchLocation();
-
     @DefaultStringValue("Search for existing sites")
     String searchLocations();
 
@@ -840,9 +810,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Share...")
     String sharingOptions();
-
-    @DefaultStringValue("Showing results for:")
-    String showingSearchResultFor();
 
     @DefaultStringValue("Count")
     String siteCount();
@@ -1033,17 +1000,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Year/Month")
     String yearMonthGrouping();
 
-    @DefaultStringValue("New field")
-    String newField();
-
-    @DefaultStringValue("Remove field")
-    String removeField();
-
     @DefaultStringValue("Reset")
     String reset();
-
-    @DefaultStringValue("Complete the form below according to the instructions. When you're finished, click the Save button to save your changes. You can also complete this form with a mobile phone, print a blank paper form.")
-    String userFormPanelInvitation();
 
     @DefaultStringValue("Label")
     String labelFieldLabel();
