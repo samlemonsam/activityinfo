@@ -1533,4 +1533,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Download Google Chrome")
     String downloadGoogleChrome();
+
+    @DefaultStringValue("New Report Element")
+    String newReportElement();
 }

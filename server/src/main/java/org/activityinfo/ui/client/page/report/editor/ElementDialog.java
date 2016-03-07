@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.report.HasReportElement;
@@ -76,7 +77,7 @@ public class ElementDialog extends Dialog implements HasReportElement<ReportElem
         setWidth((int) (Window.getClientWidth() * 0.90));
         setHeight((int) (Window.getClientHeight() * 0.90));
         if (element.getTitle() == null) {
-            setHeadingText("New Report Element");
+            setHeadingText(I18N.CONSTANTS.newReportElement());
         } else {
             setHeadingText(element.getTitle());
         }
