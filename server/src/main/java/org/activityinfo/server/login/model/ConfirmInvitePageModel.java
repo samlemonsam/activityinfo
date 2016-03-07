@@ -53,4 +53,5 @@ public class ConfirmInvitePageModel extends PageModel {
     public void setFormIncomplete(boolean formIncomplete) {
         this.formIncomplete = formIncomplete;
     }
+   
 }

@@ -1,11 +1,14 @@
 package org.activityinfo.model.type.expr;
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ParametrizedFieldType;
+import org.activityinfo.model.type.ParametrizedFieldTypeClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,8 +44,8 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         public FormClass getParameterFormClass() {
 
             FormField exprField = new FormField(ResourceId.valueOf("expression"));
-            exprField.setLabel("Expression");
-            exprField.setDescription("Example: A+B+(C/D)+[Volume A]");
+            exprField.setLabel(I18N.CONSTANTS.expression());
+            exprField.setDescription(I18N.CONSTANTS.expressionExample());
             exprField.setType(ExprFieldType.INSTANCE);
 
             FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id(getId()));

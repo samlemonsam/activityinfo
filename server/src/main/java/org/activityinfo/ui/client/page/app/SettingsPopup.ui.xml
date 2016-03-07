@@ -61,6 +61,7 @@
     }
   </ui:style>
   <ui:with field="constants" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="messages" type="org.activityinfo.i18n.shared.UiMessages"/>
 
   <g:HTMLPanel styleName="{style.panel}">
     <div class="{style.group}">

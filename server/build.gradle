@@ -26,7 +26,6 @@ gwt {
 
     minHeapSize = "512M";
     maxHeapSize = "2048M";
-
     if (gwtMode.equals('safari')) {
         modules 'org.activityinfo.ui.ActivityInfoSafariTest'
         compiler {
@@ -167,7 +166,7 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     dependsOn appengineDownloadSdk
 
 
-    extraOptions = ["--application=${environment.projectId}", '--version=qa']
+    extraOptions = ["--application=${environment.projectId}", '--version=arabic']
     oauth2 = true
     
     doFirst {

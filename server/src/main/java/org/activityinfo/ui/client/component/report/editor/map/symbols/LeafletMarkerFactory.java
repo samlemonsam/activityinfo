@@ -83,7 +83,7 @@ public class LeafletMarkerFactory {
 
     public static Marker createPieMapMarker(PieMapMarker marker) {
         StringBuilder sb = new StringBuilder();
-        sb.append("icon?t=piechart&r=").append(marker.getRadius());
+        sb.append("/icon?t=piechart&r=").append(marker.getRadius());
         for (SliceValue slice : marker.getSlices()) {
             sb.append("&value=").append(slice.getValue());
             sb.append("&color=").append(slice.getColor());

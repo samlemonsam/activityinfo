@@ -83,7 +83,7 @@ public class RemoteDispatcherTest {
                 .build();
         dispatcher = new CachingDispatcher(proxyManager,
                 new MergingDispatcher(
-                        new RemoteDispatcher(new MockEventBus(), auth, service),
+                        new RemoteDispatcher(auth, service, "en"),
                         scheduler,
                         backOff));
     }
@@ -322,6 +322,7 @@ public class RemoteDispatcherTest {
     private void expectRemoteCall(GetSchema command) {
         service.execute(
                 eq(AUTH_TOKEN),
+                eq("en"), 
                 eq(Collections.<Command>singletonList(command)),
                 capture(remoteCallback));
     }
@@ -330,7 +331,7 @@ public class RemoteDispatcherTest {
         expectLastCall().andAnswer(new IAnswer<Object>() {
             @Override
             public Object answer() throws Throwable {
-                ((AsyncCallback) getCurrentArguments()[2])
+                ((AsyncCallback) getCurrentArguments()[3])
                         .onSuccess(Collections.singletonList(result));
                 return null;
             }

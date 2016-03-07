@@ -53,7 +53,7 @@ public class CommandServlet2 extends RemoteServiceServlet implements RemoteComma
     private static final Logger LOGGER = Logger.getLogger(CommandServlet2.class.getName());
 
     @Override
-    public List<CommandResult> execute(String authToken, List<Command> commands) throws CommandException {
+    public List<CommandResult> execute(String authToken, String locale, List<Command> commands) throws CommandException {
         Authentication auth = retrieveAuthentication(authToken);
         try {
             return handleCommands(auth.getUser(), commands);

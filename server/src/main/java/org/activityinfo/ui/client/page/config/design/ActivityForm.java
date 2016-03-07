@@ -128,48 +128,6 @@ class ActivityForm extends AbstractDesignForm {
             }
         });
 
-//        // hack : we represent boolean value with radiobuttons (instead of checkbox)
-//        // therefore radio buttons order is important: true - first button selected, false - second button selected
-//        final Radio classicView = new Radio();
-//        classicView.setBoxLabel(I18N.CONSTANTS.classicView());
-//        classicView.setToolTip(I18N.CONSTANTS.classicViewExplanation());
-//
-//        final Radio modernView = new Radio();
-//        modernView.setBoxLabel(I18N.CONSTANTS.modernView());
-//        modernView.setToolTip(I18N.CONSTANTS.modernViewExplanation());
-//
-//        frequencyCombo.addSelectionChangedListener(new SelectionChangedListener() {
-//            @Override
-//            public void selectionChanged(SelectionChangedEvent se) {
-//                Object value = frequencyCombo.getValue();
-//                boolean isMonthlySelected = value instanceof ModelData && ((ModelData)value).get("value") instanceof Integer &&
-//                        ((ModelData)value).get("value").equals(ActivityFormDTO.REPORT_MONTHLY);
-//                if (isMonthlySelected && modernView.getValue()) {
-//                    classicView.setValue(true);
-//                }
-//                modernView.setEnabled(!isMonthlySelected);
-//            }
-//        });
-//
-//        RadioGroup radioViewGroup = new RadioGroup();
-//        radioViewGroup.add(classicView); // order is important! - true is first button, false is second button
-//        radioViewGroup.add(modernView);
-//
-//        radioViewGroup.setFieldLabel(I18N.CONSTANTS.viewType());
-//
-//        binding.addFieldBinding(new OnlyValidFieldBinding(radioViewGroup, "classicView"));
-//
-//        this.add(radioViewGroup);
-//        this.add(new LabelField(I18N.CONSTANTS.classicViewExplanation()));
-//        this.add(new LabelField(I18N.CONSTANTS.modernViewExplanation()));
-//
-//        Anchor linkOnExplanation = new Anchor();
-//        linkOnExplanation.setTarget("_blank");
-//        linkOnExplanation.setHref(NewFormDialog.CLASSIC_VIEW_EXPLANATION_URL);
-//        linkOnExplanation.setText(I18N.CONSTANTS.moreAboutView());
-//
-//        this.add(new AdapterField(linkOnExplanation));
-
         hideFieldWhenNull(idField);
     }
 

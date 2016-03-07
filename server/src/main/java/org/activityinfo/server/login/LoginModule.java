@@ -24,7 +24,6 @@ package org.activityinfo.server.login;
 
 import com.google.common.collect.Maps;
 import com.google.inject.servlet.ServletModule;
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.activityinfo.server.util.jaxrs.JaxRsContainer;
 
 import java.util.Map;
@@ -38,13 +37,17 @@ public class LoginModule extends ServletModule {
     @Override
     protected void configureServlets() {
 
-        serve("/ActivityInfo/ActivityInfo.nocache.js").with(SelectionServlet.class);
-        serve("/ActivityInfo/ActivityInfo.appcache").with(SelectionServlet.class);
-
+        serveRegex("/ActivityInfo/[a-z]{2}.(js|appcache)").with(SelectionServlet.class);
+        
         Map<String, String> initParams = Maps.newHashMap();
         filter("/login*").through(JaxRsContainer.class);
         filter("/unsupportedBrowser").through(JaxRsContainer.class);
 
+        bind(AppResource.class);
+        filter("/app*").through(JaxRsContainer.class);
+        
+        
+        
         filterContainer(initParams,
                 HostController.class,
                 LoginController.class,

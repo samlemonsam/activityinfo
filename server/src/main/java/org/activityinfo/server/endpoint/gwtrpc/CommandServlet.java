@@ -26,6 +26,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandService;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -37,6 +38,7 @@ import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,10 +68,12 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
     private ServerSideAuthProvider authProvider;
 
     @Override
-    public List<CommandResult> execute(String authToken, List<Command> commands) throws CommandException {
+    public List<CommandResult> execute(String authToken, String locale, List<Command> commands) throws CommandException {
         if (!checkAuthentication(authToken)) {
             throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
         }
+
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(locale));
 
         try {
             return handleCommands(commands);
@@ -77,6 +81,9 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
         } catch (Exception caught) {
             LOGGER.log(Level.SEVERE, "Could not execute commands!", caught);
             throw new CommandException();
+            
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
         }
     }
 

@@ -60,12 +60,6 @@ import java.util.List;
 @Singleton
 public class LocalController extends AbstractDispatcher {
 
-    public interface PromptConnectCallback {
-        void onCancel();
-
-        void onTryToConnect();
-    }
-
     private final EventBus eventBus;
     private final Provider<Synchronizer> synchronizerProvider;
     private UiConstants uiConstants;

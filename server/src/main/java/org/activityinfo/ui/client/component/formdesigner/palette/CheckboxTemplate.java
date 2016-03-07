@@ -19,10 +19,10 @@ public class CheckboxTemplate implements FieldTemplate {
     @Override
     public FormField createField() {
         List<EnumItem> values = Lists.newArrayList();
-        values.add(new EnumItem(EnumItem.generateId(), "Option 1"));
-        values.add(new EnumItem(EnumItem.generateId(), "Option 2"));
+        values.add(new EnumItem(EnumItem.generateId(), I18N.MESSAGES.defaultEnumItem(1)));
+        values.add(new EnumItem(EnumItem.generateId(), I18N.MESSAGES.defaultEnumItem(2)));
         FormField field = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
-        field.setLabel("Which options apply?");
+        field.setLabel(I18N.CONSTANTS.defaultCheckboxFieldLabel());
         field.setType(new EnumType(Cardinality.MULTIPLE, values));
 
         return field;
