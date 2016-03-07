@@ -22,11 +22,7 @@ package org.activityinfo.server.login.model;
  * #L%
  */
 
-import org.activityinfo.i18n.shared.ApplicationLocale;
 import org.activityinfo.server.database.hibernate.entity.User;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class ConfirmInvitePageModel extends PageModel {
     private User user;
@@ -57,8 +53,5 @@ public class ConfirmInvitePageModel extends PageModel {
     public void setFormIncomplete(boolean formIncomplete) {
         this.formIncomplete = formIncomplete;
     }
-    
-    public List<ApplicationLocale> getAvailableLocales() {
-        return Arrays.asList(ApplicationLocale.values());
-    }
+   
 }

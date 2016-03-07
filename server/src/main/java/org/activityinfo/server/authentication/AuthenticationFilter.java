@@ -101,15 +101,18 @@ public class AuthenticationFilter implements Filter {
             try {
                 AuthenticatedUser currentUser = authTokenCache.get(authToken);
                 authProvider.set(currentUser);
-
-                LOGGER.info("Setting locale to " + currentUser.getUserLocale() + " for " + currentUser.getEmail()) ;
-
+                
             } catch (Exception e) {
                 authProvider.clear();
             }
         }
 
-        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(authProvider.get().getUserLocale()));
+        // Unless overridden by the Application page or command handler,
+        // we'll keep the default to English. Otherwise you end up with unexpected
+        // behavior when the content of a page changes when a cookie is / is not present
+        // https://bedatadriven.atlassian.net/browse/AI-753
+        
+        ThreadLocalLocaleProvider.pushLocale(Locale.ENGLISH);
 
         try {
             filterChain.doFilter(request, response);
