@@ -71,7 +71,8 @@ public class LoginController {
         try {
             user = userDAO.get().findUserByEmail(email);
         } catch(NoResultException e) {
-            throw new LoginException();
+            LOGGER.warning("Failed login attempt for unknown user: " + email);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
         try {
             checkPassword(password, user);
