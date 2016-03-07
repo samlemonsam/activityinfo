@@ -1,6 +1,7 @@
 package org.activityinfo.server.endpoint.export;
 
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
@@ -46,7 +47,9 @@ public class ExportSitesTask extends HttpServlet {
 
         String exportId = req.getParameter("exportId");
         String locale = req.getParameter("locale");
-        
+        if(Strings.isNullOrEmpty(locale)) {
+            locale = Locale.ENGLISH.toLanguageTag();
+        }
         
         // authenticate this task
         authProvider.set(new AuthenticatedUser("",
@@ -56,9 +59,7 @@ public class ExportSitesTask extends HttpServlet {
         ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(locale));
         
         try {
-
             // create the workbook
-
             Filter filter = FilterUrlSerializer.fromQueryParameter(req.getParameter("filter"));
             TaskContext context = new TaskContext(dispatcher.get(), storageProvider, exportId);
             SiteExporter export = new SiteExporter(context).buildExcelWorkbook(filter);
@@ -68,7 +69,6 @@ public class ExportSitesTask extends HttpServlet {
             try (OutputStream out = storage.openOutputStream()) {
                 export.getBook().write(out);
             }
-            
         } finally {
             ThreadLocalLocaleProvider.popLocale();
         }
