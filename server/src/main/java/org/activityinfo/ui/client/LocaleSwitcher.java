@@ -18,7 +18,21 @@ public class LocaleSwitcher {
     }
 
     public static String localeUrl(ApplicationLocale applicationLocale) {
-        return Window.Location.createUrlBuilder().setParameter("locale", applicationLocale.getCode()).buildString();
+        // We use the sub-delim '+' extensively in fragment identifiers,
+        // for example:
+        //     #data-entry/Activity+53432
+        // UrlBuilder will decode and re-encode this resulting in
+        //     #data-entry/Activity%2053432 
+        // Which will break navigation
+        // So we will first construct the url without the hash,
+        // and then append the already-encoded fragment identifier directly
+        
+        String url = Window.Location.createUrlBuilder()
+                .setParameter("locale", applicationLocale.getCode())
+                .setHash(null)
+                .buildString();
+        
+        return url + Window.Location.getHash();
     }
 
     public static boolean isCurrent(ApplicationLocale applicationLocale) {
