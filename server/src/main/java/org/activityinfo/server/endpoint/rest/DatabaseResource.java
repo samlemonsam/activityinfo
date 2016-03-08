@@ -55,10 +55,11 @@ public class DatabaseResource {
     @Path("schema.csv")
     public Response getDatabaseSchemaCsv() {
         SchemaCsvWriter writer = new SchemaCsvWriter(dispatcher);
+        writer.writeByteOrderMark();
         writer.write(databaseId);
 
         return Response.ok()
-                .type("text/css")
+                .type("text/csv;charset=UTF-8")
                 .header("Content-Disposition", "attachment; filename=schema_" + databaseId + ".csv")
                 .entity(writer.toString())
                 .build();
