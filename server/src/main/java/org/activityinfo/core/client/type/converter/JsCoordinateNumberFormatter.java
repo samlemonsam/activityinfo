@@ -22,21 +22,29 @@ package org.activityinfo.core.client.type.converter;
  * #L%
  */
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import org.activityinfo.core.shared.type.converter.CoordinateParser;
 
 public class JsCoordinateNumberFormatter implements CoordinateParser.NumberFormatter {
 
     public static final JsCoordinateNumberFormatter INSTANCE = new JsCoordinateNumberFormatter();
+    
 
     private NumberFormat dddFormat;
     private NumberFormat shortFracFormat;
     private NumberFormat intFormat;
+    private char decimalSeparator;
 
     public JsCoordinateNumberFormatter() {
         dddFormat = NumberFormat.getFormat("+0.000000;-0.000000");
         shortFracFormat = NumberFormat.getFormat("0.00");
         intFormat = NumberFormat.getFormat("0");
+        String decimalSeperatorString = LocaleInfo.getCurrentLocale().getNumberConstants().decimalSeparator();
+        if(decimalSeperatorString.length() != 1) {
+            throw new AssertionError("Decimal separator is longer than expected");
+        }
+        decimalSeparator = decimalSeperatorString.charAt(0);
     }
 
 
@@ -60,4 +68,8 @@ public class JsCoordinateNumberFormatter implements CoordinateParser.NumberForma
         return NumberFormat.getDecimalFormat().parse(string);
     }
 
+    @Override
+    public char getDecimalSeparator() {
+        return decimalSeparator;
+    }
 }
