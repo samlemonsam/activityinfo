@@ -29,10 +29,6 @@
 
     }
 
-    .email {
-      font-weight: bold;
-    }
-
     .group {
       border-left: 1px solid #99BBE8;
       border-right: 1px solid #99BBE8;
@@ -67,7 +63,7 @@
     <div class="{style.group}">
       <div class="{style.menuRow}">
         <ui:text from="{constants.appVersion}"/>
-        <span ui:field="versionLabel">2.5.1</span>
+        <span ui:field="versionLabel" dir="ltr"/>
       </div>
       <div class="{style.menuRow}">
         <span ui:field="versionStatus"/>
@@ -98,10 +94,7 @@
     </div>
 
     <div class="{style.group}">
-      <div class="{style.menuRow}">
-        Logged in as
-        <span class="{style.email}" ui:field="emailLabel"/>
-      </div>
+      <div ui:field="emailLabel" class="{style.menuRow}"/>
       <div class="{style.menuRow}">
         <g:Label text="{constants.userProfile}" styleName="{style.action}"
                  ui:field="userProfileLink"/>

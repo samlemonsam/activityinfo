@@ -64,7 +64,8 @@ public class SettingsPopup extends PopupPanel {
 
     @UiField SpanElement versionLabel;
 
-    @UiField SpanElement emailLabel;
+    @UiField
+    DivElement emailLabel;
 
     @UiField SpanElement versionStatus;
 
@@ -108,7 +109,7 @@ public class SettingsPopup extends PopupPanel {
         setWidth(WIDTH + "px");
 
         versionLabel.setInnerText(ClientContext.getVersion());
-        emailLabel.setInnerText(new ClientSideAuthProvider().get().getEmail());
+        emailLabel.setInnerText(I18N.MESSAGES.loggedInAs(new ClientSideAuthProvider().get().getEmail()));
 
         syncRow.getStyle().setDisplay(Display.NONE);
 

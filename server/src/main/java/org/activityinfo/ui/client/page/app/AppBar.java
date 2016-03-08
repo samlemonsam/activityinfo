@@ -109,6 +109,7 @@ public class AppBar extends Composite {
                 CheckMenuItem menuItem = new CheckMenuItem(applicationLocale.getLocalizedName());
                 menuItem.setChecked(LocaleSwitcher.isCurrent(applicationLocale));
                 menuItem.setGroup("lang");
+                menuItem.setDirectionEstimated(false);
                 menuItem.addSelectionListener(new SelectionListener<MenuEvent>() {
                     @Override
                     public void componentSelected(MenuEvent ce) {
@@ -120,6 +121,7 @@ public class AppBar extends Composite {
             localeMenu.add(new SeparatorMenuItem());
 
             MenuItem preferenceItem = new MenuItem(I18N.CONSTANTS.language());
+            preferenceItem.setDirectionEstimated(false);
             preferenceItem.addSelectionListener(new SelectionListener<MenuEvent>() {
                 @Override
                 public void componentSelected(MenuEvent ce) {
