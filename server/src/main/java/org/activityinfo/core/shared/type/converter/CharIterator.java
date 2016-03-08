@@ -22,7 +22,7 @@ class CharIterator  {
      * and returning true if there is a match.
      */
     public boolean tryMatch(String toMatch) {
-        if(hasNext() && string.substring(index).equals(toMatch)) {
+        if(hasNext() && string.substring(index).startsWith(toMatch)) {
             index += toMatch.length();
             return true;
         } else {
