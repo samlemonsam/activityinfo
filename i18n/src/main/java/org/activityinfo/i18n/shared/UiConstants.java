@@ -1078,9 +1078,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Filter by name")
     String filterByName();
 
-    @DefaultStringValue("Add instance")
-    String addInstance();
-
     @DefaultStringValue("Add column")
     String addColumn();
 
@@ -1089,9 +1086,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Double-click a value to drill down to the individual sites")
     String drillDownTip();
-
-    @DefaultStringValue("Edit instance")
-    String editInstance();
 
     @DefaultStringValue("Save operation failed (formclass).")
     String failedToSaveClass();
