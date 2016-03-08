@@ -1530,4 +1530,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("New Report Element")
     String newReportElement();
+
+    @DefaultStringValue("ActivityInfo News")
+    String activityInfoNews();
 }
