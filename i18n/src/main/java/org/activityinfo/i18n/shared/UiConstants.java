@@ -181,7 +181,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Choose Site")
     String chooseLocation();
 
-    @DefaultStringValue("Here you can choose the location of your form submission. Use the filters below to find locations linked to existing form submissions. This will make it possible to to link your form submissions to other forms inside and outside of your organization.")
+    @DefaultStringValue("Here you can choose the location of your form submission. Use the filters below to find locations linked to existing form submissions. This will make it possible to link your form submissions to other forms inside and outside of your organization.")
     String chooseLocationDescription();
 
     @DefaultStringValue("Please choose a title for your report before saving")
@@ -873,7 +873,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Synchronization Error")
     String syncError();
-    
+
     @DefaultStringValue("An unexpected error occurred during synchronization.")
     String syncErrorUnexpected();
 
@@ -1476,7 +1476,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("No image selected.")
     String noImage();
-    
+
     @DefaultStringValue("Upload file size limit is set to 10 MB.")
     String uploadFileSizeLimit();
 
@@ -1485,16 +1485,16 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right.")
     String columnMappingHelpLink();
-    
+
     @DefaultStringValue("Show me")
     String showMe();
 
     @DefaultStringValue("Blank value is not allowed.")
     String blankValueIsNotAllowed();
-    
+
     @DefaultStringValue("Expression")
     String expression();
-    
+
     @DefaultStringValue("Example: A+B+(C/D)+[Volume A]")
     String expressionExample();
 
