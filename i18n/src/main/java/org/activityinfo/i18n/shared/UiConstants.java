@@ -688,7 +688,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Preview")
     String preview();
 
-    @DefaultStringValue("Print UserForm")
+    @DefaultStringValue("Print Form")
     String printForm();
 
     @DefaultStringValue("Project")

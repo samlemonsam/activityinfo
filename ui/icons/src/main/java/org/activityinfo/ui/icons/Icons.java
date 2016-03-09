@@ -166,4 +166,6 @@ public class Icons  {
         return "icon icon_bars";
     }
     
+    public String print() { return "icon icon_print"; }
+    
 }
