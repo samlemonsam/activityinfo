@@ -47,7 +47,7 @@ public class NewsPortlet extends Portlet {
 
     public NewsPortlet() {
 
-        setHeadingText("ActivityInfo News");
+        setHeadingText(I18N.CONSTANTS.activityInfoNews());
 
         html = new Html();
         add(html);

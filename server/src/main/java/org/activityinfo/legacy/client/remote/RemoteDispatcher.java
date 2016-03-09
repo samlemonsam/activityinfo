@@ -22,6 +22,7 @@ package org.activityinfo.legacy.client.remote;
  * #L%
  */
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.Command;
@@ -29,7 +30,6 @@ import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.ui.client.EventBus;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,13 +41,19 @@ import java.util.List;
 public class RemoteDispatcher extends AbstractDispatcher {
     private final AuthenticatedUser auth;
     private final RemoteCommandServiceAsync service;
-    private EventBus eventBus;
+    private final String locale;
 
     @Inject
-    public RemoteDispatcher(EventBus eventBus, AuthenticatedUser auth, RemoteCommandServiceAsync service) {
-        this.eventBus = eventBus;
+    public RemoteDispatcher(AuthenticatedUser auth, RemoteCommandServiceAsync service) {
         this.auth = auth;
         this.service = service;
+        this.locale = LocaleInfo.getCurrentLocale().getLocaleName();
+    }
+
+    public RemoteDispatcher(AuthenticatedUser auth, RemoteCommandServiceAsync service, String locale) {
+        this.auth = auth;
+        this.service = service;
+        this.locale = locale;
     }
 
     @Override
@@ -55,6 +61,7 @@ public class RemoteDispatcher extends AbstractDispatcher {
         try {
             System.currentTimeMillis();
             service.execute(auth.getAuthToken(),
+                    locale,
                     Collections.singletonList((Command) command),
                     new AsyncCallback<List<CommandResult>>() {
                         @Override

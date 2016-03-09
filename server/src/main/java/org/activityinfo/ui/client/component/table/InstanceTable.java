@@ -96,6 +96,7 @@ public class InstanceTable implements IsWidget {
         actions.add(new NewHeaderAction(this));
         actions.add(new DeleteHeaderAction(this));
         actions.add(new EditHeaderAction(this));
+        actions.add(new PrintFormAction(this));
         actions.add(new ImportHeaderAction(this));
         actions.add(new ChooseColumnsHeaderAction(this));
         return actions;

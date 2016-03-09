@@ -56,7 +56,7 @@ public class PoEditorSource implements TranslationSource {
      * 
      * @param terms
      */
-    public void updateTerms(List<ResourceClassTerm> terms) throws IOException {
+    public void updateTerms(List<ResourceClassTerm> terms, boolean sync) throws IOException {
         
         List<PoTermUpdate> updates = Lists.newArrayList();
         for (ResourceClassTerm term : terms) {
@@ -64,7 +64,7 @@ public class PoEditorSource implements TranslationSource {
         }
 
         PoEditorClient client = new PoEditorClient(apiToken);
-        PoUploadResponse response = client.upload(projectId, updates);
+        PoUploadResponse response = client.upload(projectId, updates, sync);
 
         PoUploadResponse.Details details = response.getDetails();
         System.out.println(String.format("Terms:       %5d  Added: %5d  Deleted: %d",

@@ -36,18 +36,9 @@ public class WebKitCapabilityProfile extends LocalCapabilityProfile {
     }
 
     @Override
-    public String getInstallInstructions() {
-        return null;
-    }
-
-    @Override
     public void acquirePermission(AsyncCallback<Void> callback) {
         // no user permission required for web kit
         callback.onSuccess(null);
     }
 
-    @Override
-    public boolean hasPermission() {
-        return true;
-    }
 }

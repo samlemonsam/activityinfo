@@ -164,7 +164,7 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
                                  Grid<ReportMetadataDTO> grid) {
 
                 if (model.getAmOwner()) {
-                    return "Me";
+                    return I18N.CONSTANTS.me();
                 } else {
                     return model.getOwnerName();
                 }

@@ -13,9 +13,18 @@ import java.util.List;
  */
 public class Push {
 
+    /**
+     * If true, unused terms will be purged from PoEditor.com
+     */
+    private boolean purge;
 
     public static void main(String[] args) throws IOException {
         Push task = new Push();
+        
+        if(args.length > 0 && args[0].equals("purge")) {
+            task.purge = true;
+        }
+        
         task.execute();
     }
 
@@ -29,6 +38,6 @@ public class Push {
             terms.addAll(visitor.getTerms());
         }
 
-       Project.INSTANCE.getTranslationSource().updateTerms(terms);
+       Project.INSTANCE.getTranslationSource().updateTerms(terms, purge);
     }
 }

@@ -30,6 +30,6 @@ import java.util.List;
 
 public interface RemoteCommandService extends RemoteService {
 
-    List<CommandResult> execute(String authToken, List<Command> cmd) throws CommandException;
+    List<CommandResult> execute(String authToken, String locale, List<Command> cmd) throws CommandException;
 
 }

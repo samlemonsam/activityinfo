@@ -22,7 +22,10 @@ package org.activityinfo.server.login;
  * #L%
  */
 
-import com.bedatadriven.rebar.appcache.server.*;
+import com.bedatadriven.rebar.appcache.server.DefaultSelectionServlet;
+import com.bedatadriven.rebar.appcache.server.PropertyProvider;
+import com.bedatadriven.rebar.appcache.server.SelectionException;
+import com.bedatadriven.rebar.appcache.server.UnknownUserAgentException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -101,7 +104,7 @@ public class SelectionServlet extends DefaultSelectionServlet {
 
     @Override
     protected void handleNoAvailablePermutation(Path path, HttpServletResponse resp) throws IOException {
-        if (path.file.endsWith(".js")) {
+        if (path.fileType.equals("js")) {
             resp.getWriter().println("window.location = '/unsupportedBrowser';");
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unsupported browser");

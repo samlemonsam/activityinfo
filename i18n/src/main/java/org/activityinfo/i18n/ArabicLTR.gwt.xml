@@ -1,0 +1,21 @@
+<module>
+
+    <!-- Provides an alternative CldrImpl_ar for display arabic text and locale
+         but not changing the basic orientation of the application -->
+    
+    
+    <inherits name="com.google.gwt.i18n.I18N"/>
+
+    <replace-with class="org.activityinfo.i18n.shared.CdlrImpl_ar_ltr">
+        <when-type-is class="com.google.gwt.i18n.client.impl.CldrImpl"/>
+        <when-property-is name="locale" value="ar" />
+    </replace-with>
+
+    <replace-with class="org.activityinfo.i18n.shared.DateTimeFormatInfoImpl_ar_ltr">
+        <when-type-is class="com.google.gwt.i18n.client.impl.cldr.DateTimeFormatInfoImpl"/>
+        <when-property-is name="locale" value="ar" />
+    </replace-with>
+
+
+    <source path="shared"/>
+</module>

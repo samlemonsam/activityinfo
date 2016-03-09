@@ -99,8 +99,10 @@ public class CoordinateEditor implements PropertyEditor<Double>, Validator {
 
             return null;
         } catch (CoordinateFormatException ex) {
+            Log.debug("CoordinateFormatException parsing [" + value + "]", ex);
             return ex.getMessage();
         } catch (NumberFormatException ex) {
+            Log.debug("NumberFormatException parsing [" + value + "]", ex);
             return ex.getMessage();
         }
     }

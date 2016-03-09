@@ -222,10 +222,10 @@ public class SiteExporter {
         sheet.setColumnHidden(0, true);
         sheet.setColumnHidden(1, true);
 
-        createHeaderCell(headerRow2, column++, "Date1", CellStyle.ALIGN_RIGHT);
-        createHeaderCell(headerRow2, column++, "Date2", CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow2, column++, I18N.CONSTANTS.startDate(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow2, column++, I18N.CONSTANTS.endDate(), CellStyle.ALIGN_RIGHT);
 
-        createHeaderCell(headerRow2, column, "Partner");
+        createHeaderCell(headerRow2, column, I18N.CONSTANTS.partner());
         sheet.setColumnWidth(column, characters(PARTNER_COLUMN_WIDTH));
         column++;
 
@@ -233,7 +233,7 @@ public class SiteExporter {
         sheet.setColumnWidth(column, characters(LOCATION_COLUMN_WIDTH));
         column++;
 
-        createHeaderCell(headerRow2, column++, "Axe");
+        createHeaderCell(headerRow2, column++, I18N.CONSTANTS.axe());
 
         indicators = Maps.newLinkedHashMap();
         for (IndicatorGroup group : activity.groupIndicators()) {

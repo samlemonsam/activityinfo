@@ -32,7 +32,7 @@ public class CoordinateParser {
      * Provides number formatting & parsing. Extracted from the class to allow
      * for testing.
      */
-    public static interface NumberFormatter {
+    public interface NumberFormatter {
 
         /*
          * Formats a coordinate as Degree-decimal, with exactly six decimal places and always with a
@@ -45,6 +45,16 @@ public class CoordinateParser {
         String formatInt(double value);
 
         double parseDouble(String string);
+
+        /**
+         * @return the decimal separator for the current locale. In English, this would be "."
+         */
+        char getDecimalSeparator();
+
+        /**
+         * Return true if the given character {@code c} is a digit in the current locale
+         */
+        boolean isDigit(char c);
     }
 
     private static final double MINUTES_PER_DEGREE = 60;
@@ -53,8 +63,6 @@ public class CoordinateParser {
     private static final double MAX_MINUTES = 60;
     private static final double MIN_SECONDS = 0;
     private static final double MAX_SECONDS = 60;
-
-    private static final String DECIMAL_SEPARATORS = ".,";
 
     private final String posHemiChars;
     private final String negHemiChars;
@@ -124,24 +132,37 @@ public class CoordinateParser {
          * hemisphere, then we can assume the sign.
          */
         double sign = maybeInferSignFromBounds();
+        
+        CharIterator it = new CharIterator(value);
 
-        for (i = 0; i != value.length(); ++i) {
-            char c = value.charAt(i);
-
-            if (isNegHemiChar(c)) {
+        while(it.hasNext()) {
+            
+            if(it.tryMatch('+') || it.tryMatch(posHemiChars)) {
+                sign = +1;
+            } else if(it.tryMatch('-') || it.tryMatch(negHemiChars)) {
                 sign = -1;
-            } else if (isPosHemiChar(c)) {
-                sign = 1;
-            } else if (isNumberPart(c)) {
-                if (numberIndex > 2) {
-                    throw new CoordinateFormatException(tooManyNumbersErrorMessage);
+            } else {
+                char c = it.next();
+                
+                if (isNumberPart(c)) {
+                    if (numberIndex > 2) {
+                        throw new CoordinateFormatException(tooManyNumbersErrorMessage);
+                    }
+                    // Normalize decimal point to correct locale-specific decimal point
+                    // so that we can parse it correctly
+                    // For example, if a user in the French locale enters "32.14", this
+                    // should actually be parsed as "32,14"
+                    if(isDecimalSeparator(c)) {
+                        c = numberFormatter.getDecimalSeparator();
+                    }
+                    numbers[numberIndex].append(c);
+
+                } else if (numberIndex != 2 && numbers[numberIndex].length() > 0) {
+                    // advance to the next token on anything else-- whitespace,
+                    // symbols like ' " ° -- we won't insist that they are used
+                    // in the right place
+                    numberIndex++;
                 }
-                numbers[numberIndex].append(c);
-            } else if (numberIndex != 2 && numbers[numberIndex].length() > 0) {
-                // advance to the next token on anything else-- whitespace,
-                // symbols like ' " ° -- we won't insist that they are used
-                // in the right place
-                numberIndex++;
             }
         }
 
@@ -171,15 +192,14 @@ public class CoordinateParser {
     }
 
     private boolean isNumberPart(char c) {
-        return Character.isDigit(c) || DECIMAL_SEPARATORS.indexOf(c) != -1;
+        return isDecimalSeparator(c) || numberFormatter.isDigit(c);
     }
 
-    private boolean isPosHemiChar(char c) {
-        return c == '+' || posHemiChars.indexOf(c) != -1;
-    }
-
-    private boolean isNegHemiChar(char c) {
-        return c == '-' || negHemiChars.indexOf(c) != -1;
+    private boolean isDecimalSeparator(char c) {
+        // Be generous in what we accept while parsing. 
+        // A thousands seperator will never be valid in a coordinate string,
+        // so we can safely asusme that a comma is a european decimal separator for example
+        return c == '.' || c == ',' || c == numberFormatter.getDecimalSeparator();
     }
 
     private double parseCoordinate(StringBuffer[] tokens)
@@ -188,7 +208,7 @@ public class CoordinateParser {
             throw new CoordinateFormatException(noNumberErrorMessage);
         }
 
-        double coordinate = Double.parseDouble(tokens[0].toString());
+        double coordinate = numberFormatter.parseDouble(tokens[0].toString());
         notation = Notation.DDd;
 
         if (tokens[1].length() != 0) {
@@ -224,8 +244,8 @@ public class CoordinateParser {
 
         StringBuilder sb = new StringBuilder();
         sb.append(numberFormatter.formatInt(Math.abs(degrees))).append("° ");
-        sb.append(numberFormatter.formatShortFraction(minutes)).append("' ");
-        sb.append(hemisphereChar(value));
+        sb.append(numberFormatter.formatShortFraction(minutes * MINUTES_PER_DEGREE)).append("' ");
+        sb.append(hemisphereLabel(value));
 
         return sb.toString();
     }
@@ -255,7 +275,7 @@ public class CoordinateParser {
         sb.append(numberFormatter.formatInt(Math.abs(degrees))).append("° ");
         sb.append(numberFormatter.formatInt(minutes)).append("' ");
         sb.append(numberFormatter.formatShortFraction(seconds)).append("\" ");
-        sb.append(hemisphereChar(value));
+        sb.append(hemisphereLabel(value));
 
         return sb.toString();
     }
@@ -282,11 +302,11 @@ public class CoordinateParser {
         }
     }
 
-    private char hemisphereChar(double value) {
+    private String hemisphereLabel(double value) {
         if (Math.signum(value) < 0) {
-            return negHemiChars.charAt(0);
+            return negHemiChars;
         } else {
-            return posHemiChars.charAt(0);
+            return posHemiChars;
         }
     }
 

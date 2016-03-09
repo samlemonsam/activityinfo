@@ -38,6 +38,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
@@ -59,13 +60,16 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
 
     public interface Templates extends SafeHtmlTemplates {
 
-        @Template("{0} <span class='enum-edit-controls'>[ <span class='enum-edit'>Edit</span> | <span class='enum-remove'>Delete</span> ]</span>")
-        SafeHtml designLabel(String label);
+        // Note: the Left-to-right Mark (‎‎‎‎\u200E) is used here to ensure that the symbols [ | ] are correctly
+        // interpretered as Left-to-right even if the text in between is RTL
+        
+        @Template("{0} <span class='enum-edit-controls'>\u200E[ <span class='enum-edit'>{1}</span> \u200E| <span class='enum-remove'>{2}</span> \u200E]</span>")
+        SafeHtml designLabel(String itemLabel, String editLabel, String deleteLabel);
 
         @Template("{0} <span class='enum-edit-controls'/>")
         SafeHtml normalLabel(String label);
 
-        @Template("<span class='enum-add'>+ {0}</span>")
+        @Template("<span class='enum-add'>\u200E+ {0}</span>")
         SafeHtml addChoice(String label);
     }
 
@@ -114,7 +118,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
         }
         panel.add(boxPanel);
         if (this.fieldWidgetMode == FieldWidgetMode.DESIGN) {
-            panel.add(new HTML(TEMPLATES.addChoice("Add option")));
+            panel.add(new HTML(TEMPLATES.addChoice(I18N.CONSTANTS.addItem())));
         }
 
         panel.sinkEvents(Event.MOUSEEVENTS);
@@ -173,7 +177,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     private void addOption() {
-        String newLabel = Window.prompt("Enter a new label for this option", "");
+        String newLabel = Window.prompt(I18N.CONSTANTS.enterNameForOption(), "");
         if (!Strings.isNullOrEmpty(newLabel)) {
             EnumItem newValue = new EnumItem(EnumItem.generateId(), newLabel);
             enumType.getValues().add(newValue);
@@ -183,11 +187,15 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
 
     private void editLabel(ResourceId id) {
         EnumItem enumItem = enumValueForId(id);
-        String newLabel = Window.prompt("Enter a new label for this option", enumItem.getLabel());
+        String newLabel = Window.prompt(I18N.CONSTANTS.enterNameForOption(), enumItem.getLabel());
         if (!Strings.isNullOrEmpty(newLabel)) {
             enumItem.setLabel(newLabel);
-            controlForId(id).setHTML(TEMPLATES.designLabel(newLabel));
+            controlForId(id).setHTML(designLabel(newLabel));
         }
+    }
+
+    private SafeHtml designLabel(String newLabel) {
+        return TEMPLATES.designLabel(newLabel, I18N.CONSTANTS.edit(), I18N.CONSTANTS.delete());
     }
 
     private CheckBox controlForId(ResourceId id) {
@@ -223,7 +231,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     private SafeHtml label(String label) {
-        return fieldWidgetMode == FieldWidgetMode.DESIGN ? TEMPLATES.designLabel(label) : TEMPLATES.normalLabel(label);
+        return fieldWidgetMode == FieldWidgetMode.DESIGN ? designLabel(label) : TEMPLATES.normalLabel(label);
     }
 
     private CheckBox createControl(EnumItem instance) {
@@ -294,7 +302,6 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
 
     @Override
     public void setType(FieldType type) {
-
     }
 
     @Override

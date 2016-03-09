@@ -23,7 +23,6 @@ package org.activityinfo.ui.client.page.app;
  */
 
 import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
@@ -45,6 +44,7 @@ import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
 import org.activityinfo.ui.client.local.LocalController;
 import org.activityinfo.ui.client.local.LocalStateChangeEvent;
 import org.activityinfo.ui.client.local.LocalStateChangeEvent.State;
+import org.activityinfo.ui.client.local.UnsupportedDialog;
 import org.activityinfo.ui.client.local.capability.LocalCapabilityProfile;
 import org.activityinfo.ui.client.local.sync.SyncCompleteEvent;
 import org.activityinfo.ui.client.local.sync.SyncStatusEvent;
@@ -64,7 +64,8 @@ public class SettingsPopup extends PopupPanel {
 
     @UiField SpanElement versionLabel;
 
-    @UiField SpanElement emailLabel;
+    @UiField
+    DivElement emailLabel;
 
     @UiField SpanElement versionStatus;
 
@@ -108,7 +109,7 @@ public class SettingsPopup extends PopupPanel {
         setWidth(WIDTH + "px");
 
         versionLabel.setInnerText(ClientContext.getVersion());
-        emailLabel.setInnerText(new ClientSideAuthProvider().get().getEmail());
+        emailLabel.setInnerText(I18N.MESSAGES.loggedInAs(new ClientSideAuthProvider().get().getEmail()));
 
         syncRow.getStyle().setDisplay(Display.NONE);
 
@@ -211,9 +212,7 @@ public class SettingsPopup extends PopupPanel {
                 if (offlineCapabilityProfile.isOfflineModeSupported()) {
                     offlineController.install();
                 } else {
-                    MessageBox.info("Offline Mode not supported",
-                            offlineCapabilityProfile.getInstallInstructions(),
-                            null);
+                    UnsupportedDialog.show();
                 }
                 break;
         }

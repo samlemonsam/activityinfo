@@ -1,8 +1,10 @@
 package org.activityinfo.server.endpoint.export;
 
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.FilterUrlSerializer;
 import org.activityinfo.model.auth.AuthenticatedUser;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Locale;
 
 @Singleton
 public class ExportSitesTask extends HttpServlet {
@@ -43,23 +46,31 @@ public class ExportSitesTask extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String exportId = req.getParameter("exportId");
+        String locale = req.getParameter("locale");
+        if(Strings.isNullOrEmpty(locale)) {
+            locale = Locale.ENGLISH.toLanguageTag();
+        }
         
         // authenticate this task
         authProvider.set(new AuthenticatedUser("",
                 Integer.parseInt(req.getParameter("userId")),
                 req.getParameter("userEmail")));
 
-
-        // create the workbook
+        ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(locale));
         
-        Filter filter = FilterUrlSerializer.fromQueryParameter(req.getParameter("filter"));
-        TaskContext context = new TaskContext(dispatcher.get(), storageProvider, exportId);
-        SiteExporter export = new SiteExporter(context).buildExcelWorkbook(filter);
+        try {
+            // create the workbook
+            Filter filter = FilterUrlSerializer.fromQueryParameter(req.getParameter("filter"));
+            TaskContext context = new TaskContext(dispatcher.get(), storageProvider, exportId);
+            SiteExporter export = new SiteExporter(context).buildExcelWorkbook(filter);
 
-        // Save to Export storage
-        GeneratedResource storage = storageProvider.get(exportId);
-        try(OutputStream out = storage.openOutputStream()) {
-            export.getBook().write(out);
+            // Save to Export storage
+            GeneratedResource storage = storageProvider.get(exportId);
+            try (OutputStream out = storage.openOutputStream()) {
+                export.getBook().write(out);
+            }
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
         }
     }
 }

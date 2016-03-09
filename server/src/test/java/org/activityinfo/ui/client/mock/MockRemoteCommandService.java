@@ -62,7 +62,7 @@ public class MockRemoteCommandService implements RemoteCommandServiceAsync {
     }
 
     @Override
-    public void execute(String authToken, List<Command> cmds,
+    public void execute(String authToken, String locale, List<Command> cmds,
                         AsyncCallback<List<CommandResult>> callback) {
 
         List<CommandResult> results = new ArrayList<CommandResult>();

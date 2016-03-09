@@ -34,6 +34,7 @@ import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.activityinfo.i18n.shared.ApplicationLocale;
 import org.activityinfo.server.branding.ScaffoldingDirective;
 
 import javax.ws.rs.core.Context;
@@ -105,6 +106,7 @@ public class FreemarkerViewProcessor implements ViewProcessor<Template> {
             env.setLocale(localeProvider.get());
             env.setVariable("label", getResourceBundle(localeProvider.get()));
             env.setVariable("scaffolding", scaffoldingDirective);
+            env.setVariable("availableLocales", BeansWrapper.DEFAULT_WRAPPER.wrap(ApplicationLocale.values()));
             env.process();
             writer.flush();
         } catch (TemplateException e) {

@@ -22,21 +22,32 @@ package org.activityinfo.core.client.type.converter;
  * #L%
  */
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import org.activityinfo.core.shared.type.converter.CoordinateParser;
 
 public class JsCoordinateNumberFormatter implements CoordinateParser.NumberFormatter {
 
     public static final JsCoordinateNumberFormatter INSTANCE = new JsCoordinateNumberFormatter();
+    
 
     private NumberFormat dddFormat;
     private NumberFormat shortFracFormat;
     private NumberFormat intFormat;
+    private char decimalSeparator;
+    private char localizedZeroDigit;
 
     public JsCoordinateNumberFormatter() {
         dddFormat = NumberFormat.getFormat("+0.000000;-0.000000");
         shortFracFormat = NumberFormat.getFormat("0.00");
         intFormat = NumberFormat.getFormat("0");
+        String decimalSeparatorString = LocaleInfo.getCurrentLocale().getNumberConstants().decimalSeparator();
+        if(decimalSeparatorString.length() != 1) {
+            throw new AssertionError("Decimal separator is longer than expected");
+        }
+        String zeroDigitString = LocaleInfo.getCurrentLocale().getNumberConstants().zeroDigit();
+        localizedZeroDigit = zeroDigitString.charAt(0);
+        decimalSeparator = decimalSeparatorString.charAt(0);
     }
 
 
@@ -60,4 +71,13 @@ public class JsCoordinateNumberFormatter implements CoordinateParser.NumberForma
         return NumberFormat.getDecimalFormat().parse(string);
     }
 
+    @Override
+    public char getDecimalSeparator() {
+        return decimalSeparator;
+    }
+
+    @Override
+    public boolean isDigit(char c) {
+        return (c >= '0' && c <= '9') || (c >= localizedZeroDigit && c <= (localizedZeroDigit+9));
+    }
 }

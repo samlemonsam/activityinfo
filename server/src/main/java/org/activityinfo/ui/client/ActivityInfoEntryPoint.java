@@ -27,10 +27,13 @@ import com.extjs.gxt.ui.client.state.StateManager;
 import com.extjs.gxt.ui.client.util.Theme;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.legacy.client.state.SafeStateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.ui.client.inject.AppInjector;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
+import org.activityinfo.ui.client.page.print.PrintFormPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -72,34 +75,50 @@ public class ActivityInfoEntryPoint implements EntryPoint {
 
         final AppInjector injector = GWT.create(AppInjector.class);
 
-        injector.createAppLoader();
-        injector.createDashboardLoader();
-        injector.createDataEntryLoader();
-        injector.createReportLoader();
-        injector.createConfigLoader();
-        injector.createFolderPageLoader();
+        if(Window.Location.getHash() != null && Window.Location.getHash().startsWith("#print/")) {
+            // Show form only view appropriate for printing
+            
+            openPrintView(injector);
+        
+        } else {
 
-        injector.getUsageTracker();
+            // Launch the normal application
+            
+            injector.createAppLoader();
+            injector.createDashboardLoader();
+            injector.createDataEntryLoader();
+            injector.createReportLoader();
+            injector.createConfigLoader();
+            injector.createFolderPageLoader();
 
-        injector.getHistoryManager();
+            injector.getUsageTracker();
 
-        injector.createOfflineController();
+            injector.getHistoryManager();
 
-        // hold off on this until it's possilbe to
-        // turn off
-        // injector.createPromptOfflineDialog();
+            injector.createOfflineController();
 
-        createCaches(injector);
+            createCaches(injector);
 
-        AppCacheMonitor.start();
+            AppCacheMonitor.start();
+        }
 
         Log.info("Application: everyone plugged, firing Init event");
 
         injector.getEventBus().fireEvent(AppEvents.INIT);
+
     }
+
 
     protected void createCaches(AppInjector injector) {
         injector.createSchemaCache();
         injector.createAdminCache();
+    }
+
+
+    private void openPrintView(AppInjector injector) {
+        PrintFormPanel printFormPanel = injector.createPrintFormPanel();
+
+        RootPanel.get().add(printFormPanel);
+        
     }
 }

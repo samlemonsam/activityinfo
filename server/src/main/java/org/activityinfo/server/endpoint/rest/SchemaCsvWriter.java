@@ -15,6 +15,13 @@ public class SchemaCsvWriter {
         this.dispatcher = dispatcher;
     }
 
+    /**
+     * Writes a byte order mark that should help spreadsheet software detect the UTF-8 character set.
+     */
+    public void writeByteOrderMark() {
+        csv.append('\ufeff');
+    }
+
     public void write(int databaseId) {
 
         UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
