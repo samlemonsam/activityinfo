@@ -151,11 +151,4 @@ public class FormDesigner {
     public static boolean isBuiltin(ResourceId formClassId, ResourceId fieldId) {
         return builtinFields(formClassId).contains(fieldId);
     }
-
-    public static boolean isBuiltinExceptDateFields(ResourceId formClassId, ResourceId fieldId) {
-        Set<ResourceId> builtIn = builtinFields(formClassId);
-        builtIn.remove(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
-        builtIn.remove(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
-        return builtIn.contains(fieldId);
-    }
 }
