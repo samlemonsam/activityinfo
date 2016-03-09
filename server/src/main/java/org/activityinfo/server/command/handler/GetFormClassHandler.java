@@ -89,6 +89,8 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
 
         boolean hasPartner = false;
         boolean hasProject = false;
+        boolean hasStartDate = false;
+        boolean hasEndDate = false;
         boolean hasLocation = false;
 
         for (FormField formField : formClass.getFields()) {
@@ -108,6 +110,10 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
                         .setRange(CuidAdapter.projectFormClass(activityDTO.getDatabaseId())));
 
                 hasProject = true;
+            } else if (fieldIndex == CuidAdapter.START_DATE_FIELD) {
+                hasStartDate = true;
+            } else if (fieldIndex == CuidAdapter.END_DATE_FIELD) {
+                hasEndDate = true;
             } else if (fieldIndex == CuidAdapter.LOCATION_FIELD) {
                 hasLocation = true;
             }
@@ -116,6 +122,12 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
 
         if (!hasPartner) {
             formClass.addElement(ActivityFormClassBuilder.createPartnerField(formClass.getId(), activityDTO));
+        }
+        if (!hasStartDate) {
+            formClass.addElement(ActivityFormClassBuilder.createStartDateField(formClass.getId()));
+        }
+        if (!hasEndDate) {
+            formClass.addElement(ActivityFormClassBuilder.createEndDateField(formClass.getId()));
         }
         if (!hasProject) {
             formClass.addElement(ActivityFormClassBuilder.createProjectField(formClass.getId(), activityDTO));
