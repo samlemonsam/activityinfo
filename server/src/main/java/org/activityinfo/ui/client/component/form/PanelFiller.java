@@ -32,8 +32,8 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormType;
-import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
+import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 
 /**
@@ -46,6 +46,8 @@ public class PanelFiller {
     private final FormWidgetCreator widgetCreator;
     private final SubFormsHandler subFormsHandler;
     private final RelevanceHandler relevanceHandler;
+
+    private boolean headingVisible = false;
 
     public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator, SubFormsHandler subFormsHandler, RelevanceHandler relevanceHandler) {
         this.panel = panel;
@@ -60,6 +62,13 @@ public class PanelFiller {
     }
 
     public void add(FormElementContainer container, final int depth, final FlowPanel panel) {
+
+        if (headingVisible) {
+            FormHeading heading = new FormHeading();
+            heading.setFormClass(model.getRootFormClass());
+            panel.add(heading);
+        }
+
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 panel.add(createHeader(depth, element.getLabel()));
@@ -115,5 +124,13 @@ public class PanelFiller {
     public static Widget createHeader(int depth, String header) {
         String hn = "h" + (3 + depth);
         return new HTML("<" + hn + ">" + SafeHtmlUtils.htmlEscape(header) + "</" + hn + ">");
+    }
+
+    public boolean isHeadingVisible() {
+        return headingVisible;
+    }
+
+    public void setHeadingVisible(boolean headingVisible) {
+        this.headingVisible = headingVisible;
     }
 }

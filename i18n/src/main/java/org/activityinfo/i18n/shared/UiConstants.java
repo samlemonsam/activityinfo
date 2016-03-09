@@ -1510,7 +1510,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
-    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right.")
     @DefaultStringValue("Repeating")
     String repeating();
 

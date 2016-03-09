@@ -47,6 +47,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
     private final SubFormsHandler subFormsHandler;
+    private final PanelFiller panelFiller;
     private Optional<Button> deleteButton = Optional.absent();
 
     public SimpleFormPanel(ResourceLocator resourceLocator) {
@@ -79,6 +80,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.panel.addStyleName("hide-button-on-over");
         this.scrollPanel = new ScrollPanel(panel);
         this.formActions = new FormActions(locator, this);
+        this.panelFiller = new PanelFiller(panel, model, widgetCreator, subFormsHandler, relevanceHandler);
     }
 
     public Button addDeleteButton() { // used for collection subforms
@@ -128,8 +130,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 @Nullable
                 @Override
                 public Void apply(Void input) {
-                    PanelFiller filler = new PanelFiller(panel, model, widgetCreator, subFormsHandler, relevanceHandler);
-                    filler.add(formClass, 0);
+                    panelFiller.add(formClass, 0);
                     return null;
                 }
             });
@@ -280,4 +281,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         return relevanceHandler;
     }
 
+    public void setHeadingVisible(boolean isHeadingVisible) {
+        panelFiller.setHeadingVisible(isHeadingVisible);
+    }
 }
