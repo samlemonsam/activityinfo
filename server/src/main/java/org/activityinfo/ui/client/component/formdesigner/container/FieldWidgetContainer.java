@@ -71,7 +71,7 @@ public class FieldWidgetContainer implements WidgetContainer {
         fieldPanel.getWidgetContainer().add(formFieldWidget);
         fieldPanel.getRemoveButton().addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                if (FormDesigner.isBuiltin(parentId, formField.getId())) {
+                if (FormDesigner.isBuiltinExceptDateFields(parentId, formField.getId())) {
                     HTML dialogContent = new HTML(Templates.WARNING_MESSAGE_TEMPLATE.html(I18N.CONSTANTS.notAllowedToRemoveBuiltinField()));
                     new ModalDialog(dialogContent, I18N.CONSTANTS.warning()).
                             hideCancelButton().
