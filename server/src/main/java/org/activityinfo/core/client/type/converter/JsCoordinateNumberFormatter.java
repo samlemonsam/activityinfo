@@ -35,16 +35,19 @@ public class JsCoordinateNumberFormatter implements CoordinateParser.NumberForma
     private NumberFormat shortFracFormat;
     private NumberFormat intFormat;
     private char decimalSeparator;
+    private char localizedZeroDigit;
 
     public JsCoordinateNumberFormatter() {
         dddFormat = NumberFormat.getFormat("+0.000000;-0.000000");
         shortFracFormat = NumberFormat.getFormat("0.00");
         intFormat = NumberFormat.getFormat("0");
-        String decimalSeperatorString = LocaleInfo.getCurrentLocale().getNumberConstants().decimalSeparator();
-        if(decimalSeperatorString.length() != 1) {
+        String decimalSeparatorString = LocaleInfo.getCurrentLocale().getNumberConstants().decimalSeparator();
+        if(decimalSeparatorString.length() != 1) {
             throw new AssertionError("Decimal separator is longer than expected");
         }
-        decimalSeparator = decimalSeperatorString.charAt(0);
+        String zeroDigitString = LocaleInfo.getCurrentLocale().getNumberConstants().zeroDigit();
+        localizedZeroDigit = zeroDigitString.charAt(0);
+        decimalSeparator = decimalSeparatorString.charAt(0);
     }
 
 
@@ -71,5 +74,10 @@ public class JsCoordinateNumberFormatter implements CoordinateParser.NumberForma
     @Override
     public char getDecimalSeparator() {
         return decimalSeparator;
+    }
+
+    @Override
+    public boolean isDigit(char c) {
+        return (c >= '0' && c <= '9') || (c >= localizedZeroDigit && c <= (localizedZeroDigit+9));
     }
 }

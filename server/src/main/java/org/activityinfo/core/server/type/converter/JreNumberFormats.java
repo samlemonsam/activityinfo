@@ -44,6 +44,11 @@ public class JreNumberFormats implements CoordinateParser.NumberFormatter {
     }
 
     @Override
+    public boolean isDigit(char c) {
+        return Character.isDigit(c);
+    }
+
+    @Override
     public String formatDDd(double value) {
         if (value > 0) {
             return "+" + decimalFormat.format(value);

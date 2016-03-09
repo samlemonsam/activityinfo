@@ -45,8 +45,16 @@ public class CoordinateParser {
         String formatInt(double value);
 
         double parseDouble(String string);
-        
+
+        /**
+         * @return the decimal separator for the current locale. In English, this would be "."
+         */
         char getDecimalSeparator();
+
+        /**
+         * Return true if the given character {@code c} is a digit in the current locale
+         */
+        boolean isDigit(char c);
     }
 
     private static final double MINUTES_PER_DEGREE = 60;
@@ -140,11 +148,15 @@ public class CoordinateParser {
                     if (numberIndex > 2) {
                         throw new CoordinateFormatException(tooManyNumbersErrorMessage);
                     }
-                    if(Character.isDigit(c)) {
-                        numbers[numberIndex].append(c);
-                    } else if(isDecimalSeparator(c)) {
-                        numbers[numberIndex].append(numberFormatter.getDecimalSeparator());
+                    // Normalize decimal point to correct locale-specific decimal point
+                    // so that we can parse it correctly
+                    // For example, if a user in the French locale enters "32.14", this
+                    // should actually be parsed as "32,14"
+                    if(isDecimalSeparator(c)) {
+                        c = numberFormatter.getDecimalSeparator();
                     }
+                    numbers[numberIndex].append(c);
+
                 } else if (numberIndex != 2 && numbers[numberIndex].length() > 0) {
                     // advance to the next token on anything else-- whitespace,
                     // symbols like ' " ° -- we won't insist that they are used
@@ -180,7 +192,7 @@ public class CoordinateParser {
     }
 
     private boolean isNumberPart(char c) {
-        return Character.isDigit(c) || isDecimalSeparator(c);
+        return isDecimalSeparator(c) || numberFormatter.isDigit(c);
     }
 
     private boolean isDecimalSeparator(char c) {
