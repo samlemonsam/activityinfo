@@ -22,6 +22,8 @@ package org.activityinfo.model.date;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.Resources;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import java.io.Serializable;
@@ -106,6 +108,26 @@ public class LocalDateRange implements Serializable {
         return new DateRange(
                 minDate != null ? minDate.atMidnightInMyTimezone() : null,
                 maxDate != null ? maxDate.atMidnightInMyTimezone() : null);
+    }
+
+    public Record asRecord() {
+        return new Record().
+                set("min_date", minDate.toString()).
+                set("max_date", maxDate.toString());
+    }
+
+    public String asJson() {
+        return Resources.toJsonObject(asRecord()).toString();
+    }
+
+    public static LocalDateRange fromRecord(Record record) {
+        return new LocalDateRange(
+                LocalDate.parse(record.getString("min_date")),
+                LocalDate.parse(record.getString("max_date")));
+    }
+
+    public static LocalDateRange fromJson(String json) {
+        return fromRecord(Resources.recordFromJson(json));
     }
 
     /**

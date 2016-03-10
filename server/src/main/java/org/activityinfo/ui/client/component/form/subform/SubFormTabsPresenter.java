@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.util.DateWrapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -28,11 +29,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.date.DateRange;
+import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
@@ -252,9 +255,17 @@ public class SubFormTabsPresenter {
             FormInstance instance = instancesMap.get(elementId);
             Preconditions.checkNotNull(instance);
             if (instanceTabClickHandler != null) {
+                saveSelection(instance);
                 instanceTabClickHandler.onClick(instance);
             }
         }
+    }
+
+    private void saveSelection(FormInstance instance) {
+        LocalDateRange dateRange = PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance).asLocalDateRange();
+
+        Cookies.setCookie("subform.tab." + getPeriodType().name(), dateRange.asJson(),
+                (new DateWrapper()).addDays(30).asDate());
     }
 
     public void setMoveButtonClickHandler(ClickHandler<ButtonType> moveButtonClickHandler) {

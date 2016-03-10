@@ -199,7 +199,9 @@ public class PeriodInstanceKeyedGenerator {
             return formatter.format("yyyy", date);
         } else if (PredefinedPeriods.MONTHLY.getPeriod().equals(period)) {
             return formatter.format("MMM yyyy", date);
-        } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {
+        } else if (PredefinedPeriods.DAILY.getPeriod().equals(period) ||
+                PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period) ||
+                PredefinedPeriods.WEEKLY.getPeriod().equals(period)) {
             return formatter.format("dd MMM yyyy", date);
         }
 

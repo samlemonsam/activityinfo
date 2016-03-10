@@ -24,12 +24,15 @@ package org.activityinfo.ui.client.component.form.subform;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.gwt.user.client.Cookies;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
+import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -115,7 +118,7 @@ public class SubFormTabsManipulator {
 
         final PeriodInstanceKeyedGenerator instanceGenerator = new PeriodInstanceKeyedGenerator(subForm.getId());
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
-        presenter.set(instanceGenerator.generate(periodValue, new Date(), PeriodInstanceKeyedGenerator.Direction.BACK, presenter.getTabCount()));
+        presenter.set(instanceGenerator.generate(periodValue, getTabDate(), PeriodInstanceKeyedGenerator.Direction.BACK, presenter.getTabCount()));
 
         presenter.setShowNextButtons(true);
         presenter.setShowPreviousButtons(true);
@@ -135,9 +138,9 @@ public class SubFormTabsManipulator {
     }
 
     private void onInstanceTabClick(FormInstance instance) {
-        formModel.setSelectedInstance(instance, subForm);
-
         if (!designMode) {
+            formModel.setSelectedInstance(instance, subForm);
+
             applyInstanceValues(formModel.getSubFormInstances().get(new FormModel.SubformValueKey(subForm, instance)));
 
             relevanceHandler.get().onValueChange();
@@ -244,5 +247,15 @@ public class SubFormTabsManipulator {
 
     public boolean isDesignMode() {
         return designMode;
+    }
+
+    public Date getTabDate() {
+        String cookieValue = Cookies.getCookie("subform.tab." + PredefinedPeriods.fromPeriod(periodValue).name());
+
+        if (!Strings.isNullOrEmpty(cookieValue)) {
+            return LocalDateRange.fromJson(cookieValue).asDateRange().midDate();
+        } else {
+            return new Date();
+        }
     }
 }
