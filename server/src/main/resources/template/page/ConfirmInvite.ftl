@@ -94,7 +94,9 @@
     <script type="text/javascript">
 
         var validateName = function () {
-            var valid = !!( $('#nameInput').val() );
+            var name = $('#nameInput').val();
+            var valid = name && name.length <= 50;
+            
             $('#nameGroup').toggleClass('error', !valid);
             $('#nameHelp').toggleClass('hide', valid);
             return valid;
