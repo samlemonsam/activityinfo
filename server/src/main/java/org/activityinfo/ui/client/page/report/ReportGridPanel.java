@@ -65,7 +65,7 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
 
-        setHeadingText("Saved Reports");
+        setHeadingText(I18N.CONSTANTS.savedReports());
 
         toolBar = new ActionToolBar(this);
         toolBar.addButton(UIActions.PRINT, I18N.CONSTANTS.open(), IconImageBundle.ICONS.pdf());
