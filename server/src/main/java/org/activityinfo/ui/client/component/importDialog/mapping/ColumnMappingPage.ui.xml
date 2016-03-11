@@ -12,12 +12,15 @@
     <!-- Header -->
     <g:HTMLPanel>
       <h3 ui:field="promptHeading"/>
+      <p><ui:text from="{i18n.columnMappingHelpLink}"/> 
+          <a href="http://help.activityinfo.org/m/28175/l/445646-batch-import" target="_blank">
+              <ui:text from="{i18n.showMe}"/></a></p>
     </g:HTMLPanel>
 
     <!-- Body -->
-    <g:DockLayoutPanel unit="EM" width="100%" height="100%">
+    <g:DockLayoutPanel unit="EM" width="100%" height="100%" ui:field="dockLayout">
         <g:center>
-            <m:ColumnMappingGrid ui:field="dataGrid" width="100%" height="100%"/>
+           <m:ColumnMappingGrid ui:field="dataGrid" width="100%" height="100%"/>
         </g:center>
 
         <g:east size="20" >

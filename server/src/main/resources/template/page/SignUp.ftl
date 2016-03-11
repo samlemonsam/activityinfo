@@ -1,3 +1,5 @@
+<#-- @ftlvariable name="" type="org.activityinfo.server.login.model.SignUpPageModel" -->
+
 <#--
  #%L
  ActivityInfo Server
@@ -91,8 +93,9 @@
 
                             <div class="controls">
                                 <select name="locale" id="localeInput">
-                                    <option value="en">${label.english}</option>
-                                    <option value="fr">${label.francais}</option>
+                                <#list availableLocales as locale>
+                                    <option value="${locale.code}">${locale.localizedName}</option>
+                                </#list>
                                 </select>
                             </div>
                         </div>
@@ -145,7 +148,9 @@
     <@scripts>
     <script type="text/javascript">
         var validateName = function () {
-            var valid = !!( $('#nameInput').val() );
+            var name = $('#nameInput').val();
+            var valid = name && name.length <= 50;
+
             $('#nameGroup').toggleClass('error', !valid);
             $('#nameHelp').toggleClass('hide', valid);
             return valid;

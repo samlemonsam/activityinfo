@@ -1,8 +1,11 @@
 package org.activityinfo.model.type.expr;
 
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import net.sf.cglib.core.Local;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -11,6 +14,11 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 
 public class CalculatedFieldTypeTest {
+    
+    @BeforeClass
+    public static void setupI18N() {
+        LocaleProxy.initialize();
+    }
 
     @Test
     public void serialization() {

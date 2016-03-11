@@ -59,7 +59,7 @@ public class Message {
 
     private List<Chunk> chunks = Lists.newArrayList();
 
-    public Message(String pattern) {
+    public Message(String pattern) throws MessageFormatException {
         PeekingIterator<Character> it = Iterators.peekingIterator(Lists.charactersOf(pattern).iterator());
 
         while(it.hasNext()) {
@@ -75,7 +75,7 @@ public class Message {
         return chunks;
     }
 
-    private Chunk consumePlaceholder(PeekingIterator<Character> it) {
+    private Chunk consumePlaceholder(PeekingIterator<Character> it) throws MessageFormatException {
         char openingBrace = it.next();
         Preconditions.checkState(openingBrace == '{');
 
@@ -93,12 +93,19 @@ public class Message {
         return new Chunk(argumentIndex, format.toString());
     }
 
-    private int consumeIndex(PeekingIterator<Character> it) {
+    private int consumeIndex(PeekingIterator<Character> it) throws MessageFormatException {
         StringBuilder number = new StringBuilder();
         while(Character.isDigit(it.peek())) {
             number.append(it.next());
         }
-        return Integer.parseInt(number.toString());
+        if(number.length() == 0) {
+            throw new MessageFormatException("Expected number at placeholder, found: " + it.peek());
+        }
+        try {
+            return Integer.parseInt(number.toString());
+        } catch (NumberFormatException e) {
+            throw new MessageFormatException("Invalid placeholder number: '" + number.toString() + "'");
+        }
     }
 
     private Chunk consumeStaticChunk(PeekingIterator<Character> it) {

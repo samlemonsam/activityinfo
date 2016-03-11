@@ -4,6 +4,7 @@ import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.type.converter.CoordinateFormatException;
 import org.activityinfo.core.shared.type.converter.CoordinateParser;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -35,6 +36,16 @@ public class JreNumberFormats implements CoordinateParser.NumberFormatter {
         } catch (ParseException e) {
             throw new CoordinateFormatException(e.getMessage());
         }
+    }
+    
+    @Override
+    public char getDecimalSeparator() {
+        return ((DecimalFormat) decimalFormat).getDecimalFormatSymbols().getDecimalSeparator();
+    }
+
+    @Override
+    public boolean isDigit(char c) {
+        return Character.isDigit(c);
     }
 
     @Override

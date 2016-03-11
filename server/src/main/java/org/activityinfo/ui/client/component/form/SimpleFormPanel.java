@@ -64,6 +64,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     private FormClass formClass;
     private ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
+    
+    private boolean headingVisible = false;
 
     // validation form class is used to refer to "top-level" form class.
     // For example "Properties panel" renders current type-formClass but in order to validate expression we need
@@ -91,6 +93,14 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         scrollPanel = new ScrollPanel(panel);
 
         bindEvents();
+    }
+
+    public boolean isHeadingVisible() {
+        return headingVisible;
+    }
+
+    public void setHeadingVisible(boolean headingVisible) {
+        this.headingVisible = headingVisible;
     }
 
     private void bindEvents() {
@@ -139,6 +149,12 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
     private Promise<Void> buildForm(final FormClass formClass) {
         this.formClass = formClass;
         this.relevanceHandler.formClassChanged();
+        
+        if(headingVisible) {
+            FormHeading heading = new FormHeading();
+            heading.setFormClass(formClass);
+            panel.add(heading);
+        }
 
         try {
             return createWidgets().then(new Function<Void, Void>() {

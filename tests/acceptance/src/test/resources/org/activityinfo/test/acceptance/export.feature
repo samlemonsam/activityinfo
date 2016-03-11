@@ -43,8 +43,8 @@ Feature: Export to Excel
       | 2015-03  |                          250 |
     When I export the form "Site"
     Then the exported spreadsheet contains:
-      | Date1  | Date2   | Partner | # with improved water supply |
-      | 1/1/15 | 1/31/15 | ACF     |                        1,000 |
-      | 2/1/15 | 2/28/15 | ACF     |                          500 |
-      | 3/1/15 | 3/31/15 | ACF     |                          250 |   
+      | Start Date | End Date | Partner | # with improved water supply |
+      | 1/1/15     | 1/31/15  | ACF     | 1,000                        |
+      | 2/1/15     | 2/28/15  | ACF     | 500                          |
+      | 3/1/15     | 3/31/15  | ACF     | 250                          |   
 

@@ -20,10 +20,10 @@ public class RadioButtonTemplate implements FieldTemplate {
     @Override
     public FormField createField() {
         List<EnumItem> values = Lists.newArrayList();
-        values.add(new EnumItem(EnumItem.generateId(), "Choice 1"));
-        values.add(new EnumItem(EnumItem.generateId(), "Choice 2"));
+        values.add(new EnumItem(EnumItem.generateId(), I18N.MESSAGES.defaultEnumItem(1)));
+        values.add(new EnumItem(EnumItem.generateId(), I18N.MESSAGES.defaultEnumItem(2)));
         FormField field = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
-        field.setLabel("Which choice would you choose?");
+        field.setLabel(I18N.CONSTANTS.defaultRadioFieldLabel());
         field.setType(new EnumType(Cardinality.SINGLE, values));
 
         return field;

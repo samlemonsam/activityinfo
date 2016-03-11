@@ -87,11 +87,11 @@ public class PoEditorClient {
 
     /**
      * Uploads a list of terms along with English translations.
-     * 
-     * @param projectId the PoEditor project id
+     *  @param projectId the PoEditor project id
      * @param terms the list of terms to update
+     * @param sync
      */
-    public PoUploadResponse upload(int projectId, List<PoTermUpdate> terms) throws IOException {
+    public PoUploadResponse upload(int projectId, List<PoTermUpdate> terms, boolean sync) throws IOException {
         FormDataMultiPart form = new FormDataMultiPart();
         form.field("api_token", token);
         form.field("action", "upload");
@@ -99,7 +99,7 @@ public class PoEditorClient {
         form.field("updating", "terms_definitions");
         form.field("language", "en");
         form.field("overwrite", "1");
-        form.field("sync_terms", "0");
+        form.field("sync_terms", sync ? "1" : "0");
         form.bodyPart(createUpload(terms));
 
         String responseText = client.resource("https://poeditor.com/api/")

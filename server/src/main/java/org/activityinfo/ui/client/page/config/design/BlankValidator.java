@@ -1,5 +1,4 @@
-package org.activityinfo.ui.client.local.capability;
-
+package org.activityinfo.ui.client.page.config.design;
 /*
  * #%L
  * ActivityInfo Server
@@ -22,20 +21,20 @@ package org.activityinfo.ui.client.local.capability;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.widget.form.Field;
+import com.extjs.gxt.ui.client.widget.form.Validator;
+import com.google.common.base.Strings;
+import org.activityinfo.i18n.shared.I18N;
+
 /**
- * Internet Explorer 6-8 offline capability profile.
- * <p/>
- * If gears is not installed, the user is prompted to install.
- * <p/>
- * IE itself does not support offline features. There is an "experimental"
- * indexeddb plugin that can be downloaded from MS lab's web site, but there is
- * absolutely no appcache support, even in IE9.
+ * @author yuriyz on 02/18/2016.
  */
-public class IECapabilityProfile extends GearsCapabilityProfile {
-
+public class BlankValidator implements Validator {
     @Override
-    public String getInstallInstructions() {
-        return ProfileResources.INSTANCE.startupMessageIE().getText();
+    public String validate(Field<?> field, String value) {
+        if (Strings.isNullOrEmpty(value.trim())) {
+            return I18N.CONSTANTS.blankValueIsNotAllowed();
+        }
+        return null;
     }
-
 }

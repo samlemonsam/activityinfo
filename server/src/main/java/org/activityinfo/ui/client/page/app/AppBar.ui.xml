@@ -84,6 +84,13 @@
     .helpIcon {
       background-image: helpUrl;
     }
+    
+    .locale {
+      font-weight: bold;
+      font-family: sans-serif;
+      font-size: 14px;
+      color: #15428B;
+    }
 
   </ui:style>
   <g:LayoutPanel styleName="{style.bar}">
@@ -96,6 +103,7 @@
         <b:SectionTabStrip ui:field="sectionTabStrip"/>
         <g:Label styleName="{style.icon} {style.settingsIcon}" ui:field="settingsButton"/>
         <g:Label styleName="{style.icon} {style.helpIcon}" ui:field="helpButton"/>
+        <g:Label styleName="{style.icon} {style.locale}" ui:field="localeButton"/>
       </g:HTMLPanel>
     </g:layer>
 

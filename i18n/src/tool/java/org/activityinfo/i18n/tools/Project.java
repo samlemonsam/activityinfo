@@ -1,6 +1,7 @@
 package org.activityinfo.i18n.tools;
 
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.ApplicationLocale;
 
 import java.io.File;
 import java.util.List;
@@ -17,13 +18,11 @@ public class Project {
 
     private File sourceDirectory;
     private String defaultLanguage;
-    private List<String> languages;
     private PoEditorSource translationSource;
 
     private Project() {
         sourceDirectory = new File("src/main/java");
         defaultLanguage = "en";
-        languages = Lists.newArrayList("en", "fr");
         translationSource = new PoEditorSource(ACTIVITYINFO_PROJECT_ID, System.getProperty("poApiKey"));
         resourceClasses.add("org.activityinfo.i18n.shared.UiConstants");
         resourceClasses.add("org.activityinfo.i18n.shared.UiMessages");
@@ -42,7 +41,11 @@ public class Project {
     }
 
     public List<String> getLanguages() {
-        return languages;
+        List<String> languageCodes = Lists.newArrayList();
+        for (ApplicationLocale applicationLocale : ApplicationLocale.values()) {
+            languageCodes.add(applicationLocale.name().toLowerCase());
+        }
+        return languageCodes;
     }
 
     public PoEditorSource getTranslationSource() {

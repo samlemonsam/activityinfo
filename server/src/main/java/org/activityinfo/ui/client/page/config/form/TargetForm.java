@@ -32,6 +32,7 @@ import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 
@@ -49,6 +50,7 @@ public class TargetForm extends FormPanel {
         nameField.setFieldLabel(constants.name());
         nameField.setMaxLength(255);
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
         binding.addFieldBinding(new FieldBinding(nameField, "name"));
         this.add(nameField);
 

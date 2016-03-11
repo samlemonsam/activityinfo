@@ -1,6 +1,7 @@
 package org.activityinfo.test.ui;
 
 import cucumber.api.DataTable;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.FieldValue;
 import org.activityinfo.test.driver.TableDataParser;
 import org.activityinfo.test.driver.UiApplicationDriver;
@@ -53,7 +54,7 @@ public class DateFormUiTest {
         List<String> headers = dataTable.getGherkinRows().get(0).getCells();
         List<String> values = dataTable.getGherkinRows().get(1).getCells();
         
-        assertThat(values.get(headers.indexOf("Date1")), equalTo(date.toString("M/d/YY")));
-        assertThat(values.get(headers.indexOf("Date2")), equalTo(date.toString("M/d/YY")));
+        assertThat(values.get(headers.indexOf(I18N.CONSTANTS.startDate())), equalTo(date.toString("M/d/YY")));
+        assertThat(values.get(headers.indexOf(I18N.CONSTANTS.endDate())), equalTo(date.toString("M/d/YY")));
     }
 }

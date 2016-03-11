@@ -121,9 +121,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Attachments")
     String attachment();
 
-    @DefaultStringValue("Attribute Types")
-    String attributeTypes();
-
     @DefaultStringValue("Attributes")
     String attributes();
 
@@ -153,9 +150,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Cancel")
     String cancel();
-
-    @DefaultStringValue("Google Maps could not be loaded. Please verify your internet connection.")
-    String cannotLoadMap();
 
     @DefaultStringValue("Category")
     String category();
@@ -190,7 +184,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Choose Site")
     String chooseLocation();
 
-    @DefaultStringValue("Here you can choose the location of your form submission. Use the filters below to find locations linked to existing form submissions. This will make it possible to to link your form submissions to other forms inside and outside of your organization.")
+    @DefaultStringValue("Here you can choose the location of your form submission. Use the filters below to find locations linked to existing form submissions. This will make it possible to link your form submissions to other forms inside and outside of your organization.")
     String chooseLocationDescription();
 
     @DefaultStringValue("Please choose a title for your report before saving")
@@ -330,9 +324,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Discard Changes")
     String discardChanges();
-
-    @DefaultStringValue("Don't ask again")
-    String dontAskAgain();
 
     @DefaultStringValue("Downloading changes from server")
     String downSyncProgress();
@@ -610,9 +601,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("New partner")
     String newPartner();
 
-    @DefaultStringValue("Please enter the new name of the project")
-    String newProjectName();
-
     @DefaultStringValue("New Submission")
     String newSite();
 
@@ -631,26 +619,14 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S/W/E)")
     String noHemisphere();
 
-    @DefaultStringValue("Warning: no administrative level")
-    String noLevels();
-
-    @DefaultStringValue("No matches")
-    String noMatches();
-
     @DefaultStringValue("Coordinates must have at least one number")
     String noNumber();
 
     @DefaultStringValue("Some administrative levels are disabled because the boundaries are not available or have not yet been loaded.")
     String noPolygonsWarning();
 
-    @DefaultStringValue("No search")
-    String noSearch();
-
     @DefaultStringValue("Undo")
     String undo();
-
-    @DefaultStringValue("Redo")
-    String redo();
 
     @DefaultStringValue("Move up")
     String moveUp();
@@ -670,23 +646,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("You are not authorized to make this change: either your access permissions have changed in the last few minutes, or there has been an error on the server.")
     String notAuthorized();
 
-    @DefaultStringValue("Ask me later")
-    String notNow();
-
     @DefaultStringValue("Not published")
     String notPublished();
-
-    @DefaultStringValue("Did you know? You can use ActivityInfo even when you don't have an internet connection.")
-    String offlineIntro1();
-
-    @DefaultStringValue("Enabling offline mode will allow you to continue working with ActivityInfo even if an internet connection is not available. When a connection becomes available, ActivityInfo will synchronize with the server.")
-    String offlineIntro2();
-
-    @DefaultStringValue("To open ActivityInfo when offline, you can simply type <b>www.activityinfo.org</b> into your browser's address bar.")
-    String offlineIntro3();
-
-    @DefaultStringValue("<b>Note:</b> if you enable offline mode, ActivityInfo will store data locally on your computer, which could be accessible to anyone else using this computer. You should not enable offline mode on public or shared computers.")
-    String offlineIntro4();
 
     @DefaultStringValue("Open")
     String open();
@@ -730,7 +691,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Preview")
     String preview();
 
-    @DefaultStringValue("Print UserForm")
+    @DefaultStringValue("Print Form")
     String printForm();
 
     @DefaultStringValue("Project")
@@ -757,7 +718,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Maximum Radius")
     String radiusMaximum();
 
-    @DefaultStringValue("Minimum radius")
+    @DefaultStringValue("Minimum Radius")
     String radiusMinimum();
 
     @DefaultStringValue("Realized")
@@ -769,9 +730,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Refresh Preview")
     String refreshPreview();
 
-    @DefaultStringValue("Reinstall offline mode")
-    String reinstallOfflineMode();
-
     @DefaultStringValue("A minute ago")
     String relativeTimeMinAgo();
 
@@ -780,9 +738,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Remove from Dashboard")
     String removeFromDashboard();
-
-    @DefaultStringValue("Remove")
-    String removeItem();
 
     @DefaultStringValue("Remove partner")
     String removePartner();
@@ -823,9 +778,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Search")
     String search();
 
-    @DefaultStringValue("Search for a site")
-    String searchLocation();
-
     @DefaultStringValue("Search for existing sites")
     String searchLocations();
 
@@ -858,9 +810,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Share...")
     String sharingOptions();
-
-    @DefaultStringValue("Showing results for:")
-    String showingSearchResultFor();
 
     @DefaultStringValue("Count")
     String siteCount();
@@ -924,6 +873,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("There is a new version of ActivityInfo available. You need to reload the page to load the new version and continue with synchronization.")
     String syncErrorReload();
+
+    @DefaultStringValue("Synchronization Error")
+    String syncError();
 
     @DefaultStringValue("An unexpected error occurred during synchronization.")
     String syncErrorUnexpected();
@@ -1048,17 +1000,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Year/Month")
     String yearMonthGrouping();
 
-    @DefaultStringValue("New field")
-    String newField();
-
-    @DefaultStringValue("Remove field")
-    String removeField();
-
     @DefaultStringValue("Reset")
     String reset();
-
-    @DefaultStringValue("Complete the form below according to the instructions. When you're finished, click the Save button to save your changes. You can also complete this form with a mobile phone, print a blank paper form.")
-    String userFormPanelInvitation();
 
     @DefaultStringValue("Label")
     String labelFieldLabel();
@@ -1078,38 +1021,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Ignored")
     String ignored();
 
-    @DefaultStringValue("Import this column as a new field")
-    String importNewColumnAction();
-
-    @DefaultStringValue("Add new section")
-    String addSection();
-
-    @DefaultStringValue("Add new field")
-    String addField();
-
-    @DefaultStringValue("Edit section")
-    String editSection();
-
-    @DefaultStringValue("Section label")
-    String sectionLabel();
-
-    @DefaultStringValue("Unknown Group")
-    String unknownGroup();
-
     @DefaultStringValue("Label")
     String fieldLabel();
 
     @DefaultStringValue("Type")
     String fieldType();
-
-    @DefaultStringValue("Description")
-    String fieldDescription();
-
-    @DefaultStringValue("Unit")
-    String fieldUnit();
-
-    @DefaultStringValue("Reference")
-    String fieldTypeReference();
 
     @DefaultStringValue("Quantity")
     String fieldTypeQuantity();
@@ -1129,20 +1045,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("To begin, select the table you want to import in Excel, copy it to the clipboard, and then paste here")
     String pasteSpreadsheetInstructions();
 
-    @DefaultStringValue("Paste your spreadsheet data here by right-clicking then choosing \"Paste\"")
-    String pastePlaceholder();
-
     @DefaultStringValue("Choose the destination field.")
     String chooseDestinationField();
 
     @DefaultStringValue("Change")
     String change();
-
-    @DefaultStringValue("Change type")
-    String changeType();
-
-    @DefaultStringValue("Type change leads to conversion of all existing data.")
-    String changeTypeWarning();
 
     @DefaultStringValue("Label")
     String label();
@@ -1156,9 +1063,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("home")
     String home();
 
-    @DefaultStringValue("Control is empty")
-    String validationControlIsEmpty();
-
     @DefaultStringValue("Range")
     String range();
 
@@ -1167,12 +1071,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Next »")
     String nextButton();
-
-    @DefaultStringValue("Bulk edit")
-    String bulkEdit();
-
-    @DefaultStringValue("Move right")
-    String moveRight();
 
     @DefaultStringValue("Choose columns")
     String chooseColumns();
@@ -1183,29 +1081,14 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Filter by name")
     String filterByName();
 
-    @DefaultStringValue("Add instance")
-    String addInstance();
-
-    @DefaultStringValue("Remove instance")
-    String removeInstance();
-
     @DefaultStringValue("Add column")
     String addColumn();
-
-    @DefaultStringValue("Failed to create widget.")
-    String failedToCreateWidget();
 
     @DefaultStringValue("Double click")
     String drillDownTipHeading();
 
     @DefaultStringValue("Double-click a value to drill down to the individual sites")
     String drillDownTip();
-
-    @DefaultStringValue("(Locked)")
-    String lockedMonthHeader();
-
-    @DefaultStringValue("Edit instance")
-    String editInstance();
 
     @DefaultStringValue("Save operation failed (formclass).")
     String failedToSaveClass();
@@ -1222,17 +1105,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No")
     String no();
 
-    @DefaultStringValue("Failed to remove row(s).")
-    String failedToRemoveRows();
-
     @DefaultStringValue("New Value")
     String changeHeaderMessage();
 
     @DefaultStringValue("Clear filter")
     String clearFilter();
-
-    @DefaultStringValue("Advanced filter")
-    String advancedFilter();
 
     @DefaultStringValue("Select all")
     String selectAll();
@@ -1303,9 +1180,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Allow editing ONLY by users with 'design' privileges")
     String partOfWorkflow();
 
-    @DefaultStringValue("Clustered bar")
-    String clusteredBar();
-
     @DefaultStringValue("Line")
     String line();
 
@@ -1342,9 +1216,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Read only")
     String readonly();
 
-    @DefaultStringValue("Boolean")
-    String fieldTypeBoolean();
-
     @DefaultStringValue("Relevance")
     String relevance();
 
@@ -1365,9 +1236,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Or")
     String or();
-
-    @DefaultStringValue("or")
-    String orWithSpaces();
 
     @DefaultStringValue("Try the new data entry page (BETA)")
     String tryNewDataEntryInterface();
@@ -1411,24 +1279,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Try the new (BETA) form layout")
     String tryNewFormLayout();
 
-    @DefaultStringValue("Modern view")
-    String modernView();
-
-    @DefaultStringValue("Classic view : attributes and indicators appear separately")
-    String classicViewExplanation();
-
-    @DefaultStringValue("Modern view : visual designer and flexible data entry form")
-    String modernViewExplanation();
-
-    @DefaultStringValue("Flexible Data Entry Form")
-    String newFormAsFormDesigner();
-
-    @DefaultStringValue("ActivityInfo Classic")
-    String newFormAsClassic();
-
-    @DefaultStringValue("ActivityInfo Classic - Monthly : attributes and indicators appear separately and users enter indicator results in a monthly grid.")
-    String newFormAsClassicMonthly();
-
     @DefaultStringValue("New Form (Beta)")
     String newForm();
 
@@ -1437,21 +1287,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("What's this?")
     String whatsThis();
-
-    @DefaultStringValue("More about view types")
-    String moreAboutView();
-
-    @DefaultStringValue("View type")
-    String viewType();
-
-    @DefaultStringValue("Want your users to see the new form layout?")
-    String alertAboutModerView();
-
-    @DefaultStringValue("Learn more about the change")
-    String learnMore();
-
-    @DefaultStringValue("Switch to new layout")
-    String switchToNewLayout();
 
     @DefaultStringValue("Create a new database")
     String createNewDatabase();
@@ -1507,9 +1342,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
-    @DefaultStringValue("Unfortunately you do not have design privileges to perform this action.")
-    String noDesignPrivileges();
-
     @DefaultStringValue("New Submission")
     String newSubmission();
 
@@ -1527,12 +1359,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
-
-    @DefaultStringValue("Recommended mode for new users")
-    String recommendedMode();
-
-    @DefaultStringValue("Attributes and indicators appear separately")
-    String newFormAsClassicHelpBlock();
 
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
@@ -1627,9 +1453,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Browse")
     String browse();
 
-    @DefaultStringValue("Control is read only.")
-    String controlIsReadOnly();
-
     @DefaultStringValue("Download")
     String download();
 
@@ -1638,9 +1461,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter is not supported.")
     String filterIsNotSupported();
-
-    @DefaultStringValue("No file selected")
-    String noFileSelected();
 
     @DefaultStringValue("Single")
     String single();
@@ -1659,11 +1479,64 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("No image selected.")
     String noImage();
-    
+
     @DefaultStringValue("Upload file size limit is set to 10 MB.")
     String uploadFileSizeLimit();
 
     @DefaultStringValue("Unknown")
     String unknown();
 
+    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right.")
+    String columnMappingHelpLink();
+
+    @DefaultStringValue("Show me")
+    String showMe();
+
+    @DefaultStringValue("Blank value is not allowed.")
+    String blankValueIsNotAllowed();
+
+    @DefaultStringValue("Expression")
+    String expression();
+
+    @DefaultStringValue("Example: A+B+(C/D)+[Volume A]")
+    String expressionExample();
+
+    @DefaultStringValue("Working online")
+    String workingOnline();
+
+    @DefaultStringValue("Working offline")
+    String workingOffline();
+
+    @DefaultStringValue("Me")
+    String me();
+
+    @DefaultStringValue("Which options apply?")
+    String defaultCheckboxFieldLabel();
+
+    @DefaultStringValue("Which choice would you choose?")
+    String defaultRadioFieldLabel();
+
+    @DefaultStringValue("Enter a new label for this option")
+    String enterNameForOption();
+
+    @DefaultStringValue("households")
+    String defaultQuantityUnits();
+
+    @DefaultStringValue("Offline Mode not supported")
+    String offlineNotSupportedTitle();
+
+    @DefaultStringValue("Unfortunately, offline mode is not supported on your browser. To enable offline mode, we recommend using Google Chrome.")
+    String offlineNotSupported();
+
+    @DefaultStringValue("Download Google Chrome")
+    String downloadGoogleChrome();
+
+    @DefaultStringValue("New Report Element")
+    String newReportElement();
+
+    @DefaultStringValue("ActivityInfo News")
+    String activityInfoNews();
+
+    @DefaultStringValue("Saved Reports")
+    String savedReports();
 }

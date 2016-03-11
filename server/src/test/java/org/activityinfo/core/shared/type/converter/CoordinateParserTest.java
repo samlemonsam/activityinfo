@@ -143,8 +143,9 @@ public class CoordinateParserTest {
 
     @Test
     public void parseDMSInFrenchLocale() throws CoordinateFormatException {
+        ThreadLocalLocaleProvider.pushLocale(Locale.FRANCE);
+
         try {
-            ThreadLocalLocaleProvider.pushLocale(Locale.FRANCE);
 
             assertThat(parseLatitude("25 10 54,23\"  N"), closeTo(25.18173056, 0.000001));
             assertThat(parseLatitude("176 50' 23\" S"), closeTo(-176.8397222, 0.000001));
@@ -153,6 +154,28 @@ public class CoordinateParserTest {
         }
     }
 
+    @Test
+    public void parseArabicCoordinates() throws CoordinateFormatException {
+        
+        // Note that the JRE behaves differently 
+        Locale ar = new Locale("ar");
+        ThreadLocalLocaleProvider.pushLocale(ar);
+        try {
+
+            CoordinateParser parser = new CoordinateParser(CoordinateAxis.LATITUDE, new JreNumberFormats());
+
+            double latitude = 25.405;
+            String formatted = parser.formatAsDMd(latitude);
+            System.out.println(formatted);
+            double parsedLatitude = parser.parse(formatted);
+            
+            assertThat(parsedLatitude, equalTo(latitude));
+
+        } finally {
+            ThreadLocalLocaleProvider.popLocale();
+        }
+    }
+    
     @Test
     public void formatDDd() {
         CoordinateParser parser = new CoordinateParser(CoordinateAxis.LATITUDE, new JreNumberFormats());
@@ -166,7 +189,7 @@ public class CoordinateParserTest {
         CoordinateParser parser = new CoordinateParser(CoordinateAxis.LATITUDE, new JreNumberFormats());
         parser.setNotation(CoordinateParser.Notation.DMd);
 
-        assertThat(parser.format(2.405), equalTo("2° 0.40' N"));
+        assertThat(parser.format(2.405), equalTo("2° 24.30' N"));
     }
 
     @Test
@@ -186,8 +209,8 @@ public class CoordinateParserTest {
             CoordinateParser parser = new CoordinateParser(CoordinateAxis.LONGITUDE, new JreNumberFormats());
             parser.setNotation(CoordinateParser.Notation.DMd);
 
-            assertThat(parser.format(2.405), equalTo("2° 0,40' E"));
-            assertThat(parser.format(-2.465), equalTo("2° 0,46' O"));
+            assertThat(parser.format(2.405), equalTo("2° 24,30' E"));
+            assertThat(parser.format(-2.465), equalTo("2° 27,90' O"));
         } finally {
             ThreadLocalLocaleProvider.popLocale();
         }

@@ -37,9 +37,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.logging.Logger;
 
 @Path(LoginController.ENDPOINT)
 public class LoginController {
+    
+    private static final Logger LOGGER = Logger.getLogger(LoginController.ENDPOINT);
 
     public static final String ENDPOINT = "/login";
 
@@ -68,9 +71,15 @@ public class LoginController {
         try {
             user = userDAO.get().findUserByEmail(email);
         } catch(NoResultException e) {
-            throw new LoginException();
+            LOGGER.warning("Failed login attempt for unknown user: " + email);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        checkPassword(password, user);
+        try {
+            checkPassword(password, user);
+        } catch (LoginException e) {
+            LOGGER.warning("Failed login attempt for user " + user.getEmail());
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
         return Response.ok().cookie(authTokenProvider.get().createNewAuthCookies(user)).build();
     }

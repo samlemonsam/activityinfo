@@ -36,6 +36,8 @@ public class ColumnMappingGrid extends DataGrid<SourceRow> {
     public static final int SOURCE_COLUMN_HEADER_ROW = 0;
     public static final int MAPPING_HEADER_ROW = 1;
 
+    public static final int COLUMN_WIDTH_LIMIT_IN_EM = 20;
+
     private final ImportModel model;
     private final EventBus eventBus;
 
@@ -165,6 +167,14 @@ public class ColumnMappingGrid extends DataGrid<SourceRow> {
         }
     }
 
+    private static int columnWidthInEm(String header) {
+        int width = GwtUtil.columnWidthInEm(header);
+        if (width > COLUMN_WIDTH_LIMIT_IN_EM) {
+            return COLUMN_WIDTH_LIMIT_IN_EM;
+        }
+        return width;
+    }
+
     public void refresh() {
         while (this.getColumnCount() > 0) {
             this.removeColumn(0);
@@ -173,8 +183,8 @@ public class ColumnMappingGrid extends DataGrid<SourceRow> {
         for (SourceColumn sourceColumn : sourceColumns) {
             GridColumn gridColumn = new GridColumn(sourceColumn);
             GridHeader gridHeader = new GridHeader(sourceColumn, headerCell, columnSelectionModel);
-            this.addColumn(gridColumn, gridHeader);
-            this.setColumnWidth(gridColumn, GwtUtil.columnWidthInEm(sourceColumn.getHeader()), com.google.gwt.dom.client.Style.Unit.EM);
+            addColumn(gridColumn, gridHeader);
+            setColumnWidth(gridColumn, columnWidthInEm(sourceColumn.getHeader()), com.google.gwt.dom.client.Style.Unit.EM);
         }
         this.redrawHeaders();
 

@@ -67,8 +67,6 @@
 
                             <div class="pull-right">
                                 <ul class="upper nav">
-                                    <li class="language <#if .lang="en">active</#if>"><a href="">en</a></li>
-                                    <li class="language <#if .lang="fr">active</#if>"><a href="">fr</a></li>
                                     <li class="normal-header">
                                         <a href="/login" class="btn">${label.login}</a>
                                     </li>
