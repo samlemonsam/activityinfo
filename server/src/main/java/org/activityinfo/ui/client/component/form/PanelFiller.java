@@ -86,7 +86,7 @@ public class PanelFiller {
 
                             subFormsHandler.getSubForms().put(subForm, manipulator);
                         } else { // keyed subforms
-                            final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator(), relevanceHandler);
+                            final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator(), model.getStateProvider(), relevanceHandler);
 
                             final FlowPanel subformPanel = new FlowPanel();
                             subformPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
@@ -124,10 +124,6 @@ public class PanelFiller {
     public static Widget createHeader(int depth, String header) {
         String hn = "h" + (3 + depth);
         return new HTML("<" + hn + ">" + SafeHtmlUtils.htmlEscape(header) + "</" + hn + ">");
-    }
-
-    public boolean isHeadingVisible() {
-        return headingVisible;
     }
 
     public void setHeadingVisible(boolean headingVisible) {

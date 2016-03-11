@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.legacy.client.state.GxtStateProvider;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -65,7 +66,7 @@ public class FormModelTest extends CommandTestCase2 {
 
     @Test
     public void modelState() {
-        FormModel formModel = new FormModel(resourceLocator);
+        FormModel formModel = new FormModel(resourceLocator, new GxtStateProvider());
         assertResolves(formModel.loadFormClassWithDependentSubForms(setupFormClass.getId()));
 
         assertEquals(formModel.getRootFormClass().getId(), setupFormClass.getId());

@@ -21,19 +21,19 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.util.DateWrapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.date.LocalDateRange;
@@ -90,12 +90,13 @@ public class SubFormTabsPresenter {
     }
 
     private final SubFormTabs view;
+    private final StateProvider stateProvider;
 
     private int tabCount = SubformConstants.DEFAULT_TAB_COUNT;
     private boolean showPreviousButtons = true;
     private boolean showNextButtons = true;
 
-    private final Map<String, FormInstance> instancesMap = Maps.newHashMap();
+    private final Map<String, FormInstance> instancesMap = Maps.newLinkedHashMap();
     private List<FormInstance> instances = null;
 
     /**
@@ -109,8 +110,9 @@ public class SubFormTabsPresenter {
     private PredefinedPeriods periodType;
     private String activeTabId = null;
 
-    public SubFormTabsPresenter(@Nonnull SubFormTabs view) {
+    public SubFormTabsPresenter(@Nonnull SubFormTabs view, @Nonnull StateProvider stateProvider) {
         this.view = view;
+        this.stateProvider = stateProvider;
     }
 
     public void clear() {
@@ -201,22 +203,27 @@ public class SubFormTabsPresenter {
             addClickHandlerToElementById(appendIdSuffix(id));
         }
 
-        selectTabFromCookie();
+        selectTabFromStateProvider();
     }
 
-    private void selectTabFromCookie() {
+    private void selectTabFromStateProvider() {
         if (activeTabId != null) {
             return; // we already have manually selected tab
         }
 
         Optional<FormInstance> selectedPeriodInstance = getSelectedPeriodInstance();
+        final FormInstance instanceToSelect;
         if (selectedPeriodInstance.isPresent()) {
-            onButtonClick(appendIdSuffix(selectedPeriodInstance.get().getId().asString()));
+            instanceToSelect = selectedPeriodInstance.get();
+        } else {
+            instanceToSelect = instancesMap.values().iterator().next();
         }
+
+        onButtonClick(appendIdSuffix(instanceToSelect.getId().asString()));
     }
 
     private Optional<FormInstance> getSelectedPeriodInstance() {
-        DateRange selectedRange = SubFormTabsManipulator.getSelectedRange(periodType).asDateRange();
+        DateRange selectedRange = getSelectedRange(periodType).asDateRange();
         if (selectedRange != null) {
             for (FormInstance instance : instancesMap.values()) {
                 if (PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance).equals(selectedRange)) {
@@ -291,8 +298,7 @@ public class SubFormTabsPresenter {
     private void saveSelection(FormInstance instance) {
         LocalDateRange dateRange = PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance).asLocalDateRange();
 
-        Cookies.setCookie("subform.tab." + getPeriodType().name(), dateRange.asJson(),
-                (new DateWrapper()).addDays(30).asDate());
+        stateProvider.set("subform.tab." + getPeriodType().name(), dateRange.asJson());
     }
 
     public void setMoveButtonClickHandler(ClickHandler<ButtonType> moveButtonClickHandler) {
@@ -365,5 +371,15 @@ public class SubFormTabsPresenter {
 
     public void setPeriodType(PredefinedPeriods periodType) {
         this.periodType = periodType;
+    }
+
+    public LocalDateRange getSelectedRange(PredefinedPeriods predefinedPeriod) {
+        String json = stateProvider.getString("subform.tab." + predefinedPeriod.name());
+
+        if (!Strings.isNullOrEmpty(json)) {
+            return LocalDateRange.fromJson(json);
+        } else {
+            return null;
+        }
     }
 }

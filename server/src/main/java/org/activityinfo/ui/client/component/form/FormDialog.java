@@ -28,6 +28,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -54,12 +55,12 @@ public class FormDialog {
     private final SimpleFormPanel formPanel;
     private final LoadingPanel<FormInstance> loadingPanel;
 
-    public FormDialog(ResourceLocator resourceLocator) {
+    public FormDialog(ResourceLocator resourceLocator, StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
 
         ModalStylesheet.INSTANCE.ensureInjected();
 
-        formPanel = new SimpleFormPanel(resourceLocator);
+        formPanel = new SimpleFormPanel(resourceLocator, stateProvider);
 
         loadingPanel = new LoadingPanel<>(new PageLoadingPanel());
         loadingPanel.setDisplayWidget(formPanel);

@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.client.form.tree.AsyncFormTreeBuilder;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
@@ -33,9 +34,9 @@ public class TableTab implements DisplayWidget<FormInstance> {
     private List<FieldColumn> columns;
     private ResourceLocator resourceLocator;
 
-    public TableTab(ResourceLocator resourceLocator) {
+    public TableTab(ResourceLocator resourceLocator, StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
-        this.tableView = new InstanceTableView(resourceLocator);
+        this.tableView = new InstanceTableView(resourceLocator, stateProvider);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class NewHeaderAction implements TableHeaderAction {
         final FormClass formClass = table.getRootFormClass();
         final ResourceId instanceId = CuidAdapter.newLegacyFormInstanceId(formClass.getId());
         FormInstance newInstance = new FormInstance(instanceId, formClass.getId());
-        FormDialog dialog = new FormDialog(table.getResourceLocator());
+        FormDialog dialog = new FormDialog(table.getResourceLocator(), table.getStateProvider());
         dialog.setDialogTitle(I18N.CONSTANTS.newSubmission());
         dialog.show(newInstance, new FormDialogCallback() {
             @Override

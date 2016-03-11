@@ -180,7 +180,7 @@ public class SubFormRepeatingManipulator {
 
     private void addForm(final FormModel.SubformValueKey key, int panelIndex) {
 
-        final SimpleFormPanel formPanel = new SimpleFormPanel(formModel.getLocator());
+        final SimpleFormPanel formPanel = new SimpleFormPanel(formModel.getLocator(), formModel.getStateProvider());
         formPanel.asWidget().addStyleName(FormPanelStyles.INSTANCE.subformPanel());
 
         formPanel.addDeleteButton().addClickHandler(new ClickHandler() {

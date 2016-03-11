@@ -13,6 +13,7 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.table.action.*;
 import org.activityinfo.ui.client.component.table.filter.FilterCellAction;
@@ -37,6 +38,7 @@ public class InstanceTable implements IsWidget {
     public static final int COLUMN_WIDTH = 10;
 
     private final ResourceLocator resourceLocator;
+    private final StateProvider stateProvider;
 
     private final CellTable<Projection> table;
     private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
@@ -52,6 +54,8 @@ public class InstanceTable implements IsWidget {
     public InstanceTable(InstanceTableView tableView) {
         this.tableView = tableView;
         this.resourceLocator = tableView.getResourceLocator();
+        this.stateProvider = tableView.getStateProvider();
+
         CellTableResources.INSTANCE.cellTableStyle().ensureInjected();
 
         final TableHeaderActionBrowserEventHandler headerActionEventHandler = new TableHeaderActionBrowserEventHandler(this);
@@ -189,7 +193,7 @@ public class InstanceTable implements IsWidget {
         return loadingIndicator;
     }
 
-    public void loadMore() {
-        dataLoader.loadMore();
+    public StateProvider getStateProvider() {
+        return stateProvider;
     }
 }

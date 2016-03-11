@@ -25,6 +25,7 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -47,6 +48,7 @@ import java.util.Set;
 public class FormDesigner {
 
     private final EventBus eventBus = new SimpleEventBus();
+    private final StateProvider stateProvider;
     private final ResourceLocator resourceLocator;
     private final PropertiesPresenter propertiesPresenter;
     private final ContainerPropertiesPresenter containerPresenter;
@@ -58,8 +60,9 @@ public class FormDesigner {
     private final DropControllerRegistry dropControllerRegistry;
     private final FormDesignerModel model;
 
-    public FormDesigner(@Nonnull ResourceLocator resourceLocator, @Nonnull FormClass rootFormClass) {
+    public FormDesigner(@Nonnull ResourceLocator resourceLocator, @Nonnull FormClass rootFormClass, @Nonnull StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
+        this.stateProvider = stateProvider;
 
         this.model = new FormDesignerModel(rootFormClass);
         this.dropControllerRegistry = new DropControllerRegistry(this);
@@ -134,6 +137,10 @@ public class FormDesigner {
 
     public FormDesignerModel getModel() {
         return model;
+    }
+
+    public StateProvider getStateProvider() {
+        return stateProvider;
     }
 
     public WidgetContainer getWidgetContainer(ResourceId resourceId) {

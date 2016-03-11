@@ -43,6 +43,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.*;
@@ -70,6 +71,7 @@ import org.activityinfo.ui.client.page.instance.InstancePlace;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -81,6 +83,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private final Dispatcher dispatcher;
     private final EventBus eventBus;
+    private final StateProvider stateProvider;
 
     private GroupingComboBox groupingComboBox;
 
@@ -105,9 +108,10 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
 
     @Inject
-    public DataEntryPage(final EventBus eventBus, Dispatcher dispatcher) {
+    public DataEntryPage(final EventBus eventBus, Dispatcher dispatcher, StateProvider stateProvider) {
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
+        this.stateProvider = stateProvider;
 
         setLayout(new BorderLayout());
 
@@ -375,7 +379,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             public void onSuccess(ActivityFormDTO form) {
                 // make sure we haven't navigated away by the time the request comes back
                 Optional<Integer> currentActivityId = getCurrentActivityId();
-                if(!currentActivityId.isPresent() || currentActivityId.get() != activityId) {
+                if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), activityId)) {
                     return;
                 }
                 if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
@@ -411,7 +415,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         if (UIActions.ADD.equals(actionId)) {
 
-            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus);
+            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
             formHelper.addSite(filter, new SiteDialogCallback() {
 
                 @Override
@@ -423,7 +427,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         } else if (UIActions.EDIT.equals(actionId)) {
             final SiteDTO selection = gridPanel.getSelection();
-            SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus);
+            SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
             launcher.editSite(selection, new SiteDialogCallback() {
 
                 @Override

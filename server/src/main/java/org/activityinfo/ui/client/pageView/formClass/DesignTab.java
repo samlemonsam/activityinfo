@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.promise.Promise;
@@ -18,10 +19,12 @@ import javax.annotation.Nullable;
 public class DesignTab implements DisplayWidget<FormInstance> {
 
     private ResourceLocator resourceLocator;
+    private StateProvider stateProvider;
     private FlowPanel panel;
 
-    public DesignTab(ResourceLocator resourceLocator) {
+    public DesignTab(ResourceLocator resourceLocator, StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
+        this.stateProvider = stateProvider;
         this.panel = new FlowPanel();
     }
 
@@ -32,7 +35,7 @@ public class DesignTab implements DisplayWidget<FormInstance> {
                     @Nullable
                     @Override
                     public Void apply(FormClass formClass) {
-                        panel.add(new FormDesigner(resourceLocator, formClass).getFormDesignerPanel());
+                        panel.add(new FormDesigner(resourceLocator, formClass, stateProvider).getFormDesignerPanel());
                         return null;
                     }
                 });

@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.widget.AlertPanel;
 import org.activityinfo.ui.client.widget.loading.TableLoadingIndicator;
@@ -32,6 +33,8 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     private static final Logger LOGGER = Logger.getLogger(InstanceTableView.class.getName());
 
     private final ResourceLocator resourceLocator;
+    private final StateProvider stateProvider;
+
     private final HTMLPanel panel;
     private List<FieldColumn> columns;
     private List<FieldColumn> selectedColumns;
@@ -53,9 +56,13 @@ public class InstanceTableView implements IsWidget, RequiresResize {
 
     private static InstanceTableViewUiBinder ourUiBinder = GWT.create(InstanceTableViewUiBinder.class);
 
-    public InstanceTableView(ResourceLocator resourceLocator) {
+    public InstanceTableView(ResourceLocator resourceLocator, StateProvider stateProvider) {
+
         InstanceTableStyle.INSTANCE.ensureInjected();
+
         this.resourceLocator = resourceLocator;
+        this.stateProvider = stateProvider;
+
         this.table = new InstanceTable(this);
         this.loadingIndicator = table.getLoadingIndicator();
         this.panel = ourUiBinder.createAndBindUi(this);
@@ -154,5 +161,9 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         if (rootFormClasses != null && !rootFormClasses.isEmpty()) {
             table.setRootFormClass(rootFormClasses.iterator().next());
         }
+    }
+
+    public StateProvider getStateProvider() {
+        return stateProvider;
     }
 }

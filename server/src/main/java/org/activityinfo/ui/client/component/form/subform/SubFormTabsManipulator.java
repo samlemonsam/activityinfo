@@ -24,14 +24,13 @@ package org.activityinfo.ui.client.component.form.subform;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.gwt.user.client.Cookies;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -61,6 +60,7 @@ public class SubFormTabsManipulator {
 
     private final SubFormTabsPresenter presenter;
     private final ResourceLocator resourceLocator;
+    private final StateProvider stateProvider;
     private final boolean designMode;
     private Optional<RelevanceHandler> relevanceHandler = Optional.absent();
 
@@ -71,17 +71,19 @@ public class SubFormTabsManipulator {
     private FormModel formModel;
     private FormDesigner formDesigner;
 
-    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator, RelevanceHandler relevanceHandler) {
+    public SubFormTabsManipulator(@Nonnull ResourceLocator resourceLocator, StateProvider stateProvider, RelevanceHandler relevanceHandler) {
         this.resourceLocator = resourceLocator;
-        this.presenter = new SubFormTabsPresenter(new SubFormTabs());
+        this.stateProvider = stateProvider;
+        this.presenter = new SubFormTabsPresenter(new SubFormTabs(), stateProvider);
         this.designMode = false;
         this.relevanceHandler = Optional.of(relevanceHandler);
     }
 
     public SubFormTabsManipulator(@Nonnull FormDesigner formDesigner, @Nonnull SubFormTabs tabs) {
         this.resourceLocator = formDesigner.getResourceLocator();
+        this.stateProvider = formDesigner.getStateProvider();
         this.formDesigner = formDesigner;
-        this.presenter = new SubFormTabsPresenter(tabs);
+        this.presenter = new SubFormTabsPresenter(tabs, stateProvider);
         this.designMode = true;
     }
 
@@ -255,16 +257,6 @@ public class SubFormTabsManipulator {
     }
 
     public LocalDateRange getSelectedRange() {
-        return getSelectedRange(PredefinedPeriods.fromPeriod(periodValue));
-    }
-
-    public static LocalDateRange getSelectedRange(PredefinedPeriods predefinedPeriod) {
-        String cookieValue = Cookies.getCookie("subform.tab." + predefinedPeriod.name());
-
-        if (!Strings.isNullOrEmpty(cookieValue)) {
-            return LocalDateRange.fromJson(cookieValue);
-        } else {
-            return null;
-        }
+        return presenter.getSelectedRange(PredefinedPeriods.fromPeriod(periodValue));
     }
 }

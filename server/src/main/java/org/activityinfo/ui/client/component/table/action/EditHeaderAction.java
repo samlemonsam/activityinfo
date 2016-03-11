@@ -50,7 +50,7 @@ public class EditHeaderAction implements TableHeaderAction {
     @Override
     public void execute() {
         final Projection selectedProjection = table.getSelectionModel().getSelectedSet().iterator().next();
-        final FormDialog dialog = new FormDialog(table.getResourceLocator());
+        final FormDialog dialog = new FormDialog(table.getResourceLocator(), table.getStateProvider());
         dialog.setDialogTitle(I18N.CONSTANTS.editSubmission());
         dialog.show(selectedProjection.getRootInstanceId(), new FormDialogCallback() {
             @Override

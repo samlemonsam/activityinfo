@@ -239,7 +239,8 @@ public class PropertiesPresenter {
         });
 
         ResourceLocator locator = fieldWidgetContainer.getFormDesigner().getResourceLocator();
-        currentDesignWidget = new SimpleFormPanel(locator, new HorizontalFieldContainer.Factory(),
+        currentDesignWidget = new SimpleFormPanel(locator, fieldWidgetContainer.getFormDesigner().getStateProvider(),
+                new HorizontalFieldContainer.Factory(),
                 new FormFieldWidgetFactory(locator, FieldWidgetMode.NORMAL), false) {
             @Override
             public void onFieldUpdated(FormField field, FieldValue newValue) {

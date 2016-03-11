@@ -10,6 +10,7 @@ import org.activityinfo.core.shared.application.FolderClass;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.instance.InstancePage;
@@ -23,14 +24,17 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
 
     private final NavigationHandler pageManager;
     private ResourceLocator resourceLocator;
+    private StateProvider stateProvider;
 
     @Inject
     public PageLoader(NavigationHandler pageManager,
                       PageStateSerializer placeSerializer,
-                      ResourceLocator resourceLocator) {
+                      ResourceLocator resourceLocator,
+                      StateProvider stateProvider) {
 
         this.resourceLocator = resourceLocator;
         this.pageManager = pageManager;
+        this.stateProvider = stateProvider;
 
 
         pageManager.registerPageLoader(HomePage.PAGE_ID, this);
@@ -56,7 +60,7 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
 
                 } else if (pageState instanceof InstancePlace) {
                     InstancePlace instancePlace = (InstancePlace) pageState;
-                    InstancePage page = new InstancePage(resourceLocator, instancePlace.getPageId(), pageManager.getEventBus());
+                    InstancePage page = new InstancePage(resourceLocator, instancePlace.getPageId(), stateProvider);
                     page.navigate(pageState);
                     callback.onSuccess(page);
                 }

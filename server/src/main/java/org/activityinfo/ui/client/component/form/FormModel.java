@@ -28,6 +28,7 @@ import com.google.common.collect.*;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -111,6 +112,7 @@ public class FormModel {
     }
 
     private final ResourceLocator locator;
+    private final StateProvider stateProvider;
     private final EventBus eventBus = new SimpleEventBus();
 
     /**
@@ -158,8 +160,9 @@ public class FormModel {
      */
     private final Map<ResourceId, Set<FieldContainer>> classToFields = Maps.newHashMap();
 
-    public FormModel(ResourceLocator locator) {
+    public FormModel(ResourceLocator locator, StateProvider stateProvider) {
         this.locator = locator;
+        this.stateProvider = stateProvider;
     }
 
     public Promise<Void> loadFormClassWithDependentSubForms(ResourceId rootClassId) {
@@ -329,5 +332,9 @@ public class FormModel {
 
     public Set<ResourceId> getPersistedInstanceToRemoveByLocator() {
         return persistedInstanceToRemoveByLocator;
+    }
+
+    public StateProvider getStateProvider() {
+        return stateProvider;
     }
 }

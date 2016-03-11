@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -50,17 +51,17 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final PanelFiller panelFiller;
     private Optional<Button> deleteButton = Optional.absent();
 
-    public SimpleFormPanel(ResourceLocator resourceLocator) {
-        this(resourceLocator, new VerticalFieldContainer.Factory(),
+    public SimpleFormPanel(ResourceLocator resourceLocator, StateProvider stateProvider) {
+        this(resourceLocator, stateProvider, new VerticalFieldContainer.Factory(),
                 new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.NORMAL));
     }
 
-    public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
+    public SimpleFormPanel(ResourceLocator locator, StateProvider stateProvider, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory) {
-        this(locator, containerFactory, widgetFactory, true);
+        this(locator, stateProvider, containerFactory, widgetFactory, true);
     }
 
-    public SimpleFormPanel(ResourceLocator locator, FieldContainerFactory containerFactory,
+    public SimpleFormPanel(ResourceLocator locator, StateProvider stateProvider, FieldContainerFactory containerFactory,
                            FormFieldWidgetFactory widgetFactory, boolean withScroll) {
         FormPanelStyles.INSTANCE.ensureInjected();
 
@@ -69,7 +70,8 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         Preconditions.checkNotNull(widgetFactory);
 
         this.locator = locator;
-        this.model = new FormModel(locator);
+
+        this.model = new FormModel(locator, stateProvider);
         this.withScroll = withScroll;
         this.relevanceHandler = new RelevanceHandler(this);
         this.subFormsHandler = new SubFormsHandler();

@@ -28,6 +28,7 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.DimensionType;
@@ -51,12 +52,14 @@ public class SiteDialogLauncher {
     private final Dispatcher dispatcher;
     private final ResourceLocator resourceLocator;
     private final EventBus eventBus;
+    private final StateProvider stateProvider;
 
-    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus) {
+    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus, StateProvider stateProvider) {
         super();
         this.dispatcher = dispatcher;
         this.eventBus = eventBus;
         this.resourceLocator = new ResourceLocatorAdaptor(dispatcher);
+        this.stateProvider = stateProvider;
     }
 
     public void addSite(final Filter filter, final SiteDialogCallback callback) {
@@ -120,12 +123,13 @@ public class SiteDialogLauncher {
     }
 
     public void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew) {
-        showModernFormDialog(formName, instance, callback, isNew, resourceLocator);
+        showModernFormDialog(formName, instance, callback, isNew, resourceLocator, stateProvider);
     }
 
-    public static void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew, ResourceLocator resourceLocator) {
+    public static void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback,
+                                            boolean isNew, ResourceLocator resourceLocator, StateProvider stateProvider) {
         String h2Title = isNew ? I18N.CONSTANTS.newSubmission() : I18N.CONSTANTS.editSubmission();
-        FormDialog dialog = new FormDialog(resourceLocator);
+        FormDialog dialog = new FormDialog(resourceLocator, stateProvider);
         dialog.setDialogTitle(formName, h2Title);
         dialog.show(instance, new FormDialogCallback() {
             @Override

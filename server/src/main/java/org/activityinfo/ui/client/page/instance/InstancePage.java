@@ -5,9 +5,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.inject.Provider;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.formdesigner.FormSavedGuard;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.Page;
@@ -34,12 +34,12 @@ public class InstancePage implements Page {
 
     private final PageId pageId;
     private final ResourceLocator locator;
-    private final EventBus eventBus;
+    private final StateProvider stateProvider;
 
-    public InstancePage(ResourceLocator resourceLocator, PageId pageId, EventBus eventBus) {
+    public InstancePage(ResourceLocator resourceLocator, PageId pageId, StateProvider stateProvider) {
         this.locator = resourceLocator;
         this.pageId = pageId;
-        this.eventBus = eventBus;
+        this.stateProvider = stateProvider;
 
         Icons.INSTANCE.ensureInjected();
 
@@ -84,9 +84,9 @@ public class InstancePage implements Page {
         final InstancePlace instancePlace = (InstancePlace) place;
 
         if (instancePlace.getPageId() == InstancePage.DESIGN_PAGE_ID) {
-            loadingPanel.setDisplayWidget(new DesignTab(locator));
+            loadingPanel.setDisplayWidget(new DesignTab(locator, stateProvider));
         } else if (instancePlace.getPageId() == InstancePage.TABLE_PAGE_ID) {
-            loadingPanel.setDisplayWidget(new TableTab(locator));
+            loadingPanel.setDisplayWidget(new TableTab(locator, stateProvider));
         } else {
             throw new UnsupportedOperationException("Unknown page id:" + instancePlace.getPageId());
         }

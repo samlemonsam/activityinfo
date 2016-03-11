@@ -137,7 +137,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
         if (isSubform) {
             final FormClass subForm = (FormClass) elementContainer;
-            final FormModel formModel = new FormModel(formDesigner.getResourceLocator());
+            final FormModel formModel = new FormModel(formDesigner.getResourceLocator(), formDesigner.getStateProvider());
 
             panel.getPanel().getSubformTabs().setVisible(!ClassType.isRepeating(subForm));
             if (!ClassType.isRepeating(subForm)) { // keyed subforms
