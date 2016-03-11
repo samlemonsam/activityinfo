@@ -88,7 +88,11 @@ public class User implements java.io.Serializable {
     }
 
     public void setName(String name) {
-        this.name = name;
+        if(name.length() > 50) {
+            this.name = name.substring(0, 50);
+        } else {
+            this.name = name;
+        }
     }
 
     @Column(name = "Organization", nullable = true, length = 100)

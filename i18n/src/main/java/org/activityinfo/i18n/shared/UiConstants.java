@@ -1584,4 +1584,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("ActivityInfo News")
     String activityInfoNews();
+
+    @DefaultStringValue("Saved Reports")
+    String savedReports();
 }

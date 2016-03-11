@@ -32,6 +32,9 @@ public class JaxRsContainer extends GuiceContainer {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, CharsetResponseFilter.class.getName());
         
+        // Silence errors about not being able to generate WADL from random requests
+        parameters.put(ResourceConfig.FEATURE_DISABLE_WADL, true);
+        
         DefaultResourceConfig config = new DefaultResourceConfig();
         config.setPropertiesAndFeatures(parameters);
         

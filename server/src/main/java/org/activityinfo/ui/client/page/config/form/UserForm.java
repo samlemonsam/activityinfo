@@ -57,6 +57,7 @@ public class UserForm extends FormPanel {
         nameField.setFieldLabel(constants.name());
         nameField.setAllowBlank(false);
         nameField.setValidator(new BlankValidator());
+        nameField.setMaxLength(50);
         this.add(nameField);
 
         emailField = new TextField<String>();
