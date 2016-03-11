@@ -116,9 +116,14 @@ public class SubFormTabsManipulator {
     private void generateFormInstanceForPeriod(FormClass subForm, ResourceId typeClassId) {
         this.periodValue = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
 
+        final LocalDateRange selectedRange = getSelectedRange();
+        final Date startDate = selectedRange != null ? selectedRange.asDateRange().getStart() : new Date();
+
         final PeriodInstanceKeyedGenerator instanceGenerator = new PeriodInstanceKeyedGenerator(subForm.getId());
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
-        presenter.set(instanceGenerator.generate(periodValue, getTabDate(), PeriodInstanceKeyedGenerator.Direction.BACK, presenter.getTabCount()));
+
+        instanceGenerator.generate(periodValue, startDate, PeriodInstanceKeyedGenerator.Direction.BACK, presenter.getTabCount());
+        presenter.set(instanceGenerator.next());
 
         presenter.setShowNextButtons(true);
         presenter.setShowPreviousButtons(true);
@@ -249,13 +254,13 @@ public class SubFormTabsManipulator {
         return designMode;
     }
 
-    public Date getTabDate() {
+    public LocalDateRange getSelectedRange() {
         String cookieValue = Cookies.getCookie("subform.tab." + PredefinedPeriods.fromPeriod(periodValue).name());
 
         if (!Strings.isNullOrEmpty(cookieValue)) {
-            return LocalDateRange.fromJson(cookieValue).asDateRange().midDate();
+            return LocalDateRange.fromJson(cookieValue);
         } else {
-            return new Date();
+            return null;
         }
     }
 }

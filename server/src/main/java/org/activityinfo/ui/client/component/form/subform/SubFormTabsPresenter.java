@@ -232,13 +232,6 @@ public class SubFormTabsPresenter {
             public void onBrowserEvent(Event event) {
                 if (Event.ONCLICK == event.getTypeInt()) {
                     onButtonClick(elementId);
-
-                    deselectActive();
-
-                    if (!ButtonType.isPredefinedButton(elementId)) {
-                        activeTabId = elementId;
-                        selectActive();
-                    }
                 }
             }
         });
@@ -251,6 +244,13 @@ public class SubFormTabsPresenter {
                 moveButtonClickHandler.onClick(buttonType);
             }
         } else {
+            deselectActive();
+
+            if (!ButtonType.isPredefinedButton(elementId)) {
+                activeTabId = elementId;
+                selectActive();
+            }
+
             elementId = cutOffIdSuffix(elementId); // cut off suffix
             FormInstance instance = instancesMap.get(elementId);
             Preconditions.checkNotNull(instance);
