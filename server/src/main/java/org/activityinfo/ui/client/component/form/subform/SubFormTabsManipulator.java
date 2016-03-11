@@ -255,7 +255,11 @@ public class SubFormTabsManipulator {
     }
 
     public LocalDateRange getSelectedRange() {
-        String cookieValue = Cookies.getCookie("subform.tab." + PredefinedPeriods.fromPeriod(periodValue).name());
+        return getSelectedRange(PredefinedPeriods.fromPeriod(periodValue));
+    }
+
+    public static LocalDateRange getSelectedRange(PredefinedPeriods predefinedPeriod) {
+        String cookieValue = Cookies.getCookie("subform.tab." + predefinedPeriod.name());
 
         if (!Strings.isNullOrEmpty(cookieValue)) {
             return LocalDateRange.fromJson(cookieValue);

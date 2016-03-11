@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.extjs.gxt.ui.client.util.DateWrapper;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -199,6 +200,32 @@ public class SubFormTabsPresenter {
         for (String id : keySet) {
             addClickHandlerToElementById(appendIdSuffix(id));
         }
+
+        selectTabFromCookie();
+    }
+
+    private void selectTabFromCookie() {
+        if (activeTabId != null) {
+            return; // we already have manually selected tab
+        }
+
+        Optional<FormInstance> selectedPeriodInstance = getSelectedPeriodInstance();
+        if (selectedPeriodInstance.isPresent()) {
+            onButtonClick(appendIdSuffix(selectedPeriodInstance.get().getId().asString()));
+        }
+    }
+
+    private Optional<FormInstance> getSelectedPeriodInstance() {
+        DateRange selectedRange = SubFormTabsManipulator.getSelectedRange(periodType).asDateRange();
+        if (selectedRange != null) {
+            for (FormInstance instance : instancesMap.values()) {
+                if (PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance).equals(selectedRange)) {
+                    return Optional.of(instance);
+                }
+            }
+        }
+
+        return Optional.absent();
     }
 
     private String appendIdSuffix(String id) {
