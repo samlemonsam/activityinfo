@@ -37,6 +37,7 @@ import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -313,7 +314,8 @@ public class FormModel {
     }
 
     public Set<FieldContainer> getContainersOfClass(ResourceId classId) {
-        return classToFields.get(classId);
+        Set<FieldContainer> containers = classToFields.get(classId);
+        return containers != null ? containers : Collections.<FieldContainer>emptySet();
     }
 
     public FormModel addContainerOfClass(ResourceId classId, FieldContainer fieldContainer) {
