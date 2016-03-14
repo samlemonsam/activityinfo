@@ -25,7 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.date.EpiWeek;
@@ -180,7 +179,7 @@ public class PeriodInstanceKeyedGenerator {
     private String getLabel(DateRange range, PeriodValue period, Direction direction) {
         if (period.equals(PredefinedPeriods.WEEKLY.getPeriod())) {
             EpiWeek epiWeek = CalendarUtils.epiWeek(range.midDate(), dayOfWeekProvider);
-            return I18N.CONSTANTS.week() + " " + epiWeek.getWeekInYear() + " " + epiWeek.getYear();
+            return epiWeek.getYear() + "W" + epiWeek.getWeekInYear();
         } else if (period.equals(PredefinedPeriods.BI_WEEKLY.getPeriod())) {
             Date startDate = CalendarUtil.copyDate(range.getStart());
             Date endDate = CalendarUtil.copyDate(range.getEnd());
@@ -191,12 +190,7 @@ public class PeriodInstanceKeyedGenerator {
             EpiWeek firstWeek = CalendarUtils.epiWeek(startDate, dayOfWeekProvider);
             EpiWeek secondWeek = CalendarUtils.epiWeek(endDate, dayOfWeekProvider);
 
-            if (firstWeek.getYear() == secondWeek.getYear()) {
-                return I18N.CONSTANTS.week() + " " + firstWeek.getWeekInYear() + ", " + secondWeek.getWeekInYear() + " " + firstWeek.getYear();
-            } else {
-                return I18N.CONSTANTS.week() + " " + firstWeek.getWeekInYear() + " " + firstWeek.getYear() + " - " +
-                        I18N.CONSTANTS.week() + " " + secondWeek.getWeekInYear() + " " + secondWeek.getYear();
-            }
+            return firstWeek.getYear() + "W" + firstWeek.getWeekInYear() + "-" + secondWeek.getWeekInYear();
         }
         return format(getDateForLabel(range, period), period);
     }
@@ -215,9 +209,7 @@ public class PeriodInstanceKeyedGenerator {
             return formatter.format("yyyy", date);
         } else if (PredefinedPeriods.MONTHLY.getPeriod().equals(period)) {
             return formatter.format("MMM yyyy", date);
-        } else if (PredefinedPeriods.DAILY.getPeriod().equals(period) ||
-                PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period) ||
-                PredefinedPeriods.WEEKLY.getPeriod().equals(period)) {
+        } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {
             return formatter.format("dd MMM yyyy", date);
         }
 
