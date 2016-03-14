@@ -181,6 +181,22 @@ public class PeriodInstanceKeyedGenerator {
         if (period.equals(PredefinedPeriods.WEEKLY.getPeriod())) {
             EpiWeek epiWeek = CalendarUtils.epiWeek(range.midDate(), dayOfWeekProvider);
             return I18N.CONSTANTS.week() + " " + epiWeek.getWeekInYear() + " " + epiWeek.getYear();
+        } else if (period.equals(PredefinedPeriods.BI_WEEKLY.getPeriod())) {
+            Date startDate = CalendarUtil.copyDate(range.getStart());
+            Date endDate = CalendarUtil.copyDate(range.getEnd());
+
+//            CalendarUtil.addDaysToDate(startDate, 1);
+//            CalendarUtil.addDaysToDate(endDate, 1);
+
+            EpiWeek firstWeek = CalendarUtils.epiWeek(startDate, dayOfWeekProvider);
+            EpiWeek secondWeek = CalendarUtils.epiWeek(endDate, dayOfWeekProvider);
+
+            if (firstWeek.getYear() == secondWeek.getYear()) {
+                return I18N.CONSTANTS.week() + " " + firstWeek.getWeekInYear() + ", " + secondWeek.getWeekInYear() + " " + firstWeek.getYear();
+            } else {
+                return I18N.CONSTANTS.week() + " " + firstWeek.getWeekInYear() + " " + firstWeek.getYear() + " - " +
+                        I18N.CONSTANTS.week() + " " + secondWeek.getWeekInYear() + " " + secondWeek.getYear();
+            }
         }
         return format(getDateForLabel(range, period), period);
     }
@@ -241,6 +257,7 @@ public class PeriodInstanceKeyedGenerator {
             return CalendarUtils.rangeByEpiWeekFromDate(dayOfWeekProvider, point);
         } else if (PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period)) {
             CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -14 : 14);
+            return CalendarUtils.rangeByEpiBiWeekFromDate(dayOfWeekProvider, point);
         } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {
             CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -1 : 1);
         } else {

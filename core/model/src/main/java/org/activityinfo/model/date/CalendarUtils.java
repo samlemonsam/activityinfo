@@ -168,6 +168,13 @@ public class CalendarUtils {
         return rangeByEpiWeek(dayOfWeekProvider, epiWeek);
     }
 
+    public static DateRange rangeByEpiBiWeekFromDate(DayOfWeekProvider dayOfWeekProvider, Date date) {
+        EpiWeek epiWeek = epiWeek(date, dayOfWeekProvider);
+        DateRange firstRange = rangeByEpiWeek(dayOfWeekProvider, epiWeek);
+        DateRange secondRange = rangeByEpiWeek(dayOfWeekProvider, epiWeek.setWeekInYear(epiWeek.getWeekInYear() + 1));
+        return new DateRange(firstRange.getStart(), secondRange.getEnd());
+    }
+
     public static DateRange rangeByEpiWeek(DayOfWeekProvider dayOfWeekProvider, EpiWeek epiWeek) {
         Date date = new LocalDate(epiWeek.getYear(), 1, 1).atMidnightInMyTimezone();
         int dayInYearInsideWeek = epiWeek.getWeekInYear() * 7 - 4;
