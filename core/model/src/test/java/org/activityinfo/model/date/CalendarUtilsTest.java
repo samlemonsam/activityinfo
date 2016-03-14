@@ -67,6 +67,7 @@ public class CalendarUtilsTest {
 
     @Test
     public void weekOfYear() {
+        assertWeekOfYear(2016, 1, 3, 1, 2016);
         assertWeekOfYear(2015, 1, 1, 53, 2014);
         assertWeekOfYear(2015, 1, 4, 1, 2015);
         assertWeekOfYear(2015, 2, 2, 5, 2015);
@@ -81,7 +82,7 @@ public class CalendarUtilsTest {
         assertWeekOfYear(2013, 12, 29, 1, 2014);
         assertWeekOfYear(2013, 12, 30, 1, 2014);
         assertWeekOfYear(2013, 12, 31, 1, 2014);
-        assertWeekOfYear(2012, 1, 1, 52, 2011);
+        assertWeekOfYear(2012, 1, 1, 1, 2012);
         assertWeekOfYear(2012, 1, 2, 1, 2012);
         assertWeekOfYear(2011, 1, 1, 52, 2010);
         assertWeekOfYear(2011, 2, 2, 5, 2011);

@@ -103,7 +103,7 @@ public class CalendarUtils {
         // Number of days between first day of epic week in year and target date
         int daysBetween = CalendarUtil.getDaysBetween(firstDayOfEpicWeekInYear, target);
         if (daysBetween < 0 ||
-                (daysBetween == 0 && (dayInMonth < 4) && (dayOfWeek == DayOfWeek.FRIDAY || dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY))) {
+                (daysBetween == 0 && (dayInMonth < 4) && (dayOfWeek == DayOfWeek.FRIDAY || dayOfWeek == DayOfWeek.SATURDAY))) {
             Date lastDayInPreviousYear = new LocalDate(year - 1, 12, 31).atMidnightInMyTimezone();
             EpiWeek epiWeek = epiWeek(lastDayInPreviousYear, dayOfWeekProvider);
             epiWeek.setYear(year - 1);

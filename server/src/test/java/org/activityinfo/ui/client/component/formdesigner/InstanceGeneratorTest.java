@@ -344,10 +344,10 @@ public class InstanceGeneratorTest {
         print(instances, "Weekly BACK 4");
 
         Assert.assertEquals(instances.size(), 4);
-        assertLabel(instances.get(0), "Week 1 2015");
-        assertLabel(instances.get(1), "Week 2 2015");
-        assertLabel(instances.get(2), "Week 3 2015");
-        assertLabel(instances.get(3), "Week 4 2015");
+        assertLabel(instances.get(0), "2015W1");
+        assertLabel(instances.get(1), "2015W2");
+        assertLabel(instances.get(2), "2015W3");
+        assertLabel(instances.get(3), "2015W4");
 
         instances = generator.next();
 
@@ -355,10 +355,10 @@ public class InstanceGeneratorTest {
 
         Assert.assertEquals(instances.size(), 4);
 
-        assertLabel(instances.get(0), "Week 2 2015");
-        assertLabel(instances.get(1), "Week 3 2015");
-        assertLabel(instances.get(2), "Week 4 2015");
-        assertLabel(instances.get(3), "Week 5 2015");
+        assertLabel(instances.get(0), "2015W2");
+        assertLabel(instances.get(1), "2015W3");
+        assertLabel(instances.get(2), "2015W4");
+        assertLabel(instances.get(3), "2015W5");
 
         instances = generator.next();
 
@@ -366,10 +366,10 @@ public class InstanceGeneratorTest {
 
         Assert.assertEquals(instances.size(), 4);
 
-        assertLabel(instances.get(0), "Week 3 2015");
-        assertLabel(instances.get(1), "Week 4 2015");
-        assertLabel(instances.get(2), "Week 5 2015");
-        assertLabel(instances.get(3), "Week 6 2015");
+        assertLabel(instances.get(0), "2015W3");
+        assertLabel(instances.get(1), "2015W4");
+        assertLabel(instances.get(2), "2015W5");
+        assertLabel(instances.get(3), "2015W6");
 
         instances = generator.previous();
 
@@ -377,10 +377,10 @@ public class InstanceGeneratorTest {
 
         Assert.assertEquals(instances.size(), 4);
 
-        assertLabel(instances.get(0), "Week 2 2015");
-        assertLabel(instances.get(1), "Week 3 2015");
-        assertLabel(instances.get(2), "Week 4 2015");
-        assertLabel(instances.get(3), "Week 5 2015");
+        assertLabel(instances.get(0), "2015W2");
+        assertLabel(instances.get(1), "2015W3");
+        assertLabel(instances.get(2), "2015W4");
+        assertLabel(instances.get(3), "2015W5");
 
         instances = generator.next();
 
@@ -388,10 +388,10 @@ public class InstanceGeneratorTest {
 
         Assert.assertEquals(instances.size(), 4);
 
-        assertLabel(instances.get(0), "Week 3 2015");
-        assertLabel(instances.get(1), "Week 4 2015");
-        assertLabel(instances.get(2), "Week 5 2015");
-        assertLabel(instances.get(3), "Week 6 2015");
+        assertLabel(instances.get(0), "2015W3");
+        assertLabel(instances.get(1), "2015W4");
+        assertLabel(instances.get(2), "2015W5");
+        assertLabel(instances.get(3), "2015W6");
 
         instances = generator.fullPrevious();
 
@@ -399,11 +399,10 @@ public class InstanceGeneratorTest {
 
         Assert.assertEquals(instances.size(), 4);
 
-        assertLabel(instances.get(0), "Week 52 2014");
-        assertLabel(instances.get(1), "Week 53 2014");
-        assertLabel(instances.get(2), "Week 1 2015");
-        assertLabel(instances.get(3), "Week 2 2015");
-
+        assertLabel(instances.get(0), "2014W52");
+        assertLabel(instances.get(1), "2014W53");
+        assertLabel(instances.get(2), "2015W1");
+        assertLabel(instances.get(3), "2015W2");
     }
 
     @Test
@@ -485,6 +484,88 @@ public class InstanceGeneratorTest {
         assertLabel(instances.get(1), "30 Jan 2016");
         assertLabel(instances.get(2), "31 Jan 2016");
         assertLabel(instances.get(3), "01 Feb 2016");
+
+    }
+
+    @Test
+    public void fortnightly() {
+        PeriodInstanceKeyedGenerator generator = jvmGenerator();
+
+        List<FormInstance> instances = generator.generate(PredefinedPeriods.BI_WEEKLY.getPeriod(), fixedDate(4, Calendar.FEBRUARY, 2016), PeriodInstanceKeyedGenerator.Direction.BACK, 4);
+
+        print(instances, "fortnightly BACK 4");
+
+        Assert.assertEquals(instances.size(), 4);
+        assertLabel(instances.get(0), "2015W49-50");
+        assertLabel(instances.get(1), "2015W51-52");
+        assertLabel(instances.get(2), "2016W1-2");
+        assertLabel(instances.get(3), "2016W3-4");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "2015W47-48");
+        assertLabel(instances.get(1), "2015W49-50");
+        assertLabel(instances.get(2), "2015W51-52");
+        assertLabel(instances.get(3), "2016W1-2");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "2015W45-46");
+        assertLabel(instances.get(1), "2015W47-48");
+        assertLabel(instances.get(2), "2015W49-50");
+        assertLabel(instances.get(3), "2015W51-52");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "2015W43-44");
+        assertLabel(instances.get(1), "2015W45-46");
+        assertLabel(instances.get(2), "2015W47-48");
+        assertLabel(instances.get(3), "2015W49-50");
+
+        instances = generator.previous();
+
+        print(instances, "Daily PREVIOUS 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "2015W41-42");
+        assertLabel(instances.get(1), "2015W43-44");
+        assertLabel(instances.get(2), "2015W45-46");
+        assertLabel(instances.get(3), "2015W47-48");
+
+        instances = generator.next();
+
+        print(instances, "Daily NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "2015W43-44");
+        assertLabel(instances.get(1), "2015W45-46");
+        assertLabel(instances.get(2), "2015W47-48");
+        assertLabel(instances.get(3), "2015W49-50");
+
+        instances = generator.next();
+
+        print(instances, "Daily NEXT 1");
+
+        Assert.assertEquals(instances.size(), 4);
+
+        assertLabel(instances.get(0), "2015W45-46");
+        assertLabel(instances.get(1), "2015W47-48");
+        assertLabel(instances.get(2), "2015W49-50");
+        assertLabel(instances.get(3), "2015W51-52");
 
     }
 

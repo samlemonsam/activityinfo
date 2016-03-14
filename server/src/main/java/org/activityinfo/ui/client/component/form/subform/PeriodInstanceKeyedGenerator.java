@@ -245,11 +245,11 @@ public class PeriodInstanceKeyedGenerator {
             CalendarUtil.addDaysToDate(endDate, -1);
             return new DateRange(startDate, endDate);
         } else if (PredefinedPeriods.WEEKLY.getPeriod().equals(period)) {
-            CalendarUtil.addDaysToDate(point, direction == Direction.BACK ? -7 : 7);
-            return CalendarUtils.rangeByEpiWeekFromDate(dayOfWeekProvider, point);
+            CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -7 : 7);
+            return CalendarUtils.rangeByEpiWeekFromDate(dayOfWeekProvider, copy);
         } else if (PredefinedPeriods.BI_WEEKLY.getPeriod().equals(period)) {
             CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -14 : 14);
-            return CalendarUtils.rangeByEpiBiWeekFromDate(dayOfWeekProvider, point);
+            return CalendarUtils.rangeByEpiBiWeekFromDate(dayOfWeekProvider, copy);
         } else if (PredefinedPeriods.DAILY.getPeriod().equals(period)) {
             CalendarUtil.addDaysToDate(copy, direction == Direction.BACK ? -1 : 1);
         } else {
