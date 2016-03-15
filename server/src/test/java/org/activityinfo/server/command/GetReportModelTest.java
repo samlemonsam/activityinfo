@@ -34,6 +34,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.*;
+
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
@@ -80,5 +82,25 @@ public class GetReportModelTest extends CommandTestCase {
 
         assertNotNull(result.getReportMetadataDTO());
         assertEquals("Alex", result.getReportMetadataDTO().getOwnerName());
+    }
+
+    @Test //AI-1359
+    public void serializationDeserialization() throws IOException, ClassNotFoundException {
+        setUser(1);
+        ReportDTO result = execute(new GetReportModel(3, true));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(result);
+
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+        ReportDTO rereadDto = (ReportDTO) ois.readObject();
+
+        assertEquals(result.getReportMetadataDTO().getId(), rereadDto.getReportMetadataDTO().getId());
+        assertEquals(result.getReportMetadataDTO().getSubscribers(), rereadDto.getReportMetadataDTO().getSubscribers());
+        assertEquals(result.getReportMetadataDTO().getAmOwner(), rereadDto.getReportMetadataDTO().getAmOwner());
+        assertEquals(result.getReportMetadataDTO().getEmailDelivery(), rereadDto.getReportMetadataDTO().getEmailDelivery());
+        assertEquals(result.getReportMetadataDTO().getOwnerName(), rereadDto.getReportMetadataDTO().getOwnerName());
+        assertEquals(result.getReportMetadataDTO().getDay(), rereadDto.getReportMetadataDTO().getDay());
     }
 }
