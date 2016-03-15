@@ -25,11 +25,10 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.extjs.gxt.ui.client.data.RpcMap;
 import com.google.common.collect.Maps;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.legacy.shared.reports.model.EmailDelivery;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +170,8 @@ public final class ReportMetadataDTO extends BaseModelData implements DTO {
         return get("dashboard", false);
     }
 
-    private void writeObject(ObjectOutputStream o)
+    @GwtIncompatible
+    private void writeObject(java.io.ObjectOutputStream o)
             throws IOException {
 
         o.writeObject(freq);
@@ -180,8 +180,9 @@ public final class ReportMetadataDTO extends BaseModelData implements DTO {
         o.writeObject(Maps.newHashMap(map.getTransientMap()));
     }
 
-    private void readObject(ObjectInputStream o)
-            throws IOException, ClassNotFoundException {
+    @GwtIncompatible
+    private void readObject(java.io.ObjectInputStream o)
+            throws IOException, java.lang.ClassNotFoundException {
 
         freq = (EmailDelivery) o.readObject();
         subscribers = (List) o.readObject();
