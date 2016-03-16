@@ -60,11 +60,11 @@ public class GeneratorUtils {
         Filter filter = new Filter(element.getFilter());
 
         if (dateRange != null) {
-            if (filter.getMinDate() == null) {
-                filter.setMinDate(dateRange.getMinDate());
+            if (filter.getEndDateRange().getMinDate() == null) {
+                filter.getEndDateRange().setMinDate(dateRange.getMinDate());
             }
-            if (filter.getMaxDate() == null) {
-                filter.setMaxDate(dateRange.getMaxDate());
+            if (filter.getEndDateRange().getMaxDate() == null) {
+                filter.getEndDateRange().setMaxDate(dateRange.getMaxDate());
             }
         }
         return filter;

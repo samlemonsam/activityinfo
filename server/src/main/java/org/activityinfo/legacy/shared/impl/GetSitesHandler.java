@@ -43,6 +43,7 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.model.expr.eval.FieldReader;
 import org.activityinfo.model.expr.eval.FormSymbolTable;
 import org.activityinfo.model.expr.eval.PartialEvaluator;
@@ -507,15 +508,19 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 }
                 query.onlyWhere(")");
             }
+            applyDateRangeFilter("site.Date1", filter.getEndDateRange(), query);
+            applyDateRangeFilter("site.Date2", filter.getEndDateRange(), query);
+        }
+    }
 
-            LocalDate filterMinDate = filter.getDateRange().getMinLocalDate();
-            if (filterMinDate != null) {
-                query.where("site.Date2").greaterThanOrEqualTo(filterMinDate);
-            }
-            LocalDate filterMaxDate = filter.getDateRange().getMaxLocalDate();
-            if (filterMaxDate != null) {
-                query.where("site.Date2").lessThanOrEqualTo(filterMaxDate);
-            }
+    private void applyDateRangeFilter(String field, DateRange range, SqlQuery query) {
+        LocalDate filterMinDate = range.getMinLocalDate();
+        if (filterMinDate != null) {
+            query.where(field).greaterThanOrEqualTo(filterMinDate);
+        }
+        LocalDate filterMaxDate = range.getMaxLocalDate();
+        if (filterMaxDate != null) {
+            query.where(field).lessThanOrEqualTo(filterMaxDate);
         }
     }
 

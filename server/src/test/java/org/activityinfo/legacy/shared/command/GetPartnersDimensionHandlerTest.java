@@ -64,8 +64,8 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
 
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.Activity, 1);
-        filter.setMinDate(new LocalDate(1998,1,1).atMidnightInMyTimezone());
-        filter.setMaxDate(new LocalDate(2099,1,15).atMidnightInMyTimezone());
+        filter.getEndDateRange().setMinDate(new LocalDate(1998,1,1).atMidnightInMyTimezone());
+        filter.getEndDateRange().setMaxDate(new LocalDate(2099,1,15).atMidnightInMyTimezone());
 
         PartnerResult result = execute(filter);
         assertThat(result.getData().size(), equalTo(2));

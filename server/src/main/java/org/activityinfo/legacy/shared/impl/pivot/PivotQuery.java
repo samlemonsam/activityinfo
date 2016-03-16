@@ -175,11 +175,11 @@ public class PivotQuery implements WorkItem {
             appendVisibilityFilter();
         }
 
-        if (filter.getMinDate() != null) {
-            query.where(baseTable.getDateCompleteColumn()).greaterThanOrEqualTo(filter.getMinDate());
+        if (filter.getEndDateRange().getMinDate() != null) {
+            query.where(baseTable.getDateCompleteColumn()).greaterThanOrEqualTo(filter.getEndDateRange().getMinDate());
         }
-        if (filter.getMaxDate() != null) {
-            query.where(baseTable.getDateCompleteColumn()).lessThanOrEqualTo(filter.getMaxDate());
+        if (filter.getEndDateRange().getMaxDate() != null) {
+            query.where(baseTable.getDateCompleteColumn()).lessThanOrEqualTo(filter.getEndDateRange().getMaxDate());
         }
 
         appendDimensionRestrictions();

@@ -15,10 +15,7 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
-import org.activityinfo.legacy.shared.reports.model.AdminDimension;
-import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
-import org.activityinfo.legacy.shared.reports.model.DateDimension;
-import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.legacy.shared.reports.model.*;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
@@ -217,8 +214,7 @@ public class PivotAdapter {
 
             case Database:
                 return new DatabaseDimBinding();
-
-
+            
             case Target:
                 return new TargetDimBinding();
 
@@ -544,7 +540,7 @@ public class PivotAdapter {
         
         } else if(activity.isMonthly() && 
                 (command.isPivotedBy(DimensionType.Date) ||
-                 command.getFilter().isDateRestricted())) {
+                 command.getFilter().isEndDateRestricted())) {
             
             // if we are pivoting or filtering by date, then we need
             // to query the actual reporting periods and count distinct sites
@@ -674,7 +670,8 @@ public class PivotAdapter {
         conditions.addAll(filterExpr("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location));
         conditions.addAll(adminFilter(formTree));
         conditions.addAll(attributeFilters());
-        conditions.addAll(dateFilter("date2"));
+        conditions.addAll(dateFilter("date1", filter.getStartDateRange()));
+        conditions.addAll(dateFilter("date2", filter.getEndDateRange()));
         
         if(permissionFilter.isPresent()) {
             conditions.add(permissionFilter.get());
@@ -695,7 +692,9 @@ public class PivotAdapter {
         List<ExprNode> conditions = Lists.newArrayList();
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
         conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
-        conditions.addAll(dateFilter("toDate"));
+
+        conditions.addAll(dateFilter("fromDate", filter.getStartDateRange()));
+        conditions.addAll(dateFilter("toDate", filter.getEndDateRange()));
         
         if(conditions.isEmpty()) {
             return null;
@@ -769,12 +768,12 @@ public class PivotAdapter {
     }
 
 
-    private Collection<FunctionCallNode> dateFilter(String dateField) {
-        if(filter.isDateRestricted()) {
+    private Collection<FunctionCallNode> dateFilter(String dateField, DateRange range) {
+        if(range.isRestricted()) {
 
             SymbolExpr dateExpr = new SymbolExpr(dateField);
-            ConstantExpr minDate = new ConstantExpr(new LocalDate(filter.getMinDate()));
-            ConstantExpr maxDate = new ConstantExpr(new LocalDate(filter.getMaxDate()));
+            ConstantExpr minDate = new ConstantExpr(new LocalDate(range.getMinDate()));
+            ConstantExpr maxDate = new ConstantExpr(new LocalDate(range.getMaxDate()));
 
             return singleton(
                     new FunctionCallNode(AndFunction.INSTANCE,

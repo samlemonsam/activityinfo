@@ -180,7 +180,7 @@ public class SiteTimeTreeLoader extends BaseTreeLoader<ModelData> implements Sit
 
         private Filter narrowFilter(DateRange range) {
             Filter narrowed = new Filter(filter);
-            narrowed.setDateRange(DateRange.intersection(filter.getDateRange(), range));
+            narrowed.setEndDateRange(DateRange.intersection(filter.getEndDateRange(), range));
             return narrowed;
         }
     }

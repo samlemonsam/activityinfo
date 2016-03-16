@@ -269,7 +269,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
     private Filter composeSiteFilter() {
         Filter siteFilter = new Filter();
         siteFilter.addRestriction(DimensionType.Activity, activityIds);
-        siteFilter.setDateRange(query.getFilter().getDateRange());
+        siteFilter.setEndDateRange(query.getFilter().getEndDateRange());
 
         for(DimensionType type : query.getFilter().getRestrictedDimensions()) {
             if(type != DimensionType.Activity && type != DimensionType.Database && type != DimensionType.Indicator) {

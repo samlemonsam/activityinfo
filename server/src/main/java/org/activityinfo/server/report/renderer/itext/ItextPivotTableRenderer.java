@@ -41,7 +41,7 @@ public class ItextPivotTableRenderer implements ItextRenderer<PivotTableReportEl
 
         document.add(ThemeHelper.elementTitle(element.getTitle()));
         ItextRendererHelper.addFilterDescription(document, element.getContent().getFilterDescriptions());
-        ItextRendererHelper.addDateFilterDescription(document, element.getFilter().getDateRange());
+        ItextRendererHelper.addDateFilterDescription(document, element.getFilter().getEndDateRange());
         PivotTableData data = element.getContent().getData();
 
         if (data.isEmpty()) {

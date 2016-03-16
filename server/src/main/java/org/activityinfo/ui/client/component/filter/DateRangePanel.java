@@ -46,13 +46,22 @@ import java.util.Date;
  * @author Alex Bertram
  */
 public class DateRangePanel extends ContentPanel implements HasValue<Filter>, FilterPanel {
-    private DateField datefieldMinDate;
-    private DateField datefieldMaxDate;
+
+    private DateType dateType;
+
+    public enum DateType {
+        START,
+        END
+    }
+    
+    private DateField minField;
+    private DateField maxField;
 
     private FilterToolBar filterToolBar;
 
-    public DateRangePanel() {
+    public DateRangePanel(DateType dateType) {
         super();
+        this.dateType = dateType;
 
         initializeComponent();
 
@@ -83,12 +92,23 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
     protected void applyFilter() {
         Filter value = getValue();
         ValueChangeEvent.fire(this, value);
-        filterToolBar.setRemoveFilterEnabled(value.isDateRestricted());
+        filterToolBar.setRemoveFilterEnabled(isRestricted(value));
+    }
+
+    private boolean isRestricted(Filter value) {
+        switch (dateType) {
+            case START:
+                return value.isStartDateRestricted();
+            case END:
+                return value.isEndDateRestricted();
+            default:
+                throw new IllegalStateException("dateType: " + dateType);
+        }
     }
 
     protected void removeFilter() {
-        datefieldMinDate.setValue(null);
-        datefieldMaxDate.setValue(null);
+        minField.setValue(null);
+        maxField.setValue(null);
         filterToolBar.setRemoveFilterEnabled(false);
         ValueChangeEvent.fire(this, getValue());
     }
@@ -96,19 +116,26 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
     private void createToDateField() {
         add(new LabelField(I18N.CONSTANTS.toDate()));
 
-        datefieldMaxDate = new DateField();
-        add(datefieldMaxDate);
+        maxField = new DateField();
+        add(maxField);
     }
 
     private void createFromDateField() {
         add(new LabelField(I18N.CONSTANTS.fromDate()));
 
-        datefieldMinDate = new DateField();
-        add(datefieldMinDate);
+        minField = new DateField();
+        add(minField);
     }
 
     private void initializeComponent() {
-        setHeadingText(I18N.CONSTANTS.filterByDate());
+        switch (dateType) {
+            case START:
+                setHeadingText(I18N.CONSTANTS.filterByStartDate());
+                break;
+            case END:
+                setHeadingText(I18N.CONSTANTS.filterByEndDate());
+                break;
+        }
         setIcon(IconImageBundle.ICONS.filter());
     }
 
@@ -128,8 +155,16 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
     @Override
     public Filter getValue() {
         Filter filter = new Filter();
-        filter.setMinDate(datefieldMinDate.getValue());
-        filter.setMaxDate(datefieldMaxDate.getValue());
+        switch (dateType) {
+            case START:
+                filter.getStartDateRange().setMinDate(minField.getValue());
+                filter.getStartDateRange().setMaxDate(maxField.getValue());
+                break;
+            case END:
+                filter.getEndDateRange().setMinDate(minField.getValue());
+                filter.getEndDateRange().setMaxDate(maxField.getValue());
+                break;
+        }
 
         return filter;
     }
@@ -141,10 +176,18 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
 
     @Override
     public void setValue(Filter value, boolean fireEvents) {
-        datefieldMinDate.setValue(value.getMinDate());
-        datefieldMaxDate.setValue(value.getMaxDate());
+        switch (dateType) {
+            case START:
+                minField.setValue(value.getStartDateRange().getMinDate());
+                maxField.setValue(value.getStartDateRange().getMaxDate());               
+                break;
+            case END:
+                minField.setValue(value.getEndDateRange().getMinDate());
+                maxField.setValue(value.getEndDateRange().getMaxDate());
+                break;
+        }
 
-        filterToolBar.setRemoveFilterEnabled(value.isDateRestricted());
+        filterToolBar.setRemoveFilterEnabled(isRestricted(value));
 
         if (fireEvents) {
             ValueChangeEvent.fire(this, getValue());
@@ -152,19 +195,19 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
     }
 
     public Date getMinDate() {
-        return datefieldMinDate.getValue();
+        return minField.getValue();
     }
 
     public Date getMaxDate() {
-        return datefieldMaxDate.getValue();
+        return maxField.getValue();
     }
 
     public void setMinDate(Date date) {
-        datefieldMinDate.setValue(date);
+        minField.setValue(date);
     }
 
     public void setMaxDate(Date date) {
-        datefieldMaxDate.setValue(date);
+        maxField.setValue(date);
     }
 
     @Override

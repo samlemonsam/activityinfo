@@ -38,21 +38,24 @@ public class FilterPane extends ContentPanel {
 
         ActivityFilterPanel activityFilterPanel = new ActivityFilterPanel(dispatcher);
         AdminFilterPanel adminFilterPanel = new AdminFilterPanel(dispatcher);
-        DateRangePanel datePanel = new DateRangePanel();
+        DateRangePanel startDatePanel = new DateRangePanel(DateRangePanel.DateType.START);
+        DateRangePanel endDatePanel = new DateRangePanel(DateRangePanel.DateType.END);
         PartnerFilterPanel partnerPanel = new PartnerFilterPanel(dispatcher);
         AttributeFilterPanel attributePanel = new AttributeFilterPanel(dispatcher);
         LocationFilterPanel locationFilterPanel = new LocationFilterPanel(dispatcher);
 
         add(activityFilterPanel);
         add(adminFilterPanel);
-        add(datePanel);
+        add(startDatePanel);
+        add(endDatePanel);
         add(partnerPanel);
         add(attributePanel);
         add(locationFilterPanel);
 
         filterPanelSet = new FilterPanelSet(activityFilterPanel,
                 adminFilterPanel,
-                datePanel,
+                endDatePanel,
+                startDatePanel,
                 partnerPanel,
                 attributePanel,
                 locationFilterPanel);

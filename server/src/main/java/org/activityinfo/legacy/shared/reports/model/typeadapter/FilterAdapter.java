@@ -49,14 +49,22 @@ public class FilterAdapter extends XmlAdapter<FilterAdapter.FilterElement, Filte
         @XmlElement(name = "restriction")
         private List<Restriction> restrictions = new ArrayList<Restriction>(0);
 
+        /**
+         * Date range for end date. Note that the XML element is called "dateRange" and 
+         * not "endDateRange" for backward compatibility.
+         */
+        @XmlElement(name = "dateRange")
+        private DateRange endDateRange;
+        
         @XmlElement
-        private DateRange dateRange;
+        private DateRange startDateRange;
     }
 
     @Override
     public Filter unmarshal(FilterElement element) throws Exception {
         Filter filter = new Filter();
-        filter.setDateRange(element.dateRange);
+        filter.setStartDateRange(element.startDateRange);
+        filter.setEndDateRange(element.endDateRange);
 
         for (Restriction r : element.restrictions) {
             for (String s : r.categories) {
@@ -79,7 +87,8 @@ public class FilterAdapter extends XmlAdapter<FilterAdapter.FilterElement, Filte
     @Override
     public FilterElement marshal(Filter filter) throws Exception {
         FilterElement element = new FilterElement();
-        element.dateRange = filter.getDateRange();
+        element.startDateRange = filter.getStartDateRange();
+        element.endDateRange = filter.getEndDateRange();
         for (DimensionType t : filter.getRestrictedDimensions()) {
             Restriction r = new Restriction();
             r.dimension = t.toString().toLowerCase();

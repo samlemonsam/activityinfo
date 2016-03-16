@@ -112,7 +112,7 @@ public class DrillDownEditor implements Shutdownable {
         while (axis != null) {
             if (axis.getDimension() != null) {
                 if (axis.getDimension().getType() == DimensionType.Date) {
-                    filter.setDateRange(intersection(filter.getDateRange(),
+                    filter.setEndDateRange(intersection(filter.getEndDateRange(),
                             DATES.rangeFromCategory(axis.getCategory())));
 
                 } else if (axis.getCategory() instanceof EntityCategory) {

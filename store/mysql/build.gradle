@@ -9,7 +9,7 @@ dependencies {
     compile libraries.guava
     compile libraries.jdbc.mysql
 
-    testCompile 'org.dbunit:dbunit:2.5.0'
+    testCompile libraries.dbunit
 
     testCompile libraries.appengine.api
     testCompile libraries.appengine.testing

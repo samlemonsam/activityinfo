@@ -261,7 +261,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         forTotalSiteCounts();
         filteringOnDatabases(1, 2);
         dimensions.add(new DateDimension(DateUnit.MONTH));
-        filter.setDateRange(new DateUtilCalendarImpl().yearRange(2009));
+        filter.setEndDateRange(new DateUtilCalendarImpl().yearRange(2009));
 
         execute();
 
@@ -316,7 +316,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         dimensions.add(new DateDimension(DateUnit.YEAR));
         dimensions.add(new Dimension(DimensionType.Target));
         filter.addRestriction(DimensionType.Indicator, 1);
-        filter.setDateRange(new DateRange(new LocalDate(2008, 1, 1), new LocalDate(2008, 12, 31)));
+        filter.setEndDateRange(new DateRange(new LocalDate(2008, 1, 1), new LocalDate(2008, 12, 31)));
         execute();
 
         assertThat().thereAre(2).buckets();
@@ -332,7 +332,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         dimensions.add(new DateDimension(DateUnit.YEAR));
         dimensions.add(new Dimension(DimensionType.Target));
         filter.addRestriction(DimensionType.Indicator, 1);
-        filter.setDateRange(new DateRange(new LocalDate(2008, 1, 1), new LocalDate(2008, 12, 31)));
+        filter.setEndDateRange(new DateRange(new LocalDate(2008, 1, 1), new LocalDate(2008, 12, 31)));
         execute();
 
         assertThat().thereAre(1).buckets();
