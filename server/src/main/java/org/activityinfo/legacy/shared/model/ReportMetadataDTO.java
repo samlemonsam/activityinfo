@@ -23,9 +23,15 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.extjs.gxt.ui.client.data.RpcMap;
+import com.google.common.collect.Maps;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.legacy.shared.reports.model.EmailDelivery;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * One-to-one DTO for the
@@ -162,6 +168,34 @@ public final class ReportMetadataDTO extends BaseModelData implements DTO {
 
     public boolean isDashboard() {
         return get("dashboard", false);
+    }
+
+    @GwtIncompatible
+    private void writeObject(java.io.ObjectOutputStream o)
+            throws IOException {
+
+        o.writeObject(freq);
+        o.writeObject(subscribers);
+        o.writeBoolean(allowNestedValues);
+        o.writeObject(Maps.newHashMap(map.getTransientMap()));
+    }
+
+    @GwtIncompatible
+    private void readObject(java.io.ObjectInputStream o)
+            throws IOException, java.lang.ClassNotFoundException {
+
+        freq = (EmailDelivery) o.readObject();
+        subscribers = (List) o.readObject();
+        allowNestedValues = o.readBoolean();
+
+        HashMap<String,Object> readMap = (HashMap<String, Object>) o.readObject();
+        map = new RpcMap();
+
+        if (readMap != null && !readMap.isEmpty()) {
+            for (Map.Entry<String, Object> entry : readMap.entrySet()) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
 }

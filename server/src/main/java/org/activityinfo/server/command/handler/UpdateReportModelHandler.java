@@ -38,6 +38,7 @@ import org.activityinfo.server.report.ReportParserJaxb;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.xml.bind.JAXBException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +46,8 @@ import java.util.logging.Logger;
 public class UpdateReportModelHandler implements CommandHandler<UpdateReportModel> {
 
     private static final Logger LOGGER = Logger.getLogger(UpdateReportModelHandler.class.getName());
+
+    private static final MemcacheService MEMCACHE = MemcacheServiceFactory.getMemcacheService();
 
     private final EntityManager em;
 
@@ -64,25 +67,35 @@ public class UpdateReportModelHandler implements CommandHandler<UpdateReportMode
             throw new IllegalAccessCommandException("Current user does not have the right to edit this report");
         }
 
+        // Invalidate the cache BEFORE attempting to update the database,
+        // otherwise, we will leave the system in an inconsistent state if 
+        // the database update succeeds, but the memcache delete fails.
+        invalidateMemcache(cmd.getModel().getId());
+
+        // Now that we're sure that the memcache is clear of the old copy,
+        // we can safely update the underlying persistant datastore
         result.setTitle(cmd.getModel().getTitle());
-        // result.setJson(cmd.getReportJsonModel());
         try {
             result.setXml(ReportParserJaxb.createXML(cmd.getModel()));
         } catch (JAXBException e) {
             throw new UnexpectedCommandException(e);
         }
-
         em.persist(result);
-        invalidateMemcache(cmd.getModel().getId());
 
         return null;
     }
 
     public static void invalidateMemcache(Integer reportId) {
+        
+        // Invalidate the existing memcache entries for this reportId,
+        // AND prevent memcache from accepting updates for 10 seconds.
+        // This will ensure that any concurrent reads do not cache an old 
+        // version before the database commit completes.
         try {
-            final MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
-            memcacheService.delete(new GetReportModel(reportId, false), TimeUnit.SECONDS.toMillis(1));
-            memcacheService.delete(new GetReportModel(reportId, true), TimeUnit.SECONDS.toMillis(1));
+            MEMCACHE.deleteAll(Arrays.asList(
+                    new GetReportModel(reportId, false),
+                    new GetReportModel(reportId, true)), TimeUnit.SECONDS.toMillis(30));
+            
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to invalidate report cache", e);
         }

@@ -95,7 +95,7 @@ public class Message {
 
     private int consumeIndex(PeekingIterator<Character> it) throws MessageFormatException {
         StringBuilder number = new StringBuilder();
-        while(Character.isDigit(it.peek())) {
+        while(isAsciiDigit(it.peek())) {
             number.append(it.next());
         }
         if(number.length() == 0) {
@@ -106,6 +106,10 @@ public class Message {
         } catch (NumberFormatException e) {
             throw new MessageFormatException("Invalid placeholder number: '" + number.toString() + "'");
         }
+    }
+
+    private boolean isAsciiDigit(char c) {
+        return c >= '0' && c <= '9';
     }
 
     private Chunk consumeStaticChunk(PeekingIterator<Character> it) {
