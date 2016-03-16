@@ -23,6 +23,7 @@ package org.activityinfo.server.report.renderer.itext;
  */
 
 import com.lowagie.text.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.reports.content.PivotTableData;
 import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
 
@@ -45,7 +46,7 @@ public class ItextPivotTableRenderer implements ItextRenderer<PivotTableReportEl
         PivotTableData data = element.getContent().getData();
 
         if (data.isEmpty()) {
-            document.add(new Paragraph("Aucune Données")); // TODO: i18n
+            document.add(new Paragraph(I18N.CONSTANTS.noData()));
 
         } else {
             int colDepth = data.getRootColumn().getDepth();

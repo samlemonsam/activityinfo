@@ -1,14 +1,14 @@
 package org.activityinfo.ui.client.component.form.field;
 
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
@@ -53,6 +53,16 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 validate(true);
+            }
+        });
+        box.addBlurHandler(new BlurHandler() {
+            @Override
+            public void onBlur(BlurEvent event) {
+                try { // AI-1363
+                    box.getValueOrThrow();
+                } catch (ParseException e) {
+                    clearValue();
+                }
             }
         });
 

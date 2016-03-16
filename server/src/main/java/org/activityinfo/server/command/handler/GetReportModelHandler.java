@@ -98,7 +98,10 @@ public class GetReportModelHandler implements CommandHandlerAsync<GetReportModel
 
     private void memcache(GetReportModel cmd, ReportDTO report) {
         try {
-            memcacheService.put(cmd, report, Expiration.byDeltaSeconds(60), MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+            // Cache for 10 hours, will be invalidated by UpdateReportModelHandler if 
+            // there is a change.
+            memcacheService.put(cmd, report, Expiration.byDeltaSeconds(36000), 
+                    MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Exception putting report model to memcache", e);
         }

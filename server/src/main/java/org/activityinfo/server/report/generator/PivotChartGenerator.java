@@ -86,10 +86,11 @@ public class PivotChartGenerator extends PivotGenerator<PivotChartReportElement>
         PivotTableData.RangeCalculator rangeCalculator = new PivotTableData.RangeCalculator();
         data.visitAllCells(rangeCalculator);
 
-        // anchor the y axis to zero.
-        // TODO: check for cases where we don't want the axis to start at zero
-        // e.g. non-sum, non-count indicators
-        return ScaleUtil.computeScale(0, rangeCalculator.getMaxValue(), 5);
+        // In the case that all values are > 0, anchor the minimum to zero 
+        // to avoid a deceptive scale
+        double lowerBound = Math.min(rangeCalculator.getMinValue(), 0);
+
+        return ScaleUtil.computeScale(lowerBound, rangeCalculator.getMaxValue(), 5);
     }
 
     /**

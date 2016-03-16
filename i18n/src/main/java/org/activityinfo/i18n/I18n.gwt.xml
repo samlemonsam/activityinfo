@@ -28,13 +28,13 @@
   <source path="shared"/>
 
     <!-- Define the locales for which we have translations -->
-    <extend-property name="locale" values="en,fr,es,ar,nl"/>
+    <extend-property name="locale" values="en,fr,es,ar,nl,fa"/>
 
     <!-- work-around to eliminate "default locale" permutations -->
     <!-- http://www.google.com/url?sa=D&q=http://code.google.com/p/google-web-toolkit/issues/detail%3Fid%3D5769%23c1 -->
 
     <set-property-fallback name="locale" value="en"/>
 
-    <set-property name="locale" value="en,fr,es,ar,nl"/>
+    <set-property name="locale" value="en,fr,es,ar,nl,fa"/>
 
 </module>

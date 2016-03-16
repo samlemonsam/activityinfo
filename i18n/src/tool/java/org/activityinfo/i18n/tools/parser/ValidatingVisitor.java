@@ -45,14 +45,24 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
         try {
             format = new Message(decorator.apply(inputMessage));
         } catch (MessageFormatException e) {
+            System.err.println(String.format("Invalid message format %s[%s]: %s", key, input.getLanguage(), e.getMessage()));
             return false;
         }
         // make sure there are enough arguments for all the placeholders
         for (Message.Chunk chunk : format.getChunks()) {
             if(chunk.isPlaceholder()) {
+                boolean validPlaceholder = true;
                 if(chunk.getArgumentIndex() >= decl.getParameters().size()) {
                     System.err.println(String.format("Invalid translation %s[%s]: not enough arguments for [%s]",
                             key, input.getLanguage(), inputMessage));
+                    validPlaceholder = false;
+                }
+                
+                if(!validatePlaceholder(chunk)) {
+                    validPlaceholder = false;
+                }
+                
+                if(!validPlaceholder) {
                     return false;
                 }
             }
@@ -69,6 +79,13 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
                 }
             }
         }
+        return true;
+    }
+
+    private boolean validatePlaceholder(Message.Chunk chunk) {
+        String parts[] = chunk.getFormat().split(",");
+        
+        // TODO
         return true;
     }
 }

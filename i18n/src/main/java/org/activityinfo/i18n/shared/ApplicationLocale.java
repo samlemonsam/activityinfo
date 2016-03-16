@@ -9,7 +9,8 @@ public enum ApplicationLocale {
     ES("Español"),
     FR("Français"),
     NL("Nederlands"),
-    AR("العربية");
+    AR("العربية"),
+    FA("فارسی");
     
     private String localizedName;
 
