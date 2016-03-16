@@ -1,6 +1,5 @@
 package org.activityinfo.server.command.handler;
 
-import org.activityinfo.legacy.shared.command.OldPivotSites;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -28,16 +27,7 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
     
     @Override
     public CommandResult execute(final PivotSites cmd, final User user) throws CommandException {
-        
-        if(cmd.isPointRequested()) {
 
-            LOGGER.info("Falling back to old query engine for geographic query.");
-
-            // this is the only thing that is not working, so fall back to the old pivot sites handler
-            return dispatcher.execute(new OldPivotSites(cmd));
-
-        } 
-        
         PivotAdapter adapter;
         try {
             adapter = new PivotAdapter(catalog.get(), cmd, user.getId());

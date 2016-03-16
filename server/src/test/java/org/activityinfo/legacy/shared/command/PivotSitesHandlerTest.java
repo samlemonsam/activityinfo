@@ -869,45 +869,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         PivotTableData table = tableDataBuilder.build(report.getRowDimensions(), report.getColumnDimensions(),
             buckets);
     }
-
-    @Test
-    @OnDataSet("/dbunit/sites-points.db.xml")
-    public void testPointsInferred() {
-        dimensions.add(new Dimension(DimensionType.Location));
-        withPoints();
-        filteringOnDatabases(1);
-        execute();
-
-        // should be calculated from the territory's MBR
-        assertThat().forLocation(1).thereIsOneBucketWithValue(1500).at(
-                (26.8106418 + 28.37725848) / 2.0,
-                (-4.022388142 + -1.991221064) / 2.0);
-
-        // should be taken right from the location
-        assertThat().forLocation(2).thereIsOneBucketWithValue(3600).at(27.328491, -2.712609);
-
-        // should be calculated from RDC's MBR
-        assertThat().forLocation(4).thereIsOneBucketWithValue(44).at(
-                (12.18794184 + 31.306) / 2,
-                (-13.45599996 + 5.386098154) / 2);
-    }
-
-    @Test
-    @OnDataSet("/dbunit/sites-points.db.xml")
-    public void testPointsAdmin() {
-        dimensions.add(new AdminDimension(2));
-        filteringOnDatabases(1);
-        withPoints();
-        execute();
-
-        assertThat().forTerritoire(10).thereIsOneBucketWithValue(10000).at(
-                (28.30146624 + 29.0339514) / 2.0,
-                (-2.998746978 + -2.494392989) / 2.0);
-
-        assertThat().forTerritoire(12).thereIsOneBucketWithValue(5100).at(
-                (26.8106418 + 28.37725848) / 2.0,
-                (-4.022388142 + -1.991221064) / 2.0);
-    }
     
     @Test
     public void noVisibility() {
@@ -1056,7 +1017,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         try {
             PivotSites pivot = new PivotSites(dimensions, filter);
             pivot.setValueType(valueType);
-            pivot.setPointRequested(pointsRequested);
             buckets = execute(pivot).getBuckets();
         } catch (CommandException e) {
             throw new RuntimeException(e);
@@ -1245,16 +1205,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
             bucketCountIs(OWNER_USER_ID);
             assertEquals(description("value of only bucket"), expectedValue,
                     matchingBuckets.get(0).doubleValue(), 0.001);
-            return this;
-        }
-
-        public AssertionBuilder at(double x, double y) {
-            if (matchingBuckets.get(0).getPoint() == null) {
-                throw new AssertionError(description("non-null point for "));
-            }
-            assertEquals(description("x"), x, matchingBuckets.get(0).getPoint().getLng(), 0.001);
-            assertEquals(description("y"), y, matchingBuckets.get(0).getPoint().getLat(), 0.001);
-
             return this;
         }
 

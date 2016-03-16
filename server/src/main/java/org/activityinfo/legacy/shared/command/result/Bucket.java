@@ -98,10 +98,6 @@ public class Bucket implements Serializable {
         this.count = count;
     }
 
-    public AiLatLng getPoint() {
-        return point;
-    }
-
     public void setPoint(AiLatLng point) {
         this.point = point;
     }

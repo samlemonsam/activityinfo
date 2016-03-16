@@ -12,8 +12,6 @@ public class OldPivotSites extends PivotSites {
         setDimensions(command.getDimensions());
         setFilter(command.getFilter());
         setValueType(command.getValueType());
-        setPointRequested(command.isPointRequested());
-        
     }
     
 }
