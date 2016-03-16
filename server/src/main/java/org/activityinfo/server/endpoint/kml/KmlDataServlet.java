@@ -24,10 +24,11 @@ package org.activityinfo.server.endpoint.kml;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.activityinfo.legacy.shared.command.*;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.command.DimensionType;
+import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
+import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.server.authentication.BasicAuthentication;
 import org.activityinfo.server.command.DispatcherSync;
@@ -88,7 +89,7 @@ public class KmlDataServlet extends javax.servlet.http.HttpServlet {
 
         if (user == null) {
             // Not allowed, or no password provided so report unauthorized
-            res.setHeader("WWW-Authenticate", "BASIC realm=\"Utilisateurs authorises\"");
+            res.setHeader("WWW-Authenticate", "BASIC realm=\"ActivityInfo\"");
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

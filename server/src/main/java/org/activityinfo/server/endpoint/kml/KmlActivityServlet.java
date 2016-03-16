@@ -74,12 +74,13 @@ public class KmlActivityServlet extends HttpServlet {
         User user = authenticator.doAuthentication(auth);
         if (user == null) {
             // Not allowed, or no password provided so report unauthorized
-            res.setHeader("WWW-Authenticate", "BASIC realm=\"Utilisateurs authorises\"");
+            res.setHeader("WWW-Authenticate", "BASIC realm=\"ActivityInfo\"");
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String baseURL = "http://" + req.getServerName() + ":" + req.getServerPort() + "/earth/sites?activityId=";
+        String baseURL = (req.isSecure() ? "https" : "http") +  "://" + req.getServerName() + ":" + 
+                req.getServerPort() + "/earth/sites?activityId=";
         SchemaDTO schemaDTO = dispatcher.execute(new GetSchema());
 
         Map<String, Object> map = new HashMap<String, Object>();

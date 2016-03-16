@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * {@link org.activityinfo.server.endpoint.kml.KmlDataServlet}.
  * <p/>
  * This file will be downloaded to the users computer and can be saved locally,
- * but will asssure that all actual data comes live from the server.
+ * but will assure that all actual data comes live from the server.
  *
  * @author Alex Bertram (akbertram@gmail.com)
  */
@@ -64,8 +64,8 @@ public class KmlLinkServlet extends HttpServlet {
 
         Map<String, Object> link = new HashMap<String, Object>();
 
-        link.put("href", "http://" + req.getServerName() + ":" +
-                         req.getServerPort() + "/" + req.getRequestURI() + "/activities");
+        link.put("href", (req.isSecure() ? "https" : "http") + "://" + req.getServerName() + ":" +
+                         req.getServerPort() + req.getRequestURI() + "/activities");
 
         Template tpl = templateCfg.getTemplate("kml/NetworkLink.kml.ftl");
         resp.setContentType("application/vnd.google-earth.kml+xml;");
