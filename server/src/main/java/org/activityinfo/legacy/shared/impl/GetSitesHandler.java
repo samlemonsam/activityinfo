@@ -448,7 +448,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 boolean isRestricted = false;
                 for (DimensionType type : filter.getRestrictedDimensions()) {
                     if (isQueryableType(type)) {
-                        addJoint(query, filter.isLenient(), isFirst);
+                        addJoint(query, isFirst);
                         isRestricted = true;
                     }
 
@@ -486,7 +486,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                                     .where("av.AttributeId")
                                     .equalTo(attribute);
 
-                            addJoint(query, filter.isLenient(), isFirstAttr);
+                            addJoint(query, isFirstAttr);
                             if (isFirstAttr) {
                                 isFirstAttr = false;
                             }
@@ -530,13 +530,9 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 type == DimensionType.Location);
     }
 
-    private void addJoint(SqlQuery query, boolean lenient, boolean first) {
+    private void addJoint(SqlQuery query, boolean first) {
         if (!first) {
-            if (lenient) {
-                query.onlyWhere(" OR ");
-            } else {
-                query.onlyWhere(" AND ");
-            }
+            query.onlyWhere(" AND ");
         }
     }
 

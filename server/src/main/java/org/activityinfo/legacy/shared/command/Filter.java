@@ -47,20 +47,10 @@ public class Filter implements Serializable {
     private DateRange dateRange = new DateRange();
 
     /**
-     * In short: when set to true, the where-clauses of the pivotquery are joined by 'OR' instead of 'AND' (which is the
-     * default).
-     */
-    private boolean lenient = false;
-
-    /**
      * Constructs a <code>Filter</code> with no restrictions. All data visible
      * to the user will be included.
      */
     public Filter() {
-    }
-
-    public Filter(boolean lenient) {
-        this.lenient = lenient;
     }
 
     /**
@@ -74,7 +64,6 @@ public class Filter implements Serializable {
             this.restrictions.put(entry.getKey(), new HashSet<Integer>(entry.getValue()));
         }
         this.dateRange = filter.dateRange;
-        this.lenient = filter.lenient;
     }
 
     /**
@@ -232,14 +221,6 @@ public class Filter implements Serializable {
         return dateRange;
     }
 
-    public boolean isLenient() {
-        return lenient;
-    }
-
-    public void setLenient(boolean lenient) {
-        this.lenient = lenient;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -269,9 +250,6 @@ public class Filter implements Serializable {
         if (sb.length() != 0) {
             sb.append(", ");
         }
-        sb.append("lenient: ");
-        sb.append(lenient);
-
         sb.insert(0, "[");
         sb.append("]");
         return sb.toString();
