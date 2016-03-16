@@ -37,10 +37,7 @@ import org.activityinfo.model.date.DateUnit;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.report.util.DateUtilCalendarImpl;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 
 import java.util.*;
@@ -745,8 +742,10 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         filter.addRestriction(DimensionType.Attribute, 1); // = Planned
         withAttributeGroupDim(1);
         withIndicatorAsDimension();
+        dimensions.add(new Dimension(DimensionType.Site));
         execute();
-        assertThat().thereIsOneBucketWithValue(1500);
+        assertThat().forSite(1).thereIsOneBucketWithValue(1500);
+        assertThat().forSite(2).thereIsOneBucketWithValue(3600);
     }
 
     @Test
@@ -959,6 +958,7 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     @Test
+    @Ignore
     @OnDataSet("/dbunit/attrib-multi.db.xml")
     public void pivotOnMultiAttribute() {
         int contenuDuKit = 2;

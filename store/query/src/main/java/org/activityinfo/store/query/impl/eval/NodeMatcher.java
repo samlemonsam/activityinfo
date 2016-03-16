@@ -11,6 +11,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -61,7 +62,8 @@ public class NodeMatcher {
         List<Collection<NodeMatch>> matches = Lists.newArrayList();
 
         for (FormTree.Node field : fields) {
-            if(field.getType() instanceof ReferenceType) {
+            if(field.getType() instanceof ReferenceType || 
+               field.getType() instanceof RecordFieldType) {
                 Collection<NodeMatch> result = unionMatches(queryPath, field);
                 if (!result.isEmpty()) {
                     matches.add(result);
