@@ -133,7 +133,7 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
         newSite.setIndicatorValue(fieldId("EXP"), 3);
         newSite.setIndicatorValue(fieldId("WATER_ALLOC"), 400);
         newSite.setIndicatorValue(fieldId("PCT_INITIAL"), 50);
-        //newSite.setIndicatorValue(fieldId("PCT_INITIAL_HARD"), 0);
+        newSite.setIndicatorValue(fieldId("PCT_INITIAL_HARD"), 0);
         newSite.setIndicatorValue(fieldId("PCT_INITIAL_SOFT"), 30);
 
         CreateResult createSiteResult = execute(new CreateSite(newSite));

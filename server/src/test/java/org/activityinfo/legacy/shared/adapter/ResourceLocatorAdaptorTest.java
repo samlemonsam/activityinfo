@@ -163,10 +163,13 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         // read from server
         Projection secondRead = singleSiteProjection(query);
 
-        assertEquals(null, secondRead.getValue(path(indicatorField(1))));
-        assertEquals(null, secondRead.getValue(path(indicatorField(2))));
-        assertEquals(new Quantity(0), secondRead.getValue(path(indicatorField(11))));
-        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(12)))); // make sure NaN is not returned |
+        assertEquals(null, secondRead.getValue(path(indicatorField(1)))); // BENE
+        assertEquals(null, secondRead.getValue(path(indicatorField(2)))); // BACHE
+        
+        // Both BENE+BACHE and BENE/BACHE should be missing, because both
+        // BENE and BACHE are missing
+        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(11))));
+        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(12))));
     }
 
     private FieldPath path(ResourceId... fieldIds) {
