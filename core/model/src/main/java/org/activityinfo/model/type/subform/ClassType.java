@@ -116,10 +116,10 @@ public enum ClassType {
     }
 
     public static Optional<ClassType> byFormClass(@Nullable FormClass subForm) {
-        if (subForm == null || !subForm.getKeyField().isPresent()) {
+        if (subForm == null || !subForm.getSubformType().isPresent()) {
             return Optional.absent();
         }
-        return Optional.fromNullable(ClassType.byId(subForm.getKeyFieldType().get().getRange().iterator().next()));
+        return Optional.fromNullable(ClassType.byId(subForm.getSubformType().get()));
     }
 
     public static boolean isRepeating(FormClass formClass) {

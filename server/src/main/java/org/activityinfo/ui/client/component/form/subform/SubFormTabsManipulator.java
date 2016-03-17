@@ -103,7 +103,7 @@ public class SubFormTabsManipulator {
         this.subForm = subForm;
         this.formModel = formModel;
 
-        ResourceId typeClassId = subForm.getKeyFieldType().get().getRange().iterator().next();
+        ResourceId typeClassId = subForm.getSubformType().get();
 
         presenter.setTabCountSafely(SubformConstants.DEFAULT_TAB_COUNT);
 
@@ -116,7 +116,7 @@ public class SubFormTabsManipulator {
     }
 
     private void generateFormInstanceForPeriod(FormClass subForm, ResourceId typeClassId) {
-        this.periodValue = ((PeriodSubFormType) SubFormTypeRegistry.get().getKind(typeClassId)).getPeriod();
+        this.periodValue = ((PeriodSubFormType) SubFormTypeRegistry.get().getType(typeClassId)).getPeriod();
 
         final LocalDateRange selectedRange = getSelectedRange();
         final Date startDate = selectedRange != null ? selectedRange.asDateRange().getStart() : new Date();

@@ -31,8 +31,6 @@ import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -63,12 +61,7 @@ public class FormDesignerModel {
         final FormClass formClass = new FormClass(ResourceId.generateId());
 
         formClass.setOwnerId(rootFormClass.getId());
-        formClass.setKeyField(new FormField(ResourceId.generateId())
-                .setVisible(false)
-                .setType(new ReferenceType()
-                                .setCardinality(Cardinality.SINGLE)
-                                .setRange(PredefinedPeriods.MONTHLY.getResourceId())
-                ));
+        formClass.setSubformType(PredefinedPeriods.MONTHLY.getResourceId());
 
         registerSubform(formFieldId, formClass);
         return formClass;

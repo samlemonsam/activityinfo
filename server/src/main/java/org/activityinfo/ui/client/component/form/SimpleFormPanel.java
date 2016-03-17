@@ -179,7 +179,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
             validateField(widgetCreator.get(field.getId()));
         } else {
             FormClass formClass = model.getClassByField(field.getId());
-            if (formClass.getKeyField().isPresent()) {
+            if (formClass.getSubformType().isPresent()) {
                 widgetCreator.get(field.getId()).setInvalid(I18N.CONSTANTS.subFormTabNotSelected());
                 widgetCreator.get(field.getId()).getFieldWidget().clearValue();
             }

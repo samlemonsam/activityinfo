@@ -36,7 +36,7 @@ public class SubFormTypeRegistry {
 
     private static final SubFormTypeRegistry INSTANCE = new SubFormTypeRegistry();
 
-    private final Map<ResourceId, SubFormType> kinds = Maps.newLinkedHashMap();
+    private final Map<ResourceId, SubFormType> types = Maps.newLinkedHashMap();
 
     private SubFormTypeRegistry() {
 
@@ -51,22 +51,22 @@ public class SubFormTypeRegistry {
     }
 
     private void register(SubFormType kind) {
-        kinds.put(kind.getDefinition().getId(), kind);
+        types.put(kind.getDefinition().getId(), kind);
     }
 
     public static SubFormTypeRegistry get() {
         return INSTANCE;
     }
 
-    public SubFormType getKind(String id) {
-        return getKind(ResourceId.valueOf(id));
+    public SubFormType getType(String id) {
+        return getType(ResourceId.valueOf(id));
     }
 
-    public SubFormType getKind(ResourceId id) {
-        return kinds.get(id);
+    public SubFormType getType(ResourceId id) {
+        return types.get(id);
     }
 
-    public List<SubFormType> getKinds() {
-        return Lists.newArrayList(kinds.values());
+    public List<SubFormType> getTypes() {
+        return Lists.newArrayList(types.values());
     }
 }

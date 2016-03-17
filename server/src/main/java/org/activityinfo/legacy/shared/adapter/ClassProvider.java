@@ -56,7 +56,7 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
             // is that a location_type form class isn't treated specially by the application, while we are going
             // to have a small number of *different* form classes that ARE treated specially...
             case '_':
-                SubFormType subFormKind = SubFormTypeRegistry.get().getKind(classId);
+                SubFormType subFormKind = SubFormTypeRegistry.get().getType(classId);
                 if (subFormKind != null) {
                     return Promise.resolved(subFormKind.getDefinition());
                 }
