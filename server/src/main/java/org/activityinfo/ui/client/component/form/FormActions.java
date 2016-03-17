@@ -59,7 +59,7 @@ public class FormActions {
 
         for (Map.Entry<FormModel.SubformValueKey, FormInstance> entry : subformInstances.entrySet()) { // sub form instances
             if (!ClassType.isRepeating(entry.getKey().getSubForm())) {
-                toPersist.add(entry.getKey().getInstance()); // keyes
+                toPersist.add(entry.getKey().getTabInstance()); // keyes
             }
             toPersist.add(entry.getValue()); // values
 

@@ -78,19 +78,19 @@ public class FormModel {
     public static class SubformValueKey {
 
         private final FormClass subForm;
-        private final FormInstance instance;
+        private final FormInstance tabInstance;
 
-        public SubformValueKey(FormClass subForm, FormInstance instance) {
+        public SubformValueKey(FormClass subForm, FormInstance tabInstance) {
             this.subForm = subForm;
-            this.instance = instance;
+            this.tabInstance = tabInstance;
         }
 
         public FormClass getSubForm() {
             return subForm;
         }
 
-        public FormInstance getInstance() {
-            return instance;
+        public FormInstance getTabInstance() {
+            return tabInstance;
         }
 
         @Override
@@ -100,15 +100,24 @@ public class FormModel {
 
             SubformValueKey that = (SubformValueKey) o;
 
-            return !(subForm != null ? !subForm.equals(that.subForm) : that.subForm != null) && !(instance != null ? !instance.equals(that.instance) : that.instance != null);
+            return !(subForm != null ? !subForm.equals(that.subForm) : that.subForm != null) && !(tabInstance != null ? !tabInstance.equals(that.tabInstance) : that.tabInstance != null);
 
         }
 
         @Override
         public int hashCode() {
             int result = subForm != null ? subForm.hashCode() : 0;
-            result = 31 * result + (instance != null ? instance.hashCode() : 0);
+            result = 31 * result + (tabInstance != null ? tabInstance.hashCode() : 0);
             return result;
+        }
+
+        /**
+         * Value instance id is composition of subform class id and key id (selected tab instance id).
+         *
+         * @return value instance id.
+         */
+        public ResourceId generateValueInstanceId() {
+            return ResourceId.valueOf(subForm.getId().asString() + "_" + tabInstance.getId().asString());
         }
     }
 
@@ -280,7 +289,7 @@ public class FormModel {
         List<FormInstance> result = Lists.newArrayList();
 
         for (SubformValueKey key : subFormInstances.keySet()) {
-            result.add(key.getInstance());
+            result.add(key.getTabInstance());
         }
         return result;
     }
@@ -305,9 +314,9 @@ public class FormModel {
     private FormInstance createSubFormValueInstanceIfAbsent(SubformValueKey key) {
         FormInstance valueInstance = subFormInstances.get(key);
         if (valueInstance == null) {
-            valueInstance = new FormInstance(ResourceId.generateId(), key.getSubForm().getId());
+            valueInstance = new FormInstance(key.generateValueInstanceId(), key.getSubForm().getId());
             valueInstance.setOwnerId(getWorkingRootInstance().getId());
-            valueInstance.setKeyId(key.getInstance().getId());
+            valueInstance.setKeyId(key.getTabInstance().getId());
             subFormInstances.put(key, valueInstance);
         }
         return valueInstance;

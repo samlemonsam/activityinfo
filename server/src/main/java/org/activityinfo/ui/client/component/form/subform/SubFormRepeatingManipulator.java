@@ -133,8 +133,8 @@ public class SubFormRepeatingManipulator {
         Collections.sort(keys, new Comparator<FormModel.SubformValueKey>() {
             @Override
             public int compare(FormModel.SubformValueKey o1, FormModel.SubformValueKey o2) {
-                Double d1 = o1.getInstance().getDouble(SORT_FIELD_ID);
-                Double d2 = o2.getInstance().getDouble(SORT_FIELD_ID);
+                Double d1 = o1.getTabInstance().getDouble(SORT_FIELD_ID);
+                Double d2 = o2.getTabInstance().getDouble(SORT_FIELD_ID);
                 if (d1 != null && d2 != null) {
                     return d1.compareTo(d2);
                 }
