@@ -34,7 +34,7 @@ task setupDevDatabase(type: MySqlSetupTask) {
 
 task migrateDatabaseAT(type: MySqlSetupTask, dependsOn: 'configureDatabase') {
     description =  "Applies schema migrations to the local 'activityinfo' development database"
-    database =      mysql.localAT
+    database =      environment.database
 }
 
 task migrateDatabaseDev(type: MySqlSetupTask) {
