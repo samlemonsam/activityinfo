@@ -29,7 +29,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.junit.After;
 import org.junit.Before;
@@ -93,7 +93,7 @@ public class FormModelTest extends CommandTestCase2 {
         subFormChildField = setupSubform.addField();
         subFormChildField.setType(TextType.INSTANCE);
 
-        SubFormType subFormType = new SubFormType();
+        SubFormReferenceType subFormType = new SubFormReferenceType();
         subFormType.setClassId(setupSubform.getId());
 
         subformOwnerField = formClass.addField();

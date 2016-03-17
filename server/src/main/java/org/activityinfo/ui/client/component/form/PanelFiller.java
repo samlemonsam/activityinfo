@@ -31,7 +31,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.type.subform.ClassType;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
@@ -76,7 +76,7 @@ public class PanelFiller {
             } else if (element instanceof FormField) {
                 FormField formField = (FormField) element;
                 if (formField.isVisible()) {
-                    if (formField.getType() instanceof SubFormType) {
+                    if (formField.getType() instanceof SubFormReferenceType) {
                         final FormClass subForm = model.getSubFormByOwnerFieldId(formField.getId());
 
 

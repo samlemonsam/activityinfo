@@ -23,7 +23,7 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
 
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 /**
  * @author yuriyz on 01/21/2015.
@@ -37,9 +37,9 @@ public class SubformTemplate implements Template<FormField> {
 
     @Override
     public FormField create() {
-        FormField field = new FormField(ResourceId.generateFieldId(SubFormType.TYPE_CLASS));
+        FormField field = new FormField(ResourceId.generateFieldId(SubFormReferenceType.TYPE_CLASS));
         field.setLabel("Sub Form");
-        field.setType(new SubFormType());
+        field.setType(new SubFormReferenceType());
 
         return field;
     }

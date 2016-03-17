@@ -98,8 +98,8 @@ public enum ClassType {
         return null;
     }
 
-    public SubFormKind createSubformKind() {
-        return new SubFormKind() {
+    public SubFormType createSubformKind() {
+        return new SubFormType() {
             @Override
             public FormClass getDefinition() {
                 return ClassType.this.getDefinition();

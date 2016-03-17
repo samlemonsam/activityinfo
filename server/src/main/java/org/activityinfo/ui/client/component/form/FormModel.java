@@ -33,7 +33,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -182,8 +182,8 @@ public class FormModel {
             public Promise<Void> apply(FormClass rootFormClass) {
                 List<Promise<FormClass>> promises = Lists.newArrayList();
                 for (final FormField formField : rootFormClass.getFields()) {
-                    if (formField.getType() instanceof SubFormType) {
-                        SubFormType subFormType = (SubFormType) formField.getType();
+                    if (formField.getType() instanceof SubFormReferenceType) {
+                        SubFormReferenceType subFormType = (SubFormReferenceType) formField.getType();
                         Promise<FormClass> promise = locator.getFormClass(subFormType.getClassId());
                         promise.then(new Function<FormClass, Object>() {
                             @Nullable

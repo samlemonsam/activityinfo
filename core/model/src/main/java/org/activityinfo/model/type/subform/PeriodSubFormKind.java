@@ -31,7 +31,7 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
 /**
  * @author yuriyz on 01/27/2015.
  */
-public class PeriodSubFormKind implements SubFormKind {
+public class PeriodSubFormKind implements SubFormType {
 
     private final ResourceId classId;
     private final String label;

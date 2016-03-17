@@ -33,7 +33,7 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -395,9 +395,9 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
             }
             field.setType(new QuantityType().setUnits(units));
 
-        } else if (getTypeId().equals(SubFormType.TYPE_CLASS.getId())) {
+        } else if (getTypeId().equals(SubFormReferenceType.TYPE_CLASS.getId())) {
             Record typeRecord = Resources.recordFromJson(getTypeJson());
-            field.setType(SubFormType.TYPE_CLASS.deserializeType(typeRecord));
+            field.setType(SubFormReferenceType.TYPE_CLASS.deserializeType(typeRecord));
 
         } else {
             field.setType(getType().createType());

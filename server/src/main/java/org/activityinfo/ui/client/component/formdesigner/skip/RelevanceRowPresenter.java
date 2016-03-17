@@ -40,7 +40,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -132,7 +132,7 @@ public class RelevanceRowPresenter {
 
         for (FormField formField : formFields) {
             if (formField.getType() instanceof AttachmentType ||
-                    formField.getType() instanceof SubFormType) {
+                    formField.getType() instanceof SubFormReferenceType) {
                 continue;
             }
             view.getFormfield().addItem(formField.getLabel(), formField.getId().asString());

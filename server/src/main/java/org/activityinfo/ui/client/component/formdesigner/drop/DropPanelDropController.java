@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -189,7 +189,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
             subForm.setLabel(formField.getLabel());
 
-            SubFormType type = (SubFormType) formField.getType();
+            SubFormReferenceType type = (SubFormReferenceType) formField.getType();
             type.setClassId(subForm.getId());
 
             final FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, subForm, formField.getId());

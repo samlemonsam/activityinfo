@@ -32,13 +32,13 @@ import java.util.Map;
 /**
  * @author yuriyz on 01/27/2015.
  */
-public class SubFormKindRegistry {
+public class SubFormTypeRegistry {
 
-    private static final SubFormKindRegistry INSTANCE = new SubFormKindRegistry();
+    private static final SubFormTypeRegistry INSTANCE = new SubFormTypeRegistry();
 
-    private final Map<ResourceId, SubFormKind> kinds = Maps.newLinkedHashMap();
+    private final Map<ResourceId, SubFormType> kinds = Maps.newLinkedHashMap();
 
-    private SubFormKindRegistry() {
+    private SubFormTypeRegistry() {
 
         register(ClassType.REPEATING.createSubformKind());
 
@@ -50,23 +50,23 @@ public class SubFormKindRegistry {
 
     }
 
-    private void register(SubFormKind kind) {
+    private void register(SubFormType kind) {
         kinds.put(kind.getDefinition().getId(), kind);
     }
 
-    public static SubFormKindRegistry get() {
+    public static SubFormTypeRegistry get() {
         return INSTANCE;
     }
 
-    public SubFormKind getKind(String id) {
+    public SubFormType getKind(String id) {
         return getKind(ResourceId.valueOf(id));
     }
 
-    public SubFormKind getKind(ResourceId id) {
+    public SubFormType getKind(ResourceId id) {
         return kinds.get(id);
     }
 
-    public List<SubFormKind> getKinds() {
+    public List<SubFormType> getKinds() {
         return Lists.newArrayList(kinds.values());
     }
 }

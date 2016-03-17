@@ -27,8 +27,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.type.subform.ClassType;
-import org.activityinfo.model.type.subform.SubFormKind;
-import org.activityinfo.model.type.subform.SubFormKindRegistry;
+import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 
@@ -84,7 +84,7 @@ public class ContainerPropertiesPanel extends Composite {
     }
 
     private void initSubformCombobox() {
-        for (SubFormKind kind : SubFormKindRegistry.get().getKinds()) {
+        for (SubFormType kind : SubFormTypeRegistry.get().getKinds()) {
             subformKind.addItem(kind.getDefinition().getLabel(), kind.getDefinition().getId().asString());
         }
     }

@@ -40,7 +40,7 @@ import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.PeriodSubFormKind;
-import org.activityinfo.model.type.subform.SubFormKindRegistry;
+import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 import org.activityinfo.model.type.subform.SubformConstants;
 import org.activityinfo.ui.client.component.form.FieldContainer;
 import org.activityinfo.ui.client.component.form.FormModel;
@@ -116,7 +116,7 @@ public class SubFormTabsManipulator {
     }
 
     private void generateFormInstanceForPeriod(FormClass subForm, ResourceId typeClassId) {
-        this.periodValue = ((PeriodSubFormKind) SubFormKindRegistry.get().getKind(typeClassId)).getPeriod();
+        this.periodValue = ((PeriodSubFormKind) SubFormTypeRegistry.get().getKind(typeClassId)).getPeriod();
 
         final LocalDateRange selectedRange = getSelectedRange();
         final Date startDate = selectedRange != null ? selectedRange.asDateRange().getStart() : new Date();

@@ -39,7 +39,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -208,8 +208,8 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                         FlowPanel parentDropPanel = (FlowPanel) formDesigner.getDropControllerRegistry().getDropController(widgetContainer.getParentId()).getDropTarget();
                         parentDropPanel.add(widget);
                     }
-                    if (formField.getType() instanceof SubFormType) {
-                        ResourceId subFormId = ((SubFormType) formField.getType()).getClassId();
+                    if (formField.getType() instanceof SubFormReferenceType) {
+                        ResourceId subFormId = ((SubFormReferenceType) formField.getType()).getClassId();
                         FormClass subForm = (FormClass) formDesigner.getModel().getElementContainer(subFormId);
                         fillPanel(subForm, formDesigner);
                     }
@@ -235,8 +235,8 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 buildWidgetContainers(formDesigner, formSection, owner, depth + 1, promises);
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
-                if (formField.getType() instanceof SubFormType) { // subform
-                    SubFormType subform = (SubFormType) formField.getType();
+                if (formField.getType() instanceof SubFormReferenceType) { // subform
+                    SubFormReferenceType subform = (SubFormReferenceType) formField.getType();
 
                     Promise<Void> promise = formDesigner.getResourceLocator().getFormClass(subform.getClassId()).then(new Function<FormClass, Void>() {
                         @Override

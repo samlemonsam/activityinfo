@@ -39,8 +39,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.ClassType;
-import org.activityinfo.model.type.subform.SubFormKind;
-import org.activityinfo.model.type.subform.SubFormKindRegistry;
+import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 
@@ -151,7 +151,7 @@ public class ContainerPropertiesPresenter {
             return;
         }
 
-        SubFormKind kind = SubFormKindRegistry.get().getKind(selectedValue);
+        SubFormType kind = SubFormTypeRegistry.get().getKind(selectedValue);
         if (kind != null) {
             subFormType.setRange(kind.getDefinition().getId());
             forceSubformRerender(subForm);

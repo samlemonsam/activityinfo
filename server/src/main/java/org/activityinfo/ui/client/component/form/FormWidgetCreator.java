@@ -30,7 +30,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.subform.ClassType;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -75,7 +75,7 @@ public class FormWidgetCreator {
     public Promise<Void> createWidgets(final FormClass formClass, final FieldUpdated fieldUpdated) {
         List<Promise<Void>> promises = Lists.newArrayList();
         for (final FormField field : formClass.getFields()) {
-            if (field.getType() instanceof SubFormType) {
+            if (field.getType() instanceof SubFormReferenceType) {
                 FormClass subForm = model.getSubFormByOwnerFieldId(field.getId());
                 if (!ClassType.isRepeating(subForm)) { // for repeating we create it internally in sub SimpleFormPanel
                     Promise<Void> subFormWidgetsPromise = createWidgets(subForm, fieldUpdated);

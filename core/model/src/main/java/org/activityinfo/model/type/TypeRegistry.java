@@ -11,7 +11,7 @@ import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.subform.SubFormType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 
@@ -47,7 +47,7 @@ public class TypeRegistry {
         register(BooleanType.TYPE_CLASS);
         register(BarcodeType.TYPE_CLASS);
         register(AttachmentType.TYPE_CLASS);
-        register(SubFormType.TYPE_CLASS);
+        register(SubFormReferenceType.TYPE_CLASS);
     }
 
     private void register(FieldTypeClass typeClass) {
