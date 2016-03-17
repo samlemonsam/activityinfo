@@ -76,7 +76,7 @@ public class ExprParser {
             return parseGroup();
 
         } else if (token.getType() == TokenType.SYMBOL) {
-            if(isFunction(token)) {
+            if(lexer.hasNext() && lexer.peek().getType() == TokenType.PAREN_START) {
                 return parseFunctionCall(token);
             } else {
                 return new SymbolExpr(token.getString());
@@ -128,10 +128,6 @@ public class ExprParser {
 
     private boolean prefixOperator(Token token) {
         return token.getType() == TokenType.OPERATOR && PREFIX_OPERATORS.contains(token.getString());
-    }
-
-    private boolean isFunction(Token token) {
-        return token.getType() == TokenType.SYMBOL && FUNCTIONS.contains(token.getString()) && lexer.peek().getType() == TokenType.PAREN_START;
     }
 
     private ExprNode parseGroup() {

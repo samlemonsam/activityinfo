@@ -110,6 +110,11 @@ public class ExprParserTest {
                         new SymbolExpr("v1"))
         ));
     }
+    
+    @Test
+    public void parseMax() {
+        expect("max(A, B)", new FunctionCallNode(MaxFunction.INSTANCE, new SymbolExpr("A"), new SymbolExpr("B")));
+    }
 
     @Test
     @Ignore("todo")

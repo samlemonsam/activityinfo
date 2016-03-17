@@ -34,6 +34,8 @@ public final class ExprFunctions {
             register(BooleanFunctions.GREATER_OR_EQUAL);
             register(BooleanFunctions.LESS);
             register(BooleanFunctions.LESS_OR_EQUAL);
+            register(MaxFunction.INSTANCE);
+            register(MinFunction.INSTANCE);
         }
 
         ExprFunction exprFunction = lookupMap.get(name);
