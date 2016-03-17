@@ -54,7 +54,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
 
         @Override
         public SubFormReferenceType deserializeType(Record typeParameters) {
-            String classId = typeParameters.getString("classReference");
+            String classId = typeParameters.isString("classReference");
             return new SubFormReferenceType()
                     .setClassId(Strings.isNullOrEmpty(classId) ? null : ResourceId.valueOf(classId));
         }
