@@ -75,10 +75,16 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testLocation() {
 
+        System.out.println("***** testLocation() starting ******* ");
+
         FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
         
         query(CuidAdapter.locationFormClass(1), "label", "axe", "territoire.province.name", "territoire.name",
                 "province.name", "province._id", "visible");
+
+        System.out.println("***** testLocation() done ******* ");
+
+
         assertThat(column("label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga", "Boga"));
         assertThat(column("axe"), hasValues(null, "Bunia-Wakombe", null, null));
         assertThat(column("territoire.name"), hasValues("Shabunda", null, "Irumu", "Bukavu"));
@@ -86,6 +92,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
         assertThat(column("visible"), hasValues(true, true, true, true));
+
+
     }
 
     @Test
