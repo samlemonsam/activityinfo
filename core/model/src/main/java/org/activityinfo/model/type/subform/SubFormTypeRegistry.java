@@ -42,11 +42,11 @@ public class SubFormTypeRegistry {
 
         register(ClassType.REPEATING.createSubformKind());
 
-        register(new PeriodSubFormKind(PredefinedPeriods.YEARLY));
-        register(new PeriodSubFormKind(PredefinedPeriods.MONTHLY));
-        register(new PeriodSubFormKind(PredefinedPeriods.BI_WEEKLY));
-        register(new PeriodSubFormKind(PredefinedPeriods.WEEKLY));
-        register(new PeriodSubFormKind(PredefinedPeriods.DAILY));
+        register(new PeriodSubFormType(PredefinedPeriods.YEARLY));
+        register(new PeriodSubFormType(PredefinedPeriods.MONTHLY));
+        register(new PeriodSubFormType(PredefinedPeriods.BI_WEEKLY));
+        register(new PeriodSubFormType(PredefinedPeriods.WEEKLY));
+        register(new PeriodSubFormType(PredefinedPeriods.DAILY));
 
     }
 

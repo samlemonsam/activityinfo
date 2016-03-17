@@ -31,17 +31,17 @@ import org.activityinfo.model.type.period.PredefinedPeriods;
 /**
  * @author yuriyz on 01/27/2015.
  */
-public class PeriodSubFormKind implements SubFormType {
+public class PeriodSubFormType implements SubFormType {
 
     private final ResourceId classId;
     private final String label;
     private final PeriodValue period;
 
-    public PeriodSubFormKind(PredefinedPeriods predefinedPeriods) {
+    public PeriodSubFormType(PredefinedPeriods predefinedPeriods) {
         this(predefinedPeriods.getResourceId(), predefinedPeriods.getPeriod(), predefinedPeriods.getLabel());
     }
 
-    public PeriodSubFormKind(ResourceId classId, PeriodValue period, String label) {
+    public PeriodSubFormType(ResourceId classId, PeriodValue period, String label) {
         this.classId = classId;
         this.period = period;
         this.label = label;
