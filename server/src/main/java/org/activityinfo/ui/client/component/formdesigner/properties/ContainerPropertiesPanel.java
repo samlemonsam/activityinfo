@@ -49,15 +49,15 @@ public class ContainerPropertiesPanel extends Composite {
     @UiField
     FormGroup labelGroup;
     @UiField
-    ListBox subformKind;
+    ListBox subformType;
     @UiField
-    FormGroup subformKindGroup;
+    FormGroup subformTypeGroup;
     @UiField
     HTMLPanel subformGroup;
     @UiField
-    ListBox subformSubKind;
+    ListBox subformSubType;
     @UiField
-    FormGroup subformSubKindGroup;
+    FormGroup subformSubTypeGroup;
 
     private final Map<ClassType, Integer> classTypeIndexesInList = Maps.newHashMap();
 
@@ -68,8 +68,8 @@ public class ContainerPropertiesPanel extends Composite {
     }
 
     private void initIndexes() {
-        for (int i = 0; i < getSubformKind().getItemCount(); i++) {
-            String value = getSubformKind().getValue(i);
+        for (int i = 0; i < getSubformType().getItemCount(); i++) {
+            String value = getSubformType().getValue(i);
             for (ClassType classType : ClassType.values()) {
                 if (value.equals(classType.getResourceId().asString())) {
                     classTypeIndexesInList.put(classType, i);
@@ -85,7 +85,7 @@ public class ContainerPropertiesPanel extends Composite {
 
     private void initSubformCombobox() {
         for (SubFormType kind : SubFormTypeRegistry.get().getKinds()) {
-            subformKind.addItem(kind.getDefinition().getLabel(), kind.getDefinition().getId().asString());
+            subformType.addItem(kind.getDefinition().getLabel(), kind.getDefinition().getId().asString());
         }
     }
 
@@ -97,23 +97,23 @@ public class ContainerPropertiesPanel extends Composite {
         return labelGroup;
     }
 
-    public ListBox getSubformKind() {
-        return subformKind;
+    public ListBox getSubformType() {
+        return subformType;
     }
 
-    public FormGroup getSubformKindGroup() {
-        return subformKindGroup;
+    public FormGroup getSubformTypeGroup() {
+        return subformTypeGroup;
     }
 
     public HTMLPanel getSubformGroup() {
         return subformGroup;
     }
 
-    public ListBox getSubformSubKind() {
-        return subformSubKind;
+    public ListBox getSubformSubType() {
+        return subformSubType;
     }
 
-    public FormGroup getSubformSubKindGroup() {
-        return subformSubKindGroup;
+    public FormGroup getSubformSubTypeGroup() {
+        return subformSubTypeGroup;
     }
 }

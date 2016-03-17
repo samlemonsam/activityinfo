@@ -10,7 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
  */
 public class CuidAdapter {
 
-    public static final char COLLECTION_DOMAIN = 'b'; // used for subform collections
+    public static final char REPEATING_DOMAIN = 'b'; // used for subform repeating
 
     public static final char COUNTRY_DOMAIN = 'c';
 

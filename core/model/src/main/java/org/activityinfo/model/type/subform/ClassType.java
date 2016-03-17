@@ -92,7 +92,7 @@ public enum ClassType {
                 return PARTNER;
             case CuidAdapter.PROJECT_CLASS_DOMAIN:
                 return PROJECT;
-            case CuidAdapter.COLLECTION_DOMAIN:
+            case CuidAdapter.REPEATING_DOMAIN:
                 return REPEATING;
         }
         return null;
