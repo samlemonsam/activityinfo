@@ -11,6 +11,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -58,6 +59,7 @@ public abstract class AbstractMySqlTest {
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "catalog-test.db.xml"));
         catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
         executor = new ColumnSetBuilder(catalogProvider);
+        CountryStructure.clearCache();
     }
 
 

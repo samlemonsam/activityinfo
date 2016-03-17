@@ -30,6 +30,10 @@ public class CountryStructure {
     
     private CountryStructure() {}
     
+    public static void clearCache() {
+        INSTANCE_CACHE.invalidateAll();
+    }
+    
     public static CountryStructure query(QueryExecutor executor, int countryId) throws SQLException {
         
         // Try first to fetch from the instance-level cache        

@@ -40,7 +40,7 @@ public class AdminColumnBuilder {
     public void addObserver(CursorObserver<FieldValue> observer) {
         observers.add(observer);
     }
-    
+        
     public boolean hasObservers() {
         return !observers.isEmpty();
     }
