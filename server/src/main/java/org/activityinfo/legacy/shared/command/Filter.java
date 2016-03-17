@@ -26,7 +26,6 @@ import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.model.typeadapter.FilterAdapter;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
@@ -44,23 +43,15 @@ public class Filter implements Serializable {
     // TODO: should be restrictions on DIMENSIONS and not DimensionTypes!!
     private Map<DimensionType, Set<Integer>> restrictions = new HashMap<DimensionType, Set<Integer>>();
 
-    private DateRange dateRange = new DateRange();
-
-    /**
-     * In short: when set to true, the where-clauses of the pivotquery are joined by 'OR' instead of 'AND' (which is the
-     * default).
-     */
-    private boolean lenient = false;
+    private DateRange endDateRange = new DateRange();
+    
+    private DateRange startDateRange = new DateRange();
 
     /**
      * Constructs a <code>Filter</code> with no restrictions. All data visible
      * to the user will be included.
      */
     public Filter() {
-    }
-
-    public Filter(boolean lenient) {
-        this.lenient = lenient;
     }
 
     /**
@@ -73,8 +64,7 @@ public class Filter implements Serializable {
         for (Map.Entry<DimensionType, Set<Integer>> entry : filter.restrictions.entrySet()) {
             this.restrictions.put(entry.getKey(), new HashSet<Integer>(entry.getValue()));
         }
-        this.dateRange = filter.dateRange;
-        this.lenient = filter.lenient;
+        this.endDateRange = filter.endDateRange;
     }
 
     /**
@@ -94,7 +84,8 @@ public class Filter implements Serializable {
             this.restrictions.put(type, intersect(a.getRestrictionSet(type, false), b.getRestrictionSet(type, false)));
 
         }
-        this.dateRange = DateRange.intersection(a.getDateRange(), b.getDateRange());
+        this.endDateRange = DateRange.intersection(a.getEndDateRange(), b.getEndDateRange());
+        this.startDateRange = DateRange.intersection(a.getStartDateRange(), b.getStartDateRange());
 
     }
 
@@ -148,7 +139,7 @@ public class Filter implements Serializable {
 
     public boolean isRestricted(DimensionType type) {
         if (type == DimensionType.Date) {
-            return isDateRestricted();
+            return isEndDateRestricted();
         } else {
             Set<Integer> set = restrictions.get(type);
             return set != null && !set.isEmpty();
@@ -156,18 +147,19 @@ public class Filter implements Serializable {
     }
 
     public boolean isNull() {
-        return restrictions.isEmpty() && !isDateRestricted();
+        return restrictions.isEmpty() && !isEndDateRestricted();
     }
 
     public boolean hasRestrictions() {
         return !restrictions.isEmpty();
     }
 
-    public boolean isDateRestricted() {
-        if (dateRange == null) {
-            return false;
-        }
-        return dateRange.getMinDate() != null || dateRange.getMaxDate() != null;
+    public boolean isEndDateRestricted() {
+        return endDateRange != null && endDateRange.isRestricted();
+    }
+    
+    public boolean isStartDateRestricted() {
+        return startDateRange != null && startDateRange.isRestricted();
     }
 
     public Set<DimensionType> getRestrictedDimensions() {
@@ -184,26 +176,8 @@ public class Filter implements Serializable {
         return restrictions;
     }
 
-    @XmlTransient
-    public Date getMinDate() {
-        return getDateRange().getMinDate();
-    }
-
-    public void setMinDate(Date minDate) {
-        getDateRange().setMinDate(minDate);
-    }
-
-    @XmlTransient
-    public Date getMaxDate() {
-        return getDateRange().getMaxDate();
-    }
-
-    public void setMaxDate(Date maxDate) {
-        getDateRange().setMaxDate(maxDate);
-    }
-
-    public void setDateRange(DateRange range) {
-        this.dateRange = range;
+    public void setEndDateRange(DateRange range) {
+        this.endDateRange = range;
     }
 
     public boolean isDimensionRestrictedToSingleCategory(DimensionType type) {
@@ -211,7 +185,6 @@ public class Filter implements Serializable {
     }
 
     /**
-     * @return
      * @throws UnsupportedOperationException if the dimension is not restricted to exactly one category
      */
     public int getRestrictedCategory(DimensionType type) {
@@ -224,20 +197,11 @@ public class Filter implements Serializable {
         return ids.iterator().next();
     }
 
-    @XmlElement
-    public DateRange getDateRange() {
-        if (dateRange == null) {
-            dateRange = new DateRange();
+    public DateRange getEndDateRange() {
+        if (endDateRange == null) {
+            endDateRange = new DateRange();
         }
-        return dateRange;
-    }
-
-    public boolean isLenient() {
-        return lenient;
-    }
-
-    public void setLenient(boolean lenient) {
-        this.lenient = lenient;
+        return endDateRange;
     }
 
     @Override
@@ -253,11 +217,22 @@ public class Filter implements Serializable {
             }
             sb.append(" }");
         }
-        if (dateRange.getMinDate() != null || dateRange.getMaxDate() != null) {
+        toString("startDate", startDateRange, sb);
+        toString("endDate", endDateRange, sb);
+        if (sb.length() != 0) {
+            sb.append(", ");
+        }
+        sb.insert(0, "[");
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private void toString(final String fieldName, DateRange dateRange, StringBuilder sb) {
+        if (dateRange != null && (dateRange.getMinDate() != null || dateRange.getMaxDate() != null)) {
             if (sb.length() != 0) {
                 sb.append(", ");
             }
-            sb.append("date=[");
+            sb.append(fieldName + "=[");
             if (dateRange.getMinDate() != null) {
                 sb.append(dateRange.getMinDate());
             }
@@ -266,15 +241,6 @@ public class Filter implements Serializable {
                 sb.append(dateRange.getMaxDate()).append("]");
             }
         }
-        if (sb.length() != 0) {
-            sb.append(", ");
-        }
-        sb.append("lenient: ");
-        sb.append(lenient);
-
-        sb.insert(0, "[");
-        sb.append("]");
-        return sb.toString();
     }
 
     public Filter onActivity(int activityId) {
@@ -292,6 +258,17 @@ public class Filter implements Serializable {
         return this;
     }
 
+    public DateRange getStartDateRange() {
+        if(startDateRange == null) {
+            startDateRange = new DateRange();
+        }
+        return startDateRange;
+    }
+
+    public void setStartDateRange(DateRange startDateRange) {
+        this.startDateRange = startDateRange;
+    }
+
     public static Filter filter() {
         return new Filter();
     }
@@ -300,7 +277,7 @@ public class Filter implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((dateRange == null) ? 0 : dateRange.hashCode());
+        result = prime * result + ((endDateRange == null) ? 0 : endDateRange.hashCode());
         result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
         return result;
     }
@@ -317,7 +294,7 @@ public class Filter implements Serializable {
             return false;
         }
         Filter other = (Filter) obj;
-        return getDateRange().equals(other.getDateRange()) && getRestrictions().equals(other.getRestrictions());
+        return getEndDateRange().equals(other.getEndDateRange()) && getRestrictions().equals(other.getRestrictions());
     }
 
 }

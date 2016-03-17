@@ -34,6 +34,8 @@ public class CuidAdapter {
 
     public static final char MONTHLY_REPORT = 'm';
 
+    public static final char MONTHLY_REPORT_FORM_CLASS = 'M';
+
     public static final char ATTRIBUTE_DOMAIN = 't';
 
     public static final char DATABASE_DOMAIN = 'd';
@@ -51,7 +53,13 @@ public class CuidAdapter {
     public static final char USER_DOMAIN = 'U';
 
     public static final char LOCK_DOMAIN = 'k';
-
+    
+    public static final char TARGET_FORM_CLASS_DOMAIN = 'Q';
+    
+    public static final char TARGET_INSTANCE_DOMAIN = 'v';
+    
+    public static final char TARGET_INDICATOR_FIELD_DOMAIN = 'w';
+    
     public static final int NAME_FIELD = 1;
     public static final int ADMIN_PARENT_FIELD = 2;
     public static final int CODE_FIELD = 3;
@@ -68,6 +76,7 @@ public class CuidAdapter {
     public static final int COMMENT_FIELD = 14;
     public static final int LOCATION_NAME_FIELD = 15;
     public static final int GPS_FIELD = 16;
+    public static final int SITE_FIELD = 17;
 
     public static final int BLOCK_SIZE = 10;
     public static final String CLASS_FIELD = "_class";
@@ -206,10 +215,6 @@ public class CuidAdapter {
         return cuid(ATTRIBUTE_DOMAIN, attributeId);
     }
 
-    public static ResourceId siteField(int siteId) {
-        return cuid(INDICATOR_DOMAIN, siteId);
-    }
-
     /**
      * @return the {@code FormField} ResourceId for the field of a given Activity {@code FormClass} that
      * references the given AttributeGroup FormClass
@@ -288,7 +293,19 @@ public class CuidAdapter {
         return cuid(SITE_DOMAIN, new KeyGenerator().generateInt());
     }
 
+    public static ResourceId countryId(int id) {
+        return cuid(COUNTRY_DOMAIN, id);
+    }
+
+    public static ResourceId reportingPeriodFormClass(int activityId) {
+        return cuid(MONTHLY_REPORT_FORM_CLASS, activityId);
+    }
+
     public static ResourceId lockId(int id) {
         return cuid(LOCK_DOMAIN, id);
+    }
+
+    public static ResourceId targetIndicatorField(int indicatorId) {
+        return cuid(TARGET_INDICATOR_FIELD_DOMAIN, indicatorId);
     }
 }

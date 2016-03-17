@@ -46,9 +46,21 @@ public class ExprParser {
             return new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE);
         }
         ExprNode expr = parseSimple();
+
+        // Consume compound expressions
+        while(lexer.hasNext() && lexer.peek().getType() == TokenType.DOT) {
+            // Consume dot
+            lexer.next();
+            // Consume field name
+            Token fieldName = expectNext(TokenType.SYMBOL, "Field name");
+            
+            expr = new CompoundExpr(expr, new SymbolExpr(fieldName.getString()));
+        }
+
         if (!lexer.hasNext()) {
             return expr;
         }
+        
         Token token = lexer.peek();
         if (isInfixOperator(token)) {
             lexer.next();
@@ -56,10 +68,7 @@ public class ExprParser {
             ExprNode right = parse();
 
             return new FunctionCallNode(function, expr, right);
-
-        } else if(token.getType() == TokenType.DOT) {
-            lexer.next();
-            return new CompoundExpr(expr, new SymbolExpr(expectNext(TokenType.SYMBOL, "Field name").getString()));
+        
         } else {
             return expr;
         }
@@ -157,7 +166,7 @@ public class ExprParser {
             ExprParser parser = new ExprParser(new ExprLexer(expression));
             return parser.parse();
         } catch(Exception e) {
-            throw new RuntimeException("Failed to parse expression: " + expression, e);
+            throw new RuntimeException("Failed to parse expression: '" + expression + "'", e);
         }
     }
 }

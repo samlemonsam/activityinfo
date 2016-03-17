@@ -1,5 +1,6 @@
 package org.activityinfo.geoadmin.model;
 
+import org.activityinfo.model.type.geo.Extents;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -7,7 +8,7 @@ public class Country {
     private int id;
     private String code;
     private String name;
-    private Bounds bounds;
+    private Extents bounds;
 
     public int getId() {
         return id;
@@ -33,11 +34,11 @@ public class Country {
         this.name = name;
     }
 
-    public Bounds getBounds() {
+    public Extents getBounds() {
         return bounds;
     }
 
-    public void setBounds(Bounds bounds) {
+    public void setBounds(Extents bounds) {
         this.bounds = bounds;
     }
 

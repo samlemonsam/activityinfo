@@ -163,7 +163,7 @@ subprojects {
             force libraries.guava
             force libraries.gwt.values()
             force libraries.jts
-
+            force libraries.gson
 
             // Resolve dependencies as Maven would have for the moment
             // to avoid introducing changes with the new build script

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  ActivityInfo Server
+  %%
+  Copyright (C) 2009 - 2013 UNICEF
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="alex" id="36-01">
+        <comment>
+            Improve query performance on site table
+        </comment>
+        <addColumn tableName="site">
+            <column name="deleted" type="bit" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>
+            UPDATE site SET deleted = dateDeleted IS NOT NULL
+        </sql>
+        <createIndex tableName="site" indexName="site_activity_deleted">
+            <column name="deleted"/>
+            <column name="ActivityId"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="alex" id="36-02">
+        <comment>
+            Keep the database in sync even against other application versions without this change
+        </comment>
+        <sql splitStatements="false" endDelimiter="//">
+            CREATE TRIGGER site_delete_sync
+            BEFORE UPDATE
+            ON site FOR EACH ROW
+            BEGIN
+            SET NEW.deleted = (NEW.dateDeleted IS NOT NULL);
+            END
+        </sql>
+    </changeSet>
+</databaseChangeLog>

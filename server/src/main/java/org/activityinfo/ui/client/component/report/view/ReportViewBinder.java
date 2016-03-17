@@ -53,7 +53,7 @@ public class ReportViewBinder<C extends Content, R extends ReportElement<C>> imp
 
     private R elementModel;
 
-    private GenerateElement latestRequest;
+    private int latestRequest;
 
     public static <C extends Content, R extends ReportElement<C>> ReportViewBinder<C, R> create(EventBus eventBus,
                                                                                                 Dispatcher dispatcher,
@@ -102,12 +102,12 @@ public class ReportViewBinder<C extends Content, R extends ReportElement<C>> imp
         
         if (!elementModel.getFilter().getRestrictions(DimensionType.Indicator).isEmpty()) {
 
-            final GenerateElement<C> request = new GenerateElement<C>(elementModel);
-            
-            latestRequest = request;
+            final int thisRequest = latestRequest+1;
+            latestRequest = thisRequest;
 
             view.loading();
-            dispatcher.execute(request, new AsyncCallback<C>() {
+
+            executeLoad(new AsyncCallback<C>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -122,13 +122,18 @@ public class ReportViewBinder<C extends Content, R extends ReportElement<C>> imp
 
                 @Override
                 public void onSuccess(C result) {
-                    if(request == latestRequest) {
+                    if (thisRequest == latestRequest) {
                         elementModel.setContent(result);
                         view.show(elementModel);
                     }
                 }
             });
         }
+    }
+
+    protected void executeLoad(AsyncCallback<C> callback) {
+        GenerateElement<C> request = new GenerateElement<C>(elementModel);
+        dispatcher.execute(request, callback);
     }
 
     @Override

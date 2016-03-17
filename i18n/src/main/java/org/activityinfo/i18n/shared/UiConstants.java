@@ -141,6 +141,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Basemap")
     String basemap();
+    
+    @DefaultStringValue("Boundaries")
+    String boundaries();
 
     @DefaultStringValue("OK")
     String ok();
@@ -399,6 +402,13 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter by date")
     String filterByDate();
+    
+    @DefaultStringValue("Filter by end date")
+    String filterByEndDate();
+
+    @DefaultStringValue("Filter by start date")
+    String filterByStartDate();
+
 
     @DefaultStringValue("Filter by geography")
     String filterByGeography();

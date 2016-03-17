@@ -2,6 +2,9 @@ package org.activityinfo.model.formTree;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Iterator;
@@ -80,6 +83,15 @@ public class FieldPath  {
         return path;
     }
 
+    public ExprNode toExpr() {
+        Iterator<ResourceId> it = path.iterator();
+        ExprNode expr = new SymbolExpr(it.next());
+        while(it.hasNext()) {
+            expr = new CompoundExpr(expr, new SymbolExpr(it.next()));
+        }
+        return expr;
+    }
+    
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

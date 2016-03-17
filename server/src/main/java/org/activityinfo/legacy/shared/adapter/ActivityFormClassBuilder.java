@@ -2,12 +2,14 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.IsFormField;
+import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.*;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -36,6 +38,7 @@ public class ActivityFormClassBuilder {
     public static FormField createPartnerField(ResourceId classId, ActivityFormDTO activity) {
         return new FormField(CuidAdapter.field(classId, CuidAdapter.PARTNER_FIELD))
                 .setLabel(I18N.CONSTANTS.partner())
+                .setCode("partner")
                 .setType(ReferenceType.single(CuidAdapter.partnerFormClass(activity.getDatabaseId())))
 //                .setVisible(activity.isEditAllAllowed() && activity.getPartnerRange().size() > 1)
                 .setVisible(true)

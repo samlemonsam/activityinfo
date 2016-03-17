@@ -297,7 +297,7 @@ public class ColumnModelBuilder {
 
     public ColumnModelBuilder maybeAddDateColumn(ActivityFormDTO activity) {
         if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            columns.add(new EditableLocalDateColumn("date2", I18N.CONSTANTS.date(), 100));
+            columns.add(new EditableLocalDateColumn("date2", I18N.CONSTANTS.endDate(), 100));
         }
         return this;
     }

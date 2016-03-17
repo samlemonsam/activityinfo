@@ -31,5 +31,13 @@ public class LocalDateIntervalType implements FieldType {
         return TYPE_CLASS;
     }
 
+    /**
+     *
+     * @return the singleton instance for this type
+     */
+    private Object readResolve() {
+        return INSTANCE;
+    }
+
 
 }

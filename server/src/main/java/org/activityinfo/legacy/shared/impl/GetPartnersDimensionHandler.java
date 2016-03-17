@@ -57,7 +57,7 @@ public class GetPartnersDimensionHandler implements CommandHandlerAsync<GetPartn
         PivotSites query = new PivotSites();
         query.setFilter(cmd.getFilter());
         query.setDimensions(dimension);
-        query.setValueType(ValueType.DIMENSION);
+        query.setValueType(ValueType.TOTAL_SITES);
         context.execute(query, new AsyncCallback<PivotSites.PivotResult>() {
 
             @Override

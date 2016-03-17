@@ -31,7 +31,7 @@ import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.core.shared.form.tree.FormTreePrettyPrinter;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.strategy.*;

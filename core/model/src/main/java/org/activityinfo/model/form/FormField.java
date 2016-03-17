@@ -7,6 +7,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nonnull;
+import java.io.Serializable;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
@@ -16,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The smallest logical unit of data entry.
  */
-public class FormField extends FormElement {
+public class FormField extends FormElement implements Serializable {
 
     private final ResourceId id;
     private String code;

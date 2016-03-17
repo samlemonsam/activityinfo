@@ -1,8 +1,10 @@
 package org.activityinfo.model.expr.diagnostic;
 
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formTree.FormTree;
 
 public class SymbolNotFoundException extends ExprException {
+
 
     public SymbolNotFoundException() {
     }
@@ -14,4 +16,5 @@ public class SymbolNotFoundException extends ExprException {
     public SymbolNotFoundException(SymbolExpr symbolExpr) {
         this(symbolExpr.getName());
     }
+
 }

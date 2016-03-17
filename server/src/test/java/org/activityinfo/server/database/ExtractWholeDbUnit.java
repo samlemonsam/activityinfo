@@ -38,7 +38,7 @@ import java.sql.DriverManager;
 public class ExtractWholeDbUnit {
 
     public static final String XML_FILE_NAME = "sites-calculated-indicators.db.xml";
-    public static final String DB_URL = "jdbc:mysql://localhost:3306/activityinfo-test?zeroDateTimeBehavior=convertToNull";
+    public static final String DB_URL = "jdbc:mysql://localhost:3306/activityinfo?zeroDateTimeBehavior=convertToNull";
     public static final String DB_USERNAME = "root";
     public static final String DB_PW = "secret";
 

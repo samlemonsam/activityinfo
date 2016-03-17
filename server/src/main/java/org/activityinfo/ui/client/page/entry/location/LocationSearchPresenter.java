@@ -30,10 +30,9 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.SearchLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
-import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.Collection;
 import java.util.List;

@@ -7,7 +7,7 @@ import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.core.shared.form.tree.FormTreePrettyPrinter;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
 import org.activityinfo.core.shared.importing.source.SourceColumn;

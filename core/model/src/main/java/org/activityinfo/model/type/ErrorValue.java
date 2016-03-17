@@ -17,4 +17,9 @@ public class ErrorValue implements FieldValue {
         return ErrorType.TYPE_CLASS;
     }
 
+
+    @Override
+    public String toString() {
+        return "ErrorValue{" + exception.getMessage() + "}";
+    }
 }

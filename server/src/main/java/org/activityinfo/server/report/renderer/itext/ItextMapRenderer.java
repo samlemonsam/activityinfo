@@ -64,7 +64,7 @@ public class ItextMapRenderer extends ImageMapRenderer implements ItextRenderer<
         try {
             doc.add(ThemeHelper.elementTitle(element.getTitle()));
             ItextRendererHelper.addFilterDescription(doc, element.getContent().getFilterDescriptions());
-            ItextRendererHelper.addDateFilterDescription(doc, element.getFilter().getDateRange());
+            ItextRendererHelper.addDateFilterDescription(doc, element.getFilter().getEndDateRange());
             renderMap(writer, element, doc);
             if (!element.getContent().getLegends().isEmpty()) {
                 renderLegend(element, doc);

@@ -64,7 +64,7 @@ public class ImageMapRendererTest {
 
         ImageMapRenderer.drawPieMarker(g2d, pmm);
 
-        File outputFile = new File("target/report-tests/pieChart-" + ((int) value) + ".png");
+        File outputFile = new File("build/report-tests/pieChart-" + ((int) value) + ".png");
         outputFile.getParentFile().mkdirs();
 
         FileOutputStream fos = new FileOutputStream(outputFile);

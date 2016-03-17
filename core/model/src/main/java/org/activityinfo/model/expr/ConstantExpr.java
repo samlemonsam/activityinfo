@@ -9,6 +9,8 @@ import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateType;
 
 import javax.annotation.Nonnull;
 
@@ -43,6 +45,10 @@ public class ConstantExpr extends ExprNode {
         this(value, TextType.INSTANCE);
     }
 
+    public ConstantExpr(LocalDate localDate) {
+        this(localDate, LocalDateType.INSTANCE);
+    }
+
     public static ConstantExpr valueOf(FieldValue value) {
         if(value instanceof TextValue) {
             return new ConstantExpr(((TextValue) value).asString());
@@ -67,15 +73,14 @@ public class ConstantExpr extends ExprNode {
 
     @Override
     public String asExpression() {
-        if(value instanceof TextValue) {
-            // TODO: Escaping
-            return "\"" + value + "\"";
-        } else if(value instanceof Quantity) {
+        if(value instanceof Quantity) {
             return Double.toString(((Quantity) value).getValue());
         } else if(value instanceof BooleanFieldValue) {
             return ((BooleanFieldValue) value).asBoolean() ? "true" : "false";
+        } else {
+            // TODO: Escaping
+            return "\"" + value + "\"";
         }
-        throw new UnsupportedOperationException();
     }
 
     @Override

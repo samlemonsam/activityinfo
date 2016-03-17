@@ -18,4 +18,9 @@ public class EqualFunction extends ComparisonOperator {
     protected boolean apply(FieldValue a, FieldValue b) {
         return a.equals(b);
     }
+
+    @Override
+    protected boolean apply(double x, double y) {
+        return x == y;
+    }
 }

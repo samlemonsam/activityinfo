@@ -46,7 +46,7 @@ public class CubeResource {
 
         if(monthName != null) {
             Month month = Month.parseMonth(monthName);
-            filter.setDateRange(new DateUtilCalendarImpl().monthRange(month));
+            filter.setEndDateRange(new DateUtilCalendarImpl().monthRange(month));
         }
 
         Set<Dimension> pivotDimensions = Sets.newHashSet();

@@ -1,14 +1,18 @@
 package org.activityinfo.model.formTree;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.UnmodifiableIterator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -21,7 +25,7 @@ import java.util.*;
  */
 public class FormTree {
 
-
+    
     public class Node {
 
         private Node parent;
@@ -30,6 +34,7 @@ public class FormTree {
         private FieldPath path;
         private FormClass formClass;
         private List<Node> children = Lists.newArrayList();
+        
         private int depth;
 
         public boolean isRoot() {
@@ -45,8 +50,6 @@ public class FormTree {
         }
 
         public Node addChild(FormClass declaringClass, FormField field) {
-            assert isReference() : "only reference fields can have children";
-
             FormTree.Node childNode = new FormTree.Node();
             childNode.parent = this;
             childNode.field = field;
@@ -54,6 +57,8 @@ public class FormTree {
             childNode.formClass = declaringClass;
             children.add(childNode);
             nodeMap.put(childNode.path, childNode);
+            formClassMap.put(declaringClass.getId(), declaringClass);
+            
             if (childNode.parent != null) {
                 childNode.depth = childNode.parent.depth + 1;
             }
@@ -66,6 +71,19 @@ public class FormTree {
          */
         public List<Node> getChildren() {
             return children;
+        }
+
+        /**
+         * @return the fields that are defined one of the classes in this field's range
+         */
+        public Iterable<Node> getChildren(ResourceId formClassId) {
+            List<Node> matching = Lists.newArrayList();
+            for (Node child : children) {
+                if(child.getDefiningFormClass().getId().equals(formClassId)) {
+                    matching.add(child);
+                }
+            }
+            return matching;
         }
 
         public FieldPath getPath() {
@@ -95,6 +113,8 @@ public class FormTree {
         public Set<ResourceId> getRange() {
             if(field.getType() instanceof ReferenceType) {
                 return ((ReferenceType) field.getType()).getRange();
+            } else if(field.getType() instanceof RecordFieldType) {
+                return Collections.singleton(((RecordFieldType) field.getType()).getFormClass().getId());
             } else {
                 return Collections.emptySet();
             }
@@ -171,9 +191,55 @@ public class FormTree {
         }
 
 
+        public boolean hasChildren() {
+            return !children.isEmpty();
+        }
+
+        public FormClass getRootFormClass() {
+            if(isRoot()) {
+                return getDefiningFormClass();
+            } else {
+                return getParent().getRootFormClass();
+            }
+        }
+
+        public List<Node> getSelfAndAncestors() {
+            LinkedList<Node> list = Lists.newLinkedList();
+            Node node = this;
+            while(!node.isRoot()) {
+                list.addFirst(node);
+                node = node.getParent();
+            }
+            list.addFirst(node);
+            return list;
+        }
+
+        public boolean isLinked() {
+            return parent != null && (parent.isLinked() || parent.getType() instanceof ReferenceType);
+        }
         public boolean isCalculated() {
             return getType() instanceof ExprFieldType || getType() instanceof CalculatedFieldType;
         }
+
+        public Iterator<Node> selfAndAncestors() {
+            return new UnmodifiableIterator<Node>() {
+                
+                private Node next = Node.this;
+                
+                @Override
+                public boolean hasNext() {
+                    return next != null;
+                }
+
+                @Override
+                public Node next() {
+                    Node toReturn = next;
+                    next = next.getParent();
+                    return toReturn;
+                }
+            };
+        }
+
     }
 
     public enum SearchOrder {
@@ -183,6 +249,7 @@ public class FormTree {
 
     private List<Node> rootFields = Lists.newArrayList();
     private Map<FieldPath, Node> nodeMap = Maps.newHashMap();
+    private Map<ResourceId, FormClass> formClassMap = new HashMap<>();
 
     public FormTree() {
 
@@ -194,6 +261,7 @@ public class FormTree {
         node.field = field;
         node.path = new FieldPath(field.getId());
         rootFields.add(node);
+        formClassMap.put(declaringClass.getId(), declaringClass);
         nodeMap.put(node.path, node);
         return node;
     }
@@ -208,15 +276,34 @@ public class FormTree {
             paths.add(node.getPath());
         }
         return paths;
-
     }
 
+    public FormClass getRootFormClass() {
+        return Iterables.getOnlyElement(getRootFormClasses().values());
+    }
+    
     public Map<ResourceId, FormClass> getRootFormClasses() {
         Map<ResourceId, FormClass> map = Maps.newHashMap();
         for(Node node : rootFields) {
             map.put(node.getDefiningFormClass().getId(), node.getDefiningFormClass());
         }
         return map;
+    }
+
+    public FormClass getFormClass(ResourceId formClassId) {
+        Optional<FormClass> formClass = getFormClassIfPresent(formClassId);
+        if(!formClass.isPresent()) {
+            throw new IllegalArgumentException("No such FormClass: " + formClassId);
+        }
+        return formClass.get();
+    }
+    
+    public Collection<FormClass> getFormClasses() {
+        return formClassMap.values();
+    }
+
+    public Optional<FormClass> getFormClassIfPresent(ResourceId formClassId) {
+        return Optional.fromNullable(formClassMap.get(formClassId));
     }
 
     public Node getNodeByPath(FieldPath path) {
@@ -255,6 +342,12 @@ public class FormTree {
         return paths;
     }
 
+    public List<FieldPath> search(SearchOrder order, Node parent) {
+        List<FieldPath> paths = Lists.newArrayList();
+        search(paths, parent.getChildren(), order, Predicates.alwaysTrue(), Predicates.alwaysTrue());
+        return paths;
+    }
+    
     private void search(List<FieldPath> paths,
                         Iterable<Node> childNodes,
                         SearchOrder searchOrder,
@@ -304,7 +397,6 @@ public class FormTree {
     public static Predicate<Node> pathNotIn(final Collection<FieldPath> paths) {
         return Predicates.not(pathIn(paths));
     }
-
 
     @Override
     public String toString() {

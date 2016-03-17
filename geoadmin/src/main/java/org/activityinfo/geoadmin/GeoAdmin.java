@@ -161,7 +161,7 @@ public class GeoAdmin extends JFrame {
         if(args.length == 1) {
             endpoint = args[0];
         } else {
-            endpoint = "http://www.activityinfo.org/resources";
+            endpoint = "https://beta-api-dot-activityinfoeu.appspot.com/resources";
         }
 
         if(!tryLoadCredentialsFromHomeDir(endpoint)) {

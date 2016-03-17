@@ -5,7 +5,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 import net.miginfocom.swing.MigLayout;
-import org.activityinfo.geoadmin.model.*;
+import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.AdminEntity;
+import org.activityinfo.geoadmin.model.AdminLevel;
+import org.activityinfo.geoadmin.model.Country;
+import org.activityinfo.model.type.geo.Extents;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -29,6 +33,7 @@ import java.util.zip.GZIPOutputStream;
 public class ImportWindow extends JDialog {
 
     private static final Logger LOGGER = Logger.getLogger(ImportWindow.class.getName());
+    private static final int MAX_NAME_LENGTH = 254;
 
     private ActivityInfoClient client;
     private List<AdminEntity> parentEntities;
@@ -292,11 +297,15 @@ public class ImportWindow extends JDialog {
 
                 if(!entityMap.containsKey(key)) {
                     AdminEntity entity = new AdminEntity();
-                    entity.setName(featureName);
+                    String truncatedName = featureName;
+                    if(truncatedName.length() > MAX_NAME_LENGTH) {
+                        truncatedName = truncatedName.substring(0, MAX_NAME_LENGTH);
+                    }
+                    entity.setName(truncatedName);
                     if (codeAttribute != -1) {
                         entity.setCode(feature.getAttributeStringValue(codeAttribute));
                     }
-                    Bounds bounds = GeoUtils.toBounds(feature.getEnvelope());
+                    Extents bounds = GeoUtils.toBounds(feature.getEnvelope());
                     entity.setBounds(bounds);
 
                     if (importForm.isGeometryImported()) {

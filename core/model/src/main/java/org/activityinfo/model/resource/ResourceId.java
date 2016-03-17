@@ -5,8 +5,10 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.codehaus.jackson.annotate.JsonValue;
 
 import javax.annotation.Nonnull;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -14,7 +16,7 @@ import java.util.Date;
  * for {@code Resources}
  *
  */
-public final class ResourceId {
+public final class ResourceId implements Serializable {
 
     public static final ResourceId ROOT_ID = ResourceId.valueOf("_root");
 
@@ -44,6 +46,7 @@ public final class ResourceId {
         this.text = text;
     }
 
+    @JsonValue
     public String asString() {
         return this.text;
     }
@@ -82,5 +85,9 @@ public final class ResourceId {
         } else {
             return CuidAdapter.indicatorField(generator.generateInt());
         }
+    }
+
+    public ResourceId fieldId(String propertyName) {
+        return ResourceId.valueOf(text + "." + propertyName);
     }
 }

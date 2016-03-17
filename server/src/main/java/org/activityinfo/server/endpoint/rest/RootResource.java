@@ -22,6 +22,8 @@ package org.activityinfo.server.endpoint.rest;
  * #L%
  */
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.GetCountries;
@@ -29,16 +31,27 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.DTOViews;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
+import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.store.mysql.collections.CountryTable;
+import org.activityinfo.store.query.impl.InvalidUpdateException;
+import org.activityinfo.store.query.impl.Updater;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
@@ -48,15 +61,22 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-
+    private Provider<CollectionCatalog> catalog;
+    private Provider<AuthenticatedUser> userProvider;
+    private ServerSideAuthProvider authProvider;
+    
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
+                        Provider<CollectionCatalog> catalog,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config) {
+                        DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider, ServerSideAuthProvider authProvider) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
+        this.catalog = catalog;
         this.config = config;
+        this.userProvider = userProvider;
+        this.authProvider = authProvider;
     }
 
     @Path("/adminEntity/{id}")
@@ -64,17 +84,23 @@ public class RootResource {
         return new AdminEntityResource(entityManager.get().find(AdminEntity.class, id));
     }
 
-    @GET @Path("/countries") 
-    @JsonView(DTOViews.List.class) 
+    @GET 
+    @Path("/countries")
+    @JsonView(DTOViews.List.class)
     @Produces(MediaType.APPLICATION_JSON)
     public List<CountryDTO> getCountries() {
+
+        QueryModel model = new QueryModel(CountryTable.FORM_CLASS_ID);
+        model.selectField(CountryTable.CODE_FIELD_ID).as("code");
+        model.selectField(CountryTable.NAME_FIELD_ID).as("name");
+        
         return dispatcher.execute(new GetCountries()).getData();
     }
 
 
     @Path("/country/{id: [0-9]+}")
     public CountryResource getCountryById(@PathParam("id") int id) {
-        Country result = (Country) entityManager.get().find(Country.class, id);
+        Country result = entityManager.get().find(Country.class, id);
         if (result == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
@@ -96,7 +122,8 @@ public class RootResource {
         return new CountryResource(results.get(0));
     }
 
-    @GET @Path("/databases") 
+    @GET 
+    @Path("/databases") 
     @JsonView(DTOViews.List.class) 
     @Produces(MediaType.APPLICATION_JSON)
     public List<UserDatabaseDTO> getDatabases() {
@@ -111,7 +138,7 @@ public class RootResource {
 
     @Path("/adminLevel/{id}")
     public AdminLevelResource getAdminLevel(@PathParam("id") int id) {
-        return new AdminLevelResource(entityManager, entityManager.get().find(AdminLevel.class, id));
+        return new AdminLevelResource(catalog, entityManager, userProvider, entityManager.get().find(AdminLevel.class, id));
     }
 
     @Path("/sites")
@@ -130,12 +157,57 @@ public class RootResource {
     }
 
     @Path("/form/{id}")
-    public FormResource getForm(@PathParam("id") String id) {
-        return new FormResource(id);
+    public FormResource getForm(@PathParam("id") ResourceId id) {
+        return new FormResource(id, catalog, userProvider);
+    }
+    
+    @Path("/query")
+    public QueryResource query() {
+        return new QueryResource(catalog);
+    }
+    
+    @POST
+    @Path("/update") 
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response update(String json) {
+
+        assertUserIsTrustedWhileInBeta();
+
+        Gson gson = new Gson();
+        final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
+
+        Updater updater = new Updater(catalog.get());
+        try {
+            updater.execute(jsonElement.getAsJsonObject());
+        } catch (InvalidUpdateException e) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build());
+        }
+        return Response.ok().build();
+    }
+    
+
+    private void assertUserIsTrustedWhileInBeta() {
+        if(!DeploymentEnvironment.isAppEngineDevelopment() && !userProvider.get().getEmail().endsWith("@bedatadriven.com")) {
+            throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
+        }
     }
 
     @Path("/users")
     public UsersResource getUsers() {
         return new UsersResource(config, entityManager);
     }
+    
+    @Path("/usage")
+    public UsageResource getUsage() {
+        return new UsageResource(entityManager, config);
+    }
+    
+    @Path("/testPivot")
+    public PivotTestResource getPivotTestResource() {
+        return new PivotTestResource( dispatcher, authProvider);
+    }
+    
+    
 }

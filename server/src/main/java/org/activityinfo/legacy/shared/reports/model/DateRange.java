@@ -97,6 +97,10 @@ public final class DateRange implements Serializable {
         setMinDate((LocalDate) null);
         setMaxDate((LocalDate) null);
     }
+    
+    public boolean isRestricted() {
+        return minDate != null || maxDate != null;
+    }
 
     /**
      * Gets the minimum date in this range (inclusive).

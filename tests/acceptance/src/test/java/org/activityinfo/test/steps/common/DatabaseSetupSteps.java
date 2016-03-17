@@ -11,6 +11,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -315,6 +316,20 @@ public class DatabaseSetupSteps {
     @Given("^I have submitted a \"([^\"]*)\" form with:$")
     public void I_have_submitted_a_form_with(String formName, List<FieldValue> values) throws Throwable {
         driver.setup().submitForm(formName, values);
+    }
+
+    @Given("^I have submitted \"([^\"]*)\" forms with:$")
+    public void I_submitted_forms_with(String formName, DataTable table) throws Throwable {
+        DataTableRow header = table.getGherkinRows().get(0);
+        List<DataTableRow> rows = table.getGherkinRows().subList(1, table.getGherkinRows().size());
+
+        for(int i=0;i<rows.size();++i) {
+            List<FieldValue> fieldValues = Lists.newArrayList();
+            for(int j=0;j<header.getCells().size();++j) {
+                fieldValues.add(new FieldValue(header.getCells().get(j), rows.get(i).getCells().get(j)));
+            }
+            driver.setup().submitForm(formName, fieldValues);
+        }
     }
 
 

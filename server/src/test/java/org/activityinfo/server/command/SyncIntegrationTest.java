@@ -30,6 +30,7 @@ import com.google.gson.JsonParser;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -334,8 +335,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Test
     @OnDataSet("/dbunit/sites-simple-with-unicode.db.xml")
     public void failResume() throws SQLException, InterruptedException {
-        String databaseName = "target/localdbtest"
-                + new java.util.Date().getTime();
+        String databaseName = TestOutput.getFile(getClass(), ".sqlite").getAbsolutePath();
 
         final AtomicBoolean forceFail = new AtomicBoolean(true);
 

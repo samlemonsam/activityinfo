@@ -21,7 +21,7 @@ package org.activityinfo.core.shared.importing.strategy;
  * #L%
  */
 
-import org.activityinfo.core.shared.importing.match.names.LatinPlaceNameScorer;
+import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 
 /**

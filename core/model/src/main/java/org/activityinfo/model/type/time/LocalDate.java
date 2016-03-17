@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * {@code FieldValue} of type {@code LocalDateType}
  */
-public class LocalDate implements FieldValue, IsRecord {
+public class LocalDate implements FieldValue, IsRecord, TemporalValue {
 
     private int year;
     private int monthOfYear;
@@ -71,6 +71,12 @@ public class LocalDate implements FieldValue, IsRecord {
         this.dayOfMonth = dayOfMonth;
     }
 
+    
+    public int getQuarter() {
+        int quarter0 = (monthOfYear - 1) / 3;
+        return quarter0 + 1;
+    }
+    
     /**
      *
      * @return a java.util.Date instance representing the instant at midnight on this date
@@ -198,5 +204,10 @@ public class LocalDate implements FieldValue, IsRecord {
 
     public static LocalDate valueOf(com.bedatadriven.rebar.time.calendar.LocalDate rebarDate) {
         return new LocalDate(rebarDate.getYear(), rebarDate.getMonthOfYear(), rebarDate.getDayOfMonth());
+    }
+
+    @Override
+    public LocalDateInterval asInterval() {
+        return new LocalDateInterval(this, this);
     }
 }

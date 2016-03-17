@@ -41,6 +41,9 @@ public class LinkedSumAvgIndicatorValues extends BaseTable {
 
         query.from(Tables.INDICATOR_LINK, "IndicatorLink");
         query.leftJoin(Tables.INDICATOR_VALUE, "V").on("IndicatorLink.SourceIndicatorId=V.IndicatorId");
+        query.leftJoin(Tables.INDICATOR, "SI").on("IndicatorLink.SourceIndicatorId=SI.IndicatorId");
+        query.leftJoin(Tables.ACTIVITY, "SA").on("SI.activityid=SA.activityId");
+        query.leftJoin(Tables.USER_DATABASE, "SD").on("SD.databaseId=SA.databaseId");
         query.leftJoin(Tables.INDICATOR, "Indicator").on("IndicatorLink.DestinationIndicatorId=Indicator.IndicatorId");
         query.leftJoin(Tables.ACTIVITY, "Activity").on("Activity.ActivityId=Indicator.ActivityId");
         query.leftJoin(Tables.USER_DATABASE, "UserDatabase").on("UserDatabase.DatabaseId=Activity.DatabaseId");
@@ -54,12 +57,31 @@ public class LinkedSumAvgIndicatorValues extends BaseTable {
 
         query.groupBy("Indicator.IndicatorId");
         query.groupBy("Indicator.Aggregation");
-        query.whereTrue(" ((V.value <> 0 and Indicator.Aggregation=0) or Indicator.Aggregation=1) ");
+        query.whereTrue(" (Indicator.Aggregation=0 or Indicator.Aggregation=1) ");
 
         query.where("Site.dateDeleted").isNull();
+        
+        // Exclude if either source or destination activity is deleted
+        query.where("SA.dateDeleted").isNull();
         query.where("Activity.dateDeleted").isNull();
+
+        query.where("SD.dateDeleted").isNull();
         query.where("UserDatabase.dateDeleted").isNull();
 
+        // Exclude if eitehr source or destination indicator has been deleted
+        query.whereTrue(" (SI.datedeleted is NULL) ");
+        query.whereTrue(" (Indicator.dateDeleted IS NULL) ");
+        
+        // Do not include empty values in aggregations EVER
+        query.whereTrue(" (V.VALUE IS NOT NULL)");
+
+
+        // Exclude values for indicators that have been changed to text
+        query.whereTrue(" Indicator.type = 'QUANTITY'");
+        query.whereTrue(" SI.type = 'QUANTITY' ");
+        
+        query.whereTrue(" IndicatorLink.SourceIndicatorId != IndicatorLink.DestinationIndicatorId ");
+        
     }
 
     @Override

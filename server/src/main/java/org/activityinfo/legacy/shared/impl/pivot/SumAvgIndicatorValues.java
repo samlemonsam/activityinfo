@@ -54,13 +54,20 @@ public class SumAvgIndicatorValues extends BaseTable {
          * Add the indicator to the query: we can't aggregate values from
          * different indicators so this is a must
          */
-        query.appendColumn("Indicator.Aggregation", ValueFields.AGGREGATION);
+        query.appendColumn("MIN(Indicator.Aggregation)", ValueFields.AGGREGATION);
         query.appendColumn("SUM(V.Value)", ValueFields.SUM);
         query.appendColumn("COUNT(V.Value)", ValueFields.COUNT);
 
-        query.groupBy("Indicator.IndicatorId");
-        query.groupBy("Indicator.Aggregation");
         query.whereTrue(" (Indicator.Aggregation=0 or Indicator.Aggregation=1) ");
+
+        // Do not include empty values in aggregations EVER
+        query.whereTrue(" (V.VALUE IS NOT NULL)");
+
+        // Exclude values for indicators that have been changed to text
+        query.whereTrue(" Indicator.type = 'quantity' ");
+        
+        // Ensure that we don't get values erroneously associated with calculated indicators
+        query.whereTrue(" (Indicator.calculatedAutomatically=0 OR Indicator.expression IS NULL)");
     }
 
     @Override

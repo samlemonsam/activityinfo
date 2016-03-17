@@ -38,6 +38,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
+import org.activityinfo.legacy.shared.reports.content.PivotContent;
 import org.activityinfo.legacy.shared.reports.content.PivotTableData;
 import org.activityinfo.legacy.shared.reports.model.PivotReportElement;
 
@@ -46,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PivotGridPanel extends ContentPanel implements ReportView<PivotReportElement> {
+public class PivotGridPanel extends ContentPanel implements ReportView<PivotReportElement<PivotContent>> {
 
     private static final int ROW_INDENT = 15;
 

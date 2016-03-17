@@ -68,4 +68,9 @@ public class AdminDimension extends Dimension {
     public int hashCode() {
         return levelId;
     }
+
+    @Override
+    public String toString() {
+        return "AdminDimension." + levelId;
+    }
 }

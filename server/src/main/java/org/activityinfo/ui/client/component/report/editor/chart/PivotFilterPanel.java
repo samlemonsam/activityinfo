@@ -55,8 +55,11 @@ public class PivotFilterPanel extends ContentPanel implements HasReportElement<P
         AdminFilterPanel adminFilterPanel = new AdminFilterPanel(dispatcher);
         add(adminFilterPanel);
 
-        DateRangePanel dateFilterPanel = new DateRangePanel();
-        add(dateFilterPanel);
+        DateRangePanel startDateFilterPanel = new DateRangePanel(DateRangePanel.DateType.START);
+        add(startDateFilterPanel);
+        
+        DateRangePanel endDateFilterPanel = new DateRangePanel(DateRangePanel.DateType.END);
+        add(endDateFilterPanel);
 
         PartnerFilterPanel partnerFilterPanel = new PartnerFilterPanel(dispatcher);
         add(partnerFilterPanel);
@@ -69,7 +72,8 @@ public class PivotFilterPanel extends ContentPanel implements HasReportElement<P
 
         panelSet = new FilterPanelSet(indicatorPanel,
                 adminFilterPanel,
-                dateFilterPanel,
+                startDateFilterPanel,
+                endDateFilterPanel,
                 partnerFilterPanel,
                 attributePanel,
                 locationFilterPanel);

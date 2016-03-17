@@ -4,6 +4,7 @@ import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.HasSetFieldValue;
+import org.activityinfo.model.type.NullFieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 
@@ -13,7 +14,7 @@ public class Casting {
     public static Quantity toQuantity(FieldValue fieldValue) {
         if(fieldValue instanceof Quantity) {
             return (Quantity) fieldValue;
-        } else if(fieldValue == null) {
+        } else if(fieldValue == NullFieldValue.INSTANCE || fieldValue == null) {
             return new Quantity(Double.NaN);
         } else {
             throw new InvalidTypeException("Cannot cast " + fieldValue + " to quantity");

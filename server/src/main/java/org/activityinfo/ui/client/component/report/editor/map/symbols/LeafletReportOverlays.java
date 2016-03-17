@@ -10,7 +10,7 @@ import org.activityinfo.legacy.shared.reports.content.MapContent;
 import org.activityinfo.legacy.shared.reports.content.MapMarker;
 import org.activityinfo.legacy.shared.reports.content.MapboxLayers;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.ui.client.util.LeafletUtil;
 import org.discotools.gwt.leaflet.client.Options;
 import org.discotools.gwt.leaflet.client.events.Event;

@@ -10,6 +10,7 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.FormClassResult;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 import org.activityinfo.promise.Promise;
@@ -41,7 +42,6 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
 
             case PROJECT_CLASS_DOMAIN:
                 return Promise.resolved(BuiltinFormClasses.projectFormClass(getLegacyIdFromCuid(classId)));
-
 
             case ADMIN_LEVEL_DOMAIN:
                 return dispatcher.execute(new GetSchema())

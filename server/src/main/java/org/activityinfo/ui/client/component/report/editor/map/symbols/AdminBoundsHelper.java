@@ -23,7 +23,7 @@ package org.activityinfo.ui.client.component.report.editor.map.symbols;
  */
 
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 
 import java.util.Collection;
 

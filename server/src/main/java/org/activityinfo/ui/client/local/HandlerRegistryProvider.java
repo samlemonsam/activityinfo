@@ -26,7 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.impl.*;
-import org.activityinfo.legacy.shared.impl.BatchCommandHandlerAsync;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;
 
 public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
@@ -39,14 +38,13 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
                                    GetMonthlyReportsHandlerAsync getMonthlyReportsHandler,
                                    GetAdminEntitiesHandler adminHandler,
                                    GetPartnersDimensionHandler partnersDimensionHandler,
-                                   GetAttributeGroupsDimensionHandler attributeGroupsDimensionHandler,
                                    CreateSiteHandlerAsync createSiteHandler,
                                    UpdateSiteHandlerAsync updateSiteHandlerAsync,
                                    UpdateMonthlyReportsAsync updateMonthly,
                                    CreateLocationHandlerAsync createLocationHandler,
                                    SearchLocationsHandler searchLocationsHandler,
                                    // SearchHandler searchHandler,
-                                   PivotSitesHandler pivotSitesHandler,
+                                   OldPivotSitesHandler pivotSitesHandler,
                                    GetLocationsHandler getLocationsHandler,
                                    DeleteSiteHandlerAsync deleteSiteHandler,
                                    GetSiteAttachmentsHandler getSiteAttachmentsHandler,
@@ -59,7 +57,6 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
         registry.registerHandler(GetSites.class, sitesHandler);
         registry.registerHandler(GetAdminEntities.class, adminHandler);
         registry.registerHandler(GetPartnersDimension.class, partnersDimensionHandler);
-        registry.registerHandler(GetAttributeGroupsDimension.class, attributeGroupsDimensionHandler);
         registry.registerHandler(CreateSite.class, createSiteHandler);
         registry.registerHandler(UpdateSite.class, updateSiteHandlerAsync);
         registry.registerHandler(CreateLocation.class, createLocationHandler);

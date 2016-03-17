@@ -1,6 +1,7 @@
 package org.activityinfo.model.type;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.IsRecord;
@@ -37,6 +38,9 @@ public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
         return resourceIds;
     }
 
+    public ResourceId getResourceId() {
+        return Iterables.getOnlyElement(resourceIds);
+    }
 
     @Override
     public Record asRecord() {

@@ -43,6 +43,7 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.model.expr.eval.FieldReader;
 import org.activityinfo.model.expr.eval.FormSymbolTable;
 import org.activityinfo.model.expr.eval.PartialEvaluator;
@@ -57,10 +58,7 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.promise.Promise;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult> {
 
@@ -451,7 +449,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 boolean isRestricted = false;
                 for (DimensionType type : filter.getRestrictedDimensions()) {
                     if (isQueryableType(type)) {
-                        addJoint(query, filter.isLenient(), isFirst);
+                        addJoint(query, isFirst);
                         isRestricted = true;
                     }
 
@@ -489,7 +487,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                                     .where("av.AttributeId")
                                     .equalTo(attribute);
 
-                            addJoint(query, filter.isLenient(), isFirstAttr);
+                            addJoint(query, isFirstAttr);
                             if (isFirstAttr) {
                                 isFirstAttr = false;
                             }
@@ -510,15 +508,19 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 }
                 query.onlyWhere(")");
             }
+            applyDateRangeFilter("site.Date1", filter.getEndDateRange(), query);
+            applyDateRangeFilter("site.Date2", filter.getEndDateRange(), query);
+        }
+    }
 
-            LocalDate filterMinDate = filter.getDateRange().getMinLocalDate();
-            if (filterMinDate != null) {
-                query.where("site.Date2").greaterThanOrEqualTo(filterMinDate);
-            }
-            LocalDate filterMaxDate = filter.getDateRange().getMaxLocalDate();
-            if (filterMaxDate != null) {
-                query.where("site.Date2").lessThanOrEqualTo(filterMaxDate);
-            }
+    private void applyDateRangeFilter(String field, DateRange range, SqlQuery query) {
+        LocalDate filterMinDate = range.getMinLocalDate();
+        if (filterMinDate != null) {
+            query.where(field).greaterThanOrEqualTo(filterMinDate);
+        }
+        LocalDate filterMaxDate = range.getMaxLocalDate();
+        if (filterMaxDate != null) {
+            query.where(field).lessThanOrEqualTo(filterMaxDate);
         }
     }
 
@@ -533,13 +535,9 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 type == DimensionType.Location);
     }
 
-    private void addJoint(SqlQuery query, boolean lenient, boolean first) {
+    private void addJoint(SqlQuery query, boolean first) {
         if (!first) {
-            if (lenient) {
-                query.onlyWhere(" OR ");
-            } else {
-                query.onlyWhere(" AND ");
-            }
+            query.onlyWhere(" AND ");
         }
     }
 
@@ -808,27 +806,30 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         query.execute(tx, new SqlResultCallback() {
             @Override
             public void onSuccess(SqlTransaction tx, final SqlResultSet results) {
-                List<FormField> fields = Lists.newArrayList();
+                Multimap<Integer, FormField> fields = HashMultimap.create();
                 for(SqlResultSetRow row : results.getRows()) {
-                    fields.add(createField(row));
+                    fields.put(row.getInt("activityId"), createField(row));
                 }
+                // Have to resolve symbols on a per-form basis
+                for (Integer activityId : fields.keySet()) {
+                    Collection<FormField> activityFields = fields.get(activityId);
+                    FormSymbolTable symbolTable = new FormSymbolTable(activityFields);
+                    PartialEvaluator<SiteDTO> evaluator = new PartialEvaluator<>(symbolTable, new SiteFieldReaderFactory());
 
-                FormSymbolTable symbolTable = new FormSymbolTable(fields);
-                PartialEvaluator<SiteDTO> evaluator = new PartialEvaluator<>(symbolTable, new SiteFieldReaderFactory());
-
-                List<CalculatedIndicatorReader> readers = Lists.newArrayList();
-                for(FormField field : fields) {
-                    if(field.getType() instanceof CalculatedFieldType) {
-                        FieldReader<SiteDTO> reader = evaluator.partiallyEvaluate(field);
-                        if(reader.getType() instanceof QuantityType) {
-                            readers.add(new CalculatedIndicatorReader(field, reader));
+                    List<CalculatedIndicatorReader> readers = Lists.newArrayList();
+                    for(FormField field : activityFields) {
+                        if(field.getType() instanceof CalculatedFieldType) {
+                            FieldReader<SiteDTO> reader = evaluator.partiallyEvaluate(field);
+                            if(reader.getType() instanceof QuantityType) {
+                                readers.add(new CalculatedIndicatorReader(field, reader));
+                            }
                         }
                     }
-                }
 
-                for(SiteDTO site : siteMap.values()) {
-                    for(CalculatedIndicatorReader reader : readers) {
-                        reader.read(site);
+                    for(SiteDTO site : siteMap.values()) {
+                        for(CalculatedIndicatorReader reader : readers) {
+                            reader.read(site);
+                        }
                     }
                 }
                 complete.onSuccess(null);
@@ -839,7 +840,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
     private FormField createField(SqlResultSetRow rs) {
         IndicatorDTO indicator = new IndicatorDTO();
         indicator.setId(rs.getInt("indicatorId"));
-        indicator.setName("indicatorName");
+        indicator.setName(rs.getString("indicatorName"));
         indicator.setTypeId(rs.getString("type"));
         indicator.setExpression(rs.getString("expression"));
         indicator.setRelevanceExpression(rs.getString("skipExpression"));

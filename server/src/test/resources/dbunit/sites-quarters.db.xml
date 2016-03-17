@@ -80,7 +80,7 @@
             Y="28.232" timeEdited="1"/>
 
   <site siteId="2" activityId="1" locationId="2" partnerId="1"
-        Date1="2009-01-15" Date2="2009-01-16" DateCreated="2009-02-01"
+        Date1="2009-01-15" Date2="2009-04-16" DateCreated="2009-02-01"
         DateEdited="2009-02-01"/>
 
   <reportingPeriod reportingPeriodId="2" siteId="2"

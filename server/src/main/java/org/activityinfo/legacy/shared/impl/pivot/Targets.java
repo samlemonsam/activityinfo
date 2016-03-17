@@ -102,6 +102,14 @@ public class Targets extends BaseTable {
         query.appendColumn(String.valueOf(IndicatorDTO.AGGREGATE_SUM), ValueFields.AGGREGATION);
         query.appendColumn("V.Value", ValueFields.SUM);
         query.appendColumn("COUNT(V.Value)", ValueFields.COUNT);
+        
+        // Exclude targets for indicators which have changed to text 
+        query.whereTrue("Indicator.type = 'QUANTITY' ");
+        
+        // Exclude targets for indicators which have been deleted
+        query.where("Indicator.dateDeleted").isNull();
+        query.where("Activity.dateDeleted").isNull();
+        query.where("UserDatabase.dateDeleted").isNull();
 
         // filter out deleted targets (handle case when targetvalue was not removed after target removing)
         query.where("V.TargetId IN (SELECT Target.TargetId FROM target)");

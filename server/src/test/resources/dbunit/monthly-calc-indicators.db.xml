@@ -50,7 +50,7 @@
                code="40" x1="0" y1="0" x2="0" y2="0"/>
 
   <adminEntity adminLevelId="2" adminEntityId="10"
-               adminEntityParentId="4" name="Bukavu" code="203" x1="0" y1="0" x2="0"
+               adminEntityParentId="2" name="Bukavu" code="203" x1="0" y1="0" x2="0"
                y2="0"/>
   <adminEntity adminLevelId="2" adminEntityId="11"
                adminEntityParentId="2" name="Walungu" code="201" x1="0" y1="0" x2="0"
@@ -64,8 +64,12 @@
   <adminEntity adminLevelId="2" adminEntityId="21"
                adminEntityParentId="4" name="Irumu" code="203" x1="0" y1="0" x2="0"
                y2="0"/>
+    <adminEntity adminLevelId="2" adminEntityId="31"
+                 adminEntityParentId="3" name="Beni" code="301" x1="0" y1="0" x2="0"
+                 y2="0"/>
 
-  <!-- User setup -->
+
+    <!-- User setup -->
   <userLogin userId="1" name="Alex"
              email="akbertram@gmail.com" password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
              locale="fr" organization="" jobtitle="" emailnotification="1"/>
@@ -140,9 +144,9 @@
   <locationAdminLink locationId="401" adminEntityId="2"/>
   <locationAdminLink locationId="401" adminEntityId="10"/>
 
-  <location locationId="402" name="Walungu" locationTypeId="1" timeEdited="550"/>
+  <location locationId="402" name="Bene Ville" locationTypeId="1" timeEdited="550"/>
   <locationAdminLink locationId="402" adminEntityId="3"/>
-  <locationAdminLink locationId="402" adminEntityId="11"/>
+  <locationAdminLink locationId="402" adminEntityId="31"/>
 
   <location locationId="403" name="Shabunda" locationTypeId="1" timeEdited="600"/>
   <locationAdminLink locationId="403" adminEntityId="3"/>

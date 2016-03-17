@@ -1,13 +1,14 @@
 package org.activityinfo.geoadmin.model;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.model.type.geo.Extents;
 
 public class AdminEntity {
     private int id;
     private Integer parentId;
     private String name;
     private String code;
-    private Bounds bounds;
+    private Extents bounds;
     private boolean deleted;
     private int levelId;
     private Geometry geometry;
@@ -36,11 +37,11 @@ public class AdminEntity {
         this.code = code;
     }
 
-    public Bounds getBounds() {
+    public Extents getBounds() {
         return bounds;
     }
 
-    public void setBounds(Bounds bounds) {
+    public void setBounds(Extents bounds) {
         this.bounds = bounds;
     }
 

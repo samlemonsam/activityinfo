@@ -22,6 +22,7 @@ package org.activityinfo.server.report;
  * #L%
  */
 
+import org.activityinfo.TestOutput;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.legacy.shared.reports.model.layers.BubbleMapLayer;
@@ -56,13 +57,13 @@ public class ReadWriteReportTest {
 
         Report.class.getPackage();
 
-        JAXBContext jc = JAXBContext.newInstance(Report.class.getPackage()
-                .getName());
+        JAXBContext jc = JAXBContext.newInstance(Report.class.getPackage().getName());
         Marshaller marshaller = jc.createMarshaller();
-        marshaller
-                .setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+        marshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        FileOutputStream fo = new FileOutputStream("SomeXmlTest.xml");
-        marshaller.marshal(report, fo);
+        
+        try(FileOutputStream fo = TestOutput.open(getClass(), "SomeXmlTest", ".xml")) {
+            marshaller.marshal(report, fo);
+        }
     }
 }

@@ -12,6 +12,9 @@ import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +24,7 @@ import java.util.Set;
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
  */
-public class FormClass implements IsResource, FormElementContainer {
+public class FormClass implements IsResource, FormElementContainer, Serializable {
 
 
     /**
@@ -29,6 +32,7 @@ public class FormClass implements IsResource, FormElementContainer {
      */
     public static final ResourceId CLASS_ID = ResourceId.valueOf("_class");
 
+    
     /**
      * Instances of FormClass have one FormField: a label, which has its own
      * FormField id. It is defined at the application level to be a subproperty of
