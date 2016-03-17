@@ -57,6 +57,15 @@ public class FunctionCallNode extends ExprNode {
         return arguments;
     }
 
+    public int getArgumentCount() {
+        return arguments.size();
+    }
+
+
+    public ExprNode getArgument(int i) {
+        return arguments.get(i);
+    }
+
     @Override
     public String toString() {
         return "(" + function.getId() + " " + Joiner.on(" ").join(arguments) + ")";
@@ -77,7 +86,7 @@ public class FunctionCallNode extends ExprNode {
             return arguments.get(0).asExpression() + "" + function.getId() + "" + arguments.get(1).asExpression();
         }
     }
-
+    
     @Override
     public <T> T accept(ExprVisitor<T> visitor) {
         return visitor.visitFunctionCall(this);
@@ -106,4 +115,6 @@ public class FunctionCallNode extends ExprNode {
         FunctionCallNode other = (FunctionCallNode) obj;
         return other.function.equals(function) && other.arguments.equals(arguments);
     }
+
+
 }

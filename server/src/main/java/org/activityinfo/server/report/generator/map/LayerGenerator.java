@@ -24,7 +24,7 @@ package org.activityinfo.server.report.generator.map;
 
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.reports.content.MapContent;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.server.command.DispatcherSync;
 
 public interface LayerGenerator {

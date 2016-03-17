@@ -71,11 +71,9 @@ public class PivotTableRendererTest {
 
         // Write output to disk
         try {
-            File outputFile = new File("target/report-tests");
+            File outputFile = new File("build/report-tests");
             outputFile.mkdirs();
-            OutputStream out =
-                    new FileOutputStream(outputFile.getAbsoluteFile()
-                            + "/PivotTableRendererTest.xls");
+            OutputStream out =  new FileOutputStream(new File(outputFile, "PivotTableRendererTest.xls"));
 
             book.write(out);
             out.close();
@@ -101,11 +99,9 @@ public class PivotTableRendererTest {
 
         // Write output to disk
         try {
-            File outputFile = new File("target/report-tests");
+            File outputFile = new File("build/report-tests");
             outputFile.mkdirs();
-            OutputStream out =
-                    new FileOutputStream(outputFile.getAbsoluteFile()
-                            + "/testNoColumnDimensions.xls");
+            OutputStream out = new FileOutputStream(new File(outputFile,  "testNoColumnDimensions.xls"));
 
             book.write(out);
             out.close();

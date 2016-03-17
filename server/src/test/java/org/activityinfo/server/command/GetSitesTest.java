@@ -83,7 +83,7 @@ public class GetSitesTest extends CommandTestCase2 {
         // assure project is present
         SiteDTO s1 = result.getData().get(1);
         assertThat(s1.getId(), equalTo(1));
-        assertThat(s1.getProject().getId(), equalTo(1));
+        assertThat(s1.getProject().getId(), equalTo(3));
 
     }
 

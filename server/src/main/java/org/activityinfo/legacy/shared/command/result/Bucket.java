@@ -22,10 +22,10 @@ package org.activityinfo.legacy.shared.command.result;
  * #L%
  */
 
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.type.geo.AiLatLng;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -41,21 +41,31 @@ public class Bucket implements Serializable {
     private int aggregationMethod;
     private AiLatLng point;
 
-    private Map<Dimension, DimensionCategory> categories = new HashMap<Dimension, DimensionCategory>();
+    private Map<Dimension, DimensionCategory> categories;
 
     public Bucket() {
+        categories = new HashMap<Dimension, DimensionCategory>();
     }
 
     public Bucket(double sum) {
         this.sum = sum;
         this.count = 1;
         this.aggregationMethod = IndicatorDTO.AGGREGATE_SUM;
+        this.categories = new HashMap<>();
     }
 
     public Bucket(double sum, int count, int aggregationMethod) {
         this.sum = sum;
         this.count = count;
         this.aggregationMethod = aggregationMethod;
+        this.categories = new HashMap<>();
+    }
+
+    public Bucket(double sum, int count, int aggregationMethod, Map<Dimension, DimensionCategory> categories) {
+        this.sum = sum;
+        this.count = count;
+        this.aggregationMethod = aggregationMethod;
+        this.categories = categories;
     }
 
     public Collection<Dimension> dimensions() {
@@ -63,7 +73,9 @@ public class Bucket implements Serializable {
     }
 
     public void setCategory(Dimension dimension, DimensionCategory category) {
-        this.categories.put(dimension, category);
+        if(category != null) {
+            this.categories.put(dimension, category);
+        }
     }
 
     public DimensionCategory getCategory(Dimension dimension) {
@@ -84,10 +96,6 @@ public class Bucket implements Serializable {
 
     public void setCount(int count) {
         this.count = count;
-    }
-
-    public AiLatLng getPoint() {
-        return point;
     }
 
     public void setPoint(AiLatLng point) {

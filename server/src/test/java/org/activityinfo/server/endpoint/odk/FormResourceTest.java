@@ -7,6 +7,7 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.legacy.shared.command.GetFormClass;
@@ -97,7 +98,7 @@ public class FormResourceTest extends CommandTestCase2 {
     }
 
     private void validate(Response form) throws JAXBException, URISyntaxException, IOException, InterruptedException, ParserConfigurationException, SAXException {
-        File file = new File(targetDir(), "form.xml");
+        File file = TestOutput.getFile(FormResourceTest.class, "form", ".xml");
         JAXBContext context = JAXBContext.newInstance(XForm.class);
         Marshaller marshaller = context.createMarshaller();
 
@@ -191,15 +192,6 @@ public class FormResourceTest extends CommandTestCase2 {
 
     private String fieldName(int fieldIndex) {
         return field(activityFormClass(ACTIVITY_ID), fieldIndex).asString();
-    }
-
-    private File targetDir() {
-        String relPath = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-        File targetDir = new File(relPath + "../../target");
-        if (!targetDir.exists()) {
-            targetDir.mkdir();
-        }
-        return targetDir;
     }
 
     public void validate(File file) throws URISyntaxException, IOException, InterruptedException {

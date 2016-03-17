@@ -4,6 +4,7 @@ import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * A FieldValue containing a symbolic expression such as "A + B"
@@ -16,6 +17,7 @@ public class ExprValue implements FieldValue, IsRecord {
         this.expression = expression;
     }
 
+    @JsonValue
     public String getExpression() {
         return expression;
     }

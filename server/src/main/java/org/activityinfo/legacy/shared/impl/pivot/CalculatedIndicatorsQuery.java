@@ -200,7 +200,9 @@ public class CalculatedIndicatorsQuery implements WorkItem {
         // databases we own
         .append("db.OwnerUserId = ").append(userId).append(" ")
 
-        // databases with allow view all
+        // databases with allow view
+        // Note this we're not considering partner visiblity here 
+        // because this just checks INDICATOR visibility, not SITE visibility
         .append("OR ")
         .append("db.DatabaseId IN (")
         .append(" SELECT ")
@@ -210,7 +212,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
         .append(" WHERE ")
         .append("  p.UserId = ")
         .append(userId)
-        .append("  AND p.AllowViewAll").append(") ")
+        .append("  AND p.AllowView").append(") ")
 
        // or activities that are published
 
@@ -227,7 +229,9 @@ public class CalculatedIndicatorsQuery implements WorkItem {
         sitesQuery.setFetchAdminEntities( query.isPivotedBy(DimensionType.AdminLevel) );
         sitesQuery.setFetchAttributes(query.isPivotedBy(DimensionType.AttributeGroup));
         sitesQuery.setFetchAllIndicators(true);
-        sitesQuery.setFetchLocation(query.isPivotedBy(DimensionType.Location));
+        sitesQuery.setFetchLocation(
+                query.isPivotedBy(DimensionType.Location) || 
+                query.isPivotedBy(DimensionType.Site));
         sitesQuery.setFetchPartner(query.isPivotedBy(DimensionType.Partner));
         sitesQuery.setFetchComments(false);
         sitesQuery.setFetchDates(query.isPivotedBy(DimensionType.Date));
@@ -265,7 +269,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
     private Filter composeSiteFilter() {
         Filter siteFilter = new Filter();
         siteFilter.addRestriction(DimensionType.Activity, activityIds);
-        siteFilter.setDateRange(query.getFilter().getDateRange());
+        siteFilter.setEndDateRange(query.getFilter().getEndDateRange());
 
         for(DimensionType type : query.getFilter().getRestrictedDimensions()) {
             if(type != DimensionType.Activity && type != DimensionType.Database && type != DimensionType.Indicator) {
@@ -321,7 +325,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
             for (EntityCategory indicator : indicatorMap.values()) {
                 Double value = site.getIndicatorDoubleValue(indicator.getId());
 
-                if (value != null) {
+                if (value != null && !Double.isNaN(value) && !Double.isInfinite(value)) {
 
                     Bucket bucket = new Bucket(value);
                     bucket.setAggregationMethod(indicatorAggregationMap.get(indicator.getId()));

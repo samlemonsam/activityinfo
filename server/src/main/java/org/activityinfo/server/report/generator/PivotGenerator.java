@@ -53,6 +53,6 @@ public abstract class PivotGenerator<T extends PivotReportElement> extends BaseG
         PivotResult result = getDispatcher().execute(new PivotSites(element.allDimensions(), filter));
 
         PivotTableDataBuilder builder = new PivotTableDataBuilder();
-        return builder.build(element, rowDims, colDims, result.getBuckets());
+        return builder.build(rowDims, colDims, result.getBuckets());
     }
 }

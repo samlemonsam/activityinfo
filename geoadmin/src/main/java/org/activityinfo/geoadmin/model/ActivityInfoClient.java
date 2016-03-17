@@ -1,14 +1,37 @@
 package org.activityinfo.geoadmin.model;
 
 import com.bedatadriven.geojson.GeoJsonModule;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.vividsolutions.jts.geom.Point;
+import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormClassProvider;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.JsonFormTreeBuilder;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnType;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
+import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.views.EmptyColumnView;
+import org.activityinfo.store.query.impl.views.GeoColumnView;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -16,18 +39,28 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.ContextResolver;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * ActivityInfo REST Client
  */
-public class ActivityInfoClient {
+public class ActivityInfoClient implements FormClassProvider {
 
     public static final Logger LOGGER = Logger.getLogger(ActivityInfoClient.class.getName());
 
     private Client client;
     private URI root;
+    
+    private FeatureSourceCatalog localCatalog = new FeatureSourceCatalog();
+
+    @Override
+    public FormClass getFormClass(ResourceId resourceId) {
+        Preconditions.checkArgument(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN);
+        return ActivityInfoClient.this.getFormClass(CuidAdapter.getLegacyIdFromCuid(resourceId));
+    }
 
     public static class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
@@ -94,9 +127,9 @@ public class ActivityInfoClient {
             .path(countryCode)
             .path("adminLevels").build();
         return Arrays.asList(
-            client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(AdminLevel[].class));
+                client.resource(uri)
+                        .accept(MediaType.APPLICATION_JSON_TYPE)
+                        .get(AdminLevel[].class));
 	}
 	
 	public List<LocationType> getLocationTypesByCountryCode(String countryCode) {
@@ -182,9 +215,9 @@ public class ActivityInfoClient {
             .build();
 
         return Arrays.asList(
-            client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(AdminEntity[].class));
+                client.resource(uri)
+                        .accept(MediaType.APPLICATION_JSON_TYPE)
+                        .get(AdminEntity[].class));
     }
 
     /**
@@ -246,10 +279,120 @@ public class ActivityInfoClient {
         return client.resource(uri)
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .type(MediaType.APPLICATION_JSON_TYPE)
-            .post(new GenericType<List<List<AdminEntity>>>() { }, points);
+            .post(new GenericType<List<List<AdminEntity>>>() {
+            }, points);
     }
 
     public ObjectMapper getObjectMapper() {
         return new ObjectMapperProvider().getContext(ObjectMapper.class);
+    }
+    
+    
+    public FormClass getFormClass(int adminLevelId) {
+        
+        String json = formResource(CuidAdapter.adminLevelFormClass(adminLevelId)).path("class").get(String.class);
+
+
+        return FormClass.fromResource(Resources.resourceFromJson(json));
+    }
+
+    public FormTree getFormTree(ResourceId resourceId) {
+        
+        if(localCatalog.isLocalResource(resourceId)) {
+            FormTreeBuilder treeBuilder = new FormTreeBuilder(localCatalog);
+            return treeBuilder.queryTree(resourceId);
+        
+        } else {
+
+            String json = formResource(resourceId).path("tree").get(String.class);
+            JsonObject object = new Gson().fromJson(json, JsonObject.class);
+            return JsonFormTreeBuilder.fromJson(object);
+        }
+    }
+
+    public FormTree getFormTree(int adminLevelId) {
+        return getFormTree(CuidAdapter.adminLevelFormClass(adminLevelId));
+    }
+    
+    public ColumnSet queryColumns(QueryModel queryModel) {
+        
+        if(localCatalog.isLocalQuery(queryModel)) {
+            ColumnSetBuilder builder = new ColumnSetBuilder(localCatalog);
+            return builder.build(queryModel);
+
+        } else {
+
+            return queryColumnsRemotely(queryModel);
+        }
+    }
+    
+    private ColumnSet queryColumnsRemotely(QueryModel queryModel) {
+        String json = client.resource(root)
+                .path("query")
+                .path("columns")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .post(String.class, queryModel);
+
+        JsonObject object = new Gson().fromJson(json, JsonObject.class);
+        int numRows = object.getAsJsonPrimitive("rows").getAsInt();
+
+        Map<String, ColumnView> columnMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
+            JsonObject columnValue = column.getValue().getAsJsonObject();
+            String storage = columnValue.getAsJsonPrimitive("storage").getAsString();
+            switch (storage) {
+                case "array":
+                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
+                    break;
+                case "coordinates":
+                    columnMap.put(column.getKey(), parseCoordinates(columnValue.getAsJsonArray("coordinates")));
+                    break;
+                case "empty":
+                    columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
+                    break;
+                default:
+                    throw new UnsupportedOperationException(storage);
+            }
+        }
+
+        return new ColumnSet(numRows, columnMap);
+    }
+
+    private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
+        String typeName = columnValue.get("type").getAsString();
+        ColumnType type = ColumnType.valueOf(typeName);
+        return new EmptyColumnView(numRows, type);
+    }
+
+    public void executeTransaction(TransactionBuilder builder) {
+        ClientResponse response = client.resource(root)
+                .path("update")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(builder.build().toString(), MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class);
+        
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Transaction failed with status code: " + response.getStatus() + " "  +
+            response.getEntity(String.class));
+        }
+    }
+    
+    private ColumnView parseCoordinates(JsonArray coordinateArray) {
+        double[] coordinates = new double[coordinateArray.size()];
+        for (int i = 0; i < coordinateArray.size(); i++) {
+            JsonElement coord = coordinateArray.get(i);
+            if(coord.isJsonNull()) {
+                coordinates[i] = Double.NaN;
+            } else {
+                coordinates[i] = coord.getAsDouble();
+            }
+        }
+        return new GeoColumnView(coordinates);
+    }
+
+    private WebResource formResource(ResourceId resourceId) {
+        return client.resource(root)
+                .path("form")
+                .path(resourceId.asString());
     }
 }

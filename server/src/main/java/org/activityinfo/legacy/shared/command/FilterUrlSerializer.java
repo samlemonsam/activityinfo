@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.legacy.shared.reports.model.DateRange;
 
 import java.util.Set;
 
@@ -50,16 +51,22 @@ public class FilterUrlSerializer {
                 url.append(id);
             }
         }
-        if (filter.isDateRestricted()) {
+        appendDateRange("startDate", filter.getStartDateRange(), url);
+        appendDateRange("endDate", filter.getEndDateRange(), url);
+
+        return url.toString();
+    }
+
+    private static void appendDateRange(final String fieldName, DateRange range, StringBuilder url) {
+        if (range.isRestricted()) {
             if (url.length() > 0) {
                 url.append("-");
             }
-            url.append("date+");
-            appendDate(filter.getDateRange().getMinLocalDate(), url);
+            url.append(fieldName + "+");
+            appendDate(range.getMinLocalDate(), url);
             url.append('+');
-            appendDate(filter.getDateRange().getMaxLocalDate(), url);
+            appendDate(range.getMaxLocalDate(), url);
         }
-        return url.toString();
     }
 
     public static Filter fromUrlFragment(String fragment) {
@@ -68,9 +75,12 @@ public class FilterUrlSerializer {
 
         for (String dim : dimensions) {
             String[] elements = dim.split("\\+");
-            if (elements[0].equals("date")) {
-                filter.getDateRange().setMinDate(parseDate(elements[1]));
-                filter.getDateRange().setMaxDate(parseDate(elements[2]));
+            if (elements[0].equals("date") || elements[0].equals("endDate")) {
+                filter.getEndDateRange().setMinDate(parseDate(elements[1]));
+                filter.getEndDateRange().setMaxDate(parseDate(elements[2]));
+            } else if(elements[0].equals("startDate")) {
+                filter.getStartDateRange().setMinDate(parseDate(elements[1]));
+                filter.getStartDateRange().setMaxDate(parseDate(elements[2]));                
             } else {
                 DimensionType dimType = DimensionType.valueOf(elements[0]);
                 for (int i = 1; i < elements.length; ++i) {

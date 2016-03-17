@@ -61,10 +61,10 @@ public class GraphTest {
     protected void saveGraphImage(String testName, MarkerGraph graph,
                                   int maxRadius) throws Exception {
 
-        File outputDir = new File("target/report-tests");
+        File outputDir = new File("build/report-tests");
         outputDir.mkdirs();
 
-        File outputFile = new File("target/report-tests/" + testName + ".svg");
+        File outputFile = new File("build/report-tests/" + testName + ".svg");
 
         FileWriter svg = new FileWriter(outputFile);
 
@@ -99,10 +99,10 @@ public class GraphTest {
     protected void saveClusters(MarkerGraph graph, String fileName,
                                 List<Cluster> clusters) throws IOException {
 
-        File outputDir = new File("target/report-tests");
+        File outputDir = new File("build/report-tests");
         outputDir.mkdirs();
 
-        File outputFile = new File("target/report-tests/" + fileName + ".svg");
+        File outputFile = new File("build/report-tests/" + fileName + ".svg");
 
         FileWriter svg = new FileWriter(outputFile);
 

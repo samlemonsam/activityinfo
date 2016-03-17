@@ -124,6 +124,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
 
 tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
+tasks.warTemplate.enabled = false
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
@@ -166,7 +167,7 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     dependsOn appengineDownloadSdk
 
 
-    extraOptions = ["--application=${environment.projectId}", '--version=qa']
+    extraOptions = ["--application=${environment.projectId}", '--version=pivot']
     oauth2 = true
     
     doFirst {
@@ -174,6 +175,16 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
             throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
         }
     }
+}
+
+task deployBetaApi(type: com.google.appengine.task.appcfg.UpdateTask) {
+
+    dependsOn appengineDownloadSdk
+    dependsOn appengineExplodeApp
+
+    extraOptions = ["--application=activityinfoeu", '--version=beta-api']
+    oauth2 = true
+
 }
 
 
@@ -194,5 +205,12 @@ task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     dependsOn appengineDownloadSdk
 
     extraOptions = ["--application=${environment.projectId}", '--version=1']
+    oauth2 = true
+}
+
+task rollbackBetaApi(type: com.google.appengine.task.appcfg.RollbackTask) {
+    dependsOn appengineDownloadSdk
+
+    extraOptions = ["--application=activityinfoeu", '--version=beta-api']
     oauth2 = true
 }

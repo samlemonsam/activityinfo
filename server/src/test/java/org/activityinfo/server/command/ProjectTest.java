@@ -37,6 +37,7 @@ public class ProjectTest extends CommandTestCase {
 
         // make sure it's gone from sites
         Filter filter = new Filter();
+        filter.addRestriction(DimensionType.Activity, 1);
         filter.addRestriction(DimensionType.Site, 3);
         SiteResult sites = execute(new GetSites(filter));
 

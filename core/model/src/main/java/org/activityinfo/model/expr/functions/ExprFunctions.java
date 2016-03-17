@@ -5,18 +5,21 @@ import java.util.Map;
 
 public final class ExprFunctions {
 
-    private static Map<String, ExprFunction> lookupMap;
 
-    private ExprFunctions() {
-    }
+    /**
+     * Avoids race conditions by using the <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">
+     *     Initialization-on-demand holder idiom</a>
+     */
+    private static class MapHolder {
+        private static final MapHolder INSTANCE = new MapHolder();
+        
+        private Map<String, ExprFunction> lookupMap = new HashMap<>();
 
-    private static void register(ExprFunction function) {
-        lookupMap.put(function.getId(), function);
-    }
-
-    public static ExprFunction get(String name) {
-        if (lookupMap == null) {
-            lookupMap = new HashMap<>();
+        private void register(ExprFunction function) {
+            lookupMap.put(function.getId(), function);
+        }
+        
+        public MapHolder() {
             register(AndFunction.INSTANCE);
             register(DivideFunction.INSTANCE);
             register(EqualFunction.INSTANCE);
@@ -35,11 +38,21 @@ public final class ExprFunctions {
             register(BooleanFunctions.LESS);
             register(BooleanFunctions.LESS_OR_EQUAL);
         }
+        
+        public ExprFunction get(String name) {
 
-        ExprFunction exprFunction = lookupMap.get(name);
-        if (exprFunction == null) {
-            throw new UnsupportedOperationException("No such function '" + name + "'");
+            ExprFunction exprFunction = lookupMap.get(name);
+            if (exprFunction == null) {
+                throw new UnsupportedOperationException("No such function '" + name + "'");
+            }
+            return exprFunction;
         }
-        return exprFunction;
+    }
+    
+    private ExprFunctions() {
+    }
+
+    public static ExprFunction get(String name) {
+        return MapHolder.INSTANCE.get(name);
     }
 }

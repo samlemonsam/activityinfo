@@ -203,12 +203,13 @@
   <locationAdminLink locationId="2" adminEntityId="2"/>
   <locationAdminLink locationId="2" adminEntityId="11"/>
 
-  <site siteId="2" activityId="2"
+    <!-- Status: Planned -->
+
+    <site siteId="2" activityId="2"
         locationId="2" partnerId="1"
         Date1="2009-01-15" Date2="2009-01-16" DateCreated="2009-02-01"
         DateEdited="2009-02-01" timeEdited="3"/>
 
-  <!-- Status: Planned -->
   <attributeValue siteId="2" attributeId="6" value="1"/>
 
   <reportingPeriod reportingPeriodId="2" siteId="2"
@@ -216,6 +217,21 @@
                    DateEdited="2009-02-01"/>
   <indicatorValue reportingPeriodId="2" indicatorId="2"
                   value="3600"/>
+    
+    <!-- Status: Completed -->
+
+    <site siteId="3" activityId="2"
+          locationId="2" partnerId="1"
+          Date1="2009-01-15" Date2="2009-01-16" DateCreated="2009-02-01"
+          DateEdited="2009-02-01" timeEdited="3"/>
+
+    <attributeValue siteId="3" attributeId="8" value="1"/>
+
+    <reportingPeriod reportingPeriodId="3" siteId="3"
+                     date1="2009-01-15" date2="2009-01-16" DateCreated="2009-02-01"
+                     DateEdited="2009-02-01"/>
+    <indicatorValue reportingPeriodId="3" indicatorId="2"
+                    value="9200"/>
 
 
 </dataset>

@@ -103,7 +103,7 @@ public abstract class ItextReportRenderer implements Renderer {
         Report report = (Report) element;
         document.add(ThemeHelper.reportTitle(report.getTitle()));
         ItextRendererHelper.addFilterDescription(document, report.getContent().getFilterDescriptions());
-        ItextRendererHelper.addDateFilterDescription(document, report.getFilter().getDateRange());
+        ItextRendererHelper.addDateFilterDescription(document, report.getFilter().getEndDateRange());
 
         for (ReportElement childElement : report.getElements()) {
             renderElement(writer, document, childElement);

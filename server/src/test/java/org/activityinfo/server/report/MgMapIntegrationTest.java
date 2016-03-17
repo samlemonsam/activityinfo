@@ -1,5 +1,6 @@
 package org.activityinfo.server.report;
 
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.legacy.shared.command.GenerateElement;
@@ -13,12 +14,12 @@ import org.activityinfo.legacy.shared.reports.model.layers.IconMapLayer;
 import org.activityinfo.legacy.shared.reports.model.layers.MapLayer;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.geo.TestGeometry;
 import org.activityinfo.server.report.renderer.image.ImageMapRenderer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -35,15 +36,11 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
     public static final int MG_OWNER_ID = 1070;
     public static final int FOKOTANY_LEVEL_ID = 1512;
 
-    private File outFolder;
     private MapContent content;
     private MapReportElement map;
 
     @Before
     public final void setup() {
-        outFolder = new File("target/report-tests");
-        outFolder.mkdirs();
-
         setUser(MG_OWNER_ID);
     }
 
@@ -53,7 +50,7 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
         BubbleMapLayer layer = new BubbleMapLayer();
         layer.addIndicator(NUMBER_OF_BENE_INDICATOR_ID);
 
-        generateMap(layer, "mg-bubbles.png");
+        generateMap(layer, "mg-bubbles");
 
         assertThat(content.getMarkers().size(), equalTo(10));
 
@@ -69,7 +66,7 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
         layer.setIcon("educ");
         layer.getIndicatorIds().add(NUMBER_OF_BENE_INDICATOR_ID);
 
-        generateMap(layer, "mg-icons.png");
+        generateMap(layer, "mg-icons");
 
         assertThat(content.getMarkers().size(), equalTo(10));
 
@@ -87,7 +84,7 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
         layer.getIndicatorIds().add(NUMBER_OF_BENE_INDICATOR_ID);
         layer.setClustering(new AutomaticClustering());
 
-        generateMap(layer, "mg-icons-auto.png");
+        generateMap(layer, "mg-icons-auto");
 
         assertTrue(content.getMarkers().size() > 0);
         assertTrue(content.getUnmappedSites().isEmpty());
@@ -101,7 +98,7 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
         layer.addIndicator(NUMBER_OF_BENE_INDICATOR_ID);
         layer.setClustering(new AutomaticClustering());
 
-        generateMap(layer, "mg-auto-cluster.png");
+        generateMap(layer, "mg-auto-cluster");
 
         assertThat(content.getMarkers().size(), equalTo(4));
         assertThat(content.getUnmappedSites().size(), equalTo(0));
@@ -114,7 +111,7 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
         layer.addIndicator(NUMBER_OF_BENE_INDICATOR_ID);
         layer.setClustering(clusterByFokotany());
 
-        generateMap(layer, "mg-cluster-fok.png");
+        generateMap(layer, "mg-cluster-fok");
 
         assertThat(content.getMarkers().size(), equalTo(10));
         assertThat(content.getUnmappedSites().size(), equalTo(0));
@@ -145,7 +142,7 @@ public class MgMapIntegrationTest extends CommandTestCase2 {
     }
 
     private void renderToFile(MapReportElement map, String fileName) throws IOException {
-        ImageMapRenderer renderer = new ImageMapRenderer(null, "src/main/webapp/mapicons");
-        renderer.renderToFile(map, new File(outFolder, fileName));
+        ImageMapRenderer renderer = new ImageMapRenderer(TestGeometry.get(), "src/main/webapp/mapicons");
+        renderer.renderToFile(map, TestOutput.getFile(getClass(), fileName, ".png"));
     }
 }

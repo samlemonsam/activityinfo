@@ -142,7 +142,7 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
     }
 
     private void addTimeDimensions() {
-        DimensionModel folder = new DimensionModel(I18N.CONSTANTS.time());
+        DimensionModel folder = new DimensionModel(I18N.CONSTANTS.endDate());
         store.add(folder, false);
         store.add(folder, new DimensionModel(DateUnit.YEAR), false);
         store.add(folder, new DimensionModel(DateUnit.QUARTER), false);

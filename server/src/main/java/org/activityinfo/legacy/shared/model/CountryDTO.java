@@ -23,7 +23,7 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;

@@ -34,9 +34,9 @@ public class WeekCategory implements DimensionCategory {
     public WeekCategory() {
     }
 
-    public WeekCategory(int year, int quarter) {
+    public WeekCategory(int year, int week) {
         this.year = year;
-        this.week = quarter;
+        this.week = week;
     }
 
     public int getYear() {

@@ -9,7 +9,7 @@ import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.core.shared.form.tree.FormTreePrettyPrinter;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.core.shared.form.tree.Hierarchy;
 import org.activityinfo.core.shared.form.tree.HierarchyPrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;

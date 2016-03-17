@@ -1,7 +1,10 @@
 package org.activityinfo.model.type.barcode;
 
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordFieldTypeClass;
 
 /**
  * A value types that describes a real-valued barcode and its units.
@@ -43,4 +46,13 @@ public class BarcodeType implements FieldType {
     public String toString() {
         return "BarcodeType";
     }
+
+    /**
+     *
+     * @return the singleton instance for this type
+     */
+    private Object readResolve() {
+        return INSTANCE;
+    }
+
 }

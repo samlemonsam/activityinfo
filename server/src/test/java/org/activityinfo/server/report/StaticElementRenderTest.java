@@ -25,90 +25,38 @@ package org.activityinfo.server.report;
 import org.activityinfo.legacy.shared.reports.content.FilterDescription;
 import org.activityinfo.legacy.shared.reports.content.ReportContent;
 import org.activityinfo.legacy.shared.reports.model.Report;
-import org.activityinfo.server.geo.TestGeometry;
-import org.activityinfo.server.report.renderer.itext.HtmlReportRenderer;
-import org.activityinfo.server.report.renderer.itext.PdfReportRenderer;
-import org.activityinfo.server.report.renderer.itext.RtfReportRenderer;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class StaticElementRenderTest {
 
+    public static final String MAP_ICON_PATH = "";
+    private Report report;
+
     @Before
-    public void setup() {
-        File file = new File("target/report-tests");
-        file.mkdirs();
-    }
-
-    public Report parseXml(String filename) throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance(Report.class.getPackage()
-                .getName());
-        Unmarshaller um = jc.createUnmarshaller();
-        um.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
-        return (Report) um.unmarshal(new InputStreamReader(
-                getClass()
-                        .getResourceAsStream("/report-def/parse-test/" + filename)));
-    }
-
-    public Report getStatic() throws JAXBException {
-        Report r = parseXml("static.xml");
-        r.setContent(new ReportContent());
-        r.getContent()
-                .setFilterDescriptions(new ArrayList<FilterDescription>());
-        return r;
-    }
-
-    public static void dumpXml(Report report) throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance(Report.class.getPackage()
-                .getName());
-        Marshaller m = jc.createMarshaller();
-        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        m.marshal(report, System.out);
+    public void setup() throws JAXBException {
+        report = Reports.parseXml(getClass(), "static.xml");
+        report.setContent(new ReportContent());
+        report.getContent().setFilterDescriptions(new ArrayList<FilterDescription>());
     }
 
     @Test
     public void testPdfRender() throws JAXBException, IOException {
-        Report r = getStatic();
-        PdfReportRenderer renderer = new PdfReportRenderer(TestGeometry.get(),
-                "");
-
-        FileOutputStream fos = new FileOutputStream(
-                "target/report-tests/render-static" + renderer.getFileSuffix());
-        renderer.render(r, fos);
-        fos.close();
+        Reports.toPdf(getClass(), report);
     }
 
     @Test
     public void testRtfRender() throws JAXBException, IOException {
-        Report r = getStatic();
-        RtfReportRenderer renderer = new RtfReportRenderer(TestGeometry.get(),
-                "");
-
-        FileOutputStream fos = new FileOutputStream(
-                "target/report-tests/render-static" + renderer.getFileSuffix());
-        renderer.render(r, fos);
-        fos.close();
+        Reports.toRtf(getClass(), report);
     }
 
     @Test
     public void testHtmlRender() throws JAXBException, IOException {
-        Report r = getStatic();
-        HtmlReportRenderer renderer = new HtmlReportRenderer(
-                TestGeometry.get(), "", new NullStorageProvider());
-        FileOutputStream fos = new FileOutputStream(
-                "target/report-tests/render-static" + renderer.getFileSuffix());
-        renderer.render(r, fos);
-        fos.close();
+        Reports.toHtml(getClass(), report);
     }
 
 }

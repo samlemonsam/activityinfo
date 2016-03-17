@@ -9,4 +9,8 @@ public class AmbiguousSymbolException extends ExprException {
     }
 
 
+    public AmbiguousSymbolException(String symbol, String message) {
+        super("Ambiguous symbol [" + symbol + "]: " + message);
+    }
+
 }

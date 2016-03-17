@@ -1,9 +1,11 @@
 package org.activityinfo.model.type;
 
+import java.io.Serializable;
+
 /**
  * Instance of a typed field value
  */
-public interface FieldValue {
+public interface FieldValue extends Serializable {
 
     /**
      * The name of the field that contains the id of the {@code FieldTypeClass}

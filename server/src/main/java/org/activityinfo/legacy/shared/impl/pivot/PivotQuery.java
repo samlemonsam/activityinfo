@@ -101,14 +101,10 @@ public class PivotQuery implements WorkItem {
 
         baseTable.setupQuery(command, query);
 
-        if (command.isPivotedBy(DimensionType.Location) || command.isPivotedBy(DimensionType.Site) ||
-            command.isPointRequested()) {
+        if (command.isPivotedBy(DimensionType.Location) || command.isPivotedBy(DimensionType.Site)) {
             query.leftJoin(Tables.LOCATION, "Location")
                  .on("Location.LocationId=" + baseTable.getDimensionIdColumn(DimensionType.Location));
-
-            if(command.getValueType() == PivotSites.ValueType.DIMENSION) {
-                query.orderBy("Location.Name");
-            }
+            
         }
         if (command.isPivotedBy(DimensionType.Partner)) {
             query.leftJoin(Tables.PARTNER, "Partner")
@@ -126,50 +122,6 @@ public class PivotQuery implements WorkItem {
                  .on("Project.ProjectId=" + baseTable.getDimensionIdColumn(DimensionType.Project));
         }
 
-        if (command.isPointRequested()) {
-            if (command.isPivotedBy(DimensionType.Location)) {
-                query.appendColumn("Location.X", "LX");
-                query.appendColumn("Location.Y", "LY");
-            } else {
-                query.appendColumn("AVG(Location.X)", "LX");
-                query.appendColumn("AVG(Location.Y)", "LY");
-            }
-
-            // Build the derived table that identifies the MBR for each
-            // location using the admin MBRs
-            SqlQuery adminBoundsQuery = SqlQuery.select()
-                                                .appendColumn("link.LocationId", "LocationId")
-                                                .appendColumn("(MAX(X1)+MIN(X2))/2.0", "AX")
-                                                .appendColumn("(MAX(Y1)+MIN(Y2))/2.0", "AY")
-                                                .from(Tables.LOCATION_ADMIN_LINK, "link")
-                                                .leftJoin(Tables.ADMIN_ENTITY, "e")
-                                                .on("link.adminentityid=e.adminentityid")
-                                                .groupBy("link.locationid");
-
-            query.leftJoin(adminBoundsQuery, "ambr").on("Location.LocationId=ambr.LocationId");
-            query.appendColumn("ambr.AX", "AX");
-            query.appendColumn("ambr.AY", "AY");
-
-            // join the country table to get the country mbr to fall back to
-            query.leftJoin(Tables.LOCATION_TYPE, "LocationType")
-                 .on("Location.LocationTypeId=LocationType.LocationTypeId")
-                 .leftJoin(Tables.COUNTRY, "Country")
-                 .on("Country.CountryId=LocationType.CountryId");
-            query.appendColumn("(Country.X1+Country.X2)/2", "CX");
-            query.appendColumn("(Country.Y1+Country.Y2)/2", "CY");
-
-
-            // if we're rolling up to an admin level, use only the coordinates
-            // from the admin level and ignore any individual location points
-            // even if they're present: we don't have a good way of using both admin mbr and location
-            // together and using only location doesn't seem logical.
-            if (command.isPivotedBy(DimensionType.AdminLevel) && !command.isPivotedBy(DimensionType.Location)) {
-                bundlers.add(new AdminPointBundler());
-            } else {
-                bundlers.add(new LocationPointBundler());
-            }
-        }
-
         addDimensionBundlers();
 
         // Only allow results that are visible to this user if we are on the server,
@@ -178,11 +130,11 @@ public class PivotQuery implements WorkItem {
             appendVisibilityFilter();
         }
 
-        if (filter.getMinDate() != null) {
-            query.where(baseTable.getDateCompleteColumn()).greaterThanOrEqualTo(filter.getMinDate());
+        if (filter.getEndDateRange().getMinDate() != null) {
+            query.where(baseTable.getDateCompleteColumn()).greaterThanOrEqualTo(filter.getEndDateRange().getMinDate());
         }
-        if (filter.getMaxDate() != null) {
-            query.where(baseTable.getDateCompleteColumn()).lessThanOrEqualTo(filter.getMaxDate());
+        if (filter.getEndDateRange().getMaxDate() != null) {
+            query.where(baseTable.getDateCompleteColumn()).lessThanOrEqualTo(filter.getEndDateRange().getMaxDate());
         }
 
         appendDimensionRestrictions();
@@ -420,7 +372,7 @@ public class PivotQuery implements WorkItem {
                 query.where("(");
                 boolean isFirst = true;
                 for (DimensionType type : filter.getRestrictedDimensions()) {
-                    addJoint(query, filter.isLenient(), isFirst);
+                    addJoint(query, isFirst);
 
                     if (isFirst) {
                         isFirst = false;
@@ -444,7 +396,7 @@ public class PivotQuery implements WorkItem {
                                                                .where("v.AttributeId")
                                                                .equalTo(attribute);
 
-                            addJoint(query, filter.isLenient(), isFirstAttr);
+                            addJoint(query, isFirstAttr);
                             if (isFirstAttr) {
                                 isFirstAttr = false;
                             }
@@ -461,13 +413,9 @@ public class PivotQuery implements WorkItem {
         }
     }
 
-    private void addJoint(SqlQuery query, boolean lenient, boolean first) {
+    private void addJoint(SqlQuery query, boolean first) {
         if (!first) {
-            if (lenient) {
-                query.onlyWhere(" OR ");
-            } else {
-                query.onlyWhere(" AND ");
-            }
+            query.onlyWhere(" AND ");
         }
     }
 }

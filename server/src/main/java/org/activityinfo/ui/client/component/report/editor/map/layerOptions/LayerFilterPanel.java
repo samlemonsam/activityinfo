@@ -88,7 +88,7 @@ public class LayerFilterPanel extends ContentPanel implements HasValue<Filter> {
     private void createNewFilterAndFireEvent() {
         Filter filter = new Filter();
 
-        filter.setDateRange(dateWidget.getValue().getDateRange());
+        filter.setEndDateRange(dateWidget.getValue().getEndDateRange());
 
         Filter partnerFilter = partnerFilterWidget.getValue();
         if (partnerFilter.hasRestrictions()) {

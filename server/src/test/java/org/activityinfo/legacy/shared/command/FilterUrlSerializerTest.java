@@ -42,8 +42,8 @@ public class FilterUrlSerializerTest {
     @Test
     public void withDates() {
         Filter filter = new Filter();
-        filter.getDateRange().setMinDate(new LocalDate(2011, 4, 19));
-        filter.getDateRange().setMaxDate(new LocalDate(2012, 3, 31));
+        filter.getEndDateRange().setMinDate(new LocalDate(2011, 4, 19));
+        filter.getEndDateRange().setMaxDate(new LocalDate(2012, 3, 31));
         filter.addRestriction(DimensionType.Activity, 1);
         filter.addRestriction(DimensionType.Database, Sets.newHashSet(31, 42));
 

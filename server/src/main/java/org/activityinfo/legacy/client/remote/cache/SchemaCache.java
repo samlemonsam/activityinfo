@@ -22,6 +22,7 @@ package org.activityinfo.legacy.client.remote.cache;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -29,11 +30,14 @@ import org.activityinfo.legacy.client.CommandCache;
 import org.activityinfo.legacy.client.DispatchEventSource;
 import org.activityinfo.legacy.client.DispatchListener;
 import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.model.legacy.CuidAdapter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,8 +53,8 @@ public class SchemaCache implements DispatchListener {
 
     private SchemaDTO schema = null;
     private Set<String> schemaEntityTypes = Sets.newHashSet();
-    private Map<Integer, ActivityFormDTO> activityMap = Maps.newHashMap();
-
+    private Map<Integer, ActivityFormDTO> activityFormCache = Maps.newHashMap();
+    private Map<Integer, Integer> indicatorToActivityMap = new HashMap<>();
 
     @Inject
     public SchemaCache(DispatchEventSource source) {
@@ -71,13 +75,18 @@ public class SchemaCache implements DispatchListener {
 
     public static void initSource(DispatchEventSource source, SchemaCache cache) {
         source.registerProxy(GetSchema.class, cache.new SchemaProxy());
-         source.registerListener(GetSchema.class, cache);
+        source.registerProxy(GetActivityForm.class, cache.new ActivityFormProxy());
+        source.registerProxy(GetActivityForms.class, cache.new ActivityFormsProxy());
+        
+        source.registerListener(GetSchema.class, cache);
+        source.registerListener(GetActivityForm.class, cache);
+        source.registerListener(GetActivityForms.class, cache);
+        
         source.registerListener(UpdateEntity.class, cache);
         source.registerListener(CreateEntity.class, cache);
         source.registerListener(AddPartner.class, cache);
         source.registerListener(RemovePartner.class, cache);
         source.registerListener(RequestChange.class, cache);
-        source.registerListener(BatchCommand.class, cache);
         source.registerListener(BatchCommand.class, cache);
         source.registerListener(Delete.class, cache);
         source.registerListener(CloneDatabase.class, cache);
@@ -100,7 +109,7 @@ public class SchemaCache implements DispatchListener {
 
         } else if (command instanceof UpdateFormClass) {
             String formClassId = ((UpdateFormClass) command).getFormClassId();
-            activityMap.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
+            activityFormCache.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
 
         } else if (command instanceof BatchCommand) {
             for (Command element : ((BatchCommand) command).getCommands()) {
@@ -111,7 +120,7 @@ public class SchemaCache implements DispatchListener {
 
     private void clearCache() {
         schema = null;
-        activityMap.clear();
+        activityFormCache.clear();
     }
 
     private boolean isSchemaEntity(String entityName) {
@@ -122,13 +131,31 @@ public class SchemaCache implements DispatchListener {
     public void onSuccess(Command command, CommandResult result) {
         if (command instanceof GetSchema) {
             cache((SchemaDTO) result);
+        
         } else if (command instanceof GetActivityForm) {
             ActivityFormDTO activity = (ActivityFormDTO) result;
-            activityMap.put(activity.getId(), activity);
+            cacheActivityForm(activity);
+        
+        } else if (command instanceof GetActivityForms) {
+            cachActivityForms((ActivityFormResults)result);
+            
         } else if (schema != null) {
             if (command instanceof AddPartner) {
                 clearCache();
             }
+        }
+    }
+
+    private void cachActivityForms(ActivityFormResults result) {
+        for (ActivityFormDTO form : result.getData()) {
+            cacheActivityForm(form);
+        }
+    }
+
+    private void cacheActivityForm(ActivityFormDTO activity) {
+        activityFormCache.put(activity.getId(), activity);
+        for (IndicatorDTO indicator : activity.getIndicators()) {
+            indicatorToActivityMap.put(indicator.getId(), activity.getId());
         }
     }
 
@@ -144,9 +171,53 @@ public class SchemaCache implements DispatchListener {
 
     @Override
     public void onFailure(Command command, Throwable caught) {
+    }
+    
+    private class ActivityFormsProxy implements CommandCache<GetActivityForms> {
 
+        @Override
+        public CacheResult maybeExecute(GetActivityForms command) {
+            Set<Integer> activities = Sets.newHashSet(command.getActivities());
+            for (Integer indicatorId : command.getIndicators()) {
+                // First... do we know to which activity this indicator belongs??
+                Integer activityId = indicatorToActivityMap.get(indicatorId);
+                if(activityId == null) {
+                    return CacheResult.couldNotExecute();
+                }
+                activities.add(activityId);
+            }
+            Map<Integer, ActivityFormDTO> forms = new HashMap<>();
+            for (Integer activityId :activities) {
+                ActivityFormDTO form = activityFormCache.get(activityId);
+                if(form == null) {
+                    return CacheResult.couldNotExecute();
+                }
+                forms.put(activityId, form);
+            }
+            return new CacheResult(new ActivityFormResults(Lists.newArrayList(forms.values())));
+        }
+
+        @Override
+        public void clear() {
+            clearCache();
+        }
     }
 
+    private class ActivityFormProxy implements CommandCache<GetActivityForm> {
+
+        @Override
+        public CacheResult maybeExecute(GetActivityForm command) {
+            if(activityFormCache.containsKey(command.getActivityId())) {
+                return new CacheResult(activityFormCache.get(command.getActivityId()));
+            }
+            return CacheResult.couldNotExecute();
+        }
+
+        @Override
+        public void clear() {
+            clearCache();
+        }
+    }
 
     private class SchemaProxy implements CommandCache<GetSchema> {
         @Override

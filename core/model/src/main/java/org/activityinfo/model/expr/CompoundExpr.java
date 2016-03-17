@@ -1,6 +1,7 @@
 package org.activityinfo.model.expr;
 
 import org.activityinfo.model.expr.eval.EvalContext;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 
@@ -16,6 +17,11 @@ public class CompoundExpr extends ExprNode {
     @Nonnull
     private final SymbolExpr field;
 
+    public CompoundExpr(@Nonnull ResourceId value, @Nonnull String field) {
+        this.value = new SymbolExpr(value);
+        this.field = new SymbolExpr(field);
+    }
+    
     public CompoundExpr(@Nonnull ExprNode value, @Nonnull SymbolExpr field) {
         this.value = value;
         this.field = field;
@@ -70,5 +76,10 @@ public class CompoundExpr extends ExprNode {
         int result = value.hashCode();
         result = 31 * result + field.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return value + "." + field;
     }
 }

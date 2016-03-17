@@ -64,8 +64,8 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
 
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.Activity, 1);
-        filter.setMinDate(new LocalDate(1998,1,1).atMidnightInMyTimezone());
-        filter.setMaxDate(new LocalDate(2099,1,15).atMidnightInMyTimezone());
+        filter.getEndDateRange().setMinDate(new LocalDate(1998,1,1).atMidnightInMyTimezone());
+        filter.getEndDateRange().setMaxDate(new LocalDate(2099,1,15).atMidnightInMyTimezone());
 
         PartnerResult result = execute(filter);
         assertThat(result.getData().size(), equalTo(2));
@@ -73,13 +73,26 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
         assertThat(result.getData().get(1).getName(), equalTo("Solidarites"));
     }
 
-    // report filter population query
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void testIndicatorEmpty() throws CommandException {
+    public void testSiteCountIndicators() throws CommandException {
+        /*
+        Activity #1
+        Indicator #103 (site count)
+        Indicator #675 (site count)
+        
+        Site #1: Partner #1
+        Site #2: Partner #1
+        Site #3: partner #2
+        */
+        
         // empty
         PartnerResult result = execute(DimensionType.Indicator, 103, 675);
-        assertThat(result.getData().size(), equalTo(0));
+        
+        // indicators 103 and 675 are site count indicators, so all sites of activity #1 
+        // should have a non empty value and be considered present
+        
+        assertThat(result.getData().size(), equalTo(2));
     }
 
     @Test
@@ -113,6 +126,18 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
     @Test
     @OnDataSet("/dbunit/sites-linked.db.xml")
     public void testIndicatorLinked2() throws CommandException {
+        /*
+        Database #1 > Activity #1 (once)
+        Site #2: Partner #1 
+        I1=400
+        
+        Database #2 > Activity #2 (once)
+        Site #1: Partner #1
+        I3=1500
+        
+        Links
+        I3 -> I2
+        */
         // NRC
         PartnerResult result = execute(DimensionType.Indicator, 2);
         assertThat(result.getData().size(), equalTo(1));
@@ -140,7 +165,10 @@ public class GetPartnersDimensionHandlerTest extends CommandTestCase2 {
         if (type != null) {
             filter.addRestriction(type, Arrays.asList(params));
         }
-        return execute(filter);
+        PartnerResult results = execute(filter);
+        System.out.println(results.getData());
+
+        return results;
     }
 
     private PartnerResult execute(Filter filter) {

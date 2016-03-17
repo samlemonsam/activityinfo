@@ -1,6 +1,9 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.query.ColumnType;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -8,7 +11,7 @@ import org.activityinfo.model.type.number.QuantityType;
 
 import java.util.List;
 
-public abstract class RealValuedBinaryFunction extends ExprFunction {
+public abstract class RealValuedBinaryFunction extends ExprFunction implements ColumnFunction {
 
     private String name;
 
@@ -34,9 +37,22 @@ public abstract class RealValuedBinaryFunction extends ExprFunction {
         }
     }
 
-    protected abstract double apply(double a, double b);
-
-    protected abstract String applyUnits(String a, String b);
+    @Override
+    public ColumnView columnApply(List<ColumnView> arguments) {
+        Preconditions.checkArgument(arguments.size() == 2);
+        ColumnView x = arguments.get(0);
+        ColumnView y = arguments.get(1);
+        
+        Preconditions.checkArgument(
+            x.getType() == ColumnType.NUMBER && 
+            y.getType() == ColumnType.NUMBER);
+        
+        double result[] = new double[x.numRows()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = apply(x.getDouble(i), y.getDouble(i));
+        }
+        return new DoubleArrayColumnView(result);
+    }
 
     @Override
     public final String getId() {
@@ -63,4 +79,9 @@ public abstract class RealValuedBinaryFunction extends ExprFunction {
             throw new UnsupportedOperationException("todo");
         }
     }
+
+
+    protected abstract double apply(double a, double b);
+
+    protected abstract String applyUnits(String a, String b);
 }

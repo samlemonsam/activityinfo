@@ -24,7 +24,7 @@ class MySqlReleaseTask extends DefaultTask {
         
         MySqlDatabase database = server.database('activityinfo')
 
-        logger.info("Connecting to production database...")
+        logger.info("Connecting to production database @ ${server.host}...")
         def connection = database.connect()
         def liquibase = new Liquibase(changeLog,
                 new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),

@@ -81,7 +81,6 @@ Feature: Indicator Targets
     Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
       |                       | Value       |
       | Realized              | 1,800       |
-      | Targeted              |     0       |
 
 
   @AI-1066
@@ -101,7 +100,6 @@ Feature: Indicator Targets
     Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
       |                       | Value       |
       | Realized              | 1,800       |
-      | Targeted              |     0       |
     When I set the targets of "Goals" to:
       | field                 | value       |
       | nb. kits              | 6000        |

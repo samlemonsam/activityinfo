@@ -2,14 +2,14 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import org.activityinfo.core.client.NotFoundException;
-import org.activityinfo.legacy.shared.command.GetFormClass;
-import org.activityinfo.legacy.shared.command.result.FormClassResult;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.application.ApplicationClassProvider;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.result.FormClassResult;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 
@@ -37,7 +37,6 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
 
             case PROJECT_CLASS_DOMAIN:
                 return Promise.resolved(BuiltinFormClasses.projectFormClass(getLegacyIdFromCuid(classId)));
-
 
             case ADMIN_LEVEL_DOMAIN:
                 return dispatcher.execute(new GetSchema())

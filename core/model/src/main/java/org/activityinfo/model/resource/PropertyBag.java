@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.type.geo.GeoFieldValue;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 
@@ -340,6 +343,19 @@ public class PropertyBag<T extends PropertyBag> {
                    value instanceof Record ||
                    value instanceof Boolean;
         }
+    }
+
+    /**
+     * @return the minimum bounding rectangle of all geographic field values
+     */
+    public Extents getEnvelope() {
+        Extents extents = Extents.emptyExtents();
+        for(Object value : properties.values()) {
+            if(value instanceof GeoFieldValue) {
+                extents.grow(((GeoFieldValue) value).getEnvelope());
+            }
+        }
+        return extents;
     }
 
     /**

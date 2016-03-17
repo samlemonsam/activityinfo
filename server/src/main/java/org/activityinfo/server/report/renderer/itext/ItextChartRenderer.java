@@ -45,7 +45,7 @@ public class ItextChartRenderer implements ItextRenderer<PivotChartReportElement
 
         doc.add(ThemeHelper.elementTitle(element.getTitle()));
         ItextRendererHelper.addFilterDescription(doc, element.getContent().getFilterDescriptions());
-        ItextRendererHelper.addDateFilterDescription(doc, element.getFilter().getDateRange());
+        ItextRendererHelper.addDateFilterDescription(doc, element.getFilter().getEndDateRange());
 
         if (element.getContent().getData().isEmpty()) {
             Paragraph para = new Paragraph(I18N.CONSTANTS.noData());

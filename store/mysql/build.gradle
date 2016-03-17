@@ -1,0 +1,23 @@
+
+
+
+dependencies {
+    compile project(':core:model')
+    compile project(':core:services')
+    compile project(':store:query')
+    compile project(':i18n')
+    compile libraries.guava
+    compile libraries.jdbc.mysql
+
+    testCompile libraries.dbunit
+
+    testCompile libraries.appengine.api
+    testCompile libraries.appengine.testing
+    testCompile libraries.appengine.stubs
+
+}
+
+test.dependsOn ':server:setupTestDatabase'
+
+jacocoTestReport.dependsOn 'test'
+

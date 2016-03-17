@@ -44,5 +44,5 @@
   <source path="system"/>
   <source path="legacy"/>
   <source path="util"/>
-
+  <source path="query"/>
 </module>

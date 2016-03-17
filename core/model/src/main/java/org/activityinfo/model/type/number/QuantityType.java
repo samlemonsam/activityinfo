@@ -6,12 +6,17 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ParametrizedFieldType;
+import org.activityinfo.model.type.ParametrizedFieldTypeClass;
+import org.activityinfo.model.type.RecordFieldTypeClass;
+
+import java.io.Serializable;
 
 /**
  * A value types that describes a real-valued quantity and its units.
  */
-public class QuantityType implements ParametrizedFieldType {
+public class QuantityType implements ParametrizedFieldType, Serializable {
 
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {

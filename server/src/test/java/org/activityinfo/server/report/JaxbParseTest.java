@@ -134,7 +134,7 @@ public class JaxbParseTest {
         dumpXml(report);
 
         Calendar minDate = Calendar.getInstance();
-        minDate.setTime(report.getFilter().getDateRange().getMinDate());
+        minDate.setTime(report.getFilter().getEndDateRange().getMinDate());
         Assert.assertEquals(2008, minDate.get(Calendar.YEAR));
         Assert.assertEquals(11, minDate.get(Calendar.MONTH));
         Assert.assertEquals(1, minDate.get(Calendar.DATE));

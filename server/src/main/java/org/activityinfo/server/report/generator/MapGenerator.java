@@ -39,7 +39,7 @@ import org.activityinfo.legacy.shared.reports.content.PredefinedBaseMaps;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.legacy.shared.reports.model.layers.*;
-import org.activityinfo.legacy.shared.reports.util.mapping.Extents;
+import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.legacy.shared.reports.util.mapping.TileMath;
 import org.activityinfo.model.form.FormFieldType;
 import org.activityinfo.server.command.DispatcherSync;

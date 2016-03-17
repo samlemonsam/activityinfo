@@ -61,4 +61,9 @@ class MySqlServer {
         }
         return properties
     }
+
+    @Override
+    String toString() {
+        "${host}:${port}"
+    }
 }

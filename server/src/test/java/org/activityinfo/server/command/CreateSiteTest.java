@@ -238,10 +238,11 @@ public class CreateSiteTest extends CommandTestCase2 {
 
         SiteDTO secondRead = readSite(newSite.getId());
 
-        Assert.assertEquals(null, secondRead.getIndicatorValue(1));
-        Assert.assertEquals(null, secondRead.getIndicatorValue(2));
-        Assert.assertEquals(0d, secondRead.getIndicatorValue(11));
-        Assert.assertEquals(Double.NaN, secondRead.getIndicatorValue(12));
+        Assert.assertEquals(null, secondRead.getIndicatorValue(1)); // BACHE
+        Assert.assertEquals(null, secondRead.getIndicatorValue(2)); // BENE
+        
+        Assert.assertEquals(Double.NaN, secondRead.getIndicatorValue(11)); // BACHE + BENE
+        Assert.assertEquals(Double.NaN, secondRead.getIndicatorValue(12)); // BACHE / BENE
 
     }
 

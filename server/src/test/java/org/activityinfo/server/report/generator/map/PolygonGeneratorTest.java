@@ -25,33 +25,34 @@ package org.activityinfo.server.report.generator.map;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.type.geo.AiLatLng;
+import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GenerateElement;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.legacy.shared.reports.model.layers.PolygonMapLayer;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.geo.TestGeometry;
+import org.activityinfo.server.report.Reports;
 import org.activityinfo.server.report.generator.MapGenerator;
 import org.activityinfo.server.report.renderer.itext.PdfReportRenderer;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/polygons.db.xml")
 public class PolygonGeneratorTest extends CommandTestCase2 {
 
+
+    public static final String MAP_ICON_PATH = "";
 
     @BeforeClass
     public static void initLocale() {
@@ -61,10 +62,6 @@ public class PolygonGeneratorTest extends CommandTestCase2 {
     @Inject
     private MapGenerator generator;
 
-    @Before
-    public void setUpDirs() {
-        new File("target/report-tests").mkdirs();
-    }
 
     @Test
     public void basicTest() throws IOException {
@@ -79,11 +76,12 @@ public class PolygonGeneratorTest extends CommandTestCase2 {
         MapContent content = execute(new GenerateElement<MapContent>(map));
         map.setContent(content);
 
-        FileOutputStream fos = new FileOutputStream(
-                "target/report-tests/polygon.pdf");
-        PdfReportRenderer pdfr = new PdfReportRenderer(TestGeometry.get(), "");
-        pdfr.render(map, fos);
-        fos.close();
+        Reports.toPdf(getClass(), map, "polygon");
+
+        try(FileOutputStream fos = TestOutput.open(getClass(), "polygon.pdf")) {
+            PdfReportRenderer renderer = new PdfReportRenderer(TestGeometry.get(), MAP_ICON_PATH);
+            renderer.render(map, fos);
+        }
     }
 
     @Test
@@ -128,10 +126,9 @@ public class PolygonGeneratorTest extends CommandTestCase2 {
         map.addLayer(layer);
         map.setContent(content);
 
-        FileOutputStream fos = new FileOutputStream(
-                "target/report-tests/polygon-hole.pdf");
-        PdfReportRenderer pdfr = new PdfReportRenderer(TestGeometry.get(), "");
-        pdfr.render(map, fos);
-        fos.close();
+        try(FileOutputStream fos = TestOutput.open(getClass(), "polygon-hole.pdf")) {
+            PdfReportRenderer renderer = new PdfReportRenderer(TestGeometry.get(), MAP_ICON_PATH);
+            renderer.render(map, fos);
+        }
     }
 }

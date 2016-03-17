@@ -15,18 +15,16 @@ subprojects {
     tasks.withType(Test) {
         jacoco {
             // Turn off test coverage generation by default
-            enabled = false
+            //enabled = false
         }
     }
 }
 
 // ONLY when sonar is enabled, ignore test failures when they occur 
 // and turn on instrumentation of tests
-project.gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.find { it.name == "sonarRunner" }) {
-        project.getTasksByName("test", true).each { Test test ->
-            test.ignoreFailures = true
-            test.jacoco.enabled = true
-        }
+if(project.hasProperty("coverage")) {
+    project.getTasksByName("test", true).each { Test test ->
+        test.ignoreFailures = true
+        test.jacoco.enabled = true
     }
-}
+} 
