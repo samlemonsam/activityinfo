@@ -15,6 +15,7 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -86,9 +87,6 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // Update the activity table with the JSON value
         JsonHelper.updateWithJson(activity, cmd.getJson());
 
-        // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
-//        activity.setClassicView(false);
-
         syncEntities(activity, formClass);
         entityManager.get().persist(activity);
 
@@ -98,10 +96,20 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private FormClass validateFormClass(String json) {
         try {
             Resource resource = Resources.resourceFromJson(json);
-            return FormClass.fromResource(resource);
+            FormClass formClass = FormClass.fromResource(resource);
+
+            for (FormField field : formClass.getFields()) {
+                FieldType type = field.getType();
+                if (type instanceof SubFormReferenceType) {
+                    ResourceId subformClassId = ((SubFormReferenceType) type).getClassId();
+                    validateSubformClassExist(subformClassId);
+                }
+            }
+
+            return formClass;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Invalid FormClass json: " + e.getMessage(), e);
-            throw new CommandException();
+            throw new CommandException("Invalid FormClass json: " + e.getMessage());
         }
     }
 
@@ -177,7 +185,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         if(fieldEntity instanceof AttributeGroup) {
             updateAttributeGroup((AttributeGroup) fieldEntity, field, sortOrder);
         } else {
-            updateIndicator((Indicator)fieldEntity, field, sortOrder);
+            updateIndicator((Indicator) fieldEntity, field, sortOrder);
         }
     }
 
@@ -229,6 +237,14 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
         } else {
             indicator.setType(field.getType().getTypeClass().getId());
+        }
+    }
+
+    private void validateSubformClassExist(ResourceId classId) {
+        FormClassEntity subformClass = entityManager.get().find(FormClassEntity.class, classId.asString());
+        if (subformClass == null) {
+            LOGGER.log(Level.SEVERE, "Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
+            throw new CommandException("Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
         }
     }
 

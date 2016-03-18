@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.common.collect.Lists;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.client.state.GxtStateProvider;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
@@ -61,7 +62,7 @@ public class FormModelTest extends CommandTestCase2 {
 
     @After
     public final void tearDown() {
-        resourceLocator.remove(Lists.newArrayList(setupFormClass.getId()));
+        resourceLocator.remove(Lists.newArrayList(setupSubform.getId(), setupFormClass.getId()));
     }
 
     @Test
@@ -74,8 +75,30 @@ public class FormModelTest extends CommandTestCase2 {
 
         assertNotNull(formModel.getSubFormByOwnerFieldId(subformOwnerField.getId()));
         assertNotNull(formModel.getClassByField(subFormChildField.getId()));
+    }
 
+    @Test
+    public void doNotPersistFormClassWithStaleSubformReference() {
+        FormClass formClass = new FormClass(ResourceId.generateId());
+        formClass.setOwnerId(ResourceId.generateId());
 
+        FormClass subform = new FormClass(ResourceId.generateId());
+        subform.setOwnerId(formClass.getId());
+
+        FormField subformOwnerField = formClass.addField();
+        subformOwnerField.setType(new SubFormReferenceType(subform.getId()));
+
+        resourceLocator.persist(formClass).then(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // expected result
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                throw new RuntimeException("FormClass is persisted with stale (non-existent) SubFormClass reference.");
+            }
+        });
     }
 
 
