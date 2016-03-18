@@ -117,7 +117,7 @@ public class FormModel {
          * @return value instance id.
          */
         public ResourceId generateValueInstanceId() {
-            return ResourceId.valueOf(subForm.getId().asString() + "_" + tabInstance.getId().asString());
+            return ResourceId.valueOf(tabInstance.getId().asString() + "_" + subForm.getId().asString());
         }
     }
 

@@ -81,7 +81,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.panel.setStyleName(FormPanelStyles.INSTANCE.formPanel());
         this.panel.addStyleName("hide-button-on-over");
         this.scrollPanel = new ScrollPanel(panel);
-        this.formActions = new FormActions(locator, this);
+        this.formActions = new FormActions(locator, model);
         this.panelFiller = new PanelFiller(panel, model, widgetCreator, subFormsHandler, relevanceHandler);
     }
 

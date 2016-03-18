@@ -41,21 +41,21 @@ import java.util.Map;
 public class FormActions {
 
     private final ResourceLocator locator;
-    private final SimpleFormPanel panel;
+    private final FormModel model;
 
-    public FormActions(ResourceLocator locator, SimpleFormPanel panel) {
+    public FormActions(ResourceLocator locator, FormModel model) {
         this.locator = locator;
-        this.panel = panel;
+        this.model = model;
     }
 
     public Promise<Void> save() {
 
-        panel.getModel().getEventBus().fireEvent(new BeforeSaveEvent());
+        model.getEventBus().fireEvent(new BeforeSaveEvent());
 
-        BiMap<FormModel.SubformValueKey, FormInstance> subformInstances = panel.getModel().getSubFormInstances();
+        BiMap<FormModel.SubformValueKey, FormInstance> subformInstances = model.getSubFormInstances();
 
         List<IsResource> toPersist = Lists.newArrayList();
-        toPersist.add(panel.getModel().getWorkingRootInstance()); // root instance
+        toPersist.add(model.getWorkingRootInstance()); // root instance
 
         for (Map.Entry<FormModel.SubformValueKey, FormInstance> entry : subformInstances.entrySet()) { // sub form instances
             if (!ClassType.isRepeating(entry.getKey().getSubForm())) {
@@ -68,8 +68,8 @@ public class FormActions {
         Promise<Void> persist = locator.persist(toPersist);
         Promise<Void> remove = Promise.done();
 
-        if (!panel.getModel().getPersistedInstanceToRemoveByLocator().isEmpty()) {
-            remove = locator.remove(panel.getModel().getPersistedInstanceToRemoveByLocator());
+        if (!model.getPersistedInstanceToRemoveByLocator().isEmpty()) {
+            remove = locator.remove(model.getPersistedInstanceToRemoveByLocator());
         }
 
         Promise<Void> waitAll = Promise.waitAll(persist, remove);
@@ -77,12 +77,12 @@ public class FormActions {
         waitAll.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                panel.getModel().getEventBus().fireEvent(new SaveFailedEvent(caught));
+                model.getEventBus().fireEvent(new SaveFailedEvent(caught));
             }
 
             @Override
             public void onSuccess(Void result) {
-                panel.getModel().getPersistedInstanceToRemoveByLocator().clear();
+                model.getPersistedInstanceToRemoveByLocator().clear();
             }
         });
 

@@ -597,7 +597,7 @@ public class InstanceGeneratorTest {
         return fixedDate(1, month, year);
     }
 
-    private Date fixedDate(int day, int month, int year) {
+    public static Date fixedDate(int day, int month, int year) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month);

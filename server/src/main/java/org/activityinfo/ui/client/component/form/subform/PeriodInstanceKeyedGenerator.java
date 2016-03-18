@@ -57,7 +57,7 @@ public class PeriodInstanceKeyedGenerator {
         String format(String pattern, Date date);
     }
 
-    private final ResourceId classId;
+    private final ResourceId subFormClassId;
     private final Formatter formatter;
     private final CalendarUtils.DayOfWeekProvider dayOfWeekProvider;
 
@@ -65,9 +65,8 @@ public class PeriodInstanceKeyedGenerator {
     private PeriodValue lastPeriod;
     private int lastCount = 1;
 
-
-    public PeriodInstanceKeyedGenerator(ResourceId classId) {
-        this(classId, new Formatter() {
+    public PeriodInstanceKeyedGenerator(ResourceId subFormClassId) {
+        this(subFormClassId, new Formatter() {
             @Override
             public String format(String pattern, Date date) {
                 return DateTimeFormat.getFormat(pattern).format(date);
@@ -75,12 +74,12 @@ public class PeriodInstanceKeyedGenerator {
         });
     }
 
-    public PeriodInstanceKeyedGenerator(ResourceId classId, Formatter formatter) {
-        this(classId, formatter, CalendarUtils.GWT_DAY_OF_WEEK_PROVIDER);
+    public PeriodInstanceKeyedGenerator(ResourceId subFormClassId, Formatter formatter) {
+        this(subFormClassId, formatter, CalendarUtils.GWT_DAY_OF_WEEK_PROVIDER);
     }
 
-    public PeriodInstanceKeyedGenerator(ResourceId classId, Formatter formatter, CalendarUtils.DayOfWeekProvider dayOfWeekProvider) {
-        this.classId = classId;
+    public PeriodInstanceKeyedGenerator(ResourceId subFormClassId, Formatter formatter, CalendarUtils.DayOfWeekProvider dayOfWeekProvider) {
+        this.subFormClassId = subFormClassId;
         this.formatter = formatter;
         this.dayOfWeekProvider = dayOfWeekProvider;
     }
@@ -169,7 +168,7 @@ public class PeriodInstanceKeyedGenerator {
     }
 
     private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        FormInstance instance = KeyInstanceGenerator.newKeyedInstance(range, classId);
+        FormInstance instance = KeyInstanceGenerator.newKeyedInstance(range, subFormClassId);
         instance.set(PERIOD_START_DATE_ID, range.getStart());
         instance.set(PERIOD_END_DATE_ID, range.getEnd());
         FormInstanceLabeler.setLabel(instance, getLabel(range, period, direction));
