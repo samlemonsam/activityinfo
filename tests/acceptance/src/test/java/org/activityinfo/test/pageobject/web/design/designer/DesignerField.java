@@ -59,7 +59,13 @@ public class DesignerField {
     private String labelWithMandatoryMarker() {
         Optional<FluentElement> labelElement = element.find().div().div(withClass("h5")).firstIfPresent();
         if (labelElement.isPresent()) {
-            return labelElement.get().text();
+            FluentElement header = labelElement.get();
+            String label = labelElement.get().text();
+            Optional<FluentElement> code = header.find().span(withClass("small")).firstIfPresent();
+            if(code.isPresent()) {
+                label = label.substring(code.get().text().length()+1);
+            }
+            return label;
         }
         return "";
     }
