@@ -1597,4 +1597,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Saved Reports")
     String savedReports();
+
+    @DefaultStringValue("Please select type of subform again and save the subform due to serialization format change.")
+    String pleaseRecreateOutdatedSubfrom();
+
+    @DefaultStringValue("Subform type change forbidden because there are data associated with it.")
+    String subformTypeChangeDisabled();
 }

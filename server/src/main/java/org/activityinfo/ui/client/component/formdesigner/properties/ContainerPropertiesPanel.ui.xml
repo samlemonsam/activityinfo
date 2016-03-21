@@ -20,7 +20,7 @@
 
       <!-- Subform kind -->
       <f:FormGroup ui:field="subformTypeGroup" label="{i18n.type}" columnLabelWidth="4">
-        <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformType"/>
+        <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformType" enabled="false"/>
       </f:FormGroup>
 
       <!-- Subform sub kind -->

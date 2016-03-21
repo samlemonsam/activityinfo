@@ -30,7 +30,7 @@ import org.activityinfo.ui.client.component.formdesigner.container.WidgetContain
  */
 public class WidgetContainerSelectionEvent extends GwtEvent<WidgetContainerSelectionEvent.Handler> {
 
-    public static interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void handle(WidgetContainerSelectionEvent event);
     }
 
