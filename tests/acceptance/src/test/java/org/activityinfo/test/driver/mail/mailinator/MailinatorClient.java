@@ -19,7 +19,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -163,8 +162,9 @@ public class MailinatorClient implements EmailDriver {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to fetch email from mailinator. " + e.getMessage(), e);
+            throw new IOException("Failed to fetch email from mailinator inbox " + account.getEmail() + 
+                    ": " + e.getMessage(), e);
         }
-        throw new AssertionError("No emails from " + SENDER_EMAIL + " found.");
+        throw new AssertionError("No emails from " + SENDER_EMAIL + " found in mailbox " + account.getEmail() + ".");
     }
 }
