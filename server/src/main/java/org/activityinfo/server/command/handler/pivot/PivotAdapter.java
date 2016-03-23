@@ -17,7 +17,6 @@ import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.*;
 import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
 import org.activityinfo.model.expr.functions.LessOrEqualFunction;
 import org.activityinfo.model.form.FormClass;
@@ -769,20 +768,18 @@ public class PivotAdapter {
 
 
     private Collection<FunctionCallNode> dateFilter(String dateField, DateRange range) {
-        if(range.isRestricted()) {
 
-            SymbolExpr dateExpr = new SymbolExpr(dateField);
-            ConstantExpr minDate = new ConstantExpr(new LocalDate(range.getMinDate()));
-            ConstantExpr maxDate = new ConstantExpr(new LocalDate(range.getMaxDate()));
-
-            return singleton(
-                    new FunctionCallNode(AndFunction.INSTANCE,
-                            new FunctionCallNode(GreaterOrEqualFunction.INSTANCE, dateExpr, minDate),
-                            new FunctionCallNode(LessOrEqualFunction.INSTANCE, dateExpr, maxDate)));
-
-        } else {
-            return Collections.emptyList();
+        SymbolExpr dateExpr = new SymbolExpr(dateField);
+        List<FunctionCallNode> conditions = Lists.newArrayList();
+        if(range != null) {
+            if (range.getMinLocalDate() != null) {
+                conditions.add(new FunctionCallNode(GreaterOrEqualFunction.INSTANCE, dateExpr, new ConstantExpr(new LocalDate(range.getMinDate()))));
+            }
+            if (range.getMaxLocalDate() != null) {
+                conditions.add(new FunctionCallNode(LessOrEqualFunction.INSTANCE, dateExpr, new ConstantExpr(new LocalDate(range.getMaxDate()))));
+            }
         }
+        return conditions;
     }
 
     private DimensionCategory[][] extractCategories(Activity activity, ColumnSet columnSet) {

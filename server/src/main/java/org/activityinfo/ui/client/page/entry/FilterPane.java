@@ -46,8 +46,8 @@ public class FilterPane extends ContentPanel {
 
         add(activityFilterPanel);
         add(adminFilterPanel);
-        add(startDatePanel);
         add(endDatePanel);
+        add(startDatePanel);
         add(partnerPanel);
         add(attributePanel);
         add(locationFilterPanel);
