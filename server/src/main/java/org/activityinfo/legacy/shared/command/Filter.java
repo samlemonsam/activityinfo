@@ -26,7 +26,6 @@ import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.model.typeadapter.FilterAdapter;
 
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.*;
@@ -64,6 +63,7 @@ public class Filter implements Serializable {
         for (Map.Entry<DimensionType, Set<Integer>> entry : filter.restrictions.entrySet()) {
             this.restrictions.put(entry.getKey(), new HashSet<Integer>(entry.getValue()));
         }
+        this.startDateRange = filter.startDateRange;
         this.endDateRange = filter.endDateRange;
     }
 
@@ -278,6 +278,7 @@ public class Filter implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((endDateRange == null) ? 0 : endDateRange.hashCode());
+        result = prime * result + ((startDateRange == null) ? 0 : startDateRange.hashCode());
         result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
         return result;
     }
@@ -294,7 +295,9 @@ public class Filter implements Serializable {
             return false;
         }
         Filter other = (Filter) obj;
-        return getEndDateRange().equals(other.getEndDateRange()) && getRestrictions().equals(other.getRestrictions());
+        return getEndDateRange().equals(other.getEndDateRange()) && 
+                getStartDateRange().equals(other.getStartDateRange()) &&
+                getRestrictions().equals(other.getRestrictions());
     }
 
 }
