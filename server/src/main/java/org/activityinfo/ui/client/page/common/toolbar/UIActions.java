@@ -41,6 +41,8 @@ public final class UIActions {
     public static final String EDIT = "edit";
 
     public static final String EXPORT = "export";
+    
+    public static final String EXPORT_XLSFORM = "export_xlsform";
 
     public static final String SAVE = "save";
 

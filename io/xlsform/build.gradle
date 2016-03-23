@@ -1,0 +1,12 @@
+
+
+
+
+dependencies {
+    compile project(':core:model')
+    compile libraries.guava
+    compile libraries.poi
+    
+    testCompile libraries.junit
+    testCompile libraries.easymock
+}

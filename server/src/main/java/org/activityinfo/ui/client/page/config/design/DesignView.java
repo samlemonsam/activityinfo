@@ -249,6 +249,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
 
         toolBar.addImportButton();
         toolBar.addExcelExportButton();
+        toolBar.addButton(UIActions.EXPORT_XLSFORM, "XLSForm", IconImageBundle.ICONS.excel());
     }
 
     protected void initNewMenu(Menu menu, SelectionListener<MenuEvent> listener) {

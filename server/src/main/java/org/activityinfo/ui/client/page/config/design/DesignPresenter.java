@@ -254,6 +254,9 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         if (UIActions.EXPORT.equals(actionId)) {
             Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
 
+        } else if(UIActions.EXPORT_XLSFORM.equals(actionId)) {
+            Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
+            
         } else if (UIActions.IMPORT.equals(actionId)) {
             SchemaImporter importer = new SchemaImporter(service, db);
             SchemaImportDialog dialog = new SchemaImportDialog(importer);
