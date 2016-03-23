@@ -243,8 +243,9 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     private void validateSubformClassExist(ResourceId classId) {
         FormClassEntity subformClass = entityManager.get().find(FormClassEntity.class, classId.asString());
         if (subformClass == null) {
-            LOGGER.log(Level.SEVERE, "Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
-            throw new CommandException("Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
+            // TODO : we can't guarantee that subform is saved before root class if it is saved as one unit, need to think about better approach
+//            LOGGER.log(Level.SEVERE, "Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
+//            throw new CommandException("Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
         }
     }
 
