@@ -22,6 +22,7 @@ package org.activityinfo.legacy.client.remote.cache;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -109,7 +110,10 @@ public class SchemaCache implements DispatchListener {
 
         } else if (command instanceof UpdateFormClass) {
             String formClassId = ((UpdateFormClass) command).getFormClassId();
-            activityFormCache.remove(CuidAdapter.getLegacyIdFromCuid(formClassId));
+            Optional<Integer> legacyId = CuidAdapter.getLegacyIdFromCuidOptional(formClassId);
+            if (legacyId.isPresent()) {
+                activityFormCache.remove(legacyId);
+            }
 
         } else if (command instanceof BatchCommand) {
             for (Command element : ((BatchCommand) command).getCommands()) {

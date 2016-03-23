@@ -1,5 +1,6 @@
 package org.activityinfo.model.legacy;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -107,6 +108,14 @@ public class CuidAdapter {
 
     public static final int getLegacyIdFromCuid(String cuid) {
         return Integer.parseInt(cuid.substring(1), ResourceId.RADIX);
+    }
+
+    public static Optional<Integer> getLegacyIdFromCuidOptional(String cuid) {
+        try {
+            return Optional.of(getLegacyIdFromCuid(cuid));
+        } catch (NumberFormatException e) {
+            return Optional.absent();
+        }
     }
 
     public static final ResourceId cuid(char domain, int id) {
