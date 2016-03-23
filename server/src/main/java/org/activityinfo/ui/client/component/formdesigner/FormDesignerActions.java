@@ -60,19 +60,22 @@ public class FormDesignerActions {
         return this;
     }
 
+    private List<FormClass> getFormClassesForPersistence() {
+        List<FormClass> classesToPersist = Lists.newArrayList();
+        for (FormClass subForm : formDesigner.getModel().getSubforms()) {
+            classesToPersist.add(subForm);
+        }
+        classesToPersist.add(formDesigner.getRootFormClass()); // order is important, subform classes must be saved first
+        return classesToPersist;
+    }
+
     public Promise<Void> save() {
 
         formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saving());
         formDesignerPanel.getSaveButton().setEnabled(false);
 
-        List<Promise<Void>> promises = Lists.newArrayList();
-        for (FormClass subForm : formDesigner.getModel().getSubforms()) {
-            promises.add(persist(subForm));
-        }
-
-        promises.add(persist(formDesigner.getRootFormClass()));
-        Promise<Void> voidPromise = Promise.waitAll();
-        voidPromise.then(new AsyncCallback<Void>() {
+        Promise<Void> promise = persist(getFormClassesForPersistence());
+        promise.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 showFailureDelayed(caught);
@@ -94,12 +97,11 @@ public class FormDesignerActions {
                 }, 500);
             }
         });
-        return voidPromise;
+        return promise;
     }
 
-    private Promise<Void> persist(FormClass formClass) {
-        formClass.reorderFormFields();
-        return formDesigner.getResourceLocator().persist(formClass);
+    private Promise<Void> persist(List<FormClass> formClasses) {
+        return formDesigner.getResourceLocator().persist(formClasses);
     }
 
     private void showFailureDelayed(final Throwable caught) {

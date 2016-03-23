@@ -41,7 +41,6 @@ import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.formdesigner.InstanceGeneratorTest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -89,7 +88,6 @@ public class FormModelTest extends CommandTestCase2 {
         assertNotNull(formModel.getClassByField(subFormChildField.getId()));
     }
 
-    @Ignore
     @Test
     public void doNotPersistFormClassWithStaleSubformReference() {
         FormClass formClass = new FormClass(ResourceId.generateId());

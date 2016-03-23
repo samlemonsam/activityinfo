@@ -128,7 +128,14 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
+
+        if (UpdateFormClass.isAllFormClasses(resources)) {
+            // goal is to force persistence order and guarantee that subform formclasses are saved before root form class is saved.
+            return dispatcher.execute(UpdateFormClass.batchCommandForMultipleFormClasses(resources)).thenDiscardResult();
+        }
+
         final List<PromiseExecutionOperation> operations = Lists.newArrayList();
+
         for (final IsResource resource : resources) {
             operations.add(new PromiseExecutionOperation() {
                 @Override
