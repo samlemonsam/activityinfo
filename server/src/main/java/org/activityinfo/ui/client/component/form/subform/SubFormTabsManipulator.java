@@ -118,8 +118,8 @@ public class SubFormTabsManipulator {
     private void generateFormInstanceForPeriod(FormClass subForm, ResourceId typeClassId) {
         this.periodValue = ((PeriodSubFormType) SubFormTypeRegistry.get().getType(typeClassId)).getPeriod();
 
-        final LocalDateRange selectedRange = getSelectedRange();
-        final Date startDate = selectedRange != null ? selectedRange.asDateRange().getStart() : new Date();
+        final Optional<LocalDateRange> selectedRange = getSelectedRange();
+        final Date startDate = selectedRange.isPresent() ? selectedRange.get().asDateRange().getStart() : new Date();
 
         final PeriodInstanceKeyedGenerator instanceGenerator = new PeriodInstanceKeyedGenerator(subForm.getId());
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
@@ -256,7 +256,7 @@ public class SubFormTabsManipulator {
         return designMode;
     }
 
-    public LocalDateRange getSelectedRange() {
+    public Optional<LocalDateRange> getSelectedRange() {
         return presenter.getSelectedRange(PredefinedPeriods.fromPeriod(periodValue));
     }
 }

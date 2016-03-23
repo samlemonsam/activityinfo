@@ -223,10 +223,10 @@ public class SubFormTabsPresenter {
     }
 
     private Optional<FormInstance> getSelectedPeriodInstance() {
-        DateRange selectedRange = getSelectedRange(periodType).asDateRange();
-        if (selectedRange != null) {
+        Optional<LocalDateRange> selectedRange = getSelectedRange(periodType);
+        if (selectedRange.isPresent()) {
             for (FormInstance instance : instancesMap.values()) {
-                if (PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance).equals(selectedRange)) {
+                if (PeriodInstanceKeyedGenerator.getDateRangeFromInstance(instance).equals(selectedRange.get().asDateRange())) {
                     return Optional.of(instance);
                 }
             }
@@ -373,13 +373,13 @@ public class SubFormTabsPresenter {
         this.periodType = periodType;
     }
 
-    public LocalDateRange getSelectedRange(PredefinedPeriods predefinedPeriod) {
+    public Optional<LocalDateRange> getSelectedRange(PredefinedPeriods predefinedPeriod) {
         String json = stateProvider.getString("subform.tab." + predefinedPeriod.name());
 
         if (!Strings.isNullOrEmpty(json)) {
-            return LocalDateRange.fromJson(json);
+            return Optional.of(LocalDateRange.fromJson(json));
         } else {
-            return null;
+            return Optional.absent();
         }
     }
 }
