@@ -8,10 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
-import org.activityinfo.model.formTree.JsonFormTreeBuilder;
+import org.activityinfo.model.formTree.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -30,6 +27,7 @@ import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.xlsform.XlsFormBuilder;
 
 import javax.inject.Provider;
 import javax.ws.rs.GET;
@@ -55,12 +53,17 @@ public class FormResource {
 
     private final ResourceId resourceId;
     private final Gson prettyPrintingGson;
+    private final FormClassProvider formClassProvider;
 
-    public FormResource(ResourceId resourceId, Provider<CollectionCatalog> catalog, Provider<AuthenticatedUser> userProvider) {
+    public FormResource(ResourceId resourceId, 
+                        Provider<CollectionCatalog> catalog, 
+                        Provider<AuthenticatedUser> userProvider, 
+                        FormClassProvider formClassProvider) {
         this.resourceId = resourceId;
         this.catalog = catalog;
         this.userProvider = userProvider;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
+        this.formClassProvider = formClassProvider;
     }
 
     /**
@@ -80,6 +83,25 @@ public class FormResource {
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }
 
+    @GET
+    @Path("form.xls")
+    public Response getXlsForm() {
+        assertVisible(resourceId);
+
+        final XlsFormBuilder xlsForm = new XlsFormBuilder(formClassProvider);
+        xlsForm.build(resourceId);
+
+        StreamingOutput output = new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                xlsForm.write(outputStream);
+            }
+        };
+        
+        return Response.ok(output, "application/vnd.ms-excel").build();
+    }
+    
     /**
      *
      * @return a list of {@link org.activityinfo.model.form.FormClass}es that includes the {@code FormClass}
