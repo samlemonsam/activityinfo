@@ -31,6 +31,8 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
  */
 public class FieldsHolderPanel implements WidgetContainer {
 
+    public static final String FIELDS_HOLDER_ATTRIBUTE_NAME = "fieldsHolder";
+
     private final FormDesigner formDesigner;
     private final ResourceId parentId;
     private final FieldPanel panel;
@@ -44,6 +46,7 @@ public class FieldsHolderPanel implements WidgetContainer {
                 return FormDesignerStyles.INSTANCE.sectionWidgetContainerSelected();
             }
         };
+        this.panel.asWidget().getElement().setAttribute(FIELDS_HOLDER_ATTRIBUTE_NAME, "true"); // mark holder panel
         this.panel.getLabel().addStyleName(FormDesignerStyles.INSTANCE.sectionLabel());
     }
 

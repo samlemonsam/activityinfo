@@ -26,9 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.LIElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -99,19 +96,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     @UiField
     HTML paletteSpacer;
     @UiField
-    HTMLPanel containerPropertiesTab;
-    @UiField
     ContainerPropertiesPanel containerPropertiesPanel;
-    @UiField
-    Anchor containerPropertiesTabLink;
-    @UiField
-    Anchor propertiesTabLink;
-    @UiField
-    HTMLPanel propertiesTab;
-    @UiField
-    LIElement containerPropertiesTabLi;
-    @UiField
-    LIElement propertiesTabLi;
 
     /**
      * Main FormDesigner panel. It must be created via FormDesigner only.
@@ -162,35 +147,16 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 calcSpacerHeight();
             }
         });
-
-        propertiesTabLink.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                setPropertiesTabSelected();
-            }
-        });
-        containerPropertiesTabLink.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                setContainerPropertiesTabSelected();
-            }
-        });
     }
 
-    public void setContainerPropertiesTabSelected() {
-        containerPropertiesTabLi.addClassName("active");
-        propertiesTabLi.removeClassName("active");
-
-        containerPropertiesTab.setVisible(true);
-        propertiesTab.setVisible(false);
+    public void setContainerPropertiesPanelVisible() {
+        containerPropertiesPanel.setVisible(true);
+        propertiesPanel.setVisible(false);
     }
 
-    public void setPropertiesTabSelected() {
-        propertiesTabLi.addClassName("active");
-        containerPropertiesTabLi.removeClassName("active");
-
-        propertiesTab.setVisible(true);
-        containerPropertiesTab.setVisible(false);
+    public void setPropertiesPanelVisible() {
+        propertiesPanel.setVisible(true);
+        containerPropertiesPanel.setVisible(false);
     }
 
     private void fillPanel(final FormClass formClass, final FormDesigner formDesigner) {

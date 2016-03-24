@@ -74,7 +74,7 @@ public class HeaderPresenter implements FieldsHolder {
     private void onClick() {
         formDesigner.getPropertiesPresenter().reset();
         formDesigner.getContainerPresenter().show(this);
-        formDesigner.getFormDesignerPanel().setContainerPropertiesTabSelected();
+        formDesigner.getFormDesignerPanel().setContainerPropertiesPanelVisible();
 
         formDesigner.getEventBus().fireEvent(new HeaderSelectionEvent(this));
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

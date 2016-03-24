@@ -25,18 +25,22 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.ui.FocusPanel;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldPanel;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 01/21/2015.
@@ -45,6 +49,7 @@ public class FormDesignerModel {
 
     private final BiMap<ResourceId, FormClass> formFieldToSubFormClass = HashBiMap.create();
 
+    private final Map<FocusPanel, FieldPanel> focusMap = Maps.newHashMap();
     private final FormClass rootFormClass;
     private WidgetContainer selectedWidgetContainer;
 
@@ -179,5 +184,9 @@ public class FormDesignerModel {
 
     public WidgetContainer getSelectedWidgetContainer() {
         return selectedWidgetContainer;
+    }
+
+    public Map<FocusPanel, FieldPanel> getFocusMap() {
+        return focusMap;
     }
 }

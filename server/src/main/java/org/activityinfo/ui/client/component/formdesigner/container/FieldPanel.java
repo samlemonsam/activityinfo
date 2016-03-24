@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.formdesigner.container;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
@@ -40,12 +41,22 @@ public class FieldPanel {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
-
     interface OurUiBinder extends UiBinder<Widget, FieldPanel> {
     }
 
     private final FormDesigner formDesigner;
     private ClickHandler clickHandler;
+
+    private FocusPanel parentFocusPanel;
+
+    // workaround to avoid parent FocusPanel onClick handling
+    // Example: Subform focus panel contains field focus panel.
+    //          If click on field focus panel click is invoked for both field and subform focus panels.
+    // Requirement: show properties only for field or only for subform.
+    // Solution: we mark parent focus panel with FieldsHolderPanel.FIELDS_HOLDER_ATTRIBUTE_NAME
+    //           and setting ignoreClickOneTime for parent to true. So it makes illusion that click event
+    //           is not fired for parent focus panel (and as result click handler is not invoked for parent)
+    private boolean ignoreClickOneTime;
 
     @UiField
     Button removeButton;
@@ -72,6 +83,7 @@ public class FieldPanel {
                 setSelected(false);
             }
         });
+        formDesigner.getModel().getFocusMap().put(focusPanel, this);
 
         this.focusPanel.addClickHandler(new ClickHandler() {
             @Override
@@ -79,6 +91,27 @@ public class FieldPanel {
                 FieldPanel.this.onClick();
             }
         });
+        this.focusPanel.addAttachHandler(new AttachEvent.Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                findParentFocusPanel(focusPanel);
+            }
+        });
+    }
+
+    private void findParentFocusPanel(Widget widget) {
+        if (widget.getParent() == null) {
+            return;
+        }
+
+        if (widget.getParent() instanceof FocusPanel) {
+            FocusPanel parent = (FocusPanel) widget.getParent();
+            if (parent != null && "true".equalsIgnoreCase(parent.getElement().getAttribute(FieldsHolderPanel.FIELDS_HOLDER_ATTRIBUTE_NAME))) {
+                parentFocusPanel = parent;
+            }
+        } else {
+            findParentFocusPanel(widget.getParent());
+        }
     }
 
     /**
@@ -109,9 +142,17 @@ public class FieldPanel {
 
     private void onClick() {
         setSelected(true);
-        if (clickHandler != null) {
+        if (clickHandler != null && !ignoreClickOneTime) {
             clickHandler.onClick(null);
+
+            if (parentFocusPanel != null) {
+                FieldPanel fieldPanel = formDesigner.getModel().getFocusMap().get(parentFocusPanel);
+                if (fieldPanel != null) {
+                    fieldPanel.setIgnoreClickOneTime(true);
+                }
+            }
         }
+        ignoreClickOneTime = false;
     }
 
     public HTML getLabel() {
@@ -160,6 +201,14 @@ public class FieldPanel {
 
     public void setClickHandler(ClickHandler clickHandler) {
         this.clickHandler = clickHandler;
+    }
+
+    public void setIgnoreClickOneTime(boolean ignoreClickOneTime) {
+        this.ignoreClickOneTime = ignoreClickOneTime;
+    }
+
+    public boolean isIgnoreClickOneTime() {
+        return ignoreClickOneTime;
     }
 }
 

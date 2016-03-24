@@ -78,6 +78,8 @@ public class ContainerPropertiesPresenter {
 
         reset();
 
+        formDesigner.getFormDesignerPanel().setContainerPropertiesPanelVisible();
+
         view.getLabelGroup().setVisible(true);
         view.getLabel().setValue(Strings.nullToEmpty(fieldsHolder.getElementContainer().getLabel()));
 

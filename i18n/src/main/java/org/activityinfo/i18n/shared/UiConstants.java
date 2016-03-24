@@ -1220,12 +1220,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Properties")
     String properties();
 
-    @DefaultStringValue("Field")
-    String fieldProperties();
-
-    @DefaultStringValue("Container")
-    String containerProperties();
-
     @DefaultStringValue("Read only")
     String readonly();
 

@@ -33,7 +33,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
@@ -48,7 +47,6 @@ import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
@@ -145,7 +143,7 @@ public class PropertiesPresenter {
     private void show(final FieldWidgetContainer fieldWidgetContainer) {
         reset();
 
-        formDesigner.getFormDesignerPanel().setPropertiesTabSelected();
+        formDesigner.getFormDesignerPanel().setPropertiesPanelVisible();
 
         final FormField formField = fieldWidgetContainer.getFormField();
         boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getModel().getRootFormClass().getId(), formField.getId());
@@ -282,18 +280,6 @@ public class PropertiesPresenter {
         }
 
         view.getPanel().add(currentDesignWidget);
-
-        formDesigner.getContainerPresenter().show(new FieldsHolder() {
-            @Override
-            public FormElementContainer getElementContainer() {
-                return formDesigner.getModel().getElementContainer(fieldWidgetContainer.getParentId());
-            }
-
-            @Override
-            public void updateUi() {
-                formDesigner.getWidgetContainer(fieldWidgetContainer.getParentId()).syncWithModel();
-            }
-        });
     }
 
     /**
