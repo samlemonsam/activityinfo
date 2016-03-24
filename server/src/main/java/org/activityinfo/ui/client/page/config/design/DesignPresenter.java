@@ -80,6 +80,7 @@ import java.util.Objects;
 public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> implements DbPage {
     public static final PageId PAGE_ID = new PageId("design");
 
+
     @ImplementedBy(DesignView.class)
     public interface View extends TreeGridView<DesignPresenter, ModelData> {
         public void init(DesignPresenter presenter, UserDatabaseDTO db, TreeStore store);
@@ -247,17 +248,20 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                ((DbPageState) place).getDatabaseId() == db.getId();
     }
 
+
+    public void exportFullDatabase() {
+        Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
+    }
+
+    public void exportFormAsXlsForm() {
+        Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
+    }
+
     @Override
     public void onUIAction(String actionId) {
         super.onUIAction(actionId);
 
-        if (UIActions.EXPORT.equals(actionId)) {
-            Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
-
-        } else if(UIActions.EXPORT_XLSFORM.equals(actionId)) {
-            Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
-            
-        } else if (UIActions.IMPORT.equals(actionId)) {
+        if (UIActions.IMPORT.equals(actionId)) {
             SchemaImporter importer = new SchemaImporter(service, db);
             SchemaImportDialog dialog = new SchemaImportDialog(importer);
             dialog.show().then(new Function<Void, Object>() {

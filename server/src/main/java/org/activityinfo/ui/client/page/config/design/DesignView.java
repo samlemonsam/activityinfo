@@ -248,8 +248,25 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         toolBar.add(new SeparatorToolItem());
 
         toolBar.addImportButton();
-        toolBar.addExcelExportButton();
-        toolBar.addButton(UIActions.EXPORT_XLSFORM, "XLSForm", IconImageBundle.ICONS.excel());
+        
+        Menu menu = new Menu();
+        menu.add(new MenuItem("Export complete database", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+            @Override
+            public void componentSelected(MenuEvent menuEvent) {
+                presenter.exportFullDatabase();
+            }
+        }));
+        menu.add(new MenuItem("Export selected form as XLSForm", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+            @Override
+            public void componentSelected(MenuEvent menuEvent) {
+                presenter.exportFormAsXlsForm();
+            }
+        }));
+
+        Button exportButton = new Button(I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
+        exportButton.setMenu(menu);
+
+        toolBar.add(exportButton);
     }
 
     protected void initNewMenu(Menu menu, SelectionListener<MenuEvent> listener) {

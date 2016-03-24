@@ -7,6 +7,7 @@ import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -139,6 +140,9 @@ public class XlsFormBuilder {
         } else if(type instanceof TextType) {
             fieldRow.createCell(TYPE_COLUMN).setCellValue(XlsFormTypes.TEXT);
 
+        } else if(type instanceof NarrativeType) {
+            fieldRow.createCell(TYPE_COLUMN).setCellValue("narrative");
+            
         } else if(type instanceof CalculatedFieldType) {
             CalculatedFieldType calculatedType = (CalculatedFieldType) field.getType();
             fieldRow.createCell(TYPE_COLUMN).setCellValue(XlsFormTypes.CALCULATE);
