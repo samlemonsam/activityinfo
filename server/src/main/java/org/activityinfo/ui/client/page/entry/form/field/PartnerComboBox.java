@@ -51,6 +51,7 @@ public class PartnerComboBox extends ComboBox<PartnerDTO> {
         setFieldLabel(I18N.CONSTANTS.partner());
         setForceSelection(true);
         setAllowBlank(false);
+        setSimpleTemplate(ComboboxTemplates.MULTILINE_TEMPLATE);
 
         if (store.getCount() == 1) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {

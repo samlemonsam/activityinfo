@@ -33,10 +33,14 @@ import org.activityinfo.legacy.client.DispatchListener;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.Resources;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -91,6 +95,7 @@ public class SchemaCache implements DispatchListener {
         source.registerListener(BatchCommand.class, cache);
         source.registerListener(Delete.class, cache);
         source.registerListener(CloneDatabase.class, cache);
+        source.registerListener(UpdateFormClass.class, cache);
     }
 
     @Override
@@ -146,6 +151,14 @@ public class SchemaCache implements DispatchListener {
         } else if (schema != null) {
             if (command instanceof AddPartner) {
                 clearCache();
+            } else if (command instanceof UpdateFormClass) {
+                String formClassId = ((UpdateFormClass) command).getFormClassId();
+                ActivityDTO activity = schema.getActivityById(CuidAdapter.getLegacyIdFromCuid(formClassId));
+                if (activity != null) {
+                    Resource resource = Resources.resourceFromJson(((UpdateFormClass) command).getJson());
+                    FormClass formClass = FormClass.fromResource(resource);
+                    activity.setName(formClass.getLabel());
+                }
             }
         }
     }

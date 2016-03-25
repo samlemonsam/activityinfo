@@ -43,5 +43,6 @@ public class ProjectComboBox extends ComboBox<ProjectDTO> {
         setFieldLabel(I18N.CONSTANTS.project());
         setForceSelection(true);
         setAllowBlank(true);
+        setSimpleTemplate(ComboboxTemplates.MULTILINE_TEMPLATE);
     }
 }
