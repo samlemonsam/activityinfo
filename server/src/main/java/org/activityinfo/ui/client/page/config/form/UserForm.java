@@ -36,6 +36,7 @@ import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.ui.client.page.config.design.BlankValidator;
+import org.activityinfo.ui.client.page.entry.form.field.ComboboxTemplates;
 
 public class UserForm extends FormPanel {
 
@@ -76,8 +77,9 @@ public class UserForm extends FormPanel {
         partnerCombo.setDisplayField("name");
         partnerCombo.setStore(partnerStore);
         partnerCombo.setForceSelection(true);
-        partnerCombo.setTriggerAction(TriggerAction.QUERY);
+        partnerCombo.setTriggerAction(TriggerAction.ALL);
         partnerCombo.setAllowBlank(false);
+        partnerCombo.setSimpleTemplate(ComboboxTemplates.MULTILINE_TEMPLATE);
         this.add(partnerCombo);
     }
 
