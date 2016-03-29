@@ -1597,4 +1597,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Subform type change forbidden because there are data associated with it.")
     String subformTypeChangeDisabled();
+
+    @DefaultStringValue("Text")
+    String text();
 }

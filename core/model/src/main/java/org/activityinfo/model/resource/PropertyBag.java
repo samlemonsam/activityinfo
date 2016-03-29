@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.geo.GeoFieldValue;
-import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 
@@ -204,20 +203,23 @@ public class PropertyBag<T extends PropertyBag> {
         return (T)this;
     }
 
-
     public PropertyBag<T> set(@Nonnull ResourceId fieldId, FieldValue fieldValue) {
+        return set(fieldId.asString(), fieldValue);
+    }
+
+    public PropertyBag<T> set(@Nonnull String fieldId, FieldValue fieldValue) {
         Preconditions.checkNotNull(fieldId);
         if (fieldValue == null) {
-            remove(fieldId.asString());
+            remove(fieldId);
 
         } else if (fieldValue instanceof TextValue) {
-            set(fieldId.asString(), ((TextValue) fieldValue).toString());
+            set(fieldId, ((TextValue) fieldValue).asString());
 
         } else if (fieldValue instanceof BooleanFieldValue) {
-            set(fieldId.asString(), fieldValue == BooleanFieldValue.TRUE);
+            set(fieldId, fieldValue == BooleanFieldValue.TRUE);
 
         } else if(fieldValue instanceof IsRecord) {
-            set(fieldId.asString(), ((IsRecord) fieldValue).asRecord());
+            set(fieldId, ((IsRecord) fieldValue).asRecord());
 
         } else {
             throw new UnsupportedOperationException(fieldId + " = " + fieldValue);
@@ -367,8 +369,14 @@ public class PropertyBag<T extends PropertyBag> {
         return (T)this;
     }
 
-    public void setAll(PropertyBag propertyBag) {
+    public T setAll(PropertyBag propertyBag) {
         properties.putAll(propertyBag.properties);
+        return (T)this;
+    }
+
+    public T setAll(Map<String, Object> map) {
+        properties.putAll(map);
+        return (T)this;
     }
 
     public Map<String, Object> getProperties() {

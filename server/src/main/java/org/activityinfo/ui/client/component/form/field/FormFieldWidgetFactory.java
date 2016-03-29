@@ -35,6 +35,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -147,6 +148,8 @@ public class FormFieldWidgetFactory {
 
         } else if (type instanceof BarcodeType) {
             return Promise.resolved(new BarcodeFieldWidget(valueUpdater));
+        } else if (type instanceof MetadataType) {
+            return Promise.resolved(new LabelFieldWidget((MetadataType) type));
         }
 
         Log.error("Unexpected field type " + type.getTypeClass());
