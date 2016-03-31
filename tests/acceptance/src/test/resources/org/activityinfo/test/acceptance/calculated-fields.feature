@@ -71,8 +71,8 @@ Feature: Calculated fields
       | plus             |   280 |   39.5 |
       | percent          | 1,200 |   30   |
     Then drill down on "280" should yield:
-      | NRC      |       | 2014-07-21 |    | 110   |
-      | NRC      |       | 2014-05-21 |    | 450   |
+      | RRMP | NFI Distribution | NRC |  | 2014-07-21 | plus | 110 |
+      | RRMP | NFI Distribution | NRC |  | 2014-05-21 | plus | 450 |
 
   Scenario: Aggregating calculated indicators ignore missing values and divisions by zero
     # When aggregating calculated fields with values that include 10/0, for
