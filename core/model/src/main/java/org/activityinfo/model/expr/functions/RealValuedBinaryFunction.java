@@ -3,6 +3,7 @@ package org.activityinfo.model.expr.functions;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.ConstantColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
@@ -42,11 +43,11 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
         Preconditions.checkArgument(arguments.size() == 2);
         ColumnView x = arguments.get(0);
         ColumnView y = arguments.get(1);
-        
-        Preconditions.checkArgument(
-            x.getType() == ColumnType.NUMBER && 
-            y.getType() == ColumnType.NUMBER);
-        
+
+        if(x.getType() != ColumnType.NUMBER ||
+           y.getType() != ColumnType.NUMBER) {
+            return new ConstantColumnView(x.numRows(), Double.NaN);
+        }
         double result[] = new double[x.numRows()];
         for (int i = 0; i < result.length; i++) {
             result[i] = apply(x.getDouble(i), y.getDouble(i));

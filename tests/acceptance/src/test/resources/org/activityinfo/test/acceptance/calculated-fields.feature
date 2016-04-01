@@ -53,6 +53,7 @@ Feature: Calculated fields
       |                  | Value |
       | percent          | 50    |
 
+
   @AI-1082
   Scenario: Drill down on calculated indicator
     Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
@@ -73,6 +74,17 @@ Feature: Calculated fields
     Then drill down on "280" should yield:
       | RRMP | NFI Distribution | NRC |  | 2014-07-21 | plus | 110 |
       | RRMP | NFI Distribution | NRC |  | 2014-05-21 | plus | 450 |
+
+  Scenario: Aggregating calculated fields with invalid expressions
+    Given I have created a quantity field "Number of Beneficiaries" in "NFI Distribution"
+    And I have created a calculated field "Cost/Beneficiary" in "NFI Distribution" with expression "Foo/Bar"
+    And I have submitted "NFI Distribution" forms with:
+      | partner | Number of Beneficiaries | Start Date | End Date   |
+      | NRC     | 150                     | 2016-01-01 | 2016-12-31 |
+      | NRC     | 0                       | 2016-01-01 | 2016-12-31 |
+    Then aggregating the indicators Number of Beneficiaries and Cost/Beneficiary by Indicator and Year should yield:
+      |                         | 2016 |
+      | Number of Beneficiaries |  150 |
 
   Scenario: Aggregating calculated indicators ignore missing values and divisions by zero
     # When aggregating calculated fields with values that include 10/0, for
