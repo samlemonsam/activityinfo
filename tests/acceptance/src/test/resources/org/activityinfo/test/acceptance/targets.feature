@@ -23,7 +23,7 @@ Feature: Indicator Targets
         | nb. kits           | 800    |
       
   Scenario: Target by database
-    Given I have created a target with values:
+    When I create a target with values:
       | field       | value |
       | nb. kits    | 3000  |
     Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
