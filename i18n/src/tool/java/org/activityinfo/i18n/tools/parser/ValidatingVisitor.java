@@ -2,10 +2,15 @@ package org.activityinfo.i18n.tools.parser;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import org.activityinfo.i18n.tools.model.Message;
-import org.activityinfo.i18n.tools.model.MessageFormatException;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.gwt.i18n.server.MessageFormatUtils;
 import org.activityinfo.i18n.tools.model.TranslationSet;
 import org.activityinfo.i18n.tools.output.MessageDecorator;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -20,6 +25,10 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
     public ValidatingVisitor(TranslationSet translationSet) {
         this.input = translationSet;
         this.validatedSet = new TranslationSet(translationSet.getLanguage());
+    }
+
+    public void setDecorator(MessageDecorator decorator) {
+        this.decorator = decorator;
     }
 
     public TranslationSet getValidatedSet() {
@@ -41,51 +50,42 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
 
     private boolean validateMessage(String key, MethodDeclaration decl, String inputMessage) {
 
-        Message format;
+        List<MessageFormatUtils.TemplateChunk> chunks;
         try {
-            format = new Message(decorator.apply(inputMessage));
-        } catch (MessageFormatException e) {
+            chunks = MessageFormatUtils.MessageStyle.MESSAGE_FORMAT.parse(decorator.apply(inputMessage));
+        } catch (Exception e) {
             System.err.println(String.format("Invalid message format %s[%s]: %s", key, input.getLanguage(), e.getMessage()));
             return false;
         }
-        // make sure there are enough arguments for all the placeholders
-        for (Message.Chunk chunk : format.getChunks()) {
-            if(chunk.isPlaceholder()) {
-                boolean validPlaceholder = true;
-                if(chunk.getArgumentIndex() >= decl.getParameters().size()) {
-                    System.err.println(String.format("Invalid translation %s[%s]: not enough arguments for [%s]",
-                            key, input.getLanguage(), inputMessage));
-                    validPlaceholder = false;
-                }
-                
-                if(!validatePlaceholder(chunk)) {
-                    validPlaceholder = false;
-                }
-                
-                if(!validPlaceholder) {
-                    return false;
-                }
+
+        List<MessageFormatUtils.ArgumentChunk> argumentChunks =
+                Lists.newArrayList(Iterables.filter(chunks, MessageFormatUtils.ArgumentChunk.class));
+
+        // Check that each {placeholder} in the translated string has a corresponding
+        // argument in the message method.
+        for (MessageFormatUtils.ArgumentChunk argumentChunk : argumentChunks) {
+            if(argumentChunk.getArgumentNumber() >= decl.getParameters().size()) {
+                System.err.println(String.format("Invalid translation %s[%s]: not enough arguments for [%s]",
+                        key, input.getLanguage(), inputMessage));
+                return false;
             }
         }
 
-
-        // And make sure all arguments are used...
+        // Now check that every method argument is present in the translated string
+        Set<Integer> argumentsUsed = Sets.newHashSet();
+        for (MessageFormatUtils.ArgumentChunk argumentChunk : argumentChunks) {
+            argumentsUsed.add(argumentChunk.getArgumentNumber());
+        }
         if(decl.getParameters() != null) {
             for (int i = 0; i < decl.getParameters().size(); ++i) {
-                if (!format.hasPlaceholder(i)) {
-                    System.err.println(String.format("Invalid translation %s[%s]: argument %d is not used: [%s]",
+                if (!argumentsUsed.contains(i)) {
+                    System.err.println(String.format("Invalid translation %s[%s]: placeholder for argument %d is not present" +
+                                    "in translated message: [%s]",
                             key, input.getLanguage(), i, inputMessage));
                     return false;
                 }
             }
         }
-        return true;
-    }
-
-    private boolean validatePlaceholder(Message.Chunk chunk) {
-        String parts[] = chunk.getFormat().split(",");
-        
-        // TODO
         return true;
     }
 }
