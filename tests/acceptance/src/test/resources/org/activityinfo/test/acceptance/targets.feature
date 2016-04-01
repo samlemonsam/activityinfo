@@ -11,7 +11,7 @@ Feature: Indicator Targets
       And I have added partner "NRC" to "RRMP"
       And I have created a form named "NFI Distribution" in "RRMP"
       And I have created a quantity field "nb. kits" in "NFI Distribution"
-      And I have created a quantity field "Satisfaction score" in "NFI Distribution"
+      And I have created a quantity field "Satisfaction score" with aggregation "Average"
       And I have submitted a "NFI Distribution" form with:
         | field              | value  |
         | partner            | CRS    |
@@ -23,13 +23,27 @@ Feature: Indicator Targets
         | nb. kits           | 800    |
       
   Scenario: Target by database
-    When I create a target with values:
+    Given I have created a target with values:
       | field       | value |
       | nb. kits    | 3000  |
     Then aggregating the indicator "nb. kits" by Realized / Targeted should yield:
       |                     | Value |
       | Realized            | 1,800 |
       | Targeted            | 3,000 |
+
+  Scenario: Defining multiple targets
+    Given I have created a target named "UNICEF Goals" with values:
+      | field              | value |
+      | nb. kits           | 3000  |
+      | Satisfaction score | 8.0   |
+    And I have created a target named "Cluster Goals" with values:
+      | field              | value |
+      | nb. kits           | 2000  |
+      | Satisfaction score | 10.0  |
+    Then aggregating the indicators nb. kits and Satisfaction score by Indicator and Realized / Targeted should yield:
+      |          | nb. kits | Satisfaction Score |
+      | Realized | 1,800    | 5.4                |
+      | Targeted | 5,000    | 9.0                |
 
   @AI-1126
   Scenario: Defining database-level target for two activities
