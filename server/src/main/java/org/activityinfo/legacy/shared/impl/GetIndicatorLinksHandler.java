@@ -60,6 +60,7 @@ public class GetIndicatorLinksHandler implements CommandHandlerAsync<GetIndicato
                 .on("DA.ActivityId=DI.ActivityId")
                 .innerJoin(Tables.USER_DATABASE, "DDB")
                 .on("DDB.DatabaseId=DA.DatabaseId")
+                .whereTrue("L.SourceIndicatorId!=L.DestinationIndicatorId")
                 .execute(context.getTransaction(), new SqlResultCallback() {
 
                     @Override
