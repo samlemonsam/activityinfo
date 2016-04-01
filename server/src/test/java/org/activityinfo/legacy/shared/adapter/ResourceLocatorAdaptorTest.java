@@ -168,8 +168,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         
         // Both BENE+BACHE and BENE/BACHE should be missing, because both
         // BENE and BACHE are missing
-        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(11))));
-        assertEquals(new Quantity(Double.NaN), secondRead.getValue(path(indicatorField(12))));
+        assertEquals(null, secondRead.getValue(path(indicatorField(11))));
+        assertEquals(null, secondRead.getValue(path(indicatorField(12))));
     }
 
     private FieldPath path(ResourceId... fieldIds) {
