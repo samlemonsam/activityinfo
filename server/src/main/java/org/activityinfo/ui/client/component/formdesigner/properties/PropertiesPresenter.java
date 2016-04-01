@@ -149,12 +149,14 @@ public class PropertiesPresenter {
 
         final FormField formField = fieldWidgetContainer.getFormField();
         boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getModel().getRootFormClass().getId(), formField.getId());
+        boolean isLabel = formField.getType() instanceof MetadataType;
 
         view.setVisible(true);
-        view.getRequiredGroup().setVisible(true);
+        view.getRequiredGroup().setVisible(!isLabel);
         view.getVisibleGroup().setVisible(true);
-        view.getRelevanceGroup().setVisible(!isBuiltIn);
-        view.getCodeGroup().setVisible(true);
+        view.getRelevanceGroup().setVisible(!isBuiltIn && !isLabel);
+        view.getCodeGroup().setVisible(!isLabel);
+        view.getDescriptionGroup().setVisible(!isLabel);
 
         view.getLabel().setValue(Strings.nullToEmpty(formField.getLabel()));
         view.getDescription().setValue(Strings.nullToEmpty(formField.getDescription()));

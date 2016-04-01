@@ -23,7 +23,7 @@
     </f:FormGroup>
 
     <!-- Description -->
-    <f:FormGroup label="{i18n.description}" columnLabelWidth="4">
+    <f:FormGroup label="{i18n.description}" columnLabelWidth="4" ui:field="descriptionGroup">
       <a:TextArea ui:field="description" width="100%"/>
     </f:FormGroup>
 
