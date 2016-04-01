@@ -43,6 +43,7 @@ public class SitesResources {
                         @QueryParam("partner") List<Integer> partnerIds,
                         @QueryParam("attribute") List<Integer> attributeIds,
                         @QueryParam("location") List<Integer> locationIds,
+                        @QueryParam("site") List<Integer> siteIds,
                         @QueryParam("format") String format) throws IOException {
 
         Filter filter = new Filter();
@@ -52,6 +53,7 @@ public class SitesResources {
         filter.addRestriction(DimensionType.Partner, partnerIds);
         filter.addRestriction(DimensionType.Attribute, attributeIds);
         filter.addRestriction(DimensionType.Location, locationIds);
+        filter.addRestriction(DimensionType.Site, siteIds);
 
         List<SiteDTO> sites = dispatcher.execute(new GetSites(filter)).getData();
 

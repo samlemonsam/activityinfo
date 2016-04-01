@@ -24,10 +24,8 @@ package org.activityinfo.test.pageobject.web.entry;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.driver.FieldValue;
-import org.junit.Assert;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz on 04/17/2015.
@@ -44,14 +42,7 @@ public class DetailsEntry {
     }
 
     public void assertVisible(List<FieldValue> values) {
-        Map<String, FieldValue> map = FieldValue.toMap(fieldValues);
 
-        for (FieldValue value : values) {
-            FieldValue fieldValue = map.get(value.getField());
-
-            Assert.assertNotNull("Indicator is not visible, name: " + value.getField() + appendValues(values), fieldValue);
-            Assert.assertEquals("Value for indicator with name: " + value.getField() + " does not match." + appendValues(values), value.getValue(), fieldValue.getValue());
-        }
     }
 
     private String appendValues(List<FieldValue> values) {

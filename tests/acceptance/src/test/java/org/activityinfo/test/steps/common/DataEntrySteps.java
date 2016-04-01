@@ -15,6 +15,7 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ApplicationDriver;
 import org.activityinfo.test.driver.DataEntryDriver;
@@ -37,6 +38,7 @@ import org.joda.time.LocalDate;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -56,10 +58,13 @@ public class DataEntrySteps {
 
     private File exportedFile = null;
 
+    private ResourceId lastSubmissionId = null;
+
+    public static final String MISSING_VALUE = "<Missing>";
 
     @Given("^I submit a \"([^\"]*)\" form with:$")
     public void I_have_submitted_a_form_with(String formName, List<FieldValue> values) throws Throwable {
-        driver.submitForm(formName, values);
+        lastSubmissionId = driver.submitForm(formName, values);
     }
 
     @Then("^the \"([^\"]*)\" form should have one submission$")
@@ -112,8 +117,6 @@ public class DataEntrySteps {
 
     }
 
-
-
     private void dumpChanges(List<HistoryEntry> entries) {
         StringBuilder s = new StringBuilder();
         for(HistoryEntry entry: entries) {
@@ -127,18 +130,6 @@ public class DataEntrySteps {
         return hasProperty("summary", allOf(
                 containsString("added the entry"),
                 containsString(new LocalDate().toString("dd-MM-YYYY"))));
-    }
-
-    @Then("^the submission's detail shows:$")
-    public void the_submission_s_detail_shows(List<FieldValue> values) throws Throwable {
-        driver.getDetails().assertVisible(changeNamesToAlias(values));
-    }
-
-    private List<FieldValue> changeNamesToAlias(List<FieldValue> values) {
-        for (FieldValue value : values) {
-            value.setField(driver.getAliasTable().getAlias(value.getField()));
-        }
-        return values;
     }
 
     @Then("^the exported spreadsheet contains:$")
@@ -489,5 +480,48 @@ public class DataEntrySteps {
     @Then("^\"([^\"]*)\" field should be with an empty value$")
     public void field_should_be_with_an_empty_value(String fieldLabel) throws Throwable {
         assertTrue(driver.getCurrentModal().form().findFieldByLabel(driver.getAliasTable().getAlias(fieldLabel)).isEmpty());
+    }
+
+    @Then("^the value of \"([^\"]*)\" in the submission should be ([^\\s]+)$")
+    public void theValueOfInTheSubmissionShouldBeResult(String fieldName, String result) throws Throwable {
+        Preconditions.checkArgument(lastSubmissionId != null, "No current submission");
+
+        List<FieldValue> values = driver.getFieldValues(lastSubmissionId);
+
+        if(MISSING_VALUE.equalsIgnoreCase(result)) {
+            assertMissingValue(values, fieldName);
+            return;
+        }
+
+
+        FieldValue value = find(values, fieldName);
+        // Try comparing numbers
+        try {
+            double expected = Double.parseDouble(result);
+            double actual = Double.parseDouble(value.getValue());
+            if(expected != actual) {
+                throw new AssertionError(String.format("Expected value %f for field '%s', found %f",
+                        expected, fieldName, actual));
+            }
+        } catch (NumberFormatException e) {
+            throw new UnsupportedEncodingException("TODO: implement non-numeric comparisons");
+        }
+    }
+
+    private void assertMissingValue(List<FieldValue> values, String fieldName) {
+        for (FieldValue value : values) {
+            if(value.getField().equals(fieldName)) {
+                throw new AssertionError("Expected missing value for " + fieldName + ", found: " + value.getValue());
+            }
+        }
+    }
+
+    private FieldValue find(List<FieldValue> values, String fieldName) {
+        for (FieldValue value : values) {
+            if(value.getField().equals(fieldName)) {
+                return value;
+            }
+        }
+        throw new AssertionError("No field with name '" + fieldName + "'. Found: " + values);
     }
 }

@@ -12,6 +12,9 @@ public class DivideFunction extends RealValuedBinaryFunction {
 
     @Override
     protected double apply(double a, double b) {
+        if(b == 0) {
+            return Double.NaN;
+        }
         return a / b;
     }
 

@@ -861,7 +861,10 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         public void read(SiteDTO site) {
             FieldValue value = reader.readField(site);
             if(value instanceof Quantity) {
-                site.set(propertyName, ((Quantity) value).getValue());
+                double doubleValue = ((Quantity) value).getValue();
+                if(!Double.isNaN(doubleValue)) {
+                    site.set(propertyName, doubleValue);
+                }
             }
         }
     }

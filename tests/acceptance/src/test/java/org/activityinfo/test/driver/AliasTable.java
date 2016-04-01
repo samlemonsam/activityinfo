@@ -132,6 +132,15 @@ public class AliasTable {
             }
         }
     }
+
+    public String testHandleForId(int id) {
+        for (Map.Entry<TestHandle, Supplier<Integer>> entry : testHandleToId.entrySet()) {
+            if(entry.getValue().get() == id) {
+                return entry.getKey().getTestHandle();
+            }
+        }
+        throw new IllegalStateException("No test handle for id " + id);
+    }
     
     /**
      * Maps a test handle to its server-generated ID

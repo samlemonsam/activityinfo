@@ -238,6 +238,17 @@ public class DatabaseSetupSteps {
         this.currentForm = formName;
     }
 
+
+    @And("^I have created a quantity field \"([^\"]*)\" with code \"([^\"]*)\"$")
+    public void I_have_created_a_quantity_field_with_code(String fieldName, String fieldCode) throws Throwable {
+        driver.setup().createField(
+                property("form", currentForm),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("code", fieldCode)
+        );
+    }
+
     @And("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\" and relevance condition \"([^\"]*)\" $")
     public void I_have_created_a_quantity_field_in_with_code(String fieldName, String formName, String fieldCode, String relevanceCondition) throws Throwable {
         driver.setup().createField(
@@ -267,6 +278,12 @@ public class DatabaseSetupSteps {
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
     public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
         I_have_created_a_calculated_field_in_with_aggregation(fieldName, formName, expression, AggregationMethod.Sum.name());
+    }
+
+
+    @Given("^I have created a calculated field \"([^\"]*)\" with expression \"([^\"]*)\"$")
+    public void I_have_created_a_calculated_field(String fieldName, String expression) throws Throwable {
+        I_have_created_a_calculated_field_in_with_aggregation(fieldName, currentForm, expression, AggregationMethod.Sum.name());
     }
 
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\" with aggregation \"([^\"]*)\"$")
