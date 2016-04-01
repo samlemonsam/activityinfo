@@ -71,7 +71,7 @@ public class FormGroup extends Composite implements HasWidgets.ForIsWidget {
 
     public FormGroup label(String label) {
         if (!Strings.isNullOrEmpty(label)) {
-            this.label.setInnerText(label);
+            this.label.setInnerHTML(label);
         }
         return this;
     }

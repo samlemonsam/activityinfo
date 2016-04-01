@@ -37,8 +37,10 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ParametrizedFieldTypeClass;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.ui.client.component.form.HorizontalFieldContainer;
@@ -251,6 +253,11 @@ public class PropertiesPresenter {
                     // for calculated fields we updated expression directly because it is handled via ExprFieldType
                     ExprValue exprValue = (ExprValue) newValue;
                     ((CalculatedFieldType) formField.getType()).setExpression(exprValue.getExpression());
+                } else if (formField.getType() instanceof MetadataType) {
+                    MetadataType metadataType = (MetadataType) formField.getType();
+                    if (metadataType.getTypeClass() == MetadataType.LABEL_TYPE_CLASS && newValue instanceof EnumValue) {
+                        metadataType.getValues().put("text_style", ((EnumValue) newValue).getValueId().asString());
+                    }
                 } else {
                     formField.setType(typeClass.deserializeType(param));
                 }

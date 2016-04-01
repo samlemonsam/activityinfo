@@ -2,14 +2,13 @@ package org.activityinfo.model.type;
 
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
-import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -51,6 +50,7 @@ public class TypeRegistry {
         register(BarcodeType.TYPE_CLASS);
         register(AttachmentType.TYPE_CLASS);
         register(SubFormReferenceType.TYPE_CLASS);
+        register(MetadataType.LABEL_TYPE_CLASS);
     }
 
     private void register(FieldTypeClass typeClass) {

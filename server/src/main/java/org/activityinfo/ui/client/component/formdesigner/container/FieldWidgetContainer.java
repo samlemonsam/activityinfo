@@ -35,6 +35,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
@@ -131,6 +132,9 @@ public class FieldWidgetContainer implements WidgetContainer {
         String labelHtml = label.toSafeHtml().asString();
         if (!formField.isVisible()) {
             labelHtml = "<del>" + labelHtml + "</del>";
+        }
+        if (formField.getType() instanceof MetadataType) {
+            labelHtml = ((MetadataType) formField.getType()).applyStyle(labelHtml);
         }
         fieldPanel.getLabel().setHTML(labelHtml);
         formFieldWidget.setType(formField.getType());

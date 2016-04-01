@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 import org.activityinfo.ui.client.widget.form.ValidationStateType;
@@ -27,11 +28,17 @@ public class VerticalFieldContainer implements FieldContainer {
         this.field = formField;
         this.fieldWidget = fieldWidget;
         formGroup = new FormGroup()
-                .label(formField.getLabel())
+                .label(label(formField))
                 .description(formField.getDescription())
                 .validationStateType(ValidationStateType.ERROR)
                 .addWidget(fieldWidget);
+    }
 
+    private String label(FormField field) {
+        if (field.getType() instanceof MetadataType) {
+            return ((MetadataType) field.getType()).applyStyle(field.getLabel());
+        }
+        return field.getLabel();
     }
 
 

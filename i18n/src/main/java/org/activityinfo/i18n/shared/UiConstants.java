@@ -1600,4 +1600,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Text")
     String text();
+
+    @DefaultStringValue("Plain")
+    String plain();
+
+    @DefaultStringValue("Bold")
+    String bold();
 }

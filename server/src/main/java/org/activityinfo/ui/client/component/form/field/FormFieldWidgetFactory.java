@@ -149,7 +149,7 @@ public class FormFieldWidgetFactory {
         } else if (type instanceof BarcodeType) {
             return Promise.resolved(new BarcodeFieldWidget(valueUpdater));
         } else if (type instanceof MetadataType) {
-            return Promise.resolved(new LabelFieldWidget((MetadataType) type));
+            return Promise.resolved(new NullFieldWidget());
         }
 
         Log.error("Unexpected field type " + type.getTypeClass());

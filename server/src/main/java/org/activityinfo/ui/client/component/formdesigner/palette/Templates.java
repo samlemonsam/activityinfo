@@ -44,7 +44,7 @@ public class Templates {
         items.add(new TypeClassTemplate(BarcodeType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeBarcode()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.IMAGE, I18N.CONSTANTS.image()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.ATTACHMENT, I18N.CONSTANTS.attachment()));
-        items.add(new TypeClassTemplate(MetadataType.TYPE_CLASS, I18N.CONSTANTS.label()));
+        items.add(new TypeClassTemplate(MetadataType.LABEL_TYPE_CLASS, I18N.CONSTANTS.label()));
         items.add(new SectionTemplate());
         items.add(new SubformTemplate());
 

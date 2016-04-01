@@ -21,6 +21,7 @@ package org.activityinfo.model.type;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
@@ -28,9 +29,12 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * It's not really type but convenient way to keep metadata of formclass as formfield (typically invisible).
@@ -41,9 +45,61 @@ import java.util.HashMap;
  */
 public class MetadataType implements ParametrizedFieldType {
 
-    public static class TypeClass implements ParametrizedFieldTypeClass, Serializable {
+    public enum TextStyle {
+        PLAIN("plain", I18N.CONSTANTS.plain(), "", ""),
+        BOLD("bold", I18N.CONSTANTS.bold(), "<b>", "</b>");
 
-        private TypeClass() {}
+        private String value;
+        private String label;
+        private String htmlStartTag;
+        private String htmlEndTag;
+
+        TextStyle(String value, String label, String htmlStartTag, String htmlEndTag) {
+            this.value = value;
+            this.label = label;
+            this.htmlStartTag = htmlStartTag;
+            this.htmlEndTag = htmlEndTag;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public ResourceId getResourceId() {
+            return ResourceId.valueOf(value);
+        }
+
+        public static TextStyle fromValue(String textStyle) {
+            for (TextStyle style : values()) {
+                if (style.getValue().equalsIgnoreCase(textStyle)) {
+                    return style;
+                }
+            }
+
+            return null;
+        }
+
+        public String applyStyle(String html) {
+            return getHtmlStartTag() + html + getHtmlEndTag();
+        }
+
+        public String getHtmlStartTag() {
+            return htmlStartTag;
+        }
+
+        public String getHtmlEndTag() {
+            return htmlEndTag;
+        }
+    }
+
+    public static class LabelTypeClass implements ParametrizedFieldTypeClass, Serializable {
+
+        public LabelTypeClass() {
+        }
 
         @Override
         public String getId() {
@@ -65,14 +121,25 @@ public class MetadataType implements ParametrizedFieldType {
         @Override
         public FormClass getParameterFormClass() {
             FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("metadata"));
-            formClass.addElement(new FormField(ResourceId.valueOf("text"))
-                    .setType(FREE_TEXT.createType())
-                    .setLabel(I18N.CONSTANTS.text()));
+
+            List<EnumItem> items = Lists.newArrayList();
+            for (TextStyle style : TextStyle.values()) {
+                EnumItem item = new EnumItem(style.getResourceId(), style.getLabel());
+                items.add(item);
+            }
+
+            EnumType enumType = new EnumType(Cardinality.SINGLE, items);
+            enumType.getDefaultValues().add(new EnumItem(TextStyle.PLAIN.getResourceId(), TextStyle.PLAIN.getLabel()));
+
+            formClass.addElement(new FormField(ResourceId.valueOf("text_style"))
+                    .setType(enumType)
+                    .setLabel(I18N.CONSTANTS.style()));
+
             return formClass;
         }
     }
 
-    public static final TypeClass TYPE_CLASS = new TypeClass();
+    public static final LabelTypeClass LABEL_TYPE_CLASS = new LabelTypeClass();
 
     private HashMap<String, Object> values = Maps.newHashMap();
 
@@ -85,7 +152,7 @@ public class MetadataType implements ParametrizedFieldType {
 
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
-        return TYPE_CLASS;
+        return LABEL_TYPE_CLASS;
     }
 
     @Override
@@ -105,5 +172,16 @@ public class MetadataType implements ParametrizedFieldType {
         return "MetadataType{" +
                 "values='" + values + '\'' +
                 '}';
+    }
+
+    public String applyStyle(String html) {
+        Object textStyleStr = values.get("text_style");
+        if (textStyleStr instanceof String) {
+            TextStyle textStyle = TextStyle.fromValue((String) textStyleStr);
+            if (textStyle != null) {
+                return textStyle.applyStyle(html);
+            }
+        }
+        return html;
     }
 }
