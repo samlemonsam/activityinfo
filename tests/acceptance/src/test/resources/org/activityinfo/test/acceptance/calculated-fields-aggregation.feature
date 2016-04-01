@@ -85,6 +85,7 @@ Feature: Calculated fields
     Then aggregating the indicators Cost/Beneficiary by Partner and Year should yield:
       |         | 2016  |
       | UPS     | 10    |
+      | NRC     |  0    |
 
   @AI-1082
   Scenario: Combining sum and average calculated indicators
@@ -104,9 +105,9 @@ Feature: Calculated fields
       | NRC     | 7   | 0   | 2016-07-21 | 2016-07-21 |
 
     Then aggregating the indicators percent by Partner and Year should yield:
-      |         | 2014  | 2015 |
-      | NRC     | 700   | 20   |
-      | UPS     | 1,000 | 10   |
+      |         | 2014  | 2015 | 2016 |
+      | NRC     | 700   | 20   |   0  |
+      | UPS     | 1,000 | 10   |      |
     Then aggregating the indicators plus by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
       | NRC     | 231   | 24   | 7    |
