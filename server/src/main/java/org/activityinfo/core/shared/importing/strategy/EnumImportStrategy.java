@@ -71,7 +71,11 @@ public class EnumImportStrategy implements FieldImportStrategy {
             sourceColumns.add(mappings.get(VALUE));
         } else {
             for (EnumItem item : type.getValues()) {
-                sourceColumns.add(mappings.get(new TargetSiteId(item.getId().asString())));
+                ColumnAccessor accessor = mappings.get(new TargetSiteId(item.getId().asString()));
+                if (accessor == null) {
+                    accessor = new EmptyColumn(item.getLabel());
+                }
+                sourceColumns.add(accessor);
             }
         }
 

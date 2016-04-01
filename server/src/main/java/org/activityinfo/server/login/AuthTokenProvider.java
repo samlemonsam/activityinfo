@@ -60,9 +60,8 @@ public class AuthTokenProvider {
         NewCookie userCookie = newAuthCookie(AuthenticatedUser.USER_ID_COOKIE,
                 Integer.toString(token.getUser().getId()));
         NewCookie emailCookie = newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail());
-        NewCookie localeCookie = newLocaleCookie(AuthenticatedUser.USER_LOCAL_COOKIE, user.getLocale());
 
-        return new NewCookie[]{cookie, userCookie, emailCookie, localeCookie};
+        return new NewCookie[]{cookie, userCookie, emailCookie };
     }
 
     private NewCookie newAuthCookie(String name, String value) {

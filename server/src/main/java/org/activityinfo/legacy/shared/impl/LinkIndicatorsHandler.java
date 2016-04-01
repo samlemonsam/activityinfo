@@ -27,11 +27,16 @@ import com.bedatadriven.rebar.sql.client.query.SqlUpdate;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.LinkIndicators;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
+import org.activityinfo.legacy.shared.exception.CommandException;
 
 public class LinkIndicatorsHandler implements CommandHandlerAsync<LinkIndicators, VoidResult> {
 
     @Override
     public void execute(LinkIndicators command, ExecutionContext context, AsyncCallback<VoidResult> callback) {
+
+        if(command.getDestIndicatorId() == command.getSourceIndicatorId()) {
+            throw new CommandException("An indicator cannot be linked to itself.");
+        }
 
         SqlUpdate.delete(Tables.INDICATOR_LINK)
                  .where("sourceIndicatorId", command.getSourceIndicatorId())

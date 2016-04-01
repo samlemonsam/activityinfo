@@ -227,4 +227,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Option {0,number}")
     String defaultEnumItem(int number);
+
+    @DefaultMessage("Unknown value: {0}. Each selection of 'Multiple selection' control must have separate column " +
+            "with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
+    String unknownMultiEnumValue(String value);
 }

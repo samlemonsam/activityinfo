@@ -53,6 +53,7 @@ Feature: Calculated fields
       |                  | Value |
       | percent          | 50    |
 
+
   @AI-1082
   Scenario: Drill down on calculated indicator
     Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
@@ -71,9 +72,38 @@ Feature: Calculated fields
       | plus             |   280 |   39.5 |
       | percent          | 1,200 |   30   |
     Then drill down on "280" should yield:
-      | NRC      |       | 2014-07-21 |    | 110   |
-      | NRC      |       | 2014-05-21 |    | 450   |
-    
+      | RRMP | NFI Distribution | NRC |  | 2014-07-21 | plus | 110 |
+      | RRMP | NFI Distribution | NRC |  | 2014-05-21 | plus | 450 |
+
+  Scenario: Aggregating calculated fields with invalid expressions
+    Given I have created a quantity field "Number of Beneficiaries" in "NFI Distribution"
+    And I have created a calculated field "Cost/Beneficiary" in "NFI Distribution" with expression "Foo/Bar"
+    And I have submitted "NFI Distribution" forms with:
+      | partner | Number of Beneficiaries | Start Date | End Date   |
+      | NRC     | 150                     | 2016-01-01 | 2016-12-31 |
+      | NRC     | 0                       | 2016-01-01 | 2016-12-31 |
+    Then aggregating the indicators Number of Beneficiaries and Cost/Beneficiary by Indicator and Year should yield:
+      |                         | 2016 |
+      | Number of Beneficiaries |  150 |
+
+  Scenario: Aggregating calculated indicators ignore missing values and divisions by zero
+    # When aggregating calculated fields with values that include 10/0, for
+    # example, these values are ignored
+    Given I have created a quantity field "Cost" in "NFI Distribution" with code "C"
+    And I have created a quantity field "Number of Beneficiaries" in "NFI Distribution" with code "N"
+    And I have created a calculated field "Cost/Beneficiary" in "NFI Distribution" with expression "C/N" with aggregation "Average"
+    And I have submitted "NFI Distribution" forms with:
+      | partner | Cost  | Number of Beneficiaries | Start Date | End Date   |
+      | NRC     |       | 150                     | 2016-01-01 | 2016-12-31 |
+      | NRC     | 100   | 0                       | 2016-01-01 | 2016-12-31 |
+      | NRC     | 4     |                         | 2016-01-01 | 2016-12-31 |
+      | UPS     | 100   |                         | 2016-01-01 | 2016-12-31 |
+      | UPS     | 500   | 50                      | 2016-01-01 | 2016-12-31 |
+      | UPS     | 600   | 0                       | 2016-01-01 | 2016-12-31 |
+    Then aggregating the indicators Cost/Beneficiary by Partner and Year should yield:
+      |         | 2016  |
+      | UPS     | 10    |
+
   @AI-1082
   Scenario: Combining sum and average calculated indicators
     # When combining indicators that use different aggregation methods,
@@ -92,9 +122,9 @@ Feature: Calculated fields
       | NRC     | 7   | 0   | 2016-07-21 | 2016-07-21 |
 
     Then aggregating the indicators percent by Partner and Year should yield:
-      |         | 2014  | 2015 | 2016 |
-      | NRC     | 700   | 20   | ∞    |
-      | UPS     | 1,000 | 10   |      |
+      |         | 2014  | 2015 |
+      | NRC     | 700   | 20   |
+      | UPS     | 1,000 | 10   |
     Then aggregating the indicators plus by Partner and Year should yield:
       |         | 2014  | 2015 | 2016 |
       | NRC     | 231   | 24   | 7    |
@@ -105,5 +135,5 @@ Feature: Calculated fields
       | UPS     | 210  | 60   |      |
     Then aggregating the indicators plus and percent by Partner and Year should yield:
       |         | 2014   | 2015 | 2016 |
-      | NRC     | 1,162  | 44   | ∞    |
+      | NRC     | 1,162  | 44   |    7 |
       | UPS     | 1,110  | 65   |      |

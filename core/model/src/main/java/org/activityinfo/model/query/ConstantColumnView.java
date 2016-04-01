@@ -1,8 +1,6 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.model.query;
 
 import com.google.common.base.Strings;
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.Quantity;

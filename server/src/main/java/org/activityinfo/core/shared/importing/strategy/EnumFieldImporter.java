@@ -28,6 +28,7 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.importing.match.ColumnTypeGuesser;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -75,7 +76,7 @@ public class EnumFieldImporter implements FieldImporter {
         for (ColumnAccessor source : sources) {
             String value = source.getValue(row);
             if (!Strings.isNullOrEmpty(value) && !ColumnTypeGuesser.isBoolean(value)) {
-                result.add(ValidationResult.error("Unknown value: " + value));
+                result.add(ValidationResult.error(I18N.MESSAGES.unknownMultiEnumValue(value)));
             } else {
                 result.add(ValidationResult.OK);
             }

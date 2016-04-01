@@ -2,7 +2,6 @@ package org.activityinfo.io.match.names;
 
 import com.google.common.collect.Lists;
 import org.junit.Ignore;
-import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.junit.Test;
 
 import java.util.List;
@@ -105,6 +104,15 @@ public class LatinPlaceNameScorerTest {
         double score = scorer.score("q1", "Q1");
         System.out.println(score);
         assertThat(score, greaterThan(MINIMUM_SCORE));
+    }
+
+    @Test
+    public void avoidIntegerOverflowWithLongStrings() {
+        final LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+        double score = scorer.score("Partner with long name 111111111x 222222222222 333333333 444444444444444", "Social and Medical Assistance to Beneficiaries - 3");
+
+        System.out.println(score);
+        assertThat(score, equalTo((double) 0));
     }
     
     @Test

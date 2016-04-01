@@ -72,7 +72,7 @@ public class ValidationPage extends Composite implements PromiseMonitor, ImportP
                 .then(new AsyncCallback<ValidatedRowTable>() {
                     @Override
                     public void onFailure(Throwable throwable) {
-                        Log.error("Validate rows failed", throwable);
+                        Log.error("Rows validation failed", throwable);
                     }
 
                     @Override

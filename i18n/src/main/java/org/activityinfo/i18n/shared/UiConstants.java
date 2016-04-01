@@ -1592,6 +1592,17 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Saved Reports")
     String savedReports();
 
+    @DefaultStringValue("An indicator cannot be linked to itself")
+    String indicatorCannotBeLinkedToItself();
+
+    @DefaultStringValue("Click to unlink")
+    String clickToUnlink();
+
+    @DefaultStringValue("Click to link")
+    String clickToLink();
+
+
+
     @DefaultStringValue("Please select type of subform again and save the subform due to serialization format change.")
     String pleaseRecreateOutdatedSubfrom();
 

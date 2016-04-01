@@ -9,9 +9,15 @@ public class MissingColumn implements ColumnAccessor {
     private MissingColumn() {
     }
 
+    private String header;
+
+    public MissingColumn(String header) {
+        this.header = header;
+    }
+
     @Override
     public String getHeading() {
-        return null;
+        return header;
     }
 
     @Override

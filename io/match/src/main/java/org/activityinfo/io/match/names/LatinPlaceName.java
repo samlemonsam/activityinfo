@@ -170,14 +170,14 @@ class LatinPlaceName {
         return Character.isDigit(chars[partStart(partIndex)]);
     }
 
-    public int parsePartAsInteger(int index) {
+    public long parsePartAsInteger(int index) {
         int numberStart = partStart(index);
         int numberEnd = numberStart;
         int partEnd = partStart(index+1);
         while(numberEnd < partEnd && isDigit(chars[numberEnd])) {
             numberEnd++;
         }
-        return Integer.parseInt(new String(chars, numberStart, numberEnd - numberStart));
+        return Long.parseLong(new String(chars, numberStart, numberEnd - numberStart));
     }
 
     @Override
