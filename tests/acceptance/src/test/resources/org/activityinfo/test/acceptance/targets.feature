@@ -41,9 +41,13 @@ Feature: Indicator Targets
       | nb. kits           | 2000  |
       | Satisfaction score | 10.0  |
     Then aggregating the indicators nb. kits and Satisfaction score by Indicator and Realized / Targeted should yield:
-      |          | nb. kits | Satisfaction Score |
-      | Realized | 1,800    | 5.4                |
-      | Targeted | 5,000    | 9.0                |
+      |                    | Value |
+      | nb. kits           |       |
+      |   Realized         | 1,800 |
+      |   Targeted         | 5,000 |
+      | Satisfaction score |       |
+      |   Realized         | 5.4   |
+      |   Targeted         | 9     |
 
   @AI-1126
   Scenario: Defining database-level target for two activities
