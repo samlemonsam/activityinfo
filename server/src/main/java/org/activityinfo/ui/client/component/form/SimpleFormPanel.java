@@ -29,6 +29,7 @@ import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.form.field.NullFieldWidget;
+import org.activityinfo.ui.client.component.form.field.QuantityFieldWidget;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 
 import javax.annotation.Nullable;
@@ -249,6 +250,11 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance> {
         FieldValue value = getCurrentValue(field);
         if (value != null && value.getTypeClass() != field.getType().getTypeClass()) {
             value = null;
+        }
+
+        if (container.getFieldWidget() instanceof QuantityFieldWidget &&
+                !((QuantityFieldWidget) container.getFieldWidget()).isValid()) {
+            return false;
         }
 
         Optional<Boolean> validatedBuiltInDates = validateBuiltinDates(container, field);
