@@ -18,7 +18,6 @@ import java.util.Date;
 
 public class DateIntervalFieldWidget implements FormFieldWidget<LocalDateInterval> {
 
-
     interface DateIntervalFieldWidgetUiBinder extends UiBinder<HTMLPanel, DateIntervalFieldWidget> {
     }
 
@@ -42,6 +41,11 @@ public class DateIntervalFieldWidget implements FormFieldWidget<LocalDateInterva
     @Override
     public void fireValueChanged() {
         valueUpdater.update(getValue());
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
     }
 
     @UiHandler("startDateBox")

@@ -75,6 +75,11 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         suggestBox.setEnabled(!readOnly);
     }

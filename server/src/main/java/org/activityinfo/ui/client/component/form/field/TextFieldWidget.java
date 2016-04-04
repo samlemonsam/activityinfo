@@ -65,7 +65,11 @@ public class TextFieldWidget implements FormFieldWidget<TextValue> {
 
     @Override
     public void setType(FieldType type) {
+    }
 
+    @Override
+    public boolean isValid() {
+        return true;
     }
 
     @Override

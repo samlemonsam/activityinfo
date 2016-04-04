@@ -49,6 +49,11 @@ public class HierarchyFieldWidget implements ReferenceFieldWidget {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
 

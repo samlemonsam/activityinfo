@@ -40,6 +40,11 @@ public class BarcodeFieldWidget implements FormFieldWidget<BarcodeValue> {
         valueUpdater.update(getValue());
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     private BarcodeValue getValue() {
         return BarcodeValue.valueOf(BarcodeFieldWidget.this.box.getValue());
     }
