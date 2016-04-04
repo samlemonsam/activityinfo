@@ -126,3 +126,19 @@ Feature: Calculated fields
       |         | 2014   | 2015 | 2016 |
       | NRC     | 1,162  | 44   |    7 |
       | UPS     | 1,110  | 65   |      |
+
+
+  Scenario: Pivoting calculated indicator by attributes
+    Given I have created a calculated field "Count" in "NFI Distribution" with expression "1"
+    And I have created a single-valued enumerated field "Donor" with choices:
+      | UNICEF |
+      | UNHCR  |
+    And I have submitted "NFI Distribution" forms with:
+      | partner | Donor  | Start Date | End Date   |
+      | NRC     | UNHCR  | 2014-05-21 | 2014-05-21 |
+      | UPS     | UNHCR  | 2014-07-21 | 2014-07-21 |
+      | NRC     | UNICEF | 2014-10-21 | 2014-10-21 |
+    Then aggregating the indicator "Count" by Donor should yield:
+      |         | Value |
+      | UNICEF  | 1     |
+      | UNHCR   | 2     |
