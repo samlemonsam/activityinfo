@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.web.reports;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import cucumber.api.DataTable;
 import org.activityinfo.i18n.shared.I18N;
@@ -30,7 +31,11 @@ public class PivotTableEditor {
 
 
     public void selectMeasure(String name) {
-        indicatorTree().waitUntilLoaded().search(name).get().setChecked(true);
+        Optional<GxtTree.GxtNode> node = indicatorTree().waitUntilLoaded().search(name);
+        if(!node.isPresent()) {
+            throw new AssertionError("No such measure '" + name + "'");
+        }
+        node.get().setChecked(true);
     }
 
 

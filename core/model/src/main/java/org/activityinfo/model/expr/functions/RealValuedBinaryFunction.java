@@ -23,10 +23,22 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
     @Override
     public FieldValue apply(List<FieldValue> arguments) {
         Preconditions.checkState(arguments.size() == 2);
+
+        // Excel-style (sort-of) missing value handling
+        // (1) If at least one value is non-missing, however, treat the other as zero
+        // (2) If both values are missing, then the result is also missing (NaN)
+        // The first case is consistent with Excel, and the second with SQL and R
+
         Quantity qa = Casting.toQuantity(arguments.get(0));
         Quantity qb = Casting.toQuantity(arguments.get(1));
 
-        double value = apply(qa.getValue(), qb.getValue());
+        if(Double.isNaN(qa.getValue()) && Double.isNaN(qb.getValue())) {
+            return new Quantity(Double.NaN);
+        }
+        double da = toDouble(qa);
+        double db = toDouble(qb);
+
+        double value = apply(da, db);
         if(Double.isNaN(value)) {
             return new Quantity(Double.NaN);
         } else {
@@ -36,6 +48,14 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
                 return new Quantity(value, applyUnits(qa.getUnits(), qb.getUnits()));
             }
         }
+    }
+
+    private double toDouble(Quantity quantity) {
+        double d = quantity.getValue();
+        if(Double.isNaN(d)) {
+            return 0d;
+        }
+        return d;
     }
 
     @Override
@@ -50,7 +70,19 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
         }
         double result[] = new double[x.numRows()];
         for (int i = 0; i < result.length; i++) {
-            result[i] = apply(x.getDouble(i), y.getDouble(i));
+            double xd = x.getDouble(i);
+            double yd = y.getDouble(i);
+            if(Double.isNaN(xd) && Double.isNaN(yd)) {
+                result[i] = Double.NaN;
+            } else {
+                if (Double.isNaN(xd)) {
+                    xd = 0;
+                }
+                if( Double.isNaN(yd)) {
+                    yd = 0;
+                }
+                result[i] = apply(xd, yd);
+            }
         }
         return new DoubleArrayColumnView(result);
     }

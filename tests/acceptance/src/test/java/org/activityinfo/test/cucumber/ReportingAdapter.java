@@ -99,6 +99,9 @@ public class ReportingAdapter implements Formatter, Reporter {
 
     @Override
     public void match(Match match) {
+        if(match == Match.UNDEFINED) {
+            throw new RuntimeException("Failed to match step");
+        }
         printlnf("Running %s", match.getLocation());
     }
 

@@ -15,6 +15,8 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.calc.AggregationMethod;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
@@ -306,18 +308,19 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
-        submitForm(formName, values, Lists.<String>newArrayList());
+    public ResourceId submitForm(String formName, List<FieldValue> values) throws Exception {
+        return submitForm(formName, values, Lists.<String>newArrayList());
     }
 
     @Override
-    public void submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
+    public ResourceId submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
         int activityId = aliases.getId(formName);
+        int siteId = aliases.generateId();
 
         JSONObject properties = new JSONObject();
         properties.put("activityId", activityId);
         properties.put("locationId", queryNullaryLocationType(RDC));
-        properties.put("id", aliases.generateId());
+        properties.put("id", siteId);
         properties.put("reportingPeriodId", aliases.generateId());
         properties.put("date1", "2014-01-01");
         properties.put("date2", "2014-02-01");  
@@ -363,6 +366,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
         }
 
         executeCreateSite(properties);
+
+        return CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, siteId);
     }
 
     @Override
@@ -616,6 +621,48 @@ public class ApiApplicationDriver extends ApplicationDriver {
             IOUtils.closeQuietly(inputStream);
         }
         return file;
+    }
+
+    @Override
+    public List<FieldValue> getFieldValues(ResourceId resourceId) {
+        if(resourceId.getDomain() == CuidAdapter.SITE_DOMAIN) {
+            return getSiteFieldValues(CuidAdapter.getLegacyIdFromCuid(resourceId));
+        } else {
+            throw new UnsupportedOperationException("Domain: " + resourceId.getDomain());
+        }
+    }
+
+    private List<FieldValue> getSiteFieldValues(int siteId) {
+        String json = root().path("resources")
+                .path("sites")
+                .queryParam("site", Integer.toString(siteId))
+                .get(String.class);
+
+        try {
+            List<FieldValue> fieldValues = Lists.newArrayList();
+
+            JSONArray resultList = new JSONArray(json);
+            if(resultList.length() != 1) {
+                throw new IllegalStateException("When querying for site " + siteId +
+                        ", expected one result, found " + resultList.length());
+            }
+            JSONObject site = resultList.getJSONObject(0);
+            if(site.has("indicatorValues")) {
+                JSONObject indicatorValues = site.getJSONObject("indicatorValues");
+                // TODO: only indicators returned
+                Iterator<String> keys = indicatorValues.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    int indicatorId = Integer.parseInt(key);
+                    String fieldName = aliases.testHandleForId(indicatorId);
+                    fieldValues.add(new FieldValue(fieldName, indicatorValues.get(key).toString()));
+                }
+            }
+            return fieldValues;
+
+        } catch (JSONException e) {
+            throw new AssertionError("Could not parse sites response");
+        }
     }
 
     private File export(String exportModel) throws Exception {

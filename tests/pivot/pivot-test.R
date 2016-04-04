@@ -40,6 +40,9 @@ queryDatabases <- function(whereClause = "1") {
   dbs
 }
 
+withTargets <- "databaseId IN (SELECT databaseId FROM target)"
+
+
 hasLinks <- paste(
     "databaseId IN ",
     "(SELECT DA.databaseId FROM indicatorlink K ",
@@ -173,27 +176,33 @@ logDetails <- function(req, engine) {
 #' Each saved report may contain zero or more pivot table / pivot chart queries,
 #' so compare them each in turn
 compareResults <- function(req.name, old, nqe) {
-  stopifnot(is.list(old), is.list(nqe))
+  if(!is.list(old) || !is.list(nqe)) {
+    cat("OLD:\n")
+    str(old)
+    cat("NEW:\n")
+    str(nqe)
+    return(NA)
+  }
   if(length(old) == 0) {
     return(NA)
   }
   
- # tryCatch({
+ tryCatch({
     matching <- sapply(1:length(old), function(i) {
       compareBuckets(req.name, i, old[[i]]$buckets, nqe[[i]]$buckets)
     })
     return(all(matching, na.rm=TRUE))
-#   }, error = function(e) {
-#     cat("  -> ERROR!\n")
-#     capture.output({ 
-#       print(e)
-#       cat("old:\n")
-#       str(old)
-#       cat("new:\n")
-#       str(nqe)
-#     }, file = sprintf("logs/%s.error.log", req.name))
-#     return(NA)
-#   })
+  }, error = function(e) {
+    cat("  -> ERROR!\n")
+    capture.output({ 
+      print(e)
+      cat("old:\n")
+      str(old)
+      cat("new:\n")
+      str(nqe)
+    }, file = sprintf("logs/%s.error.log", req.name))
+    return(NA)
+  })
 }
 
 

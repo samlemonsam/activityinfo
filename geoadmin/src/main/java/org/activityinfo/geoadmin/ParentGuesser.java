@@ -1,13 +1,12 @@
 package org.activityinfo.geoadmin;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.strtree.STRtree;
+import org.activityinfo.geoadmin.model.AdminEntity;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-
-import org.activityinfo.geoadmin.model.AdminEntity;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Given a new set of administrative entities from a shapefile, guess their
@@ -38,13 +37,15 @@ public class ParentGuesser {
     public ParentGuesser(ImportSource importSource, List<AdminEntity> parents) {
         super();
         this.importSource = importSource;
-        this.index = new STRtree(parents.size());
-        
-        // create a spatial index to help narrow down the search
-        for(AdminEntity entity : parents) {
-        	Envelope mbr = GeoUtils.toEnvelope(entity.getBounds());
-        	mbr.expandBy(mbr.getWidth() * 0.10, mbr.getHeight() * 0.10);
-        	index.insert(mbr, entity);
+        if(!parents.isEmpty()) {
+            this.index = new STRtree(parents.size());
+
+            // create a spatial index to help narrow down the search
+            for (AdminEntity entity : parents) {
+                Envelope mbr = GeoUtils.toEnvelope(entity.getBounds());
+                mbr.expandBy(mbr.getWidth() * 0.10, mbr.getHeight() * 0.10);
+                index.insert(mbr, entity);
+            }
         }
     }
 

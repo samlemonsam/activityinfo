@@ -238,6 +238,17 @@ public class DatabaseSetupSteps {
         this.currentForm = formName;
     }
 
+
+    @And("^I have created a quantity field \"([^\"]*)\" with code \"([^\"]*)\"$")
+    public void I_have_created_a_quantity_field_with_code(String fieldName, String fieldCode) throws Throwable {
+        driver.setup().createField(
+                property("form", currentForm),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("code", fieldCode)
+        );
+    }
+
     @And("^I have created a quantity field \"([^\"]*)\" in \"([^\"]*)\" with code \"([^\"]*)\" and relevance condition \"([^\"]*)\" $")
     public void I_have_created_a_quantity_field_in_with_code(String fieldName, String formName, String fieldCode, String relevanceCondition) throws Throwable {
         driver.setup().createField(
@@ -251,9 +262,28 @@ public class DatabaseSetupSteps {
         this.currentForm = formName;
     }
 
+    @And("^I have created a quantity field \"([^\"]*)\" with aggregation \"([^\"]*)\"$")
+    public void I_have_created_a_quantity_field_in_with_code(String fieldName,  String aggregation) throws Throwable {
+        Preconditions.checkState(currentForm != null, "No current form");
+
+        driver.setup().createField(
+                property("form", currentForm),
+                property("name", fieldName),
+                property("type", "quantity"),
+                property("aggregation", AggregationMethod.valueOf(aggregation).code()));
+
+    }
+
+
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\"$")
     public void I_have_created_a_calculated_field_in(String fieldName, String formName, String expression) throws Throwable {
         I_have_created_a_calculated_field_in_with_aggregation(fieldName, formName, expression, AggregationMethod.Sum.name());
+    }
+
+
+    @Given("^I have created a calculated field \"([^\"]*)\" with expression \"([^\"]*)\"$")
+    public void I_have_created_a_calculated_field(String fieldName, String expression) throws Throwable {
+        I_have_created_a_calculated_field_in_with_aggregation(fieldName, currentForm, expression, AggregationMethod.Sum.name());
     }
 
     @Given("^I have created a calculated field \"([^\"]*)\" in \"([^\"]*)\" with expression \"([^\"]*)\" with aggregation \"([^\"]*)\"$")
@@ -388,6 +418,14 @@ public class DatabaseSetupSteps {
                 property("name", targetName));
     }
 
+    @Given("^I have created a target named \"([^\"]*)\" with values:$")
+    public void I_have_created_a_target_named_for_database(String targetName, List<FieldValue> values) throws Throwable {
+        driver.setup().createTarget(
+                property("database", getCurrentDatabase()),
+                property("name", targetName));
+        driver.setup().setTargetValues(targetName, values);
+    }
+
     private String getCurrentDatabase() throws Exception {
         if(currentDatabase == null) {
             createDatabase("Database");
@@ -444,6 +482,14 @@ public class DatabaseSetupSteps {
                 property("database", getCurrentDatabase()),
                 property("project", project));
         driver.setTargetValues(targetName, values);
+    }
+
+    @When("^I create a target named \"([^\"]*)\" with values:$")
+    public void I_create_a_target_named_with_values(String targetName, List<FieldValue> targetValues) throws Throwable {
+        driver.createTarget(
+                property("database", getCurrentDatabase()),
+                property("name", targetName));
+        driver.setTargetValues(targetName, targetValues);
     }
 
     @When("^I create a target for project \"([^\"]*)\" with values:$")

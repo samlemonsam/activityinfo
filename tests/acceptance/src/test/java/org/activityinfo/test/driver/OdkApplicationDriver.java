@@ -2,8 +2,10 @@ package org.activityinfo.test.driver;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import cucumber.api.PendingException;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import io.appium.java_client.AppiumDriver;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.test.pageobject.odk.BlankForm;
 import org.activityinfo.test.pageobject.odk.FormList;
 import org.activityinfo.test.pageobject.odk.OdkApp;
@@ -92,9 +94,9 @@ public class OdkApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
+    public ResourceId submitForm(String formName, List<FieldValue> values) throws Exception {
         // Ignored for now!!
-        
+        throw new PendingException();
     }
 
     public List<String> queryFormList() {
