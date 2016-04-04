@@ -42,4 +42,6 @@ public interface FormFieldWidget<T extends FieldValue> extends IsWidget {
     void clearValue();
 
     void fireValueChanged();
+
+    boolean isValid();
 }

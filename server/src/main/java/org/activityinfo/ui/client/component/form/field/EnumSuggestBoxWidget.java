@@ -74,6 +74,11 @@ public class EnumSuggestBoxWidget implements FormFieldWidget<EnumValue> {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         suggestBox.setEnabled(!readOnly);
     }

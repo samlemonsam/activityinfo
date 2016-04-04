@@ -99,6 +99,11 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
         valueUpdater.update(new LocalDate(dateBox.getValue()));
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     public static DateBox.Format createFormat() {
         return new DateBox.DefaultFormat(DateTimeFormat.getFormat(FORMAT));
     }

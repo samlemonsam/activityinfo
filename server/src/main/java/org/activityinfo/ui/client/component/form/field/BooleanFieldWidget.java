@@ -55,6 +55,11 @@ public class BooleanFieldWidget implements FormFieldWidget<BooleanFieldValue> {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         checkBox.setEnabled(!readOnly);
     }

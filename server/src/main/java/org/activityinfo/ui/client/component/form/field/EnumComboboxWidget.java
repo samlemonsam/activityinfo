@@ -67,6 +67,11 @@ public class EnumComboboxWidget implements FormFieldWidget<EnumValue> {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         dropBox.setEnabled(!readOnly);
     }

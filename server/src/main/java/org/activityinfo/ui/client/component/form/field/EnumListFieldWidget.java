@@ -164,6 +164,11 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
         setClearButtonState(value);
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     private void onClick(MouseUpEvent event) {
         Element target = event.getNativeEvent().getEventTarget().cast();
         if (target.getClassName().contains("enum-remove")) {

@@ -70,6 +70,11 @@ public class CalculatedFieldWidget implements FormFieldWidget<CalculatedValue> {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setType(FieldType type) {
     }
 

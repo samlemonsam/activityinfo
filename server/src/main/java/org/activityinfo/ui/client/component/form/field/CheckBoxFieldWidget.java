@@ -92,6 +92,11 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
         valueUpdater.update(updatedValue());
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     private CheckBox createControl(String groupId, FormInstance instance, Cardinality cardinality) {
         final CheckBox checkBox;
         final String label = FormInstanceLabeler.getLabel(instance);

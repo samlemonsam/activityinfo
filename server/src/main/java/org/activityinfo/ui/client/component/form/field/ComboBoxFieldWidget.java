@@ -69,6 +69,11 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         dropBox.setEnabled(!readOnly);
     }
