@@ -68,6 +68,12 @@ Feature: Calculated fields
       |                         | 2016 |
       | Number of Beneficiaries |  150 |
 
+  Scenario: Aggregating calculated fields with empty expressions
+    And I have created a form "School Registration" using the new layout
+    And I have created a calculated field "Age" in "School Registration" with expression ""
+    Then aggregating the indicator "Age" by Indicator and Year should yield:
+      |                         | Value |
+
   Scenario: Aggregating calculated indicators ignore missing values and divisions by zero
     # When aggregating calculated fields with values that include 10/0, for
     # example, these values are ignored
