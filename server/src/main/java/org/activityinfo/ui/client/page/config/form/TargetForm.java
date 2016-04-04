@@ -24,10 +24,9 @@ package org.activityinfo.ui.client.page.config.form;
 
 import com.extjs.gxt.ui.client.binding.FieldBinding;
 import com.extjs.gxt.ui.client.binding.FormBinding;
-import com.extjs.gxt.ui.client.widget.form.DateField;
-import com.extjs.gxt.ui.client.widget.form.FormPanel;
-import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.extjs.gxt.ui.client.widget.form.*;
 import com.google.gwt.core.client.GWT;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
@@ -54,15 +53,27 @@ public class TargetForm extends FormPanel {
         binding.addFieldBinding(new FieldBinding(nameField, "name"));
         this.add(nameField);
 
-        DateField fromDateField = new DateField();
+        final DateField fromDateField = new DateField();
         fromDateField.setFieldLabel(constants.fromDate());
         fromDateField.setAllowBlank(false);
         binding.addFieldBinding(LocalDateBinding.create(fromDateField, "fromDate"));
         this.add(fromDateField);
 
-        DateField toDateField = new DateField();
+        final DateField toDateField = new DateField();
         toDateField.setFieldLabel(constants.toDate());
         toDateField.setAllowBlank(false);
+        toDateField.setValidator(new Validator() {
+            @Override
+            public String validate(Field<?> field, String value) {
+                if (fromDateField.getValue() != null && toDateField.getValue() != null) {
+                    if (toDateField.getValue().before(fromDateField.getValue())) {
+                        return I18N.CONSTANTS.inconsistentDateRangeWarning();
+                    }
+                }
+                return null;
+            }
+        });
+
         binding.addFieldBinding(LocalDateBinding.create(toDateField, "toDate"));
         this.add(toDateField);
 
