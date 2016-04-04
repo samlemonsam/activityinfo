@@ -388,6 +388,7 @@ public class UiApplicationDriver extends ApplicationDriver {
             switch (dimension) {
                 case "Indicator":
                 case "Partner":
+                case "Project":
                 case "Year":
                 case "Month":
                 case "Realized / Targeted":
