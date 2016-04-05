@@ -15,6 +15,8 @@ dependencies {
 node {
     // Version of node to use.
     version = '0.10.25'
+    npmVersion = '2.1.5'
+
 
     // Enabled the automatic download. False is the default (for now).
     download = true
