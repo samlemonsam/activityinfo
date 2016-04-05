@@ -390,7 +390,17 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         int expectedCount = 1;
         assertBucketCount(expectedCount);
         assertEquals(3, (int) buckets.get(0).doubleValue());
+    }
 
+    @Test
+    public void testSiteCountOnMonthly() {
+        forTotalSiteCounts();
+        withAdminDimension(new AdminDimension(1));
+        filter.addRestriction(DimensionType.Activity, 3);
+
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(1);
     }
 
     @Test
