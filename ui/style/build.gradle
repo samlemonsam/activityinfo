@@ -15,6 +15,7 @@ dependencies {
 node {
     // Version of node to use.
     version = '0.10.25'
+    npmVersion = '2.1.5'
     download = true
 }
 
