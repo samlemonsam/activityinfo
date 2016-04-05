@@ -1,8 +1,4 @@
 
-plugins {
-    id "com.moowork.grunt" version "0.10"
-}
-
 apply plugin: 'com.moowork.grunt'
 apply plugin: 'gwt-base'
 
@@ -32,6 +28,10 @@ grunt {
     // Whether output from Grunt should be buffered - useful when running tasks in parallel
     bufferOutput = false
 }
+
+// Work around for
+// https://github.com/srs/gradle-grunt-plugin/issues/32
+installGrunt.setArgs( ['install', 'grunt-cli@1.2.0', 'grunt@0.4.5'] )
 
 jar {
     from project.sourceSets.main.allSource
