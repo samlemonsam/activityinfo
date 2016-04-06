@@ -64,6 +64,11 @@ public class EnumFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     @Override
+    public boolean isValid() {
+        return widget.isValid();
+    }
+
+    @Override
     public Widget asWidget() {
         return widget.asWidget();
     }

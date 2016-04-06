@@ -61,7 +61,11 @@ public class NarrativeFieldWidget implements FormFieldWidget<NarrativeValue> {
 
     @Override
     public void setType(FieldType type) {
+    }
 
+    @Override
+    public boolean isValid() {
+        return true;
     }
 
     @Override

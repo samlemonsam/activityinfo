@@ -6,6 +6,7 @@ import com.google.common.base.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
@@ -34,10 +35,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
@@ -59,6 +57,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
     private boolean flushing = false;
 
     private int retryCount = 0;
+
+    private Map<String, String> entityTypes = Maps.newHashMap();
 
     public UserAccount getCurrentUser() {
         return currentUser;
@@ -349,11 +349,12 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     properties.put("comments", value.getValue());
                     break;
                 default:
-
-                    if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                    String entityType = entityTypes.get(aliases.getAlias(value.getField()));
+                    if ("AttributeGroup".equals(entityType) || value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                        int attributeGroupId = aliases.getId(value.getField());
                         for (String item : value.getValue().split("\\s*,\\s*")) {
                             if (!Strings.isNullOrEmpty(item)) {
-                                int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
+                                int attributeId = aliases.getId(new AliasTable.TestHandle(item, attributeGroupId));
                                 properties.put("ATTRIB" + attributeId, true);
                             }
                         }
@@ -701,6 +702,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         PendingId pendingId = createEntity(entityType, properties);
 
+        entityTypes.put(properties.getString("name"), entityType);
         aliases.bindAliasToId(properties.getString("name"), pendingId);
 
         return pendingId;

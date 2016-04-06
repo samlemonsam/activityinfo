@@ -55,4 +55,54 @@
             END
         </sql>
     </changeSet>
+    <changeSet author="alex" id="36-03">
+        <comment>
+            Improve query performance on attribute table
+        </comment>
+        <addColumn tableName="attribute">
+            <column name="deleted" type="bit" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>
+            UPDATE attribute SET deleted = dateDeleted IS NOT NULL
+        </sql>
+        <createIndex tableName="attribute" indexName="attribute_group_deleted">
+            <column name="deleted"/>
+            <column name="AttributeGroupId"/>
+        </createIndex>
+        <sql splitStatements="false" endDelimiter="//">
+            CREATE TRIGGER attribute_delete_sync
+            BEFORE UPDATE
+            ON attribute FOR EACH ROW
+            BEGIN
+            SET NEW.deleted = (NEW.dateDeleted IS NOT NULL);
+            END
+        </sql>
+    </changeSet>
+    <changeSet author="alex" id="36-04">
+        <comment>
+            Improve query performance on indicator table
+        </comment>
+        <addColumn tableName="indicator">
+            <column name="deleted" type="bit" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>
+            UPDATE indicator SET deleted = dateDeleted IS NOT NULL
+        </sql>
+        <createIndex tableName="indicator" indexName="indicator_activity_deleted">
+            <column name="deleted"/>
+            <column name="ActivityId"/>
+        </createIndex>
+        <sql splitStatements="false" endDelimiter="//">
+            CREATE TRIGGER indicator_delete_sync
+            BEFORE UPDATE
+            ON indicator FOR EACH ROW
+            BEGIN
+            SET NEW.deleted = (NEW.dateDeleted IS NOT NULL);
+            END
+        </sql>
+    </changeSet>
 </databaseChangeLog>

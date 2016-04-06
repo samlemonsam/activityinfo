@@ -107,7 +107,7 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
 
             @Override
             public void handleEvent(BaseEvent be) {
-                applyModelState();
+                applyModelState(false);
             }
         });
 
@@ -154,7 +154,7 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
     @Override
     public void bind(PivotTableReportElement model) {
         this.model = model;
-        applyModelState();
+        applyModelState(true);
     }
 
     @Override
@@ -165,23 +165,11 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
     private void onModelChanged() {
         if (needToReloadDimensions(model)) {
             clearIndicatorSpecificDimensions();
-            Dimensions.loadDimensions(dispatcher, model).then(new AsyncCallback<Dimensions>() {
-                @Override
-                public void onFailure(Throwable caught) {
-
-                }
-
-                @Override
-                public void onSuccess(Dimensions result) {
-                    populateIndicatorSpecificDimensions(result);
-                    applyModelState(result);
-                }
-            });
+            applyModelState(true);
         }
     }
 
-
-    private void applyModelState() {
+    private void applyModelState(final boolean updateDimensions) {
         Dimensions.loadDimensions(dispatcher, model).then(new AsyncCallback<Dimensions>() {
 
             @Override
@@ -191,13 +179,16 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
 
             @Override
             public void onSuccess(Dimensions result) {
-                applyModelState(result);
+                applyModelState(result, updateDimensions);
             }
         });
     }
 
 
-    private void applyModelState(Dimensions schema) {
+    private void applyModelState(Dimensions schema, boolean updateDimensions) {
+        if(updateDimensions) {
+            populateIndicatorSpecificDimensions(schema);
+        }
         for (DimensionModel node : store.getAllItems()) {
             if (node.hasDimension()) {
                 treePanel.setChecked(node, isDimensionSelected(schema, node.getDimension()));

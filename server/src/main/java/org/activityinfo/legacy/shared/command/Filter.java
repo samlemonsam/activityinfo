@@ -162,6 +162,10 @@ public class Filter implements Serializable {
         return startDateRange != null && startDateRange.isRestricted();
     }
 
+    public boolean isDateRestricted() {
+        return isStartDateRestricted() || isEndDateRestricted();
+    }
+
     public Set<DimensionType> getRestrictedDimensions() {
         Set<DimensionType> dims = Sets.newHashSet();
         for (Entry<DimensionType, Set<Integer>> entries : restrictions.entrySet()) {

@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.form.field;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -75,7 +76,7 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     private GeoPoint getValue() {
         Double latitude = latitudeBox.getValue();
         Double longitude = longitudeBox.getValue();
-        if(latitude == null || longitude == null) {
+        if (latitude == null || longitude == null) {
             return null;
         } else {
             return new GeoPoint(latitude, longitude);
@@ -109,6 +110,19 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     @Override
     public void setType(FieldType type) {
 
+    }
+
+    @Override
+    public boolean isValid() {
+        if (Strings.isNullOrEmpty(latitudeBox.getText()) && Strings.isNullOrEmpty(longitudeBox.getText())) {
+            return true;
+        }
+
+        if ((!Strings.isNullOrEmpty(latitudeBox.getText()) && latitudeBox.getValue() != null) &&
+                (!Strings.isNullOrEmpty(longitudeBox.getText()) && longitudeBox.getValue() != null)) {
+            return true;
+        }
+        return false;
     }
 
     @Override

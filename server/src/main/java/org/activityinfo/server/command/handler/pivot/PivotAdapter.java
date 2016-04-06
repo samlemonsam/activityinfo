@@ -136,8 +136,14 @@ public class PivotAdapter {
         Set<ResourceId> formIds = new HashSet<>();
         for(Activity activity : activities) {
             formIds.add(activity.getLeafFormClassId());
+            if(command.getValueType() == PivotSites.ValueType.TOTAL_SITES) {
+                formIds.add(activity.getSiteFormClassId());
+            }
             for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
                 formIds.add(linkedActivity.getLeafFormClassId());
+                if(command.getValueType() == PivotSites.ValueType.TOTAL_SITES) {
+                    formIds.add(activity.getSiteFormClassId());
+                }
             }
         }
 
@@ -539,7 +545,7 @@ public class PivotAdapter {
         
         } else if(activity.isMonthly() && 
                 (command.isPivotedBy(DimensionType.Date) ||
-                 command.getFilter().isEndDateRestricted())) {
+                 command.getFilter().isDateRestricted())) {
             
             // if we are pivoting or filtering by date, then we need
             // to query the actual reporting periods and count distinct sites
@@ -719,7 +725,6 @@ public class PivotAdapter {
                     conditions.add(Exprs.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
                 }
             }
-
             return singleton(anyTrue(conditions));
 
         } else {

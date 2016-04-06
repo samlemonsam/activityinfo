@@ -92,6 +92,11 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
         }
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     private boolean validate() {
         // reset first
         boxWrapper.removeStyleName("has-error");

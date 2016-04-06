@@ -82,7 +82,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
 
     }
 
-    private Promise<ActivityFormDTO> applyPermissions(ExecutionContext context, final ActivityFormDTO form) {
+    private Promise<ActivityFormDTO> applyPermissions(final ExecutionContext context, final ActivityFormDTO form) {
         final Promise<ActivityFormDTO> result = new Promise<>();
         SqlQuery.selectAll()
                 .appendColumn("allowView")
@@ -101,7 +101,8 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                             if (form.getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
                                 result.resolve(form);
                             } else {
-                                result.reject(new IllegalAccessCommandException());
+                                result.reject(new IllegalAccessCommandException("User " + context.getUser().getId() +
+                                 " does not have access to form " + form.getId()));
                             }
                             return;
                         }
@@ -110,7 +111,8 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                             if (form.getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
                                 result.resolve(form);
                             } else {
-                                result.reject(new IllegalAccessCommandException());
+                                result.reject(new IllegalAccessCommandException("User " + context.getUser().getId() +
+                                        " does not have access to form " + form.getId()));
                             }
                             return;
                         }

@@ -68,6 +68,12 @@ Feature: Calculated fields
       |                         | 2016 |
       | Number of Beneficiaries |  150 |
 
+  Scenario: Aggregating calculated fields with empty expressions
+    And I have created a form "School Registration" using the new layout
+    And I have created a calculated field "Age" in "School Registration" with expression ""
+    Then aggregating the indicator "Age" by Indicator and Year should yield:
+      |                         | Value |
+
   Scenario: Aggregating calculated indicators ignore missing values and divisions by zero
     # When aggregating calculated fields with values that include 10/0, for
     # example, these values are ignored
@@ -120,3 +126,19 @@ Feature: Calculated fields
       |         | 2014   | 2015 | 2016 |
       | NRC     | 1,162  | 44   |    7 |
       | UPS     | 1,110  | 65   |      |
+
+
+  Scenario: Pivoting calculated indicator by attributes
+    Given I have created a calculated field "Count" in "NFI Distribution" with expression "1"
+    And I have created a single-valued enumerated field "Donor" with choices:
+      | UNICEF |
+      | UNHCR  |
+    And I have submitted "NFI Distribution" forms with:
+      | partner | Donor  | Start Date | End Date   |
+      | NRC     | UNHCR  | 2014-05-21 | 2014-05-21 |
+      | UPS     | UNHCR  | 2014-07-21 | 2014-07-21 |
+      | NRC     | UNICEF | 2014-10-21 | 2014-10-21 |
+    Then aggregating the indicator "Count" by Donor should yield:
+      |         | Value |
+      | UNICEF  | 1     |
+      | UNHCR   | 2     |

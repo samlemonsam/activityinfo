@@ -368,7 +368,7 @@ public class ActivityLoader {
                 "Expression expr, " +
                 "Aggregation aggregation " +
                 "FROM indicator " +
-                "WHERE dateDeleted IS NULL AND " +
+                "WHERE deleted = 0 AND " +
                 "ActivityId IN " + idList(activityIds) +
                 " ) " +
                 
@@ -474,7 +474,7 @@ public class ActivityLoader {
 
         String sql = "SELECT * " +
                 "FROM attribute A " +
-                "WHERE A.dateDeleted is null AND " +
+                "WHERE A.deleted=0 AND " +
                 "AttributeGroupId in" +
                 " (Select AttributeGroupId FROM attributegroupinactivity where ActivityId IN " + idList(activityIds) + ")" +
                 " ORDER BY A.SortOrder";

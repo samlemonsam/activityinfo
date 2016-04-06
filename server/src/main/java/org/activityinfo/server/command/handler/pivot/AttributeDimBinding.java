@@ -4,6 +4,7 @@ import org.activityinfo.legacy.shared.reports.content.AttributeCategory;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -11,17 +12,18 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.store.mysql.metadata.Activity;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class AttributeDimBinding extends DimBinding {
 
     private final AttributeGroupDimension model;
     private final ResourceId groupId;
-    private final String groupName;
+    private final FormField groupField;
+    private final Map<String, Integer> attributeOrder;
     private final String columnId;
 
     public AttributeDimBinding(AttributeGroupDimension model, Collection<FormTree> formTrees) {
@@ -34,15 +36,28 @@ public class AttributeDimBinding extends DimBinding {
         //    included
         
         this.groupId = CuidAdapter.attributeGroupField(model.getAttributeGroupId());
-        this.groupName = findGroupName(formTrees);
+        this.groupField = findGroupName(formTrees);
+        this.attributeOrder = findAttributeOrder(groupField);
         this.columnId = "A" + model.getAttributeGroupId();
     }
 
-    private String findGroupName(Collection<FormTree> formTrees) {
+    private Map<String, Integer> findAttributeOrder(FormField field) {
+        Map<String, Integer> map = new HashMap<>();
+        if(field.getType() instanceof EnumType) {
+            EnumType type = (EnumType) field.getType();
+            List<EnumItem> items = type.getValues();
+            for (int i = 0; i < items.size(); i++) {
+                map.put(items.get(i).getLabel(), i);
+            }
+        }
+        return map;
+    }
+
+    private FormField findGroupName(Collection<FormTree> formTrees) {
         for (FormTree formTree : formTrees) {
             for (FormTree.Node node : formTree.getLeaves()) {
                 if(node.getFieldId().equals(groupId)) {
-                    return node.getField().getLabel();
+                    return node.getField();
                 }
             }
         }
@@ -85,7 +100,7 @@ public class AttributeDimBinding extends DimBinding {
 
     private FieldPath findFieldByName(List<FormTree.Node> fields) {
         for (FormTree.Node field : fields) {
-            if(field.isEnum() && field.getField().getLabel().equals(groupName)) {
+            if(field.isEnum() && field.getField().getLabel().equals(groupField.getLabel())) {
                 return field.getPath();
             }
         }
@@ -104,10 +119,19 @@ public class AttributeDimBinding extends DimBinding {
             for (int i = 0; i < columnSet.getNumRows(); i++) {
                 String value = view.getString(i);
                 if (value != null) {
-                    c[i] = new AttributeCategory(value, 0);
+                    c[i] = new AttributeCategory(value, getSortOrder(value));
                 }
             }
         } 
         return c;
     }
+
+    private int getSortOrder(String value) {
+        Integer order = attributeOrder.get(value);
+        if(order == null) {
+            return Integer.MAX_VALUE;
+        }
+        return order;
+    }
+
 }

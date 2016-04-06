@@ -193,6 +193,10 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
             value = null;
         }
 
+        if (!container.getFieldWidget().isValid()) {
+            return false;
+        }
+
         Optional<Boolean> validatedBuiltInDates = validateBuiltinDates(container, field);
         if (validatedBuiltInDates.isPresent()) {
             return validatedBuiltInDates.get();

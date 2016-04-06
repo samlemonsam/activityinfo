@@ -365,7 +365,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
 
     @Override
-    public DataTable pivotTable(List<String> measures, List<String> rowDimension) {
+    public DataTable pivotTable(List<String> measures, List<String> rowDimensions) {
         ensureLoggedIn();
 
         PivotTableEditor pivotTable = applicationPage
@@ -378,8 +378,28 @@ public class UiApplicationDriver extends ApplicationDriver {
             pivotTable.selectMeasure(aliasTable.getAlias(measure));
         }
 
-        pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
+        pivotTable.selectDimensions(deAliasDimension(rowDimensions),  Collections.<String>emptyList());
         return pivotTable.extractData();
+    }
+
+    private List<String> deAliasDimension(List<String> dimensions) {
+        List<String> deAliased = Lists.newArrayList();
+        for (String dimension : dimensions) {
+            switch (dimension) {
+                case "Indicator":
+                case "Partner":
+                case "Project":
+                case "Year":
+                case "Month":
+                case "Realized / Targeted":
+                    deAliased.add(dimension);
+                    break;
+                default:
+                    deAliased.add(getAliasTable().getAlias(dimension));
+                    break;
+            }
+        }
+        return deAliased;
     }
 
     @Override

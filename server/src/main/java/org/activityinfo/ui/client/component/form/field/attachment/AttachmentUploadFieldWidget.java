@@ -200,6 +200,11 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         valueUpdater.update(getValue());
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     private AttachmentValue getValue() {
         AttachmentValue value = new AttachmentValue();
 
