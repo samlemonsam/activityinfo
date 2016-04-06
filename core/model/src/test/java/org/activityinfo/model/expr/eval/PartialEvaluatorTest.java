@@ -10,9 +10,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by yuriy on 1/3/2015.
- */
+
 public class PartialEvaluatorTest {
 
     private static final String symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
