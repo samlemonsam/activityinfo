@@ -1617,4 +1617,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Bold")
     String bold();
+
+    @DefaultStringValue("Reference")
+    String reference();
 }

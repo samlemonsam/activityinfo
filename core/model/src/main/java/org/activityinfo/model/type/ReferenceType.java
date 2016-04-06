@@ -17,7 +17,6 @@ import java.util.Set;
  */
 public class ReferenceType implements ParametrizedFieldType {
 
-
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
         private TypeClass() {
@@ -58,7 +57,7 @@ public class ReferenceType implements ParametrizedFieldType {
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
     private Cardinality cardinality;
-    private Set<ResourceId> range;
+    private final Set<ResourceId> range = Sets.newHashSet();
 
     public ReferenceType() {
     }
@@ -81,27 +80,37 @@ public class ReferenceType implements ParametrizedFieldType {
      * @return the set of FormClasses to which fields of this type can refer.
      */
     public Set<ResourceId> getRange() {
-        return range;
+        return Sets.newHashSet(range);
     }
 
 
     public ReferenceType setRange(ResourceId formClassId) {
-        this.range = Collections.singleton(formClassId);
+        this.range.clear();
+        this.range.add(formClassId);
         return this;
     }
 
     private ReferenceType setRange(List<String> range) {
-        Set<ResourceId> formClassIds = Sets.newHashSet();
+        this.range.clear();
         for(String id : range) {
-            formClassIds.add(ResourceId.valueOf(id));
+            this.range.add(ResourceId.valueOf(id));
         }
-        setRange(formClassIds);
         return this;
     }
 
+    public ReferenceType addToRange(ResourceId resourceId) {
+        this.range.add(resourceId);
+        return this;
+    }
+
+    public ReferenceType removeFromRange(ResourceId resourceId) {
+        this.range.remove(resourceId);
+        return this;
+    }
 
     public ReferenceType setRange(Set<ResourceId> range) {
-        this.range = range;
+        this.range.clear();
+        this.range.addAll(range);
         return this;
     }
 

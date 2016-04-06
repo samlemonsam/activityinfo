@@ -64,5 +64,26 @@
         <span class="hide help-block" ui:field="relevanceExpression"/>
       </div>
     </g:HTMLPanel>
+
+    <!-- Reference -->
+    <g:HTMLPanel addStyleNames="form-group" ui:field="referenceGroup">
+      <label class="control-label col-xs-4">
+        <ui:text from='{i18n.reference}'/>
+      </label>
+      <div class="col-xs-8">
+        <g:ListBox name="referenceListBox" ui:field="referenceListBox" multipleSelect="true" />
+      </div>
+
+      <div class="col-xs-4"/> <!-- reserve space-->
+      <div class="col-xs-8">
+        <g:Button addStyleNames="btn btn-default btn-xs" ui:field="referenceAddButton">
+          <ui:text from='{i18n.add}'/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-default btn-xs" ui:field="referenceRemoveButton">
+          <ui:text from='{i18n.remove}'/>
+        </g:Button>
+
+      </div>
+    </g:HTMLPanel>
   </g:HTMLPanel>
 </ui:UiBinder>

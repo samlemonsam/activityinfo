@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -47,6 +48,7 @@ public class Templates {
         items.add(new TypeClassTemplate(MetadataType.LABEL_TYPE_CLASS, I18N.CONSTANTS.label()));
         items.add(new SectionTemplate());
         items.add(new SubformTemplate());
+        items.add(new TypeClassTemplate(ReferenceType.TYPE_CLASS, I18N.CONSTANTS.reference()));
 
         return items;
     }
