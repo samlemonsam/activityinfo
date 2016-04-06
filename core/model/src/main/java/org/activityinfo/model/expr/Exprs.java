@@ -36,7 +36,11 @@ public class Exprs {
     }
     
     public static ExprNode anyTrue(List<ExprNode> nodes) {
-        return binaryTree(OrFunction.INSTANCE, nodes);
+        if(nodes.isEmpty()) {
+            return new ConstantExpr(false);
+        } else {
+            return binaryTree(OrFunction.INSTANCE, nodes);
+        }
     }
     
     private static ExprNode binaryTree(ExprFunction function, List<ExprNode> nodes) {

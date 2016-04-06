@@ -725,7 +725,6 @@ public class PivotAdapter {
                     conditions.add(Exprs.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
                 }
             }
-
             return singleton(anyTrue(conditions));
 
         } else {
