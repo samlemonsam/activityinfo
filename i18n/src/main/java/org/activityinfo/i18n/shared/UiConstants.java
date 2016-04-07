@@ -1557,4 +1557,12 @@ public interface UiConstants extends Constants {
     String clickToLink();
 
 
+    @DefaultStringValue("clear")
+    String clear();
+
+    @DefaultStringValue("Link created")
+    String linkCreated();
+
+    @DefaultStringValue("Link removed")
+    String linkRemoved();
 }

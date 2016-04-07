@@ -31,6 +31,7 @@ import com.extjs.gxt.ui.client.widget.Status;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -114,12 +115,12 @@ public class SavePromptMessageBox extends Window implements AsyncMonitor {
 
         asyncCallCancelled = false;
 
-        status.setBusy(I18N.CONSTANTS.saving());
+        status.setBusyText(I18N.CONSTANTS.saving());
     }
 
     @Override
     public void onConnectionProblem() {
-        status.setBusy(I18N.CONSTANTS.connectionProblem());
+        status.setBusyText(I18N.CONSTANTS.connectionProblem());
     }
 
     @Override
@@ -129,7 +130,7 @@ public class SavePromptMessageBox extends Window implements AsyncMonitor {
         }
 
         cancelButton.disable();
-        status.setBusy(I18N.CONSTANTS.retrying());
+        status.setBusyText(I18N.CONSTANTS.retrying());
 
         return true;
     }
@@ -139,9 +140,9 @@ public class SavePromptMessageBox extends Window implements AsyncMonitor {
 
         saveButton.enable();
         cancelButton.enable();
-        status.clearStatus("");
+        status.clearStatus();
 
-        MessageBox.alert(this.getHeadingHtml(), I18N.CONSTANTS.serverError(), null);
+        MessageBox.alert(this.getHeadingHtml(), SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.serverError()), null);
     }
 
     @Override

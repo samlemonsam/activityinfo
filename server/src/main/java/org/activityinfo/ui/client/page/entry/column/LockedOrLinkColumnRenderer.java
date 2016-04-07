@@ -27,8 +27,10 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
-import org.activityinfo.legacy.shared.model.SiteDTO;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
+import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 public class LockedOrLinkColumnRenderer implements GridCellRenderer<ModelData> {
@@ -40,29 +42,21 @@ public class LockedOrLinkColumnRenderer implements GridCellRenderer<ModelData> {
     }
 
     @Override
-    public Object render(ModelData model,
-                         String property,
-                         ColumnData config,
-                         int rowIndex,
-                         int colIndex,
-                         ListStore listStore,
-                         Grid grid) {
+    public SafeHtml render(ModelData model,
+                           String property,
+                           ColumnData config,
+                           int rowIndex,
+                           int colIndex,
+                           ListStore listStore,
+                           Grid grid) {
         if (model instanceof SiteDTO) {
             SiteDTO siteModel = (SiteDTO) model;
-            StringBuilder builder = new StringBuilder();
             if (siteModel.isLinked()) {
-                return IconImageBundle.ICONS.link().getHTML();
+                return IconImageBundle.ICONS.link().getSafeHtml();
             } else if (lockSet.isLocked(siteModel)) {
-                // String tooltip = buildTooltip(model, activity);
-
-                // builder.append("<span qtip='");
-                // builder.append(tooltip);
-                // builder.append("'>");
-                builder.append(IconImageBundle.ICONS.lockedPeriod().getHTML());
-                // builder.append("</span>");
-                return builder.toString();
+                return IconImageBundle.ICONS.lockedPeriod().getSafeHtml();
             }
         }
-        return "";
+        return SafeHtmlUtils.EMPTY_SAFE_HTML;
     }
 }

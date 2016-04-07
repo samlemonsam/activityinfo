@@ -36,6 +36,8 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.common.collect.Lists;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -205,21 +207,21 @@ public class IndicatorGridPanel extends ContentPanel {
         icon.setRenderer(new GridCellRenderer<ModelData>() {
 
             @Override
-            public Object render(ModelData model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<ModelData> store,
-                                 Grid<ModelData> grid) {
+            public SafeHtml render(ModelData model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<ModelData> store,
+                                   Grid<ModelData> grid) {
 
                 if (model instanceof IndicatorDTO) {
                     int id = ((IndicatorDTO) model).getId();
                     if (linked.contains(id)) {
-                        return IconImageBundle.ICONS.link().getHTML();
+                        return IconImageBundle.ICONS.link().getSafeHtml();
                     }
                 }
-                return "";
+                return SafeHtmlUtils.EMPTY_SAFE_HTML;
             }
 
         });
@@ -228,7 +230,7 @@ public class IndicatorGridPanel extends ContentPanel {
         name.setRenderer(new GridCellRenderer<ModelData>() {
 
             @Override
-            public Object render(ModelData model,
+            public SafeHtml render(ModelData model,
                                  String property,
                                  ColumnData config,
                                  int rowIndex,
@@ -242,9 +244,9 @@ public class IndicatorGridPanel extends ContentPanel {
                     html.append(";font-weight: bold;");
                 }
                 html.append("\">");
-                html.append(model.get("name"));
+                html.append(SafeHtmlUtils.htmlEscape("" + model.get("name")));
                 html.append("</div>");
-                return html.toString();
+                return SafeHtmlUtils.fromTrustedString(html.toString());
             }
 
         });

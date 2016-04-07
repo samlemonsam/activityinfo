@@ -24,10 +24,11 @@ package org.activityinfo.ui.client.page.entry.form;
 
 import com.google.common.base.Strings;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import org.activityinfo.model.type.FieldTypeClass;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.type.IndicatorValueFormatter;
+import org.activityinfo.model.type.FieldTypeClass;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -49,11 +50,11 @@ public class SiteRenderer {
         html.append("<table cellspacing='0'>");
         if (!activity.getLocationType().isAdminLevel()) {
             html.append("<tr><td>");
-            html.append(activity.getLocationType().getName()).append(": ");
+            html.append(SafeHtmlUtils.htmlEscape(activity.getLocationType().getName())).append(": ");
             html.append("</td><td>");
-            html.append(site.getLocationName());
+            html.append(SafeHtmlUtils.htmlEscape(site.getLocationName()));
             if (!Strings.isNullOrEmpty(site.getLocationAxe())) {
-                html.append("<br>").append(site.getLocationAxe());
+                html.append("<br>").append(SafeHtmlUtils.htmlEscape(site.getLocationAxe()));
             }
             html.append("</td></tr>");
         }
@@ -61,8 +62,8 @@ public class SiteRenderer {
             AdminEntityDTO entity = site.getAdminEntity(level.getId());
             if (entity != null) {
                 html.append("<tr><td>");
-                html.append(level.getName()).append(":</td><td>");
-                html.append(entity.getName());
+                html.append(SafeHtmlUtils.htmlEscape(level.getName())).append(":</td><td>");
+                html.append(SafeHtmlUtils.htmlEscape(entity.getName()));
                 html.append("</td></tr>");
             }
         }
@@ -75,8 +76,9 @@ public class SiteRenderer {
         StringBuilder html = new StringBuilder();
 
         if (renderComments && site.getComments() != null) {
-            String commentsHtml = site.getComments();
+            String commentsHtml = SafeHtmlUtils.htmlEscape(site.getComments());
             commentsHtml = commentsHtml.replace("\n", "<br/>");
+
             html.append("<p class='comments'><span class='groupName'>");
             html.append(I18N.CONSTANTS.comments());
             html.append(":</span> ");
@@ -140,7 +142,7 @@ public class SiteRenderer {
                          .append("<td class='indicatorValue'>")
                          .append(formatValue(indicator, value))
                          .append("</td><td class='indicatorUnits'>")
-                         .append(indicator.getUnits())
+                         .append(SafeHtmlUtils.htmlEscape(indicator.getUnits()))
                          .append("</td>");
                 } else {
                     groupHtml
@@ -215,12 +217,12 @@ public class SiteRenderer {
         for (String attributeName : attributeNames) {
             if (count == 0) {
                 html.append("<p class='attribute'><span class='groupName'>");
-                html.append(groupName);
+                html.append(SafeHtmlUtils.htmlEscape(groupName));
                 html.append(": </span><span class='attValues'>");
             } else {
                 html.append(", ");
             }
-            html.append(attributeName);
+            html.append(SafeHtmlUtils.htmlEscape(attributeName));
             count++;
         }
         html.append("</span></p>");
@@ -234,12 +236,12 @@ public class SiteRenderer {
                 if (value) {
                     if (count == 0) {
                         html.append("<p class='attribute'><span class='groupName'>");
-                        html.append(group.getName());
+                        html.append(SafeHtmlUtils.htmlEscape(group.getName()));
                         html.append(": </span><span class='attValues'>");
                     } else {
                         html.append(", ");
                     }
-                    html.append(attribute.getName());
+                    html.append(SafeHtmlUtils.htmlEscape(attribute.getName()));
                     count++;
                 }
             }

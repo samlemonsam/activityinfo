@@ -225,7 +225,7 @@ public class ElementWidget extends Composite {
 
     private void editTitle() {
         final MessageBox box = new MessageBox();
-        box.setTitleHtml(SafeHtmlUtils.htmlEscape(I18N.CONSTANTS.changeTitleDialogTitle()));
+        box.setTitle(I18N.CONSTANTS.changeTitleDialogTitle());
         box.setType(MessageBoxType.PROMPT);
         box.setButtons(Dialog.OKCANCEL);
         box.show();

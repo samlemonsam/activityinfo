@@ -29,6 +29,8 @@ import com.extjs.gxt.ui.client.store.StoreSorter;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
@@ -122,14 +124,14 @@ public class DbListPage extends ContentPanel implements DbListPresenter.View, Pa
         ColumnConfig countryColumn = new ColumnConfig("country", I18N.CONSTANTS.country(), 150);
         countryColumn.setRenderer(new GridCellRenderer<UserDatabaseDTO>() {
             @Override
-            public String render(UserDatabaseDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<UserDatabaseDTO> store,
-                                 Grid<UserDatabaseDTO> grid) {
-                return model.getCountry().getName();
+            public SafeHtml render(UserDatabaseDTO model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<UserDatabaseDTO> store,
+                                   Grid<UserDatabaseDTO> grid) {
+                return SafeHtmlUtils.fromString(model.getCountry().getName());
             }
         });
         return countryColumn;

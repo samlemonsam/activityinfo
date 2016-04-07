@@ -129,7 +129,7 @@ public class UserProfilePage extends FormPanel implements Page {
             dispatcher.execute(new UpdateUserProfile(userProfile), new AsyncCallback<VoidResult>() {
                 @Override
                 public void onSuccess(final VoidResult result) {
-                    Info.display(I18N.CONSTANTS.saved(), I18N.CONSTANTS.savedChanges());
+                    Info.displayText(I18N.CONSTANTS.saved(), I18N.CONSTANTS.savedChanges());
                 }
 
                 @Override

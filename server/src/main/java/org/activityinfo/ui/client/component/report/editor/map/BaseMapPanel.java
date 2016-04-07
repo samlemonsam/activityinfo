@@ -25,6 +25,7 @@ package org.activityinfo.ui.client.component.report.editor.map;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayout;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayout.HBoxLayoutAlign;
@@ -53,7 +54,7 @@ public class BaseMapPanel extends ContentPanel implements HasValue<String> {
 
     private final Dispatcher dispatcher;
     private String value;
-    private LabelWithText label;
+    private Label label;
 
     public BaseMapPanel(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -70,7 +71,7 @@ public class BaseMapPanel extends ContentPanel implements HasValue<String> {
         setLayout(layout);
 
         Image icon = new Image(MapResources.INSTANCE.globe());
-        label = new LabelWithText();
+        label = new Label();
         Button button = new Button(I18N.CONSTANTS.change(), new SelectionListener<ButtonEvent>() {
 
             @Override
@@ -88,7 +89,7 @@ public class BaseMapPanel extends ContentPanel implements HasValue<String> {
 
         add(button);
 
-        label.setHtml(I18N.CONSTANTS.loading());
+        label.setText(I18N.CONSTANTS.loading());
     }
 
     private void chooseBaseMap() {

@@ -81,12 +81,12 @@ public class NewsPortlet extends Portlet {
 
             @Override
             public void loaderBeforeLoad(LoadEvent le) {
-                html.setHtml(I18N.CONSTANTS.loading());
+                html.setText(I18N.CONSTANTS.loading());
             }
 
             @Override
             public void loaderLoadException(LoadEvent le) {
-                html.setHtml(I18N.CONSTANTS.connectionProblem());
+                html.setText(I18N.CONSTANTS.connectionProblem());
             }
 
         });

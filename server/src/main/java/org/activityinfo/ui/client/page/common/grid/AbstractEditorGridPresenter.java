@@ -29,6 +29,7 @@ import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
@@ -142,7 +143,8 @@ public abstract class AbstractEditorGridPresenter<M extends ModelData> extends A
         if (view instanceof DesignView) {
             AbstractDesignForm currentForm = ((DesignView) view).getCurrentForm();
             if (!currentForm.isValid()) {
-                MessageBox.alert(currentForm.getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
+                MessageBox.alert(currentForm.getHeadingHtml(),
+                        SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.pleaseCompleteForm()), null);
                 return false;
             }
         }

@@ -37,6 +37,8 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.fromSafeConstant;
+
 /*
  * Default implementation for a FormDialog that displays a FormPanel
  */
@@ -95,7 +97,8 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
                     @Override
                     public void execute() {
                         if (!form.isValid()) {
-                            MessageBox.alert(getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
+                            MessageBox.alert(getHeadingHtml(),
+                                    fromSafeConstant(I18N.CONSTANTS.pleaseCompleteForm()), null);
                         } else {
                             onValidated();
                         }
@@ -169,12 +172,12 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
 
         asyncCallCancelled = false;
 
-        status.setBusy(workingText);
+        status.setBusyText(workingText);
     }
 
     @Override
     public void onConnectionProblem() {
-        status.setBusy(I18N.CONSTANTS.connectionProblem());
+        status.setBusyText(I18N.CONSTANTS.connectionProblem());
     }
 
     @Override
@@ -184,7 +187,7 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
         }
 
         cancelButton.disable();
-        status.setBusy(I18N.CONSTANTS.retrying());
+        status.setBusyText(I18N.CONSTANTS.retrying());
 
         return true;
     }
@@ -194,13 +197,13 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
         form.enable();
         saveButton.enable();
         cancelButton.enable();
-        status.clearStatus("");
-        MessageBox.alert(this.getHeadingHtml(), I18N.CONSTANTS.serverError(), null);
+        status.clearStatus();
+        MessageBox.alert(this.getHeadingHtml(), fromSafeConstant(I18N.CONSTANTS.serverError()), null);
     }
 
     @Override
     public void onCompleted() {
-        status.clearStatus("");
+        status.clearStatus();
         form.enable();
         saveButton.enable();
         cancelButton.enable();

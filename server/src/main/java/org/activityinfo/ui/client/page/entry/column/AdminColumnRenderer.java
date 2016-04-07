@@ -28,7 +28,9 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.google.common.collect.Sets;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelPredicates;
@@ -54,21 +56,21 @@ public class AdminColumnRenderer implements GridCellRenderer<ModelData> {
     }
 
     @Override
-    public Object render(ModelData model,
-                         String property,
-                         ColumnData config,
-                         int rowIndex,
-                         int colIndex,
-                         ListStore<ModelData> store,
-                         Grid<ModelData> grid) {
+    public SafeHtml render(ModelData model,
+                           String property,
+                           ColumnData config,
+                           int rowIndex,
+                           int colIndex,
+                           ListStore<ModelData> store,
+                           Grid<ModelData> grid) {
         if (model instanceof SiteDTO) {
             return render((SiteDTO) model);
         } else {
-            return "";
+            return SafeHtmlUtils.EMPTY_SAFE_HTML;
         }
     }
 
-    private Object render(SiteDTO model) {
+    private SafeHtml render(SiteDTO model) {
 
         StringBuilder qtip = new StringBuilder();
         SafeHtmlBuilder summary = new SafeHtmlBuilder();
@@ -100,6 +102,6 @@ public class AdminColumnRenderer implements GridCellRenderer<ModelData> {
             }
         }
         // return summary.toSafeHtml().asString();
-        return ColumnTemplates.INSTANCE.adminCell(qtip.toString(), summary.toSafeHtml()).asString();
+        return ColumnTemplates.INSTANCE.adminCell(qtip.toString(), summary.toSafeHtml());
     }
 }

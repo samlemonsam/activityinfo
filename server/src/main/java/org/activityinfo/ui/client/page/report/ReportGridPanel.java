@@ -34,7 +34,12 @@ import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid.ClicksToEdit;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
@@ -55,6 +60,18 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 import java.util.Arrays;
 
 public class ReportGridPanel extends ContentPanel implements ActionListener {
+
+    interface Templates extends SafeHtmlTemplates {
+
+        @Template("<div style='cursor:pointer'>{0}</div>")
+        SafeHtml starCell(SafeHtml icon);
+
+        @Template("<i>{0}</i>")
+        SafeHtml noDelivery(String noDeliveryLabel);
+    }
+
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
+
     private Dispatcher dispatcher;
     private ListStore<ReportMetadataDTO> store;
     private EventBus eventBus;
@@ -128,25 +145,27 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
 
     private ColumnModel createColumnModel() {
         ColumnConfig dashboard = new ColumnConfig("dashboard", "", 28);
-        dashboard.setHeaderHtml(IconImageBundle.ICONS.star().getHTML());
+        dashboard.setHeaderHtml(IconImageBundle.ICONS.star().getSafeHtml());
         dashboard.setResizable(false);
         dashboard.setMenuDisabled(true);
         dashboard.setRenderer(new GridCellRenderer<ReportMetadataDTO>() {
 
             @Override
-            public Object render(ReportMetadataDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<ReportMetadataDTO> store,
-                                 Grid<ReportMetadataDTO> grid) {
+            public SafeHtml render(ReportMetadataDTO model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<ReportMetadataDTO> store,
+                                   Grid<ReportMetadataDTO> grid) {
 
-                return "<div style='cursor:pointer'>" +
-                       (model.isDashboard() ? IconImageBundle.ICONS.star().getHTML() : IconImageBundle.ICONS.starWhite()
-                                                                                                            .getHTML()) +
-                       "</div>";
-
+                AbstractImagePrototype icon;
+                if(model.isDashboard()) {
+                    icon = IconImageBundle.ICONS.star();
+                } else {
+                    icon = IconImageBundle.ICONS.starWhite();
+                }
+                return TEMPLATES.starCell(icon.getSafeHtml());
             }
         });
 
@@ -155,7 +174,7 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
         owner.setRenderer(new GridCellRenderer<ReportMetadataDTO>() {
 
             @Override
-            public Object render(ReportMetadataDTO model,
+            public SafeHtml render(ReportMetadataDTO model,
                                  String property,
                                  ColumnData config,
                                  int rowIndex,
@@ -164,9 +183,9 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
                                  Grid<ReportMetadataDTO> grid) {
 
                 if (model.getAmOwner()) {
-                    return I18N.CONSTANTS.me();
+                    return SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.me());
                 } else {
-                    return model.getOwnerName();
+                    return SafeHtmlUtils.fromString(model.getOwnerName());
                 }
             }
         });
@@ -175,7 +194,7 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
         email.setRenderer(new GridCellRenderer<ReportMetadataDTO>() {
 
             @Override
-            public Object render(ReportMetadataDTO model,
+            public SafeHtml render(ReportMetadataDTO model,
                                  String property,
                                  ColumnData config,
                                  int rowIndex,
@@ -185,12 +204,12 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
 
                 switch (model.getEmailDelivery()) {
                     case NONE:
-                        return "<i>" + I18N.CONSTANTS.none() + "</i>";
+                        return TEMPLATES.noDelivery(I18N.CONSTANTS.none());
                     case MONTHLY:
-                        return I18N.CONSTANTS.monthly();
+                        return SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.monthly());
                     case WEEKLY:
                     default:
-                        return I18N.CONSTANTS.weekly();
+                        return SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.weekly());
                 }
             }
         });
@@ -243,10 +262,10 @@ public class ReportGridPanel extends ContentPanel implements ActionListener {
 
             @Override
             public void onSuccess(VoidResult result) {
-                Info.display(I18N.CONSTANTS.saved(),
-                        model.isDashboard() ? I18N.MESSAGES.addedToDashboard(model.getTitle()) : I18N.MESSAGES
-                                .removedFromDashboard(
-                                model.getTitle()));
+                Info.displayText(I18N.CONSTANTS.saved(),
+                        model.isDashboard() ?
+                                I18N.MESSAGES.addedToDashboard(model.getTitle()) :
+                                I18N.MESSAGES.removedFromDashboard(model.getTitle()));
             }
         });
 

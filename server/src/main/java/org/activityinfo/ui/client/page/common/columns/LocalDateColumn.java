@@ -29,7 +29,8 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import org.activityinfo.ui.client.util.GwtUtil;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 import java.util.Date;
 
@@ -48,17 +49,17 @@ public class LocalDateColumn extends ReadTextColumn {
         setRenderer(new GridCellRenderer<ModelData>() {
 
             @Override
-            public Object render(ModelData model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<ModelData> store,
-                                 Grid<ModelData> grid) {
+            public SafeHtml render(ModelData model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<ModelData> store,
+                                   Grid<ModelData> grid) {
 
                 Object value = model.get(property);
                 if (value == null) {
-                    return "";
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
                 }
                 Date date;
                 if (value instanceof Date) {
@@ -68,7 +69,7 @@ public class LocalDateColumn extends ReadTextColumn {
                 } else {
                     throw new RuntimeException("Don't know how to handle date as class " + value.getClass().getName());
                 }
-                return GwtUtil.valueWithTooltip(FORMAT.format(date));
+                return SafeHtmlUtils.fromTrustedString(FORMAT.format(date));
             }
 
         });

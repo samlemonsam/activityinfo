@@ -51,8 +51,8 @@ public class DimensionComboBoxSet implements HasReportElement<PivotChartReportEl
     private final DimensionProxy proxy;
     private final ListStore<DimensionModel> store;
     private final ListLoader<ListLoadResult<DimensionModel>> loader;
-    private final LabelToolItemWithText categoryLabel;
-    private final LabelToolItemWithText seriesLabel;
+    private final LabelToolItem categoryLabel;
+    private final LabelToolItem seriesLabel;
     private final DimensionCombo categoryCombo;
     private final DimensionCombo seriesCombo;
 
@@ -85,8 +85,8 @@ public class DimensionComboBoxSet implements HasReportElement<PivotChartReportEl
                 }
             }
         });
-        this.categoryLabel = new LabelToolItemWithText();
-        this.seriesLabel = new LabelToolItemWithText();
+        this.categoryLabel = new LabelToolItem();
+        this.seriesLabel = new LabelToolItem();
         this.reportEventBus = new ReportEventBus(eventBus, this);
         this.reportEventBus.listen(new ReportChangeHandler() {
 

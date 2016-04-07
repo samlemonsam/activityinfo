@@ -72,7 +72,7 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
     private class SaveCallback implements AsyncCallback<VoidResult> {
         @Override
         public void onSuccess(final VoidResult result) {
-            Info.display(I18N.CONSTANTS.saved(), I18N.MESSAGES.reportSaved(currentModel.getTitle()));
+            Info.displayText(I18N.CONSTANTS.saved(), I18N.MESSAGES.reportSaved(currentModel.getTitle()));
             onSaved();
         }
 
@@ -268,10 +268,10 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
                     @Override
                     public void onSuccess(final VoidResult result) {
                         if (update.getPinnedToDashboard()) {
-                            Info.display(I18N.CONSTANTS.saved(),
+                            Info.displayText(I18N.CONSTANTS.saved(),
                                     I18N.MESSAGES.addedToDashboard(currentModel.getTitle()));
                         } else {
-                            Info.display(I18N.CONSTANTS.saved(),
+                            Info.displayText(I18N.CONSTANTS.saved(),
                                     I18N.MESSAGES.removedFromDashboard(currentModel.getTitle()));
                         }
                     }
@@ -298,7 +298,7 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
     }
 
     private void promptForTitle(final AsyncCallback<VoidResult> callback) {
-        MessageBox.prompt(I18N.CONSTANTS.save(), I18N.CONSTANTS.chooseReportTitle(), new Listener<MessageBoxEvent>() {
+        MessageBox.promptText(I18N.CONSTANTS.save(), I18N.CONSTANTS.chooseReportTitle(), new Listener<MessageBoxEvent>() {
 
             @Override
             public void handleEvent(final MessageBoxEvent be) {

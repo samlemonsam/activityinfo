@@ -329,7 +329,9 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
 
             @Override
             public void onSuccess(VoidResult result) {
-                Info.display(I18N.CONSTANTS.saved(), isLinked ? "Link created" : "Link removed");
+                Info.displayText(I18N.CONSTANTS.saved(), isLinked ?
+                        I18N.CONSTANTS.linkCreated() :
+                        I18N.CONSTANTS.linkRemoved());
             }
         });
 

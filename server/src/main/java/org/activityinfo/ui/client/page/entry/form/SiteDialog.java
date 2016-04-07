@@ -55,6 +55,8 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.List;
 
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.fromSafeConstant;
+
 public class SiteDialog extends Window {
 
     private static final int HEIGHT = 470;
@@ -220,7 +222,7 @@ public class SiteDialog extends Window {
             if (!section.getSection().validate()) {
                 navigationListView.getSelectionModel().select(section, false);
                 if (!section.getSection().validate()) { // validate after render to enable validation-error styling
-                    MessageBox.alert(getHeadingHtml(), I18N.CONSTANTS.pleaseCompleteForm(), null);
+                    MessageBox.alert(getHeadingHtml(), fromSafeConstant(I18N.CONSTANTS.pleaseCompleteForm()), null);
                     return false;
                 }
             }

@@ -29,12 +29,15 @@ import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.GridEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
-import com.extjs.gxt.ui.client.util.Format;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
@@ -48,6 +51,15 @@ import java.util.List;
 import java.util.Map;
 
 public class PivotGridPanel extends ContentPanel implements ReportView<PivotReportElement<PivotContent>> {
+
+    interface Templates extends SafeHtmlTemplates {
+
+        @Template("<span style=\"margin-left:{1}px\">{0}</span>")
+        SafeHtml header(String header, int indent);
+
+    }
+
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     private static final int ROW_INDENT = 15;
 
@@ -154,16 +166,14 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
     private static class RowHeaderRenderer implements GridCellRenderer<PivotTableRow> {
 
         @Override
-        public Object render(PivotTableRow model,
+        public SafeHtml render(PivotTableRow model,
                              String property,
                              ColumnData config,
                              int rowIndex,
                              int colIndex,
                              ListStore<PivotTableRow> store,
                              Grid<PivotTableRow> grid) {
-            String indent = (model.getDepth() * ROW_INDENT) + "px";
-            return "<span style=\"margin-left:" + indent + "\">" +
-                   Format.htmlEncode((String) model.get("header")) + "</span>";
+            return TEMPLATES.header((String) model.get("header"), model.getDepth() * ROW_INDENT);
         }
 
     }
@@ -197,13 +207,13 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
             column.setMenuDisabled(true);
             column.setRenderer(new GridCellRenderer() {
                 @Override
-                public Object render(ModelData model,
-                                     String property,
-                                     ColumnData config,
-                                     int rowIndex,
-                                     int colIndex,
-                                     ListStore store,
-                                     Grid grid) {
+                public SafeHtml render(ModelData model,
+                                       String property,
+                                       ColumnData config,
+                                       int rowIndex,
+                                       int colIndex,
+                                       ListStore store,
+                                       Grid grid) {
 
                     Double value = model.get(property);
                     if (value == null) {
@@ -211,7 +221,7 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
                         return null;
                     } else {
                         config.cellAttr = "data-pivot='value'";
-                        return IndicatorNumberFormat.INSTANCE.format(value);
+                        return SafeHtmlUtils.fromTrustedString(IndicatorNumberFormat.INSTANCE.format(value));
                     }
                 }
             });
@@ -236,7 +246,8 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
                 for (PivotTableData.Axis child : children) {
 
                     int colSpan = child.getLeaves().size();
-                    columnModel.addHeaderGroup(row, col, new HeaderGroupConfig(child.getLabel(), 1, colSpan));
+                    columnModel.addHeaderGroup(row, col,
+                            new HeaderGroupConfig(SafeHtmlUtils.fromString(child.getLabel()), 1, colSpan));
 
                     col += colSpan;
                 }

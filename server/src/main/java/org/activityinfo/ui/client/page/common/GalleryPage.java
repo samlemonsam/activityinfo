@@ -104,13 +104,13 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
     }
 
     @Override
-    public void setHeading(String html) {
-        heading.setHtml(html);
+    public void setHeading(String text) {
+        heading.setText(text);
     }
 
     @Override
-    public void setIntro(String html) {
-        introPara.setHtml(html);
+    public void setIntro(String text) {
+        introPara.setText(text);
     }
 
     @Override

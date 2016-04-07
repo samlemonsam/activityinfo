@@ -39,6 +39,10 @@ import com.extjs.gxt.ui.client.widget.treepanel.TreePanel.CheckCascade;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
@@ -72,6 +76,14 @@ public class IndicatorTreePanel extends ContentPanel {
     private ToolBar toolBar;
     private StoreFilterField filter;
     private boolean multipleSelection;
+
+    interface Templates extends SafeHtmlTemplates {
+
+        @Template("<b>{0}</b>")
+        SafeHtml headerNode(String name);
+    }
+
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     /**
      * Keep our own copy of our selection state that is independent of the
@@ -199,15 +211,15 @@ public class IndicatorTreePanel extends ContentPanel {
 
     private final class NodeLabelProvider implements ModelStringProvider<ModelData> {
         @Override
-        public String getStringValue(ModelData model, String property) {
+        public SafeHtml getStringValue(ModelData model, String property) {
             String name = model.get("name");
             if (model instanceof IndicatorDTO) {
-                return name;
+                return SafeHtmlUtils.fromString(((IndicatorDTO) model).getName());
             } else {
                 if (name == null) {
                     name = "noname";
                 }
-                return "<b>" + name + "</b>";
+                return TEMPLATES.headerNode(name);
             }
         }
     }
@@ -392,7 +404,7 @@ public class IndicatorTreePanel extends ContentPanel {
             String[] keywords = filter.toLowerCase().split("\\s+");
             String name = ((String) record.get("name")).toLowerCase();
             for (String keyword : keywords) {
-                if (name.indexOf(keyword) == -1) {
+                if (!name.contains(keyword)) {
                     return false;
                 }
             }
