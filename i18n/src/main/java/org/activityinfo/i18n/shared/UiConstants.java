@@ -1620,4 +1620,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Reference")
     String reference();
+
+    @DefaultStringValue("Choose form")
+    String chooseForm();
 }

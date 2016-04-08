@@ -165,6 +165,9 @@ public class FormFieldWidgetFactory {
     }
 
     private Promise createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
+        if (type.getRange().isEmpty()) {
+            return Promise.resolved(NullFieldWidget.INSTANCE);
+        }
         return resourceLocator
                 .queryInstances(type.getRange())
                 .then(new Function<List<FormInstance>, FormFieldWidget>() {

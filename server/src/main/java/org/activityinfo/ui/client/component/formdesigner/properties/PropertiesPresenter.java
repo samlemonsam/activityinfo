@@ -265,10 +265,9 @@ public class PropertiesPresenter {
                 dialog.show().setOkClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        view.getReferenceListBox().addItem(
-                                dialog.getFormClass().getLabel(), dialog.getFormClass().getId().asString());
+                        // todo put in cache
                         ReferenceType referenceType = (ReferenceType) formField.getType();
-                        referenceType.getRange().add(dialog.getFormClass().getId());
+                        referenceType.getRange().addAll(dialog.getFormClassIds());
                         setReferenceListItems(referenceType);
                     }
                 });
@@ -282,7 +281,7 @@ public class PropertiesPresenter {
                 for (int i = 0; i < view.getReferenceListBox().getItemCount(); i++) {
                     if (view.getReferenceListBox().isItemSelected(i)) {
                         ResourceId resourceId = ResourceId.valueOf(view.getReferenceListBox().getValue(i));
-                        referenceType.removeFromRange(resourceId);
+                        referenceType.getRange().remove(resourceId);
                     }
                 }
                 setReferenceListItems(referenceType);

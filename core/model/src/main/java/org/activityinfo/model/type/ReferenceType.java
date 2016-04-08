@@ -80,7 +80,7 @@ public class ReferenceType implements ParametrizedFieldType {
      * @return the set of FormClasses to which fields of this type can refer.
      */
     public Set<ResourceId> getRange() {
-        return Sets.newHashSet(range);
+        return range;
     }
 
 
@@ -95,16 +95,6 @@ public class ReferenceType implements ParametrizedFieldType {
         for(String id : range) {
             this.range.add(ResourceId.valueOf(id));
         }
-        return this;
-    }
-
-    public ReferenceType addToRange(ResourceId resourceId) {
-        this.range.add(resourceId);
-        return this;
-    }
-
-    public ReferenceType removeFromRange(ResourceId resourceId) {
-        this.range.remove(resourceId);
         return this;
     }
 
