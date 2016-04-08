@@ -1,7 +1,9 @@
 package org.activityinfo.test.steps.web;
 
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -18,6 +20,7 @@ import org.activityinfo.test.sut.UserAccount;
 
 import javax.inject.Inject;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
@@ -64,8 +67,21 @@ public class SignUpSteps {
     @Then("^I should receive an email with a link to confirm my address$")
     public void I_should_receive_an_email_with_a_link_to_confirm_my_address() throws Throwable {
 
-        NotificationEmail email = emailDriver.lastNotificationFor(newUserAccount);
-        confirmationUrl = email.extractLink();
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Optional<NotificationEmail> email;
+        do {
+            email = emailDriver.lastNotificationFor(newUserAccount);
+            if(email.isPresent()) {
+                break;
+            }
+            Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+        } while (stopwatch.elapsed(TimeUnit.SECONDS) < 90);
+
+        if(!email.isPresent()) {
+            throw new AssertionError("No email for " + newUserAccount.getEmail());
+        }
+
+        confirmationUrl = email.get().extractLink();
 
         System.out.println("Confirmation URL: " + confirmationUrl);
 

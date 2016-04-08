@@ -1,5 +1,6 @@
 package org.activityinfo.test.driver.mail.mailinator;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.RateLimiter;
 import com.sun.jersey.api.client.Client;
@@ -152,19 +153,19 @@ public class MailinatorClient implements EmailDriver {
 
 
     @Override
-    public NotificationEmail lastNotificationFor(UserAccount account) throws IOException {
+    public Optional<NotificationEmail> lastNotificationFor(UserAccount account) throws IOException {
         try {
             List<MessageHeader> messages = queryInbox(account);
             for (MessageHeader header : messages) {
                 if (header.getFrom().equals(SENDER_EMAIL)) {
                     Message message = queryMessage(header, 1);
-                    return new NotificationEmail(header.getSubject(), message.getPlainText());
+                    return Optional.of(new NotificationEmail(header.getSubject(), message.getPlainText()));
                 }
             }
         } catch (Exception e) {
             throw new IOException("Failed to fetch email from mailinator inbox " + account.getEmail() + 
                     ": " + e.getMessage(), e);
         }
-        throw new AssertionError("No emails from " + SENDER_EMAIL + " found in mailbox " + account.getEmail() + ".");
+        return Optional.absent();
     }
 }
