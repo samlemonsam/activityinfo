@@ -244,7 +244,7 @@ public class IndicatorGridPanel extends ContentPanel {
                     html.append(";font-weight: bold;");
                 }
                 html.append("\">");
-                html.append(SafeHtmlUtils.htmlEscape("" + model.get("name")));
+                html.append(SafeHtmlUtils.htmlEscape(String.valueOf(model.get("name"))));
                 html.append("</div>");
                 return SafeHtmlUtils.fromTrustedString(html.toString());
             }

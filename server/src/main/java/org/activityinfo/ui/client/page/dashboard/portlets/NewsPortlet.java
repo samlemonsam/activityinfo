@@ -22,35 +22,38 @@ package org.activityinfo.ui.client.page.dashboard.portlets;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.core.XTemplate;
 import com.extjs.gxt.ui.client.data.*;
 import com.extjs.gxt.ui.client.event.LoadListener;
-import com.extjs.gxt.ui.client.util.Util;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.custom.Portlet;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import org.activityinfo.i18n.shared.I18N;
 
 public class NewsPortlet extends Portlet {
 
-    private Html html;
 
-    public interface Templates extends ClientBundle {
+    public interface Templates extends SafeHtmlTemplates {
 
-        @Source("News.html") TextResource newsTemplate();
-
+        @Template("<h2>{0}</h2><p>{1}</p><p><a href=\"{2}\" target=\"_blank\">Read more...</a></p>")
+        SafeHtml newsItem(String title, String excerpt, SafeUri uri);
     }
 
     public static final Templates TEMPLATES = GWT.create(Templates.class);
+
+
+    private Html contents;
 
     public NewsPortlet() {
 
         setHeadingText(I18N.CONSTANTS.activityInfoNews());
 
-        html = new Html();
-        add(html);
+        contents = new Html();
+        add(contents);
 
         ModelType type = new ModelType();
         type.setRoot("posts");
@@ -74,19 +77,27 @@ public class NewsPortlet extends Portlet {
 
             @Override
             public void loaderLoad(LoadEvent le) {
-                XTemplate tpl = XTemplate.create(TEMPLATES.newsTemplate().getText());
+                SafeHtmlBuilder html = new SafeHtmlBuilder();
                 ListLoadResult<ModelData> result = le.getData();
-                tpl.overwrite(html.getElement(), Util.getJsObjects(result.getData(), 3));
+                for (ModelData item : result.getData()) {
+                    String title = item.get("title");
+                    String excerpt = item.get("excerpt");
+                    SafeUri uri = UriUtils.fromString((String)item.get("url"));
+
+                    html.append(TEMPLATES.newsItem(title, excerpt, uri));
+                }
+
+                contents.setHtml(html.toSafeHtml());
             }
 
             @Override
             public void loaderBeforeLoad(LoadEvent le) {
-                html.setText(I18N.CONSTANTS.loading());
+                contents.setText(I18N.CONSTANTS.loading());
             }
 
             @Override
             public void loaderLoadException(LoadEvent le) {
-                html.setText(I18N.CONSTANTS.connectionProblem());
+                contents.setText(I18N.CONSTANTS.connectionProblem());
             }
 
         });

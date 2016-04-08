@@ -32,7 +32,6 @@ import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.ListView;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationEvent;
@@ -55,7 +54,7 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
         public GalleryModel(String name, String desc, String path, PageState place) {
             set("name", name);
             set("path", path);
-            set("desc", desc);
+            set("description", desc);
 
             this.place = place;
         }
@@ -86,7 +85,7 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
         store = new ListStore<GalleryModel>();
 
         ListView<GalleryModel> view = new ListView<GalleryModel>();
-        view.setTemplate(getTemplate(GWT.getModuleBaseURL() + "image/"));
+        view.setRenderer(new GalleryRenderer<GalleryModel>("image/thumbs/"));
         view.setBorders(false);
         view.setStore(store);
         view.setItemSelector("dd");
@@ -118,16 +117,5 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
 
         store.add(new GalleryModel(name, desc, path, place));
     }
-
-    private native String getTemplate(String base) /*-{
-      return ['<dl><tpl for=".">',
-        '<dd>',
-        '<img src="' + base + 'thumbs/{path}" title="{name}">',
-        '<div>',
-        '<h4>{name}</h4><p>{desc}</p></div>',
-        '</tpl>',
-        '<div style="clear:left;"></div></dl>'].join("");
-
-    }-*/;
 
 }

@@ -29,6 +29,7 @@ import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
+import com.extjs.gxt.ui.client.widget.ListRenderer;
 import com.extjs.gxt.ui.client.widget.ListView;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.AnchorData;
@@ -38,6 +39,7 @@ import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.extjs.gxt.ui.client.widget.menu.SeparatorMenuItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -178,7 +180,13 @@ public final class LayersWidget extends LayoutContainer implements HasReportElem
 
     private void createListView() {
         view.setStore(store);
-        view.setTemplate(MapResources.INSTANCE.layerTemplate().getText());
+        view.setRenderer(new ListRenderer<LayerModel>() {
+            @Override
+            protected void renderItem(LayerModel layerModel, SafeHtmlBuilder html) {
+                renderLayerItem(layerModel, html);
+            }
+
+        });
         view.setItemSelector(".layerItem");
 
         // Prevents confusion for the user where an onmouseover-ed item in the
@@ -199,6 +207,36 @@ public final class LayersWidget extends LayoutContainer implements HasReportElem
         });
         layersPanel.add(view);
     }
+
+    private void renderLayerItem(LayerModel layerModel, SafeHtmlBuilder html) {
+        html.appendHtmlConstant("<div class=layerItem>");
+
+        switch (layerModel.getLayerType()) {
+            case "Bubble":
+                html.appendHtmlConstant("<div class=iconBubble></div>");
+                break;
+            case "Icon":
+                html.appendHtmlConstant("<div class=iconIcon></div>");
+                break;
+            case "Piechart":
+                html.appendHtmlConstant("<div class=iconPiechart></div>");
+                break;
+        }
+
+        html.appendHtmlConstant("<div class=\"layerName\">");
+        html.appendEscaped(layerModel.getName());
+        html.appendHtmlConstant("</div>");
+
+        if(layerModel.isVisible()) {
+            html.appendHtmlConstant("<div class=checkbox><input class=x-view-item-checkbox type='checkbox' checked='checked'/></div>");
+        } else {
+            html.appendHtmlConstant("<div class=checkbox><input class=x-view-item-checkbox type='checkbox'/></div>");
+        }
+        html.appendHtmlConstant("<div class=grabSprite></div>");
+        html.appendHtmlConstant("<div style='clear:both'></div>");
+        html.appendHtmlConstant("</div>");
+    }
+
 
     private void onLayerSelected(ListViewEvent<LayerModel> event) {
         if (event.getIndex() == -1) {

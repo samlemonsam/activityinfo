@@ -28,10 +28,16 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.Label;
+import com.extjs.gxt.ui.client.widget.ListRenderer;
 import com.extjs.gxt.ui.client.widget.ListView;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -51,6 +57,18 @@ import java.util.List;
  * Displays a list of options and hints for the map
  */
 public class BaseMapDialog extends Dialog {
+
+    interface Templates extends SafeHtmlTemplates {
+
+        @Template("<div class=\"thumb-wrap\">'" +
+                    "<div class=\"thumb\"><img src=\"{0}\" title=\"{1}\"></div>" +
+                    "<span class=\"x-editable\">{1}</span>" +
+                  "</div>")
+        SafeHtml baseMap(SafeUri path, String name);
+    }
+
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
+
     private final Dispatcher service;
     private ListView<ModelData> listView;
     private String originalId;
@@ -90,21 +108,20 @@ public class BaseMapDialog extends Dialog {
 
     private void createListView() {
         listView = new ListView<ModelData>();
-        listView.setTemplate(getTemplate());
+        listView.setRenderer(new ListRenderer<ModelData>() {
+            @Override
+            protected void renderItem(ModelData modelData, SafeHtmlBuilder html) {
+                SafeUri iconUri = UriUtils.fromTrustedString((String) modelData.get("path"));
+                String baseMapName = (String) modelData.get("name");
+                html.append(TEMPLATES.baseMap(iconUri, baseMapName));
+            }
+        });
         listView.setStore(new ListStore<ModelData>());
         listView.setItemSelector("div.thumb-wrap");
         listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         add(listView);
     }
 
-    private native String getTemplate() /*-{
-      return ['<tpl for=".">',
-        '<div class="thumb-wrap">',
-        '<div class="thumb"><img src="{path}" title="{name}"></div>',
-        '<span class="x-editable">{name}</span></div>',
-        '</tpl>',
-        '<div class="x-clear"></div>'].join("");
-    }-*/;
 
     private void loadBaseMaps() {
         listView.getStore().removeAll();

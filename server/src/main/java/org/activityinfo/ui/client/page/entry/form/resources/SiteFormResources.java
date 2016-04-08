@@ -33,10 +33,6 @@ public interface SiteFormResources extends ClientBundle {
 
     static final SiteFormResources INSTANCE = GWT.create(SiteFormResources.class);
 
-    @Source("LocationTemplate.html") TextResource locationTemplate();
-
-    @Source("FormNavigationTemplate.html") TextResource formNavigationTemplate();
-
     @Source("collectionForm.html") TextResource collectionForm();
 
     @Source("FormStyle.css") @NotStrict FormStyle style();
