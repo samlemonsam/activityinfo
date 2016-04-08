@@ -34,6 +34,8 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.google.common.base.Predicate;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
 import org.activityinfo.legacy.shared.command.Month;
@@ -91,13 +93,13 @@ class MonthlyGrid extends EditorGrid<IndicatorRowDTO> {
         }
     }
 
-    private String formatHeader(Month month) {
+    private SafeHtml formatHeader(Month month) {
         DateWrapper date = new DateWrapper(month.getYear(), month.getMonth() - 1, 1);
         String header = monthFormat.format(date.asDate());
         if (locked.apply(month)) {
             header = IconImageBundle.ICONS.lockedPeriodSmall().getHTML() + " " + header;
         }
-        return header;
+        return SafeHtmlUtils.fromTrustedString(header);
     }
 
     private static ColumnModel createColumnModel() {

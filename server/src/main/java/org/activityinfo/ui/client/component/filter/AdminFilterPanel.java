@@ -116,7 +116,7 @@ public class AdminFilterPanel extends ContentPanel implements FilterPanel {
     private void initializeComponent() {
         this.setLayout(new FitLayout());
         this.setScrollMode(Style.Scroll.AUTO);
-        this.setHeadingHtml(I18N.CONSTANTS.filterByGeography());
+        this.setHeadingText(I18N.CONSTANTS.filterByGeography());
         this.setIcon(IconImageBundle.ICONS.filter());
 
         loader = new AdminTreeLoader(dispatcher);

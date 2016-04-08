@@ -22,6 +22,8 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  * #L%
  */
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +39,11 @@ class Item {
     }
 
     void setMsg(String msg) {
-        this.msg = msg;
+        if(msg == null) {
+            this.msg = null;
+        } else {
+            this.msg = SafeHtmlUtils.htmlEscape(msg);
+        }
     }
 
     void setDetails(List<ItemDetail> details) {

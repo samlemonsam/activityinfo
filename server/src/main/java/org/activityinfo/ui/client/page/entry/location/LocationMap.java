@@ -30,6 +30,7 @@ import com.extjs.gxt.ui.client.store.StoreListener;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.google.common.collect.Lists;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.reports.content.MapboxLayers;
@@ -73,7 +74,7 @@ public class LocationMap extends Html {
         LeafletResourceInjector.ensureInjected();
 
         setStyleName("gwt-Map");
-        setHtml("<div style=\"width:100%; height: 100%; position: relative;\"></div>");
+        setHtml(SafeHtmlUtils.fromSafeConstant("<div style=\"width:100%; height: 100%; position: relative;\"></div>"));
     }
 
     @Override

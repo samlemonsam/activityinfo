@@ -60,6 +60,8 @@ import org.activityinfo.ui.client.page.config.form.DatabaseForm;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.fromString;
+
 public class DbListPresenter implements ActionListener {
     public static final PageId PAGE_ID = new PageId("dblist");
 
@@ -140,7 +142,8 @@ public class DbListPresenter implements ActionListener {
     }
 
     private void onDelete() {
-        MessageBox.confirm(ClientContext.getAppTitle(),
+        MessageBox.confirm(
+                fromString(ClientContext.getAppTitle()),
                 I18N.MESSAGES.confirmDeleteDb(selection.getName()),
                 new Listener<MessageBoxEvent>() {
                     @Override

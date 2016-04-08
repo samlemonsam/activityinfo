@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.page.config.form;
 
 import com.extjs.gxt.ui.client.Style.SortDir;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.CheckBox;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
@@ -36,7 +37,7 @@ import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.ui.client.page.config.design.BlankValidator;
-import org.activityinfo.ui.client.page.entry.form.field.ComboboxTemplates;
+import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
 public class UserForm extends FormPanel {
 
@@ -79,7 +80,7 @@ public class UserForm extends FormPanel {
         partnerCombo.setForceSelection(true);
         partnerCombo.setTriggerAction(TriggerAction.ALL);
         partnerCombo.setAllowBlank(false);
-        partnerCombo.setSimpleTemplate(ComboboxTemplates.MULTILINE_TEMPLATE);
+        partnerCombo.setItemRenderer(new MultilineRenderer<PartnerDTO>(new ModelPropertyRenderer<PartnerDTO>("name")));
         this.add(partnerCombo);
     }
 

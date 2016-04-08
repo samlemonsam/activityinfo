@@ -84,7 +84,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     public void setUserDatabase(UserDatabaseDTO userDatabase) {
         this.userDatabase = userDatabase;
 
-        labelDatabaseName.setValue(userDatabase.getName());
+        labelDatabaseName.setText(userDatabase.getName());
 
         storeProjects.removeAll();
         storeProjects.add(userDatabase.getProjects());
@@ -123,10 +123,8 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         labelDatabase = new LabelField(I18N.CONSTANTS.database());
         labelDatabase.setWidth(100);
-        labelDatabase.setUseHtml(false);
 
         labelDatabaseName = new LabelField();
-        labelDatabaseName.setUseHtml(false);
 
         radioDatabase = new Radio();
         radioDatabase.setFieldLabel(I18N.CONSTANTS.database());
@@ -143,7 +141,6 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         labelActivity = new LabelField(I18N.CONSTANTS.activity());
         labelActivity.setWidth(100);
-        labelActivity.setUseHtml(false);
 
         panelActivity = new HorizontalPanel();
         panelActivity.add(labelActivity);
@@ -163,7 +160,6 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         labelProject = new LabelField(I18N.CONSTANTS.project());
         labelProject.setWidth(100);
-        labelProject.setUseHtml(false);
 
         panelProject = new HorizontalPanel();
         panelProject.add(labelProject);

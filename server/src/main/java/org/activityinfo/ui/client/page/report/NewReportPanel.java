@@ -22,8 +22,6 @@ package org.activityinfo.ui.client.page.report;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
-import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.ListViewEvent;
 import com.extjs.gxt.ui.client.event.Listener;
@@ -31,7 +29,6 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.ListView;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -41,6 +38,7 @@ import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.NavigationEvent;
 import org.activityinfo.ui.client.page.NavigationHandler;
+import org.activityinfo.ui.client.page.common.GalleryRenderer;
 import org.activityinfo.ui.client.page.report.template.*;
 
 public class NewReportPanel extends ContentPanel {
@@ -56,7 +54,7 @@ public class NewReportPanel extends ContentPanel {
         setHeadingText(I18N.CONSTANTS.createNewReport());
         setLayout(new FitLayout());
 
-        store = new ListStore<ReportTemplate>();
+        store = new ListStore<>();
         store.add(new ChartTemplate(dispatcher));
         store.add(new PivotTableTemplate(dispatcher));
         store.add(new MapTemplate(dispatcher));
@@ -64,7 +62,7 @@ public class NewReportPanel extends ContentPanel {
 
         ListView<ReportTemplate> view = new ListView<ReportTemplate>();
         view.setStyleName("gallery");
-        view.setTemplate(getTemplate(GWT.getModuleBaseURL() + "image/"));
+        view.setRenderer(new GalleryRenderer<ReportTemplate>("image/reports/"));
         view.setBorders(false);
         view.setStore(store);
         view.setItemSelector("dd");
@@ -106,27 +104,6 @@ public class NewReportPanel extends ContentPanel {
 
             }
         });
-
     }
-
-    private ModelData createReportModel(String name, String desc, String image) {
-        ModelData model = new BaseModelData();
-        model.set("name", name);
-        model.set("desc", desc);
-        model.set("path", image);
-        return model;
-    }
-
-    private native String getTemplate(String base) /*-{
-      return ['<dl><tpl for=".">',
-        '<dd>',
-        '<img src="' + base + 'reports/{path}" title="{name}">',
-        '<div>',
-        '<h4>{name}</h4><p>{description}</p></div>',
-        '</tpl>',
-        '<div style="clear:left;"></div></dl>'].join("");
-
-    }-*/;
-
 
 }

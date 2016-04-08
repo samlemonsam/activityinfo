@@ -25,11 +25,7 @@ package org.activityinfo.ui.client.page.entry.location;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
 import com.extjs.gxt.ui.client.Style.Scroll;
-import com.extjs.gxt.ui.client.event.BaseEvent;
-import com.extjs.gxt.ui.client.event.ButtonEvent;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Window;
@@ -108,9 +104,9 @@ public class LocationDialog extends Window {
             @Override
             public void handleEvent(BaseEvent be) {
                 if (newLocationPresenter.isActive()) {
-                    formHeader.setHtml(I18N.CONSTANTS.addLocation());
+                    formHeader.setText(I18N.CONSTANTS.addLocation());
                 } else {
-                    formHeader.setHtml(I18N.CONSTANTS.searchLocations());
+                    formHeader.setText(I18N.CONSTANTS.searchLocations());
                 }
                 addLocationHeader.setVisible(!newLocationPresenter.isActive());
                 addLocationHelp.setVisible(!newLocationPresenter.isActive());

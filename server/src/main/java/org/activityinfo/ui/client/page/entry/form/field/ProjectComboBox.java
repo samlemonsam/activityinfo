@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.page.entry.form.field;
  */
 
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
@@ -43,6 +44,6 @@ public class ProjectComboBox extends ComboBox<ProjectDTO> {
         setFieldLabel(I18N.CONSTANTS.project());
         setForceSelection(true);
         setAllowBlank(true);
-        setSimpleTemplate(ComboboxTemplates.MULTILINE_TEMPLATE);
+        setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<ProjectDTO>("name")));
     }
 }

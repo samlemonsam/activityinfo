@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
  */
 
 import com.google.common.base.Objects;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.Month;
 import org.activityinfo.legacy.shared.model.*;
@@ -170,11 +171,11 @@ class ItemDetail {
     private static void addValues(StringBuilder sb, String key, Object oldValue, Object newValue, String units) {
         sb.append(key);
         sb.append(": ");
-        sb.append(newValue);
+        sb.append(SafeHtmlUtils.htmlEscape(String.valueOf(newValue)));
 
         if (units != null) {
             sb.append(" ");
-            sb.append(units);
+            sb.append(SafeHtmlUtils.htmlEscape(units));
         }
 
         if (!Objects.equal(oldValue, newValue)) {
@@ -182,7 +183,7 @@ class ItemDetail {
             if (oldValue == null) {
                 sb.append(I18N.MESSAGES.siteHistoryOldValueBlank());
             } else {
-                sb.append(I18N.MESSAGES.siteHistoryOldValue(oldValue));
+                sb.append(SafeHtmlUtils.htmlEscape(I18N.MESSAGES.siteHistoryOldValue(oldValue)));
             }
             sb.append(")");
         }

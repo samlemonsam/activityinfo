@@ -56,4 +56,12 @@ public class FormSectionModel<M> extends BaseModelData {
         return section;
     }
 
+    public String getHeader() {
+        return get("header");
+    }
+
+    public String getDescription() {
+        return get("description");
+    }
+
 }

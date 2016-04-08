@@ -1623,4 +1623,12 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Choose form")
     String chooseForm();
+    @DefaultStringValue("clear")
+    String clear();
+
+    @DefaultStringValue("Link created")
+    String linkCreated();
+
+    @DefaultStringValue("Link removed")
+    String linkRemoved();
 }

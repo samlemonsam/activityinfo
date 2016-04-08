@@ -39,20 +39,16 @@ import com.google.gwt.user.client.ui.HasValue;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.GetAdminLevels;
-import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.AdminLevelResult;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.legacy.shared.reports.model.clustering.AdministrativeLevelClustering;
 import org.activityinfo.legacy.shared.reports.model.clustering.AutomaticClustering;
 import org.activityinfo.legacy.shared.reports.model.clustering.Clustering;
 import org.activityinfo.legacy.shared.reports.model.clustering.NoClustering;
 import org.activityinfo.legacy.shared.reports.model.layers.MapLayer;
-import org.activityinfo.server.database.hibernate.entity.AdminLevel;
-import org.activityinfo.server.endpoint.rest.AdminLevelResource;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /*
  * Shows a list of options to aggregate markers on the map

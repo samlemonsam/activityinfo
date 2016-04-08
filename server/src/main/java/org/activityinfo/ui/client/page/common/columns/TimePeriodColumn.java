@@ -28,7 +28,10 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.i18n.shared.I18N;
+
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.fromTrustedString;
 
 public class TimePeriodColumn extends ReadTextColumn {
 
@@ -43,18 +46,19 @@ public class TimePeriodColumn extends ReadTextColumn {
         setRenderer(new GridCellRenderer<ModelData>() {
 
             @Override
-            public Object render(ModelData model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<ModelData> store,
-                                 Grid<ModelData> grid) {
+            public SafeHtml render(ModelData model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<ModelData> store,
+                                   Grid<ModelData> grid) {
 
                 LocalDate fromDate = model.get("fromDate");
                 LocalDate toDate = model.get("toDate");
 
-                return I18N.MESSAGES.dateRange(fromDate.atMidnightInMyTimezone(), toDate.atMidnightInMyTimezone());
+                return fromTrustedString(
+                        I18N.MESSAGES.dateRange(fromDate.atMidnightInMyTimezone(), toDate.atMidnightInMyTimezone()));
             }
         });
     }

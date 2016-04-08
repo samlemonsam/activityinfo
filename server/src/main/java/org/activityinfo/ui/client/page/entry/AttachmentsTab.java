@@ -34,6 +34,12 @@ import com.extjs.gxt.ui.client.widget.TabItem;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
@@ -46,7 +52,18 @@ import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 
+import java.util.List;
+
 public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View {
+
+    interface Templates extends SafeHtmlTemplates {
+
+        @Template("<dd><img src=\"{0}\" title=\"{1}\"><span>{1}</span></dd>")
+        SafeHtml item(SafeUri iconUri, String filename);
+
+    }
+
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     protected ActionToolBar toolBar;
     private ContentPanel panel;
@@ -77,7 +94,7 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
         store = new ListStore<SiteAttachmentDTO>();
 
         attachmentList = new ListView<SiteAttachmentDTO>();
-        attachmentList.setTemplate(getTemplate(GWT.getModuleBaseURL() + "image/"));
+        attachmentList.setRenderer(new ListRenderer());
         attachmentList.setBorders(false);
         attachmentList.setStore(store);
         attachmentList.setItemSelector("dd");
@@ -150,16 +167,7 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
                 store.add(result.getData());
             }
         });
-
     }
-
-    private native String getTemplate(String base) /*-{
-      return [ '<dl><tpl for=".">', '<dd>',
-        '<img src="' + base + 'attach.png" title="{fileName}">',
-        '<span>{fileName}</span>', '</tpl>',
-        '<div style="clear:left;"></div></dl>' ].join("");
-
-    }-*/;
 
     @Override
     public String getSelectedItem() {
@@ -180,5 +188,27 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
         store.removeAll();
         toolBar.setActionEnabled(UIActions.UPLOAD, false);
         toolBar.setActionEnabled(UIActions.DELETE, false);
+    }
+
+    private class ListRenderer implements SafeHtmlRenderer<List<SiteAttachmentDTO>> {
+
+        @Override
+        public SafeHtml render(List<SiteAttachmentDTO> siteAttachmentDTOs) {
+            return null;
+        }
+
+        @Override
+        public void render(List<SiteAttachmentDTO> attachments, SafeHtmlBuilder html) {
+
+            SafeUri iconUrl = UriUtils.fromTrustedString(GWT.getModuleBaseURL() + "/image/attach.png");
+
+            html.appendHtmlConstant("<dl>");
+            for (SiteAttachmentDTO attachment : attachments) {
+                html.append(TEMPLATES.item(iconUrl, attachment.getFileName()));
+            }
+
+            html.appendHtmlConstant("<div style=\"clear:left;\"></div>");
+            html.appendHtmlConstant("</dl>");
+        }
     }
 }

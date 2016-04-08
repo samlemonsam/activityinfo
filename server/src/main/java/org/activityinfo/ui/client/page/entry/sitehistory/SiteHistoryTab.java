@@ -25,16 +25,19 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.TabItem;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetLocations;
-import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.GetSiteHistory;
 import org.activityinfo.legacy.shared.command.GetSiteHistory.GetSiteHistoryResult;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.legacy.shared.model.SiteHistoryDTO;
 
 import java.util.List;
 
@@ -87,7 +90,7 @@ public class SiteHistoryTab extends TabItem {
                                         public void onSuccess(ActivityFormDTO schema) {
                                             if (schema == null || locationsResult == null || locationsResult.getData() == null ||
                                                     historyResult.getSiteHistories() == null) {
-                                                content.setHtml("");
+                                                content.setHtml(SafeHtmlUtils.EMPTY_SAFE_HTML);
                                                 return;
                                             }
 
@@ -110,14 +113,17 @@ public class SiteHistoryTab extends TabItem {
                         final List<LocationDTO> locations,
                         final SiteDTO site,
                         final List<SiteHistoryDTO> histories) {
-        content.setHtml(new SiteHistoryRenderer().render(schema, locations, site, histories));
+        content.setHtml(SafeHtmlUtils.fromTrustedString(
+                new SiteHistoryRenderer().render(schema, locations, site, histories)));
     }
 
     private void renderNotAvailable(final SiteDTO site) {
-        content.setHtml(new SiteHistoryRenderer().renderNotAvailable(site));
+        content.setHtml(SafeHtmlUtils.fromTrustedString(
+                new SiteHistoryRenderer().renderNotAvailable(site)));
     }
 
     private void renderLoading() {
-        content.setHtml(new SiteHistoryRenderer().renderLoading());
+        content.setHtml(SafeHtmlUtils.fromTrustedString(
+                new SiteHistoryRenderer().renderLoading()));
     }
 }

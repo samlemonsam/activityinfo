@@ -25,8 +25,9 @@ package org.activityinfo.ui.client.page.entry.form;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
 import com.extjs.gxt.ui.client.event.ListViewEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.ListRenderer;
 import com.extjs.gxt.ui.client.widget.ListView;
-import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 import java.util.Arrays;
 
@@ -39,7 +40,7 @@ public class FormNavigationListView extends ListView<FormSectionModel> {
         store = new ListStore<FormSectionModel>();
 
         setStore(store);
-        setTemplate(SiteFormResources.INSTANCE.formNavigationTemplate().getText());
+        setRenderer(new Renderer());
         setItemSelector(".formSec");
 
         getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -84,4 +85,27 @@ public class FormNavigationListView extends ListView<FormSectionModel> {
             }
         }
     }
+
+    private class Renderer extends ListRenderer<FormSectionModel> {
+
+        @Override
+        protected void renderItem(FormSectionModel section, SafeHtmlBuilder html) {
+//            <tpl for=".">
+//            <div class="formSec">
+//            <div class="formSecHeader">{header}</div>
+//            <div class="formSecDesc">{description}</div>
+//            </div>
+//            </tpl>
+
+            html.appendHtmlConstant("<div class=formSec>");
+            html.appendHtmlConstant("<div class=formSecHeader>");
+            html.appendEscaped(section.getHeader());
+            html.appendHtmlConstant("</div>");
+            html.appendHtmlConstant("<div class=formSecDesc>");
+            html.appendEscaped(section.getDescription());
+            html.appendHtmlConstant("</div>");
+            html.appendHtmlConstant("</div>");
+        }
+    }
+
 }
