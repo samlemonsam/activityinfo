@@ -142,7 +142,7 @@ public class SiteRenderer {
                          .append("<td class='indicatorValue'>")
                          .append(formatValue(indicator, value))
                          .append("</td><td class='indicatorUnits'>")
-                         .append(SafeHtmlUtils.htmlEscape(indicator.getUnits()))
+                         .append(SafeHtmlUtils.htmlEscape(Strings.nullToEmpty(indicator.getUnits())))
                          .append("</td>");
                 } else {
                     groupHtml
