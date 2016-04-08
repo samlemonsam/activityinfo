@@ -11,7 +11,7 @@ import java.util.Date;
 public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will loose all activities and indicator results.")
-    String confirmDeleteDb(String arg0);
+    SafeHtml confirmDeleteDb(String arg0);
 
     @DefaultMessage("The coordinate falls outside of the bounds of {0}")
     String coordOutsideBounds(String arg0);

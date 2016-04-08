@@ -34,7 +34,9 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -50,12 +52,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.gwt.safecss.shared.SafeStylesUtils.forMarginLeft;
+
 public class PivotGridPanel extends ContentPanel implements ReportView<PivotReportElement<PivotContent>> {
 
     interface Templates extends SafeHtmlTemplates {
 
-        @Template("<span style=\"margin-left:{1}px\">{0}</span>")
-        SafeHtml header(String header, int indent);
+        @Template("<span style=\"{0}\">{1}</span>")
+        SafeHtml header(SafeStyles indent, String header);
 
     }
 
@@ -173,9 +177,12 @@ public class PivotGridPanel extends ContentPanel implements ReportView<PivotRepo
                              int colIndex,
                              ListStore<PivotTableRow> store,
                              Grid<PivotTableRow> grid) {
-            return TEMPLATES.header((String) model.get("header"), model.getDepth() * ROW_INDENT);
-        }
 
+            String header = model.get("header");
+            SafeStyles indent = forMarginLeft(model.getDepth() * ROW_INDENT, Unit.PX);
+
+            return TEMPLATES.header(indent, header);
+        }
     }
 
     protected ColumnModel createColumnModel(PivotTableData data) {

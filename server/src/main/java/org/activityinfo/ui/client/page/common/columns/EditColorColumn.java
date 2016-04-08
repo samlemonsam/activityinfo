@@ -25,6 +25,7 @@ package org.activityinfo.ui.client.page.common.columns;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.i18n.shared.I18N;
@@ -32,11 +33,13 @@ import org.activityinfo.ui.client.component.report.editor.map.layerOptions.Piech
 import org.activityinfo.ui.client.component.report.editor.map.layerOptions.PiechartLayerOptions.NamedSlice;
 import org.activityinfo.ui.client.widget.legacy.ColorField;
 
+import static com.google.gwt.safecss.shared.SafeStylesUtils.forTrustedBackgroundColor;
+
 public class EditColorColumn extends ColumnConfig {
 
     interface Templates extends SafeHtmlTemplates {
-        @Template("<span style=\"background:#{0}\">{0}</span>")
-        SafeHtml colorCell(String color);
+        @Template("<span style=\"{0}\">{1}</span>")
+        SafeHtml colorCell(SafeStyles style, String color);
     }
 
     private static final Templates TEMPLATES = GWT.create(Templates.class);
@@ -58,7 +61,7 @@ public class EditColorColumn extends ColumnConfig {
                                    int colIndex,
                                    ListStore<NamedSlice> store,
                                    Grid<NamedSlice> grid) {
-                return TEMPLATES.colorCell(model.getColor());
+                return TEMPLATES.colorCell(forTrustedBackgroundColor(model.getColor()), model.getColor());
             }
         };
 
