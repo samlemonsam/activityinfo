@@ -9,7 +9,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 */
 public interface ValidationCellTemplates extends SafeHtmlTemplates {
 
-    public static final ValidationCellTemplates INSTANCE = GWT.create(ValidationCellTemplates.class);
+    ValidationCellTemplates INSTANCE = GWT.create(ValidationCellTemplates.class);
 
     @Template("<del>{0}</del>")
     public SafeHtml deleted(String text);

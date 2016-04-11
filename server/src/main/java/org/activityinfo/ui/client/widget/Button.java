@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.widget;
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiConstructor;
 import org.activityinfo.ui.client.style.ElementStyle;
 
@@ -15,6 +16,6 @@ public class Button extends ButtonWithSize {
     }
 
     public void setLabel(String label) {
-        super.setHTML(label);
+        super.setHTML(SafeHtmlUtils.fromString(label));
     }
 }
