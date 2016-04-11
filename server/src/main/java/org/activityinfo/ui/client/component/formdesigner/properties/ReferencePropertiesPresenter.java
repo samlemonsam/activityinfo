@@ -43,6 +43,14 @@ public class ReferencePropertiesPresenter {
 
     public void show(final FieldWidgetContainer fieldWidgetContainer) {
         final FormField formField = fieldWidgetContainer.getFormField();
+        final boolean isVisible = formField.getType() instanceof ReferenceType;
+
+        view.setVisible(isVisible);
+        if (!isVisible) {
+            return;
+        }
+
+        final ReferenceType referenceType = (ReferenceType) formField.getType();
 
         referenceAddButtonClickHandler = view.getReferenceAddButton().addClickHandler(new ClickHandler() {
             @Override
@@ -52,7 +60,7 @@ public class ReferencePropertiesPresenter {
                     @Override
                     public void onClick(ClickEvent event) {
                         // todo put in cache
-                        ReferenceType referenceType = (ReferenceType) formField.getType();
+
                         referenceType.getRange().addAll(dialog.getFormClassIds());
                         setReferenceListItems(referenceType);
                     }
@@ -62,8 +70,6 @@ public class ReferencePropertiesPresenter {
         referenceRemoveButtonClickHandler = view.getReferenceRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                ReferenceType referenceType = (ReferenceType) formField.getType();
-
                 for (int i = 0; i < view.getReferenceListBox().getItemCount(); i++) {
                     if (view.getReferenceListBox().isItemSelected(i)) {
                         ResourceId resourceId = ResourceId.valueOf(view.getReferenceListBox().getValue(i));

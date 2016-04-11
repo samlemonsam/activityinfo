@@ -64,7 +64,7 @@ public class ChooseFormDialog extends Composite {
     public ChooseFormDialog(ResourceLocator resourceLocator) {
         browser = createBrowser(resourceLocator);
 
-        uiBinder.createAndBindUi(this);
+        initWidget(uiBinder.createAndBindUi(this));
 
         dialog = new ModalDialog(this, I18N.CONSTANTS.chooseForm());
         dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
@@ -92,6 +92,7 @@ public class ChooseFormDialog extends Composite {
     }
 
     public ChooseFormDialog show() {
+        dialog.show();
         return this;
     }
 
