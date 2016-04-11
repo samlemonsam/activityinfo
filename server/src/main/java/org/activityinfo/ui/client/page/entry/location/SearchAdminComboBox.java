@@ -61,7 +61,7 @@ public class SearchAdminComboBox extends ComboBox<AdminEntityDTO> implements Adm
 
         clearSpan = DOM.createSpan();
         clearSpan.setInnerText(I18N.CONSTANTS.clear());
-        clearSpan.setPropertyString("class", SiteFormResources.INSTANCE.style().adminClearSpan());
+        clearSpan.addClassName(SiteFormResources.INSTANCE.style().adminClearSpan());
         clearSpan.getStyle().setVisibility(Style.Visibility.VISIBLE);
 
         DOM.sinkEvents(clearSpan, Event.MOUSEEVENTS);
