@@ -36,8 +36,7 @@ import org.activityinfo.ui.client.widget.form.FormGroup;
  */
 public class PropertiesPanel extends Composite {
 
-    private static OurUiBinder uiBinder = GWT
-            .create(OurUiBinder.class);
+    private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
     interface OurUiBinder extends UiBinder<Widget, PropertiesPanel> {
     }
