@@ -75,13 +75,7 @@ public class PropertiesPanel extends Composite {
     @UiField
     FormGroup descriptionGroup;
     @UiField
-    HTMLPanel referenceGroup;
-    @UiField
-    ListBox referenceListBox;
-    @UiField
-    Button referenceAddButton;
-    @UiField
-    Button referenceRemoveButton;
+    ReferenceProperties referenceProperties;
 
     public PropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -151,19 +145,7 @@ public class PropertiesPanel extends Composite {
         return descriptionGroup;
     }
 
-    public HTMLPanel getReferenceGroup() {
-        return referenceGroup;
-    }
-
-    public ListBox getReferenceListBox() {
-        return referenceListBox;
-    }
-
-    public Button getReferenceAddButton() {
-        return referenceAddButton;
-    }
-
-    public Button getReferenceRemoveButton() {
-        return referenceRemoveButton;
+    public ReferenceProperties getReferenceProperties() {
+        return referenceProperties;
     }
 }

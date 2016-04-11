@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,13 +32,14 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Pair;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.MetadataType;
+import org.activityinfo.model.type.ParametrizedFieldType;
+import org.activityinfo.model.type.ParametrizedFieldTypeClass;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
@@ -54,7 +54,6 @@ import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSe
 import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz on 7/9/14.
@@ -76,14 +75,13 @@ public class PropertiesPresenter {
     private HandlerRegistration relevanceEnabledValueHandler;
     private HandlerRegistration relevanceEnabledIfValueHandler;
 
-    // reference
-    private HandlerRegistration referenceAddButtonClickHandler;
-    private HandlerRegistration referenceRemoveButtonClickHandler;
-    private Map<ResourceId, Pair<String, String>> formIdToLabelAndDatabase = Maps.newHashMap();
+    private final ReferencePropertiesPresenter referencePresenter;
 
     public PropertiesPresenter(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
         this.view = formDesigner.getFormDesignerPanel().getPropertiesPanel();
+        this.referencePresenter = new ReferencePropertiesPresenter(
+                formDesigner.getResourceLocator(), view.getReferenceProperties());
 
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
@@ -117,11 +115,12 @@ public class PropertiesPresenter {
             currentDesignWidget = null;
         }
 
+        referencePresenter.reset();
+
         view.getRequiredGroup().setVisible(false);
         view.getVisibleGroup().setVisible(false);
         view.getRelevanceGroup().setVisible(false);
         view.getCodeGroup().setVisible(false);
-        view.getReferenceGroup().setVisible(false);
 
         view.getLabel().setValue("");
         view.getDescription().setValue("");
@@ -150,13 +149,6 @@ public class PropertiesPresenter {
         }
         if (relevanceButtonClickHandler != null) {
             relevanceButtonClickHandler.removeHandler();
-        }
-
-        if (referenceAddButtonClickHandler != null) {
-            referenceAddButtonClickHandler.removeHandler();
-        }
-        if (referenceRemoveButtonClickHandler != null) {
-            referenceRemoveButtonClickHandler.removeHandler();
         }
     }
 
@@ -258,35 +250,7 @@ public class PropertiesPresenter {
             }
         });
 
-        referenceAddButtonClickHandler = view.getReferenceAddButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final ChooseFormDialog dialog = new ChooseFormDialog(fieldWidgetContainer.getFormDesigner().getResourceLocator());
-                dialog.show().setOkClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        // todo put in cache
-                        ReferenceType referenceType = (ReferenceType) formField.getType();
-                        referenceType.getRange().addAll(dialog.getFormClassIds());
-                        setReferenceListItems(referenceType);
-                    }
-                });
-            }
-        });
-        referenceRemoveButtonClickHandler = view.getReferenceRemoveButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                ReferenceType referenceType = (ReferenceType) formField.getType();
-
-                for (int i = 0; i < view.getReferenceListBox().getItemCount(); i++) {
-                    if (view.getReferenceListBox().isItemSelected(i)) {
-                        ResourceId resourceId = ResourceId.valueOf(view.getReferenceListBox().getValue(i));
-                        referenceType.getRange().remove(resourceId);
-                    }
-                }
-                setReferenceListItems(referenceType);
-            }
-        });
+        referencePresenter.show(fieldWidgetContainer);
 
         ResourceLocator locator = fieldWidgetContainer.getFormDesigner().getResourceLocator();
         currentDesignWidget = new SimpleFormPanel(locator, fieldWidgetContainer.getFormDesigner().getStateProvider(),
@@ -403,12 +367,4 @@ public class PropertiesPresenter {
 //            view.getRelevanceExpression().addClassName("hide");
 //        }
     }
-
-
-    private void setReferenceListItems(ReferenceType referenceType) {
-        for (ResourceId resourceId : referenceType.getRange()) {
-            view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
-        }
-    }
-
 }

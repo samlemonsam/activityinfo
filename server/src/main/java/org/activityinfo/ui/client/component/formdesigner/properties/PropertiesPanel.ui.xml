@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:a="urn:import:org.activityinfo.ui.client.widget"
              xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
+             xmlns:prop="urn:import:org.activityinfo.ui.client.component.formdesigner.properties"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
@@ -85,5 +86,7 @@
 
       </div>
     </g:HTMLPanel>
+
+    <prop:ReferenceProperties ui:field="referenceProperties"/>
   </g:HTMLPanel>
 </ui:UiBinder>
