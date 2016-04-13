@@ -80,8 +80,7 @@ public class PropertiesPresenter {
     public PropertiesPresenter(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
         this.view = formDesigner.getFormDesignerPanel().getPropertiesPanel();
-        this.referencePresenter = new ReferencePropertiesPresenter(
-                formDesigner.getResourceLocator(), view.getReferenceProperties());
+        this.referencePresenter = new ReferencePropertiesPresenter(view.getReferenceProperties());
 
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override

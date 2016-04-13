@@ -26,6 +26,8 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
 
     public static final ResourceId HOME_ID = ResourceId.valueOf("home");
     public static final ResourceId GEODB_ID = ResourceId.valueOf("_geodb");
+    public static final ResourceId MY_DATABASES = ResourceId.valueOf("_my_databases"); // owner or allowed 'Design'
+    public static final ResourceId SHARED_DATABASES = ResourceId.valueOf("_shared_databases"); // not owner and not allowed 'Design'
 
     private final Criteria criteria;
 
@@ -82,7 +84,7 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
                 categoryFolder.set(FolderClass.LABEL_FIELD_ID, category);
 
                 if (criteria.apply(categoryFolder)) {
-                    instances.add(categoryFolder);
+                    instances.add(0, categoryFolder);
                 }
             }
         }
@@ -106,7 +108,7 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
         return instances;
     }
 
-    private FormInstance newFolder(UserDatabaseDTO db) {
+    public static FormInstance newFolder(UserDatabaseDTO db) {
         FormInstance folder = new FormInstance(cuid(DATABASE_DOMAIN, db.getId()), FolderClass.CLASS_ID);
         folder.setOwnerId(HOME_ID);
         folder.set(FolderClass.LABEL_FIELD_ID, db.getName());

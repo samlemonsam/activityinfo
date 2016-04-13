@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Pair;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -18,15 +17,13 @@ import java.util.Map;
  */
 public class ReferencePropertiesPresenter {
 
-    private ResourceLocator locator;
     private ReferenceProperties view;
 
     private HandlerRegistration referenceAddButtonClickHandler;
     private HandlerRegistration referenceRemoveButtonClickHandler;
     private Map<ResourceId, Pair<String, String>> formIdToLabelAndDatabase = Maps.newHashMap();
 
-    public ReferencePropertiesPresenter(ResourceLocator locator, ReferenceProperties view) {
-        this.locator = locator;
+    public ReferencePropertiesPresenter(ReferenceProperties view) {
         this.view = view;
     }
 
@@ -84,8 +81,11 @@ public class ReferencePropertiesPresenter {
 
 
     private void setReferenceListItems(ReferenceType referenceType) {
+        view.getReferenceListBox().clear();
+
         for (ResourceId resourceId : referenceType.getRange()) {
             view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
         }
+        view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
     }
 }

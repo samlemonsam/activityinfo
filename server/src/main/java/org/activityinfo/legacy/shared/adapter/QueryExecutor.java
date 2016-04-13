@@ -90,6 +90,10 @@ public class QueryExecutor {
             if (parentId.equals(FolderListAdapter.HOME_ID) || parentId.getDomain() == DATABASE_DOMAIN ||
                     parentId.getDomain() == ACTIVITY_CATEGORY_DOMAIN) {
                 return folders();
+            } if (parentId.equals(FolderListAdapter.MY_DATABASES)) {
+                return myDatabases();
+            } else if (parentId.equals(FolderListAdapter.SHARED_DATABASES)) {
+                return sharedDatabases();
             } else if (parentId.equals(FolderListAdapter.GEODB_ID)) {
                 return countries();
             } else if (parentId.getDomain() == CuidAdapter.COUNTRY_DOMAIN) {
@@ -287,6 +291,14 @@ public class QueryExecutor {
 
     private Promise<List<FormInstance>> folders() {
         return dispatcher.execute(new GetSchema()).then(new FolderListAdapter(criteria));
+    }
+
+    private Promise<List<FormInstance>> myDatabases() {
+        return dispatcher.execute(new GetSchema()).then(new MyDatabasesAdapter());
+    }
+
+    private Promise<List<FormInstance>> sharedDatabases() {
+        return dispatcher.execute(new GetSchema()).then(new SharedDatabasesAdapter());
     }
 
     private GetLocations composeLocationQuery(ResourceId formClassId) {

@@ -1631,4 +1631,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Link removed")
     String linkRemoved();
+
+    @DefaultStringValue("My databases")
+    String myDatabases();
+
+    @DefaultStringValue("Shared databases")
+    String sharedDatabases();
 }

@@ -22,7 +22,9 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -30,17 +32,16 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellBrowser;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.widget.ModalDialog;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yuriyz on 04/06/2016.
@@ -58,8 +59,6 @@ public class ChooseFormDialog extends Composite {
 
     @UiField(provided = true)
     CellBrowser browser;
-    @UiField
-    HTML selected;
 
     public ChooseFormDialog(ResourceLocator resourceLocator) {
         browser = createBrowser(resourceLocator);
@@ -67,23 +66,33 @@ public class ChooseFormDialog extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
 
         dialog = new ModalDialog(this, I18N.CONSTANTS.chooseForm());
+        dialog.getDialogDiv().getStyle().setWidth(800, Style.Unit.PX);
+        dialog.getPrimaryButton().setEnabled(false);
         dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-
+               if (!getSelectedLeafNodes().isEmpty()) {
+                   dialog.hide();
+               }
             }
         });
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                String html = "";
-                for (ChooseFormTreeModel.Node node : selectionModel.getSelectedSet()) {
-                    html += node.getLabel() + ",";
-                }
-                selected.setHTML(html);
+                dialog.getPrimaryButton().setEnabled(!getSelectedLeafNodes().isEmpty());
             }
         });
+    }
+
+    private Set<ChooseFormTreeModel.Node> getSelectedLeafNodes() {
+        Set<ChooseFormTreeModel.Node> set = Sets.newHashSet();
+        for (ChooseFormTreeModel.Node node : selectionModel.getSelectedSet()) {
+            if (node.isLeaf()) {
+                set.add(node);
+            }
+        }
+        return set;
     }
 
     private CellBrowser createBrowser(ResourceLocator resourceLocator) {
@@ -103,15 +112,10 @@ public class ChooseFormDialog extends Composite {
         okClickRegistration = dialog.getPrimaryButton().addClickHandler(okClickHandler);
     }
 
-    public List<FormClass> getFormClasses() {
-        List<FormClass> classes = Lists.newArrayList();
-        return classes;
-    }
-
     public List<ResourceId> getFormClassIds() {
         List<ResourceId> ids = Lists.newArrayList();
-        for (FormClass formClass : getFormClasses()) {
-            ids.add(formClass.getId());
+        for (ChooseFormTreeModel.Node node : getSelectedLeafNodes()) {
+            ids.add(node.getId());
         }
         return ids;
     }

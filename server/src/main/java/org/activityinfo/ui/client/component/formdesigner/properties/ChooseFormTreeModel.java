@@ -21,16 +21,28 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  * #L%
  */
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.*;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.core.shared.application.FolderClass;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.core.shared.criteria.ParentCriteria;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.legacy.shared.adapter.FolderListAdapter;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.icons.Icons;
 
 import java.util.List;
 
@@ -74,7 +86,72 @@ public class ChooseFormTreeModel implements TreeViewModel {
         public void setId(ResourceId id) {
             this.id = id;
         }
+
+        public static List<Node> convert(List<FormInstance> result) {
+            List<Node> nodes = Lists.newArrayList();
+            for (FormInstance instance : result) {
+                nodes.add(new Node(instance.getId(), labelFromInstance(instance)));
+            }
+            return nodes;
+        }
+
+        private static String labelFromInstance(FormInstance instance) {
+            switch (instance.getId().getDomain()) {
+                case CuidAdapter.DATABASE_DOMAIN:
+                    return instance.getString(FolderClass.LABEL_FIELD_ID);
+                case CuidAdapter.COUNTRY_DOMAIN:
+                    return instance.getString(ApplicationProperties.COUNTRY_NAME_FIELD);
+                case CuidAdapter.ADMIN_LEVEL_DOMAIN:
+                    return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
+                case CuidAdapter.ACTIVITY_DOMAIN:
+                    return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
+                case CuidAdapter.ACTIVITY_CATEGORY_DOMAIN:
+                    return instance.getString(FolderClass.LABEL_FIELD_ID);
+            }
+
+            String label = FormInstanceLabeler.getLabel(instance);
+            return !Strings.isNullOrEmpty(label) ? label : I18N.CONSTANTS.unknown();
+        }
+
+        public boolean isLeaf() {
+            char domain = getId().getDomain();
+            return domain == CuidAdapter.ACTIVITY_DOMAIN ||
+                    domain == CuidAdapter.ADMIN_ENTITY_DOMAIN ||
+                    domain == CuidAdapter.PROJECT_DOMAIN ||
+                    domain == CuidAdapter.PARTNER_DOMAIN;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Node node = (Node) o;
+
+            return !(id != null ? !id.equals(node.id) : node.id != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            return id != null ? id.hashCode() : 0;
+        }
+
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "id=" + id +
+                    ", label='" + label + '\'' +
+                    '}';
+        }
     }
+
+    public interface Template extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<span class='{0}'></span> {1}")
+        SafeHtml cell(String icon, String label);
+    }
+
+    public static final Template TEMPLATE = GWT.create(Template.class);
 
     public static class Cell extends AbstractCell<Node> {
 
@@ -84,34 +161,70 @@ public class ChooseFormTreeModel implements TreeViewModel {
         @Override
         public void render(Context context, Node value, SafeHtmlBuilder sb) {
             if (value != null) {
-                sb.append(SafeHtmlUtils.fromString(value.getLabel()));
+                sb.append(TEMPLATE.cell(icon(value), value.getLabel()));
             }
+        }
+
+        private String icon(Node node) {
+            if (node.isLeaf()) {
+                return Icons.INSTANCE.form();
+            }
+
+            ResourceId id = node.getId();
+            if (id.equals(FolderListAdapter.MY_DATABASES) ||
+                    id.equals(FolderListAdapter.SHARED_DATABASES) ||
+                    id.equals(FolderListAdapter.HOME_ID) ||
+                    id.equals(FolderListAdapter.GEODB_ID)) {
+                return Icons.INSTANCE.bars();
+            }
+
+            return Icons.INSTANCE.folder();
         }
     }
 
     public static class DataProvider extends AsyncDataProvider<Node> {
 
         private final ResourceLocator locator;
+        private final Node node;
 
-        public DataProvider(ResourceLocator locator) {
+        public DataProvider(ResourceLocator locator, Node node) {
             this.locator = locator;
+            this.node = node;
         }
 
         @Override
         protected void onRangeChanged(HasData display) {
-            Range range = display.getVisibleRange();
+            if (node == null) {
+                loadRoots();
+                return;
+            }
 
-            locator.queryInstances(new ClassCriteria(FolderClass.CLASS_ID)).then(new AsyncCallback<List<FormInstance>>() {
+            final Range range = display.getVisibleRange();
+
+            locator.queryInstances(ParentCriteria.isChildOf(node.getId())).then(new AsyncCallback<List<FormInstance>>() {
                 @Override
                 public void onFailure(Throwable caught) {
-
+                    Log.error(caught.getMessage(), caught);
                 }
 
                 @Override
                 public void onSuccess(List<FormInstance> result) {
+                    List<Node> nodes = Node.convert(result);
 
+                    DataProvider.this.updateRowData(range.getStart(), nodes);
+                    DataProvider.this.updateRowCount(nodes.size(), true);
                 }
             });
+        }
+
+        private void loadRoots() {
+            final List<Node> roots = Lists.newArrayList();
+            roots.add(new Node(FolderListAdapter.GEODB_ID, I18N.CONSTANTS.geography()));
+            roots.add(new Node(FolderListAdapter.MY_DATABASES, I18N.CONSTANTS.myDatabases()));
+            roots.add(new Node(FolderListAdapter.SHARED_DATABASES, I18N.CONSTANTS.sharedDatabases()));
+
+            updateRowData(0, roots);
+            updateRowCount(roots.size(), true);
         }
     }
 
@@ -125,15 +238,15 @@ public class ChooseFormTreeModel implements TreeViewModel {
 
     @Override
     public <T> NodeInfo<?> getNodeInfo(T value) {
-        if (value == null) {
-            return new DefaultNodeInfo<>(new DataProvider(locator), new Cell(), selectionModel, null);
-
-        }
-        throw new RuntimeException("Failed to identify child of the value: " + value);
+        return new DefaultNodeInfo<>(new DataProvider(locator, (Node) value), new Cell(), selectionModel, null);
     }
 
     @Override
     public boolean isLeaf(Object value) {
+        if (value instanceof Node) {
+            Node node = (Node) value;
+            return node.isLeaf();
+        }
         return false;
     }
 }
