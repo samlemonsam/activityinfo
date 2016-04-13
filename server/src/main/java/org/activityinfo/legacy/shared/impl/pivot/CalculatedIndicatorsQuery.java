@@ -114,7 +114,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                     boolean hasSumAggregation = false;
                     for (SqlResultSetRow row : results.getRows()) {
 
-                        LOGGER.info("row = " + row);
+                        LOGGER.finer("row = " + row);
 
                         int activityId = row.getInt("activityId");
                         int indicatorId = row.getInt("indicatorId");

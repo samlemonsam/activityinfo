@@ -31,7 +31,7 @@ public class HibernateQueryExecutor implements QueryExecutor {
 
     @Override
     public ResultSet query(final String sql) {
-        LOGGER.info("Executing query: " + sql);
+        LOGGER.fine("Executing query: " + sql);
 
         return doWork(new AbstractReturningWork<ResultSet>() {
             @Override
@@ -48,7 +48,6 @@ public class HibernateQueryExecutor implements QueryExecutor {
 
     @Override
     public int update(final String sql, final List<?> parameters) {
-        System.out.println(sql);
         return doWork(new AbstractReturningWork<Integer>() {
             @Override
             public Integer execute(Connection connection) throws SQLException {

@@ -69,16 +69,7 @@ public class AuthTokenProvider {
         String domain = null;
         String comment = null;
         int maxAge = THIS_SESSION;
-        boolean onlySecure = false;
-        return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
-    }
-
-    private NewCookie newLocaleCookie(String name, String value) {
-        String path = ROOT;
-        String domain = null;
-        String comment = null;
-        int maxAge = ONE_YEAR;
-        boolean onlySecure = false;
+        boolean onlySecure = true;
         return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
     }
 }
