@@ -86,7 +86,7 @@ public class ContentSecurityPolicy {
         append(sb, "frame-ancestors", SELF);
         
         // Report violations to the server so they can be logged and monitored
-        sb.append("report-uri /csp-violation");
+        sb.append("report-uri /csp-violation;");
         
         
         this.policy = sb.toString();
@@ -100,7 +100,7 @@ public class ContentSecurityPolicy {
             sb.append(s);
         }
         sb.append(';');
-        sb.append('\n');
+        sb.append(' ');
     }
     
     public void applyTo(HttpServletResponse response) {
