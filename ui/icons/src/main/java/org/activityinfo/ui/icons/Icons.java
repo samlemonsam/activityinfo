@@ -77,7 +77,7 @@ public class Icons  {
 
     //@Source(value = "icons/fontawesome.svg", glyph = 0xf115)
     public String folder() {
-        return "icon icon_folder";
+        return "icon icon_folderOpen";
     }
 
     //@Source(value = "icons/fontawesome.svg", glyph = 0xf114)
