@@ -63,12 +63,16 @@ public class Icons  {
 
     //@Source(value = "icons/ocha.svg", glyph = 0xe61a)
     public String form() {
-        return ""; // todo 
+        return "icon icon_file";
+    }
+
+    public String database() {
+        return "icon icon_database";
     }
 
     //@Source(value = "icons/ocha.svg", glyph = 0xe6c4)
     public String location() {
-        return ""; // todo
+        return "icon icon_file";
     }
 
     //@Source(value = "icons/fontawesome.svg", glyph = 0xf115)
@@ -167,5 +171,8 @@ public class Icons  {
     }
     
     public String print() { return "icon icon_print"; }
-    
+
+    public String home() {
+        return "icon icon_home";
+    }
 }

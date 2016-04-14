@@ -4,12 +4,18 @@ import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Pair;
+import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +53,7 @@ public class ReferencePropertiesPresenter {
             return;
         }
 
+        final ResourceLocator locator = fieldWidgetContainer.getFormDesigner().getResourceLocator();
         final ReferenceType referenceType = (ReferenceType) formField.getType();
 
         referenceAddButtonClickHandler = view.getReferenceAddButton().addClickHandler(new ClickHandler() {
@@ -56,10 +63,8 @@ public class ReferencePropertiesPresenter {
                 dialog.show().setOkClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        // todo put in cache
-
                         referenceType.getRange().addAll(dialog.getFormClassIds());
-                        setReferenceListItems(referenceType);
+                        setReferenceListItems(referenceType, locator);
                     }
                 });
             }
@@ -73,19 +78,42 @@ public class ReferencePropertiesPresenter {
                         referenceType.getRange().remove(resourceId);
                     }
                 }
-                setReferenceListItems(referenceType);
+                setReferenceListItems(referenceType, locator);
             }
         });
 
     }
 
 
-    private void setReferenceListItems(ReferenceType referenceType) {
+    private void setReferenceListItems(final ReferenceType referenceType, final ResourceLocator locator) {
         view.getReferenceListBox().clear();
 
-        for (ResourceId resourceId : referenceType.getRange()) {
-            view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
-        }
-        view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
+        locator.queryInstances(ClassCriteria.union(referenceType.getRange())).then(new AsyncCallback<List<FormInstance>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Log.error(caught.getMessage(), caught);
+
+                // failed to fetch respective form classes, show id of form directly (no label)
+                for (ResourceId resourceId : referenceType.getRange()) {
+                    view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
+                }
+                view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
+
+            }
+
+            @Override
+            public void onSuccess(List<FormInstance> result) {
+                Map<ResourceId, String> idToLabel = Maps.newHashMap();
+
+                for (FormInstance instance : result) {
+                    idToLabel.put(instance.getId(), ChooseFormTreeModel.labelFromInstance(instance));
+                }
+
+                for (ResourceId resourceId : referenceType.getRange()) {
+                    view.getReferenceListBox().addItem(idToLabel.get(resourceId), resourceId.asString());
+                }
+                view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
+            }
+        });
     }
 }

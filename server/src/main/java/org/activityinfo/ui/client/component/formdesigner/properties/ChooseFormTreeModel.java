@@ -42,6 +42,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.ui.icons.Icons;
 
 import java.util.List;
@@ -61,13 +62,19 @@ public class ChooseFormTreeModel implements TreeViewModel {
         };
 
         private ResourceId id;
+        private ResourceId ownerId;
         private String label;
 
         public Node() {
         }
 
         public Node(ResourceId id, String label) {
+            this(id, null, label);
+        }
+
+        public Node(ResourceId id, ResourceId ownerId, String label) {
             this.id = id;
+            this.ownerId = ownerId;
             this.label = label;
         }
 
@@ -87,30 +94,20 @@ public class ChooseFormTreeModel implements TreeViewModel {
             this.id = id;
         }
 
+        public ResourceId getOwnerId() {
+            return ownerId;
+        }
+
+        public void setOwnerId(ResourceId ownerId) {
+            this.ownerId = ownerId;
+        }
+
         public static List<Node> convert(List<FormInstance> result) {
             List<Node> nodes = Lists.newArrayList();
             for (FormInstance instance : result) {
                 nodes.add(new Node(instance.getId(), labelFromInstance(instance)));
             }
             return nodes;
-        }
-
-        private static String labelFromInstance(FormInstance instance) {
-            switch (instance.getId().getDomain()) {
-                case CuidAdapter.DATABASE_DOMAIN:
-                    return instance.getString(FolderClass.LABEL_FIELD_ID);
-                case CuidAdapter.COUNTRY_DOMAIN:
-                    return instance.getString(ApplicationProperties.COUNTRY_NAME_FIELD);
-                case CuidAdapter.ADMIN_LEVEL_DOMAIN:
-                    return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
-                case CuidAdapter.ACTIVITY_DOMAIN:
-                    return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
-                case CuidAdapter.ACTIVITY_CATEGORY_DOMAIN:
-                    return instance.getString(FolderClass.LABEL_FIELD_ID);
-            }
-
-            String label = FormInstanceLabeler.getLabel(instance);
-            return !Strings.isNullOrEmpty(label) ? label : I18N.CONSTANTS.unknown();
         }
 
         public boolean isLeaf() {
@@ -170,12 +167,18 @@ public class ChooseFormTreeModel implements TreeViewModel {
                 return Icons.INSTANCE.form();
             }
 
+            char domain = node.getId().getDomain();
+
+            if (domain == CuidAdapter.DATABASE_DOMAIN) {
+                return Icons.INSTANCE.database();
+            }
+
             ResourceId id = node.getId();
             if (id.equals(FolderListAdapter.MY_DATABASES) ||
                     id.equals(FolderListAdapter.SHARED_DATABASES) ||
                     id.equals(FolderListAdapter.HOME_ID) ||
                     id.equals(FolderListAdapter.GEODB_ID)) {
-                return Icons.INSTANCE.bars();
+                return Icons.INSTANCE.home();
             }
 
             return Icons.INSTANCE.folder();
@@ -201,7 +204,7 @@ public class ChooseFormTreeModel implements TreeViewModel {
 
             final Range range = display.getVisibleRange();
 
-            locator.queryInstances(ParentCriteria.isChildOf(node.getId())).then(new AsyncCallback<List<FormInstance>>() {
+            locator.queryInstances(ParentCriteria.isChildOf(node.getId(), node.getOwnerId())).then(new AsyncCallback<List<FormInstance>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Log.error(caught.getMessage(), caught);
@@ -211,10 +214,19 @@ public class ChooseFormTreeModel implements TreeViewModel {
                 public void onSuccess(List<FormInstance> result) {
                     List<Node> nodes = Node.convert(result);
 
+                    addPartnerAndProjectNodeIfNeeded(node, nodes);
+
                     DataProvider.this.updateRowData(range.getStart(), nodes);
                     DataProvider.this.updateRowCount(nodes.size(), true);
                 }
             });
+        }
+
+        private void addPartnerAndProjectNodeIfNeeded(Node parentNode, List<Node> childs) {
+            if (parentNode.getId().getDomain() == CuidAdapter.DATABASE_DOMAIN) {
+                childs.add(0, new Node(ClassType.PARTNER.getResourceId(), node.getId(), I18N.CONSTANTS.partners()));
+                childs.add(0, new Node(ClassType.PROJECT.getResourceId(), node.getId(), I18N.CONSTANTS.projects()));
+            }
         }
 
         private void loadRoots() {
@@ -248,5 +260,23 @@ public class ChooseFormTreeModel implements TreeViewModel {
             return node.isLeaf();
         }
         return false;
+    }
+
+    public static String labelFromInstance(FormInstance instance) {
+        switch (instance.getId().getDomain()) {
+            case CuidAdapter.DATABASE_DOMAIN:
+                return instance.getString(FolderClass.LABEL_FIELD_ID);
+            case CuidAdapter.COUNTRY_DOMAIN:
+                return instance.getString(ApplicationProperties.COUNTRY_NAME_FIELD);
+            case CuidAdapter.ADMIN_LEVEL_DOMAIN:
+                return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
+            case CuidAdapter.ACTIVITY_DOMAIN:
+                return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
+            case CuidAdapter.ACTIVITY_CATEGORY_DOMAIN:
+                return instance.getString(FolderClass.LABEL_FIELD_ID);
+        }
+
+        String label = FormInstanceLabeler.getLabel(instance);
+        return !Strings.isNullOrEmpty(label) ? label : I18N.CONSTANTS.unknown();
     }
 }
