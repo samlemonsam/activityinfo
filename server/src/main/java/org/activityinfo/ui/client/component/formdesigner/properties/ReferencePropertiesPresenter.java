@@ -1,5 +1,7 @@
 package org.activityinfo.ui.client.component.formdesigner.properties;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -19,8 +21,9 @@ public class ReferencePropertiesPresenter {
 
     private ReferenceProperties view;
 
-    private HandlerRegistration referenceAddButtonClickHandler;
-    private HandlerRegistration referenceRemoveButtonClickHandler;
+    private HandlerRegistration addButtonClickHandler;
+    private HandlerRegistration removeButtonClickHandler;
+    private HandlerRegistration changeHandler;
 
     public ReferencePropertiesPresenter(ReferenceProperties view) {
         this.view = view;
@@ -29,11 +32,14 @@ public class ReferencePropertiesPresenter {
     public void reset() {
         view.setVisible(false);
 
-        if (referenceAddButtonClickHandler != null) {
-            referenceAddButtonClickHandler.removeHandler();
+        if (addButtonClickHandler != null) {
+            addButtonClickHandler.removeHandler();
         }
-        if (referenceRemoveButtonClickHandler != null) {
-            referenceRemoveButtonClickHandler.removeHandler();
+        if (removeButtonClickHandler != null) {
+            removeButtonClickHandler.removeHandler();
+        }
+        if (changeHandler != null) {
+            changeHandler.removeHandler();
         }
     }
 
@@ -48,8 +54,9 @@ public class ReferencePropertiesPresenter {
 
         final ResourceLocator locator = fieldWidgetContainer.getFormDesigner().getResourceLocator();
         final ReferenceType referenceType = (ReferenceType) formField.getType();
+        setListItems(referenceType, locator);
 
-        referenceAddButtonClickHandler = view.getReferenceAddButton().addClickHandler(new ClickHandler() {
+        addButtonClickHandler = view.getAddButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 final ChooseFormDialog dialog = new ChooseFormDialog(fieldWidgetContainer.getFormDesigner().getResourceLocator());
@@ -57,34 +64,38 @@ public class ReferencePropertiesPresenter {
                     @Override
                     public void onClick(ClickEvent event) {
                         referenceType.getRange().addAll(dialog.getFormClassIds());
-                        setReferenceListItems(referenceType, locator);
+                        setListItems(referenceType, locator);
                     }
                 });
             }
         });
-        referenceRemoveButtonClickHandler = view.getReferenceRemoveButton().addClickHandler(new ClickHandler() {
+        removeButtonClickHandler = view.getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (int i = 0; i < view.getReferenceListBox().getItemCount(); i++) {
-                    if (view.getReferenceListBox().isItemSelected(i)) {
-                        ResourceId resourceId = ResourceId.valueOf(view.getReferenceListBox().getValue(i));
+                for (int i = 0; i < view.getListBox().getItemCount(); i++) {
+                    if (view.getListBox().isItemSelected(i)) {
+                        ResourceId resourceId = ResourceId.valueOf(view.getListBox().getValue(i));
                         referenceType.getRange().remove(resourceId);
                     }
                 }
-                setReferenceListItems(referenceType, locator);
+                setListItems(referenceType, locator);
             }
         });
-
+        changeHandler = view.getListBox().addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                view.getRemoveButton().setEnabled(view.getListBox().getSelectedIndex() != -1);
+            }
+        });
     }
 
 
-    private void setReferenceListItems(final ReferenceType referenceType, final ResourceLocator locator) {
-        view.getReferenceListBox().clear();
+    private void setListItems(final ReferenceType referenceType, final ResourceLocator locator) {
+        view.getListBox().clear();
 
         for (ResourceId resourceId : referenceType.getRange()) {
-            view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
+            view.getListBox().addItem(resourceId.asString(), resourceId.asString());
         }
-        view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
 
         updateLabels(referenceType, locator);
     }
@@ -100,7 +111,7 @@ public class ReferencePropertiesPresenter {
                 @Override
                 public void onSuccess(FormClass result) {
                     int index = getIndexByValue(result.getId());
-                    view.getReferenceListBox().setItemText(index, result.getLabel());
+                    view.getListBox().setItemText(index, result.getLabel());
                     putParentLabel(result, result, locator);
                 }
             });
@@ -122,9 +133,9 @@ public class ReferencePropertiesPresenter {
             public void onSuccess(FormClass owner) {
                 int index = getIndexByValue(leaf.getId());
 
-                String label = view.getReferenceListBox().getItemText(index);
+                String label = view.getListBox().getItemText(index);
                 label = owner.getLabel() + " > " + label;
-                view.getReferenceListBox().setItemText(index, label);
+                view.getListBox().setItemText(index, label);
 
                 putParentLabel(leaf, owner, locator);
             }
@@ -132,8 +143,8 @@ public class ReferencePropertiesPresenter {
     }
 
     private int getIndexByValue(ResourceId resourceId) {
-        for (int i = 0; i < view.getReferenceListBox().getItemCount(); i++) {
-            if (view.getReferenceListBox().getValue(i).equals(resourceId.asString())) {
+        for (int i = 0; i < view.getListBox().getItemCount(); i++) {
+            if (view.getListBox().getValue(i).equals(resourceId.asString())) {
                 return i;
             }
         }

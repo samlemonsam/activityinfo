@@ -20,11 +20,11 @@ public class ReferenceProperties extends Composite {
     }
 
     @UiField
-    ListBox referenceListBox;
+    ListBox listBox;
     @UiField
-    Button referenceAddButton;
+    Button addButton;
     @UiField
-    Button referenceRemoveButton;
+    Button removeButton;
 
     @UiConstructor
     public ReferenceProperties() {
@@ -32,15 +32,15 @@ public class ReferenceProperties extends Composite {
     }
 
 
-    public ListBox getReferenceListBox() {
-        return referenceListBox;
+    public ListBox getListBox() {
+        return listBox;
     }
 
-    public Button getReferenceAddButton() {
-        return referenceAddButton;
+    public Button getAddButton() {
+        return addButton;
     }
 
-    public Button getReferenceRemoveButton() {
-        return referenceRemoveButton;
+    public Button getRemoveButton() {
+        return removeButton;
     }
 }

@@ -12,12 +12,12 @@ import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.core.shared.criteria.FieldCriteria;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
+import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
-import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.legacy.shared.model.ProjectDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.legacy.shared.command.result.SiteResult;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -241,6 +241,25 @@ public class QueryExecutor {
         }
 
         switch (formClassId.getDomain()) {
+            case ACTIVITY_DOMAIN:
+                int activityId = CuidAdapter.getLegacyIdFromCuid(formClassId);
+                final Promise<SiteResult> site = dispatcher.execute(GetSites.byActivity(activityId));
+                final Promise<ActivityFormDTO> activityForm = dispatcher.execute(new GetActivityForm(activityId));
+
+                return Promise.waitAll(site, activityForm).then(new Function<Void, List<FormInstance>>() {
+                    @Override
+                    public List<FormInstance> apply(Void input) {
+                        SiteBinding binding = new SiteBindingFactory().apply(activityForm.get());
+
+                        List<FormInstance> result = Lists.newArrayList();
+                        if (site.get().getData() != null && !site.get().getData().isEmpty()) {
+                            for (SiteDTO siteDTO : site.get().getData()) {
+                                result.add(binding.newInstance(siteDTO));
+                            }
+                        }
+                        return result;
+                    }
+                });
             case ADMIN_LEVEL_DOMAIN:
                 return dispatcher.execute(adminQuery(formClassId))
                         .then(new ListResultAdapter<>(new AdminEntityInstanceAdapter()));

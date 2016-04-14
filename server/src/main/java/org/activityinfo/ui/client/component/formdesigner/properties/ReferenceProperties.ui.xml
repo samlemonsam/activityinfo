@@ -10,17 +10,17 @@
       <ui:text from='{i18n.reference}'/>
     </label>
     <div class="col-xs-8">
-      <g:ListBox name="referenceListBox" ui:field="referenceListBox"
+      <g:ListBox name="referenceListBox" ui:field="listBox"
                  multipleSelect="true" width="100%" addStyleNames="form-control"/>
     </div>
 
     <div class="col-xs-4"/>
     <!-- reserve space-->
     <div class="col-xs-8">
-      <g:Button addStyleNames="btn btn-default btn-xs" ui:field="referenceAddButton">
+      <g:Button addStyleNames="btn btn-default btn-xs" ui:field="addButton">
         <ui:text from='{i18n.add}'/>
       </g:Button>
-      <g:Button addStyleNames="btn btn-default btn-xs" ui:field="referenceRemoveButton" enabled="false">
+      <g:Button addStyleNames="btn btn-default btn-xs" ui:field="removeButton" enabled="false">
         <ui:text from='{i18n.remove}'/>
       </g:Button>
 
