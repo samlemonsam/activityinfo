@@ -88,32 +88,33 @@ public class ReferencePropertiesPresenter {
     private void setReferenceListItems(final ReferenceType referenceType, final ResourceLocator locator) {
         view.getReferenceListBox().clear();
 
+        for (ResourceId resourceId : referenceType.getRange()) {
+            view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
+        }
+        view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
+
         locator.queryInstances(ClassCriteria.union(referenceType.getRange())).then(new AsyncCallback<List<FormInstance>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Log.error(caught.getMessage(), caught);
-
-                // failed to fetch respective form classes, show id of form directly (no label)
-                for (ResourceId resourceId : referenceType.getRange()) {
-                    view.getReferenceListBox().addItem(resourceId.asString(), resourceId.asString());
-                }
-                view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
-
             }
 
             @Override
             public void onSuccess(List<FormInstance> result) {
-                Map<ResourceId, String> idToLabel = Maps.newHashMap();
-
                 for (FormInstance instance : result) {
-                    idToLabel.put(instance.getId(), ChooseFormTreeModel.labelFromInstance(instance));
+                    int index = getIndexByValue(instance.getId());
+                    view.getReferenceListBox().setItemText(index, ChooseFormTreeModel.labelFromInstance(instance));
                 }
-
-                for (ResourceId resourceId : referenceType.getRange()) {
-                    view.getReferenceListBox().addItem(idToLabel.get(resourceId), resourceId.asString());
-                }
-                view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
             }
         });
+    }
+
+    private int getIndexByValue(ResourceId resourceId) {
+        for (int i = 0; i < view.getReferenceListBox().getItemCount(); i++) {
+            if (view.getReferenceListBox().getValue(i).equals(resourceId.asString())) {
+                return i;
+            }
+        }
+        throw new RuntimeException("Unknown resourceId:" + resourceId);
     }
 }
