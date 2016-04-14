@@ -10,7 +10,6 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.FormClassResult;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 import org.activityinfo.promise.Promise;
@@ -36,6 +35,8 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
                         return input.getFormClass();
                     }
                 });
+            case DATABASE_DOMAIN:
+                return dispatcher.execute(new GetSchema()).then(new DatabaseFormClassAdapter(getLegacyIdFromCuid(classId)));
 
             case PARTNER_FORM_CLASS_DOMAIN:
                 return Promise.resolved(PartnerClassAdapter.create(getLegacyIdFromCuid(classId)));

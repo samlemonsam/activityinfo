@@ -1,22 +1,16 @@
 package org.activityinfo.ui.client.component.formdesigner.properties;
 
-import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Pair;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by yuriyz on 4/11/2016.
@@ -27,7 +21,6 @@ public class ReferencePropertiesPresenter {
 
     private HandlerRegistration referenceAddButtonClickHandler;
     private HandlerRegistration referenceRemoveButtonClickHandler;
-    private Map<ResourceId, Pair<String, String>> formIdToLabelAndDatabase = Maps.newHashMap();
 
     public ReferencePropertiesPresenter(ReferenceProperties view) {
         this.view = view;
@@ -93,18 +86,47 @@ public class ReferencePropertiesPresenter {
         }
         view.getReferenceRemoveButton().setEnabled(!referenceType.getRange().isEmpty());
 
-        locator.queryInstances(ClassCriteria.union(referenceType.getRange())).then(new AsyncCallback<List<FormInstance>>() {
+        updateLabels(referenceType, locator);
+    }
+
+    private void updateLabels(ReferenceType referenceType, final ResourceLocator locator) {
+        for (ResourceId resourceId : referenceType.getRange()) {
+            locator.getFormClass(resourceId).then(new AsyncCallback<FormClass>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Log.error(caught.getMessage(), caught);
+                }
+
+                @Override
+                public void onSuccess(FormClass result) {
+                    int index = getIndexByValue(result.getId());
+                    view.getReferenceListBox().setItemText(index, result.getLabel());
+                    putParentLabel(result, result, locator);
+                }
+            });
+        }
+    }
+
+    private void putParentLabel(final FormClass leaf, FormClass child, final ResourceLocator locator) {
+        if (child.getOwnerId() == null) {
+            return;
+        }
+
+        locator.getFormClass(child.getOwnerId()).then(new AsyncCallback<FormClass>() {
             @Override
             public void onFailure(Throwable caught) {
                 Log.error(caught.getMessage(), caught);
             }
 
             @Override
-            public void onSuccess(List<FormInstance> result) {
-                for (FormInstance instance : result) {
-                    int index = getIndexByValue(instance.getId());
-                    view.getReferenceListBox().setItemText(index, ChooseFormTreeModel.labelFromInstance(instance));
-                }
+            public void onSuccess(FormClass owner) {
+                int index = getIndexByValue(leaf.getId());
+
+                String label = view.getReferenceListBox().getItemText(index);
+                label = owner.getLabel() + " > " + label;
+                view.getReferenceListBox().setItemText(index, label);
+
+                putParentLabel(leaf, owner, locator);
             }
         });
     }
