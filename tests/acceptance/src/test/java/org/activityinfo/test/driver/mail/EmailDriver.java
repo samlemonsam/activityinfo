@@ -1,5 +1,6 @@
 package org.activityinfo.test.driver.mail;
 
+import com.google.common.base.Optional;
 import org.activityinfo.test.sut.UserAccount;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ public interface EmailDriver {
 
     UserAccount newAccount();
     
-    NotificationEmail lastNotificationFor(UserAccount account) throws IOException;
+    Optional<NotificationEmail> lastNotificationFor(UserAccount account) throws IOException;
 
     
 }

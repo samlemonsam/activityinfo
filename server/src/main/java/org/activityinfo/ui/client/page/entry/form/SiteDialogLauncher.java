@@ -128,9 +128,9 @@ public class SiteDialogLauncher {
 
     public static void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback,
                                             boolean isNew, ResourceLocator resourceLocator, StateProvider stateProvider) {
-        String h2Title = isNew ? I18N.CONSTANTS.newSubmission() : I18N.CONSTANTS.editSubmission();
+        String subtitle = isNew ? I18N.CONSTANTS.newSubmission() : I18N.CONSTANTS.editSubmission();
         FormDialog dialog = new FormDialog(resourceLocator, stateProvider);
-        dialog.setDialogTitle(formName, h2Title);
+        dialog.setDialogTitle(formName, subtitle);
         dialog.show(instance, new FormDialogCallback() {
             @Override
             public void onPersisted(List<FormInstance> instance) {

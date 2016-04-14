@@ -21,10 +21,12 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.gwt.core.client.GWT;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
@@ -47,6 +49,13 @@ import java.util.List;
  */
 public class FormDialog {
 
+    interface Templates extends SafeHtmlTemplates {
+        @Template("<h3>{0}</h3><h4>{1}</h4>")
+        SafeHtml title(String title, String subtitle);
+    }
+    
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
+    
     private FormDialogCallback callback;
 
     private final ResourceLocator resourceLocator;
@@ -81,9 +90,8 @@ public class FormDialog {
         dialog.setDialogTitle(text);
     }
 
-    public void setDialogTitle(String h3, String h4) {
-        String html = "<h3>" + h3 + "</h3><br/><h4>" + h4 + "</h4>";
-        dialog.setDialogTitle(SafeHtmlUtils.fromSafeConstant(html).asString());
+    public void setDialogTitle(String title, String subTitle) {
+        dialog.setDialogTitle(TEMPLATES.title(title, subTitle));
     }
 
     public void show(final FormInstance instance, FormDialogCallback callback) {

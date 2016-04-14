@@ -1,5 +1,6 @@
 package org.activityinfo.test.driver.mail.postmark;
 
+import com.google.common.base.Optional;
 import org.activityinfo.test.driver.mail.EmailDriver;
 import org.activityinfo.test.driver.mail.NotificationEmail;
 import org.activityinfo.test.sut.UserAccount;
@@ -21,12 +22,12 @@ public class PostmarkStubClient implements EmailDriver {
     }
 
     @Override
-    public NotificationEmail lastNotificationFor(UserAccount account) throws IOException {
+    public Optional<NotificationEmail> lastNotificationFor(UserAccount account) throws IOException {
         for (Message sentMessage : PostmarkStubServer.SENT_MESSAGES) {
             if(sentMessage.getTo().equals(account.getEmail())) {
-                return new NotificationEmail(sentMessage.getSubject(), sentMessage.getTextBody());
+                return Optional.of(new NotificationEmail(sentMessage.getSubject(), sentMessage.getTextBody()));
             }
         }
-        throw new AssertionError("No notification email for " + account.getEmail());
+        return Optional.absent();
     }
 }

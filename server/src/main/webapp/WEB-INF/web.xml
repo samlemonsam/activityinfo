@@ -23,6 +23,7 @@
 
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>Task Endpoints</web-resource-name>
       <url-pattern>/tasks/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
@@ -32,6 +33,7 @@
 
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>Admin console</web-resource-name>
       <url-pattern>/admin/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
@@ -53,10 +55,8 @@
   <!--  Force ODK to use HTTPS -->
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>xform</web-resource-name>
-      <url-pattern>/formList</url-pattern>
-      <url-pattern>/formSubmission</url-pattern>
-      <url-pattern>/activityForm</url-pattern>
+      <web-resource-name>Secure Resources</web-resource-name>
+      <url-pattern>/*</url-pattern>
     </web-resource-collection>
     <user-data-constraint>
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>

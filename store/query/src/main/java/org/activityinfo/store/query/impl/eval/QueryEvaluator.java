@@ -95,7 +95,7 @@ public class QueryEvaluator {
                 }
 
                 Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
-                LOGGER.info(symbolExpr + " matched to " + nodes);
+                LOGGER.finer(symbolExpr + " matched to " + nodes);
                 return addColumn(nodes);
 
             } finally {
