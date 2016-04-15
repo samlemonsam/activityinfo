@@ -19,6 +19,7 @@ import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
@@ -254,7 +255,11 @@ public class QueryExecutor {
                         List<FormInstance> result = Lists.newArrayList();
                         if (site.get().getData() != null && !site.get().getData().isEmpty()) {
                             for (SiteDTO siteDTO : site.get().getData()) {
-                                result.add(binding.newInstance(siteDTO));
+                                String label = siteDTO.getDate1() + " " + siteDTO.getDate2();
+
+                                FormInstance instance = binding.newInstance(siteDTO);
+                                FormInstanceLabeler.setLabel(instance, label);
+                                result.add(instance);
                             }
                         }
                         return result;
