@@ -37,10 +37,8 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ParametrizedFieldTypeClass;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.ui.client.component.form.HorizontalFieldContainer;
@@ -158,14 +156,13 @@ public class PropertiesPresenter {
 
         final FormField formField = fieldWidgetContainer.getFormField();
         boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getModel().getRootFormClass().getId(), formField.getId());
-        boolean isLabel = formField.getType() instanceof MetadataType;
 
         view.setVisible(true);
-        view.getRequiredGroup().setVisible(!isLabel);
+        view.getRequiredGroup().setVisible(true);
         view.getVisibleGroup().setVisible(true);
-        view.getRelevanceGroup().setVisible(!isBuiltIn && !isLabel);
-        view.getCodeGroup().setVisible(!isLabel);
-        view.getDescriptionGroup().setVisible(!isLabel);
+        view.getRelevanceGroup().setVisible(!isBuiltIn);
+        view.getCodeGroup().setVisible(true);
+        view.getDescriptionGroup().setVisible(true);
 
         view.getLabel().setValue(Strings.nullToEmpty(formField.getLabel()));
         view.getDescription().setValue(Strings.nullToEmpty(formField.getDescription()));
@@ -266,11 +263,6 @@ public class PropertiesPresenter {
                     // for calculated fields we updated expression directly because it is handled via ExprFieldType
                     ExprValue exprValue = (ExprValue) newValue;
                     ((CalculatedFieldType) formField.getType()).setExpression(exprValue.getExpression());
-                } else if (formField.getType() instanceof MetadataType) {
-                    MetadataType metadataType = (MetadataType) formField.getType();
-                    if (metadataType.getTypeClass() == MetadataType.LABEL_TYPE_CLASS && newValue instanceof EnumValue) {
-                        metadataType.getValues().put("text_style", ((EnumValue) newValue).getValueId().asString());
-                    }
                 } else {
                     formField.setType(typeClass.deserializeType(param));
                 }

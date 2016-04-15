@@ -2,7 +2,6 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.type.MetadataType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -45,7 +44,7 @@ public class Templates {
         items.add(new TypeClassTemplate(BarcodeType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeBarcode()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.IMAGE, I18N.CONSTANTS.image()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.ATTACHMENT, I18N.CONSTANTS.attachment()));
-        items.add(new TypeClassTemplate(MetadataType.LABEL_TYPE_CLASS, I18N.CONSTANTS.label()));
+        items.add(new LabelTemplate());
         items.add(new SectionTemplate());
         items.add(new SubformTemplate());
         items.add(new TypeClassTemplate(ReferenceType.TYPE_CLASS, I18N.CONSTANTS.reference()));

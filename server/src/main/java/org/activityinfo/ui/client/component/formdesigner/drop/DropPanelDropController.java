@@ -39,6 +39,7 @@ import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.PanelUpdatedEvent;
 import org.activityinfo.ui.client.component.formdesigner.palette.*;
@@ -181,6 +182,13 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.section(formDesigner, formSection, resourceId);
             containerMap.put(resourceId, widgetContainer); // parent drop container
             drop(widgetContainer, context, formSection);
+        } else if (template instanceof LabelTemplate) {
+            final FormLabel formLabel = ((LabelTemplate)template).create();
+
+            final LabelWidgetContainer fieldWidgetContainer = new LabelWidgetContainer(formDesigner, formLabel, resourceId);
+            containerMap.put(formLabel.getId(), fieldWidgetContainer);
+            drop(fieldWidgetContainer, context, formLabel);
+
         } else if (template instanceof SubformTemplate) {
             final FormField formField = ((SubformTemplate)template).create();
 

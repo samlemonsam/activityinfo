@@ -35,6 +35,7 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
 import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
+import org.activityinfo.ui.client.widget.form.FormGroup;
 
 /**
  * @author yuriyz on 01/18/2016.
@@ -70,7 +71,10 @@ public class PanelFiller {
         }
 
         for (FormElement element : container.getElements()) {
-            if (element instanceof FormSection) {
+            if (element instanceof FormLabel) {
+                FormLabel formLabel = (FormLabel) element;
+                panel.add(new FormGroup().label(formLabel.getLabel()));
+            } else if (element instanceof FormSection) {
                 panel.add(createHeader(depth, element.getLabel()));
                 add((FormElementContainer) element, depth + 1);
             } else if (element instanceof FormField) {
