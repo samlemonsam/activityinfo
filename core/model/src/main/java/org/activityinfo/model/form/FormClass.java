@@ -313,6 +313,8 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
                 elements.add(section);
             } else if ("label".equals(elementRecord.isString("type"))) {
                 elements.add(FormLabel.fromRecord(elementRecord));
+            } else {
+                elements.add(FormField.fromRecord(elementRecord));
             }
         }
         return elements;
