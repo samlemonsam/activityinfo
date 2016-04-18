@@ -311,8 +311,8 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
                 section.setLabel(elementRecord.getString("label"));
                 section.getElements().addAll(fromRecords(elementRecord.getRecordList("elements")));
                 elements.add(section);
-            } else {
-                elements.add(FormField.fromRecord(elementRecord));
+            } else if ("label".equals(elementRecord.isString("type"))) {
+                elements.add(FormLabel.fromRecord(elementRecord));
             }
         }
         return elements;
