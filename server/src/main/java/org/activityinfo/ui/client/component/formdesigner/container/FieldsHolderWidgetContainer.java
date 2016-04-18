@@ -73,9 +73,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
                 WidgetContainer selectedItem = event.getSelectedItem();
-                if (selectedItem instanceof FieldsHolderWidgetContainer) {
-                    panel.getPanel().setSelected(selectedItem.asWidget().equals(panel.asWidget()));
-                }
+                panel.getPanel().setSelected(selectedItem.asWidget().equals(panel.asWidget()));
             }
         });
 

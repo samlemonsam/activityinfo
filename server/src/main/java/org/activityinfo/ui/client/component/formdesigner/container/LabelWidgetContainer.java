@@ -54,9 +54,7 @@ public class LabelWidgetContainer implements WidgetContainer {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
                 WidgetContainer selectedItem = event.getSelectedItem();
-                if (selectedItem instanceof FieldWidgetContainer) {
-                    fieldPanel.setSelected(selectedItem.asWidget().equals(fieldPanel.asWidget()));
-                }
+                fieldPanel.setSelected(selectedItem.asWidget().equals(fieldPanel.asWidget()));
             }
         });
 

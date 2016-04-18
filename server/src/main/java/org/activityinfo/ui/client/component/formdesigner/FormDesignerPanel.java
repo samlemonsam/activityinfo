@@ -41,6 +41,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.drop.NullValueUpdater;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -186,6 +187,13 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                     formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
                     dropPanel.add(widget);
 
+                } else if (element instanceof FormLabel) {
+                    FormLabel label = (FormLabel) element;
+                    WidgetContainer widgetContainer = containerMap.get(label.getId());
+                    Widget widget = widgetContainer.asWidget();
+                    formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
+                    dropPanel.add(widget);
+
                 } else {
                     throw new UnsupportedOperationException("Unknown form element.");
                 }
@@ -199,6 +207,9 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 FormSection formSection = (FormSection) element;
                 containerMap.put(formSection.getId(), FieldsHolderWidgetContainer.section(formDesigner, formSection, container.getId()));
                 buildWidgetContainers(formDesigner, formSection, owner, depth + 1, promises);
+            } else if (element instanceof FormLabel) {
+                FormLabel label = (FormLabel) element;
+                containerMap.put(label.getId(), new LabelWidgetContainer(formDesigner, label, container.getId()));
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
                 if (formField.getType() instanceof SubFormReferenceType) { // subform
