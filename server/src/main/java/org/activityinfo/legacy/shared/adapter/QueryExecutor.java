@@ -255,9 +255,9 @@ public class QueryExecutor {
                         List<FormInstance> result = Lists.newArrayList();
                         if (site.get().getData() != null && !site.get().getData().isEmpty()) {
                             for (SiteDTO siteDTO : site.get().getData()) {
-                                String label = siteDTO.getDate1() + " " + siteDTO.getDate2();
-
                                 FormInstance instance = binding.newInstance(siteDTO);
+
+                                String label = instance.getId().asString() + " " + siteDTO.getDate1() + " " + siteDTO.getDate2();
                                 FormInstanceLabeler.setLabel(instance, label);
                                 result.add(instance);
                             }

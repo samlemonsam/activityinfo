@@ -34,6 +34,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormLabel;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
@@ -47,6 +48,7 @@ import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
@@ -86,6 +88,8 @@ public class PropertiesPresenter {
                 WidgetContainer widgetContainer = event.getSelectedItem();
                 if (widgetContainer instanceof FieldWidgetContainer) {
                     show((FieldWidgetContainer) widgetContainer);
+                } else if (widgetContainer instanceof LabelWidgetContainer) {
+                    show((LabelWidgetContainer) widgetContainer);
                 }
             }
         });
@@ -147,6 +151,38 @@ public class PropertiesPresenter {
         if (relevanceButtonClickHandler != null) {
             relevanceButtonClickHandler.removeHandler();
         }
+    }
+
+    private void show(final LabelWidgetContainer widgetContainer) {
+        reset();
+
+        formDesigner.getFormDesignerPanel().setPropertiesPanelVisible();
+
+        final FormLabel formLabel = widgetContainer.getFormLabel();
+
+        view.setVisible(true);
+        view.getLabelGroup().setVisible(true);
+
+        view.getRequiredGroup().setVisible(false);
+        view.getVisibleGroup().setVisible(false);
+        view.getRelevanceGroup().setVisible(false);
+        view.getCodeGroup().setVisible(false);
+        view.getDescriptionGroup().setVisible(false);
+        view.getReferenceProperties().setVisible(false);
+
+        view.getLabel().setValue(Strings.nullToEmpty(formLabel.getLabel()));
+
+        validateLabel();
+
+        labelKeyUpHandler = view.getLabel().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (validateLabel()) {
+                    formLabel.setLabel(view.getLabel().getValue());
+                    widgetContainer.syncWithModel();
+                }
+            }
+        });
     }
 
     private void show(final FieldWidgetContainer fieldWidgetContainer) {
