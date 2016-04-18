@@ -45,7 +45,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.util.Http;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -218,7 +217,7 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
             requestBuilder.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == Http.Status.OK.getCode()) {
+                    if (response.getStatusCode() == Response.SC_OK) {
                         servingUrl = response.getText();
                         setState(State.LOADED);
                     } else {
