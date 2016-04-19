@@ -178,10 +178,7 @@ public class QueryExecutor {
     }
 
     private Promise<List<FormInstance>> adminLevels(int countryId) {
-        GetAdminLevels query = new GetAdminLevels();
-        query.setCountryId(countryId);
-
-        return dispatcher.execute(query).then(new ListResultAdapter<>(new AdminLevelInstanceAdapter()));
+        return dispatcher.execute(new GetAdminLevelsByCountry(countryId)).then(new ListResultAdapter<>(new AdminLevelInstanceAdapter()));
     }
 
     private Promise<List<FormInstance>> queryByClassIds() {
