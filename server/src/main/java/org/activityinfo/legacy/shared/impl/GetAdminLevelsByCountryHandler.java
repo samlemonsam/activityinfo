@@ -24,21 +24,26 @@ public class GetAdminLevelsByCountryHandler implements CommandHandlerAsync<GetAd
                         final AsyncCallback<AdminLevelResult> callback) {
 
         SqlQuery.select()
+                .appendColumn("level.adminlevelId", "id")
+                .appendColumn("level.name", "name")
+                .appendColumn("level.polygons", "polygons")
+                .appendColumn("level.countryId", "countryId")
                 .from(Tables.ADMIN_LEVEL, "level")
                 .where("level.countryId")
                 .equalTo(command.getCountryId())
                 .execute(context.getTransaction(), new SqlResultCallback() {
 
-            @Override
-            public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                List<AdminLevelDTO> levels = Lists.newArrayList();
-                for (SqlResultSetRow row : results.getRows()) {
-                    AdminLevelDTO level = new AdminLevelDTO();
-                    level.setId(row.getInt("id"));
-                    level.setName(row.getString("name"));
-                    level.setPolygons(row.getBoolean("polygons"));
-                    levels.add(level);
-                }
+                    @Override
+                    public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+                        List<AdminLevelDTO> levels = Lists.newArrayList();
+                        for (SqlResultSetRow row : results.getRows()) {
+                            AdminLevelDTO level = new AdminLevelDTO();
+                            level.setId(row.getInt("id"));
+                            level.setName(row.getString("name"));
+                            level.setPolygons(row.getBoolean("polygons"));
+                            level.setCountryId(row.getInt("countryId"));
+                            levels.add(level);
+                        }
 
                 callback.onSuccess(new AdminLevelResult(levels));
             }
