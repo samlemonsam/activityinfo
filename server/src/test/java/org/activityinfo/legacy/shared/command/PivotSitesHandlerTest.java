@@ -946,6 +946,22 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         
     }
     
+    @Test
+    public void filterMonthlyReportsOnSiteId() {
+        int utilizationRate = 5;
+        int csNgeshwe = 9;
+        
+        filter.addRestriction(DimensionType.Indicator, utilizationRate);
+        filter.addRestriction(DimensionType.Site, csNgeshwe);
+        
+        dimensions.add(new Dimension(DimensionType.Site));
+        dimensions.add(new DateDimension(DateUnit.MONTH));
+
+        execute();
+        
+        assertThat().forSite(csNgeshwe).thereAre(3).buckets();
+    }
+    
     
     private void filteringOnDatabases(Integer... databaseIds) {
         filter.addRestriction(DimensionType.Database, asList(databaseIds));
