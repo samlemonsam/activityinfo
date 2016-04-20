@@ -51,6 +51,9 @@ public class ClassProvider implements Function<ResourceId, Promise<FormClass>> {
             case LOCATION_TYPE_DOMAIN:
                 return dispatcher.execute(new GetSchema()).then(new LocationClassAdapter(getLegacyIdFromCuid(classId)));
 
+            case COUNTRY_DOMAIN:
+                return dispatcher.execute(new GetSchema()).then(new CountryAdapter(getLegacyIdFromCuid(classId)));
+
             // this is just spike: not exactly sure how to deal with application/system-level classes properties
             // etc. The 'domains' that we're using for the legacy objects aren't really the same thing -- the whole
             // point

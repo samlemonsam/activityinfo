@@ -113,7 +113,7 @@ public class ChooseFormTreeModel implements TreeViewModel {
         public boolean isLeaf() {
             char domain = getId().getDomain();
             return domain == CuidAdapter.ACTIVITY_DOMAIN ||
-                    domain == CuidAdapter.ADMIN_ENTITY_DOMAIN ||
+                    domain == CuidAdapter.ADMIN_LEVEL_DOMAIN ||
                     domain == CuidAdapter.PROJECT_DOMAIN ||
                     domain == CuidAdapter.PARTNER_DOMAIN;
         }

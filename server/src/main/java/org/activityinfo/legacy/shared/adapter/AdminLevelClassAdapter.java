@@ -55,7 +55,12 @@ public class AdminLevelClassAdapter implements Function<SchemaDTO, FormClass> {
         nameField.setType(TextType.INSTANCE);
         nameField.setSuperProperty(ApplicationProperties.LABEL_PROPERTY);
         nameField.setRequired(true);
+
         formClass.addElement(nameField);
+
+        if (adminLevel.get("countryId") != null) {
+            formClass.setOwnerId(CuidAdapter.countryId(adminLevel.getCountryId()));
+        }
 
 
         //    Not currently exposed by the legacy api
