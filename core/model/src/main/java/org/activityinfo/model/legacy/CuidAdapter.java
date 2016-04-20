@@ -13,7 +13,7 @@ public class CuidAdapter {
 
     public static final char REPEATING_DOMAIN = 'b'; // used for subform repeating
 
-    public static final char COUNTRY_DOMAIN = 'c';
+    public static final char COUNTRY_DOMAIN = 'F'; // upper case F, avoid conflict with org.activityinfo.model.resource.ResourceId.GENERATED_ID_DOMAIN = 'c'
 
     public static final char SITE_DOMAIN = 's';
 
