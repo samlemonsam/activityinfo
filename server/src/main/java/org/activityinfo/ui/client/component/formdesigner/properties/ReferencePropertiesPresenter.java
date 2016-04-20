@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.component.formdesigner.properties;
 
+import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -136,6 +137,9 @@ public class ReferencePropertiesPresenter {
                 String label = view.getListBox().getItemText(index);
                 label = owner.getLabel() + " > " + label;
                 view.getListBox().setItemText(index, label);
+
+                SelectElement selectElement = view.getListBox().getElement().cast(); // set tooltip
+                selectElement.getOptions().getItem(index).setTitle(label);
 
                 putParentLabel(leaf, owner, locator);
             }
