@@ -67,7 +67,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         query(DatabaseTable.FORM_CLASS_ID, "label", "description", "country", "country.label", "country.code");
         assertThat(column("label"), hasValues("PEAR", "PEAR Plus", "Alpha", "Public"));
         assertThat(column("description"), hasAllNullValuesWithLengthOf(4));
-        assertThat(column("country"), hasValues("c0000000001", "c0000000001", "c0000000001", "c0000000001"));
+        assertThat(column("country"), hasValues("F0000000001", "F0000000001", "F0000000001", "F0000000001"));
         assertThat(column("country.label"), hasValues("Rdc", "Rdc", "Rdc", "Rdc"));
         assertThat(column("country.code"), hasValues("CD", "CD", "CD", "CD"));
     }
