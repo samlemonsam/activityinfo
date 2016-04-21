@@ -6,7 +6,10 @@ import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.*;
+import org.activityinfo.core.shared.criteria.ClassCriteria;
+import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.core.shared.criteria.IdCriteria;
+import org.activityinfo.core.shared.criteria.RemoveFieldCriteriaVisitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
@@ -20,8 +23,12 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnModel;
+import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.IsResource;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromiseExecutionOperation;
 import org.activityinfo.promise.PromisesExecutionGuard;
@@ -49,6 +56,16 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<FormClass> getFormClass(ResourceId classId) {
         return classProvider.apply(classId);
+    }
+
+    @Override
+    public Observable<Resource> fetchResource(ResourceId resourceId) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public Observable<ColumnSet> queryTable(ColumnModel columnModel) {
+        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

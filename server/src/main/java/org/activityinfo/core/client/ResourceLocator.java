@@ -6,9 +6,12 @@ import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormClassProvider;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.query.ColumnModel;
+import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.IsResource;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromiseExecutionOperation;
 import org.activityinfo.promise.PromisesExecutionMonitor;
@@ -21,13 +24,29 @@ import java.util.Set;
 public interface ResourceLocator extends AsyncFormClassProvider {
 
     /**
-     * Fetches the user form.
+     * Fetches the schema of a user's forms. 
+     * 
+     * <p>Convenience method for {@code FormClass.fromResource(fetchResource(formId))}</p>
      *
      * @param formId
      * @return
      */
     Promise<FormClass> getFormClass(ResourceId formId);
 
+    /**
+     * Fetches a single resource.
+     * @param resourceId the id of the resource to fetch
+     */
+    Observable<Resource> fetchResource(ResourceId resourceId);
+
+    /**
+     * Queries a flat, two dimensional view of collections.
+     * 
+     * @param columnModel model describing the query.
+     */
+    Observable<ColumnSet> queryTable(ColumnModel columnModel);
+    
+    @Deprecated
     Promise<FormInstance> getFormInstance(ResourceId formId);
 
     /**
@@ -47,21 +66,46 @@ public interface ResourceLocator extends AsyncFormClassProvider {
 
     Promise<Void> persistOperation(List<PromiseExecutionOperation> resources, @Nullable PromisesExecutionMonitor monitor);
 
+    /**
+     * 
+     * @param criteria
+     * @deprecated use {@link #queryTable(ColumnModel)}
+     */
+    @Deprecated
     Promise<QueryResult<FormInstance>> queryInstances(InstanceQuery criteria);
 
     /**
      * Retrieves the form instances that match the given criteria.
      * @param criteria
+     * @deprecated use {@link #queryTable(ColumnModel)}
      */
+    @Deprecated
     Promise<List<FormInstance>> queryInstances(Criteria criteria);
 
+    /**
+     * 
+     * @param query
+     * @deprecated use {@link #queryTable(ColumnModel)}
+     */
+    @Deprecated
     Promise<QueryResult<Projection>> queryProjection(InstanceQuery query);
 
+    /**
+     * 
+     * @param query
+     * @deprecated use {@link #queryTable(ColumnModel)}
+     */
+    @Deprecated
     Promise<List<Projection>> query(InstanceQuery query);
 
     Promise<Void> remove(ResourceId resourceId);
 
     Promise<Void> remove(Collection<ResourceId> resources);
 
+    /**
+     * @param resourceIds
+     * @deprecated use {@link #queryTable(ColumnModel)}
+     */
+    @Deprecated
     Promise<List<FormInstance>> queryInstances(Set<ResourceId> resourceIds);
 }
