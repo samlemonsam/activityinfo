@@ -122,6 +122,7 @@ public class BaseEntityHandler {
             indicator.setMandatory((Boolean) changes.get("mandatory"));
         }
 
+        indicator.getActivity().incrementSchemaVersion();
         indicator.getActivity().getDatabase().setLastSchemaUpdate(new Date());
     }
 

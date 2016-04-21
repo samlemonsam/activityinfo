@@ -188,7 +188,9 @@ public class AttributeGroup implements Serializable, Deleteable, Orderable, Form
     @Override
     public void delete() {
         this.setDateDeleted(new Date());
-        getActivities().iterator().next().getDatabase().setLastSchemaUpdate(new Date());
+        Activity activity = getActivities().iterator().next();
+        activity.incrementSchemaVersion();
+        activity.getDatabase().setLastSchemaUpdate(new Date());
     }
 
     @Column(name = "category", length = 50, nullable = true)

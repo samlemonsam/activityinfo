@@ -87,6 +87,9 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         // Update the activity table with the JSON value
         JsonHelper.updateWithJson(activity, cmd.getJson());
 
+        activity.incrementSchemaVersion();
+        activity.getDatabase().updateVersion();
+        
         syncEntities(activity, formClass);
         entityManager.get().persist(activity);
 
@@ -174,7 +177,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     }
 
     private void createNewEntity(Activity activity, FormField field, int sortOrder) {
-        if(field.getType() instanceof EnumType) {
+        if (field.getType() instanceof EnumType) {
             createAttributeGroup(activity, field, sortOrder);
         } else {
             createIndicator(activity, field, sortOrder);

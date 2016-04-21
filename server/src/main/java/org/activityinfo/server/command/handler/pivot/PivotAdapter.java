@@ -646,6 +646,17 @@ public class PivotAdapter {
         }
     }
 
+    private String siteIdField(FormTree formTree) {
+        ResourceId rootFormClassId = formTree.getRootFormClass().getId();
+        if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            // Root form class is the site, we need to compare against the ID
+            return ColumnModel.ID_SYMBOL;
+        } else {
+            // ROot form class is monhtly report, filter against the site id
+            return CuidAdapter.field(rootFormClassId, CuidAdapter.SITE_FIELD).asString();
+        }
+    }
+
     private int[] extractSiteIds(ColumnSet columnSet) {
         ColumnView columnView = columnSet.getColumnView(SITE_ID_KEY);
         int[] ids = new int[columnView.numRows()];
@@ -669,7 +680,7 @@ public class PivotAdapter {
 
     private ExprNode composeFilter(FormTree formTree, Optional<ExprNode> permissionFilter) {
         List<ExprNode> conditions = Lists.newArrayList();
-        conditions.addAll(filterExpr(ColumnModel.ID_SYMBOL, CuidAdapter.SITE_DOMAIN, DimensionType.Site));
+        conditions.addAll(filterExpr(siteIdField(formTree), CuidAdapter.SITE_DOMAIN, DimensionType.Site));
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
         conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
         conditions.addAll(filterExpr("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location));

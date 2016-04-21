@@ -104,7 +104,9 @@ public class Attribute implements Serializable, Deleteable, Orderable {
     @Override
     public void delete() {
         setDateDeleted(new Date());
-        getGroup().getActivities().iterator().next().getDatabase().setLastSchemaUpdate(new Date());
+        Activity activity = getGroup().getActivities().iterator().next();
+        activity.incrementSchemaVersion();
+        activity.getDatabase().setLastSchemaUpdate(new Date());
     }
 
     @Override @Transient

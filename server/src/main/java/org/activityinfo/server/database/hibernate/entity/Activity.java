@@ -74,6 +74,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     
     private long version;
     private long siteVersion;
+    private long schemaVersion;
     
     private boolean classicView = true;
 
@@ -81,10 +82,13 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     private byte[] gzFormClassJson;
 
     public Activity() {
-
+        this.version = 1;
+        this.schemaVersion = 1;
+        this.siteVersion = 1;
     }
 
     public Activity(int id, String name) {
+        this();
         this.id = id;
         this.name = name;
     }
@@ -323,6 +327,21 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     public void setSiteVersion(long siteVersion) {
         this.siteVersion = siteVersion;
+    }
+
+    @Column
+    public long getSchemaVersion() {
+        return schemaVersion;
+    }
+    
+    public void setSchemaVersion(long schemaVersion) {
+        this.schemaVersion = schemaVersion;
+    }
+    
+    public long incrementSchemaVersion() {
+        version++;
+        schemaVersion = version;
+        return version;
     }
 
     public long incrementSiteVersion() {
