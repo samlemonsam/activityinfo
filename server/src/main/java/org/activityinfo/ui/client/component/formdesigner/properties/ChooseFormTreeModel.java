@@ -42,7 +42,6 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.ui.icons.Icons;
 
 import java.util.List;
@@ -114,8 +113,8 @@ public class ChooseFormTreeModel implements TreeViewModel {
             char domain = getId().getDomain();
             return domain == CuidAdapter.ACTIVITY_DOMAIN ||
                     domain == CuidAdapter.ADMIN_LEVEL_DOMAIN ||
-                    domain == CuidAdapter.PROJECT_DOMAIN ||
-                    domain == CuidAdapter.PARTNER_DOMAIN;
+                    domain == CuidAdapter.PROJECT_CLASS_DOMAIN ||
+                    domain == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN;
         }
 
         @Override
@@ -224,8 +223,9 @@ public class ChooseFormTreeModel implements TreeViewModel {
 
         private void addPartnerAndProjectNodeIfNeeded(Node parentNode, List<Node> childs) {
             if (parentNode.getId().getDomain() == CuidAdapter.DATABASE_DOMAIN) {
-                childs.add(0, new Node(ClassType.PARTNER.getResourceId(), node.getId(), I18N.CONSTANTS.partners()));
-                childs.add(0, new Node(ClassType.PROJECT.getResourceId(), node.getId(), I18N.CONSTANTS.projects()));
+                int dbId = CuidAdapter.getLegacyIdFromCuid(node.getId());
+                childs.add(0, new Node(CuidAdapter.partnerFormClass(dbId), node.getId(), I18N.CONSTANTS.partners()));
+                childs.add(0, new Node(CuidAdapter.projectFormClass(dbId), node.getId(), I18N.CONSTANTS.projects()));
             }
         }
 

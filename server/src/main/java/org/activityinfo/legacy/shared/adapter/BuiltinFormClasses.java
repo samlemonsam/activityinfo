@@ -22,16 +22,17 @@ public class BuiltinFormClasses {
     public static FormClass projectFormClass(int databaseId) {
 
         ResourceId classId = CuidAdapter.projectFormClass(databaseId);
-        FormClass formClass = new FormClass(classId);
-        formClass.setLabel(I18N.CONSTANTS.project());
 
         // add the project's name
         FormField nameField = new FormField(CuidAdapter.field(classId, CuidAdapter.NAME_FIELD));
         nameField.setLabel(I18N.CONSTANTS.name());
         nameField.setType(TextType.INSTANCE);
         nameField.setRequired(true);
-        formClass.addElement(nameField);
 
+        FormClass formClass = new FormClass(classId);
+        formClass.setLabel(I18N.CONSTANTS.project());
+        formClass.addElement(nameField);
+        formClass.setOwnerId(CuidAdapter.databaseId(databaseId));
         return formClass;
     }
 

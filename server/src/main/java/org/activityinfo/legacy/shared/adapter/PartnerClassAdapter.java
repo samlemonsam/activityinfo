@@ -26,21 +26,24 @@ public class PartnerClassAdapter {
     public static FormClass create(int databaseId) {
 
         ResourceId classId = CuidAdapter.partnerFormClass(databaseId);
-        FormClass formClass = new FormClass(classId);
-        formClass.setLabel(I18N.CONSTANTS.partner());
 
         // add the partner's name
         FormField nameField = new FormField(getNameField(classId));
         nameField.setLabel(I18N.CONSTANTS.name());
         nameField.setType(TextType.INSTANCE);
         nameField.setRequired(true);
-        formClass.addElement(nameField);
+
 
         // partner full name
         FormField fullNameField = new FormField(getFullNameField(classId));
         fullNameField.setLabel(I18N.CONSTANTS.fullName());
         fullNameField.setType(TextType.INSTANCE);
+
+        FormClass formClass = new FormClass(classId);
+        formClass.setLabel(I18N.CONSTANTS.partner());
+        formClass.addElement(nameField);
         formClass.addElement(fullNameField);
+        formClass.setOwnerId(CuidAdapter.databaseId(databaseId));
 
         return formClass;
     }
