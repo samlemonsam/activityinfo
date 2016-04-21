@@ -28,5 +28,6 @@
 
   <source path="client"/>
   <source path="promise"/>
+  <source path="observable"/>
 
 </module>
