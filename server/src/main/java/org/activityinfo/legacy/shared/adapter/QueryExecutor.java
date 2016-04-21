@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -18,11 +19,15 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.ConcatList;
 import org.activityinfo.promise.Promise;
@@ -231,6 +236,45 @@ public class QueryExecutor {
         return dispatcher.execute(new GetCountries()).then(new ListResultAdapter<>(new CountryInstanceAdapter()));
     }
 
+    private static String labelFromFormInstance(FormInstance instance, ActivityFormDTO activityFormDTO) {
+
+        ResourceId labelId = ResourceId.valueOf("label");
+        FormClass formClass = new ActivityFormClassBuilder(activityFormDTO).build();
+
+        // 1. If the FormClass has a field with the code "label" use that field as the label
+        if (formClass.getField(labelId) != null) {
+
+            FieldValue label = instance.get(labelId);
+            if (label != null && !Strings.isNullOrEmpty(label.toString())) {
+                return label.toString();
+            }
+        }
+
+        // 2. IF the FormClass has a field with the super-property of "label", use that field as a label
+        for (FormField field : formClass.getFields()) {
+            if (field.isSubPropertyOf(labelId)) {
+                FieldValue label = instance.get(field.getId());
+
+                if (label != null && !Strings.isNullOrEmpty(label.toString())) {
+                    return label.toString();
+                }
+            }
+        }
+
+        // 3. If the FormClass has any text fields, use the first as the label
+        for (FormField field : formClass.getFields()) {
+            if (field.getType() instanceof TextType) {
+                FieldValue label = instance.get(field.getId());
+                if (label != null && !Strings.isNullOrEmpty(label.toString())) {
+                    return label.toString();
+                }
+            }
+        }
+
+        // 4. Otherwise use the form's ID.
+        return instance.getId().asString();
+    }
+
     private Promise<List<FormInstance>> queryByClassId(ResourceId formClassId) {
         if (formClassId.equals(FolderClass.CLASS_ID)) {
             return folders();
@@ -254,8 +298,7 @@ public class QueryExecutor {
                             for (SiteDTO siteDTO : site.get().getData()) {
                                 FormInstance instance = binding.newInstance(siteDTO);
 
-                                String label = instance.getId().asString() + " " + siteDTO.getDate1() + " " + siteDTO.getDate2();
-                                FormInstanceLabeler.setLabel(instance, label);
+                                FormInstanceLabeler.setLabel(instance, labelFromFormInstance(instance, activityForm.get()));
                                 result.add(instance);
                             }
                         }
