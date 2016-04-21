@@ -97,7 +97,7 @@ public class ChooseFormDialog extends Composite {
 
     private CellBrowser createBrowser(ResourceLocator resourceLocator) {
         ChooseFormTreeModel model = new ChooseFormTreeModel(resourceLocator, selectionModel);
-        return new CellBrowser.Builder<ChooseFormTreeModel.Node>(model, null).build();
+        return new CellBrowser.Builder<ChooseFormTreeModel.Node>(model, null).pageSize(9999).build();
     }
 
     public ChooseFormDialog show() {
