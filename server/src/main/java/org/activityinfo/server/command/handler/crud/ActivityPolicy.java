@@ -63,6 +63,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         activity.setSortOrder(calculateNextSortOrderIndex(database.getId()));
         activity.setLocationType(getLocationType(properties));
         
+        
         // activity should be classic by default
         activity.setClassicView(true);
 
@@ -81,8 +82,10 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Activity activity = em.find(Activity.class, entityId);
-
+        
         PermissionOracle.using(em).assertDesignPrivileges(activity.getDatabase(), user);
+       
+        activity.incrementSchemaVersion();
 
         applyProperties(activity, changes);
     }
