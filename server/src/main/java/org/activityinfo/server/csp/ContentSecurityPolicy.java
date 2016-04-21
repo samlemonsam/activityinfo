@@ -18,7 +18,8 @@ public class ContentSecurityPolicy {
     private static final String GOOGLE_ANALYTICS = "https://ssl.google-analytics.com";
     
     private static final String GOOGLE_STORAGE = "https://storage.googleapis.com";
-    
+    public static final String GOOGLE_FONTS = "https://fonts.googleapis.com";
+
     private final String policy;
 
     public ContentSecurityPolicy() {
@@ -39,7 +40,7 @@ public class ContentSecurityPolicy {
         append(sb, "font-src", SELF,
                 
             // We use the droid sans font
-            "https://fonts.googleapis.com"
+            GOOGLE_FONTS
         );
         
         append(sb, "script-src", SELF,
@@ -58,7 +59,9 @@ public class ContentSecurityPolicy {
         append(sb, "style-src", SELF, 
             
             // GWT makes extensive use of inline style-sheets
-            UNSAFE_INLINE
+            UNSAFE_INLINE,
+                
+            GOOGLE_FONTS
         );
         
         append(sb, "connect-src", SELF);
