@@ -114,7 +114,8 @@ public class ChooseFormTreeModel implements TreeViewModel {
             return domain == CuidAdapter.ACTIVITY_DOMAIN ||
                     domain == CuidAdapter.ADMIN_LEVEL_DOMAIN ||
                     domain == CuidAdapter.PROJECT_CLASS_DOMAIN ||
-                    domain == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN;
+                    domain == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN ||
+                    domain == CuidAdapter.LOCATION_TYPE_DOMAIN;
         }
 
         @Override
@@ -274,6 +275,8 @@ public class ChooseFormTreeModel implements TreeViewModel {
                 return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
             case CuidAdapter.ACTIVITY_CATEGORY_DOMAIN:
                 return instance.getString(FolderClass.LABEL_FIELD_ID);
+            case CuidAdapter.LOCATION_TYPE_DOMAIN:
+                return instance.getString(ResourceId.valueOf(FormClass.LABEL_FIELD_ID));
         }
 
         String label = FormInstanceLabeler.getLabel(instance);
