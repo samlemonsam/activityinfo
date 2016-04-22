@@ -66,7 +66,7 @@ Feature: Calculated fields
       | NRC     | 0                       | 2016-01-01 | 2016-12-31 |
     Then aggregating the indicators Number of Beneficiaries and Cost/Beneficiary by Indicator and Year should yield:
       |                              | 2016 |
-      | Number of male beneficiaries | 150  |
+      | Number of Beneficiaries      | 150  |
 
   Scenario: Aggregating calculated fields with ambiguous expressions
     Given I have created a quantity field "Number of male beneficiaries" with code "NB"
