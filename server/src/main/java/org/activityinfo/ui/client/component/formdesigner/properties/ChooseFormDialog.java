@@ -32,6 +32,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellBrowser;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -97,7 +98,10 @@ public class ChooseFormDialog extends Composite {
 
     private CellBrowser createBrowser(ResourceLocator resourceLocator) {
         ChooseFormTreeModel model = new ChooseFormTreeModel(resourceLocator, selectionModel);
-        return new CellBrowser.Builder<ChooseFormTreeModel.Node>(model, null).pageSize(9999).build();
+        return new CellBrowser.Builder<ChooseFormTreeModel.Node>(model, null)
+                .loadingIndicator(new Label(I18N.CONSTANTS.loading()))
+                .pageSize(9999)
+                .build();
     }
 
     public ChooseFormDialog show() {

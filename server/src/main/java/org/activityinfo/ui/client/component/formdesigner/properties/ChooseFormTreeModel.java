@@ -277,6 +277,6 @@ public class ChooseFormTreeModel implements TreeViewModel {
         }
 
         String label = FormInstanceLabeler.getLabel(instance);
-        return !Strings.isNullOrEmpty(label) ? label : I18N.CONSTANTS.unknown();
+        return !Strings.isNullOrEmpty(label) ? label : instance.getId().asString();
     }
 }
