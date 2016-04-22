@@ -5,6 +5,7 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
@@ -16,6 +17,7 @@ import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -151,7 +153,7 @@ public class QueryEvaluator {
                         throw new UnsupportedOperationException();
                     case FIELD:
                         if (node.isCalculated()) {
-                            expandedNodes.add(evaluateExpression(node.getCalculation()));
+                            expandedNodes.add(expandCalculatedField(node));
                         } else {
                             expandedNodes.add(batch.addColumn(node));
                         }
@@ -164,6 +166,18 @@ public class QueryEvaluator {
                 return expandedNodes.get(0);
             } else {
                 return new ColumnCombiner(expandedNodes);
+            }
+        }
+
+        private Slot<ColumnView> expandCalculatedField(NodeMatch node) {
+            try {
+                return evaluateExpression(node.getCalculation());
+            } catch (ExprException e) {
+                LOGGER.log(Level.WARNING, "Exception in calculated field " +
+                        node.getFormClass().getId() + "." + node.getExpr() + " = " +
+                        node.getCalculation() + ": " + e.getMessage(), e);
+            
+                return batch.addEmptyColumn(node.getFormClass());
             }
         }
     }
