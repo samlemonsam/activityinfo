@@ -160,9 +160,7 @@ public class SiteExporter {
     public void export(ActivityFormDTO activity, Filter filter) {
         this.activity = activity;
 
-        HSSFSheet sheet = book.createSheet(
-                sheetNames.name(
-                    activity.getDatabaseName() + " - " + activity.getName()));
+        HSSFSheet sheet = book.createSheet(sheetNames.name(activity.getName()));
         sheet.createFreezePane(4, 2);
 
         // initConditionalFormatting(sheet);
@@ -190,9 +188,6 @@ public class SiteExporter {
 
         createHeaderCell(headerRow2, column++, "SiteId", CellStyle.ALIGN_LEFT);
         createHeaderCell(headerRow2, column++, "DateCreated", CellStyle.ALIGN_RIGHT);
-
-        sheet.setColumnHidden(0, true);
-        sheet.setColumnHidden(1, true);
 
         createHeaderCell(headerRow2, column++, I18N.CONSTANTS.startDate(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow2, column++, I18N.CONSTANTS.endDate(), CellStyle.ALIGN_RIGHT);
