@@ -65,8 +65,8 @@ public class SiteExporterTest {
         exporter.export(activity3, filter);
         HSSFWorkbook book = exporter.getBook();
 
-        assertThat(book.getSheetAt(0).getSheetName(), equalTo("SYLI - Construction Rehabilitat"));
-        assertThat(book.getSheetAt(1).getSheetName(), equalTo("SYLI - Construction Rehabil (2)"));
-        assertThat(book.getSheetAt(2).getSheetName(), equalTo("SYLI - Construction Rehabil 2"));
+        assertThat(book.getSheetAt(0).getSheetName(), equalTo("Construction Rehabilitation of "));
+        assertThat(book.getSheetAt(1).getSheetName(), equalTo("Construction Rehabil (2)"));
+        assertThat(book.getSheetAt(2).getSheetName(), equalTo("Construction Rehabil 2"));
     }
 }
