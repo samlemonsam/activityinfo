@@ -65,8 +65,21 @@ Feature: Calculated fields
       | NRC     | 150                     | 2016-01-01 | 2016-12-31 |
       | NRC     | 0                       | 2016-01-01 | 2016-12-31 |
     Then aggregating the indicators Number of Beneficiaries and Cost/Beneficiary by Indicator and Year should yield:
-      |                         | 2016 |
-      | Number of Beneficiaries |  150 |
+      |                              | 2016 |
+      | Number of Beneficiaries      | 150  |
+
+  Scenario: Aggregating calculated fields with ambiguous expressions
+    Given I have created a quantity field "Number of male beneficiaries" with code "NB"
+    And I have created a quantity field "Number of female beneficiaries" with code "NB"
+    And I have created a calculated field "Total number of beneficiaries" in "NFI Distribution" with expression "NB+NB"
+    And I have submitted "NFI Distribution" forms with:
+      | partner | Number of male beneficiaries | Number of female beneficiaries |
+      | NRC     | 150                          | 300                            |
+    Then aggregating the indicators Number of male beneficiaries and Total number of beneficiaries by Indicator and Partner should yield:
+      |                                | Value |
+      | NRC                            |       |
+      |   Number of male beneficiaries | 150   |
+
 
   Scenario: Aggregating calculated fields with empty expressions
     And I have created a form "School Registration" using the new layout
