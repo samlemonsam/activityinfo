@@ -57,6 +57,6 @@ public class SiteExporterDbTest extends CommandTestCase2 {
         exporter.buildExcelWorkbook(filter);
 
         assertEquals(exporter.getBook().getNumberOfSheets(), 2);
-        assertNotNull(exporter.getBook().getSheet("PEAR - NFI"));
+        assertNotNull(exporter.getBook().getSheet("NFI"));
     }
 }
