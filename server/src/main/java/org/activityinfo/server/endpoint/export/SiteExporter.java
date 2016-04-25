@@ -42,7 +42,6 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.WorkbookUtil;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -55,7 +54,6 @@ public class SiteExporter {
 
     private static final Logger LOGGER = Logger.getLogger(SiteExporter.class.getName());
 
-    private static final int MAX_WORKSHEET_LENGTH = 31;
 
     private static final short FONT_SIZE = 8;
     private static final short TITLE_FONT_SIZE = 12;
@@ -76,7 +74,7 @@ public class SiteExporter {
     private final HSSFWorkbook book;
     private final CreationHelper creationHelper;
 
-    private Map<String, Integer> sheetNames;
+    private SheetNamer sheetNames = new SheetNamer();
 
     private CellStyle titleStyle;
 
@@ -103,8 +101,6 @@ public class SiteExporter {
 
         book = new HSSFWorkbook();
         creationHelper = book.getCreationHelper();
-
-        sheetNames = new HashMap<>();
 
         declareStyles();
     }
@@ -164,7 +160,9 @@ public class SiteExporter {
     public void export(ActivityFormDTO activity, Filter filter) {
         this.activity = activity;
 
-        HSSFSheet sheet = book.createSheet(composeUniqueSheetName(activity));
+        HSSFSheet sheet = book.createSheet(
+                sheetNames.name(
+                    activity.getDatabaseName() + " - " + activity.getName()));
         sheet.createFreezePane(4, 2);
 
         // initConditionalFormatting(sheet);
@@ -173,32 +171,6 @@ public class SiteExporter {
 
     }
 
-    private String composeUniqueSheetName(ActivityFormDTO activity) {
-        String sheetName = activity.getDatabaseName() + " - " + activity.getName();
-
-        // to avoid conflict with our own disambiguation scheme, remove any trailing "(n)" 
-        // from sheet names
-        sheetName = sheetName.replaceFirst("\\((\\d+)\\)$", "$1");
-
-        // shorten and translate the name to meet excel requirements
-        String safeName = WorkbookUtil.createSafeSheetName(sheetName);
-
-        // assure that the sheet name is unique
-        if (!sheetNames.containsKey(safeName)) {
-            sheetNames.put(safeName, 1);
-            return safeName;
-        } else {
-            int index = sheetNames.get(safeName) + 1;
-            sheetNames.put(safeName, index);
-
-            String disambiguatedNamed = safeName + " (" + index + ")";
-            if (disambiguatedNamed.length() > MAX_WORKSHEET_LENGTH) {
-                int toTrim = disambiguatedNamed.length() - MAX_WORKSHEET_LENGTH;
-                disambiguatedNamed = safeName.substring(0, safeName.length() - toTrim) + " (" + index + ")";
-            }
-            return disambiguatedNamed;
-        }
-    }
 
     private void createHeaders(ActivityFormDTO activity, HSSFSheet sheet) {
 
