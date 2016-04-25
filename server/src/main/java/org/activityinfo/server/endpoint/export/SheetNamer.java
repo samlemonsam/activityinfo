@@ -41,7 +41,8 @@ public class SheetNamer {
             String disambiguatedNamed = safeName + " (" + index + ")";
             if (disambiguatedNamed.length() > MAX_WORKSHEET_LENGTH) {
                 int toTrim = disambiguatedNamed.length() - MAX_WORKSHEET_LENGTH;
-                disambiguatedNamed = safeName.substring(0, safeName.length() - toTrim) + " (" + index + ")";
+                String trimmed = safeName.substring(0, safeName.length() - toTrim);
+                return name(trimmed);
             }
             return disambiguatedNamed;
         }
