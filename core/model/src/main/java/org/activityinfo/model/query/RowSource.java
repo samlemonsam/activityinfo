@@ -1,8 +1,10 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.model.resource.IsRecord;
+import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
-public class RowSource {
+public class RowSource implements IsRecord {
 
     private ResourceId rootFormClass;
 
@@ -38,5 +40,18 @@ public class RowSource {
     @Override
     public int hashCode() {
         return rootFormClass != null ? rootFormClass.hashCode() : 0;
+    }
+
+    @Override
+    public Record asRecord() {
+        Record record = new Record();
+        record.set("rootFormClass", rootFormClass);
+        return record;
+    }
+
+    public static RowSource fromRecord(Record record) {
+        RowSource source = new RowSource();
+        source.setRootFormClass(record.getResourceId("rootFormClass"));
+        return source;
     }
 }

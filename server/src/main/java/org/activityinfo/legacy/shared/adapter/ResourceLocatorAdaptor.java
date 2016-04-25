@@ -25,10 +25,12 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservablePromise;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromiseExecutionOperation;
 import org.activityinfo.promise.PromisesExecutionGuard;
@@ -65,7 +67,10 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Observable<ColumnSet> queryTable(ColumnModel columnModel) {
-        throw new UnsupportedOperationException("TODO");
+        QueryModel model = new QueryModel()
+                .addColumn(columnModel);
+
+        return new ObservablePromise<>(new HttpQueryExecutor().query(model));
     }
 
     @Override

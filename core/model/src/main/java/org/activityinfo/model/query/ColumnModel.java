@@ -4,6 +4,8 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.resource.IsRecord;
+import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -11,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonSetter;
 /**
  * Defines a Column within a query
  */
-public class ColumnModel {
+public class ColumnModel implements IsRecord {
 
     public static final String ID_SYMBOL = "_id";
     public static final String CLASS_SYMBOL = "_class";
@@ -70,4 +72,11 @@ public class ColumnModel {
         return setExpression(path.toExpr());
     }
 
+    @Override
+    public Record asRecord() {
+        Record record = new Record();
+        record.set("id", id);
+        record.set("expression", expression.asExpression());
+        return record;
+    }
 }

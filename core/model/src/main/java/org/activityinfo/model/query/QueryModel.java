@@ -5,7 +5,10 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.resource.IsRecord;
+import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.codehaus.jackson.annotate.JsonSetter;
 
@@ -15,7 +18,7 @@ import java.util.List;
  * Describes a Table to be constructed from a
  * FormTree.
  */
-public class QueryModel {
+public class QueryModel implements IsRecord {
 
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
@@ -111,8 +114,9 @@ public class QueryModel {
         this.filter = filter;
     }
 
-    public void addColumn(ColumnModel criteriaColumn) {
+    public QueryModel addColumn(ColumnModel criteriaColumn) {
         columns.add(criteriaColumn);
+        return this;
     }
 
     public void addColumns(List<ColumnModel> requiredColumns) {
@@ -149,6 +153,14 @@ public class QueryModel {
             needsComma = true;
         }
         return sb.toString();
+    }
+
+    public Record asRecord() {
+        Record record = new Record();
+        record.set("rowSources", Resources.asRecordList(rowSources));
+        record.set("columns", Resources.asRecordList(columns));
+        record.set("filter", filter.asExpression());
+        return record;
     }
 }
 

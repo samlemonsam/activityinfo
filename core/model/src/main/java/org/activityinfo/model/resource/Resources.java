@@ -139,6 +139,10 @@ public class Resources {
         return resourceObject.toString();
     }
 
+    public static String toJson(Record record) {
+        return toJsonObject(record).toString();
+    }
+
     public static JsonObject toJsonObject(Resource resource) {
         JsonObject resourceObject = new JsonObject();
         resourceObject.addProperty("@id", resource.getId().asString());
