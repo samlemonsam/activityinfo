@@ -1,15 +1,12 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.collect.Maps;
 import com.google.gwt.http.client.*;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.ColumnSetParser;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.promise.Promise;
 
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +44,7 @@ public class HttpQueryExecutor {
 
                 public void onResponseReceived(Request request, Response response) {
                     if (200 == response.getStatusCode()) {
-                        promise.resolve(fromJson(response.getText()));
+                        promise.resolve(ColumnSetParser.fromJsonColumnFormat(response.getText()));
                     } else {
                         LOGGER.log(Level.SEVERE, "Failed to perform HTTP request. Status: " + response.getStatusCode()
                                 + ", text: " + response.getText());
@@ -61,34 +58,4 @@ public class HttpQueryExecutor {
         }
         return promise;
     }
-
-    public static ColumnSet fromJson(String json) {
-        Record record = Resources.recordFromJson(json);
-
-        // TODO
-//        int numRows = object.getAsJsonPrimitive("rows").getAsInt();
-//
-//        Map<String, ColumnView> columnMap = new HashMap<>();
-//        for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
-//            JsonObject columnValue = column.getValue().getAsJsonObject();
-//            String storage = columnValue.getAsJsonPrimitive("storage").getAsString();
-//            switch (storage) {
-//                case "array":
-//                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
-//                    break;
-//                case "coordinates":
-//                    columnMap.put(column.getKey(), parseCoordinates(columnValue.getAsJsonArray("coordinates")));
-//                    break;
-//                case "empty":
-//                    columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
-//                    break;
-//                default:
-//                    throw new UnsupportedOperationException(storage);
-//            }
-//        }
-        HashMap<String, ColumnView> map = Maps.newHashMap();
-        ColumnSet set = new ColumnSet(0, map);
-        return set;
-    }
-
 }

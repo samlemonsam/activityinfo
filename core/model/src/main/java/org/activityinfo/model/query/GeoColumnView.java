@@ -1,7 +1,5 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.model.query;
 
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 /**
@@ -12,8 +10,11 @@ public class GeoColumnView implements ColumnView {
     /**
      * Stores the Minimum Bounding Rectangle (MBR) of each row as a block of (x1,y1,x2,y2)
      */
-    private final double[] coordinates;
-    private final int numRows;
+    private double[] coordinates;
+    private int numRows;
+
+    public GeoColumnView() {
+    }
 
     /**
      * 

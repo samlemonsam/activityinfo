@@ -159,7 +159,7 @@ public class QueryModel implements IsRecord {
         Record record = new Record();
         record.set("rowSources", Resources.asRecordList(rowSources));
         record.set("columns", Resources.asRecordList(columns));
-        record.set("filter", filter.asExpression());
+        record.set("filter", filter != null ? filter.asExpression() : null);
         return record;
     }
 }

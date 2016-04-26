@@ -76,7 +76,7 @@ public class ColumnModel implements IsRecord {
     public Record asRecord() {
         Record record = new Record();
         record.set("id", id);
-        record.set("expression", expression.asExpression());
+        record.set("expression", expression != null ? expression.asExpression() : null);
         return record;
     }
 }

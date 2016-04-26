@@ -7,7 +7,7 @@ import org.activityinfo.model.query.ConstantColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
-import org.activityinfo.store.query.impl.views.EmptyColumnView;
+import org.activityinfo.model.query.EmptyColumnView;
 import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 
 import java.util.List;

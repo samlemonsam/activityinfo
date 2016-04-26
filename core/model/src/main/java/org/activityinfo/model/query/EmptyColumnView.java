@@ -1,7 +1,5 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.model.query;
 
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;

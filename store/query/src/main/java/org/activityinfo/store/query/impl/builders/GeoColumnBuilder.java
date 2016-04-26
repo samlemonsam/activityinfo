@@ -6,7 +6,7 @@ import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
-import org.activityinfo.store.query.impl.views.GeoColumnView;
+import org.activityinfo.model.query.GeoColumnView;
 
 import java.util.ArrayList;
 import java.util.List;

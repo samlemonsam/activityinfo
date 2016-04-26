@@ -4,8 +4,8 @@ import com.google.gson.stream.JsonWriter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.ConstantColumnView;
-import org.activityinfo.store.query.impl.views.EmptyColumnView;
-import org.activityinfo.store.query.impl.views.GeoColumnView;
+import org.activityinfo.model.query.EmptyColumnView;
+import org.activityinfo.model.query.GeoColumnView;
 
 import java.io.IOException;
 import java.io.OutputStream;

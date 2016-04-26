@@ -53,18 +53,17 @@ public class Resources {
         return true;
     }
 
-    public static Resource resourceFromJson(String json) {
+    public static JsonObject toJsonObject(String json) {
         JsonParser parser = new JsonParser();
-        JsonObject resourceObject = parser.parse(json).getAsJsonObject();
+        return parser.parse(json).getAsJsonObject();
+    }
 
-        return resourceFromJson(resourceObject);
+    public static Resource resourceFromJson(String json) {
+        return resourceFromJson(toJsonObject(json));
     }
 
     public static Record recordFromJson(String json) {
-        JsonParser parser = new JsonParser();
-        JsonObject resourceObject = parser.parse(json).getAsJsonObject();
-
-        return recordFromJson(resourceObject);
+        return recordFromJson(toJsonObject(json));
     }
 
     public static Resource resourceFromJson(JsonObject resourceObject) {

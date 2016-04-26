@@ -1,16 +1,19 @@
-package org.activityinfo.geoadmin.model;
+package org.activityinfo.model.query;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 
 public class ColumnViewWrapper implements ColumnView {
+
+    @SuppressWarnings("GwtInconsistentSerializableClass")
     private JsonArray array;
-    private final int numRows;
+    private int numRows;
+
+    public ColumnViewWrapper() {
+    }
 
     public ColumnViewWrapper(int numRows, JsonArray array) {
         this.array = array;
