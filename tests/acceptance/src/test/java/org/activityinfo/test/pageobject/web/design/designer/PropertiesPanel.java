@@ -87,4 +87,10 @@ public class PropertiesPanel {
 
         return new RelevanceDialog(BsModal.waitForModal(container));
     }
+
+    public ChooseFormDialog chooseFormDialog() {
+        form().getForm().find().button(XPathBuilder.withText(I18N.CONSTANTS.add())).clickWhenReady();
+
+        return new ChooseFormDialog(BsModal.waitForModal(container));
+    }
 }

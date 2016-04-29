@@ -22,6 +22,8 @@ package org.activityinfo.test.steps.common;
  */
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
@@ -31,11 +33,9 @@ import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.web.components.Form;
-import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
-import org.activityinfo.test.pageobject.web.design.designer.DropLabel;
-import org.activityinfo.test.pageobject.web.design.designer.DropPanel;
-import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
+import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.openqa.selenium.support.ui.Select;
 
 import javax.inject.Inject;
@@ -257,5 +257,31 @@ public class DesignSteps {
         dropPanel.getContainer().clickWhenReady();
         page.containerProperties().selectProperty(I18N.CONSTANTS.type(), subformType);
         page.save();
+    }
+
+    @And("^choose reference for field \"([^\"]*)\"$")
+    public void choose_reference_for_field(String fieldLabel, DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        page.selectFieldByLabel(fieldLabel);
+
+        PropertiesPanel fieldProperties = page.fieldProperties();
+
+        for (int i = 0; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+
+            fieldProperties.chooseFormDialog().set(row.getCells(), driver.getAliasTable());
+        }
+    }
+
+    @Then("^\"([^\"]*)\" field has instances:$")
+    public void field_has_instances(String fieldLabel, List<String> expectedItems) throws Throwable {
+        Preconditions.checkNotNull(driver.getCurrentModal());
+
+        BsFormPanel.BsField field = driver.getCurrentModal().form().findFieldByLabel(fieldLabel);
+
+        List<String> presentItems = Lists.newArrayList(field.availableItems());
+
+        assertTrue(presentItems.containsAll(expectedItems));
     }
 }
