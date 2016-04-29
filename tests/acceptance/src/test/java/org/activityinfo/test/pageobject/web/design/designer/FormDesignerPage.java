@@ -72,14 +72,11 @@ public class FormDesignerPage {
     }
 
     public PropertiesPanel fieldProperties() {
-        selectTab("Field");
         List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
         return new PropertiesPanel(panels.get(0));
-
     }
 
     public PropertiesPanel containerProperties() {
-        selectTab("Container");
         List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
         return new PropertiesPanel(panels.get(1));
     }
