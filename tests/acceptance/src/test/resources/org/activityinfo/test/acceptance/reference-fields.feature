@@ -21,9 +21,9 @@ Feature: Reference fields
       | ReferPartners          | Reference |
       | ReferMedicalActivities | Reference |
     And choose reference for field "ReferPartners"
-      | My Databases | ReferenceDb | Partners |
+      | My databases | ReferenceDb | Partners |
     And choose reference for field "ReferMedicalActivities"
-      | My Databases | ReferenceDb | Reference fields |
+      | My databases | ReferenceDb | Reference fields |
     And I begin a new submission for "Reference fields"
     Then "ReferPartners" field has instances:
       | Default |
