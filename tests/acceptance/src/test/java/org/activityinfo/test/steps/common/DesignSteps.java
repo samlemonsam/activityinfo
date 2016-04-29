@@ -263,7 +263,7 @@ public class DesignSteps {
     public void choose_reference_for_field(String fieldLabel, DataTable dataTable) throws Throwable {
         FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
 
-        page.selectFieldByLabel(fieldLabel);
+        page.selectFieldByLabel(driver.alias(fieldLabel));
 
         PropertiesPanel fieldProperties = page.fieldProperties();
 

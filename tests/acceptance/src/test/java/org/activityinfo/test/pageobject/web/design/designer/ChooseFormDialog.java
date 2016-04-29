@@ -1,5 +1,6 @@
 package org.activityinfo.test.pageobject.web.design.designer;
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.XPathBuilder;
@@ -24,7 +25,12 @@ public class ChooseFormDialog {
 
     public ChooseFormDialog set(List<String> path, AliasTable alias) {
         for (int i = 0; i < path.size(); i++) {
-            select(path.get(i));
+            String nodeName = path.get(i);
+            if (i > 0 && !path.get(0).equals(I18N.CONSTANTS.geography())) {
+                nodeName = alias.createAlias(nodeName);
+            }
+
+            select(nodeName);
         }
         return save();
     }
