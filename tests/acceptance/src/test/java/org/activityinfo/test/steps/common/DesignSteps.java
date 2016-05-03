@@ -280,10 +280,16 @@ public class DesignSteps {
     public void field_has_instances(String fieldLabel, List<String> expectedItems) throws Throwable {
         Preconditions.checkNotNull(driver.getCurrentModal());
 
-        BsFormPanel.BsField field = driver.getCurrentModal().form().findFieldByLabel(fieldLabel);
+        BsFormPanel.BsField field = driver.getCurrentModal().form().findFieldByLabel(driver.getAliasTable().getAlias(fieldLabel));
+
+        expectedItems = Lists.newArrayList(expectedItems);
+        for (String item : Lists.newArrayList(expectedItems)) {
+            expectedItems.add(driver.getAliasTable().createAlias(item));
+        }
 
         List<String> presentItems = Lists.newArrayList(field.availableItems());
+        presentItems.removeAll(expectedItems);
 
-        assertTrue(presentItems.containsAll(expectedItems));
+        assertTrue(presentItems.isEmpty());
     }
 }
