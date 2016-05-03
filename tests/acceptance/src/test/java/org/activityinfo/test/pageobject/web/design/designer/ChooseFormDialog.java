@@ -46,8 +46,8 @@ public class ChooseFormDialog {
             String nodeName = path.get(i);
             String homeNode = path.get(0);
             if (i > 0 && !homeNode.equals(I18N.CONSTANTS.geography()) &&
-                    !homeNode.equals(I18N.CONSTANTS.partners()) &&
-                    !homeNode.equals(I18N.CONSTANTS.projects())) {
+                    !nodeName.equals(I18N.CONSTANTS.partners()) &&
+                    !nodeName.equals(I18N.CONSTANTS.projects())) {
                 nodeName = alias.createAlias(nodeName);
             }
 
