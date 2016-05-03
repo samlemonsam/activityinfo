@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.formdesigner;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -112,8 +113,8 @@ public class FormDesignerModel {
         if (rootContainer != null) {
             return getRootFormClass();
         }
-        FormElement fromRoot = getRootFormClass().getElement(elementId); // try root first
-        if (fromRoot != null) {
+        Optional<FormElement> fromRoot = getRootFormClass().getElement(elementId); // try root first
+        if (fromRoot.isPresent()) {
             return getRootFormClass();
         }
         for (FormClass subform : formFieldToSubFormClass.values()) {
@@ -124,8 +125,8 @@ public class FormDesignerModel {
             if (fromSubform != null) {
                 return subform;
             }
-            FormElement subformElement = subform.getElement(elementId);
-            if (subformElement != null) {
+            Optional<FormElement> subformElement = subform.getElement(elementId);
+            if (subformElement.isPresent()) {
                 return subform;
             }
         }

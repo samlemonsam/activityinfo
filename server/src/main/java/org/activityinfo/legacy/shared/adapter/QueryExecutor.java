@@ -242,7 +242,7 @@ public class QueryExecutor {
         FormClass formClass = new ActivityFormClassBuilder(activityFormDTO).build();
 
         // 1. If the FormClass has a field with the code "label" use that field as the label
-        if (formClass.getField(labelId) != null) {
+        if (formClass.getElement(labelId).isPresent()) {
 
             FieldValue label = instance.get(labelId);
             if (label != null && !Strings.isNullOrEmpty(label.toString())) {

@@ -169,13 +169,13 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         return elements;
     }
 
-    public FormElement getElement(ResourceId elementId) {
+    public Optional<FormElement> getElement(ResourceId elementId) {
         for (FormElement element : getAllElementsIncludingNested()) {
             if (element.getId().equals(elementId)) {
-                return element;
+                return Optional.of(element);
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     public Set<FormElement> getAllElementsIncludingNested() {
