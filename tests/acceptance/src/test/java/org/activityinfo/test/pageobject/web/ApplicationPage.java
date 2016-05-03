@@ -41,6 +41,7 @@ public class ApplicationPage {
     private static final Logger LOGGER = Logger.getLogger(ApplicationPage.class.getName());
     
     private static final By SETTINGS_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[2]");
+    private static final By LOCALE_MENU_BUTTON = By.xpath("//div[text() = 'ActivityInfo']/following-sibling::div[4]");
     private static final By DESIGN_TAB = By.xpath("//div[contains(text(), 'Design')]");
     
     private final FluentElement page;
@@ -66,6 +67,12 @@ public class ApplicationPage {
         page.findElement(SETTINGS_BUTTON).click();
         
         return new SettingsMenu(page);
+    }
+
+    public LocaleMenu openLocaleMenu() {
+        page.findElement(LOCALE_MENU_BUTTON).click();
+
+        return new LocaleMenu(page);
     }
     
     public OfflineMode getOfflineMode() {
