@@ -76,8 +76,6 @@ Feature: New form
       | Comments   |
     Then following fields are not deletable in form designer:
       | Partner    |
-      | Start Date |
-      | End Date   |
       | Comments   |
     Then "relevance, visible, required" field properties are disabled in form designer for:
       | Partner    |
