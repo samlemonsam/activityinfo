@@ -30,7 +30,7 @@ public class ChooseFormDialog {
     private SetMultimap<String, FluentElement> nodes() { // parsing manually, for some reason /div containsText(nodeName) does not work
         SetMultimap<String, FluentElement> nodes = HashMultimap.create();
         FluentElement formElement = modal.form().getForm();
-        for(FluentElement node : formElement.find().span(XPathBuilder.withClass("icon")).ancestor().div().asList().list()) {
+        for (FluentElement node : formElement.find().span(XPathBuilder.withClass("icon")).ancestor().div().asList().list()) {
             String text = node.text();
             if (!Strings.isNullOrEmpty(text)) {
                 nodes.put(text, node);
@@ -44,7 +44,10 @@ public class ChooseFormDialog {
 
         for (int i = 0; i < path.size(); i++) {
             String nodeName = path.get(i);
-            if (i > 0 && !path.get(0).equals(I18N.CONSTANTS.geography())) {
+            String homeNode = path.get(0);
+            if (i > 0 && !homeNode.equals(I18N.CONSTANTS.geography()) &&
+                    !homeNode.equals(I18N.CONSTANTS.partners()) &&
+                    !homeNode.equals(I18N.CONSTANTS.projects())) {
                 nodeName = alias.createAlias(nodeName);
             }
 
