@@ -23,7 +23,7 @@ Feature: Reference fields
     And choose reference for field "ReferPartners"
       | My databases | ReferenceDb | Partners |
     And choose reference for field "ReferMedicalActivities"
-      | My databases | ReferenceDb | Reference fields |
+      | My databases | ReferenceDb | Medical Activities |
     And I begin a new submission for "Reference fields"
     Then "ReferPartners" field has instances:
       | Default |

@@ -272,6 +272,8 @@ public class DesignSteps {
 
             fieldProperties.chooseFormDialog().set(row.getCells(), driver.getAliasTable());
         }
+
+        page.save();
     }
 
     @Then("^\"([^\"]*)\" field has instances:$")
