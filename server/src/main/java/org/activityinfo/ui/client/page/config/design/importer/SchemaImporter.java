@@ -43,6 +43,10 @@ public class SchemaImporter {
         @Template("<li>You didn't provide a column named <code>{0}</code>, " +
                   "so we'll default to <code>{1}</code>.</li>")
         SafeHtml missingColumn(String columnName, String defaultValue);
+
+        @Template("<li>You didn't provide an attribute name in AttributeValue column. Row: <code>{0}</code>, " +
+                "so we'll skip it.</li>")
+        SafeHtml missingAttribueValue(int rowCount);
     }
 
     public interface ProgressListener {
@@ -135,6 +139,7 @@ public class SchemaImporter {
 
     private LocationTypeDTO defaultLocationType;
     private boolean fatalError;
+    private boolean hasSkippedAttributes = false;
 
     private final WarningTemplates templates;
 
@@ -172,12 +177,17 @@ public class SchemaImporter {
         return missingColumns;
     }
 
+    public boolean isHasSkippedAttributes() {
+        return hasSkippedAttributes;
+    }
+
     public boolean processRows() {
         processRows(source);
         return !fatalError;
     }
 
     private void processRows(SourceTable source) {
+        int rowCount = 1;
         for (SourceRow row : source.getRows()) {
             ActivityFormDTO activity = getActivity(row);
             String fieldType = formFieldType.get(row);
@@ -221,14 +231,20 @@ public class SchemaImporter {
                 AttributeDTO attrib = findAttrib(group, attribName);
                 DtoWrapper attributeWrapper = new DtoWrapper(new AttributeKey((AttributeGroupKey) attributeGroupWrapper.getKey(), attribName));
                 if (attrib == null && !newAttributes.contains(attributeWrapper)) {
-                    attrib = new AttributeDTO();
-                    attrib.setId(-1);
-                    attrib.setName(attribName);
-                    attrib.set("attributeGroupId", group);
-                    attributeWrapper.setDto(attrib);
-                    newAttributes.add(attributeWrapper);
+                    if (!Strings.isNullOrEmpty(attribName)) {
+                        attrib = new AttributeDTO();
+                        attrib.setId(-1);
+                        attrib.setName(attribName);
+                        attrib.set("attributeGroupId", group);
+                        attributeWrapper.setDto(attrib);
+                        newAttributes.add(attributeWrapper);
+                    } else {
+                        hasSkippedAttributes = true;
+                        warnings.add(templates.missingAttribueValue(rowCount));
+                    }
                 }
             }
+            rowCount++;
         }
     }
 
@@ -332,6 +348,7 @@ public class SchemaImporter {
     }
 
     private void findColumns() {
+        hasSkippedAttributes = false;
         missingColumns.clear();
         activityCategory = findColumn("ActivityCategory", "", 255);
         activityName = findColumn("ActivityName", 45);
@@ -427,6 +444,7 @@ public class SchemaImporter {
 
     public void clearWarnings() {
         warnings.clear();
+        hasSkippedAttributes = false;
         fatalError = false;
     }
 
