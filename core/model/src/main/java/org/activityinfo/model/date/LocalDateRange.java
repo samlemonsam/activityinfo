@@ -86,10 +86,10 @@ public class LocalDateRange implements Serializable {
             boolean beforeMaxDate = true;
 
             if (minDate != null) {
-                afterMinDate = date.after(minDate);
+                afterMinDate = date.after(minDate) || date.equals(minDate);
             }
             if (maxDate != null) {
-                beforeMaxDate = date.before(maxDate);
+                beforeMaxDate = date.before(maxDate) || date.equals(maxDate);
             }
             return afterMinDate && beforeMaxDate;
         }

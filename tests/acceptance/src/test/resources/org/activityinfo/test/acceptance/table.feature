@@ -66,7 +66,7 @@ Feature: New table (based on new form)
   @AI-1102
   Scenario: Column filtering by date
     When open table for the "Medical Activities" form in the database "Patient Registration"
-    And filter date column "Start Date" with start date "2014-01-01" and end date "2014-12-31":
+    And filter date column "Start Date" with start date "2014-01-02" and end date "2014-05-11":
     Then table has rows:
       | Number of patients | Donor | Diseases treated this month    | Comments         | Partner | start date | end date   |
       | quantity           | enum  | enum                           | text             | enum    | date       | date       |
