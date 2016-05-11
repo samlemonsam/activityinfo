@@ -8,6 +8,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormClassProvider;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -42,9 +43,9 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     /**
      * Queries a flat, two dimensional view of collections.
      * 
-     * @param columnModel model describing the query.
+     * @param queryModel model describing the query.
      */
-    Observable<ColumnSet> queryTable(ColumnModel columnModel);
+    Observable<ColumnSet> queryTable(QueryModel queryModel);
     
     @Deprecated
     Promise<FormInstance> getFormInstance(ResourceId formId);

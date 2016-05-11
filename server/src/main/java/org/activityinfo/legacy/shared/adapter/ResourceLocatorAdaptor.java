@@ -23,7 +23,6 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
@@ -66,11 +65,8 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Observable<ColumnSet> queryTable(ColumnModel columnModel) {
-        QueryModel model = new QueryModel()
-                .addColumn(columnModel);
-
-        return new ObservablePromise<>(new HttpQueryExecutor().query(model));
+    public Observable<ColumnSet> queryTable(QueryModel queryModel) {
+        return new ObservablePromise<>(new HttpQueryExecutor().query(queryModel));
     }
 
     @Override

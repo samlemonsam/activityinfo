@@ -1,5 +1,6 @@
 package org.activityinfo.observable;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.promise.Promise;
 
 /**
@@ -11,6 +12,17 @@ public class ObservablePromise<T> extends Observable<T> {
 
     public ObservablePromise(Promise<T> promise) {
         this.promise = promise;
+        promise.then(new AsyncCallback<T>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                fireChange();
+            }
+
+            @Override
+            public void onSuccess(T result) {
+                fireChange();
+            }
+        });
     }
 
     @Override
@@ -20,7 +32,11 @@ public class ObservablePromise<T> extends Observable<T> {
 
     @Override
     public T get() {
-        return promise.get();
+        if (promise.getState() == Promise.State.FULFILLED) {
+            return promise.get();
+        } else {
+            return null;
+        }
     }
 
     public Promise<T> getPromise() {
