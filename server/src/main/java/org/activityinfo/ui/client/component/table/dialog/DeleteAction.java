@@ -47,7 +47,7 @@ public class DeleteAction implements ConfirmDialog.Action {
 
     public DeleteAction(InstanceTableView tableView) {
         this.tableView = tableView;
-        this.formClassLabel = tableView.getFormClassLabel();
+        this.formClassLabel = tableView.getRootFormClass().getLabel();
         for (Projection projection : tableView.getTable().getSelectionModel().getSelectedSet()) {
             selection.add(projection.getRootInstanceId());
         }

@@ -19,7 +19,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.widget.AlertPanel;
 import org.activityinfo.ui.client.widget.loading.TableLoadingIndicator;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +37,7 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     private final HTMLPanel panel;
     private List<FieldColumn> columns;
     private List<FieldColumn> selectedColumns;
-    private Collection<FormClass> rootFormClasses;
+    private FormClass rootFormClass;
 
     @UiField
     DivElement emRuler;
@@ -130,14 +129,6 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     public void onResize() {
     }
 
-    public String getFormClassLabel() {
-        if (rootFormClasses != null && !rootFormClasses.isEmpty()) {
-            final FormClass formClass = rootFormClasses.iterator().next();
-            return formClass.getLabel();
-        }
-        return "";
-    }
-
     public List<FieldColumn> getColumns() {
         if (columns == null) {
             columns = Lists.newArrayList();
@@ -156,11 +147,13 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         return resourceLocator;
     }
 
-    public void setRootFormClasses(Collection<FormClass> rootFormClasses) {
-        this.rootFormClasses = rootFormClasses;
-        if (rootFormClasses != null && !rootFormClasses.isEmpty()) {
-            table.setRootFormClass(rootFormClasses.iterator().next());
-        }
+    public void setRootFormClass(FormClass rootFormClass) {
+        this.rootFormClass = rootFormClass;
+        this.table.setRootFormClass(rootFormClass);
+    }
+
+    public FormClass getRootFormClass() {
+        return rootFormClass;
     }
 
     public StateProvider getStateProvider() {
