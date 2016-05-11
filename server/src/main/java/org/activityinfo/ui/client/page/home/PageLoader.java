@@ -5,15 +5,10 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.application.FolderClass;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.CriteriaIntersection;
-import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.legacy.client.state.StateProvider;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.ui.client.page.*;
-import org.activityinfo.ui.client.page.instance.InstancePage;
-import org.activityinfo.ui.client.page.instance.InstancePlace;
+import org.activityinfo.ui.client.page.resource.ResourcePage;
+import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.BaseStylesheet;
 
 public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
@@ -32,11 +27,11 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
         this.pageManager = pageManager;
         this.stateProvider = stateProvider;
 
-        pageManager.registerPageLoader(InstancePage.DESIGN_PAGE_ID, this);
-        placeSerializer.registerParser(InstancePage.DESIGN_PAGE_ID, new InstancePlace.Parser(InstancePage.DESIGN_PAGE_ID));
+        pageManager.registerPageLoader(ResourcePage.DESIGN_PAGE_ID, this);
+        placeSerializer.registerParser(ResourcePage.DESIGN_PAGE_ID, new ResourcePlace.Parser(ResourcePage.DESIGN_PAGE_ID));
 
-        pageManager.registerPageLoader(InstancePage.TABLE_PAGE_ID, this);
-        placeSerializer.registerParser(InstancePage.TABLE_PAGE_ID, new InstancePlace.Parser(InstancePage.TABLE_PAGE_ID));
+        pageManager.registerPageLoader(ResourcePage.TABLE_PAGE_ID, this);
+        placeSerializer.registerParser(ResourcePage.TABLE_PAGE_ID, new ResourcePlace.Parser(ResourcePage.TABLE_PAGE_ID));
     }
 
     @Override
@@ -47,9 +42,9 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
         GWT.runAsync(new RunAsyncCallback() {
             @Override
             public void onSuccess() {
-                if (pageState instanceof InstancePlace) {
-                    InstancePlace instancePlace = (InstancePlace) pageState;
-                    InstancePage page = new InstancePage(resourceLocator, instancePlace.getPageId(), stateProvider);
+                if (pageState instanceof ResourcePlace) {
+                    ResourcePlace resourcePlace = (ResourcePlace) pageState;
+                    ResourcePage page = new ResourcePage(resourceLocator, resourcePlace.getPageId(), stateProvider);
                     page.navigate(pageState);
                     callback.onSuccess(page);
                 }

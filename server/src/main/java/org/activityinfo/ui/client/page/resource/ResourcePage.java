@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.page.instance;
+package org.activityinfo.ui.client.page.resource;
 
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -6,7 +6,7 @@ import com.google.inject.Provider;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.state.StateProvider;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.formdesigner.FormSavedGuard;
 import org.activityinfo.ui.client.page.NavigationCallback;
@@ -22,7 +22,7 @@ import org.activityinfo.ui.icons.Icons;
 /**
  * Adapter that hosts a view of a given instance.
  */
-public class InstancePage implements Page {
+public class ResourcePage implements Page {
 
     public static final PageId DESIGN_PAGE_ID = new PageId("idesign");
     public static final PageId TABLE_PAGE_ID = new PageId("itable");
@@ -30,13 +30,13 @@ public class InstancePage implements Page {
     // scrollpanel.bs > div.container > loadingPanel
     private final ScrollPanel scrollPanel;
     private final SimplePanel container;
-    private final LoadingPanel<FormInstance> loadingPanel;
+    private final LoadingPanel<ResourceId> loadingPanel;
 
     private final PageId pageId;
     private final ResourceLocator locator;
     private final StateProvider stateProvider;
 
-    public InstancePage(ResourceLocator resourceLocator, PageId pageId, StateProvider stateProvider) {
+    public ResourcePage(ResourceLocator resourceLocator, PageId pageId, StateProvider stateProvider) {
         this.locator = resourceLocator;
         this.pageId = pageId;
         this.stateProvider = stateProvider;
@@ -81,19 +81,19 @@ public class InstancePage implements Page {
 
     @Override
     public boolean navigate(PageState place) {
-        final InstancePlace instancePlace = (InstancePlace) place;
+        final ResourcePlace resourcePlace = (ResourcePlace) place;
 
-        if (instancePlace.getPageId() == InstancePage.DESIGN_PAGE_ID) {
+        if (resourcePlace.getPageId() == ResourcePage.DESIGN_PAGE_ID) {
             loadingPanel.setDisplayWidget(new DesignTab(locator, stateProvider));
-        } else if (instancePlace.getPageId() == InstancePage.TABLE_PAGE_ID) {
+        } else if (resourcePlace.getPageId() == ResourcePage.TABLE_PAGE_ID) {
             loadingPanel.setDisplayWidget(new TableTab(locator, stateProvider));
         } else {
-            throw new UnsupportedOperationException("Unknown page id:" + instancePlace.getPageId());
+            throw new UnsupportedOperationException("Unknown page id:" + resourcePlace.getPageId());
         }
-        this.loadingPanel.show(new Provider<Promise<FormInstance>>() {
+        this.loadingPanel.show(new Provider<Promise<ResourceId>>() {
             @Override
-            public Promise<FormInstance> get() {
-                return locator.getFormInstance(instancePlace.getInstanceId());
+            public Promise<ResourceId> get() {
+                return Promise.resolved(resourcePlace.getInstanceId());
             }
         });
         return true;

@@ -64,8 +64,8 @@ import org.activityinfo.ui.client.page.config.DbPage;
 import org.activityinfo.ui.client.page.config.DbPageState;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporter;
-import org.activityinfo.ui.client.page.instance.InstancePage;
-import org.activityinfo.ui.client.page.instance.InstancePlace;
+import org.activityinfo.ui.client.page.resource.ResourcePage;
+import org.activityinfo.ui.client.page.resource.ResourcePlace;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -275,12 +275,12 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         } else if(UIActions.EDIT.equals(actionId)) {
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(getSelectedFormClassId(), InstancePage.DESIGN_PAGE_ID)));
+                    new ResourcePlace(getSelectedFormClassId(), ResourcePage.DESIGN_PAGE_ID)));
 
         } else if(UIActions.OPEN_TABLE.equals(actionId)) {
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(getSelectedFormClassId(), InstancePage.TABLE_PAGE_ID)));
+                    new ResourcePlace(getSelectedFormClassId(), ResourcePage.TABLE_PAGE_ID)));
         }
     }
 
@@ -404,7 +404,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 //
 //                    eventBus.fireEvent(new NavigationEvent(
 //                            NavigationHandler.NAVIGATION_REQUESTED,
-//                            new InstancePlace(newActivity.getResourceId(), InstancePage.DESIGN_PAGE_ID)));
+//                            new ResourcePlace(newActivity.getResourceId(), ResourcePage.DESIGN_PAGE_ID)));
 //                }
 //            });
 //

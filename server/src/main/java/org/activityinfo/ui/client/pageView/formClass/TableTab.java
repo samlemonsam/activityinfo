@@ -8,7 +8,6 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
@@ -24,7 +23,7 @@ import java.util.Map;
 /**
  * Presents the instances of this form class as table
  */
-public class TableTab implements DisplayWidget<FormInstance> {
+public class TableTab implements DisplayWidget<ResourceId> {
 
     private InstanceTableView tableView;
 
@@ -40,24 +39,24 @@ public class TableTab implements DisplayWidget<FormInstance> {
     }
 
     @Override
-    public Promise<Void> show(FormInstance instance) {
+    public Promise<Void> show(ResourceId resourceId) {
         return new AsyncFormTreeBuilder(resourceLocator)
-        .apply(instance.getId())
-        .join(new Function<FormTree, Promise<Void>>() {
-            @Override
-            public Promise<Void> apply(FormTree input) {
-                formTree = input;
-                enumerateColumns();
+                .apply(resourceId)
+                .join(new Function<FormTree, Promise<Void>>() {
+                    @Override
+                    public Promise<Void> apply(FormTree input) {
+                        formTree = input;
+                        enumerateColumns();
 
-                final Map<ResourceId, FormClass> rootFormClasses = formTree.getRootFormClasses();
+                        final Map<ResourceId, FormClass> rootFormClasses = formTree.getRootFormClasses();
 
-                tableView.setRootFormClasses(rootFormClasses.values());
-                tableView.setCriteria(ClassCriteria.union(rootFormClasses.keySet()));
-                tableView.setColumns(columns);
+                        tableView.setRootFormClasses(rootFormClasses.values());
+                        tableView.setCriteria(ClassCriteria.union(rootFormClasses.keySet()));
+                        tableView.setColumns(columns);
 
-                return Promise.done();
-            }
-        });
+                        return Promise.done();
+                    }
+                });
     }
 
     @Override

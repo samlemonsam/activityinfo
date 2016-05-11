@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.widget.DisplayWidget;
@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 /** *
  * Created by Mithun on 4/3/2014.
  */
-public class DesignTab implements DisplayWidget<FormInstance> {
+public class DesignTab implements DisplayWidget<ResourceId> {
 
     private ResourceLocator resourceLocator;
     private StateProvider stateProvider;
@@ -29,8 +29,8 @@ public class DesignTab implements DisplayWidget<FormInstance> {
     }
 
     @Override
-    public Promise<Void> show(FormInstance value) {
-        return this.resourceLocator.getFormClass(value.getId())
+    public Promise<Void> show(ResourceId resourceId) {
+        return this.resourceLocator.getFormClass(resourceId)
                 .then(new Function<FormClass, Void>() {
                     @Nullable
                     @Override

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.page.instance;
+package org.activityinfo.ui.client.page.resource;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -14,12 +14,12 @@ import java.util.List;
 /**
  * Place corresponding to the view of a instance.
  */
-public class InstancePlace implements PageState {
+public class ResourcePlace implements PageState {
 
     private ResourceId instanceId;
     private PageId pageId;
 
-    public InstancePlace(ResourceId resourceId, PageId part) {
+    public ResourcePlace(ResourceId resourceId, PageId part) {
         this.instanceId = resourceId;
         this.pageId = part;
     }
@@ -57,8 +57,8 @@ public class InstancePlace implements PageState {
         }
 
         @Override
-        public InstancePlace parse(String token) {
-            return new InstancePlace(ResourceId.valueOf(token), pageId);
+        public ResourcePlace parse(String token) {
+            return new ResourcePlace(ResourceId.valueOf(token), pageId);
         }
     }
 

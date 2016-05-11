@@ -66,8 +66,8 @@ import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
-import org.activityinfo.ui.client.page.instance.InstancePage;
-import org.activityinfo.ui.client.page.instance.InstancePlace;
+import org.activityinfo.ui.client.page.resource.ResourcePage;
+import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
@@ -477,7 +477,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             ResourceId formClassId = CuidAdapter.activityFormClass(activityId.get());
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(formClassId, InstancePage.TABLE_PAGE_ID)));
+                    new ResourcePlace(formClassId, ResourcePage.TABLE_PAGE_ID)));
         }
     }
 
