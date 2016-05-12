@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
@@ -37,7 +36,6 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     private final HTMLPanel panel;
     private List<FieldColumn> columns;
     private List<FieldColumn> selectedColumns;
-    private FormClass rootFormClass;
 
     @UiField
     DivElement emRuler;
@@ -65,10 +63,6 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         this.table = new InstanceTable(this);
         this.loadingIndicator = table.getLoadingIndicator();
         this.panel = ourUiBinder.createAndBindUi(this);
-    }
-
-    public void setCriteria(Criteria criteria) {
-        table.setCriteria(criteria);
     }
 
     public void setColumns(final List<FieldColumn> columns) {
@@ -148,12 +142,11 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     }
 
     public void setRootFormClass(FormClass rootFormClass) {
-        this.rootFormClass = rootFormClass;
-        this.table.setRootFormClass(rootFormClass);
+        table.setRootFormClass(rootFormClass);
     }
 
     public FormClass getRootFormClass() {
-        return rootFormClass;
+        return table.getRootFormClass();
     }
 
     public StateProvider getStateProvider() {

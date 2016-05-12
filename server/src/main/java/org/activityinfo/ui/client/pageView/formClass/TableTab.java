@@ -3,10 +3,8 @@ package org.activityinfo.ui.client.pageView.formClass;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
@@ -49,7 +47,6 @@ public class TableTab implements DisplayWidget<ResourceId> {
                         enumerateColumns();
 
                         tableView.setRootFormClass(formTree.getRootFormClass());
-                        tableView.setCriteria(ClassCriteria.union(Sets.newHashSet(resourceId)));
                         tableView.setColumns(columns);
 
                         return Promise.done();

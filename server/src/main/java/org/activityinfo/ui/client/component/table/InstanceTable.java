@@ -11,8 +11,6 @@ import com.google.gwt.view.client.RangeChangeEvent;
 import org.activityinfo.core.client.ProjectionKeyProvider;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.CriteriaIntersection;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.table.action.*;
@@ -48,8 +46,8 @@ public class InstanceTable implements IsWidget {
     private final TableLoadingIndicator loadingIndicator = new TableLoadingIndicator()
             .setHideOnSuccess(true);
 
-    private Criteria criteria;
     private FormClass rootFormClass;
+    private List<FieldColumn> columns = Lists.newArrayList();
 
     public InstanceTable(InstanceTableView tableView) {
         this.tableView = tableView;
@@ -106,17 +104,11 @@ public class InstanceTable implements IsWidget {
         return actions;
     }
 
-    public void setCriteria(Criteria criteria) {
-        this.criteria = criteria;
-    }
-
-    public Criteria getCriteria() {
-        return criteria;
-    }
-
     public void setColumns(List<FieldColumn> columns) {
         removeAllColumns();
-        dataLoader.reset();
+        this.dataLoader.reset();
+        this.columns = Lists.newArrayList(columns);
+
         for (FieldColumn column : columns) {
             final FilterCellAction filterAction = new FilterCellAction(this, column);
             table.addColumn(column, new FilterHeader(column, filterAction));
@@ -141,21 +133,6 @@ public class InstanceTable implements IsWidget {
         dataLoader.reload();
     }
 
-    public Criteria buildQueryCriteria() {
-        // we want the intersection of the base (class) criteria and
-        // each of the column filters: the rows that satisfy the class AND
-        // the Col1 filter AND Col2 filter
-        final List<Criteria> intersection = Lists.newArrayList(criteria);
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            final FieldColumn column = (FieldColumn) table.getColumn(i);
-            final Criteria columnCriteria = column.getCriteria();
-            if (columnCriteria != null) {
-                intersection.add(columnCriteria);
-            }
-        }
-        return new CriteriaIntersection(intersection);
-    }
-
     public MultiSelectionModel<Projection> getSelectionModel() {
         return selectionModel;
     }
@@ -163,6 +140,10 @@ public class InstanceTable implements IsWidget {
     @Override
     public Widget asWidget() {
         return table;
+    }
+
+    public List<FieldColumn> getColumns() {
+        return columns;
     }
 
     public CellTable<Projection> getTable() {
