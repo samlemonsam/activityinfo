@@ -1,5 +1,6 @@
 package org.activityinfo.server.command.handler.pivot;
 
+import com.google.common.base.Optional;
 import org.activityinfo.legacy.shared.reports.content.AttributeCategory;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
@@ -22,7 +23,7 @@ public class AttributeDimBinding extends DimBinding {
 
     private final AttributeGroupDimension model;
     private final ResourceId groupId;
-    private final FormField groupField;
+    private final Optional<FormField> groupField;
     private final Map<String, Integer> attributeOrder;
     private final String columnId;
 
@@ -41,10 +42,10 @@ public class AttributeDimBinding extends DimBinding {
         this.columnId = "A" + model.getAttributeGroupId();
     }
 
-    private Map<String, Integer> findAttributeOrder(FormField field) {
+    private Map<String, Integer> findAttributeOrder(Optional<FormField> field) {
         Map<String, Integer> map = new HashMap<>();
-        if(field.getType() instanceof EnumType) {
-            EnumType type = (EnumType) field.getType();
+        if(field.isPresent() && field.get().getType() instanceof EnumType) {
+            EnumType type = (EnumType) field.get().getType();
             List<EnumItem> items = type.getValues();
             for (int i = 0; i < items.size(); i++) {
                 map.put(items.get(i).getLabel(), i);
@@ -53,15 +54,15 @@ public class AttributeDimBinding extends DimBinding {
         return map;
     }
 
-    private FormField findGroupName(Collection<FormTree> formTrees) {
+    private Optional<FormField> findGroupName(Collection<FormTree> formTrees) {
         for (FormTree formTree : formTrees) {
             for (FormTree.Node node : formTree.getLeaves()) {
                 if(node.getFieldId().equals(groupId)) {
-                    return node.getField();
+                    return Optional.of(node.getField());
                 }
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     @Override
@@ -100,7 +101,7 @@ public class AttributeDimBinding extends DimBinding {
 
     private FieldPath findFieldByName(List<FormTree.Node> fields) {
         for (FormTree.Node field : fields) {
-            if(field.isEnum() && field.getField().getLabel().equals(groupField.getLabel())) {
+            if (field.isEnum() && groupField.isPresent() && field.getField().getLabel().equals(groupField.get().getLabel())) {
                 return field.getPath();
             }
         }
