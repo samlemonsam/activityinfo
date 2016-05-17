@@ -1,28 +1,18 @@
 package org.activityinfo.ui.client.component.table;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.type.enumerated.EnumItem;
-import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.number.Quantity;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Column that displays the value of a given field
  */
-public class FieldColumn extends Column<Projection, String> {
+public class FieldColumn extends Column<RowView, String> {
 
     public static final String NON_BREAKING_SPACE = "\u00A0";
 
@@ -44,54 +34,18 @@ public class FieldColumn extends Column<Projection, String> {
         this.fieldPaths = Lists.newArrayList(fieldPath);
     }
 
-    public FieldValue getFieldValue(Projection projection) {
-        for (FieldPath path : fieldPaths) {
-            final FieldValue value = projection.getValue(path);
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
+    public Object getFieldValue(RowView rowView) {
+        return rowView.getValue(node.getField().getId().asString());
     }
 
     @Override
-    public String getValue(Projection projection) {
-        final FieldValue fieldValue = getFieldValue(projection);
-
-        if (fieldValue instanceof Quantity) {
-            Double value = ((Quantity) fieldValue).getValue();
+    public String getValue(RowView rowView) {
+        Object value = getFieldValue(rowView);
+        if (value != null) {
             return value.toString();
-
-        } else if (fieldValue instanceof EnumValue) {
-            EnumValue enumValue = (EnumValue) fieldValue;
-            Set<EnumItem> items = enumValue.getValuesAsItems((EnumType) node.getField().getType());
-            final List<String> values = Lists.newArrayList();
-            for (final EnumItem item : items) {
-                values.add(item.getLabel());
-            }
-            return Joiner.on(", ").join(values);
-
-        } else if (fieldValue instanceof AttachmentValue && ((AttachmentValue) fieldValue).hasValues()) {
-            return createAttachmentLabel((AttachmentValue) fieldValue);
-        } else if (fieldValue != null) {
-            return fieldValue.toString();
         }
 
         return NON_BREAKING_SPACE;
-    }
-
-    private String createAttachmentLabel(AttachmentValue fieldValue) {
-        String result = "";
-
-        int size = fieldValue.getValues().size();
-        for (int i = 0; i < size; i++) {
-            Attachment attachment = fieldValue.getValues().get(i);
-            result += attachment.getFilename();
-            if (i != (size - 1)) {
-                result += ", ";
-            }
-        }
-        return result;
     }
 
     public void addFieldPath(FieldPath path) {

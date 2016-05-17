@@ -22,11 +22,11 @@ package org.activityinfo.ui.client.component.table.dialog;
  */
 
 import com.google.common.collect.Sets;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.InstanceTableView;
+import org.activityinfo.ui.client.component.table.RowView;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.ConfirmDialog;
 
@@ -44,12 +44,11 @@ public class DeleteAction implements ConfirmDialog.Action {
     private final Set<ResourceId> selection = Sets.newHashSet();
     private final String formClassLabel;
 
-
     public DeleteAction(InstanceTableView tableView) {
         this.tableView = tableView;
         this.formClassLabel = tableView.getRootFormClass().getLabel();
-        for (Projection projection : tableView.getTable().getSelectionModel().getSelectedSet()) {
-            selection.add(projection.getRootInstanceId());
+        for (RowView rowView : tableView.getTable().getSelectionModel().getSelectedSet()) {
+            selection.add(rowView.getResourceId());
         }
     }
 

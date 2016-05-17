@@ -21,17 +21,17 @@ package org.activityinfo.ui.client.component.table;
  * #L%
  */
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.QueryResult;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.promise.Promise;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservablePromise;
+import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.widget.CellTable;
 import org.activityinfo.ui.client.widget.loading.LoadingState;
 
@@ -49,13 +49,13 @@ public class InstanceTableDataLoader {
 
     private static final Logger LOGGER = Logger.getLogger(InstanceTableDataLoader.class.getName());
 
-    private final ListDataProvider<Projection> tableDataProvider = new ListDataProvider<>();
+    private final ListDataProvider<RowView> tableDataProvider = new ListDataProvider<>();
     private final InstanceTable table;
     private final Set<FieldPath> fields = Sets.newHashSet();
 
     private int lastVerticalScrollPosition;
-    private int instanceTotalCount = -1;
-    private QueryResult<Projection> prefetchedResult;
+    private int totalCount = -1;
+    private ColumnSet prefetchedResult;
 
     public InstanceTableDataLoader(InstanceTable table) {
         this.table = table;
@@ -107,21 +107,13 @@ public class InstanceTableDataLoader {
     public void loadMore(boolean isPrefetchCall) {
         if (!isAllLoaded()) {
             int offset = offset();
-            final int countToLoad = Math.min(PAGE_SIZE, instanceTotalCount - offset);
+            final int countToLoad = Math.min(PAGE_SIZE, totalCount - offset);
             load(offset, countToLoad, isPrefetchCall);
         }
     }
 
-    public InstanceQuery createInstanceQuery(int offset, int countToLoad) {
-        return new InstanceQuery(Lists.newArrayList(fields), table.buildQueryCriteria(), offset, countToLoad);
-    }
-
-    private Promise<QueryResult<Projection>> query(int offset, int countToLoad) {
-        return table.getResourceLocator().queryProjection(createInstanceQuery(offset, countToLoad));
-    }
-
     public boolean isAllLoaded() {
-        return offset() >= instanceTotalCount && instanceTotalCount != -1;
+        return offset() >= totalCount && totalCount != -1;
     }
 
     private int offset() {
@@ -157,39 +149,58 @@ public class InstanceTableDataLoader {
         }
 
         LOGGER.log(Level.FINE, "Loading instances... offset = " +
-                offset + ", count = " + countToLoad + ", totalCount = " + instanceTotalCount + ", fields = " + fields);
+                offset + ", count = " + countToLoad + ", totalCount = " + totalCount + ", fields = " + fields);
 
         table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, I18N.CONSTANTS.loading());
 
-        query(offset, countToLoad).then(new AsyncCallback<QueryResult<Projection>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                LOGGER.log(Level.SEVERE, "Failed to load instances. fields = " + fields, caught);
-                table.getLoadingIndicator().onLoadingStateChanged(LoadingState.FAILED, caught);
-            }
+        QueryModel queryModel = new QueryModel(table.getRootFormClass().getId());
+        for (FieldColumn column : table.getColumns()) {
+            queryModel.selectField(column.getNode().getFieldId());
+        }
 
+        Observable<ColumnSet> observable = table.getResourceLocator().queryTable(queryModel);
+        observable.subscribe(new Observer<ColumnSet>() {
             @Override
-            public void onSuccess(QueryResult<Projection> result) {
-                table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADED);
+            public void onChange(Observable<ColumnSet> observable) {
+                if (!observable.isLoading()) {
+                    table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADED);
 
-                if (isPrefetchCall) { // just save prefetch and exit
-                    prefetchedResult = result;
-                    return;
+                    if (isPrefetchCall) { // just save prefetch and exit
+                        prefetchedResult = observable.get();
+                        return;
+                    }
+
+                    ColumnSet columnSet = observable.get();
+                    if (columnSet != null) {
+                        applyQueryResult(columnSet);
+
+                        prefetch();
+                    }
                 }
 
-                applyQueryResult(result);
-
-                prefetch();
             }
         });
+        if (observable instanceof ObservablePromise) {
+            ((ObservablePromise)observable).getPromise().then(new AsyncCallback() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    LOGGER.log(Level.SEVERE, "Failed to load instances. fields = " + fields, caught);
+                    table.getLoadingIndicator().onLoadingStateChanged(LoadingState.FAILED, caught);
+                }
+
+                @Override
+                public void onSuccess(Object result) {
+                }
+            });
+        }
     }
 
-    private void applyQueryResult(QueryResult<Projection> result) {
-        LOGGER.log(Level.FINE, "Loaded projections, size = " + result.getItems().size() + ", total = " + result.getTotalCount());
+    private void applyQueryResult(ColumnSet columnSet) {
+        LOGGER.log(Level.FINE, "Loaded column set = " + columnSet);
 
-        tableDataProvider.getList().addAll(result.getItems());
+        tableDataProvider.getList().addAll(RowView.asRowViews(columnSet));
 
-        InstanceTableDataLoader.this.instanceTotalCount = result.getTotalCount();
+        InstanceTableDataLoader.this.totalCount = columnSet.getNumRows();
 
         refreshTableActionsState();
     }
@@ -209,7 +220,7 @@ public class InstanceTableDataLoader {
 
     public void reload() {
         prefetchedResult = null;
-        instanceTotalCount = -1;
+        totalCount = -1;
         tableDataProvider.getList().clear();
 
         load(0, PAGE_SIZE, false);

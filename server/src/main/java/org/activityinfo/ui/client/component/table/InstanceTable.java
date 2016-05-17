@@ -8,9 +8,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.RangeChangeEvent;
-import org.activityinfo.core.client.ProjectionKeyProvider;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.table.action.*;
@@ -38,8 +36,8 @@ public class InstanceTable implements IsWidget {
     private final ResourceLocator resourceLocator;
     private final StateProvider stateProvider;
 
-    private final CellTable<Projection> table;
-    private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
+    private final CellTable<RowView> table;
+    private final MultiSelectionModel<RowView> selectionModel = new MultiSelectionModel<>(new RowViewKeyProvider());
     private final List<TableHeaderAction> headerActions;
     private final InstanceTableView tableView;
     private final InstanceTableDataLoader dataLoader;
@@ -57,7 +55,7 @@ public class InstanceTable implements IsWidget {
         CellTableResources.INSTANCE.cellTableStyle().ensureInjected();
 
         final TableHeaderActionBrowserEventHandler headerActionEventHandler = new TableHeaderActionBrowserEventHandler(this);
-        table = new CellTable<Projection>(Integer.MAX_VALUE, CellTableResources.INSTANCE) {
+        table = new CellTable<RowView>(Integer.MAX_VALUE, CellTableResources.INSTANCE) {
             @Override
             protected void onBrowserEvent2(Event event) {
                 super.onBrowserEvent2(event);
@@ -133,7 +131,7 @@ public class InstanceTable implements IsWidget {
         dataLoader.reload();
     }
 
-    public MultiSelectionModel<Projection> getSelectionModel() {
+    public MultiSelectionModel<RowView> getSelectionModel() {
         return selectionModel;
     }
 
@@ -146,7 +144,7 @@ public class InstanceTable implements IsWidget {
         return columns;
     }
 
-    public CellTable<Projection> getTable() {
+    public CellTable<RowView> getTable() {
         return table;
     }
 

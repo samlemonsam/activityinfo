@@ -46,24 +46,20 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Provider;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.ProjectionKeyProvider;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.CriteriaUnion;
-import org.activityinfo.core.shared.criteria.CriteriaVisitor;
-import org.activityinfo.core.shared.criteria.FieldCriteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.component.table.RowView;
+import org.activityinfo.ui.client.component.table.RowViewKeyProvider;
 import org.activityinfo.ui.client.widget.DataGrid;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.TextBox;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -86,19 +82,19 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
     private static FilterContentStringUiBinder uiBinder = GWT.create(FilterContentStringUiBinder.class);
 
-    private final ListDataProvider<Projection> tableDataProvider = new ListDataProvider<>();
-    private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
+    private final ListDataProvider<RowView> tableDataProvider = new ListDataProvider<>();
+    private final MultiSelectionModel<RowView> selectionModel = new MultiSelectionModel<>(new RowViewKeyProvider());
 
     private final FieldColumn column;
-    private final DataGrid<Projection> filterGrid;
+    private final DataGrid<RowView> filterGrid;
 
-    private List<Projection> allItems;
+    private List<RowView> allItems;
     private ValueChangeHandler changeHandler;
 
     @UiField
     TextBox textBox;
     @UiField
-    LoadingPanel<List<Projection>> loadingPanel;
+    LoadingPanel<List<RowView>> loadingPanel;
     @UiField
     HTMLPanel textBoxContainer;
     @UiField
@@ -119,16 +115,16 @@ public class FilterContentExistingItems extends Composite implements FilterConte
             }
         });
 
-        final Column<Projection, Boolean> checkColumn = new Column<Projection, Boolean>(new CheckboxCell(true, false)) {
+        final Column<RowView, Boolean> checkColumn = new Column<RowView, Boolean>(new CheckboxCell(true, false)) {
             @Override
-            public Boolean getValue(Projection object) {
+            public Boolean getValue(RowView object) {
                 return selectionModel.isSelected(object);
             }
         };
 
         filterGrid = new DataGrid<>(1000, FilterDataGridResources.INSTANCE);
         filterGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager
-                .<Projection>createCheckboxManager());
+                .<RowView>createCheckboxManager());
         filterGrid.addColumn(checkColumn);
         filterGrid.addColumn(column);
         filterGrid.setColumnWidth(checkColumn, CHECKBOX_COLUMN_WIDTH, Style.Unit.PX);
@@ -147,9 +143,9 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
         tableDataProvider.addDataDisplay(filterGrid);
 
-        loadingPanel.setDisplayWidget(new DisplayWidget<List<Projection>>() {
+        loadingPanel.setDisplayWidget(new DisplayWidget<List<RowView>>() {
             @Override
-            public Promise<Void> show(List<Projection> values) {
+            public Promise<Void> show(List<RowView> values) {
                 allItems = extractItems(values);
                 if (allItems.size() < SEARCH_BOX_PRESENCE_ITEM_COUNT) {
                     textBoxContainer.remove(textBox);
@@ -174,59 +170,62 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 return filterGrid;
             }
         });
-        loadingPanel.show(new Provider<Promise<List<Projection>>>() {
+        loadingPanel.show(new Provider<Promise<List<RowView>>>() {
             @Override
-            public Promise<List<Projection>> get() {
-                InstanceQuery query = table.getDataLoader().createInstanceQuery(0, 10000)
-                        .setFilterFieldPath(column.getFieldPaths().get(0));
-                return table.getResourceLocator().query(query);
+            public Promise<List<RowView>> get() {
+                // todo
+//                InstanceQuery query = table.getDataLoader().createInstanceQuery(0, 10000)
+//                        .setFilterFieldPath(column.getFieldPaths().get(0));
+//                return table.getResourceLocator().query(query);
+                return Promise.resolved(allItems);
             }
         });
     }
 
     private void initByCriteriaVisit() {
-        final Criteria criteria = column.getCriteria();
-        if (criteria != null) {
-            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
-                @Override
-                public void visitFieldCriteria(FieldCriteria fieldCriteria) {
-                    for (Projection projection : allItems) {
-                        final Object valueAsObject = column.getFieldValue(projection);
-                        if (Objects.equals(valueAsObject, fieldCriteria.getValue())) {
-                            selectionModel.setSelected(projection, true);
-                        }
-                    }
-                }
-
-                @Override
-                public void visitUnion(CriteriaUnion criteriaUnion) {
-                    for (Criteria criteria : criteriaUnion.getElements()) {
-                        criteria.accept(this);
-                    }
-                }
-            };
-            criteria.accept(initializationVisitor);
-        }
+        // todo
+//        final Criteria criteria = column.getCriteria();
+//        if (criteria != null) {
+//            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
+//                @Override
+//                public void visitFieldCriteria(FieldCriteria fieldCriteria) {
+//                    for (Projection projection : allItems) {
+//                        final Object valueAsObject = column.getFieldValue(projection);
+//                        if (Objects.equals(valueAsObject, fieldCriteria.getValue())) {
+//                            selectionModel.setSelected(projection, true);
+//                        }
+//                    }
+//                }
+//
+//                @Override
+//                public void visitUnion(CriteriaUnion criteriaUnion) {
+//                    for (Criteria criteria : criteriaUnion.getElements()) {
+//                        criteria.accept(this);
+//                    }
+//                }
+//            };
+//            criteria.accept(initializationVisitor);
+//        }
     }
 
-    private List<Projection> extractItems(List<Projection> projections) {
-        final SortedMap<String, Projection> labelToProjectionMap = Maps.newTreeMap();
-        for (Projection projection : projections) {
-            final String value = column.getValue(projection).replace(String.valueOf((char) 160), " ").trim();
-            if (!Strings.isNullOrEmpty(value) && !labelToProjectionMap.containsKey(value)) {
-                labelToProjectionMap.put(value, projection);
+    private List<RowView> extractItems(List<RowView> rowViews) {
+        final SortedMap<String, RowView> labelToRowMap = Maps.newTreeMap();
+        for (RowView rowView : rowViews) {
+            final String value = column.getValue(rowView).replace(String.valueOf((char) 160), " ").trim();
+            if (!Strings.isNullOrEmpty(value) && !labelToRowMap.containsKey(value)) {
+                labelToRowMap.put(value, rowView);
             }
         }
-        return Lists.newArrayList(labelToProjectionMap.values());
+        return Lists.newArrayList(labelToRowMap.values());
     }
 
     private void filterData() {
         final String stringFilter = textBox.getValue();
-        final List<Projection> toShow = Lists.newArrayList();
-        for (Projection projection : allItems) {
-            final String value = column.getValue(projection);
+        final List<RowView> toShow = Lists.newArrayList();
+        for (RowView rowView : allItems) {
+            final String value = column.getValue(rowView);
             if (Strings.isNullOrEmpty(stringFilter) || value.toUpperCase().contains(stringFilter.toUpperCase())) {
-                toShow.add(projection);
+                toShow.add(rowView);
             }
         }
         tableDataProvider.setList(toShow);
@@ -234,17 +233,19 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
     @Override
     public Criteria getCriteria() {
-        final Set<Projection> selectedSet = selectionModel.getSelectedSet();
+        final Set<RowView> selectedSet = selectionModel.getSelectedSet();
         final List<Criteria> criteriaList = Lists.newArrayList();
-        for (Projection projection : selectedSet) {
-            criteriaList.add(new FieldCriteria(column.getNode().getPath(), column.getFieldValue(projection)));
-        }
+
+        // todo
+//        for (RowView rows : selectedSet) {
+//            criteriaList.add(new FieldCriteria(column.getNode().getPath(), column.getFieldValue(rows)));
+//        }
         return new CriteriaUnion(criteriaList);
     }
 
     private void selectAll(boolean selectState) {
-        for (Projection projection : tableDataProvider.getList()) {
-            selectionModel.setSelected(projection, selectState);
+        for (RowView rowView : tableDataProvider.getList()) {
+            selectionModel.setSelected(rowView, selectState);
         }
     }
 

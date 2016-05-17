@@ -31,7 +31,7 @@ import com.google.gwt.core.client.GWT;
 @Source("InstanceTable.less")
 public interface InstanceTableStyle extends Stylesheet {
 
-    public static final InstanceTableStyle INSTANCE = GWT.create(InstanceTableStyle.class);
+    InstanceTableStyle INSTANCE = GWT.create(InstanceTableStyle.class);
 
     @ClassName("instance-table-toobar")
     String toolbar();

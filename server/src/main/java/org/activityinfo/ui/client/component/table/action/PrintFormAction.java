@@ -4,10 +4,10 @@ import com.google.common.base.Optional;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.component.table.RowView;
 import org.activityinfo.ui.client.page.print.PrintFormPanel;
 import org.activityinfo.ui.icons.Icons;
 
@@ -45,9 +45,9 @@ public class PrintFormAction implements TableHeaderAction {
     }
     
     private Optional<ResourceId> getUniqueSelection() {
-        Set<Projection> set = table.getSelectionModel().getSelectedSet();
+        Set<RowView> set = table.getSelectionModel().getSelectedSet();
         if(set.size() == 1) {
-            return Optional.of(set.iterator().next().getRootInstanceId());
+            return Optional.of(set.iterator().next().getResourceId());
         } else {
             return Optional.absent();
         }

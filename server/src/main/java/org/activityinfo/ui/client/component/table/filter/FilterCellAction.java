@@ -26,7 +26,7 @@ import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.user.client.ui.PopupPanel;
-import org.activityinfo.core.shared.Projection;
+import org.activityinfo.ui.client.component.table.RowView;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
 import org.activityinfo.ui.client.widget.CellTable;
@@ -48,7 +48,7 @@ public class FilterCellAction implements ActionCell.Delegate {
 
     @Override
     public void execute(Object object) {
-        final CellTable<Projection> grid = table.getTable();
+        final CellTable<RowView> grid = table.getTable();
         final TableSectionElement tableHeadElement = grid.getTableHeadElement();
         final FilterPanel filterPanel = new FilterPanel(table, column);
         filterPanel.show(new PopupPanel.PositionCallback() {

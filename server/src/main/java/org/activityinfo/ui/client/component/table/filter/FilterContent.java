@@ -30,9 +30,9 @@ import org.activityinfo.core.shared.criteria.HasCriteria;
  */
 public interface FilterContent extends HasCriteria, IsWidget {
 
-    public void clear();
+    void clear();
 
-    public boolean isValid();
+    boolean isValid();
 
-    public void setChangeHandler(ValueChangeHandler handler);
+    void setChangeHandler(ValueChangeHandler handler);
 }
