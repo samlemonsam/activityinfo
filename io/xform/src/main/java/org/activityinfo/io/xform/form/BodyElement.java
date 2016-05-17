@@ -34,4 +34,8 @@ public abstract class BodyElement {
     public void setHint(String hint) {
         this.hint = hint;
     }
+
+    public boolean isValid() {
+        return true;
+    }
 }
