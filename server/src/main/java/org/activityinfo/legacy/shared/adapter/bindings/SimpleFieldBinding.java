@@ -3,11 +3,11 @@ package org.activityinfo.legacy.shared.adapter.bindings;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.legacy.shared.model.EntityDTO;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.barcode.BarcodeValue;
-import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
 
@@ -47,8 +47,8 @@ public class SimpleFieldBinding implements FieldBinding<EntityDTO> {
                 value = ((BarcodeValue) value).asString();
             } else if (value instanceof Quantity) {
                 value = ((Quantity) value).getValue();
-            } else if (value instanceof AttachmentValue) {
-                value = Resources.toJsonObject(((AttachmentValue) value).asRecord()).toString();
+            } else if (value instanceof IsRecord) {
+                value = Resources.toJsonObject(((IsRecord) value).asRecord()).toString();
             } else {
                 throw new UnsupportedOperationException(fieldId + " = " + value.getClass().getSimpleName());
             }
