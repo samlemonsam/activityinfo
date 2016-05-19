@@ -23,7 +23,7 @@ public class RowView {
     }
 
     public String getId() {
-        return data.get("id").getString(row);
+        return data.get("@id").getString(row);
     }
 
     public ResourceId getResourceId() {

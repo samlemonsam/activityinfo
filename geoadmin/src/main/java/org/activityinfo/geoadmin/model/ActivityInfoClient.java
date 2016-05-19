@@ -324,7 +324,7 @@ public class ActivityInfoClient implements FormClassProvider {
                 .path("query")
                 .path("columns")
                 .type(MediaType.APPLICATION_JSON_TYPE)
-                .post(String.class, queryModel);
+                .post(String.class, Resources.toJson(queryModel.asRecord()));
 
         return ColumnSetParser.fromJsonColumnFormat(json);
     }

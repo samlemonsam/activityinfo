@@ -4,7 +4,6 @@ import com.google.gwt.http.client.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnSetParser;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.promise.Promise;
 
@@ -32,8 +31,7 @@ public class HttpQueryExecutor {
     }
 
     private Promise<ColumnSet> queryColumnsRemotely(QueryModel queryModel) {
-        ResourceId formClassId = queryModel.getRowSources().iterator().next().getRootFormClass();
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, baseUrl + "/resources/form/" + formClassId.asString()  +"/query/columns");
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, baseUrl + "/resources/query/columns");
         builder.setHeader("Content-Type", "application/json");
 
         final Promise<ColumnSet> promise = new Promise<>();

@@ -1,5 +1,6 @@
 package org.activityinfo.model.query;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -161,6 +162,28 @@ public class QueryModel implements IsRecord {
         record.set("columns", Resources.asRecordList(columns));
         record.set("filter", filter != null ? filter.asExpression() : null);
         return record;
+    }
+
+    public static QueryModel fromRecord(Record record) {
+        QueryModel queryModel = new QueryModel();
+
+        for (Record rowResource : record.getRecordList("rowSources")) {
+            queryModel.getRowSources().add(RowSource.fromRecord(rowResource));
+        }
+
+        for (Record columns : record.getRecordList("columns")) {
+            queryModel.getColumns().add(ColumnModel.fromRecord(columns));
+        }
+
+        String filter = record.isString("filter");
+        if (!Strings.isNullOrEmpty(filter)) {
+            queryModel.setFilter(filter);
+        }
+        return queryModel;
+    }
+
+    public static QueryModel fromJson(String json) {
+        return fromRecord(Resources.recordFromJson(json));
     }
 }
 

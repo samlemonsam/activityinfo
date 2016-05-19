@@ -154,8 +154,9 @@ public class InstanceTableDataLoader {
         table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, I18N.CONSTANTS.loading());
 
         QueryModel queryModel = new QueryModel(table.getRootFormClass().getId());
+        queryModel.selectResourceId().as("@id");
         for (FieldColumn column : table.getColumns()) {
-            queryModel.selectField(column.getNode().getFieldId());
+            queryModel.selectField(column.getNode().getFieldId()).as(column.getNode().getFieldId().asString());
         }
 
         Observable<ColumnSet> observable = table.getResourceLocator().queryTable(queryModel);

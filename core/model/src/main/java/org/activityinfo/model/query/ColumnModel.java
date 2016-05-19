@@ -79,4 +79,11 @@ public class ColumnModel implements IsRecord {
         record.set("expression", expression != null ? expression.asExpression() : null);
         return record;
     }
+
+    public static ColumnModel fromRecord(Record record) {
+        ColumnModel columnModel = new ColumnModel();
+        columnModel.setId(record.getString("id"));
+        columnModel.setExpression(record.getString("expression"));
+        return columnModel;
+    }
 }
