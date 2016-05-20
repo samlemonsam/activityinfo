@@ -100,7 +100,15 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
     @Override
     protected void onEdit(final ProjectDTO model) {
 
-        final FormDialogImpl<ProjectForm> dialog = new FormDialogImpl<ProjectForm>(new ProjectForm());
+        final ProjectDTO copy = new ProjectDTO();
+        copy.setProperties(model.getProperties());
+
+        final FormDialogImpl<ProjectForm> dialog = new FormDialogImpl<ProjectForm>(new ProjectForm()) {
+            @Override
+            public void onCancel() {
+                model.setProperties(copy.getProperties());
+            }
+        };
         dialog.setWidth(450);
         dialog.setHeight(300);
         dialog.getForm().getBinding().bind(model);
