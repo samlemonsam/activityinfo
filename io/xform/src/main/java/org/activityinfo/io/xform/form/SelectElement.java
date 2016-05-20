@@ -13,4 +13,9 @@ public abstract class SelectElement extends BodyElement {
     public List<Item> getItems() {
         return items;
     }
+
+    @Override
+    public boolean isValid() {
+        return !items.isEmpty();
+    }
 }

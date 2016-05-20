@@ -162,22 +162,14 @@ public class XFormBuilder {
                 body.addElement(createPresentationElement(gps(field.getModel())));
             } else if (field.getModel().isVisible() && !dateFields.contains(field.getModel().getId())) {
                 BodyElement element = createPresentationElement(field);
-                if (element instanceof SelectElement) {
-                    SelectElement selectElement = (SelectElement) element;
-                    if (selectElement.getItems().isEmpty()) {
-                        if (!field.getModel().isRequired()) {
-                            // skip select element if it has no item (Avoid ODK Client : Select has question has no choices)
-                            // In AI we may have empty (and not required) select element which are not supported by ODK Collect
-                            // (for example "Project")
-                            continue;
-                        } else {
-                            LOGGER.severe("Invalid required field without any items to select. Deadlock for user. " +
-                                    "Field id: " + field.getModel().getId() + ", FormClass id: " + formClass.getId());
-                        }
+                if (element.isValid()) {
+                    body.addElement(element);
+                } else {
+                    if (field.getModel().isRequired()) {
+                        LOGGER.severe("Invalid required field. Deadlock for user. " +
+                                "Field id: " + field.getModel().getId() + ", FormClass id: " + formClass.getId());
                     }
                 }
-
-                body.addElement(element);
             }
         }
         return body;

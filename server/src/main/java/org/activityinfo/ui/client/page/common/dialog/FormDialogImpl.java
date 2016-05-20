@@ -81,6 +81,7 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
             @Override
             public void handleEvent(ButtonEvent be) {
                 hide();
+                onCancel();
             }
         });
     }
