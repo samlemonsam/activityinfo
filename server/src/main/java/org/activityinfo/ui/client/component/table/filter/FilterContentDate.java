@@ -33,13 +33,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.CriteriaUnion;
-import org.activityinfo.core.shared.criteria.CriteriaVisitor;
-import org.activityinfo.core.shared.criteria.FieldDateCriteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.LocalDateRange;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.util.Pair;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.style.ElementStyle;
@@ -48,11 +46,15 @@ import org.activityinfo.ui.client.widget.DateRangePanel;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author yuriyz on 07/03/2015.
  */
 public class FilterContentDate extends Composite implements FilterContent {
+
+    private static final Logger LOGGER = Logger.getLogger(FilterContentDate.class.getName());
 
     interface DateUiBinder extends UiBinder<HTMLPanel, FilterContentDate> {
     }
@@ -87,26 +89,27 @@ public class FilterContentDate extends Composite implements FilterContent {
     }
 
     private void initByCriteriaVisit() {
-        final Criteria criteria = column.getCriteria();
-        if (criteria != null) {
-            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
-                @Override
-                public void visitFieldCriteria(FieldDateCriteria fieldCriteria) {
-                    if (fieldCriteria.getFieldPath().equals(column.getNode().getPath())) {
-                        setCurrentRange(fieldCriteria.getRange());
-                        rangePanel.setDateRange(currentRange.asDateRange());
-                    }
-                }
-
-                @Override
-                public void visitUnion(CriteriaUnion criteriaUnion) {
-                    for (Criteria criteria : criteriaUnion.getElements()) {
-                        criteria.accept(this);
-                    }
-                }
-            };
-            criteria.accept(initializationVisitor);
-        }
+        final ExprNode filter = column.getFilter();
+        // todo
+//        if (criteria != null) {
+//            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
+//                @Override
+//                public void visitFieldCriteria(FieldDateCriteria fieldCriteria) {
+//                    if (fieldCriteria.getFieldPath().equals(column.getNode().getPath())) {
+//                        setCurrentRange(fieldCriteria.getRange());
+//                        rangePanel.setDateRange(currentRange.asDateRange());
+//                    }
+//                }
+//
+//                @Override
+//                public void visitUnion(CriteriaUnion criteriaUnion) {
+//                    for (Criteria criteria : criteriaUnion.getElements()) {
+//                        criteria.accept(this);
+//                    }
+//                }
+//            };
+//            criteria.accept(initializationVisitor);
+//        }
     }
 
     private void addLastFourQuarters() {
@@ -141,14 +144,6 @@ public class FilterContentDate extends Composite implements FilterContent {
     }
 
     @Override
-    public Criteria getCriteria() {
-        if (currentRange != null) {
-            return new FieldDateCriteria(column.getNode().getPath(), currentRange);
-        }
-        return null;
-    }
-
-    @Override
     public void clear() {
         setCurrentRange(null);
         rangePanel.clear();
@@ -166,6 +161,21 @@ public class FilterContentDate extends Composite implements FilterContent {
     public void setCurrentRange(LocalDateRange currentRange) {
         this.currentRange = currentRange;
         rangePanel.setDateRange(currentRange != null ? currentRange.asDateRange() : null);
+    }
+
+    @Override
+    public ExprNode getFilter() {
+        if (currentRange != null) {
+            try {
+                String min = currentRange.getMinLocalDate().toString();
+                String max = currentRange.getMaxLocalDate().toString();
+                String id = column.getNode().getFieldId().asString();
+                return ExprParser.parse(min + " >= '" + id + "' && " + id + " <= '" + max + "'");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     @Override

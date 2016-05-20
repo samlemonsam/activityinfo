@@ -153,8 +153,9 @@ public class InstanceTableDataLoader {
 
         table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, I18N.CONSTANTS.loading());
 
-        QueryModel queryModel = new QueryModel(table.getRootFormClass().getId());
-        queryModel.selectResourceId().as("@id");
+        QueryModel queryModel = newQueryModel();
+        queryModel.setFilter(table.getFilter());
+
         for (FieldColumn column : table.getColumns()) {
             queryModel.selectField(column.getNode().getFieldId()).as(column.getNode().getFieldId().asString());
         }
@@ -194,6 +195,12 @@ public class InstanceTableDataLoader {
                 }
             });
         }
+    }
+
+    public QueryModel newQueryModel() {
+        QueryModel queryModel = new QueryModel(table.getRootFormClass().getId());
+        queryModel.selectResourceId().as("@id");
+        return queryModel;
     }
 
     private void applyQueryResult(ColumnSet columnSet) {

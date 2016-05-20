@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.table.filter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -46,9 +47,13 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Provider;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.CriteriaUnion;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Observer;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
@@ -62,11 +67,15 @@ import org.activityinfo.ui.client.widget.TextBox;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author yuriyz on 4/3/14.
  */
 public class FilterContentExistingItems extends Composite implements FilterContent {
+
+    private static final Logger LOGGER = Logger.getLogger(FilterContentExistingItems.class.getName());
 
     public static final int FILTER_GRID_HEIGHT = 250;
     public static final int CHECKBOX_COLUMN_WIDTH = 20;
@@ -173,18 +182,43 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         loadingPanel.show(new Provider<Promise<List<RowView>>>() {
             @Override
             public Promise<List<RowView>> get() {
-                // todo
-//                InstanceQuery query = table.getDataLoader().createInstanceQuery(0, 10000)
-//                        .setFilterFieldPath(column.getFieldPaths().get(0));
-//                return table.getResourceLocator().query(query);
-                return Promise.resolved(allItems);
+                final QueryModel model = table.getDataLoader().newQueryModel();
+                model.selectField(column.getFieldPaths().get(0));
+
+                final Promise<List<RowView>> result = new Promise<>();
+                table.getResourceLocator().queryTable(model).subscribe(new Observer<ColumnSet>() {
+                    @Override
+                    public void onChange(Observable<ColumnSet> observable) {
+                        if (!observable.isLoading()) {
+                            ColumnSet columnSet = observable.get();
+                            if (columnSet != null) {
+
+                                Set<String> values = Sets.newHashSet();
+                                List<RowView> rows = Lists.newArrayList();
+
+                                // only unique values
+                                for (int row = 0; row < columnSet.getNumRows(); row++) {
+                                    RowView rowView = new RowView(row, columnSet.getColumns());
+                                    Object value = rowView.getValue(column.getNode().getFieldId().asString());
+                                    String valueStr = value != null ? value.toString() : "";
+                                    if (!Strings.isNullOrEmpty(valueStr) && !values.contains(valueStr)) {
+                                        values.add(valueStr);
+                                        rows.add(rowView);
+                                    }
+                                }
+                                result.resolve(rows);
+                            }
+                        }
+                    }
+                });
+                return result;
             }
         });
     }
 
     private void initByCriteriaVisit() {
         // todo
-//        final Criteria criteria = column.getCriteria();
+        final ExprNode node = column.getFilter();
 //        if (criteria != null) {
 //            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
 //                @Override
@@ -231,18 +265,6 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         tableDataProvider.setList(toShow);
     }
 
-    @Override
-    public Criteria getCriteria() {
-        final Set<RowView> selectedSet = selectionModel.getSelectedSet();
-        final List<Criteria> criteriaList = Lists.newArrayList();
-
-        // todo
-//        for (RowView rows : selectedSet) {
-//            criteriaList.add(new FieldCriteria(column.getNode().getPath(), column.getFieldValue(rows)));
-//        }
-        return new CriteriaUnion(criteriaList);
-    }
-
     private void selectAll(boolean selectState) {
         for (RowView rowView : tableDataProvider.getList()) {
             selectionModel.setSelected(rowView, selectState);
@@ -277,5 +299,35 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     @Override
     public void setChangeHandler(ValueChangeHandler handler) {
         this.changeHandler = handler;
+    }
+
+    @Override
+    public ExprNode getFilter() {
+        if (isValid()) {
+            try {
+                String expr = "";
+                List<RowView> set = Lists.newArrayList(selectionModel.getSelectedSet());
+                int size = set.size();
+                for (int i = 0; i < size; i++) {
+                    RowView row = set.get(i);
+                    String id = column.getNode().getFieldId().asString();
+
+                    Object value = row.getValue(id);
+                    if (value != null && !Strings.isNullOrEmpty(value.toString())) {
+                        expr += id + " == '" + value.toString() + "'";
+                        if ((i + 1) != size) { // if not last
+                            expr += " || ";
+                        }
+                    }
+                }
+                if (size > 1) {
+                    expr = "(" + expr + ")";
+                }
+                return ExprParser.parse(expr);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return null;
     }
 }

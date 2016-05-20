@@ -10,6 +10,9 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.RangeChangeEvent;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.client.state.StateProvider;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.FunctionCallNode;
+import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.table.action.*;
 import org.activityinfo.ui.client.component.table.filter.FilterCellAction;
@@ -121,6 +124,25 @@ public class InstanceTable implements IsWidget {
         while (table.getColumnCount() > 0) {
             table.removeColumn(0);
         }
+    }
+
+    public ExprNode getFilter() {
+        List<ExprNode> arguments = Lists.newArrayList();
+        for (FieldColumn column : columns) {
+            if (column.getFilter() != null) {
+                arguments.add(column.getFilter());
+            }
+        }
+
+        if (arguments.isEmpty()) {
+            return null;
+        }
+
+        if (arguments.size() == 1) {
+            return arguments.iterator().next();
+        }
+
+        return new FunctionCallNode(AndFunction.INSTANCE, arguments);
     }
 
     public InstanceTableDataLoader getDataLoader() {

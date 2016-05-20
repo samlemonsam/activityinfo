@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.component.table;
 import com.google.common.collect.Lists;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
-import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 
@@ -19,7 +19,7 @@ public class FieldColumn extends Column<RowView, String> {
     private FormTree.Node node;
     private List<FieldPath> fieldPaths;
     private String header;
-    private Criteria criteria;
+    private ExprNode filter;
 
     public FieldColumn(FormTree.Node node) {
         super(new TextCell());
@@ -72,19 +72,19 @@ public class FieldColumn extends Column<RowView, String> {
         }
     }
 
-    public Criteria getCriteria() {
-        return criteria;
+    public ExprNode getFilter() {
+        return filter;
     }
 
-    public void setCriteria(Criteria criteria) {
-        this.criteria = criteria;
+    public void setFilter(ExprNode filter) {
+        this.filter = filter;
     }
 
     @Override
     public String toString() {
         return "FieldColumn{" +
                 "header='" + header + '\'' +
-                ", criteria=" + criteria +
+                ", filter=" + filter +
                 '}';
     }
 }
