@@ -326,6 +326,10 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                             expr += "'";
                         }
 
+                        if (size > 1) {
+                            expr = "(" + expr + ")";
+                        }
+
                         if ((i + 1) != size) { // if not last
                             expr += " || ";
                         }
