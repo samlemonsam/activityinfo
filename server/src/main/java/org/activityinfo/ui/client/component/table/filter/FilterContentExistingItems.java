@@ -52,6 +52,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.promise.Promise;
@@ -311,10 +312,20 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 for (int i = 0; i < size; i++) {
                     RowView row = set.get(i);
                     String id = column.getNode().getFieldId().asString();
+                    boolean isNumber = column.getNode().getType() instanceof QuantityType;
 
                     Object value = row.getValue(id);
                     if (value != null && !Strings.isNullOrEmpty(value.toString())) {
-                        expr += id + " == '" + value.toString() + "'";
+
+                        expr += id + "==";
+                        if (!isNumber) {
+                            expr += "'";
+                        }
+                        expr += value.toString();
+                        if (!isNumber) {
+                            expr += "'";
+                        }
+
                         if ((i + 1) != size) { // if not last
                             expr += " || ";
                         }
