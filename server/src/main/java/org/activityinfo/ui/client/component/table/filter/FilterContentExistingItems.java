@@ -48,8 +48,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.expr.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
@@ -162,7 +161,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 }
 
                 filterData();
-                initByCriteriaVisit();
+                initByFilterVisit();
 
                 Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
                     @Override
@@ -217,30 +216,26 @@ public class FilterContentExistingItems extends Composite implements FilterConte
         });
     }
 
-    private void initByCriteriaVisit() {
-        // todo
+    private void initByFilterVisit() {
         final ExprNode node = column.getFilter();
-//        if (criteria != null) {
-//            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
-//                @Override
-//                public void visitFieldCriteria(FieldCriteria fieldCriteria) {
-//                    for (Projection projection : allItems) {
-//                        final Object valueAsObject = column.getFieldValue(projection);
-//                        if (Objects.equals(valueAsObject, fieldCriteria.getValue())) {
-//                            selectionModel.setSelected(projection, true);
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void visitUnion(CriteriaUnion criteriaUnion) {
-//                    for (Criteria criteria : criteriaUnion.getElements()) {
-//                        criteria.accept(this);
-//                    }
-//                }
-//            };
-//            criteria.accept(initializationVisitor);
-//        }
+        if (node != null) {
+            final VisitConstantsVisitor initializationVisitor = new VisitConstantsVisitor() {
+                @Override
+                public Object visitConstant(ConstantExpr node) {
+                    String value = constantValueAsString(node);
+                    if (!Strings.isNullOrEmpty(value)) {
+                        for (RowView rowView : allItems) {
+                            final String val = column.getValue(rowView);
+                            if (value.equals(val)) {
+                                selectionModel.setSelected(rowView, true);
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+            node.accept(initializationVisitor);
+        }
     }
 
     private List<RowView> extractItems(List<RowView> rowViews) {

@@ -22,6 +22,8 @@ package org.activityinfo.ui.client.component.table.filter;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -36,6 +38,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.LocalDateRange;
+import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.util.Pair;
@@ -45,6 +48,7 @@ import org.activityinfo.ui.client.widget.ButtonWithSize;
 import org.activityinfo.ui.client.widget.DateRangePanel;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,7 +83,7 @@ public class FilterContentDate extends Composite implements FilterContent {
         addYearRange(0);
         addYearRange(1);
 
-        initByCriteriaVisit();
+        initByFilterVisit();
         rangePanel.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
@@ -88,28 +92,32 @@ public class FilterContentDate extends Composite implements FilterContent {
         });
     }
 
-    private void initByCriteriaVisit() {
-        final ExprNode filter = column.getFilter();
-        // todo
-//        if (criteria != null) {
-//            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
-//                @Override
-//                public void visitFieldCriteria(FieldDateCriteria fieldCriteria) {
-//                    if (fieldCriteria.getFieldPath().equals(column.getNode().getPath())) {
-//                        setCurrentRange(fieldCriteria.getRange());
-//                        rangePanel.setDateRange(currentRange.asDateRange());
-//                    }
-//                }
-//
-//                @Override
-//                public void visitUnion(CriteriaUnion criteriaUnion) {
-//                    for (Criteria criteria : criteriaUnion.getElements()) {
-//                        criteria.accept(this);
-//                    }
-//                }
-//            };
-//            criteria.accept(initializationVisitor);
-//        }
+    private void initByFilterVisit() {
+        final ExprNode node = column.getFilter();
+        if (node != null) {
+            final List<LocalDate> dates = Lists.newArrayList();
+            final VisitConstantsVisitor initializationVisitor = new VisitConstantsVisitor() {
+                @Override
+                public Object visitConstant(ConstantExpr node) {
+                    String value = constantValueAsString(node);
+                    if (!Strings.isNullOrEmpty(value)) {
+                        dates.add(LocalDate.parse(value));
+                    }
+                    return null;
+                }
+            };
+            node.accept(initializationVisitor);
+
+            if (dates.size() == 2) {
+                LocalDate first = dates.get(0);
+                LocalDate second = dates.get(1);
+                LocalDateRange range = first.before(second) ?
+                        new LocalDateRange(first, second) : new LocalDateRange(second, first);
+
+                setCurrentRange(range);
+                rangePanel.setDateRange(currentRange.asDateRange());
+            }
+        }
     }
 
     private void addLastFourQuarters() {
@@ -170,7 +178,7 @@ public class FilterContentDate extends Composite implements FilterContent {
                 String min = currentRange.getMinLocalDate().toString();
                 String max = currentRange.getMaxLocalDate().toString();
                 String id = column.getNode().getFieldId().asString();
-                return ExprParser.parse(min + " >= '" + id + "' && " + id + " <= '" + max + "'");
+                return ExprParser.parse("('"+ min + "'<=" + id + ") && (" + id + " <= '" + max + "')");
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }
