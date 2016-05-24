@@ -25,7 +25,7 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
  * @author yuriyz on 12/05/2014.
  */
 public interface Template<T> {
-    public String getLabel();
+    String getLabel();
 
-    public T create();
+    T create();
 }

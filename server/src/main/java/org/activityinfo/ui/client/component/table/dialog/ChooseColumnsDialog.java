@@ -69,7 +69,6 @@ public class ChooseColumnsDialog {
     private final ListDataProvider<FieldColumn> selectedTableDataProvider = new ListDataProvider<>();
     private final MultiSelectionModel<FieldColumn> selectedSelectionModel = new MultiSelectionModel<>(
             new SimpleKeyProvider<FieldColumn>());
-    private final DataGrid<FieldColumn> selectedTable;
 
     private final ListDataProvider<FieldColumn> tableDataProvider = new ListDataProvider<>();
     private final MultiSelectionModel<FieldColumn> selectionModel = new MultiSelectionModel<>(
@@ -106,8 +105,9 @@ public class ChooseColumnsDialog {
             }
         });
 
-        selectedTable = createTable();
+        DataGrid<FieldColumn> selectedTable = createTable();
         selectedTable.setSelectionModel(selectedSelectionModel);
+
         selectedTableDataProvider.addDataDisplay(selectedTable);
         selectedTableDataProvider.setList(tableView.getSelectedColumns());
         selectedTableDataProvider.refresh();

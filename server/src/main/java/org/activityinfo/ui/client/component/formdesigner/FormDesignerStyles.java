@@ -31,7 +31,7 @@ import com.google.gwt.core.client.GWT;
 @Source("FormDesigner.less")
 public interface FormDesignerStyles extends Stylesheet{
 
-    public static final FormDesignerStyles INSTANCE = GWT.create(FormDesignerStyles.class);
+    FormDesignerStyles INSTANCE = GWT.create(FormDesignerStyles.class);
 
     @ClassName("widget-container")
     String widgetContainer();

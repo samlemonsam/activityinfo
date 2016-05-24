@@ -30,15 +30,15 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
  */
 public interface WidgetContainer {
 
-    public Widget asWidget();
+    Widget asWidget();
 
-    public Widget getDragHandle();
+    Widget getDragHandle();
 
-    public FormDesigner getFormDesigner();
+    FormDesigner getFormDesigner();
 
-    public ResourceId getParentId();
+    ResourceId getParentId();
 
-    public void syncWithModel();
+    void syncWithModel();
 
-    public void syncWithModel(boolean force);
+    void syncWithModel(boolean force);
 }

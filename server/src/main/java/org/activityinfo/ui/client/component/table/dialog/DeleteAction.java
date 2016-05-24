@@ -31,14 +31,11 @@ import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.ConfirmDialog;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * @author yuriyz on 4/8/14.
  */
 public class DeleteAction implements ConfirmDialog.Action {
-
-    private static final Logger LOGGER = Logger.getLogger(DeleteAction.class.getName());
 
     private final InstanceTableView tableView;
     private final Set<ResourceId> selection = Sets.newHashSet();
