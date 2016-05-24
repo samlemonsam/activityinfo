@@ -84,4 +84,12 @@ public class AttachmentValue implements FieldValue, IsRecord {
     public static AttachmentValue fromJson(String json) {
         return fromRecord(Resources.recordFromJson(json));
     }
+
+    public static AttachmentValue fromJsonSilently(String json) {
+        try {
+            return fromJson(json);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

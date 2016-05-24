@@ -29,6 +29,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.legacy.shared.type.IndicatorValueFormatter;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 
 import java.util.List;
@@ -112,11 +113,11 @@ public class SiteRenderer {
         return hasContent ? html.toString() : "";
     }
 
-    private boolean hasValue(Object value) {
+    private boolean hasValue(Object value, FieldTypeClass type) {
         if (value != null) {
-            if (value instanceof AttachmentValue) {
-                AttachmentValue attachment = (AttachmentValue) value;
-                return attachment.hasValues();
+            if (type == AttachmentType.TYPE_CLASS) {
+                AttachmentValue attachment = AttachmentValue.fromJsonSilently((String) value);
+                return attachment != null && attachment.hasValues();
             }
             return true;
         }
@@ -138,7 +139,7 @@ public class SiteRenderer {
 
             Object value = getIndicatorValue(site, indicator);
 
-            if (hasValue(value)) {
+            if (hasValue(value, indicator.getType())) {
 
                 groupHtml.append("<tr><td class='indicatorHeading");
                 if (group.getName() != null) {
