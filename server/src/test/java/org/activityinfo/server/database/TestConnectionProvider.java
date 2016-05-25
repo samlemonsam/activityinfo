@@ -57,7 +57,7 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
     private static final String PASSWORD_PROPERTY = "testDatabasePassword";
     private static final String USERNAME_PROPERTY = "testDatabaseUsername";
 
-    private static final String DEFAULT_PASSWORD = "root";
+    private static final String DEFAULT_PASSWORD = "adminpwd";
     private static final String DEFAULT_USERNAME = "root";
     
     public static String DATABASE_NAME, USERNAME, PASSWORD;
@@ -146,17 +146,17 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
 
     private static void initializeDatabase() throws SQLException, LiquibaseException {
 
-//        Connection connection = DriverManager.getConnection(connectionUrl(""), USERNAME, PASSWORD);
-//        Statement stmt = connection.createStatement();
-//        stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
-//        stmt.execute("CREATE DATABASE " + DATABASE_NAME);
-//        stmt.execute("USE " + DATABASE_NAME);
-//
-//        Liquibase liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
-//                new ClassLoaderResourceAccessor(),
-//                new JdbcConnection(connection));
-//        liquibase.update(null);
-//        connection.close();
+        Connection connection = DriverManager.getConnection(connectionUrl(""), USERNAME, PASSWORD);
+        Statement stmt = connection.createStatement();
+        stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
+        stmt.execute("CREATE DATABASE " + DATABASE_NAME);
+        stmt.execute("USE " + DATABASE_NAME);
+
+        Liquibase liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
+                new ClassLoaderResourceAccessor(),
+                new JdbcConnection(connection));
+        liquibase.update(null);
+        connection.close();
     }
 
     @Override

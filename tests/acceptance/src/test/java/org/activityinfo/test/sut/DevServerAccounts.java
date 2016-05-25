@@ -15,6 +15,7 @@ import org.activityinfo.test.capacity.Metrics;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +31,6 @@ public class DevServerAccounts implements Accounts {
 
 
     private static String DEV_PASSWORD = "notasecret";
-    private static String EMAIL = "user_a444982268f42fd5@mailinator.com";
 
     private final Meter users = Metrics.REGISTRY.meter("registeredUsers");
 
@@ -54,11 +54,6 @@ public class DevServerAccounts implements Accounts {
                 return createUniqueAccount(key);
             }
         });
-
-        if (server.getRootUrl().startsWith("http://localhost:8886")) {
-            EMAIL = "user1@user.com";
-            DEV_PASSWORD = "1";
-        }
     }
 
     public String getLocale() {
@@ -96,18 +91,17 @@ public class DevServerAccounts implements Accounts {
      */
     private synchronized UserAccount createUniqueAccount(String userName) {
 
-//        String email = generateAlias(userName);
-//
-//        LOGGER.fine(String.format("Creating account %s for user %s", email, userName));
-//
-//        if(batchingEnabled) {
-//            pendingUsers.add(email);
-//        } else {
-//            insertUsers(Arrays.asList(email));
-//        }
+        String email = generateAlias(userName);
 
-//        return new UserAccount(email, DEV_PASSWORD);
-        return new UserAccount(EMAIL, DEV_PASSWORD);
+        LOGGER.fine(String.format("Creating account %s for user %s", email, userName));
+
+        if(batchingEnabled) {
+            pendingUsers.add(email);
+        } else {
+            insertUsers(Arrays.asList(email));
+        }
+
+        return new UserAccount(email, DEV_PASSWORD);
     }
 
     public void flush() {
