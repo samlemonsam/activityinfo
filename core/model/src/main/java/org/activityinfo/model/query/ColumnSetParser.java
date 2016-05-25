@@ -43,9 +43,10 @@ public class ColumnSetParser {
                         views.put(column.getKey(), new ConstantColumnView(rowsCount, Double.parseDouble(value)));
                     } else if (ColumnType.BOOLEAN.name().equalsIgnoreCase(type)) {
                         views.put(column.getKey(), new ConstantColumnView(rowsCount, "1".equalsIgnoreCase(value)));
+                    } else {
+                        throw new UnsupportedOperationException("ColumnSetParser: column type is not supported, type: " + type);
                     }
-                    throw new UnsupportedOperationException("ColumnSetParser: column type is not supported, type: " + type);
-
+                    break;
                 default:
                     throw new UnsupportedOperationException("ColumnSetParser: storage is not supported, storage: " + storage);
             }
