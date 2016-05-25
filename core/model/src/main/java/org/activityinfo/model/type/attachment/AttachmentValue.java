@@ -100,4 +100,12 @@ public class AttachmentValue implements FieldValue, IsRecord {
     public int hashCode() {
         return values != null ? values.hashCode() : 0;
     }
+
+    public static AttachmentValue fromJsonSilently(String json) {
+        try {
+            return fromJson(json);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
