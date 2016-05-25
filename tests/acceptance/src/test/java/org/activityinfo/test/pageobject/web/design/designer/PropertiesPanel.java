@@ -39,12 +39,19 @@ public class PropertiesPanel {
 
     private final FluentElement container;
 
+    private int formIndex = 0;
+
     public PropertiesPanel(FluentElement container) {
+        this(container, 0);
+    }
+
+    public PropertiesPanel(FluentElement container, int formIndex) {
         this.container = container;
+        this.formIndex = formIndex;
     }
 
     public BsFormPanel form() {
-        return new BsFormPanel(container.find().div(withClass("panel-body")).first());
+        return new BsFormPanel(container.find().div(withClass("panel-body")).first(), formIndex);
     }
 
     public FluentElement getContainer() {

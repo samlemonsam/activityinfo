@@ -73,12 +73,12 @@ public class FormDesignerPage {
 
     public PropertiesPanel fieldProperties() {
         List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
-        return new PropertiesPanel(panels.get(0));
+        return new PropertiesPanel(panels.get(0), 0);
     }
 
     public PropertiesPanel containerProperties() {
         List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
-        return new PropertiesPanel(panels.get(1));
+        return new PropertiesPanel(panels.get(0), 1);
     }
 
     private void selectTab(String tabText) {

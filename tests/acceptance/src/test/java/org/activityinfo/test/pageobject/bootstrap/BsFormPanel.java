@@ -50,16 +50,23 @@ public class BsFormPanel extends Form {
 
     private final FluentElement form;
     private BsField current;
+    private int index;
 
     public BsFormPanel(FluentElement form) {
+        this(form, 0);
+    }
+
+    public BsFormPanel(FluentElement form, int index) {
         this.form = form;
+        this.index = index;
     }
 
     @Override
     public BsField findFieldByLabel(String labelText) {
         Optional<FluentElement> element = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).firstIfPresent();
         if (element.isPresent()) {
-            return new BsField(element.get());
+            List<FluentElement> list = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).asList().list();
+            return new BsField(list.get(index));
         }
 
         element = form.find().label(withText(labelText)).ancestor().span(withClass("radio")).firstIfPresent();
