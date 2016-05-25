@@ -34,8 +34,20 @@ public class ColumnSetParser {
                 case "empty":
                     views.put(column.getKey(), parseEmpty(rowsCount, columnValue));
                     break;
+                case "constant":
+                    String type = columnValue.getAsJsonPrimitive("type").getAsString();
+                    String value = columnValue.getAsJsonPrimitive("value").getAsString();
+                    if (ColumnType.STRING.name().equalsIgnoreCase(type)) {
+                        views.put(column.getKey(), new ConstantColumnView(rowsCount, value));
+                    } else if (ColumnType.NUMBER.name().equalsIgnoreCase(type)) {
+                        views.put(column.getKey(), new ConstantColumnView(rowsCount, Double.parseDouble(value)));
+                    } else if (ColumnType.BOOLEAN.name().equalsIgnoreCase(type)) {
+                        views.put(column.getKey(), new ConstantColumnView(rowsCount, "1".equalsIgnoreCase(value)));
+                    }
+                    throw new UnsupportedOperationException("ColumnSetParser: column type is not supported, type: " + type);
+
                 default:
-                    throw new UnsupportedOperationException(storage);
+                    throw new UnsupportedOperationException("ColumnSetParser: storage is not supported, storage: " + storage);
             }
         }
 

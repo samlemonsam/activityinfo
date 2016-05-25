@@ -69,6 +69,9 @@ public class ColumnJsonWriter {
         writer.name("storage").value("constant");
 
         switch (view.getType()) {
+            case BOOLEAN:
+                writer.name("value").value(view.getBoolean(0));
+                break;
             case STRING:
                 writer.name("value").value(view.getString(0));
                 break;
