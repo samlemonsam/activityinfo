@@ -248,7 +248,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER);
         String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_CREATOR);
 
-        LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerIdStr, creatorIdStr));
+        LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s, userId: ", blobId.asString(), ownerIdStr, creatorIdStr, userId.asString()));
 
         Preconditions.checkNotNull(ownerIdStr, "Owner of blob is null.");
         Preconditions.checkNotNull(creatorIdStr, "Creator of blob is null.");
@@ -264,6 +264,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
             Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
 
             if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
+                LOGGER.finest("View allowed for db: " + activity.getDatabase().getName() + ", by user: " + userId.asString());
                 return true;
             }
         } else {

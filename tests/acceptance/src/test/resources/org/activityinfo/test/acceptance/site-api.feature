@@ -156,7 +156,8 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            
+            typeJson: null
+
           - id: $score
             code: score        
             name: score
@@ -169,6 +170,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
+            typeJson: null
             
           - id: $contact
             name: contact
@@ -182,6 +184,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
+            typeJson: null
             
           - id: $description
             name: description
@@ -194,7 +197,8 @@ Feature: Site API
             calculatedAutomatically: false
             expression: null
             category: null
-            mandatory: false  
+            mandatory: false
+            typeJson: null
             
         attributeGroups: 
           - id: $donor
