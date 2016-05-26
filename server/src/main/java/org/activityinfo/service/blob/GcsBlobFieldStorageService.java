@@ -227,7 +227,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
             if (hasAccess(CuidAdapter.userId(user.getUserId()), resourceId, blobId, metadata)) {
                 return;
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         throw new WebApplicationException(UNAUTHORIZED);
@@ -238,7 +238,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
             GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId.asString()));
             ResourceId resourceId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER));
             return hasAccess(userId, resourceId, blobId, metadata);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             return false;
         }
@@ -248,7 +248,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER);
         String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_CREATOR);
 
-        LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s, userId: ", blobId.asString(), ownerIdStr, creatorIdStr, userId.asString()));
+        LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s, userId: %s", blobId.asString(), ownerIdStr, creatorIdStr, userId.asString()));
 
         Preconditions.checkNotNull(ownerIdStr, "Owner of blob is null.");
         Preconditions.checkNotNull(creatorIdStr, "Creator of blob is null.");
