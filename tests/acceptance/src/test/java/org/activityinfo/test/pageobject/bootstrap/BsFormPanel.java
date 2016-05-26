@@ -66,7 +66,11 @@ public class BsFormPanel extends Form {
         Optional<FluentElement> element = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).firstIfPresent();
         if (element.isPresent()) {
             List<FluentElement> list = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).asList().list();
-            return new BsField(list.get(index));
+            if (index < list.size()) {
+                return new BsField(list.get(index));
+            } else {
+                return new BsField(element.get());
+            }
         }
 
         element = form.find().label(withText(labelText)).ancestor().span(withClass("radio")).firstIfPresent();
