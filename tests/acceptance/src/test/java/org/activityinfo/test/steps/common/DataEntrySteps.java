@@ -360,7 +360,7 @@ public class DataEntrySteps {
         dataEntryTab.selectSubmission(0);
         BsModal modal = dataEntryTab.editBetaSubmission();
 
-        Sleep.sleepSeconds(15); // give it a time fetch image serving url and put it to img.src
+        Sleep.sleepSeconds(35); // give it a time fetch image serving url and put it to img.src
         assertTrue(modal.form().findFieldByLabel(driver.getAliasTable().getAlias(imageFieldName)).isBlobImageLoaded());
 
         modal.cancel();
