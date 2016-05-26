@@ -85,6 +85,7 @@ public class SubformContainer {
     }
 
     public SubformContainer selectKey(String keyLabel) {
+        boolean clickedOneTimeForward = false;
         for (int i = 0; i < 10; i++) {
             Optional<FluentElement> key = navButtonByLabel(keyLabel);
             Sleep.sleepSeconds(1);
@@ -93,7 +94,12 @@ public class SubformContainer {
                 key.get().clickWhenReady();
                 return this;
             } else {
-                clickPreviousFull();
+                if (!clickedOneTimeForward) {
+                    clickNextFull();
+                    clickedOneTimeForward = true;
+                } else {
+                    clickPreviousFull();
+                }
             }
         }
 
