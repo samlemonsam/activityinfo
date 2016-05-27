@@ -23,16 +23,17 @@ package org.activityinfo.ui.client.page.config;
  */
 
 import com.extjs.gxt.ui.client.Style;
+import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
-import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
-import com.extjs.gxt.ui.client.widget.grid.Grid;
+import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -62,6 +63,7 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
     private ListStore<TargetDTO> store;
     private ContentPanel targetValueContainer;
     private final AsyncMonitor loadingMonitor = new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading());
+    private UserDatabaseDTO db;
 
     @Inject
     public DbTargetGrid(UiConstants messages, IconImageBundle icons) {
@@ -86,9 +88,35 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
     protected ColumnModel createColumnModel() {
         List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
+        ColumnConfig projectColumn = new ColumnConfig("projectId", messages.project(), 150);
+        projectColumn.setRenderer(new GridCellRenderer() {
+            @Override
+            public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                Integer id = modelData.get(s);
+                if (id != null) {
+                    sb.appendEscaped(db.getProjectById(id).getName());
+                }
+                return sb.toSafeHtml();
+            }
+        });
+
+        ColumnConfig partnerColumn = new ColumnConfig("partnerId", messages.partner(), 150);
+        partnerColumn.setRenderer(new GridCellRenderer() {
+            @Override
+            public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                Integer id = modelData.get(s);
+                if (id != null) {
+                    sb.appendEscaped(db.getPartnerById(id).getName());
+                }
+                return sb.toSafeHtml();
+            }
+        });
+
         columns.add(new ColumnConfig("name", messages.name(), 150));
-        columns.add(new ColumnConfig("project", messages.project(), 150));
-        columns.add(new ColumnConfig("partner", messages.partner(), 150));
+        columns.add(projectColumn);
+        columns.add(partnerColumn);
         columns.add(new TimePeriodColumn("timePeriod", messages.timePeriod(), 300));
 
         return new ColumnModel(columns);
@@ -105,11 +133,11 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
     public void init(DbTargetEditor editor, UserDatabaseDTO db, ListStore<TargetDTO> store) {
         super.init(editor, store);
         this.setHeadingText(I18N.MESSAGES.targetsForDatabase(db.getName()));
+        this.db = db;
     }
 
     @Override
     public FormDialogTether showAddDialog(TargetDTO target, UserDatabaseDTO db, FormDialogCallback callback) {
-
         TargetForm form = new TargetForm(db);
         form.getBinding().setStore(store);
         form.getBinding().bind(store.getRecord(target).getModel());
