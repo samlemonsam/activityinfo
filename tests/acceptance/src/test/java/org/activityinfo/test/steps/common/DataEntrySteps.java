@@ -557,8 +557,10 @@ public class DataEntrySteps {
 
         for (int i = numberOfRepetitiveForms; i < numberOfRequiredForms; i++) {
             subform.addAnother();
-            Sleep.sleepMillis(100);
+            Sleep.sleepMillis(400);
         }
+
+        assertEquals(numberOfRequiredForms, subform.getRepeatingPanelsCount());
 
     }
 

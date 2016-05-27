@@ -36,6 +36,9 @@ public class ImagePathProvider {
         if (SystemUtils.IS_OS_UNIX && !path.startsWith("/")) {
             path = "/" + path;
         }
+        if (SystemUtils.IS_OS_WINDOWS && path.startsWith("/")) {
+            path = path.substring(1);
+        }
         return path;
     }
 }
