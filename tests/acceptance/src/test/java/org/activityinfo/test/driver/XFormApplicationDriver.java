@@ -3,6 +3,7 @@ package org.activityinfo.test.driver;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -42,7 +43,7 @@ public class XFormApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
+    public ResourceId submitForm(String formName, List<FieldValue> values) throws Exception {
         Client client = Client.create();
         if(currentUser != null) {
             client.addFilter(new HTTPBasicAuthFilter(currentUser.getEmail(), currentUser.getPassword()));

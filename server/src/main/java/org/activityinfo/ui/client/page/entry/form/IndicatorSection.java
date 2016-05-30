@@ -24,7 +24,6 @@ package org.activityinfo.ui.client.page.entry.form;
 
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.Style.Scroll;
-import com.extjs.gxt.ui.client.util.Format;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Text;
@@ -98,7 +97,7 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
         if (indicator.isMandatory()) {
             name += " *";
         }
-        Text indicatorLabel = new Text(Format.htmlEncode(name));
+        Text indicatorLabel = new Text(name);
         indicatorLabel.setStyleAttribute("fontSize", "9pt");
         add(indicatorLabel);
 
@@ -127,7 +126,6 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
 
             textArea.setEnabled(!indicator.isCalculated());
             textArea.setWidth(TEXT_FIELD_WIDTH);
-//            textArea.setAutoWidth(true);
             if (indicator.isMandatory()) {
                 textArea.setAllowBlank(false);
             }
@@ -154,7 +152,6 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
             TextField textField = new TextField();
 
             textField.setWidth(TEXT_FIELD_WIDTH);
-//            textField.setAutoWidth(true);
             if (indicator.isMandatory()) {
                 textField.setAllowBlank(false);
             }

@@ -166,7 +166,9 @@ public class AnalysisSteps {
         } else if(parts.length == 2) {
             String[] items = parts[0].split(",");
             for (String item : items) {
-                strings.add(item.trim());
+                if(!item.trim().isEmpty()) {
+                    strings.add(item.trim());
+                }
             }
             strings.add(parts[1].trim());
         }

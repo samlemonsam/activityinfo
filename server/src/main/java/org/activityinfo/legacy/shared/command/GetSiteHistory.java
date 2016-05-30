@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.command.GetSiteHistory.GetSiteHistoryResult;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.model.SiteHistoryDTO;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class GetSiteHistory implements Command<GetSiteHistoryResult> {
             }
         }
 
+        @JsonProperty("changes")
         public List<SiteHistoryDTO> getSiteHistories() {
             return siteHistories;
         }

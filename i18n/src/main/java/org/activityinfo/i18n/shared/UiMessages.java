@@ -11,7 +11,7 @@ import java.util.Date;
 public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will loose all activities and indicator results.")
-    String confirmDeleteDb(String arg0);
+    SafeHtml confirmDeleteDb(String arg0);
 
     @DefaultMessage("The coordinate falls outside of the bounds of {0}")
     String coordOutsideBounds(String arg0);
@@ -224,4 +224,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Option {0,number}")
     String defaultEnumItem(int number);
+
+    @DefaultMessage("Unknown value: {0}. Each selection of 'Multiple selection' control must have separate column " +
+            "with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
+    String unknownMultiEnumValue(String value);
 }

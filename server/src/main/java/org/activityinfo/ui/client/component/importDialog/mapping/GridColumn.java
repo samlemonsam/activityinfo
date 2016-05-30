@@ -18,7 +18,7 @@ class GridColumn extends Column<SourceRow, String> {
                 if (value != null) {
                     sb.append(SafeHtmlUtils.fromTrustedString("<div title='" + value.asString() + "'>"));
                     sb.append(value);
-                    sb.append(SafeHtmlUtils.fromTrustedString("</div>"));
+                    sb.appendHtmlConstant("</div>");
                 }
             }
         });

@@ -28,6 +28,7 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 public class GoogleEarthPortlet extends Portlet {
     public interface Templates extends ClientBundle {
@@ -41,7 +42,7 @@ public class GoogleEarthPortlet extends Portlet {
     public GoogleEarthPortlet() {
         setHeadingText("Google Earth");
         setLayout(new FitLayout());
-        add(new Html(TEMPLATES.googleEarthText().getText()));
+        add(new Html(SafeHtmlUtils.fromTrustedString(TEMPLATES.googleEarthText().getText())));
 
     }
 

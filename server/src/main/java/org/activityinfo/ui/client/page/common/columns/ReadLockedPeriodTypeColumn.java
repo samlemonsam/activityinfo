@@ -27,8 +27,13 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.IsActivityDTO;
+import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
+import org.activityinfo.legacy.shared.model.ProjectDTO;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 /*
@@ -42,27 +47,27 @@ public class ReadLockedPeriodTypeColumn extends ColumnConfig {
 
         GridCellRenderer<LockedPeriodDTO> iconRenderer = new GridCellRenderer<LockedPeriodDTO>() {
             @Override
-            public Object render(LockedPeriodDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<LockedPeriodDTO> store,
-                                 Grid<LockedPeriodDTO> grid) {
+            public SafeHtml render(LockedPeriodDTO model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<LockedPeriodDTO> store,
+                                   Grid<LockedPeriodDTO> grid) {
 
                 if (model.getParent() instanceof IsActivityDTO) {
-                    return IconImageBundle.ICONS.form().getHTML();
+                    return IconImageBundle.ICONS.form().getSafeHtml();
                 }
 
                 if (model.getParent() instanceof UserDatabaseDTO) {
-                    return IconImageBundle.ICONS.database().getHTML();
+                    return IconImageBundle.ICONS.database().getSafeHtml();
                 }
 
                 if (model.getParent() instanceof ProjectDTO) {
-                    return IconImageBundle.ICONS.project().getHTML();
+                    return IconImageBundle.ICONS.project().getSafeHtml();
                 }
 
-                return null;
+                return SafeHtmlUtils.EMPTY_SAFE_HTML;
             }
         };
         setHeaderText(I18N.CONSTANTS.type());

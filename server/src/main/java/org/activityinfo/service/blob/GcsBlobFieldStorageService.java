@@ -6,10 +6,10 @@ import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.images.*;
-import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
@@ -38,9 +38,7 @@ import java.nio.channels.Channels;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static javax.ws.rs.core.Response.Status.*;
 
 @Path("/service/blob")
 public class GcsBlobFieldStorageService implements BlobFieldStorageService {

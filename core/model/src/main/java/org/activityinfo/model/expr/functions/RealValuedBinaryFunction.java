@@ -1,7 +1,6 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.base.Preconditions;
-import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
@@ -22,10 +21,22 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
     @Override
     public FieldValue apply(List<FieldValue> arguments) {
         Preconditions.checkState(arguments.size() == 2);
+
+        // Excel-style (sort-of) missing value handling
+        // (1) If at least one value is non-missing, however, treat the other as zero
+        // (2) If both values are missing, then the result is also missing (NaN)
+        // The first case is consistent with Excel, and the second with SQL and R
+
         Quantity qa = Casting.toQuantity(arguments.get(0));
         Quantity qb = Casting.toQuantity(arguments.get(1));
 
-        double value = apply(qa.getValue(), qb.getValue());
+        if(Double.isNaN(qa.getValue()) && Double.isNaN(qb.getValue())) {
+            return new Quantity(Double.NaN);
+        }
+        double da = toDouble(qa);
+        double db = toDouble(qb);
+
+        double value = apply(da, db);
         if(Double.isNaN(value)) {
             return new Quantity(Double.NaN);
         } else {
@@ -37,19 +48,35 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
         }
     }
 
+    private double toDouble(Quantity quantity) {
+        double d = quantity.getValue();
+        if(Double.isNaN(d)) {
+            return 0d;
+        }
+        return d;
+    }
+
     @Override
     public ColumnView columnApply(List<ColumnView> arguments) {
         Preconditions.checkArgument(arguments.size() == 2);
         ColumnView x = arguments.get(0);
         ColumnView y = arguments.get(1);
-        
-        Preconditions.checkArgument(
-            x.getType() == ColumnType.NUMBER && 
-            y.getType() == ColumnType.NUMBER);
-        
+
         double result[] = new double[x.numRows()];
         for (int i = 0; i < result.length; i++) {
-            result[i] = apply(x.getDouble(i), y.getDouble(i));
+            double xd = x.getDouble(i);
+            double yd = y.getDouble(i);
+            if(Double.isNaN(xd) && Double.isNaN(yd)) {
+                result[i] = Double.NaN;
+            } else {
+                if (Double.isNaN(xd)) {
+                    xd = 0;
+                }
+                if( Double.isNaN(yd)) {
+                    yd = 0;
+                }
+                result[i] = apply(xd, yd);
+            }
         }
         return new DoubleArrayColumnView(result);
     }

@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
+import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.*;
 import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
 import com.google.gwt.event.shared.EventBus;
@@ -36,11 +37,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
-import org.activityinfo.legacy.shared.model.ProjectDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.AddLockedPeriodView;
+import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
 public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodView {
 
@@ -84,7 +83,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     public void setUserDatabase(UserDatabaseDTO userDatabase) {
         this.userDatabase = userDatabase;
 
-        labelDatabaseName.setValue(userDatabase.getName());
+        labelDatabaseName.setText(userDatabase.getName());
 
         storeProjects.removeAll();
         storeProjects.add(userDatabase.getProjects());
@@ -109,6 +108,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         comboboxProjects.setForceSelection(true);
         comboboxProjects.setTriggerAction(TriggerAction.ALL);
         comboboxProjects.setEditable(false);
+        comboboxProjects.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<ProjectDTO>("name")));
 
         comboboxActivities = new ComboBox<ActivityDTO>();
         storeActivities = new ListStore<ActivityDTO>();
@@ -117,16 +117,15 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         comboboxActivities.setForceSelection(true);
         comboboxActivities.setTriggerAction(TriggerAction.ALL);
         comboboxActivities.setEditable(false);
+        comboboxActivities.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<ActivityDTO>("name")));
 
         radiogroupContainer = new RadioGroup();
         radiogroupContainer.setFieldLabel(I18N.CONSTANTS.type());
 
         labelDatabase = new LabelField(I18N.CONSTANTS.database());
         labelDatabase.setWidth(100);
-        labelDatabase.setUseHtml(false);
 
         labelDatabaseName = new LabelField();
-        labelDatabaseName.setUseHtml(false);
 
         radioDatabase = new Radio();
         radioDatabase.setFieldLabel(I18N.CONSTANTS.database());
@@ -143,7 +142,6 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         labelActivity = new LabelField(I18N.CONSTANTS.activity());
         labelActivity.setWidth(100);
-        labelActivity.setUseHtml(false);
 
         panelActivity = new HorizontalPanel();
         panelActivity.add(labelActivity);
@@ -163,7 +161,6 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         labelProject = new LabelField(I18N.CONSTANTS.project());
         labelProject.setWidth(100);
-        labelProject.setUseHtml(false);
 
         panelProject = new HorizontalPanel();
         panelProject.add(labelProject);

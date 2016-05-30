@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.page.entry.form.field;
  */
 
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -51,7 +52,7 @@ public class PartnerComboBox extends ComboBox<PartnerDTO> {
         setFieldLabel(I18N.CONSTANTS.partner());
         setForceSelection(true);
         setAllowBlank(false);
-        setSimpleTemplate(ComboboxTemplates.MULTILINE_TEMPLATE);
+        setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<PartnerDTO>("name")));
 
         if (store.getCount() == 1) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {

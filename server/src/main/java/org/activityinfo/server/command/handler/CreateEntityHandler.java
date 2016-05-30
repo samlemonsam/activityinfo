@@ -94,6 +94,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
         activity.getAttributeGroups().add(group);
 
+        activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
 
@@ -115,6 +116,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         Activity activity = ag.getActivities().iterator().next(); // Assume group has only one activity
 
         entityManager().persist(attribute);
+
+        activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
         return new CreateResult(attribute.getId());
@@ -133,6 +136,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         indicator.setActivity(activity);
         assertDesignPrivileges(user, activity.getDatabase());
 
+        
         updateIndicatorProperties(indicator, properties);
         
         if(indicator.getSortOrder() == 0) {
@@ -140,6 +144,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         }
 
         entityManager().persist(indicator);
+        
+        activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
         return new CreateResult(indicator.getId());

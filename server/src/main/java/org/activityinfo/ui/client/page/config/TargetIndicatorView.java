@@ -39,6 +39,8 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.treegrid.EditorTreeGrid;
 import com.extjs.gxt.ui.client.widget.treegrid.TreeGridCellRenderer;
 import com.google.common.collect.Lists;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -194,7 +196,7 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
 
     private ColumnModel createColumnModel() {
 
-        List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
+        List<ColumnConfig> columns = new ArrayList<>();
 
         ColumnConfig nameColumn = new ColumnConfig("name", I18N.CONSTANTS.indicator(), 250);
         nameColumn.setRenderer(new TreeGridCellRenderer());
@@ -213,28 +215,33 @@ public class TargetIndicatorView extends AbstractEditorTreeGridView<ModelData, T
 
     private class TargetValueCellRenderer implements GridCellRenderer<ModelData> {
 
-        public TargetValueCellRenderer() {
+        TargetValueCellRenderer() {
         }
 
         @Override
-        public Object render(ModelData model,
-                             String property,
-                             ColumnData config,
-                             int rowIndex,
-                             int colIndex,
-                             ListStore store,
-                             Grid grid) {
+        public SafeHtml render(ModelData model,
+                               String property,
+                               ColumnData config,
+                               int rowIndex,
+                               int colIndex,
+                               ListStore store,
+                               Grid grid) {
 
-            if (model instanceof TargetValueDTO && model.get("value") == null) {
-                config.style = "color:gray;font-style:italic;";
-                return I18N.CONSTANTS.noTarget();
+            if(model instanceof TargetValueDTO) {
 
-            } else if (model.get("value") != null) {
+                Double targetValue = ((TargetValueDTO) model).getValue();
 
-                return model.get("value");
+                if (targetValue == null) {
+                    config.style = "color:gray;font-style:italic;";
+                    return SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.noTarget());
+
+                } else {
+                    return SafeHtmlUtils.fromTrustedString(targetValue.toString());
+                }
+
+            } else {
+                return SafeHtmlUtils.EMPTY_SAFE_HTML;
             }
-
-            return "";
         }
     }
 }

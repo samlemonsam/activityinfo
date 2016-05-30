@@ -10,6 +10,7 @@ import cucumber.api.DataTable;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.api.FluentElement;
@@ -110,7 +111,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
     
     @Override
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
+    public ResourceId submitForm(String formName, List<FieldValue> values) throws Exception {
         ensureLoggedIn();
 
         currentForm = formName;
@@ -125,6 +126,8 @@ public class UiApplicationDriver extends ApplicationDriver {
         fillForm(valueMap, driver);
 
         driver.submit();
+
+        return null;
     }
 
     @Override
@@ -275,17 +278,6 @@ public class UiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public DetailsEntry getDetails() {
-        Preconditions.checkState(currentForm != null, "No current form");
-
-        DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
-        currentPage = dataEntryTab.navigateToForm(aliasTable.getAlias(currentForm));
-        dataEntryTab.selectSubmission(0);
-
-        return dataEntryTab.details();
-    }
-
-    @Override
     public void cloneDatabase(TestObject testObject) {
         ensureLoggedIn();
 
@@ -373,7 +365,7 @@ public class UiApplicationDriver extends ApplicationDriver {
 
 
     @Override
-    public DataTable pivotTable(List<String> measures, List<String> rowDimension) {
+    public DataTable pivotTable(List<String> measures, List<String> rowDimensions) {
         ensureLoggedIn();
 
         PivotTableEditor pivotTable = applicationPage
@@ -386,8 +378,28 @@ public class UiApplicationDriver extends ApplicationDriver {
             pivotTable.selectMeasure(aliasTable.getAlias(measure));
         }
 
-        pivotTable.selectDimensions(rowDimension, Collections.<String>emptyList());
+        pivotTable.selectDimensions(deAliasDimension(rowDimensions),  Collections.<String>emptyList());
         return pivotTable.extractData();
+    }
+
+    private List<String> deAliasDimension(List<String> dimensions) {
+        List<String> deAliased = Lists.newArrayList();
+        for (String dimension : dimensions) {
+            switch (dimension) {
+                case "Indicator":
+                case "Partner":
+                case "Project":
+                case "Year":
+                case "Month":
+                case "Realized / Targeted":
+                    deAliased.add(dimension);
+                    break;
+                default:
+                    deAliased.add(getAliasTable().getAlias(dimension));
+                    break;
+            }
+        }
+        return deAliased;
     }
 
     @Override

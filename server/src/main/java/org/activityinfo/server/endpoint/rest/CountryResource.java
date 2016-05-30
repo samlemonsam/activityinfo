@@ -108,6 +108,7 @@ public class CountryResource {
             entity.setLevel(level);
             entity.setCode(newEntity.getCode());
             entity.setBounds(newEntity.getBounds());
+            entity.setGeometry(newEntity.getGeometry());
             level.getEntities().add(entity);
             em.persist(entity);
         }

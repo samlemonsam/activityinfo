@@ -31,6 +31,8 @@ import com.extjs.gxt.ui.client.widget.button.ToggleButton;
 import com.extjs.gxt.ui.client.widget.layout.*;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayout.HBoxLayoutAlign;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout.VBoxLayoutAlign;
+import com.extjs.gxt.ui.client.widget.tips.ToolTip;
+import com.extjs.gxt.ui.client.widget.tips.ToolTipConfig;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -64,6 +66,7 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
     private IndicatorGridPanel destIndicatorGrid;
 
     private ToggleButton linkButton;
+    private ToolTip linkButtonTip;
 
     @Inject
     public IndicatorLinkPage(Dispatcher dispatcher) {
@@ -179,6 +182,7 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
         linkButton = new ToggleButton("", IconImageBundle.ICONS.link());
         linkButton.disable();
         linkButton.setWidth(28);
+        linkButton.setHeight(40);
         linkButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
 
             @Override
@@ -186,6 +190,8 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
                 onToggleLink();
             }
         });
+
+        linkButtonTip = new ToolTip(linkButton);
 
         LayoutContainer container = new LayoutContainer();
         container.setWidth(35);
@@ -258,16 +264,39 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
 
         if (source == null || dest == null) {
             linkButton.disable();
+
+        } else if(source.getId() == dest.getId()) {
+            // indicators should not be linked to themselves.
+            linkButton.setVisible(true);
+            linkButton.disable();
+
+            ToolTipConfig config = linkTip(I18N.CONSTANTS.indicatorCannotBeLinkedToItself());
+            linkButtonTip.update(config);
+            linkButtonTip.show();
         } else {
             sourceIndicatorGrid.getRowY(source);
             destIndicatorGrid.getRowY(dest);
             sourceIndicatorGrid.el().getRight(false);
 
-            linkButton.toggle(linkGraph.linked(source, dest));
+            boolean linked = linkGraph.linked(source, dest);
+
             linkButton.enable();
-            // linkButton.showAt(x - LinkTip.WIDTH/2, y - LinkTip.HEIGHT/2);
+            linkButton.toggle(linked);
+
+            linkButtonTip.update(linkTip(linked ? I18N.CONSTANTS.clickToUnlink() : I18N.CONSTANTS.clickToLink()));
+            linkButtonTip.initTarget(linkButton);
+            linkButtonTip.show();
 
         }
+    }
+
+    private ToolTipConfig linkTip(String text) {
+        ToolTipConfig config = new ToolTipConfig();
+        config.setText(text);
+        config.setAnchor("right");
+        config.setAnchorOffset(0);
+        config.setShowDelay(0);
+        return config;
     }
 
     protected void onToggleLink() {
@@ -300,7 +329,9 @@ public class IndicatorLinkPage extends ContentPanel implements Page {
 
             @Override
             public void onSuccess(VoidResult result) {
-                Info.display(I18N.CONSTANTS.saved(), isLinked ? "Link created" : "Link removed");
+                Info.displayText(I18N.CONSTANTS.saved(), isLinked ?
+                        I18N.CONSTANTS.linkCreated() :
+                        I18N.CONSTANTS.linkRemoved());
             }
         });
 

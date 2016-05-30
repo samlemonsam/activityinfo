@@ -24,6 +24,7 @@ package org.activityinfo.server.login;
 
 import com.google.inject.Inject;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.dao.AuthenticationDAO;
 import org.activityinfo.server.database.hibernate.dao.Transactional;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
@@ -60,9 +61,8 @@ public class AuthTokenProvider {
         NewCookie userCookie = newAuthCookie(AuthenticatedUser.USER_ID_COOKIE,
                 Integer.toString(token.getUser().getId()));
         NewCookie emailCookie = newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail());
-        NewCookie localeCookie = newLocaleCookie(AuthenticatedUser.USER_LOCAL_COOKIE, user.getLocale());
 
-        return new NewCookie[]{cookie, userCookie, emailCookie, localeCookie};
+        return new NewCookie[]{cookie, userCookie, emailCookie };
     }
 
     private NewCookie newAuthCookie(String name, String value) {
@@ -70,16 +70,7 @@ public class AuthTokenProvider {
         String domain = null;
         String comment = null;
         int maxAge = THIS_SESSION;
-        boolean onlySecure = false;
-        return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
-    }
-
-    private NewCookie newLocaleCookie(String name, String value) {
-        String path = ROOT;
-        String domain = null;
-        String comment = null;
-        int maxAge = ONE_YEAR;
-        boolean onlySecure = false;
+        boolean onlySecure = DeploymentEnvironment.isAppEngineProduction();
         return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
     }
 }

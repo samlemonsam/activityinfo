@@ -22,15 +22,15 @@ package org.activityinfo.ui.client.page.entry.location;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.core.El;
-import com.extjs.gxt.ui.client.core.El.VisMode;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.ui.client.page.entry.admin.AdminComboBox;
@@ -39,7 +39,7 @@ import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 
 public class SearchAdminComboBox extends ComboBox<AdminEntityDTO> implements AdminComboBox {
 
-    private El clearSpan;
+    private Element clearSpan;
     private final AdminLevelDTO level;
 
     public SearchAdminComboBox(AdminLevelDTO level, ListStore<AdminEntityDTO> store) {
@@ -59,14 +59,14 @@ public class SearchAdminComboBox extends ComboBox<AdminEntityDTO> implements Adm
     protected void onRender(Element parent, int index) {
         super.onRender(parent, index);
 
-        clearSpan = new El(DOM.createSpan());
-        clearSpan.setInnerHtml("clear");
-        clearSpan.addStyleName(SiteFormResources.INSTANCE.style().adminClearSpan());
-        clearSpan.addEventsSunk(Event.MOUSEEVENTS);
-        clearSpan.setVisibilityMode(VisMode.VISIBILITY);
-        clearSpan.setVisible(false);
+        clearSpan = DOM.createSpan();
+        clearSpan.setInnerText(I18N.CONSTANTS.clear());
+        clearSpan.addClassName(SiteFormResources.INSTANCE.style().adminClearSpan());
+        clearSpan.getStyle().setVisibility(Style.Visibility.VISIBLE);
 
-        getElement().appendChild(clearSpan.dom);
+        DOM.sinkEvents(clearSpan, Event.MOUSEEVENTS);
+
+        getElement().appendChild(clearSpan);
     }
 
     public AdminLevelDTO getLevel() {
@@ -77,12 +77,14 @@ public class SearchAdminComboBox extends ComboBox<AdminEntityDTO> implements Adm
     public void setValue(AdminEntityDTO value) {
         super.setValue(value);
 
-        this.clearSpan.setVisible(this.value != null);
+        this.clearSpan.getStyle().setVisibility(this.value == null ?
+                Style.Visibility.HIDDEN :
+                Style.Visibility.VISIBLE);
     }
 
     @Override
     protected void onClick(ComponentEvent ce) {
-        if (clearSpan.dom.isOrHasChild(ce.getTarget())) {
+        if (clearSpan.isOrHasChild(ce.getTarget())) {
             setValue(null);
         }
         super.onClick(ce);

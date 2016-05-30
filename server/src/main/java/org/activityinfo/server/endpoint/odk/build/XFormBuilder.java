@@ -2,15 +2,7 @@ package org.activityinfo.server.endpoint.odk.build;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.activityinfo.io.xform.form.Bind;
-import org.activityinfo.io.xform.form.BindingType;
-import org.activityinfo.io.xform.form.Body;
-import org.activityinfo.io.xform.form.BodyElement;
-import org.activityinfo.io.xform.form.Instance;
-import org.activityinfo.io.xform.form.InstanceElement;
-import org.activityinfo.io.xform.form.Model;
-import org.activityinfo.io.xform.form.Translation;
-import org.activityinfo.io.xform.form.XForm;
+import org.activityinfo.io.xform.form.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -26,18 +18,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
-import static org.activityinfo.model.legacy.CuidAdapter.END_DATE_FIELD;
-import static org.activityinfo.model.legacy.CuidAdapter.GPS_FIELD;
-import static org.activityinfo.model.legacy.CuidAdapter.LOCATION_NAME_FIELD;
-import static org.activityinfo.model.legacy.CuidAdapter.START_DATE_FIELD;
-import static org.activityinfo.model.legacy.CuidAdapter.field;
+import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.server.endpoint.odk.OdkHelper.isLocation;
 
 /**
  * Constructs an XForm from a FormClass
  */
 public class XFormBuilder {
+
+    private static final Logger LOGGER = Logger.getLogger(XFormBuilder.class.getName());
+
     private OdkFormFieldBuilderFactory factory;
     private String userId;
     private FormClass formClass;
@@ -169,7 +161,15 @@ public class XFormBuilder {
                 body.addElement(createPresentationElement(locationName(field.getModel())));
                 body.addElement(createPresentationElement(gps(field.getModel())));
             } else if (field.getModel().isVisible() && !dateFields.contains(field.getModel().getId())) {
-                body.addElement(createPresentationElement(field));
+                BodyElement element = createPresentationElement(field);
+                if (element.isValid()) {
+                    body.addElement(element);
+                } else {
+                    if (field.getModel().isRequired()) {
+                        LOGGER.severe("Invalid required field. Deadlock for user. " +
+                                "Field id: " + field.getModel().getId() + ", FormClass id: " + formClass.getId());
+                    }
+                }
             }
         }
         return body;

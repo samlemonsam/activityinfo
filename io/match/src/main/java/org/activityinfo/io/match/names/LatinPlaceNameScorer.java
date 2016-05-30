@@ -250,8 +250,8 @@ public class LatinPlaceNameScorer {
     private double tryCompareNumericWithAlpha(LatinPlaceName nameWithNumericPart, int numericPartIndex,
                                               LatinPlaceName nameWithAlphaPart, int alphaPartIndex) {
 
-        int x = nameWithNumericPart.parsePartAsInteger(numericPartIndex);
-        int y = nameWithAlphaPart.tryParsePartAsRomanNumeral(alphaPartIndex);
+        long x = nameWithNumericPart.parsePartAsInteger(numericPartIndex);
+        long y = nameWithAlphaPart.tryParsePartAsRomanNumeral(alphaPartIndex);
 
         if(x == y) {
             return 1.0;

@@ -71,10 +71,10 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
             activity.setFormClass(json);
             activity.setGzFormClass(null);
         }
-
-        // we should not set it instead of user (looks very weird for end user if mode is changed because of some backend function)
-//        activity.setClassicView(false);
-
+        
+        activity.incrementSchemaVersion();
+        activity.getDatabase().updateVersion();
+        
         syncEntities(activity, formClass);
         entityManager.get().persist(activity);
 

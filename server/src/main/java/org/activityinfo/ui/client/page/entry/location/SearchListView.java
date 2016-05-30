@@ -24,9 +24,11 @@ package org.activityinfo.ui.client.page.entry.location;
 
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.widget.ListView;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Element;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.ui.client.page.entry.form.LocationResultsRenderer;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 
 import java.util.Arrays;
@@ -41,12 +43,12 @@ public class SearchListView extends ListView<LocationDTO> {
 
         setStore(presenter.getStore());
         setDisplayProperty("name");
-        setTemplate(SiteFormResources.INSTANCE.locationTemplate().getText());
+        setRenderer(new LocationResultsRenderer());
         addStyleName(SiteFormResources.INSTANCE.style().locationSearchResults());
         setItemSelector(".locSerResult");
         setBorders(false);
         setStyleAttribute("overflow", "visible");
-        setLoadingText(I18N.CONSTANTS.loading());
+        setLoadingText(SafeHtmlUtils.fromSafeConstant(I18N.CONSTANTS.loading()));
 
 
         getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<LocationDTO>() {

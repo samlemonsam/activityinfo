@@ -53,12 +53,8 @@ public class WarningBar extends LayoutContainer {
         setStyleAttribute("background-color", "#F5A9A9");
     }
 
-    public String getWarning() {
-        return (String) labelMessage.getValue();
-    }
-
     public void setWarning(String message) {
-        labelMessage.setValue(message);
+        labelMessage.setText(message);
     }
 
 }

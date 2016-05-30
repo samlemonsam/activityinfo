@@ -24,10 +24,8 @@ package org.activityinfo.ui.client.page;
 
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.util.DateWrapper;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -103,13 +101,6 @@ public class HistoryManager {
              * Lodge in the browser's history
              */
             History.newItem(token, false);
-
-            /*
-             * ... And save as a cookie so we know where to pick up next time
-             */
-
-            Cookies.setCookie("lastPlace", token,
-                    (new DateWrapper()).addDays(30).asDate());
 
         }
     }

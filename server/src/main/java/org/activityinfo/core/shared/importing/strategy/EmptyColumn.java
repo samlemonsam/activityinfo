@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.page.entry.form.field;
+package org.activityinfo.core.shared.importing.strategy;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,15 +21,31 @@ package org.activityinfo.ui.client.page.entry.form.field;
  * #L%
  */
 
+import org.activityinfo.core.shared.importing.source.SourceRow;
+
 /**
- * @author yuriyz on 03/24/2016.
+ * @author yuriyz on 03/31/2016.
  */
-public class ComboboxTemplates {
+public class EmptyColumn implements ColumnAccessor {
 
-    public static final String MULTILINE_TEMPLATE = "<span style='white-space: pre-wrap; white-space:-moz-pre-wrap; white-space:-pre-wrap;white-space:-o-pre-wrap;white-space:break-word'>" +
-            "{name}</span>";
+    private String header;
 
-    private ComboboxTemplates() {
+    public EmptyColumn(String header) {
+        this.header = header;
     }
 
+    @Override
+    public String getHeading() {
+        return header;
+    }
+
+    @Override
+    public String getValue(SourceRow row) {
+        return "";
+    }
+
+    @Override
+    public boolean isMissing(SourceRow row) {
+        return true;
+    }
 }

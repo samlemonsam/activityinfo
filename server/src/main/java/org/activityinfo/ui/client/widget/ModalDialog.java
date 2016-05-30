@@ -27,6 +27,8 @@ import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -90,7 +92,11 @@ public class ModalDialog  {
         getModalBody().add(content);
     }
 
-    public ModalDialog(IsWidget content, String dialogTitleHtml) {
+    public ModalDialog(IsWidget content, String dialogTitle) {
+        this(content, SafeHtmlUtils.fromString(dialogTitle));
+    }
+    
+    public ModalDialog(IsWidget content, SafeHtml dialogTitleHtml) {
         this(content);
         setDialogTitle(dialogTitleHtml);
     }
@@ -128,9 +134,12 @@ public class ModalDialog  {
         dialog.getElement().getStyle().setDisplay(Style.Display.NONE);
     }
 
-
-    public void setDialogTitle(String dialogTitleHtml) {
-        this.title.setInnerHTML(dialogTitleHtml);
+    public void setDialogTitle(String title) {
+        setDialogTitle(SafeHtmlUtils.fromString(title));
+    }
+    
+    public void setDialogTitle(SafeHtml dialogTitleHtml) {
+        this.title.setInnerSafeHtml(dialogTitleHtml);
     }
 
     public Button getPrimaryButton() {

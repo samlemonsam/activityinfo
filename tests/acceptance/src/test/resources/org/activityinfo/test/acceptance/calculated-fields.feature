@@ -1,109 +1,52 @@
-@web
+@api
 Feature: Calculated fields
 
-  Background:
+  Scenario Outline: Defining Expressions
     Given I have created a database "RRMP"
     And I have added partner "NRC" to "RRMP"
-    And I have added partner "UPS" to "RRMP"
     And I have created a form named "NFI Distribution"
-
-  @AI-991
-  Scenario: Calculating Percentages
-    Given I have created a quantity field "a" in "NFI Distribution" with code "a"
-    And I have created a quantity field "b" in "NFI Distribution" with code "b"
-    And I have created a calculated field "c" in "NFI Distribution" with expression "{a}/{b}"
+    And I have created a quantity field "Number of households" with code "HH"
+    And I have created a quantity field "Number of women" with code "NF"
+    And I have created a quantity field "Number of men" with code "NM"
+    And I have created a quantity field "Number of children" with code "NC"
+    And I have created a calculated field "X" in "NFI Distribution" with expression "<Expression>"
     When I submit a "NFI Distribution" form with:
-      | field              | value           |
-      | partner            | NRC             |
-      | a                  | 1               |
-      | b                  | 2               |
-      | partner            | NRC             |
-    Then the submission's detail shows:
-      | field              | value           |
-      | a                  | 1               |
-      | b                  | 2               |
-      | c                  | 0.5             |
-    When I update the submission with:
-      | field              | value           |
-      | a                  | 1               |
-      | b                  | 0               |
-    Then the submission's detail shows:
-      | field              | value           |
-      | a                  | 1               |
-      | c                  | ∞               |
-    When I update the submission with:
-      | field              | value           |
-      | a                  | 0               |
-      | b                  | 0               |
-    Then the submission's detail shows:
-      | field              | value           |
-      | c                  | NaN             |
+      | field                | value |
+      | partner              | NRC   |
+      | Number of households | <HH>  |
+      | Number of women      | <NF>  |
+      | Number of men        | <NM>  |
+      | Number of children   | <NC>  |
+    Then the value of "X" in the submission should be <Result>
 
-  @AI-1041
-  Scenario: Pivot calculated indicator
-    Given I have created a quantity field "total" in "NFI Distribution" with code "total"
-    And I have created a quantity field "withHelmet" in "NFI Distribution" with code "helmet"
-    And I have created a calculated field "percent" in "NFI Distribution" with expression "({helmet}/{total})*100" with aggregation "Average"
-    And I have submitted "NFI Distribution" forms with:
-      | partner    | total  | withHelmet |
-      | NRC        | 300    | 150        |
-      | NRC        | 500    | 50         |
-      | NRC        | 100    | 90         |
-    Then aggregating the indicator "percent" by Indicator should yield:
-      |                  | Value |
-      | percent          | 50    |
+    Examples:
+      | Expression | HH  | NF  | NM  | NC | Result    |
+      | HH         | 100 |     |     |    | 100       |
+      | [HH]       | 100 |     |     |    | 100       |
+      | {HH}       | 100 |     |     |    | 100       |
+      | HH         |     |     |     |    | <Missing> |
+      | NF+NM      |     | 42  | 11  |    | 53        |
+      | NF+NM+NC   |     | 50  | 49  | 35 | 134       |
+      | HH-NF      | 100 | 33  |     |    | 67        |
+      | (NF+NM)/HH | 50  | 100 | 100 |    | 4         |
+      | (NF+NM)/HH |     | 100 | 100 |    | <Missing> |
 
-  @AI-1082
-  Scenario: Drill down on calculated indicator
-    Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
-    And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
-    And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
-    And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
-    And I have submitted "NFI Distribution" forms with:
-      | partner | i1  | i2  | Start Date | End Date   |
-      | NRC     | 300 | 150 | 2014-05-21 | 2014-05-21 |
-      | NRC     | 100 | 10  | 2014-07-21 | 2014-07-21 |
-      | NRC     | 4   | 20  | 2015-05-21 | 2015-05-21 |
-      | NRC     | 5   | 50  | 2015-07-21 | 2015-07-21 |
-
-    Then aggregating the indicators plus and percent by Indicator and Year should yield:
-      |                  |  2014 |   2015 |
-      | plus             |   280 |   39.5 |
-      | percent          | 1,200 |   30   |
-    Then drill down on "280" should yield:
-      | NRC      |       | 2014-07-21 |    | 110   |
-      | NRC      |       | 2014-05-21 |    | 450   |
-    
-  @AI-1082
-  Scenario: Combining sum and average calculated indicators
-    # When combining indicators that use different aggregation methods,
-    # the sum aggregation method should always be used
-    Given I have created a quantity field "i1" in "NFI Distribution" with code "i1"
-    And I have created a quantity field "i2" in "NFI Distribution" with code "i2"
-    And I have created a calculated field "plus" in "NFI Distribution" with expression "{i1}+{i2}" with aggregation "Average"
-    And I have created a calculated field "percent" in "NFI Distribution" with expression "({i1}/{i2})*100" with aggregation "Sum"
-    And I have submitted "NFI Distribution" forms with:
-      | partner | i1  | i2  | Start Date | End Date   |
-      | NRC     | 300 | 150 | 2014-05-21 | 2014-05-21 |
-      | UPS     | 100 | 10  | 2014-07-21 | 2014-07-21 |
-      | NRC     | 10  | 2   | 2014-10-21 | 2014-10-21 |
-      | NRC     | 4   | 20  | 2015-05-21 | 2015-05-21 |
-      | UPS     | 5   | 50  | 2015-07-21 | 2015-07-21 |
-      | NRC     | 7   | 0   | 2016-07-21 | 2016-07-21 |
-
-    Then aggregating the indicators percent by Partner and Year should yield:
-      |         | 2014  | 2015 | 2016 |
-      | NRC     | 700   | 20   | ∞    |
-      | UPS     | 1,000 | 10   |      |
-    Then aggregating the indicators plus by Partner and Year should yield:
-      |         | 2014  | 2015 | 2016 |
-      | NRC     | 231   | 24   | 7    |
-      | UPS     | 110   | 55   |      |
-    Then aggregating the indicators i1 and plus by Partner and Year should yield:
-      |         | 2014 | 2015 | 2016 |
-      | NRC     | 772  | 28   | 14   |
-      | UPS     | 210  | 60   |      |
-    Then aggregating the indicators plus and percent by Partner and Year should yield:
-      |         | 2014   | 2015 | 2016 |
-      | NRC     | 1,162  | 44   | ∞    |
-      | UPS     | 1,110  | 65   |      |
+  Scenario: Calculations with missing values
+    Given I have created a database "WASH cost calculation"
+    And I have added partner "UNHCR"
+    And I have created a form named "Expenditures"
+    And I have created a quantity field "Expenditure" with code "EXP"
+    And I have created a quantity field "% Capital" with code "PCT_CAPITAL"
+    And I have created a quantity field "% Maintenance" with code "PCT_MAINT"
+    And I have created a calculated field "$ Capital" with expression "EXP*(PCT_CAPITAL/100)"
+    And I have submitted "Expenditures" forms with:
+      | Partner | Comments          | Expenditure | % Capital | % Maintenance |
+      | UNHCR   | Purchase of Pumps | 23450       | 100       |               |
+      | UNHCR   | Technician salary | 53600       |           | 100           |
+      | UNHCR   | Replacement parts | 10230       | 10        | 90            |
+    When I export the form "Expenditures"
+    Then the exported spreadsheet contains:
+      | Partner | Comments          | Expenditure  | % Capital | % Maintenance | $ Capital  |
+      | UNHCR   | Purchase of Pumps | 23,450       | 100       |               |    23,450  |
+      | UNHCR   | Technician salary | 53,600       |           | 100           |         0  |
+      | UNHCR   | Replacement parts | 10,230       | 10        | 90            |     1,023  |

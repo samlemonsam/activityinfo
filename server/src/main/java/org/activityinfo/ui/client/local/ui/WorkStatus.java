@@ -51,7 +51,7 @@ public class WorkStatus extends Status {
 
             @Override
             public void handleEvent(SyncStatusEvent be) {
-                setBusy(be.getTask() + " " + ((int) (be.getPercentComplete())) + "%");
+                setBusyText(be.getTask() + " " + ((int) (be.getPercentComplete())) + "%");
                 syncing = true;
             }
         });
@@ -132,13 +132,13 @@ public class WorkStatus extends Status {
         switch (state) {
             case UNINSTALLED:
             case INSTALLING:
-                this.clearStatus(I18N.CONSTANTS.workingOnline());
+                this.clearStatusText(I18N.CONSTANTS.workingOnline());
                 break;
             case CHECKING:
-                this.clearStatus(I18N.CONSTANTS.loading());
+                this.clearStatusText(I18N.CONSTANTS.loading());
                 break;
             case INSTALLED:
-                this.clearStatus(I18N.CONSTANTS.workingOffline());
+                this.clearStatusText(I18N.CONSTANTS.workingOffline());
                 break;
         }
     }

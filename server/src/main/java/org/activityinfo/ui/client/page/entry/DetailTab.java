@@ -25,14 +25,13 @@ package org.activityinfo.ui.client.page.entry;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.TabItem;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.type.IndicatorNumberFormat;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
-import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.ui.client.page.entry.form.SiteRenderer;
 
@@ -54,7 +53,7 @@ public class DetailTab extends TabItem {
     }
 
     public void setSite(final SiteDTO site) {
-        content.setHtml(I18N.CONSTANTS.loading());
+        content.setText(I18N.CONSTANTS.loading());
         dispatcher.execute(new GetActivityForm(site.getActivityId()), new AsyncCallback<ActivityFormDTO>() {
 
             @Override
@@ -73,6 +72,6 @@ public class DetailTab extends TabItem {
 
     private void render(ActivityFormDTO form, SiteDTO site) {
         SiteRenderer renderer = new SiteRenderer(new IndicatorNumberFormat());
-        content.setHtml(renderer.renderSite(site, form, true));
+        content.setHtml(SafeHtmlUtils.fromTrustedString(renderer.renderSite(site, form, true)));
     }
 }

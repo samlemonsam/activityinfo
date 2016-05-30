@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.component.report.editor.map;
 
 import com.extjs.gxt.ui.client.widget.Html;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.ui.client.util.LeafletUtil;
 import org.discotools.gwt.leaflet.client.LeafletResourceInjector;
@@ -17,7 +18,7 @@ public class LeafletMap extends Html {
         LeafletResourceInjector.ensureInjected();
 
         setStyleName("gwt-Map");
-        setHtml("<div style=\"width:100%; height: 100%; position: relative;\"></div>");
+        setHtml(SafeHtmlUtils.fromSafeConstant("<div style=\"width:100%; height: 100%; position: relative;\"></div>"));
     }
 
     @Override

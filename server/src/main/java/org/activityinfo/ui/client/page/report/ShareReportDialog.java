@@ -35,7 +35,8 @@ import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
@@ -92,14 +93,14 @@ public class ShareReportDialog extends Dialog {
         icon.setRenderer(new GridCellRenderer<ReportVisibilityDTO>() {
 
             @Override
-            public Object render(ReportVisibilityDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<ReportVisibilityDTO> store,
-                                 Grid<ReportVisibilityDTO> grid) {
-                return IconImageBundle.ICONS.group().getHTML();
+            public SafeHtml render(ReportVisibilityDTO model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<ReportVisibilityDTO> store,
+                                   Grid<ReportVisibilityDTO> grid) {
+                return IconImageBundle.ICONS.group().getSafeHtml();
             }
         });
 
@@ -107,7 +108,7 @@ public class ShareReportDialog extends Dialog {
         name.setRenderer(new GridCellRenderer<ReportVisibilityDTO>() {
 
             @Override
-            public Object render(ReportVisibilityDTO model,
+            public SafeHtml render(ReportVisibilityDTO model,
                                  String property,
                                  ColumnData config,
                                  int rowIndex,
@@ -115,7 +116,7 @@ public class ShareReportDialog extends Dialog {
                                  ListStore<ReportVisibilityDTO> store,
                                  Grid<ReportVisibilityDTO> grid) {
 
-                return I18N.MESSAGES.databaseUserGroup(model.getDatabaseName());
+                return SafeHtmlUtils.fromString(I18N.MESSAGES.databaseUserGroup(model.getDatabaseName()));
 
             }
         });

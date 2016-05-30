@@ -6,6 +6,7 @@ import com.google.common.base.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
@@ -15,6 +16,8 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.calc.AggregationMethod;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
@@ -32,10 +35,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
@@ -57,6 +57,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
     private boolean flushing = false;
 
     private int retryCount = 0;
+
+    private Map<String, String> entityTypes = Maps.newHashMap();
 
     public UserAccount getCurrentUser() {
         return currentUser;
@@ -306,18 +308,19 @@ public class ApiApplicationDriver extends ApplicationDriver {
     }
 
     @Override
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
-        submitForm(formName, values, Lists.<String>newArrayList());
+    public ResourceId submitForm(String formName, List<FieldValue> values) throws Exception {
+        return submitForm(formName, values, Lists.<String>newArrayList());
     }
 
     @Override
-    public void submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
+    public ResourceId submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
         int activityId = aliases.getId(formName);
+        int siteId = aliases.generateId();
 
         JSONObject properties = new JSONObject();
         properties.put("activityId", activityId);
         properties.put("locationId", queryNullaryLocationType(RDC));
-        properties.put("id", aliases.generateId());
+        properties.put("id", siteId);
         properties.put("reportingPeriodId", aliases.generateId());
         properties.put("date1", "2014-01-01");
         properties.put("date2", "2014-02-01");  
@@ -346,11 +349,12 @@ public class ApiApplicationDriver extends ApplicationDriver {
                     properties.put("comments", value.getValue());
                     break;
                 default:
-
-                    if (value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                    String entityType = entityTypes.get(aliases.getAlias(value.getField()));
+                    if ("AttributeGroup".equals(entityType) || value.getType().isPresent() && value.getType().get() == EnumType.TYPE_CLASS) {
+                        int attributeGroupId = aliases.getId(value.getField());
                         for (String item : value.getValue().split("\\s*,\\s*")) {
                             if (!Strings.isNullOrEmpty(item)) {
-                                int attributeId = aliases.getId(new AliasTable.TestHandle(item, aliases.getId(headers.get(i))));
+                                int attributeId = aliases.getId(new AliasTable.TestHandle(item, attributeGroupId));
                                 properties.put("ATTRIB" + attributeId, true);
                             }
                         }
@@ -363,6 +367,8 @@ public class ApiApplicationDriver extends ApplicationDriver {
         }
 
         executeCreateSite(properties);
+
+        return CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, siteId);
     }
 
     @Override
@@ -618,6 +624,48 @@ public class ApiApplicationDriver extends ApplicationDriver {
         return file;
     }
 
+    @Override
+    public List<FieldValue> getFieldValues(ResourceId resourceId) {
+        if(resourceId.getDomain() == CuidAdapter.SITE_DOMAIN) {
+            return getSiteFieldValues(CuidAdapter.getLegacyIdFromCuid(resourceId));
+        } else {
+            throw new UnsupportedOperationException("Domain: " + resourceId.getDomain());
+        }
+    }
+
+    private List<FieldValue> getSiteFieldValues(int siteId) {
+        String json = root().path("resources")
+                .path("sites")
+                .queryParam("site", Integer.toString(siteId))
+                .get(String.class);
+
+        try {
+            List<FieldValue> fieldValues = Lists.newArrayList();
+
+            JSONArray resultList = new JSONArray(json);
+            if(resultList.length() != 1) {
+                throw new IllegalStateException("When querying for site " + siteId +
+                        ", expected one result, found " + resultList.length());
+            }
+            JSONObject site = resultList.getJSONObject(0);
+            if(site.has("indicatorValues")) {
+                JSONObject indicatorValues = site.getJSONObject("indicatorValues");
+                // TODO: only indicators returned
+                Iterator<String> keys = indicatorValues.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    int indicatorId = Integer.parseInt(key);
+                    String fieldName = aliases.testHandleForId(indicatorId);
+                    fieldValues.add(new FieldValue(fieldName, indicatorValues.get(key).toString()));
+                }
+            }
+            return fieldValues;
+
+        } catch (JSONException e) {
+            throw new AssertionError("Could not parse sites response");
+        }
+    }
+
     private File export(String exportModel) throws Exception {
         WebResource root = root();
         String id = root.path("ActivityInfo").path("export")
@@ -654,6 +702,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
 
         PendingId pendingId = createEntity(entityType, properties);
 
+        entityTypes.put(properties.getString("name"), entityType);
         aliases.bindAliasToId(properties.getString("name"), pendingId);
 
         return pendingId;

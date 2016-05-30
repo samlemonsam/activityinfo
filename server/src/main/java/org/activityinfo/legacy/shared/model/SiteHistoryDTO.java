@@ -25,10 +25,15 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.gson.JsonObject;
 import org.activityinfo.legacy.shared.util.JsonUtil;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonRawValue;
 
 import java.util.Date;
 import java.util.Map;
 
+@JsonAutoDetect(JsonMethod.NONE)
 public final class SiteHistoryDTO extends BaseModelData implements EntityDTO {
     private static final long serialVersionUID = 4951231064643225215L;
 
@@ -44,6 +49,7 @@ public final class SiteHistoryDTO extends BaseModelData implements EntityDTO {
     }
 
     @Override
+    @JsonProperty
     public int getId() {
         return (Integer) get("id");
     }
@@ -52,6 +58,7 @@ public final class SiteHistoryDTO extends BaseModelData implements EntityDTO {
         set("id", id);
     }
 
+    @JsonProperty
     public String getUserName() {
         return get("userName");
     }
@@ -60,6 +67,7 @@ public final class SiteHistoryDTO extends BaseModelData implements EntityDTO {
         set("userName", userName);
     }
 
+    @JsonProperty
     public String getUserEmail() {
         return get("userEmail");
     }
@@ -76,10 +84,12 @@ public final class SiteHistoryDTO extends BaseModelData implements EntityDTO {
         set("initial", initial);
     }
 
+    @JsonProperty("propertiesChanged")
+    @JsonRawValue
     public String getJson() {
         return get("json");
     }
-
+    
     public JsonObject getJsonObject() {
         return JsonUtil.parse(getJson());
     }
@@ -96,6 +106,7 @@ public final class SiteHistoryDTO extends BaseModelData implements EntityDTO {
         return (Long) get("timeCreated");
     }
 
+    @JsonProperty("time")
     public Date getDateCreated() {
         return new Date(getTimeCreated());
     }

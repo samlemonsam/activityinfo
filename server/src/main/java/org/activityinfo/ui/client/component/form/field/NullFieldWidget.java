@@ -42,6 +42,11 @@ public class NullFieldWidget implements FormFieldWidget {
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
     }
 

@@ -30,6 +30,7 @@ public class SitesResourcesTest extends CommandTestCase2 {
         private final List<Integer> partnerIds = Lists.newArrayList();
         private final List<Integer> attributeIds = Lists.newArrayList();
         private final List<Integer>  locationIds = Lists.newArrayList();
+        private final List<Integer> siteIds = Lists.newArrayList();
         private String format = null;
     }
 
@@ -75,7 +76,9 @@ public class SitesResourcesTest extends CommandTestCase2 {
     public String query(QueryParameters parameters) throws IOException {
         return new SitesResources(getDispatcherSync()).query(
                 parameters.activityIds, parameters.databaseIds, parameters.indicatorIds, parameters.partnerIds,
-                parameters.attributeIds, parameters.locationIds, parameters.format
+                parameters.attributeIds, parameters.locationIds,
+                parameters.siteIds,
+                parameters.format
         );
     }
 

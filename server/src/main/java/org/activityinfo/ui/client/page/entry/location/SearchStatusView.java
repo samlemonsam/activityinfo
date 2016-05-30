@@ -25,6 +25,8 @@ package org.activityinfo.ui.client.page.entry.location;
 import com.extjs.gxt.ui.client.data.LoadEvent;
 import com.extjs.gxt.ui.client.event.LoadListener;
 import com.extjs.gxt.ui.client.widget.Html;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
@@ -38,25 +40,27 @@ public class SearchStatusView extends Html {
 
             @Override
             public void loaderBeforeLoad(LoadEvent le) {
-                setHtml("");
+                setHtml(SafeHtmlUtils.EMPTY_SAFE_HTML);
                 addStyleName(SiteFormResources.INSTANCE.style().locationDialogHelp());
             }
 
             @Override
             public void loaderLoadException(LoadEvent le) {
                 Log.error("Search load exception", le.exception);
-                setHtml(I18N.CONSTANTS.connectionProblem());
+                setText(I18N.CONSTANTS.connectionProblem());
             }
 
             @Override
             public void loaderLoad(LoadEvent le) {
                 LocationResult data = le.getData();
                 if (data.getTotalLength() == 0) {
-                    setHtml(I18N.CONSTANTS.locationSearchNoResults());
+                    setText(I18N.CONSTANTS.locationSearchNoResults());
                 } else if (data.getTotalLength() > data.getData().size()) {
-                    setHtml(I18N.MESSAGES.matchingLocations(data.getTotalLength()) +
-                            "<br>" +
-                            I18N.CONSTANTS.tooManyLocationsToDisplay());
+                    SafeHtmlBuilder html = new SafeHtmlBuilder();
+                    html.appendHtmlConstant(I18N.MESSAGES.matchingLocations(data.getTotalLength()));
+                    html.appendHtmlConstant("<br>");
+                    html.appendHtmlConstant(I18N.CONSTANTS.tooManyLocationsToDisplay());
+                    setHtml(html.toSafeHtml());
                 }
             }
         });

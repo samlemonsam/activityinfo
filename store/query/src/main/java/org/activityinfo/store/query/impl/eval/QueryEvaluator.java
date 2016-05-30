@@ -5,6 +5,7 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
@@ -15,9 +16,8 @@ import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,6 +37,8 @@ public class QueryEvaluator {
     private NodeMatcher resolver;
 
     private Map<String, AggregateFunction> aggregateFunctions = Maps.newHashMap();
+
+    private Deque<SymbolExpr> evaluationStack = new ArrayDeque<>();
 
     public QueryEvaluator(FormTree formTree, FormClass rootFormClass, CollectionScanBatch batch) {
         this.tree = formTree;
@@ -74,16 +76,33 @@ public class QueryEvaluator {
 
         @Override
         public Slot<ColumnView> visitSymbol(SymbolExpr symbolExpr) {
-            if(symbolExpr.getName().equals(ColumnModel.ID_SYMBOL)) {
-                return batch.addResourceIdColumn(rootFormClass);
 
-            } else if(symbolExpr.getName().equals(ColumnModel.CLASS_SYMBOL)) {
-                return batch.addConstantColumn(rootFormClass, rootFormClass.getId().asString());
+            // Check for recursion: are we in the process of evaluating
+            // this symbol? Trying to do so again will lead to an infinite
+            // loop and a StackOverflowException.
+
+            if(evaluationStack.contains(symbolExpr)) {
+                return batch.addEmptyColumn(rootFormClass);
             }
 
-            Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
-            LOGGER.info(symbolExpr + " matched to " + nodes);
-            return addColumn(nodes);
+            evaluationStack.push(symbolExpr);
+
+            try {
+
+                if (symbolExpr.getName().equals(ColumnModel.ID_SYMBOL)) {
+                    return batch.addResourceIdColumn(rootFormClass);
+
+                } else if (symbolExpr.getName().equals(ColumnModel.CLASS_SYMBOL)) {
+                    return batch.addConstantColumn(rootFormClass, rootFormClass.getId().asString());
+                }
+
+                Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
+                LOGGER.finer(symbolExpr + " matched to " + nodes);
+                return addColumn(nodes);
+
+            } finally {
+                evaluationStack.pop();
+            }
         }
 
         @Override
@@ -134,7 +153,7 @@ public class QueryEvaluator {
                         throw new UnsupportedOperationException();
                     case FIELD:
                         if (node.isCalculated()) {
-                            expandedNodes.add(evaluateExpression(node.getCalculation()));
+                            expandedNodes.add(expandCalculatedField(node));
                         } else {
                             expandedNodes.add(batch.addColumn(node));
                         }
@@ -147,6 +166,18 @@ public class QueryEvaluator {
                 return expandedNodes.get(0);
             } else {
                 return new ColumnCombiner(expandedNodes);
+            }
+        }
+
+        private Slot<ColumnView> expandCalculatedField(NodeMatch node) {
+            try {
+                return evaluateExpression(node.getCalculation());
+            } catch (ExprException e) {
+                LOGGER.log(Level.WARNING, "Exception in calculated field " +
+                        node.getFormClass().getId() + "." + node.getExpr() + " = " +
+                        node.getCalculation() + ": " + e.getMessage(), e);
+            
+                return batch.addEmptyColumn(node.getFormClass());
             }
         }
     }

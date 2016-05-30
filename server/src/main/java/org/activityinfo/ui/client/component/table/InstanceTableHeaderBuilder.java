@@ -25,7 +25,6 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.AbstractHeaderOrFooterBuilder;
 import org.activityinfo.core.shared.Projection;
@@ -96,12 +95,12 @@ public class InstanceTableHeaderBuilder extends AbstractHeaderOrFooterBuilder<Pr
         setTdWidth(th, row, 0);
 
         final SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.append(SafeHtmlUtils.fromString(table.getRootFormClass().getLabel()));
-        sb.append(SafeHtmlUtils.fromTrustedString("&nbsp;"));
+        sb.appendEscaped(table.getRootFormClass().getLabel());
+        sb.appendHtmlConstant("&nbsp;");
         for (TableHeaderAction buttonAction : table.getHeaderActions()) {
             final ButtonActionCell cell = new ButtonActionCell(buttonAction);
             cell.render(new Cell.Context(row, 0, table), "", sb);
-            sb.append(SafeHtmlUtils.fromTrustedString("&nbsp;"));
+            sb.appendHtmlConstant("&nbsp;");
         }
         th.html(sb.toSafeHtml());
 

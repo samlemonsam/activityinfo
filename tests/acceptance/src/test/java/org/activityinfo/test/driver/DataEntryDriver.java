@@ -20,7 +20,8 @@ public interface DataEntryDriver {
     boolean nextField();
 
     /**
-     * Submits the form 
+     * Submits the form
+     * @return the new id of the form
      */
     void submit() throws InterruptedException;
 

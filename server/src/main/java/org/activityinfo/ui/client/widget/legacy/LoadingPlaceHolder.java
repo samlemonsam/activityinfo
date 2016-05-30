@@ -25,8 +25,8 @@ package org.activityinfo.ui.client.widget.legacy;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
-import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 
 /**
  * An AsyncMonitor implementation that shows the "Loading Component" message
@@ -41,7 +41,7 @@ public class LoadingPlaceHolder extends LayoutContainer implements AsyncMonitor 
         setLayout(new CenterLayout());
         html = new Html();
         html.addStyleName("loading-placeholder");
-        html.setHtml(I18N.CONSTANTS.loadingComponent());
+        html.setText(I18N.CONSTANTS.loadingComponent());
         add(html);
     }
 
@@ -52,22 +52,22 @@ public class LoadingPlaceHolder extends LayoutContainer implements AsyncMonitor 
 
     @Override
     public void onCompleted() {
-        html.setHtml("Loaded.");
+        html.setText("Loaded.");
     }
 
     @Override
     public void onConnectionProblem() {
-        html.setHtml(I18N.CONSTANTS.connectionProblem());
+        html.setText(I18N.CONSTANTS.connectionProblem());
     }
 
     @Override
     public boolean onRetrying() {
-        html.setHtml(I18N.CONSTANTS.retrying());
+        html.setText(I18N.CONSTANTS.retrying());
         return false;
     }
 
     @Override
     public void onServerError(Throwable e) {
-        html.setHtml(I18N.CONSTANTS.serverError());
+        html.setText(I18N.CONSTANTS.serverError());
     }
 }

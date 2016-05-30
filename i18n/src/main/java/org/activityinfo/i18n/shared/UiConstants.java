@@ -1546,4 +1546,23 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Saved Reports")
     String savedReports();
+
+    @DefaultStringValue("An indicator cannot be linked to itself")
+    String indicatorCannotBeLinkedToItself();
+
+    @DefaultStringValue("Click to unlink")
+    String clickToUnlink();
+
+    @DefaultStringValue("Click to link")
+    String clickToLink();
+
+
+    @DefaultStringValue("clear")
+    String clear();
+
+    @DefaultStringValue("Link created")
+    String linkCreated();
+
+    @DefaultStringValue("Link removed")
+    String linkRemoved();
 }

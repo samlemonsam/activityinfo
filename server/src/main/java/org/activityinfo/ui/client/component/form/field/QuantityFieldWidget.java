@@ -1,8 +1,7 @@
 package org.activityinfo.ui.client.component.form.field;
 
+import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -55,16 +54,6 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
                 validate(true);
             }
         });
-        box.addBlurHandler(new BlurHandler() {
-            @Override
-            public void onBlur(BlurEvent event) {
-                try { // AI-1363
-                    box.getValueOrThrow();
-                } catch (ParseException e) {
-                    clearValue();
-                }
-            }
-        });
 
         unitsLabel = new InlineLabel(type.getUnits());
         unitsLabel.setStyleName("input-group-addon");
@@ -111,12 +100,20 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
         return panel;
     }
 
+    public boolean isValid() {
+        return Strings.isNullOrEmpty(box.getText()) ||
+                (!Strings.isNullOrEmpty(box.getText()) && box.getValue() != null);
+    }
+
     private void validate(boolean onKeyUp) {
         if (eventBus == null) {
             return;
         }
 
-        eventBus.fireEvent(new FieldMessageEvent(fieldId, "").setClearMessage(true));
+        if (isValid()) {
+            eventBus.fireEvent(new FieldMessageEvent(fieldId, "").setClearMessage(true));
+        }
+
         try {
             // The value sanitization algorithm is as follows: If the value of the element is not a valid floating-point number,
             // then set it to the empty string instead.

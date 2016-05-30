@@ -37,6 +37,7 @@ dependencies {
     toolCompile   libraries.jersey.json
     toolCompile   libraries.jersey.multipart
     toolCompile   libraries.guava
+    toolCompile   libraries.gwt.servlet
     toolCompile   'com.github.javaparser:javaparser-core:2.0.0'
     toolCompile   'joda-time:joda-time:2.5'
 }

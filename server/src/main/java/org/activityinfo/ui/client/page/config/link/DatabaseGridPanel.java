@@ -34,6 +34,10 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -48,6 +52,15 @@ import java.util.List;
 import java.util.Set;
 
 public class DatabaseGridPanel extends ContentPanel {
+
+    interface Templates extends SafeHtmlTemplates {
+
+        @Template("<span style=\"color: gray\">{0}</span>")
+        SafeHtml grayedOut(String databaseName);
+
+    }
+
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     private final Dispatcher dispatcher;
     private Grid<UserDatabaseDTO> grid;
@@ -105,15 +118,17 @@ public class DatabaseGridPanel extends ContentPanel {
         icon.setRenderer(new GridCellRenderer<UserDatabaseDTO>() {
 
             @Override
-            public Object render(UserDatabaseDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<UserDatabaseDTO> store,
-                                 Grid<UserDatabaseDTO> grid) {
+            public SafeHtml render(UserDatabaseDTO model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<UserDatabaseDTO> store,
+                                   Grid<UserDatabaseDTO> grid) {
 
-                return linked.contains(model.getId()) ? IconImageBundle.ICONS.link().getHTML() : "";
+                return linked.contains(model.getId()) ?
+                        IconImageBundle.ICONS.link().getSafeHtml() :
+                        SafeHtmlUtils.EMPTY_SAFE_HTML;
             }
         });
 
@@ -123,7 +138,7 @@ public class DatabaseGridPanel extends ContentPanel {
         name.setRenderer(new GridCellRenderer<UserDatabaseDTO>() {
 
             @Override
-            public Object render(UserDatabaseDTO model,
+            public SafeHtml render(UserDatabaseDTO model,
                                  String property,
                                  ColumnData config,
                                  int rowIndex,
@@ -132,13 +147,10 @@ public class DatabaseGridPanel extends ContentPanel {
                                  Grid<UserDatabaseDTO> grid) {
 
                 if (hasPermission(model)) {
-                    return model.getName();
+                    return SafeHtmlUtils.fromString(model.getName());
                 } else {
-                    StringBuilder html = new StringBuilder();
-                    html.append("<span style=\"color: gray\">").append(model.getName()).append("</span>");
-                    return html.toString();
+                    return TEMPLATES.grayedOut(model.getName());
                 }
-
             }
         });
 

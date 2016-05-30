@@ -283,6 +283,11 @@ public class ImageUploadFieldWidget implements FormFieldWidget<AttachmentValue> 
     }
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }

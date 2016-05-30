@@ -113,20 +113,9 @@
             var ga = document.createElement('script');
             ga.type = 'text/javascript';
             ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            ga.src = 'https://ssl.google-analytics.com/ga.js';
             var s = document.getElementsByTagName('script')[0];
             s.parentNode.insertBefore(ga, s);
-        })();
-    </script>
-    <script>
-        var _prum = [['id', '5450064eabe53d240dc04697'],
-            ['mark', 'firstbyte', (new Date()).getTime()]];
-        (function() {
-            var s = document.getElementsByTagName('script')[0]
-                    , p = document.createElement('script');
-            p.async = 'async';
-            p.src = '//rum-static.pingdom.net/prum.min.js';
-            s.parentNode.insertBefore(p, s);
         })();
     </script>
 </head>
@@ -157,8 +146,7 @@
 <iframe id="__printingFrame" style="position:absolute;width:0;height:0;border:0"></iframe>
 
 <script type="text/javascript">
-    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    document.write(unescape("%3Cscript src='https://ssl.google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 </body>
 </html>

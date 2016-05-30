@@ -28,6 +28,7 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import org.activityinfo.server.attachment.AttachmentModule;
 import org.activityinfo.server.authentication.AuthenticationModule;
 import org.activityinfo.server.branding.BrandingModule;
+import org.activityinfo.server.csp.ContentSecurityModule;
 import org.activityinfo.server.database.ServerDatabaseModule;
 import org.activityinfo.server.database.hibernate.HibernateModule;
 import org.activityinfo.server.digest.DigestModule;
@@ -79,6 +80,7 @@ public class StartupListener extends GuiceServletContextListener {
                 new ContentModule(),
                 new GeometryModule(),
                 new AuthenticationModule(),
+                new ContentSecurityModule(),
                 new AttachmentModule(),
                 new ReportModule(),
                 new DigestModule(),

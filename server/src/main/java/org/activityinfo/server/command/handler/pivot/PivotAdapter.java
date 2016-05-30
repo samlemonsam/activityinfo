@@ -136,8 +136,14 @@ public class PivotAdapter {
         Set<ResourceId> formIds = new HashSet<>();
         for(Activity activity : activities) {
             formIds.add(activity.getLeafFormClassId());
+            if(command.getValueType() == PivotSites.ValueType.TOTAL_SITES) {
+                formIds.add(activity.getSiteFormClassId());
+            }
             for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
                 formIds.add(linkedActivity.getLeafFormClassId());
+                if(command.getValueType() == PivotSites.ValueType.TOTAL_SITES) {
+                    formIds.add(activity.getSiteFormClassId());
+                }
             }
         }
 
@@ -539,7 +545,7 @@ public class PivotAdapter {
         
         } else if(activity.isMonthly() && 
                 (command.isPivotedBy(DimensionType.Date) ||
-                 command.getFilter().isEndDateRestricted())) {
+                 command.getFilter().isDateRestricted())) {
             
             // if we are pivoting or filtering by date, then we need
             // to query the actual reporting periods and count distinct sites
@@ -640,6 +646,17 @@ public class PivotAdapter {
         }
     }
 
+    private String siteIdField(FormTree formTree) {
+        ResourceId rootFormClassId = formTree.getRootFormClass().getId();
+        if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            // Root form class is the site, we need to compare against the ID
+            return ColumnModel.ID_SYMBOL;
+        } else {
+            // ROot form class is monhtly report, filter against the site id
+            return CuidAdapter.field(rootFormClassId, CuidAdapter.SITE_FIELD).asString();
+        }
+    }
+
     private int[] extractSiteIds(ColumnSet columnSet) {
         ColumnView columnView = columnSet.getColumnView(SITE_ID_KEY);
         int[] ids = new int[columnView.numRows()];
@@ -663,7 +680,7 @@ public class PivotAdapter {
 
     private ExprNode composeFilter(FormTree formTree, Optional<ExprNode> permissionFilter) {
         List<ExprNode> conditions = Lists.newArrayList();
-        conditions.addAll(filterExpr(ColumnModel.ID_SYMBOL, CuidAdapter.SITE_DOMAIN, DimensionType.Site));
+        conditions.addAll(filterExpr(siteIdField(formTree), CuidAdapter.SITE_DOMAIN, DimensionType.Site));
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
         conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
         conditions.addAll(filterExpr("location", CuidAdapter.LOCATION_DOMAIN, DimensionType.Location));
@@ -719,7 +736,6 @@ public class PivotAdapter {
                     conditions.add(Exprs.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
                 }
             }
-
             return singleton(anyTrue(conditions));
 
         } else {

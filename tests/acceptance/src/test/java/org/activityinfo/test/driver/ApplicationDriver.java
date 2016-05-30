@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.PendingException;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -17,7 +18,6 @@ import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerField;
 import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
 import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
-import org.activityinfo.test.pageobject.web.entry.DetailsEntry;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.sut.UserAccount;
@@ -100,15 +100,15 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public void submitForm(String formName, FieldValue... values) throws Exception {
-        submitForm(formName, Arrays.asList(values));
+    public ResourceId submitForm(String formName, FieldValue... values) throws Exception {
+        return submitForm(formName, Arrays.asList(values));
     }
     
-    public void submitForm(String formName, List<FieldValue> values) throws Exception {
-        fillForm(startNewSubmission(formName), FieldValue.toMap(values));
+    public ResourceId submitForm(String formName, List<FieldValue> values) throws Exception {
+        return fillForm(startNewSubmission(formName), FieldValue.toMap(values));
     }
     
-    protected final void fillForm(DataEntryDriver driver, Map<String, FieldValue> valueMap) throws InterruptedException {
+    protected final ResourceId fillForm(DataEntryDriver driver, Map<String, FieldValue> valueMap) throws InterruptedException {
         while (driver.nextField()) {
             System.out.println("label = " + driver.getLabel());
             switch (driver.getLabel()) {
@@ -148,12 +148,12 @@ public abstract class ApplicationDriver {
                     }
                     break;
             }
-
-            driver.submit();
         }
+        driver.submit();
+        return ResourceId.valueOf("todo");
     }
 
-    public void submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
+    public ResourceId submitForm(String formName, List<FieldValue> values, List<String> headers) throws Exception {
         throw new PendingException();
     }
 
@@ -278,14 +278,9 @@ public abstract class ApplicationDriver {
         throw new PendingException();
     }
 
-    public DetailsEntry getDetails() {
-        throw new PendingException();
-    }
-
     public AliasTable getAliasTable() {
         return aliasTable;
     }
-
 
     public void cloneDatabase(TestObject testObject) {
         throw new PendingException();
@@ -447,6 +442,10 @@ public abstract class ApplicationDriver {
     }
 
     public void setCurrentModal(BsModal modal) {
+        throw new PendingException();
+    }
+
+    public List<FieldValue> getFieldValues(ResourceId resourceId) {
         throw new PendingException();
     }
 }

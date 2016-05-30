@@ -27,37 +27,32 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.grid.ColumnData;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
+import com.google.common.base.Strings;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.ui.client.util.GwtUtil;
 
 public class LocationColumnRenderer implements GridCellRenderer<ModelData> {
 
     @Override
-    public Object render(ModelData model,
-                         String property,
-                         ColumnData config,
-                         int rowIndex,
-                         int colIndex,
-                         ListStore<ModelData> store,
-                         Grid<ModelData> grid) {
+    public SafeHtml render(ModelData model,
+                           String property,
+                           ColumnData config,
+                           int rowIndex,
+                           int colIndex,
+                           ListStore<ModelData> store,
+                           Grid<ModelData> grid) {
 
         if (model instanceof SiteDTO) {
             return render((SiteDTO) model);
         } else {
-            return "";
+            return SafeHtmlUtils.EMPTY_SAFE_HTML;
         }
     }
 
-    public Object render(SiteDTO model) {
-
-        String name = model.getLocationName();
-        String axe = model.getLocationAxe();
-
-        if (axe == null) {
-            return GwtUtil.valueWithTooltip(name);
-        } else {
-            return ColumnTemplates.INSTANCE.locationCell(model.getLocationName(), model.getLocationAxe()).asString();
-        }
+    public SafeHtml render(SiteDTO model) {
+        return ColumnTemplates.INSTANCE.locationCell(
+                Strings.nullToEmpty(model.getLocationName()),
+                Strings.nullToEmpty(model.getLocationAxe()));
     }
-
 }

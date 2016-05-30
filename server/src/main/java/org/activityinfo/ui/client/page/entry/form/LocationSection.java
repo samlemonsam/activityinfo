@@ -96,12 +96,12 @@ public class LocationSection extends FormSectionWithFormLayout<SiteDTO> implemen
     public void updateForm(LocationDTO location, boolean isNew) {
         this.location = location;
         this.isNew = isNew;
-        nameField.setValue(location.getName());
-        axeField.setValue(location.getAxe());
+        nameField.setText(location.getName());
+        axeField.setText(location.getAxe());
 
         for (Entry<Integer, LabelField> entry : levelFields.entrySet()) {
             AdminEntityDTO entity = location.getAdminEntity(entry.getKey());
-            entry.getValue().setValue(entity == null ? null : entity.getName());
+            entry.getValue().setText(entity == null ? "" : entity.getName());
         }
 
         if (location.hasCoordinates()) {

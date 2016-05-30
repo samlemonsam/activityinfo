@@ -390,7 +390,17 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         int expectedCount = 1;
         assertBucketCount(expectedCount);
         assertEquals(3, (int) buckets.get(0).doubleValue());
+    }
 
+    @Test
+    public void testSiteCountOnMonthly() {
+        forTotalSiteCounts();
+        withAdminDimension(new AdminDimension(1));
+        filter.addRestriction(DimensionType.Activity, 3);
+
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(1);
     }
 
     @Test
@@ -934,6 +944,22 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         
         assertThat().forAttributeGroupLabeled(contenuDuKit, "Casserole").thereIsOneBucketWithValue(1500);
         
+    }
+    
+    @Test
+    public void filterMonthlyReportsOnSiteId() {
+        int utilizationRate = 5;
+        int csNgeshwe = 9;
+        
+        filter.addRestriction(DimensionType.Indicator, utilizationRate);
+        filter.addRestriction(DimensionType.Site, csNgeshwe);
+        
+        dimensions.add(new Dimension(DimensionType.Site));
+        dimensions.add(new DateDimension(DateUnit.MONTH));
+
+        execute();
+        
+        assertThat().forSite(csNgeshwe).thereAre(3).buckets();
     }
     
     

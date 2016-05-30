@@ -1,9 +1,8 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.model.query;
 
 import com.google.common.base.Strings;
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NullFieldValue;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -48,9 +47,9 @@ public class ConstantColumnView implements ColumnView, Serializable {
     }
 
     public static ConstantColumnView create(int numRows, FieldValue value) {
-        if(value == null) {
-            return new ConstantColumnView(numRows, (String)null);
-            
+        if(value == null || value == NullFieldValue.INSTANCE) {
+            return new ConstantColumnView(numRows, (String) null);
+
         } else if(value instanceof Quantity) {
             return new ConstantColumnView(numRows, ((Quantity) value).getValue());
 
