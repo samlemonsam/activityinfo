@@ -111,7 +111,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         return maxSortOrder == null ? 1 : maxSortOrder + 1;
     }
 
-    private String readJson(Activity activity) {
+    private String readFormClassJson(Activity activity) {
         if (activity.getGzFormClass() != null) {
             try (Reader reader = new InputStreamReader(
                     new GZIPInputStream(
@@ -137,22 +137,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
             activity.setName(name);
 
-            String json = readJson(activity);
+            String json = readFormClassJson(activity);
 
-            if (!Strings.isNullOrEmpty(json)) {
-                FormClass formClass = UpdateFormClassHandler.validateFormClass(json);
-                formClass.setLabel(name);
-
-                // Update the activity table with the JSON value
-                String updatedJson = Resources.toJson(formClass.asResource());
-                if(updatedJson.length() > UpdateFormClassHandler.MIN_GZIP_BYTES) {
-                    activity.setGzFormClass(UpdateFormClassHandler.compressJson(updatedJson));
-                    activity.setFormClass(null);
-                } else {
-                    activity.setFormClass(updatedJson);
-                    activity.setGzFormClass(null);
-                }
-            }
+            updateFormClass(activity, name, json);
         }
 
         if (changes.containsKey("locationTypeId")) {
@@ -193,5 +180,22 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         }
 
         activity.getDatabase().setLastSchemaUpdate(new Date());
+    }
+
+    private void updateFormClass(Activity activity, String name, String json) {
+        if (!Strings.isNullOrEmpty(json)) {
+            FormClass formClass = UpdateFormClassHandler.validateFormClass(json);
+            formClass.setLabel(name);
+
+            // Update the activity table with the JSON value
+            String updatedJson = Resources.toJson(formClass.asResource());
+            if(updatedJson.length() > UpdateFormClassHandler.MIN_GZIP_BYTES) {
+                activity.setGzFormClass(UpdateFormClassHandler.compressJson(updatedJson));
+                activity.setFormClass(null);
+            } else {
+                activity.setFormClass(updatedJson);
+                activity.setGzFormClass(null);
+            }
+        }
     }
 }
