@@ -39,7 +39,7 @@ import static org.activityinfo.model.util.StringUtil.truncate;
 
 public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
-    private static final int MIN_GZIP_BYTES = 1024 * 5;
+    public static final int MIN_GZIP_BYTES = 1024 * 5;
 
     private static final Logger LOGGER = Logger.getLogger(UpdateFormClassHandler.class.getName());
 
@@ -81,7 +81,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         return new VoidResult();
     }
 
-    private byte[] compressJson(String json) {
+    public static byte[] compressJson(String json) {
         try {
             ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
             GZIPOutputStream gzOut = new GZIPOutputStream(byteArrayOut);
@@ -97,7 +97,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     }
 
 
-    private FormClass validateFormClass(String json) {
+    public static FormClass validateFormClass(String json) {
         try {
             Resource resource = Resources.resourceFromJson(json);
             return FormClass.fromResource(resource);
