@@ -22,10 +22,16 @@ package org.activityinfo.server.command.handler.crud;
  * #L%
  */
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
+import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.UpdateFormClassHandler;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.Activity;
@@ -34,7 +40,12 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Date;
+import java.util.zip.GZIPInputStream;
 
 import static org.activityinfo.model.util.StringUtil.truncate;
 
@@ -100,9 +111,48 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         return maxSortOrder == null ? 1 : maxSortOrder + 1;
     }
 
+    private String readJson(Activity activity) {
+        if (activity.getGzFormClass() != null) {
+            try (Reader reader = new InputStreamReader(
+                    new GZIPInputStream(
+                            new ByteArrayInputStream(activity.getGzFormClass())), Charsets.UTF_8)) {
+
+                return CharStreams.toString(reader);
+
+            } catch (IOException e) {
+                throw new UnexpectedCommandException(e);
+            }
+
+        } else if (activity.getFormClass() != null) {
+            return activity.getFormClass();
+
+        } else {
+            return null;
+        }
+    }
+
     private void applyProperties(Activity activity, PropertyMap changes) {
         if (changes.containsKey("name")) {
-            activity.setName(truncate((String) changes.get("name")));
+            String name = truncate((String) changes.get("name"));
+
+            activity.setName(name);
+
+            String json = readJson(activity);
+
+            if (!Strings.isNullOrEmpty(json)) {
+                FormClass formClass = UpdateFormClassHandler.validateFormClass(json);
+                formClass.setLabel(name);
+
+                // Update the activity table with the JSON value
+                String updatedJson = Resources.toJson(formClass.asResource());
+                if(updatedJson.length() > UpdateFormClassHandler.MIN_GZIP_BYTES) {
+                    activity.setGzFormClass(UpdateFormClassHandler.compressJson(updatedJson));
+                    activity.setFormClass(null);
+                } else {
+                    activity.setFormClass(updatedJson);
+                    activity.setGzFormClass(null);
+                }
+            }
         }
 
         if (changes.containsKey("locationTypeId")) {
