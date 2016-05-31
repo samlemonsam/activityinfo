@@ -5,6 +5,7 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.instance.InstancePage;
 import org.activityinfo.ui.client.page.instance.InstancePlace;
@@ -14,14 +15,18 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
 
     private final NavigationHandler pageManager;
     private ResourceLocator resourceLocator;
+    private final StateProvider stateProvider;
 
     @Inject
     public PageLoader(NavigationHandler pageManager,
                       PageStateSerializer placeSerializer,
-                      ResourceLocator resourceLocator) {
+                      ResourceLocator resourceLocator,
+                      StateProvider stateProvider
+    ) {
 
         this.resourceLocator = resourceLocator;
         this.pageManager = pageManager;
+        this.stateProvider = stateProvider;
 
         pageManager.registerPageLoader(InstancePage.DESIGN_PAGE_ID, this);
         placeSerializer.registerParser(InstancePage.DESIGN_PAGE_ID, new InstancePlace.Parser(InstancePage.DESIGN_PAGE_ID));
@@ -40,7 +45,7 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
             public void onSuccess() {
                 if (pageState instanceof InstancePlace) {
                     InstancePlace instancePlace = (InstancePlace) pageState;
-                    InstancePage page = new InstancePage(resourceLocator, instancePlace.getPageId(), pageManager.getEventBus());
+                    InstancePage page = new InstancePage(resourceLocator, instancePlace.getPageId(), pageManager.getEventBus(), stateProvider);
                     page.navigate(pageState);
                     callback.onSuccess(page);
                 }

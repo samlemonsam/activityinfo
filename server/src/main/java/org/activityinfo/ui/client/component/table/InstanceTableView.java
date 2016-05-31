@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.component.table;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -14,12 +15,14 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.widget.AlertPanel;
 import org.activityinfo.ui.client.widget.loading.TableLoadingIndicator;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +35,7 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     private static final Logger LOGGER = Logger.getLogger(InstanceTableView.class.getName());
 
     private final ResourceLocator resourceLocator;
+    private final StateProvider stateProvider;
     private final HTMLPanel panel;
     private List<FieldColumn> columns;
     private List<FieldColumn> selectedColumns;
@@ -53,9 +57,10 @@ public class InstanceTableView implements IsWidget, RequiresResize {
 
     private static InstanceTableViewUiBinder ourUiBinder = GWT.create(InstanceTableViewUiBinder.class);
 
-    public InstanceTableView(ResourceLocator resourceLocator) {
+    public InstanceTableView(ResourceLocator resourceLocator, StateProvider stateProvider) {
         InstanceTableStyle.INSTANCE.ensureInjected();
         this.resourceLocator = resourceLocator;
+        this.stateProvider = stateProvider;
         this.table = new InstanceTable(this);
         this.loadingIndicator = table.getLoadingIndicator();
         this.panel = ourUiBinder.createAndBindUi(this);
@@ -88,6 +93,21 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     }
 
     private void calculateSelectedColumns() {
+        Set<String> persistedColumnNames = table.getColumnStatePersister().getColumnNames();
+        if (!persistedColumnNames.isEmpty()) {
+            List<FieldColumn> toSelect = Lists.newArrayList();
+            for (FieldColumn column : columns) {
+                if (!Strings.isNullOrEmpty(column.getHeader()) && persistedColumnNames.contains(column.getHeader())) {
+                    toSelect.add(column);
+                }
+            }
+
+            if (!toSelect.isEmpty()) {
+                setSelectedColumns(toSelect);
+                return;
+            }
+        }
+
         if (columns.size() <= getMaxNumberOfColumns()) {
             setSelectedColumns(Lists.newArrayList(columns));
         } else {
@@ -154,5 +174,9 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         if (rootFormClasses != null && !rootFormClasses.isEmpty()) {
             table.setRootFormClass(rootFormClasses.iterator().next());
         }
+    }
+
+    public StateProvider getStateProvider() {
+        return stateProvider;
     }
 }

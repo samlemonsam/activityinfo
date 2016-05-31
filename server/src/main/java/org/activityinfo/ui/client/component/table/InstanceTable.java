@@ -43,6 +43,7 @@ public class InstanceTable implements IsWidget {
     private final List<TableHeaderAction> headerActions;
     private final InstanceTableView tableView;
     private final InstanceTableDataLoader dataLoader;
+    private final ColumnStatePersister columnStatePersister;
     private final TableLoadingIndicator loadingIndicator = new TableLoadingIndicator()
             .setHideOnSuccess(true);
 
@@ -52,6 +53,7 @@ public class InstanceTable implements IsWidget {
     public InstanceTable(InstanceTableView tableView) {
         this.tableView = tableView;
         this.resourceLocator = tableView.getResourceLocator();
+        this.columnStatePersister = new ColumnStatePersister(tableView.getStateProvider());
         CellTableResources.INSTANCE.cellTableStyle().ensureInjected();
 
         final TableHeaderActionBrowserEventHandler headerActionEventHandler = new TableHeaderActionBrowserEventHandler(this);
@@ -121,6 +123,7 @@ public class InstanceTable implements IsWidget {
 
         reload();
         table.saveColumnWidthInformation();
+        columnStatePersister.persist(columns);
     }
 
     private void removeAllColumns() {
@@ -191,5 +194,9 @@ public class InstanceTable implements IsWidget {
 
     public void loadMore() {
         dataLoader.loadMore();
+    }
+
+    public ColumnStatePersister getColumnStatePersister() {
+        return columnStatePersister;
     }
 }
