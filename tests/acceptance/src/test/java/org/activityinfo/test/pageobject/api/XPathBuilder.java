@@ -150,6 +150,10 @@ public class XPathBuilder {
         return tagName("th", conditions);
     }
 
+    public XPathBuilder thead(String... conditions) {
+        return tagName("thead", conditions);
+    }
+
     public XPathBuilder h4(String... conditions) {
         return tagName("h4", conditions);
     }

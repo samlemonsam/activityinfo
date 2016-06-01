@@ -206,6 +206,25 @@ public class BsTable {
 //                .asList().as(Row.class));
     }
 
+
+    public List<Cell> columns() {
+        List<Cell> columns = Lists.newArrayList();
+        FluentElement columnsContainer = container.find().thead().tr().asList().get(1);
+        for (FluentElement element : columnsContainer.find().th().asList()) {
+            columns.add(new Cell(element));
+        }
+        return columns;
+    }
+
+    public List<String> columnNames() {
+        List<String> columnNames = Lists.newArrayList();
+        List<Cell> columns = columns();
+        for (Cell column : columns) {
+            columnNames.add(column.text());
+        }
+        return columnNames;
+    }
+
     public Optional<Cell> findCellByText(String cellText) {
         Optional<FluentElement> cell = container.find().td(withClass(type.getTdClass())).div(withText(cellText)).firstIfPresent();
         if (cell.isPresent()) {
