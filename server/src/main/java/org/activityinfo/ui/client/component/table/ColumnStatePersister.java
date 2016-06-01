@@ -1,6 +1,6 @@
 package org.activityinfo.ui.client.component.table;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.resource.Record;
