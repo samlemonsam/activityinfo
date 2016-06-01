@@ -524,4 +524,24 @@ public class DataEntrySteps {
         }
         throw new AssertionError("No field with name '" + fieldName + "'. Found: " + values);
     }
+
+    @And("^hide built-in columns$")
+    public void hide_built_in_columns() throws Throwable {
+        BsTable table = driver.tablePage().table();
+        table.showAllColumns();
+        table.hideBuiltInColumns();
+    }
+
+    @Then("^following table columns are visible$")
+    public void following_table_columns_are_visible(List<String> expectedColumns) throws Throwable {
+        BsTable table = driver.tablePage().table();
+        List<String> columnNames = table.columnNames();
+
+        assertEquals(columnNames.size(), expectedColumns.size());
+
+        for (String expectedColumn : expectedColumns) {
+            columnNames.remove(driver.getAliasTable().getAlias(expectedColumn));
+        }
+        assertTrue(columnNames.isEmpty());
+    }
 }

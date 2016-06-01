@@ -1129,4 +1129,12 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void setCurrentModal(BsModal currentModal) {
         this.currentModal = currentModal;
     }
+
+    public String getCurrentDatabase() {
+        return currentDatabase;
+    }
+
+    public String getCurrentForm() {
+        return currentForm;
+    }
 }

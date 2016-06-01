@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.component.table;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
 import org.activityinfo.core.shared.Projection;
@@ -16,6 +17,8 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -110,6 +113,14 @@ public class FieldColumn extends Column<Projection, String> {
 
     public void setCriteria(Criteria criteria) {
         this.criteria = criteria;
+    }
+
+    public static LinkedHashSet<String> headers(Collection<FieldColumn> columns) {
+        LinkedHashSet<String> headers = Sets.newLinkedHashSet();
+        for (FieldColumn column : columns) {
+            headers.add(column.getHeader());
+        }
+        return headers;
     }
 
     @Override
