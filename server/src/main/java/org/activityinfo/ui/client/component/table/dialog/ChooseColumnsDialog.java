@@ -225,11 +225,11 @@ public class ChooseColumnsDialog {
     private void persist() {
         ColumnStatePersister persister = tableView.getTable().getColumnStatePersister();
 
-        Set<String> columnNames = Sets.newHashSet(persister.getColumnNames());
+        LinkedHashSet<String> columnNames = Sets.newLinkedHashSet(persister.getColumnNames());
 
         columnNames.addAll(FieldColumn.headers(selectedTableDataProvider.getList()));
 
-        List<FieldColumn> removed = Lists.newArrayList(tableView.getSelectedColumns());
+        List<FieldColumn> removed = Lists.newArrayList(tableView.getColumns());
         removed.removeAll(selectedTableDataProvider.getList());
 
         columnNames.removeAll(FieldColumn.headers(removed));

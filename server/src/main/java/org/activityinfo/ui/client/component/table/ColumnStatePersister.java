@@ -6,6 +6,7 @@ import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +27,12 @@ public class ColumnStatePersister {
         persist(FieldColumn.headers(columns));
     }
 
-    public void persist(Set<String> columnNames) {
+    /**
+     * Persists column names in given order (LinkedHashSet preserve order)
+     *
+     * @param columnNames column names.
+     */
+    public void persist(LinkedHashSet<String> columnNames) {
         if (columnNames.isEmpty()) {
             return;
         }
@@ -35,7 +41,7 @@ public class ColumnStatePersister {
     }
 
     public Set<String> getColumnNames() {
-        Set<String> columns = Sets.newHashSet();
+        Set<String> columns = Sets.newLinkedHashSet();
         String json = stateProvider.getString(INSTANCE_TABLE_COLUMNS_STATE);
         if (!Strings.isNullOrEmpty(json)) {
             Record record = Resources.recordFromJson(json);
@@ -44,7 +50,7 @@ public class ColumnStatePersister {
         return columns;
     }
 
-    private Record asRecord(Set<String> columnNames) {
+    private Record asRecord(LinkedHashSet<String> columnNames) {
         Record record = new Record();
         for (String columnName : columnNames) {
             record.set(columnName, columnName);

@@ -18,6 +18,7 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -114,8 +115,8 @@ public class FieldColumn extends Column<Projection, String> {
         this.criteria = criteria;
     }
 
-    public static Set<String> headers(Collection<FieldColumn> columns) {
-        Set<String> headers = Sets.newHashSet();
+    public static LinkedHashSet<String> headers(Collection<FieldColumn> columns) {
+        LinkedHashSet<String> headers = Sets.newLinkedHashSet();
         for (FieldColumn column : columns) {
             headers.add(column.getHeader());
         }
