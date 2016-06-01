@@ -32,7 +32,7 @@ import org.activityinfo.i18n.shared.I18N;
 public class BlankValidator implements Validator {
     @Override
     public String validate(Field<?> field, String value) {
-        if (Strings.isNullOrEmpty(value.trim())) {
+        if (value == null || Strings.isNullOrEmpty(value.trim())) {
             return I18N.CONSTANTS.blankValueIsNotAllowed();
         }
         return null;
