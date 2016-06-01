@@ -123,7 +123,6 @@ public class InstanceTable implements IsWidget {
 
         reload();
         table.saveColumnWidthInformation();
-        columnStatePersister.persist(columns);
     }
 
     private void removeAllColumns() {

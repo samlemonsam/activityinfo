@@ -23,12 +23,7 @@ public class ColumnStatePersister {
     }
 
     public void persist(List<FieldColumn> columns) {
-        final Set<String> columnNames = Sets.newHashSet();
-        for (FieldColumn column : columns) {
-            columnNames.add(column.getHeader());
-        }
-
-        persist(columnNames);
+        persist(FieldColumn.headers(columns));
     }
 
     public void persist(Set<String> columnNames) {

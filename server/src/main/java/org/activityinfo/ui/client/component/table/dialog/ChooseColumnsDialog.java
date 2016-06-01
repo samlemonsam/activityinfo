@@ -44,6 +44,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SimpleKeyProvider;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.component.table.ColumnStatePersister;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTableStyle;
 import org.activityinfo.ui.client.component.table.InstanceTableView;
@@ -216,8 +217,24 @@ public class ChooseColumnsDialog {
     }
 
     private void onOk() {
+        persist();
         tableView.setSelectedColumns(Lists.newArrayList(selectedTableDataProvider.getList()));
         dialog.hide();
+    }
+
+    private void persist() {
+        ColumnStatePersister persister = tableView.getTable().getColumnStatePersister();
+
+        Set<String> columnNames = Sets.newHashSet(persister.getColumnNames());
+
+        columnNames.addAll(FieldColumn.headers(selectedTableDataProvider.getList()));
+
+        List<FieldColumn> removed = Lists.newArrayList(tableView.getSelectedColumns());
+        removed.removeAll(selectedTableDataProvider.getList());
+
+        columnNames.removeAll(FieldColumn.headers(removed));
+
+        persister.persist(columnNames);
     }
 
     public void setMoveRightButtonState() {
