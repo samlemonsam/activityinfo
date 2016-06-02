@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -47,7 +48,8 @@ public class DbConfigPresenter implements DbPage {
 
     @Override
     public void go(UserDatabaseDTO db) {
-        view.setHeading(db.getFullName() == null ? db.getName() : db.getFullName());
+        view.setHeading(!Strings.isNullOrEmpty(db.getName()) ? db.getName() : "");
+        view.setIntro(!Strings.isNullOrEmpty(db.getFullName()) ? db.getFullName() : "");
 
         if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.design(),
