@@ -317,11 +317,12 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         formContainer.setHeaderVisible(false);
         formContainer.setBorders(false);
         formContainer.setFrame(false);
+        formContainer.setScrollMode(Style.Scroll.AUTO);
 
         BorderLayoutData layout = new BorderLayoutData(Style.LayoutRegion.EAST);
         layout.setSplit(true);
         layout.setCollapsible(true);
-        layout.setSize(375);
+        layout.setSize(385);
         layout.setMargins(new Margins(0, 0, 0, 5));
 
         add(formContainer, layout);
