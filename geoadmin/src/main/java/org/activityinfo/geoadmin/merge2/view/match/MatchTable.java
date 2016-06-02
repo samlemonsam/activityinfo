@@ -2,6 +2,7 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatch;
 import org.activityinfo.geoadmin.merge2.model.InstanceMatchSet;
@@ -162,6 +163,7 @@ public class MatchTable {
             if(explicitMatch.isPresent()) {
 
                 // the user has provided an explicit match between the two rows
+                
                 if(explicitMatch.get().getSourceId().isPresent()) {
                     ResourceId sourceId = explicitMatch.get().getSourceId().get();
                     int sourceRow = keyFields.getSource().indexOf(sourceId);
@@ -174,9 +176,11 @@ public class MatchTable {
             } else {
                 
                 // Use the closest automatic match
-                
                 int sourceRow = graph.getBestMatchForTarget(targetRow);
-                if(sourceRow == MatchRow.UNMATCHED) {
+                
+                // BUT check that this source has not been explicitly matched to 
+                // another target
+                if(sourceRow == MatchRow.UNMATCHED || sourceRowExplicitlyMatched(sourceRow)) {
                     row.setResolved(false);
                     row.setInputRequired(true);
                 } else {
@@ -204,6 +208,14 @@ public class MatchTable {
         
         this.rows = rows;
         fireRowsChanged();
+    }
+
+    private boolean sourceRowExplicitlyMatched(int sourceRow) {
+        Preconditions.checkArgument(sourceRow != MatchRow.UNMATCHED);
+        
+        ResourceId sourceId = getKeyFields().getSource().getRowId(sourceRow);
+        
+        return matchSet.find(sourceId).isPresent();
     }
 
     private void fireRowsChanged() {

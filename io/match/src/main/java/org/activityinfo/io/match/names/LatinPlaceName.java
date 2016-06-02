@@ -8,7 +8,7 @@ class LatinPlaceName {
 
     public static final int MAX_PARTS = 15;
 
-    public static final int MAX_LENGTH = 100;
+    public static final int MAX_LENGTH = 150;
 
     private final int LETTER_CLASS = 0;
     private final int DIGIT_CLASS = 1;
@@ -62,6 +62,9 @@ class LatinPlaceName {
 
                 int characterClass = classify(ch);
                 if (isBreak(currentClass, characterClass)) {
+                    if(numParts >= MAX_PARTS) {
+                        break;
+                    }
                     partOffsets[numParts] = numChars;
                     numParts++;
                 }
@@ -69,7 +72,7 @@ class LatinPlaceName {
                 currentClass = characterClass;
 
                 if (currentClass != OTHER) {
-                    for (int j = 0; j != ch.length(); ++j) {
+                    for (int j = 0; j != ch.length() && numChars < MAX_LENGTH; ++j) {
                         chars[numChars++] = ch.charAt(j);
                     }
                 }

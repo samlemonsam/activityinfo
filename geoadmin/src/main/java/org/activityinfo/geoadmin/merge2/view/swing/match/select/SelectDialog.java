@@ -158,7 +158,7 @@ public class SelectDialog extends JDialog {
         if(fromSide == MatchSide.TARGET) {
             explicitMatch = new InstanceMatch(Optional.<ResourceId>absent(), Optional.of(resourceId));
         } else {
-            explicitMatch = new InstanceMatch(Optional.of(resourceId), Optional.of(resourceId));
+            explicitMatch = new InstanceMatch(Optional.of(resourceId), Optional.<ResourceId>absent());
         }
        
         viewModel.getModel().getInstanceMatchSet().add(explicitMatch);

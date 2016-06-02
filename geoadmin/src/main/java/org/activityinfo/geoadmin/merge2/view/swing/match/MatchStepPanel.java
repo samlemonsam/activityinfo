@@ -7,6 +7,7 @@ import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.swing.StepPanel;
 import org.activityinfo.geoadmin.merge2.view.swing.match.select.SelectDialog;
+import org.activityinfo.geoadmin.writer.TableWriter;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.SubscriptionSet;
@@ -48,7 +49,7 @@ public class MatchStepPanel extends StepPanel {
 
         cellRenderers = new CellRenderers(view.getMatchTable());
         
-        TableColumnModel tableColumnModel = new DefaultTableColumnModel();
+        final TableColumnModel tableColumnModel = new DefaultTableColumnModel();
         
         
         JTableHeader tableHeader = new JTableHeader(tableColumnModel);
@@ -107,7 +108,7 @@ public class MatchStepPanel extends StepPanel {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(columns != null) {
+                if(columns != null && table.getSelectedColumn() != -1) {
                     MatchTableColumn column = columns.get(table.getSelectedColumn());
                     if(column instanceof ResolutionColumn) {
                         toggleResolution(table.getSelectedRow());
@@ -135,7 +136,16 @@ public class MatchStepPanel extends StepPanel {
                 }
             }
         }));
-
+        
+        unresolvedCount.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(e.getClickCount() == 2) {
+                    TableWriter.export(tableModel);
+                }
+            }
+        });
+        
         JPanel statusPanel = new JPanel();
         statusPanel.add(unresolvedCount);
         
@@ -181,10 +191,6 @@ public class MatchStepPanel extends StepPanel {
         }
     }
 
-    private void unmatch(MatchRow row) {
-        
-    }
-
 
     private void onColumnsChanged() {
 
@@ -211,15 +217,7 @@ public class MatchStepPanel extends StepPanel {
         }
 
         tableModel.updateColumns(columns);
-
-//        TableColumnModel tableColumnModel = buildColumnModel(columns);
-//        table.setColumnModel(tableColumnModel);
-//
-//        JTableHeader tableHeader = new JTableHeader(tableColumnModel);
-//        tableHeader.setResizingAllowed(true);
-//   //     tableHeader.setReorderingAllowed(false);
-//        table.setTableHeader(tableHeader);
-
+        
     }
 
 

@@ -37,6 +37,8 @@ public class MatchTableModel extends AbstractTableModel {
             return matchTable.getRowCount();
         }
     }
+    
+    
 
     @Override
     public int getColumnCount() {
