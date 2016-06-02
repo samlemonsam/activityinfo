@@ -1,12 +1,15 @@
 package org.activityinfo.ui.client.component.table;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -78,6 +81,14 @@ public class FieldColumn extends Column<RowView, String> {
 
     public void setFilter(ExprNode filter) {
         this.filter = filter;
+    }
+
+    public static LinkedHashSet<String> headers(Collection<FieldColumn> columns) {
+        LinkedHashSet<String> headers = Sets.newLinkedHashSet();
+        for (FieldColumn column : columns) {
+            headers.add(column.getHeader());
+        }
+        return headers;
     }
 
     @Override

@@ -79,3 +79,14 @@ Feature: New table (based on new form)
       | quantity           | enum    | enum                        | text             | enum    | date       | date       |
       | 13                 | USAID   | cholera, malaria            | some comment     | NRC     | 2015-02-07 | 2015-03-07 |
       | 11                 | ECHO    | cholera                     | cholera epidemic | NRC     | 2015-07-07 | 2015-08-17 |
+
+  @AI-770
+  Scenario: Choose column persistence
+    When open table for the "Medical Activities" form in the database "Patient Registration"
+    And hide built-in columns
+    And I open the form designer for "Patient Visits" in database "Patient Registration"
+    And open table for the "Medical Activities" form in the database "Patient Registration"
+    Then following table columns are visible
+      | Number of patients          |
+      | Donor                       |
+      | Diseases treated this month |

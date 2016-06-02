@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.component.table;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -19,6 +20,7 @@ import org.activityinfo.ui.client.widget.AlertPanel;
 import org.activityinfo.ui.client.widget.loading.TableLoadingIndicator;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,6 +90,21 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     }
 
     private void calculateSelectedColumns() {
+        Set<String> persistedColumnNames = table.getColumnStatePersister().getColumnNames();
+        if (!persistedColumnNames.isEmpty()) {
+            List<FieldColumn> toSelect = Lists.newArrayList();
+            for (FieldColumn column : columns) {
+                if (!Strings.isNullOrEmpty(column.getHeader()) && persistedColumnNames.contains(column.getHeader())) {
+                    toSelect.add(column);
+                }
+            }
+
+            if (!toSelect.isEmpty()) {
+                setSelectedColumns(toSelect);
+                return;
+            }
+        }
+
         if (columns.size() <= getMaxNumberOfColumns()) {
             setSelectedColumns(Lists.newArrayList(columns));
         } else {
@@ -150,6 +167,6 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     }
 
     public StateProvider getStateProvider() {
-        return stateProvider;
+        return stateProvider;    
     }
 }

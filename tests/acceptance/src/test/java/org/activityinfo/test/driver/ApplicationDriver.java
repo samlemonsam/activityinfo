@@ -448,4 +448,8 @@ public abstract class ApplicationDriver {
     public List<FieldValue> getFieldValues(ResourceId resourceId) {
         throw new PendingException();
     }
+
+    public String getCurrentDatabase() {
+        throw new PendingException();
+    }
 }

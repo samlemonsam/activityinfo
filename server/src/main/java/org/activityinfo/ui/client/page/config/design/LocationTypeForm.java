@@ -4,12 +4,14 @@ import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.binding.Converter;
 import com.extjs.gxt.ui.client.binding.FieldBinding;
 import com.extjs.gxt.ui.client.binding.FormBinding;
-import com.extjs.gxt.ui.client.widget.form.*;
+import com.extjs.gxt.ui.client.widget.form.NumberField;
+import com.extjs.gxt.ui.client.widget.form.Radio;
+import com.extjs.gxt.ui.client.widget.form.RadioGroup;
+import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
 
 public class LocationTypeForm extends AbstractDesignForm {
@@ -30,6 +32,8 @@ public class LocationTypeForm extends AbstractDesignForm {
         nameField.setFieldLabel(I18N.CONSTANTS.name());
         nameField.setMaxLength(LocationTypeDTO.NAME_MAX_LENGTH);
         nameField.setAllowBlank(false);
+        nameField.setValidator(new BlankValidator());
+
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
         add(nameField);
 

@@ -15,13 +15,14 @@ public class PageLoader implements org.activityinfo.ui.client.page.PageLoader {
 
     private final NavigationHandler pageManager;
     private ResourceLocator resourceLocator;
-    private StateProvider stateProvider;
+    private final StateProvider stateProvider;
 
     @Inject
     public PageLoader(NavigationHandler pageManager,
                       PageStateSerializer placeSerializer,
                       ResourceLocator resourceLocator,
-                      StateProvider stateProvider) {
+                      StateProvider stateProvider
+    ) {
 
         this.resourceLocator = resourceLocator;
         this.pageManager = pageManager;

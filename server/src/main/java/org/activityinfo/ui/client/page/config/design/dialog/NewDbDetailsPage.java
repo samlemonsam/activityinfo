@@ -163,7 +163,7 @@ public class NewDbDetailsPage extends WizardPageAdapter {
         descriptionField.showValidationMessage(false);
         countryField.showValidationMessage(false);
 
-        if (Strings.isNullOrEmpty(name.getValue())) {
+        if (name.getValue() == null || Strings.isNullOrEmpty(name.getValue().trim())) {
             nameField.showValidationMessage(true);
             result = false;
         }
@@ -187,7 +187,7 @@ public class NewDbDetailsPage extends WizardPageAdapter {
     }
 
     private void updateCommand() {
-        dialogData.getCommand().setName(name.getValue());
+        dialogData.getCommand().setName(name.getValue().trim());
         dialogData.getCommand().setDescription(description.getValue());
         dialogData.getCommand().setCountryId(GwtUtil.getIntSilently(country.getValue()));
         dialogData.getCommand().setCopyData(copyData.getValue());
