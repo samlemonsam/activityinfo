@@ -181,7 +181,7 @@ public class SiteRenderer {
                 return 1.0;
             } else if(indicator.getAggregation() == IndicatorDTO.AGGREGATE_SUM) {
                 Double value = site.getIndicatorDoubleValue(indicator);
-                if(value == null || value == 0.0) {
+                if(value == null) {
                     return null;
                 } else {
                     return value;
