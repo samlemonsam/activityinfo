@@ -1565,4 +1565,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Link removed")
     String linkRemoved();
+
+    @DefaultStringValue("Unfortunately you don't have design permission for this database. Please request it in the database administrator/creator.")
+    String noDbDesignPermissions();
 }

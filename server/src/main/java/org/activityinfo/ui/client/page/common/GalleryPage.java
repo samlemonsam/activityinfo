@@ -46,6 +46,7 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
     private ListStore<GalleryModel> store;
     private Html heading;
     private Html introPara;
+    private Html permissionsInfo;
 
     public static class GalleryModel extends BaseModelData {
 
@@ -80,7 +81,15 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
         introPara = new Html();
         introPara.setTagName("p");
         introPara.setStyleName("gallery-intro");
+        introPara.setStyleAttribute("margin-left", "15px");
         add(introPara);
+
+        permissionsInfo = new Html();
+        permissionsInfo.setTagName("p");
+        permissionsInfo.setStyleAttribute("margin-left", "15px");
+
+        add(permissionsInfo);
+
 
         store = new ListStore<GalleryModel>();
 
@@ -113,9 +122,17 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
     }
 
     @Override
-    public void add(String name, String desc, String path, PageState place) {
+    public void setPermissionsInfo(String text) {
+        permissionsInfo.setText(text);
+    }
 
+    @Override
+    public void add(String name, String desc, String path, PageState place) {
         store.add(new GalleryModel(name, desc, path, place));
+    }
+
+    public ListStore<GalleryModel> getStore() {
+        return store;
     }
 
 }
