@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.common;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.store.ListStore;
 import org.activityinfo.ui.client.page.PageState;
 
 /**
@@ -32,5 +33,9 @@ public interface GalleryView {
 
     void setIntro(String html);
 
+    void setPermissionsInfo(String text);
+
     void add(String name, String desc, String path, PageState place);
+
+    ListStore<GalleryPage.GalleryModel> getStore();
 }

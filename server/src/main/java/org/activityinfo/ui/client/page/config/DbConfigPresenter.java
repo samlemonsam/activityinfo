@@ -74,23 +74,19 @@ public class DbConfigPresenter implements DbPage {
                     I18N.CONSTANTS.lockPeriodsDescription(),
                     "db-lockedperiods.png",
                     new DbPageState(LockedPeriodsPresenter.PAGE_ID, db.getId()));
-        }
-        if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.project(),
                     I18N.CONSTANTS.projectManagerDescription(),
                     "db-projects.png",
                     new DbPageState(DbProjectEditor.PAGE_ID, db.getId()));
-        }
-        if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.target(),
                     I18N.CONSTANTS.targetDescription(),
                     "db-targets.png",
                     new DbPageState(DbTargetEditor.PAGE_ID, db.getId()));
         }
 
-        // view.add("Cibles", "Définer les cibles pour les indicateurs.",
-        // "db-targets",
-        // new DbPageState(Pages.DatabaseTargets, db.getId()));
+        if (view.getStore().getCount() == 0) {
+            view.setPermissionsInfo(I18N.CONSTANTS.noDbDesignPermissions());
+        }
     }
 
     @Override
