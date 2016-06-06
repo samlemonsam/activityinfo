@@ -73,9 +73,9 @@ public class ActivityFormClassBuilder {
         siteForm.setLabel(activity.getName());
 
         if (!Strings.isNullOrEmpty(activity.getCategory())) {
-            siteForm.setParentId(activityCategoryFolderId(activity.getDatabaseId(), activity.getCategory()));
+            siteForm.setOwnerId(activityCategoryFolderId(activity.getDatabaseId(), activity.getCategory()));
         } else {
-            siteForm.setParentId(CuidAdapter.databaseId(activity.getDatabaseId()));
+            siteForm.setOwnerId(CuidAdapter.databaseId(activity.getDatabaseId()));
         }
 
         siteForm.addElement(createPartnerField(classId, activity));

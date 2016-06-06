@@ -18,7 +18,7 @@ import org.activityinfo.service.store.ResourceCollection;
 import java.util.Map;
 
 /**
- * Collection-backed by 
+ * Collection-backed by the AppEngine High-Replication Datastore (HRD)
  */
 public class HrdCollection implements ResourceCollection {
 
@@ -50,6 +50,14 @@ public class HrdCollection implements ResourceCollection {
 
         Entity entity = new Entity(CollectionKeys.resourceKey(formClass.getId(), update.getResourceId()));
 
+        if(formClass.getParentFormId().isPresent()) {
+            ResourceId parentId = update.getParentId();
+            if(parentId == null) {
+                throw new IllegalArgumentException("ParentId for subforms is required");
+            }
+            entity.setProperty("@parent", parentId.asString());
+        }
+        
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
             FormField field = formClass.getField(entry.getKey());
             FieldConverter converter = FieldConverters.forType(field.getType());

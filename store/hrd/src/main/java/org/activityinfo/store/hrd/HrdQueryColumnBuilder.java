@@ -22,7 +22,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     private List<CursorObserver<ResourceId>> idObservers = Lists.newArrayList();
     private List<FieldObserver> fieldObservers = Lists.newArrayList();
     private List<CursorObserver<?>> observers = Lists.newArrayList();
-    
+
     HrdQueryColumnBuilder(DatastoreService datastoreService, Key collectionKey, FormClass formClass) {
         this.datastoreService = datastoreService;
         this.collectionKey = collectionKey;
@@ -31,7 +31,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
     @Override
     public void only(ResourceId resourceId) {
-        throw new UnsupportedOperationException();   
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -42,10 +42,19 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
-        FormField field = formClass.getField(fieldId);
-        FieldConverter converter = FieldConverters.forType(field.getType());
-        FieldObserver fieldObserver = new FieldObserver(field.getName(), converter, observer);
-        
+
+        FieldObserver fieldObserver;
+        if(fieldId.equals(FormClass.PARENT_FIELD_ID)) {
+            fieldObserver = new FieldObserver(FormClass.PARENT_FIELD_ID.asString(),
+                    FieldConverters.forParentField(), observer);
+
+        } else {
+
+            FormField field = formClass.getField(fieldId);
+            FieldConverter converter = FieldConverters.forType(field.getType());
+            fieldObserver = new FieldObserver(field.getName(), converter, observer);
+        }
+
         fieldObservers.add(fieldObserver);
         observers.add(observer);
     }
@@ -54,7 +63,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     public void execute() throws IOException {
 
         Query query = new Query(CollectionKeys.SUBMISSION_KIND, collectionKey);
-        
+
         Transaction tx = datastoreService.beginTransaction();
         try {
 
@@ -79,6 +88,4 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
             tx.rollback();
         }
     }
-    
-    
 }

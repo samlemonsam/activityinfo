@@ -4,7 +4,9 @@ import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
-public abstract class FormElement implements IsRecord {
+import java.io.Serializable;
+
+public abstract class FormElement implements IsRecord, Serializable {
 
     public abstract ResourceId getId();
 

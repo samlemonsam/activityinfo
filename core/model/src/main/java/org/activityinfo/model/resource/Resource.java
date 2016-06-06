@@ -91,17 +91,11 @@ public final class Resource extends PropertyBag<Resource> {
      *     resource
      */
     public Resource setOwnerId(String owningResourceId) {
-        if(owningResourceId == null) {
-            throw new NullPointerException("owner");
-        }
         this.owner = ResourceId.valueOf(owningResourceId);
         return this;
     }
 
     public Resource setOwnerId(ResourceId owningResourceId) {
-        if(owningResourceId == null) {
-            throw new NullPointerException("owner");
-        }
         this.owner = owningResourceId;
         return this;
     }

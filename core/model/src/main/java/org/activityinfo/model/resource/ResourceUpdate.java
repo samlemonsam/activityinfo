@@ -11,17 +11,26 @@ import java.util.Map;
 public class ResourceUpdate {
     
     private ResourceId resourceId;
+    private ResourceId parentId;
     private boolean deleted = false;
     private Map<ResourceId, FieldValue> changedFieldValues = new HashMap<>();
-
+    
     public void setResourceId(ResourceId resourceId) {
         this.resourceId = resourceId;
     }
-
+    
     public ResourceId getResourceId() {
         return resourceId;
     }
-    
+
+    public ResourceId getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(ResourceId parentId) {
+        this.parentId = parentId;
+    }
+
     public void set(ResourceId fieldId, FieldValue value) {
         changedFieldValues.put(fieldId, value);
     }

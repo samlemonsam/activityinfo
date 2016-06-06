@@ -4,6 +4,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -12,6 +13,7 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
@@ -86,6 +88,88 @@ public class HrdCatalogTest {
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
         ColumnSet columnSet = builder.build(queryModel);
         
+        System.out.println(columnSet);
+
+        assertThat(columnSet.getNumRows(), equalTo(2));
+    }
+
+    @Test
+    public void subFormTest() {
+
+        // Typical scenario with a household interview form
+        // and a repeating househould member form
+
+
+        FormClass hhForm = new FormClass(ResourceId.generateId());
+        
+        FormClass memberForm = new FormClass(ResourceId.generateId());
+        memberForm.setParentFormId(hhForm.getId());
+
+        hhForm.setOwnerId(ResourceId.valueOf("foo"));
+        hhForm.setLabel("Household interview");
+        FormField hhIdField = hhForm.addField()
+                .setLabel("Household ID")
+                .setType(TextType.INSTANCE);
+        hhForm.addField()
+                .setLabel("Household Memmbers")
+                .setType(new SubFormReferenceType(memberForm.getId()));
+
+
+        memberForm.setLabel("Household Members");
+        FormField nameField = memberForm.addField()
+                .setLabel("Name")
+                .setType(TextType.INSTANCE);
+        FormField ageField = memberForm.addField()
+                .setLabel("Age")
+                .setType(new QuantityType("years"));
+
+
+        HrdCatalog catalog = new HrdCatalog();
+        catalog.create(hhForm);
+        catalog.create(memberForm);
+
+
+        ResourceUpdate hh1 = new ResourceUpdate();
+        hh1.setResourceId(ResourceId.generateId());
+        hh1.set(hhIdField.getId(), TextValue.valueOf("HH1"));
+
+        ResourceUpdate hh2 = new ResourceUpdate();
+        hh2.setResourceId(ResourceId.generateId());
+        hh2.set(hhIdField.getId(), TextValue.valueOf("HH2"));
+        
+        ResourceUpdate father1 = new ResourceUpdate();
+        father1.setResourceId(ResourceId.generateId());
+        father1.setParentId(hh1.getResourceId());
+        father1.set(nameField.getId(), TextValue.valueOf("Homer"));
+        father1.set(ageField.getId(), new Quantity(40, "years"));
+        
+        ResourceUpdate father2 = new ResourceUpdate();
+        father2.setResourceId(ResourceId.generateId());
+        father2.setParentId(hh2.getResourceId());
+        father2.set(nameField.getId(), TextValue.valueOf("Ned"));
+        father2.set(ageField.getId(), new Quantity(41, "years"));
+        
+        Optional<ResourceCollection> hhCollection = catalog.getCollection(hhForm.getId());
+        assertTrue(hhCollection.isPresent());
+        
+        hhCollection.get().add(hh1);
+        hhCollection.get().add(hh2);
+
+        Optional<ResourceCollection> memberCollection = catalog.getCollection(memberForm.getId());
+        assertTrue(memberCollection.isPresent());
+        
+        memberCollection.get().add(father1);
+        memberCollection.get().add(father2);
+        
+        QueryModel queryModel = new QueryModel(memberForm.getId());
+        queryModel.selectResourceId().as("id");
+        queryModel.selectField("Household ID").as("hh_id");
+        queryModel.selectField("Name").as("member_name");
+        queryModel.selectField("Age").as("member_age");
+
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = builder.build(queryModel);
+
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));

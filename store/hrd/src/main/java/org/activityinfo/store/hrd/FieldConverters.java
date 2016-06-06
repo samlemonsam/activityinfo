@@ -48,6 +48,20 @@ class FieldConverters {
             throw new UnsupportedOperationException("Type: " + type);
         }
     }
+    
+    static FieldConverter<?> forParentField() {
+        return new FieldConverter<ReferenceValue>() {
+            @Override
+            public Object toHrdProperty(ReferenceValue value) {
+                return value.getResourceId().asString();
+            }
+
+            @Override
+            public ReferenceValue toFieldValue(Object hrdValue) {
+                return new ReferenceValue(ResourceId.valueOf((String)hrdValue));
+            }
+        };
+    }
 
     private static class QuantityConverter implements FieldConverter<Quantity> {
 

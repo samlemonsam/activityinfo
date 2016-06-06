@@ -164,8 +164,8 @@ public class PropertyBag<T extends PropertyBag> {
 
     public ResourceId isResourceId(String propertyName) {
         Object value = properties.get(propertyName);
-        if(value instanceof ResourceId) {
-            return (ResourceId) value;
+        if(value instanceof String) {
+            return ResourceId.valueOf((String)value);
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package org.activityinfo.model.formTree;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -26,6 +27,12 @@ public class FormTreeBuilder {
         FormTree tree = new FormTree();
         FormClass rootClass = store.getFormClass(rootFormClassId);
 
+        Optional<FormField> parentField = rootClass.getParentField();
+        if(parentField.isPresent()) {
+            FormTree.Node node = tree.addRootField(rootClass, parentField.get());
+            fetchChildren(node, rootClass.getParentFormId().asSet());
+        }
+        
         // Add fields defined by this FormClass
         for(FormField field : rootClass.getFields()) {
             FormTree.Node node = tree.addRootField(rootClass, field);

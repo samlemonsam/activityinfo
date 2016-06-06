@@ -8,12 +8,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +38,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
      * {@code _label}
      */
     public static final String LABEL_FIELD_ID = "_class_label";
+    public static final ResourceId PARENT_FIELD_ID = ResourceId.valueOf("@parent");
 
 
     @Nonnull
@@ -50,7 +50,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     private final List<FormElement> elements = Lists.newArrayList();
     private final Set<ResourceLock> locks = Sets.newHashSet();
 
-    private Optional<ResourceId> parentFormId = Optional.absent();
+    private ResourceId parentFormId = null;
     private Optional<ResourceId> subformType = Optional.absent();
 
     public FormClass(ResourceId id) {
@@ -65,10 +65,6 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     public FormClass setOwnerId(ResourceId ownerId) {
         this.ownerId = ownerId;
         return this;
-    }
-
-    public ResourceId getParentId() {
-        return ownerId;
     }
 
     public void setParentId(ResourceId resourceId) {
@@ -264,11 +260,32 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     }
 
     public Optional<ResourceId> getParentFormId() {
-        return parentFormId;
+        return Optional.fromNullable(parentFormId);
+    }
+
+    /**
+     * Returns a {@code FormField} of type {@code ReferenceType} that will refer to the master submission
+     * of a subform.
+     * 
+     * <p>If this {@code FormClass} is a sub form of another form, then each of its {@code FormSubmissions} will
+     * have a {@code @parent} field value that refers back to the master form instance. There is no corresponding
+     * {@code FormField} instance in this {@code FormClass}'s field list, because it is not a user-editable field.</p>
+     */
+    public Optional<FormField> getParentField() {
+        Optional<ResourceId> parentFormId = getParentFormId();
+        if(parentFormId.isPresent()) {
+            FormField formField = new FormField(PARENT_FIELD_ID);
+            formField.setLabel("Parent");
+            formField.setType(ReferenceType.single(parentFormId.get()));
+            return Optional.of(formField);
+            
+        } else {
+            return Optional.absent();
+        }
     }
 
     public FormClass setParentFormId(ResourceId parentFormId) {
-        this.parentFormId = Optional.fromNullable(parentFormId);
+        this.parentFormId = parentFormId;
         return this;
     }
 
@@ -298,7 +315,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         formClass.locks.addAll(ResourceLock.fromRecords(resource.getRecordList("locks")));
         formClass.subformType = resource.isString("subformType") != null ?
                 Optional.of(ResourceId.valueOf(resource.isString("subformType"))) : Optional.<ResourceId>absent();
-        formClass.parentFormId = Optional.fromNullable(resource.isResourceId("parentFormId"));
+        formClass.parentFormId = resource.isResourceId("parentFormId");
 
         return formClass;
     }
@@ -330,7 +347,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         resource.set("elements", Resources.asRecordList(elements));
         resource.set("locks", Resources.asRecordList(locks));
         resource.set("subformType", subformType.isPresent() ? subformType.get().asString() : null);
-        resource.set("parentFormId", parentFormId.isPresent() ? parentFormId.get() : null);
+        resource.set("parentFormId", parentFormId);
         return resource;
     }
 
