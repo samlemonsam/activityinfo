@@ -61,7 +61,7 @@ public class RelevanceRowPresenter {
             EqualFunction.INSTANCE, NotEqualFunction.INSTANCE
     );
 
-    private static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
+    public static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
             EqualFunction.INSTANCE, NotEqualFunction.INSTANCE,
             BooleanFunctions.GREATER, BooleanFunctions.GREATER_OR_EQUAL,
             BooleanFunctions.LESS, BooleanFunctions.LESS_OR_EQUAL
