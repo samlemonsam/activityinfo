@@ -28,6 +28,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.functions.*;
@@ -73,6 +74,7 @@ public class RelevanceRowPresenter {
     private final FieldWidgetContainer fieldWidgetContainer;
     private final RelevanceRow view = new RelevanceRow();
     private final FormFieldWidgetFactory widgetFactory;
+    private final Label errorMessage = new Label(I18N.CONSTANTS.blankValueIsNotAllowed());
 
     private FormFieldWidget valueWidget = null;
     private FieldValue value;
@@ -86,6 +88,8 @@ public class RelevanceRowPresenter {
         initFunction();
         initValueWidgetLater();
         initJoinFunction();
+
+        errorMessage.addStyleName("help-block");
     }
 
     // depends on selected field type
@@ -105,6 +109,16 @@ public class RelevanceRowPresenter {
             @Override
             public void update(FieldValue value) {
                 RelevanceRowPresenter.this.value = value;
+
+                if (value == null) {
+                    view.getValueContainer().addStyleName("has-error");
+                    view.getValueContainer().add(errorMessage);
+                } else {
+                    view.getValueContainer().removeStyleName("has-error");
+                    if (view.getValueContainer().getWidgetIndex(errorMessage) != -1) {
+                        view.getValueContainer().remove(errorMessage);
+                    }
+                }
             }
         };
 
@@ -217,5 +231,9 @@ public class RelevanceRowPresenter {
                 return;
             }
         }
+    }
+
+    public FormFieldWidget getValueWidget() {
+        return valueWidget;
     }
 }
