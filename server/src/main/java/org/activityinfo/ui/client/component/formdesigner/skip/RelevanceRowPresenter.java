@@ -40,6 +40,8 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -54,8 +56,14 @@ import java.util.List;
  */
 public class RelevanceRowPresenter {
 
-    private static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
+    private static final List<ComparisonOperator> EQUALITY_OPERATORS = Lists.newArrayList(
             EqualFunction.INSTANCE, NotEqualFunction.INSTANCE
+    );
+
+    private static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
+            EqualFunction.INSTANCE, NotEqualFunction.INSTANCE,
+            BooleanFunctions.GREATER, BooleanFunctions.GREATER_OR_EQUAL,
+            BooleanFunctions.LESS, BooleanFunctions.LESS_OR_EQUAL
     );
 
     public static final List<ExprFunction> SET_FUNCTIONS = Collections.unmodifiableList(Lists.newArrayList(
@@ -168,8 +176,10 @@ public class RelevanceRowPresenter {
             if(((ReferenceType) type).getCardinality() == Cardinality.MULTIPLE) {
                 return SET_FUNCTIONS;
             }
+        } else if (type instanceof QuantityType || type instanceof LocalDateType) {
+            return COMPARISON_OPERATORS;
         }
-        return COMPARISON_OPERATORS;
+        return EQUALITY_OPERATORS;
     }
 
     private void initJoinFunction() {

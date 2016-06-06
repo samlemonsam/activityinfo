@@ -34,6 +34,10 @@ public class LessOrEqualFunction extends ComparisonOperator {
         super("<=");
     }
 
+    public String getLabel() {
+        return "Less or equal";
+    }
+
     @Override
     protected boolean apply(FieldValue a, FieldValue b) {
         Double da = extractDouble(a);
