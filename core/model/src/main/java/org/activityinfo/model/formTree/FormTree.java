@@ -17,6 +17,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.*;
 
@@ -42,7 +43,8 @@ public class FormTree {
         }
 
         public boolean isReference() {
-            return field.getType() instanceof ReferenceType;
+            return field.getType() instanceof ReferenceType ||
+                    field.getType() instanceof SubFormReferenceType;
         }
 
         public boolean isEnum() {
@@ -113,6 +115,12 @@ public class FormTree {
         public Set<ResourceId> getRange() {
             if(field.getType() instanceof ReferenceType) {
                 return ((ReferenceType) field.getType()).getRange();
+                
+            } else if(field.getType() instanceof SubFormReferenceType) {
+                SubFormReferenceType subFormType = (SubFormReferenceType) field.getType();
+                ResourceId subFormClassId = subFormType.getClassId();
+                return Collections.singleton(subFormClassId);
+                
             } else if(field.getType() instanceof RecordFieldType) {
                 return Collections.singleton(((RecordFieldType) field.getType()).getFormClass().getId());
             } else {

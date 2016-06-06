@@ -16,7 +16,7 @@ public final class ExprFunctions {
         private Map<String, ExprFunction> lookupMap = new HashMap<>();
 
         private void register(ExprFunction function) {
-            lookupMap.put(function.getId(), function);
+            lookupMap.put(function.getId().toLowerCase(), function);
         }
         
         public MapHolder() {
@@ -43,7 +43,7 @@ public final class ExprFunctions {
         
         public ExprFunction get(String name) {
 
-            ExprFunction exprFunction = lookupMap.get(name);
+            ExprFunction exprFunction = lookupMap.get(name.toLowerCase());
             if (exprFunction == null) {
                 throw new UnsupportedOperationException("No such function '" + name + "'");
             }

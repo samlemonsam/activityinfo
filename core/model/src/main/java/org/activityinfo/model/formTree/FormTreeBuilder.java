@@ -5,7 +5,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
-import org.activityinfo.model.type.ReferenceType;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -36,9 +35,8 @@ public class FormTreeBuilder {
         // Add fields defined by this FormClass
         for(FormField field : rootClass.getFields()) {
             FormTree.Node node = tree.addRootField(rootClass, field);
-            if(field.getType() instanceof ReferenceType) {
-                ReferenceType referenceType = (ReferenceType) field.getType();
-                fetchChildren(node, referenceType.getRange());
+            if(node.isReference()) {
+                fetchChildren(node, node.getRange());
             } else if(field.getType() instanceof RecordFieldType) {
                 addChildren(node, ((RecordFieldType) field.getType()).getFormClass());
             }
