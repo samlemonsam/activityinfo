@@ -34,6 +34,10 @@ public class GreaterFunction extends ComparisonOperator {
         super(">");
     }
 
+    public String getLabel() {
+        return "Greater";
+    }
+
     @Override
     protected boolean apply(FieldValue a, FieldValue b) {
         Double da = extractDouble(a);

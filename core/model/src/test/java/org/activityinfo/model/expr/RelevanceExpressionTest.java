@@ -117,6 +117,11 @@ public class RelevanceExpressionTest {
         eval(String.format("{%s}==3", QUANTITY_FIELD_ID.asString()), true, instance);
         eval(String.format("{%s}==3.0", QUANTITY_FIELD_ID.asString()), true, instance);
         eval(String.format("{%s}!=3", QUANTITY_FIELD_ID.asString()), false, instance);
+        eval(String.format("{%s}>2", QUANTITY_FIELD_ID.asString()), true, instance);
+        eval(String.format("{%s}>3", QUANTITY_FIELD_ID.asString()), false, instance);
+        eval(String.format("{%s}>=3", QUANTITY_FIELD_ID.asString()), true, instance);
+        eval(String.format("{%s}<3", QUANTITY_FIELD_ID.asString()), false, instance);
+        eval(String.format("{%s}<=3", QUANTITY_FIELD_ID.asString()), true, instance);
     }
 
 

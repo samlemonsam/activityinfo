@@ -6,6 +6,8 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.FieldValues;
 import org.activityinfo.model.type.NullFieldValue;
+import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.number.QuantityType;
 
 public class StaticField implements FieldValueSource {
 
@@ -27,6 +29,11 @@ public class StaticField implements FieldValueSource {
 //            return field.getDefaultValue();
         } else {
             // we don't want to get NPE in ComparisonOperator
+
+            if (field.getType() instanceof QuantityType) {
+                return new Quantity(0);
+            }
+
             return NullFieldValue.INSTANCE;
         }
     }
