@@ -10,6 +10,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import org.activityinfo.i18n.tools.model.TranslationSet;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
@@ -131,10 +132,14 @@ public class PoEditorClient {
 
     public TranslationSet getTranslations(int projectId, String language) throws IOException {
         ObjectNode response = viewTerms(projectId, language);
+        System.out.println(response.toString());
 
-        PoTermTranslation[] terms = objectMapper.readValue(response.path("list"), PoTermTranslation[].class);
-
-        return new TranslationSet(language, Arrays.asList(terms));
+        try {
+            PoTermTranslation[] terms = objectMapper.readValue(response.path("list"), PoTermTranslation[].class);
+            return new TranslationSet(language, Arrays.asList(terms));
+        } catch (JsonMappingException e) {
+            throw new RuntimeException("Failed to parse response: " + response.toString(), e);
+        }
     }
 
 }
