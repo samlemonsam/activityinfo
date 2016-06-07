@@ -46,6 +46,11 @@ public class HrdCollection implements ResourceCollection {
     }
 
     @Override
+    public void updateFormClass(FormClass formClass) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void add(ResourceUpdate update) {
 
         Entity entity = new Entity(CollectionKeys.resourceKey(formClass.getId(), update.getResourceId()));

@@ -1,5 +1,6 @@
 package org.activityinfo.server.command.handler;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -27,15 +28,16 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.hrd.HrdCatalog;
 
 import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.activityinfo.model.util.StringUtil.truncate;
-
 import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
+import static org.activityinfo.model.util.StringUtil.truncate;
 
 public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
@@ -58,25 +60,32 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         if (domain == ACTIVITY_DOMAIN) {
             return updateActivityFormClass(cmd, user, formClass);
         } else {
-
-            FormClassEntity hibernateFormClass = new FormClassEntity();
-
-            hibernateFormClass.setId(formClass.getId().asString());
-            hibernateFormClass.setOwnerId(formClass.getOwnerId().asString());
-            JsonHelper.updateWithJson(hibernateFormClass, cmd.getJson());
-
-            if (!exists(hibernateFormClass.getId())) {
-                entityManager.get().persist(hibernateFormClass);
-            } else {
-                entityManager.get().merge(hibernateFormClass);
-            }
-            return new VoidResult();
+            return updateHrdFormClass(user, formClass);
         }        
     }
 
-    private boolean exists(String formClassId) {
-        return entityManager.get().find(FormClassEntity.class, formClassId) != null;
+    private CommandResult updateHrdFormClass(User user, FormClass formClass) {
+        
+        HrdCatalog catalog = new HrdCatalog();
+        
+        // Check first to see if this collection exists
+        Optional<ResourceCollection> collection = catalog.getCollection(formClass.getId());
+        if(collection.isPresent()) {
+            FormClass existingFormClass = collection.get().getFormClass();
+            permissionOracle.assertDesignPrivileges(existingFormClass, user);
+
+            collection.get().updateFormClass(formClass);
+        
+        } else {
+            // Check that we have the permission to create in this database
+            permissionOracle.assertDesignPrivileges(formClass, user);
+            
+            catalog.create(formClass);
+        }
+        
+        return new VoidResult();
     }
+
 
     private CommandResult updateActivityFormClass(UpdateFormClass cmd, User user, FormClass formClass) {
         int activityId = CuidAdapter.getLegacyIdFromCuid(cmd.getFormClassId());
@@ -244,8 +253,9 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     }
 
     private void validateSubformClassExist(ResourceId classId) {
-        FormClassEntity subformClass = entityManager.get().find(FormClassEntity.class, classId.asString());
-        if (subformClass == null) {
+        HrdCatalog catalog = new HrdCatalog();
+        Optional<ResourceCollection> collection = catalog.getCollection(classId);
+        if (!collection.isPresent()) {
             LOGGER.log(Level.SEVERE, "Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
             throw new CommandException("Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
         }

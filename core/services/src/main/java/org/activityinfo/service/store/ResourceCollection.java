@@ -27,6 +27,8 @@ public interface ResourceCollection {
      * @return this collection's schema
      */
     FormClass getFormClass();
+
+    void updateFormClass(FormClass formClass);
     
     /**
      * Adds a new resource to the collection. 
@@ -35,7 +37,7 @@ public interface ResourceCollection {
      * @throws java.lang.IllegalStateException if a resource with the given {@code resourceId} already exists              
      */
     void add(ResourceUpdate update);
-
+    
     /**
      * Updates an existing resource within the collection
      * 

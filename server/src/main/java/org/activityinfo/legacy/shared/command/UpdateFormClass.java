@@ -11,6 +11,7 @@ import java.util.List;
 
 public class UpdateFormClass implements Command<VoidResult> {
 
+    private int databaseId;
     private String formClassId;
     private String json;
 

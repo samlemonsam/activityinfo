@@ -147,6 +147,11 @@ public class LocationCollection implements ResourceCollection {
     }
 
     @Override
+    public void updateFormClass(FormClass formClass) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void add(ResourceUpdate update) {
         throw new UnsupportedOperationException();
     }

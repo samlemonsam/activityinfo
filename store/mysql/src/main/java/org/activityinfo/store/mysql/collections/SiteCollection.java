@@ -106,6 +106,10 @@ public class SiteCollection implements ResourceCollection {
         return baseMapping.getFormClass();
     }
 
+    @Override
+    public void updateFormClass(FormClass formClass) {
+        throw new UnsupportedOperationException();
+    }
 
 
     @Override

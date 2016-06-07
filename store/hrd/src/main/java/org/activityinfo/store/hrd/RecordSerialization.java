@@ -16,8 +16,8 @@ import java.util.Map;
 class RecordSerialization {
     
     public static final String RECORD_PROPERTY = "R";
-    
-    
+    public static final String OWNER_PROPERTY = "owner";
+
     static EmbeddedEntity toEmbeddedEntity(PropertyBag record) {
         EmbeddedEntity entity = new EmbeddedEntity();
         Map<String, Object> properties = record.getProperties();
@@ -60,6 +60,7 @@ class RecordSerialization {
     
     public static Entity toFormClassEntity(FormClass formClass) {
         Entity entity = new Entity(CollectionKeys.formClassKey(formClass.getId()));
+        entity.setProperty(OWNER_PROPERTY, formClass.getOwnerId().asString());
         entity.setProperty(RECORD_PROPERTY, toEmbeddedEntity(formClass.asResource()));
         return entity;
     }
@@ -77,10 +78,18 @@ class RecordSerialization {
             throw new IllegalArgumentException(String.format("Entity %s has record property '%s' of unexpected type '%s'.",
                     entity.getKey(), RECORD_PROPERTY, recordProperty.getClass().getName()));
         }
+
+        Object ownerValue = entity.getProperty(OWNER_PROPERTY);
+        if(!(ownerValue instanceof String)) {
+            throw new IllegalStateException(String.format("Entity %s has invalid %s property: %s", 
+                    OWNER_PROPERTY, ownerValue));
+        }
+
         Record formClassRecord = fromEmbeddedEntity(((EmbeddedEntity) recordProperty));
 
         Resource resource = Resources.createResource();
         resource.setId(collectionId);
+        resource.setOwnerId(ResourceId.valueOf((String) ownerValue));
         resource.getProperties().putAll(formClassRecord.getProperties());
         return FormClass.fromResource(resource);
     }

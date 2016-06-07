@@ -58,6 +58,11 @@ public class SimpleTableCollection implements ResourceCollection {
     }
 
     @Override
+    public void updateFormClass(FormClass formClass) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void update(ResourceUpdate update) {
         BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getResourceId());
         updater.update(executor, update);

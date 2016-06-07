@@ -7,7 +7,9 @@ import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.server.database.hibernate.entity.*;
@@ -19,6 +21,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
 
 public class PermissionOracle {
 
@@ -79,7 +83,22 @@ public class PermissionOracle {
                     database.getId()));
         }
     }
+    
+    public void assertDesignPrivileges(FormClass formClass, User user) {
+        assertDesignPrivileges(lookupDatabase(formClass), user);
+    }
 
+    private UserDatabase lookupDatabase(FormClass formClass) {
+        ResourceId ownerId = formClass.getOwnerId();
+        if(ownerId.getDomain() == ACTIVITY_DOMAIN) {
+            Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
+            if (activity != null) {
+                return activity.getDatabase();
+            }
+        }
+        throw new IllegalArgumentException(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
+                "a database", formClass.getLabel(), formClass.getId(), formClass.getOwnerId()));
+    }
 
     public void assertManagePartnerAllowed(UserDatabase database, User user) {
         if (!isManagePartnersAllowed(database, user)) {
@@ -302,6 +321,27 @@ public class PermissionOracle {
         this.blobService = blobService;
         return this;
     }
-
     
+    public boolean isViewAllowed(Activity activity, User user) {
+        if(activity.getPublished() > 0) {
+            return true;
+        }
+        return isViewAllowed(activity.getDatabase(), user);
+    }
+
+
+    public void assertViewAllowed(Activity activity, User user) {
+        if (!isViewAllowed(activity, user)) {
+            throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
+                    "view activity " + activity.getId());
+        }
+    }
+    
+    public void assertViewAllowed(FormClass formClass, User user) {
+        UserDatabase database = lookupDatabase(formClass);
+        if(!isViewAllowed(database, user)) {
+            throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
+                    "view form class " + formClass.getId() + " in database " + database.getId());
+        }
+    }
 }
