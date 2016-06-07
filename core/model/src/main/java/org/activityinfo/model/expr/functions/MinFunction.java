@@ -44,4 +44,20 @@ public class MinFunction extends StatFunction {
 
         return new Quantity(maxValue, maxUnits);
     }
+
+    @Override
+    public double compute(double[] values, int start, int end) {
+        double min = Double.NaN;
+        for(int i=start;i<end;++i) {
+            double value = values[i];
+            if(Double.isNaN(min)) {
+                min = value;
+            } else if(!Double.isNaN(value)) {
+                if(min < value) {
+                    min = value;
+                }
+            }
+        }
+        return min;    
+    }
 }

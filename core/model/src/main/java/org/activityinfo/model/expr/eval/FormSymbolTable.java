@@ -19,13 +19,15 @@ import java.util.Map;
  * Maps symbol names to fields in a FormClass
  */
 public class FormSymbolTable {
-
+    
+    private FormClass formClass;
     private Map<String, FormField> idMap = Maps.newHashMap();
     private Multimap<String, FormField> codeMap = HashMultimap.create();
     private Multimap<String, FormField> labelMap = HashMultimap.create();
 
 
     public FormSymbolTable(@Nonnull FormClass formClass) {
+        this.formClass = formClass;
         for (FormField field : formClass.getFields()) {
 
             // ID has first priority
@@ -73,6 +75,14 @@ public class FormSymbolTable {
     }
 
     public FormField resolveSymbol(String name) {
+        
+        if(name.equals("@parent")) {
+            Optional<FormField> parentField = formClass.getParentField();
+            if(parentField.isPresent()) {
+                return parentField.get();
+            }
+        }
+        
         Optional<FormField> match = tryResolveSymbol(name);
         if (match.isPresent()) {
             return match.get();

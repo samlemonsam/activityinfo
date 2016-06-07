@@ -10,14 +10,18 @@ import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 import java.util.List;
 
 
-public class JoinedColumnViewSlot implements Slot<ColumnView> {
+/**
+ * Computes a many-to-one join from a left-hand base table to a right hand table via one or more
+ * reference fields.
+ */
+public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
 
-    private List<JoinLink> links;
+    private List<ReferenceJoin> links;
     private Slot<ColumnView> nestedColumn;
 
     private ColumnView result;
 
-    public JoinedColumnViewSlot(List<JoinLink> links, Slot<ColumnView> nestedColumn) {
+    public JoinedReferenceColumnViewSlot(List<ReferenceJoin> links, Slot<ColumnView> nestedColumn) {
         this.links = links;
         this.nestedColumn = nestedColumn;
     }

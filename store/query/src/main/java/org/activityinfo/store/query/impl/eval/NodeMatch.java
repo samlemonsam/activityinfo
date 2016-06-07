@@ -6,10 +6,14 @@ import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -73,7 +77,7 @@ public class NodeMatch {
         
         NodeMatch match = new NodeMatch();
         match.joins = joinsTo(partitions);
-        match.joins.add(new JoinNode(leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
+        match.joins.add(new JoinNode(JoinType.REFERENCE, leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
         match.formClass = formClass;
         match.type = Type.ID;
         return match;
@@ -128,6 +132,7 @@ public class NodeMatch {
         for(int i = 0; i < partitions.size() - 1; i++) {
             // Reference field that functions as a foreign key
             List<FormTree.Node> left = partitions.get(i);
+            FormField leftField = left.get(0).getField();
             ResourceId leftFormId = left.get(0).getDefiningFormClass().getId();
             ExprNode leftFieldExpr = toExpr(left);
 
@@ -136,7 +141,16 @@ public class NodeMatch {
             List<FormTree.Node> right = partitions.get(i+1);
             ResourceId rightFormId = right.get(0).getDefiningFormClass().getId();
 
-            joins.add(new JoinNode(leftFormId, leftFieldExpr, rightFormId));
+            if(leftField.getType() instanceof ReferenceType) {
+                // Join based on the (left) foreign key ==> (right) primary key
+                joins.add(new JoinNode(JoinType.REFERENCE, leftFormId, leftFieldExpr, rightFormId));
+
+            } else if(leftField.getType() instanceof SubFormReferenceType) {
+                joins.add(new JoinNode(JoinType.SUBFORM, leftFormId, new SymbolExpr(ColumnModel.ID_SYMBOL), rightFormId));
+
+            } else {
+                throw new IllegalStateException("Invalid field for joining: " + leftField.getType());
+            }
         }
         
         return joins;

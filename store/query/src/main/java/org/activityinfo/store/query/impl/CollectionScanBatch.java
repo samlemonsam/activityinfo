@@ -7,6 +7,7 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnView;
@@ -16,16 +17,11 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
 import org.activityinfo.store.query.impl.eval.JoinNode;
+import org.activityinfo.store.query.impl.eval.JoinType;
 import org.activityinfo.store.query.impl.eval.NodeMatch;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
-import org.activityinfo.store.query.impl.join.JoinLink;
-import org.activityinfo.store.query.impl.join.JoinedColumnViewSlot;
-import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
+import org.activityinfo.store.query.impl.join.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -119,8 +115,13 @@ public class CollectionScanBatch {
      */
     private Slot<ColumnView> addJoinedColumn(NodeMatch match) {
 
+        // For the moment, handle only the simple case of a single subform join
+        if(match.getJoins().size() == 1 && match.getJoins().get(0).getType() == JoinType.SUBFORM) {
+            return addSubFormJoinedColumn(match);
+        }
+        
         // Schedule the links we need to join the node to the base form
-        List<JoinLink> links = Lists.newArrayList();
+        List<ReferenceJoin> links = Lists.newArrayList();
         for (JoinNode joinNode : match.getJoins()) {
             links.add(addJoinLink(joinNode));
         }
@@ -138,17 +139,31 @@ public class CollectionScanBatch {
                 throw new UnsupportedOperationException("type: " + match.getType());
         }
 
-        return new JoinedColumnViewSlot(links, column);
+        return new JoinedReferenceColumnViewSlot(links, column);
     }
 
-    private JoinLink addJoinLink(JoinNode node) {
+    private Slot<ColumnView> addSubFormJoinedColumn(NodeMatch match) {
+        JoinNode node = match.getJoins().get(0);
+        CollectionScan left = getTable(node.getLeftFormId());
+        CollectionScan right = getTable(node.getFormClassId());
+
+        Slot<PrimaryKeyMap> primaryKey = left.addPrimaryKey();
+        Slot<ColumnView> parentColumn = right.addField(new SymbolExpr("@parent"));
+        Slot<ColumnView> dataColumn = getDataColumn(match.getFormClass(), match.getExpr());
+
+        SubFormJoin join = new SubFormJoin(primaryKey, parentColumn);
+        
+        return new JoinedSubFormColumnViewSlot(Collections.singletonList(join), dataColumn);
+    }
+
+    private ReferenceJoin addJoinLink(JoinNode node) {
         CollectionScan left = getTable(node.getLeftFormId());
         CollectionScan right = getTable(node.getFormClassId());
 
         Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField());
         Slot<PrimaryKeyMap> primaryKey = right.addPrimaryKey();
 
-        return new JoinLink(foreignKey, primaryKey);
+        return new ReferenceJoin(foreignKey, primaryKey);
     }
 
     public Slot<ColumnView> getDataColumn(FormClass formClass, ExprNode fieldExpr) {

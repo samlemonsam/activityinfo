@@ -33,4 +33,6 @@ public abstract class StatFunction extends ExprFunction {
             return Quantity.UNKNOWN_UNITS;
         }
     }
+    
+    public abstract double compute(double[] values, int start, int end);
 }

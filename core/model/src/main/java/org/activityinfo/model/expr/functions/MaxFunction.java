@@ -1,5 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 
@@ -8,7 +10,7 @@ import java.util.List;
 /**
  * Computes the maximum value of its arguments
  */
-public class MaxFunction extends StatFunction {
+public class MaxFunction extends StatFunction implements ColumnFunction {
     
     public static final MaxFunction INSTANCE = new MaxFunction();
     
@@ -44,5 +46,43 @@ public class MaxFunction extends StatFunction {
         }
     
         return new Quantity(maxValue, maxUnits);
+    }
+
+    @Override
+    public ColumnView columnApply(List<ColumnView> arguments) {
+        int numRows = arguments.get(0).numRows();
+        double[] result = new double[numRows];
+
+        for(int i=0;i<numRows;++i) {
+            double max = Double.NaN;
+            for(int j=0;j<arguments.size();++j) {
+                double value = arguments.get(j).getDouble(i);
+                if(Double.isNaN(max)) {
+                    max = value;
+                } else if(!Double.isNaN(value))  {
+                    if(value > max) {
+                        max = value;
+                    }
+                }
+                result[i] = max;
+            }
+        }
+        return new DoubleArrayColumnView(result);
+    }
+
+    @Override
+    public double compute(double[] values, int start, int end) {
+        double max = Double.NaN;
+        for(int i=start;i<end;++i) {
+            double value = values[i];
+            if(Double.isNaN(max)) {
+                max = value;
+            } else if(!Double.isNaN(value)) {
+                if(value > max) {
+                    max = value;
+                }
+            }
+        }
+        return max;
     }
 }

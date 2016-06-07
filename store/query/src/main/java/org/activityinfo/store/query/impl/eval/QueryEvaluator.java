@@ -3,7 +3,6 @@ package org.activityinfo.store.query.impl.eval;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ColumnFunction;
@@ -16,7 +15,10 @@ import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,8 +38,6 @@ public class QueryEvaluator {
 
     private NodeMatcher resolver;
 
-    private Map<String, AggregateFunction> aggregateFunctions = Maps.newHashMap();
-
     private Deque<SymbolExpr> evaluationStack = new ArrayDeque<>();
 
     public QueryEvaluator(FormTree formTree, FormClass rootFormClass, CollectionScanBatch batch) {
@@ -45,8 +45,6 @@ public class QueryEvaluator {
         this.resolver = new NodeMatcher(formTree);
         this.rootFormClass = rootFormClass;
         this.batch = batch;
-
-        aggregateFunctions.put("sum", new SumFunction());
     }
 
     public Slot<ColumnView> evaluateExpression(ExprNode expr) {

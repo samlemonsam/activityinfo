@@ -7,13 +7,13 @@ import java.util.Collection;
 
 /**
  * Holds the foreignKey / primaryKeyMap columns required
- * to evaluate a left join between a LEFT and a RIGHT table.
+ * to evaluate a join between a LEFT and a RIGHT table via a Reference field.
  */
-public class JoinLink {
+public class ReferenceJoin {
     private Slot<ForeignKeyMap> foreignKey;
     private Slot<PrimaryKeyMap> primaryKeyMap;
 
-    public JoinLink(Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
+    public ReferenceJoin(Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
         this.foreignKey = foreignKey;
         this.primaryKeyMap = primaryKeyMap;
     }
