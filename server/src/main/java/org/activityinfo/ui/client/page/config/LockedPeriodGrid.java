@@ -130,7 +130,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
                     toDate = (LocalDate) gridEvent.getValue();
                 }
 
-                if (!fromDate.before(toDate)) {
+                if (!fromDate.before(toDate) && !fromDate.equals(toDate)) {
                     MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.fromDateIsBeforeToDate(), null);
                     lockedPeriodGrid.getActiveEditor().cancelEdit();
                 }
