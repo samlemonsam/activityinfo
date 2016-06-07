@@ -10,7 +10,7 @@ import org.activityinfo.service.store.ResourceCollection;
 import java.util.*;
 
 /**
- * Catalog of 
+ * Catalog of Collection hosted in the AppEngine High Replication Datastore
  */
 public class HrdCatalog implements CollectionCatalog {
     

@@ -33,6 +33,10 @@ public abstract class StatFunction extends ExprFunction {
             return Quantity.UNKNOWN_UNITS;
         }
     }
-    
+
+    /**
+     * Computes the statistic over the range [{@code start}, {@code end}) 
+     * of values in the given array.
+     */
     public abstract double compute(double[] values, int start, int end);
 }
