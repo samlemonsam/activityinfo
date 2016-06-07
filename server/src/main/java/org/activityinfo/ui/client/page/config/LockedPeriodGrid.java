@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
@@ -112,6 +113,29 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
         configs.add(new EditableLocalDateColumn("toDate", I18N.CONSTANTS.toDate(), 100));
 
         lockedPeriodGrid = new EditorGrid<LockedPeriodDTO>(lockedPeriodStore, new ColumnModel(configs));
+
+        lockedPeriodGrid.addListener(Events.ValidateEdit, new Listener<BaseEvent>() {
+            @Override
+            public void handleEvent(BaseEvent baseEvent) {
+                GridEvent gridEvent = (GridEvent) baseEvent;
+                LockedPeriodDTO model = (LockedPeriodDTO) gridEvent.getModel();
+
+                LocalDate fromDate = model.getFromDate();
+                LocalDate toDate = model.getToDate();
+
+                if ("fromDate".equals(gridEvent.getProperty())) {
+                    fromDate = (LocalDate) gridEvent.getValue();
+                }
+                if ("toDate".equals(gridEvent.getProperty())) {
+                    toDate = (LocalDate) gridEvent.getValue();
+                }
+
+                if (!fromDate.before(toDate)) {
+                    MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.fromDateIsBeforeToDate(), null);
+                    lockedPeriodGrid.getActiveEditor().cancelEdit();
+                }
+            }
+        });
 
         lockedPeriodGrid.addListener(Events.OnClick, new Listener<ComponentEvent>() {
             @Override
