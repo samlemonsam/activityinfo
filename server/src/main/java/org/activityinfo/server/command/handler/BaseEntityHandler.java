@@ -189,6 +189,10 @@ public class BaseEntityHandler {
             lockedPeriod.setEnabled((Boolean) changes.get("enabled"));
         }
 
+        if (!lockedPeriod.getFromDate().before(lockedPeriod.getToDate()) && !lockedPeriod.getFromDate().equals(lockedPeriod.getToDate())) {
+            throw new RuntimeException("From date is not before To date. Refuse lock object persistence: " + lockedPeriod);
+        }
+
         lockedPeriod.getParentDatabase().setLastSchemaUpdate(new Date());
         entityManager().merge(lockedPeriod);
     }
