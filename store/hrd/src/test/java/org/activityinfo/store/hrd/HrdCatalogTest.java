@@ -111,6 +111,7 @@ public class HrdCatalogTest {
         
         FormClass memberForm = new FormClass(ResourceId.generateId());
         memberForm.setParentFormId(hhForm.getId());
+        memberForm.setOwnerId(hhForm.getId());
 
         hhForm.setOwnerId(ResourceId.valueOf("foo"));
         hhForm.setLabel("Household interview");

@@ -59,6 +59,11 @@ class RecordSerialization {
     }
     
     public static Entity toFormClassEntity(FormClass formClass) {
+        
+        if(formClass.getOwnerId() == null) {
+            throw new IllegalArgumentException("FormClass " + formClass.getId() + " has no @owner");
+        }
+        
         Entity entity = new Entity(CollectionKeys.formClassKey(formClass.getId()));
         entity.setProperty(OWNER_PROPERTY, formClass.getOwnerId().asString());
         entity.setProperty(RECORD_PROPERTY, toEmbeddedEntity(formClass.asResource()));
