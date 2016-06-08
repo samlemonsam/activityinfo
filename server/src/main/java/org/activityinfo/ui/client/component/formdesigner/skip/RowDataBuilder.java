@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.functions.BooleanFunctions;
+import org.activityinfo.model.expr.functions.ComparisonOperator;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -35,6 +36,7 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerModel;
+import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.List;
 import java.util.Set;
@@ -242,7 +244,7 @@ public class RowDataBuilder {
 
 
     private static boolean isFieldFunction(ExprFunction exprFunction) {
-        return exprFunction == BooleanFunctions.EQUAL || exprFunction == BooleanFunctions.NOT_EQUAL;
+        return exprFunction instanceof ComparisonOperator && RelevanceRowPresenter.COMPARISON_OPERATORS.contains(exprFunction);
     }
 
     private static String placeholder(ExprNode node) {

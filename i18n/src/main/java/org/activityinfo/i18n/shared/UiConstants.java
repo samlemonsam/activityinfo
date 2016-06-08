@@ -725,7 +725,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Maximum Radius")
     String radiusMaximum();
 
-    @DefaultStringValue("Minimum radius")
+    @DefaultStringValue("Minimum Radius")
     String radiusMinimum();
 
     @DefaultStringValue("Realized")
@@ -1637,4 +1637,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Shared databases")
     String sharedDatabases();
+
+    @DefaultStringValue("You do not have permission to edit the design of this database.")
+    String noDbDesignPermissions();
 }

@@ -25,6 +25,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 
 import java.util.List;
@@ -109,6 +111,10 @@ public class RelevancePanelPresenter {
 
         for (int i = 0; i < widgetCount; i++) {
             RelevanceRow row = (RelevanceRow) view.getRootPanel().getWidget(i);
+            FieldValue value = map.get(row).getValue();
+            if (value == null) {
+                throw new NullPointerException("Null value is not allowed.");
+            }
             result.add(RowDataFactory.create(row, map.get(row).getValue(), fieldWidgetContainer.getFormDesigner().getModel()));
         }
         return result;

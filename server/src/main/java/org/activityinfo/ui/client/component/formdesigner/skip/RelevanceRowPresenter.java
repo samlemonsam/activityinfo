@@ -28,6 +28,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.functions.*;
@@ -40,6 +41,8 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -55,8 +58,14 @@ import java.util.List;
  */
 public class RelevanceRowPresenter {
 
-    private static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
+    private static final List<ComparisonOperator> EQUALITY_OPERATORS = Lists.newArrayList(
             EqualFunction.INSTANCE, NotEqualFunction.INSTANCE
+    );
+
+    public static final List<ComparisonOperator> COMPARISON_OPERATORS = Lists.newArrayList(
+            EqualFunction.INSTANCE, NotEqualFunction.INSTANCE,
+            BooleanFunctions.GREATER, BooleanFunctions.GREATER_OR_EQUAL,
+            BooleanFunctions.LESS, BooleanFunctions.LESS_OR_EQUAL
     );
 
     public static final List<ExprFunction> SET_FUNCTIONS = Collections.unmodifiableList(Lists.newArrayList(
@@ -66,6 +75,7 @@ public class RelevanceRowPresenter {
     private final FieldWidgetContainer fieldWidgetContainer;
     private final RelevanceRow view = new RelevanceRow();
     private final FormFieldWidgetFactory widgetFactory;
+    private final Label errorMessage = new Label(I18N.CONSTANTS.blankValueIsNotAllowed());
 
     private FormFieldWidget valueWidget = null;
     private FieldValue value;
@@ -79,6 +89,8 @@ public class RelevanceRowPresenter {
         initFunction();
         initValueWidgetLater();
         initJoinFunction();
+
+        errorMessage.addStyleName("help-block");
     }
 
     // depends on selected field type
@@ -98,6 +110,16 @@ public class RelevanceRowPresenter {
             @Override
             public void update(FieldValue value) {
                 RelevanceRowPresenter.this.value = value;
+
+                if (value == null) {
+                    view.getValueContainer().addStyleName("has-error");
+                    view.getValueContainer().add(errorMessage);
+                } else {
+                    view.getValueContainer().removeStyleName("has-error");
+                    if (view.getValueContainer().getWidgetIndex(errorMessage) != -1) {
+                        view.getValueContainer().remove(errorMessage);
+                    }
+                }
             }
         };
 
@@ -172,8 +194,10 @@ public class RelevanceRowPresenter {
             if(((ReferenceType) type).getCardinality() == Cardinality.MULTIPLE) {
                 return SET_FUNCTIONS;
             }
+        } else if (type instanceof QuantityType || type instanceof LocalDateType) {
+            return COMPARISON_OPERATORS;
         }
-        return COMPARISON_OPERATORS;
+        return EQUALITY_OPERATORS;
     }
 
     private void initJoinFunction() {
@@ -211,5 +235,9 @@ public class RelevanceRowPresenter {
                 return;
             }
         }
+    }
+
+    public FormFieldWidget getValueWidget() {
+        return valueWidget;
     }
 }

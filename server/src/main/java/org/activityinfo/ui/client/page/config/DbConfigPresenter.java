@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.config;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -47,7 +48,8 @@ public class DbConfigPresenter implements DbPage {
 
     @Override
     public void go(UserDatabaseDTO db) {
-        view.setHeading(db.getFullName() == null ? db.getName() : db.getFullName());
+        view.setHeading(!Strings.isNullOrEmpty(db.getName()) ? db.getName() : "");
+        view.setIntro(!Strings.isNullOrEmpty(db.getFullName()) ? db.getFullName() : "");
 
         if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.design(),
@@ -72,23 +74,19 @@ public class DbConfigPresenter implements DbPage {
                     I18N.CONSTANTS.lockPeriodsDescription(),
                     "db-lockedperiods.png",
                     new DbPageState(LockedPeriodsPresenter.PAGE_ID, db.getId()));
-        }
-        if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.project(),
                     I18N.CONSTANTS.projectManagerDescription(),
                     "db-projects.png",
                     new DbPageState(DbProjectEditor.PAGE_ID, db.getId()));
-        }
-        if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.target(),
                     I18N.CONSTANTS.targetDescription(),
                     "db-targets.png",
                     new DbPageState(DbTargetEditor.PAGE_ID, db.getId()));
         }
 
-        // view.add("Cibles", "Définer les cibles pour les indicateurs.",
-        // "db-targets",
-        // new DbPageState(Pages.DatabaseTargets, db.getId()));
+        if (view.getStore().getCount() == 0) {
+            view.setPermissionsInfo(I18N.CONSTANTS.noDbDesignPermissions());
+        }
     }
 
     @Override
