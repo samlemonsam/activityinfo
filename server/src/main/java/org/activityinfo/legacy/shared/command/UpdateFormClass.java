@@ -5,7 +5,7 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Resources;
 
-public class UpdateFormClass implements Command<VoidResult> {
+public class UpdateFormClass implements MutatingCommand<VoidResult> {
 
     private String formClassId;
     private String json;
