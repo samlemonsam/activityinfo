@@ -1,6 +1,7 @@
 package org.activityinfo.model.resource;
 
 
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -36,11 +37,33 @@ public final class ResourceId implements Serializable {
         return new ResourceId(string);
     }
 
+    /**
+     * Generates a globally unique Id for a new collection
+     */
     public static ResourceId generateId() {
-        return valueOf(GENERATED_ID_DOMAIN + Long.toString(new Date().getTime(), Character.MAX_RADIX) +
-                       Long.toString(COUNTER++, Character.MAX_RADIX));
+        return valueOf(GENERATED_ID_DOMAIN + generateCuid());
     }
 
+    public static ResourceId generateSubmissionId(ResourceId collectionId) {
+        switch (collectionId.getDomain()) {
+            case CuidAdapter.ACTIVITY_DOMAIN:
+                return CuidAdapter.generateSiteCuid();
+            case CuidAdapter.LOCATION_TYPE_DOMAIN:
+                return CuidAdapter.generateLocationCuid();
+            case GENERATED_ID_DOMAIN:
+                return valueOf(collectionId.asString() + "-" + generateCuid());
+        }
+        throw new IllegalArgumentException("Unsupported domain type: " + collectionId);
+    }
+
+    public static ResourceId generateSubmissionId(FormClass formClass) {
+        return generateSubmissionId(formClass.getId());
+    }
+    
+    private static String generateCuid() {
+        return Long.toString(new Date().getTime(), Character.MAX_RADIX) +
+                Long.toString(COUNTER++, Character.MAX_RADIX);
+    }
 
     private ResourceId(@Nonnull String text) {
         this.text = text;
@@ -90,4 +113,5 @@ public final class ResourceId implements Serializable {
     public ResourceId fieldId(String propertyName) {
         return ResourceId.valueOf(text + "." + propertyName);
     }
+
 }

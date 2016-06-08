@@ -21,17 +21,17 @@ package org.activityinfo.model.expr;
  * #L%
  */
 
-import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.expr.functions.Casting;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.junit.Assert;
@@ -60,7 +60,7 @@ public class SkipExpressionTest {
 
     @Test
     public void enumType() {
-        FormInstance instance = new FormInstance(ResourceId.generateId(), formClass.getId());
+        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId());
         instance.set(GENDER_FIELD_ID, enumFieldValue(GENDER_FIELD_ID, "Male"));
 
         eval(String.format("{%s}=={%s}", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Male").getId()), true, instance);
@@ -94,7 +94,7 @@ public class SkipExpressionTest {
 
     @Test
     public void text() {
-        FormInstance instance = new FormInstance(ResourceId.generateId(), formClass.getId());
+        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId());
         instance.set(TEXT_FIELD_ID, "1");
 
         eval(String.format("{%s}==\"1\"", TEXT_FIELD_ID.asString()), true, instance);
@@ -103,7 +103,7 @@ public class SkipExpressionTest {
 
     @Test
     public void quantity() {
-        FormInstance instance = new FormInstance(ResourceId.generateId(), formClass.getId());
+        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId());
         instance.set(QUANTITY_FIELD_ID, 3);
 
         eval(String.format("{%s}==3", QUANTITY_FIELD_ID.asString()), true, instance);

@@ -143,7 +143,7 @@ public class FormModelTest extends CommandTestCase2 {
         Date fixedDate = InstanceGeneratorTest.fixedDate(2, 2, 2016);
         PeriodInstanceKeyedGenerator periodGenerator = periodJvmGenerator(subFormClass.getId());
 
-        FormInstance rootInstance = new FormInstance(ResourceId.generateId(), masterFormClass.getId());
+        FormInstance rootInstance = new FormInstance(ResourceId.generateSubmissionId(masterFormClass), masterFormClass.getId());
 
         List<FormInstance> tabInstances = periodGenerator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate, PeriodInstanceKeyedGenerator.Direction.BACK, 2);
         FormInstance tab1 = tabInstances.get(0);

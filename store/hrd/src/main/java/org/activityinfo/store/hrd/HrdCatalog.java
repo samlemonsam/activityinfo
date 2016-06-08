@@ -38,7 +38,14 @@ public class HrdCatalog implements CollectionCatalog {
 
     @Override
     public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
+        if(resourceId.getDomain() != ResourceId.GENERATED_ID_DOMAIN) {
+            return Optional.absent();
+        }
+        String parts[] = resourceId.asString().split("-");
+        if(parts.length != 2) {
+            throw new IllegalArgumentException("Expected resource id in the form c00000-000000");
+        }
+        return getCollection(ResourceId.valueOf(parts[0]));
     }
 
     @Override

@@ -173,7 +173,7 @@ public class SubFormRepeatingManipulator {
     }
 
     private FormInstance newValueInstance() {
-        FormInstance instance = new FormInstance(ResourceId.generateId(), subForm.getId());
+        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(subForm), subForm.getId());
         instance.setOwnerId(formModel.getWorkingRootInstance().getId());
         return instance;
     }

@@ -138,21 +138,21 @@ public class HrdCatalogTest {
 
 
         ResourceUpdate hh1 = new ResourceUpdate();
-        hh1.setResourceId(ResourceId.generateId());
+        hh1.setResourceId(ResourceId.generateSubmissionId(hhForm));
         hh1.set(hhIdField.getId(), TextValue.valueOf("HH1"));
 
         ResourceUpdate hh2 = new ResourceUpdate();
-        hh2.setResourceId(ResourceId.generateId());
+        hh2.setResourceId(ResourceId.generateSubmissionId(hhForm));
         hh2.set(hhIdField.getId(), TextValue.valueOf("HH2"));
         
         ResourceUpdate father1 = new ResourceUpdate();
-        father1.setResourceId(ResourceId.generateId());
+        father1.setResourceId(ResourceId.generateSubmissionId(memberForm));
         father1.setParentId(hh1.getResourceId());
         father1.set(nameField.getId(), TextValue.valueOf("Homer"));
         father1.set(ageField.getId(), new Quantity(40, "years"));
         
         ResourceUpdate father2 = new ResourceUpdate();
-        father2.setResourceId(ResourceId.generateId());
+        father2.setResourceId(ResourceId.generateSubmissionId(memberForm));
         father2.setParentId(hh2.getResourceId());
         father2.set(nameField.getId(), TextValue.valueOf("Ned"));
         father2.set(ageField.getId(), new Quantity(41, "years"));
