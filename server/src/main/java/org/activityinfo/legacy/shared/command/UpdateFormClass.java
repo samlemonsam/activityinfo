@@ -61,4 +61,9 @@ public class UpdateFormClass implements Command<VoidResult> {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "UpdateFormClass{" + formClassId + "}";
+    }
 }

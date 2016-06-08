@@ -101,6 +101,8 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
         
         syncEntities(activity, formClass);
         entityManager.get().persist(activity);
+        
+        LOGGER.info("Persisted updated Activity " + formClass.getId());
 
         return new VoidResult();
     }
@@ -202,6 +204,15 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
     }
 
     private void createIndicator(Activity activity, FormField field, int sortOrder) {
+        
+        if(field.getId().getDomain() != CuidAdapter.INDICATOR_DOMAIN) {
+            throw new IllegalStateException(String.format("FormField '%s' with type '%s' must still use " +
+                    "legacy indicator id. Found: %s", 
+                    field.getLabel(),
+                    field.getType(),
+                    field.getId()));
+        }
+        
         Indicator indicator = new Indicator();
         indicator.setId(CuidAdapter.getLegacyIdFromCuid(field.getId()));
         indicator.setActivity(activity);

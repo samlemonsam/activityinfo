@@ -21,26 +21,31 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.BiMap;
-import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.client.state.GxtStateProvider;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PredefinedPeriods;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.CommandTestCase2;
+import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.form.subform.PeriodInstanceKeyedGenerator;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.component.formdesigner.InstanceGeneratorTest;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -56,47 +61,65 @@ import static org.junit.Assert.assertNotNull;
  * @author yuriyz on 02/19/2015.
  */
 @RunWith(InjectionSupport.class)
+@OnDataSet("/dbunit/schema1.db.xml")
 public class FormModelTest extends CommandTestCase2 {
 
+
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    
     private ResourceLocatorAdaptor resourceLocator;
 
-    private FormClass setupFormClass;
-    private FormClass setupSubform;
+    private FormClass masterFormClass;
+    private FormClass subFormClass;
     private FormField subFormChildField;
-    private FormField subformOwnerField;
+    private FormField subFormField;
+
+
+    @BeforeClass
+    public static void setUpLocale() {
+        LocaleProxy.initialize();
+    }
+
 
     @Before
     public final void setup() {
+        helper.setUp();
         resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        setupFormClass = persistFormClassWithSubForm();
     }
 
     @After
     public final void tearDown() {
-        resourceLocator.remove(Lists.newArrayList(setupSubform.getId(), setupFormClass.getId()));
+        helper.tearDown();
     }
 
     @Test
     public void modelState() {
+        
+        setupForms();
+        
         FormModel formModel = new FormModel(resourceLocator, new GxtStateProvider());
-        assertResolves(formModel.loadFormClassWithDependentSubForms(setupFormClass.getId()));
+        assertResolves(formModel.loadFormClassWithDependentSubForms(masterFormClass.getId()));
 
-        assertEquals(formModel.getRootFormClass().getId(), setupFormClass.getId());
-        assertEquals(formModel.getRootFormClass().getOwnerId(), setupFormClass.getOwnerId());
+        assertEquals(formModel.getRootFormClass().getId(), masterFormClass.getId());
+        assertEquals(formModel.getRootFormClass().getOwnerId(), masterFormClass.getOwnerId());
 
-        assertNotNull(formModel.getSubFormByOwnerFieldId(subformOwnerField.getId()));
+        assertNotNull(formModel.getSubFormByOwnerFieldId(subFormField.getId()));
         assertNotNull(formModel.getClassByField(subFormChildField.getId()));
     }
 
     @Test
     public void doNotPersistFormClassWithStaleSubformReference() {
+        
+        setupForms();
+        
         FormClass formClass = new FormClass(ResourceId.generateId());
         formClass.setOwnerId(ResourceId.generateId());
 
         FormClass subform = new FormClass(ResourceId.generateId());
         subform.setOwnerId(formClass.getId());
 
-        FormField subformOwnerField = formClass.addField();
+        FormField subformOwnerField = formClass.addField(CuidAdapter.generateIndicatorId());
         subformOwnerField.setType(new SubFormReferenceType(subform.getId()));
 
         resourceLocator.persist(formClass).then(new AsyncCallback<Void>() {
@@ -114,10 +137,13 @@ public class FormModelTest extends CommandTestCase2 {
 
     @Test
     public void subformInstancesPersistence() {
+        
+        setupForms();
+        
         Date fixedDate = InstanceGeneratorTest.fixedDate(2, 2, 2016);
-        PeriodInstanceKeyedGenerator periodGenerator = periodJvmGenerator(setupSubform.getId());
+        PeriodInstanceKeyedGenerator periodGenerator = periodJvmGenerator(subFormClass.getId());
 
-        FormInstance rootInstance = new FormInstance(ResourceId.generateId(), setupFormClass.getId());
+        FormInstance rootInstance = new FormInstance(ResourceId.generateId(), masterFormClass.getId());
 
         List<FormInstance> tabInstances = periodGenerator.generate(PredefinedPeriods.MONTHLY.getPeriod(), fixedDate, PeriodInstanceKeyedGenerator.Direction.BACK, 2);
         FormInstance tab1 = tabInstances.get(0);
@@ -127,13 +153,13 @@ public class FormModelTest extends CommandTestCase2 {
         formModel.setWorkingRootInstance(rootInstance);
 
         // Tab1
-        formModel.setSelectedInstance(tab1, setupSubform);
-        FormInstance valueInstance1 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(setupSubform, tab1));
+        formModel.setSelectedInstance(tab1, subFormClass);
+        FormInstance valueInstance1 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(subFormClass, tab1));
         valueInstance1.set(subFormChildField.getId(), TextValue.valueOf("tab1"));
 
         // Tab2
-        formModel.setSelectedInstance(tab2, setupSubform);
-        FormInstance valueInstance2 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(setupSubform, tab2));
+        formModel.setSelectedInstance(tab2, subFormClass);
+        FormInstance valueInstance2 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(subFormClass, tab2));
         valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab2"));
 
         // persist all value and tab/key instances
@@ -150,13 +176,13 @@ public class FormModelTest extends CommandTestCase2 {
         // Update value instances
 
         // Tab1
-        formModel.setSelectedInstance(tab1, setupSubform);
-        valueInstance1 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(setupSubform, tab1));
+        formModel.setSelectedInstance(tab1, subFormClass);
+        valueInstance1 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(subFormClass, tab1));
         valueInstance1.set(subFormChildField.getId(), TextValue.valueOf("tab11"));
 
         // Tab2
-        formModel.setSelectedInstance(tab1, setupSubform);
-        valueInstance2 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(setupSubform, tab2));
+        formModel.setSelectedInstance(tab1, subFormClass);
+        valueInstance2 = formModel.getSubFormInstances().get(new FormModel.SubformValueKey(subFormClass, tab2));
         valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab22"));
 
         // persist updates
@@ -174,12 +200,12 @@ public class FormModelTest extends CommandTestCase2 {
         emptyModel.setWorkingRootInstance(rootInstance);
 
         // load subform instances into empty model
-        assertResolves(new SubFormInstanceLoader(emptyModel).loadKeyedSubformInstances(setupSubform));
+        assertResolves(new SubFormInstanceLoader(emptyModel).loadKeyedSubformInstances(subFormClass));
         BiMap<FormModel.SubformValueKey, FormInstance> loadedInstances = emptyModel.getSubFormInstances();
 
         assertEquals(loadedInstances.size(), 2);
-        assertEquals(loadedInstances.get(new FormModel.SubformValueKey(setupSubform, tab1)), valueInstance1);
-        assertEquals(loadedInstances.get(new FormModel.SubformValueKey(setupSubform, tab2)), valueInstance2);
+        assertEquals(loadedInstances.get(new FormModel.SubformValueKey(subFormClass, tab1)), valueInstance1);
+        assertEquals(loadedInstances.get(new FormModel.SubformValueKey(subFormClass, tab2)), valueInstance2);
     }
 
     private PeriodInstanceKeyedGenerator periodJvmGenerator(ResourceId subFormClassId) {
@@ -192,25 +218,32 @@ public class FormModelTest extends CommandTestCase2 {
     }
 
 
-    public FormClass persistFormClassWithSubForm() {
+    /**
+     * Sets up test fixtures. Must be called by each test to ensure that it runs AFTER
+     * the dbunit setup
+     */
+    public void setupForms() {
+        
+        
+        ResourceId masterFormId = CuidAdapter.activityFormClass(3);
+        
+        masterFormClass = new FormClass(masterFormId);
+        masterFormClass.setOwnerId(CuidAdapter.databaseId(1));
 
-        FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setOwnerId(ResourceId.generateId());
-
-        FormField labelField = formClass.addField();
+        FormField labelField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         labelField.setLabel("label1");
         labelField.setType(TextType.INSTANCE);
 
-        setupSubform = new FormClass(ResourceId.generateId());
-        setupSubform.setOwnerId(formClass.getId());
-        subFormChildField = setupSubform.addField();
+        subFormClass = new FormClass(ResourceId.generateId());
+        subFormClass.setOwnerId(masterFormClass.getId());
+        subFormChildField = subFormClass.addField();
         subFormChildField.setType(TextType.INSTANCE);
 
-        subformOwnerField = formClass.addField();
-        subformOwnerField.setType(new SubFormReferenceType(setupSubform.getId()));
+        subFormField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
+        subFormField.setType(new SubFormReferenceType(subFormClass.getId()));
 
-        assertResolves(resourceLocator.persist(setupSubform));
-        assertResolves(resourceLocator.persist(formClass));
-        return formClass;
+        assertResolves(resourceLocator.persist(subFormClass));
+        assertResolves(resourceLocator.persist(masterFormClass));
+        
     }
 }

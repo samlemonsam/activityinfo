@@ -52,6 +52,11 @@ public class FeatureSourceCollection implements ResourceCollection {
     }
 
     @Override
+    public void updateFormClass(FormClass formClass) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void update(ResourceUpdate update) {
         throw new UnsupportedOperationException();
     }

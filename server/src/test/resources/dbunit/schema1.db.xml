@@ -34,6 +34,9 @@
   <locationType locationTypeId="1" countryId="1" name="localite"
                 reuse="1"/>
 
+  <locationType locationTypeId="2" countryId="1" name="Country" reuse="1"/>
+  <location locationTypeId="2" locationId="2" name="RDC"/>
+  
   <!-- Indicators -->
 
 
@@ -55,11 +58,14 @@
   <userDatabase databaseId="1" name="PEAR" countryId="1"
                 ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
 
-  <activity activityId="1" databaseId="1" name="NFI"
+  <activity activityId="1" databaseId="1" name="NFI" classicView="1"
             reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"/>
 
-  <activity activityId="2" databaseId="1" name="empty activity"
+  <activity activityId="2" databaseId="1" name="empty activity" classicView="1"
             reportingFrequency="0" allowEdit="1" sortOrder="2" locationTypeId="1"/>
+  
+  <activity activityId="3" databaseId="1" name="Master Form" reportingFrequency="0" allowEdit="1" sortOrder="3"
+            locationTypeId="1" classicView="0"/>
 
   <indicator indicatorId="1" activityId="1" name="beneficiaries"
              units="menages^2" aggregation="0" category="inputs" description="falling in lve"
