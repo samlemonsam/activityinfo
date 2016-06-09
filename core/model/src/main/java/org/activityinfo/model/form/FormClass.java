@@ -362,15 +362,4 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     }
 
 
-    /**
-     * Normalized FormFields order. Puts built-in formfields at the end of the list.
-     * Not super smart, one day (when we don't need built-in formfields encoded via id) we have to remove this method.
-     * (todo: ask Alex whether it's ok or it's better to put it at the beginning of the list)
-     */
-    public void reorderFormFields() {
-//        List<FormElement> builtInElements = getBuiltInElements();
-//        elements.removeAll(builtInElements); // remove
-//        elements.addAll(builtInElements); // add to the end
-    }
-
 }
