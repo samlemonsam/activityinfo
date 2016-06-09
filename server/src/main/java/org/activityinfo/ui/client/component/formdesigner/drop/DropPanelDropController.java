@@ -195,6 +195,8 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             vetoDropIfNeeded(context);
 
             FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
+            subForm.setOwnerId(formDesigner.getRootFormClass().getId());
+            subForm.setParentFormId(formDesigner.getRootFormClass().getId());
             subForm.setLabel(formField.getLabel());
 
             SubFormReferenceType type = (SubFormReferenceType) formField.getType();

@@ -147,7 +147,6 @@ public class FormModelTest extends CommandTestCase2 {
         
         Date fixedDate = InstanceGeneratorTest.fixedDate(2, 2, 2016);
         PeriodInstanceKeyedGenerator periodGenerator = periodJvmGenerator(
-                rootInstance.getId(),
                 subFormClass.getId());
 
 
@@ -211,8 +210,8 @@ public class FormModelTest extends CommandTestCase2 {
         assertEquals(loadedInstances.get(new FormModel.SubformValueKey(subFormClass, tab2)), valueInstance2);
     }
 
-    private PeriodInstanceKeyedGenerator periodJvmGenerator(ResourceId parentId, ResourceId subFormClassId) {
-        return new PeriodInstanceKeyedGenerator(parentId, subFormClassId, new PeriodInstanceKeyedGenerator.Formatter() {
+    private PeriodInstanceKeyedGenerator periodJvmGenerator(ResourceId subFormClassId) {
+        return new PeriodInstanceKeyedGenerator(subFormClassId, new PeriodInstanceKeyedGenerator.Formatter() {
             @Override
             public String format(String pattern, Date date) {
                 return new SimpleDateFormat(pattern).format(date);

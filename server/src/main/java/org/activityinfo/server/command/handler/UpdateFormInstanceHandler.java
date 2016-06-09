@@ -61,7 +61,8 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
         update.setParentId(formInstance.getOwnerId());
 
         for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
-            if(!entry.getKey().equals(ResourceId.valueOf("classId"))) {
+            if(!entry.getKey().equals(ResourceId.valueOf("classId")) &&
+               !entry.getKey().equals(ResourceId.valueOf("sort"))) {
                 update.set(entry.getKey(), entry.getValue());
             }
         }

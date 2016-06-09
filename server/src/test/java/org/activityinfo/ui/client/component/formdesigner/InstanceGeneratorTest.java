@@ -572,7 +572,7 @@ public class InstanceGeneratorTest {
     }
 
     private PeriodInstanceKeyedGenerator jvmGenerator() {
-        return new PeriodInstanceKeyedGenerator(parentId, ResourceId.generateId(), new PeriodInstanceKeyedGenerator.Formatter() {
+        return new PeriodInstanceKeyedGenerator(ResourceId.generateId(), new PeriodInstanceKeyedGenerator.Formatter() {
             @Override
             public String format(String pattern, Date date) {
                 return new SimpleDateFormat(pattern).format(date);

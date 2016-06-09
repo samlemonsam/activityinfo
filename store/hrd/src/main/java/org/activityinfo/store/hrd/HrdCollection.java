@@ -17,6 +17,7 @@ import org.activityinfo.store.hrd.entity.CollectionRootKey;
 import org.activityinfo.store.hrd.entity.Datastore;
 import org.activityinfo.store.hrd.entity.FormSubmission;
 import org.activityinfo.store.hrd.entity.FormSubmissionKey;
+import org.activityinfo.store.hrd.op.CreateOrUpdateCollection;
 import org.activityinfo.store.hrd.op.CreateOrUpdateSubmission;
 import org.activityinfo.store.hrd.op.QueryOperation;
 
@@ -52,7 +53,7 @@ public class HrdCollection implements ResourceCollection {
 
     @Override
     public void updateFormClass(FormClass formClass) {
-        throw new UnsupportedOperationException();
+        datastore.execute(new CreateOrUpdateCollection(formClass));
     }
 
     @Override
@@ -84,10 +85,17 @@ public class HrdCollection implements ResourceCollection {
     }
 
     public Iterable<FormInstance> getSubmissionsOfParent(ResourceId parentId) {
-        
+        return query(FormSubmission.parentFilter(parentId));
+    }
+
+    public Iterable<FormInstance> getSubmissions() {
+        return query(null);
+    }
+
+    private Iterable<FormInstance> query(Query.FilterPredicate filter) {
         CollectionRootKey rootKey = new CollectionRootKey(formClass.getId());
         final Query query = new Query(FormSubmission.KIND, rootKey.raw());
-        query.setFilter(FormSubmission.parentFilter(parentId));
+        query.setFilter(filter);
 
         return datastore.execute(new QueryOperation<List<FormInstance>>() {
             @Override

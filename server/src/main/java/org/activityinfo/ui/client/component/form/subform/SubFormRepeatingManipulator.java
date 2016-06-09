@@ -212,7 +212,7 @@ public class SubFormRepeatingManipulator {
         setDeleteButtonsState();
 
         // set sort field
-        formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, rootPanel.getWidgetIndex(formPanel));
+      //  formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, rootPanel.getWidgetIndex(formPanel));
     }
 
     private void setDeleteButtonsState() {

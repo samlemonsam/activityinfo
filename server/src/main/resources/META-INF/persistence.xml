@@ -36,7 +36,6 @@
     <class>org.activityinfo.server.database.hibernate.entity.User</class>
     <class>org.activityinfo.server.database.hibernate.entity.UserDatabase</class>
     <class>org.activityinfo.server.database.hibernate.entity.UserPermission</class>
-    <class>org.activityinfo.server.database.hibernate.entity.FormInstanceEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <validation-mode>NONE</validation-mode>
     <properties>

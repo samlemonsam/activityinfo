@@ -46,10 +46,13 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
             return fetchByParent(collectionId, parentId);
         }
         
+        if(cmd.getType() == GetFormInstance.Type.CLASS) {
+            return fetchByClass(ResourceId.valueOf(cmd.getClassId()));
+        }
+        
         throw new UnsupportedOperationException();
 
     }
-
 
     private CommandResult fetchById(String id) {
         ResourceId resourceId = ResourceId.valueOf(id);
@@ -63,7 +66,7 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
         try {
             instance = hrdCollection.getSubmission(resourceId);
         } catch (EntityNotFoundException e) {
-            throw new UnsupportedOperationException(e);
+            return emptyResult();
         }
         return buildResult(Collections.singleton(instance));
     }
@@ -72,7 +75,7 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
     private CommandResult fetchByParent(ResourceId collectionId, ResourceId parentId) {
         Optional<ResourceCollection> collection = catalog.getCollection(collectionId);
         if(!collection.isPresent()) {
-            throw new IllegalArgumentException("No such resource: " + collectionId);
+            return emptyResult();
         }
         
         HrdCollection hrdCollection = (HrdCollection) collection.get();
@@ -80,7 +83,25 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
         
         return buildResult(instances);
     }
-    
+
+
+    private CommandResult fetchByClass(ResourceId collectionId) {
+        Optional<ResourceCollection> collection = catalog.getCollection(collectionId);
+        if(!collection.isPresent()) {
+            return emptyResult();
+        }
+
+        HrdCollection hrdCollection = (HrdCollection) collection.get();
+        Iterable<FormInstance> instances = hrdCollection.getSubmissions();
+
+        return buildResult(instances);
+    }
+
+
+    private CommandResult emptyResult() {
+        return buildResult(Collections.<FormInstance>emptySet());
+    }
+
     private CommandResult buildResult(Iterable<FormInstance> instances) {
         List<String> jsonList = Lists.newArrayList();
         for (FormInstance instance : instances) {
