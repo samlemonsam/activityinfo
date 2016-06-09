@@ -1,5 +1,6 @@
 package org.activityinfo.server.command.handler;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.UpdateFormInstance;
@@ -7,12 +8,17 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.command.handler.json.JsonHelper;
-import org.activityinfo.server.database.hibernate.entity.FormInstanceEntity;
+import org.activityinfo.model.resource.ResourceUpdate;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.hrd.HrdCatalog;
 
 import javax.persistence.EntityManager;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,10 +29,12 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
 
     private static final Logger LOGGER = Logger.getLogger(UpdateFormInstanceHandler.class.getName());
 
-    private final Provider<EntityManager> entityManager;
+    private PermissionOracle permissionOracle;
+    private Provider<EntityManager> entityManager;
 
     @Inject
-    public UpdateFormInstanceHandler(Provider<EntityManager> entityManager) {
+    public UpdateFormInstanceHandler(PermissionOracle permissionOracle, Provider<EntityManager> entityManager) {
+        this.permissionOracle = permissionOracle;
         this.entityManager = entityManager;
     }
 
@@ -37,28 +45,35 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
 
         FormInstance formInstance = validateFormInstance(cmd.getJson());
 
-        FormInstanceEntity entity = new FormInstanceEntity();
+        // Check permission to edit
+        ResourceId parentId = formInstance.getOwnerId();
+        if(parentId.getDomain() != CuidAdapter.SITE_DOMAIN) {
+            throw new UnsupportedOperationException("Permission check only implemented for subform instances of sites");
+        }
+        int parentSiteId = CuidAdapter.getLegacyIdFromCuid(parentId);
+        Site parentSite = entityManager.get().find(Site.class, parentSiteId);
+        permissionOracle.assertEditAllowed(parentSite, user);
+        
+ 
+        // Translate the form instance to a ResourceUpdate
+        ResourceUpdate update = new ResourceUpdate();
+        update.setResourceId(formInstance.getId());
+        update.setParentId(formInstance.getOwnerId());
 
-        entity.setId(formInstance.getId().asString());
-        entity.setClassId(formInstance.getClassId().asString());
-        entity.setOwnerId(formInstance.getOwnerId() != null ? formInstance.getOwnerId().asString() : null);
-        entity.setKeyId(formInstance.getKeyId().isPresent() ? formInstance.getKeyId().get().asString() : null);
-
-        JsonHelper.updateWithJson(entity, cmd.getJson());
-
-        if (!exists(entity.getId())) {
-            entityManager.get().persist(entity);
-        } else {
-            entityManager.get().merge(entity);
+        for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
+            update.set(entry.getKey(), entry.getValue());
         }
 
+        HrdCatalog catalog = new HrdCatalog();
+        Optional<ResourceCollection> collection = catalog.getCollection(formInstance.getClassId());
+        if(!collection.isPresent()) {
+            throw new IllegalStateException("Could not get Resource Collection: " + collection);
+        }
+        collection.get().update(update);
+        
         return new VoidResult();
     }
-
-    private boolean exists(String formInstanceId) {
-        return entityManager.get().find(FormInstanceEntity.class, formInstanceId) != null;
-    }
-
+    
     private FormInstance validateFormInstance(String json) {
         try {
             return FormInstance.fromJson(json);

@@ -1,7 +1,7 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.base.Strings;
 import com.google.common.base.Function;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -328,7 +328,7 @@ public class QueryExecutor {
                 return dispatcher.execute(command).then(FormInstanceListAdapter.getInstance());
         }
     }
-
+    
     private GetAdminEntities adminQuery(ResourceId formClassId) {
         GetAdminEntities query = new GetAdminEntities();
         query.setLevelId(CuidAdapter.getLegacyIdFromCuid(formClassId));

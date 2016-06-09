@@ -1,11 +1,14 @@
 package org.activityinfo.store.hrd;
 
-import com.google.appengine.api.datastore.*;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.hrd.entity.Datastore;
+import org.activityinfo.store.hrd.entity.FormClassEntity;
+import org.activityinfo.store.hrd.entity.FormClassKey;
+import org.activityinfo.store.hrd.op.CreateOrUpdateCollection;
 
 import java.util.*;
 
@@ -14,26 +17,26 @@ import java.util.*;
  */
 public class HrdCatalog implements CollectionCatalog {
     
-    private DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
-    
+    private Datastore datastore = new Datastore();
 
-    public void create(FormClass formClass) {
-        Entity entity = RecordSerialization.toFormClassEntity(formClass);
-        datastoreService.put(entity);
+    public HrdCollection create(FormClass formClass) {
+        datastore.execute(new CreateOrUpdateCollection(formClass));
+        
+        return new HrdCollection(datastore, formClass);
     }
     
     @Override
     public Optional<ResourceCollection> getCollection(ResourceId collectionId) {
 
-        Entity entity;
-        try {
-            entity = datastoreService.get(CollectionKeys.formClassKey(collectionId));
-        } catch (EntityNotFoundException e) {
+        Optional<FormClassEntity> formClassEntity = datastore.loadIfPresent(new FormClassKey(collectionId));
+        
+        if(!formClassEntity.isPresent()) {
             return Optional.absent();
         }
+
+        HrdCollection collection = new HrdCollection(datastore, formClassEntity.get().readFormClass());
         
-        FormClass formClass = RecordSerialization.fromFormClassEntity(entity);
-        return Optional.<ResourceCollection>of(new HrdCollection(datastoreService, formClass));
+        return Optional.<ResourceCollection>of(collection);
     }
 
     @Override
@@ -43,7 +46,8 @@ public class HrdCatalog implements CollectionCatalog {
         }
         String parts[] = resourceId.asString().split("-");
         if(parts.length != 2) {
-            throw new IllegalArgumentException("Expected resource id in the form c00000-000000");
+            throw new IllegalArgumentException("Invalid submission id: " + resourceId + 
+                    ". Expected format c00000-000000");
         }
         return getCollection(ResourceId.valueOf(parts[0]));
     }
@@ -51,22 +55,17 @@ public class HrdCatalog implements CollectionCatalog {
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
         
-        Set<Key> toLoad = new HashSet<>();
+        Set<FormClassKey> toLoad = new HashSet<>();
         for (ResourceId collectionId : collectionIds) {
-            toLoad.add(CollectionKeys.formClassKey(collectionId));
+            toLoad.add(new FormClassKey(collectionId));
         }
-        Map<Key, Entity> entityMap = datastoreService.get(toLoad);
+        Map<FormClassKey, FormClassEntity> entityMap = datastore.get(toLoad);
         Map<ResourceId, FormClass> formClassMap = new HashMap<>();
-        
-        for (ResourceId collectionId : collectionIds) {
-            Key key = CollectionKeys.formClassKey(collectionId);
-            Entity entity = entityMap.get(key);
-            if(entity != null) {
-                FormClass formClass = RecordSerialization.fromFormClassEntity(entity);
-                formClassMap.put(collectionId, formClass);
-            }
-        }
 
+        for (Map.Entry<FormClassKey, FormClassEntity> entry : entityMap.entrySet()) {
+            formClassMap.put(entry.getKey().getCollectionId(), entry.getValue().readFormClass());
+        }
+        
         return formClassMap;
     }
 

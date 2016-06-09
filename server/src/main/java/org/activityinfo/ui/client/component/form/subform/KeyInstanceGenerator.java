@@ -35,16 +35,12 @@ public class KeyInstanceGenerator {
     }
 
     public static ResourceId periodId(DateRange range, ResourceId subformId) {
-        return ResourceId.valueOf(ResourceId.GENERATED_ID_DOMAIN + "_period_" +
-                Iso8601.asString(range.getStart()) + "_" + Iso8601.asString(range.getEnd()) + "_" + subformId.asString());
-    }
-
-    public static ResourceId newCollectionId() {
-        return ResourceId.generateId();
+        return ResourceId.valueOf(subformId.asString() + "-" +
+                Iso8601.asString(range.getStart()) + "_" + Iso8601.asString(range.getEnd()));
     }
 
     public static FormInstance newUnkeyedInstance(ResourceId subFormId) {
-        return new FormInstance(newCollectionId(), subFormId);
+        return new FormInstance(ResourceId.generateSubmissionId(subFormId), subFormId);
     }
 
     public static FormInstance newKeyedInstance(DateRange dateRange, ResourceId subFormId) {

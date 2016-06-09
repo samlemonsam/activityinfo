@@ -121,7 +121,9 @@ public class SubFormTabsManipulator {
         final Optional<LocalDateRange> selectedRange = getSelectedRange();
         final Date startDate = selectedRange.isPresent() ? selectedRange.get().asDateRange().getStart() : new Date();
 
-        final PeriodInstanceKeyedGenerator instanceGenerator = new PeriodInstanceKeyedGenerator(subForm.getId());
+        final PeriodInstanceKeyedGenerator instanceGenerator = new PeriodInstanceKeyedGenerator(
+                formModel.getWorkingRootInstance().getOwnerId(), 
+                subForm.getId());
         presenter.setPeriodType(PredefinedPeriods.fromPeriod(periodValue));
 
         instanceGenerator.generate(periodValue, startDate, PeriodInstanceKeyedGenerator.Direction.BACK, presenter.getTabCount());

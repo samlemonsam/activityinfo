@@ -17,6 +17,7 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.Updater;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,7 +48,7 @@ public class HrdCatalogTest {
     }
     
     @Test
-    public void test() {
+    public void simpleFormTest() {
 
         ResourceId collectionId = ResourceId.valueOf("XYZ123");
         ResourceId villageField = ResourceId.valueOf("FV");
@@ -98,6 +99,45 @@ public class HrdCatalogTest {
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+    }
+    
+    @Test
+    public void createResource() {
+
+
+        FormClass formClass = new FormClass(ResourceId.generateId());
+        formClass.setOwnerId(ResourceId.valueOf("foo"));
+        formClass.setLabel("NFI Distributions");
+        FormField nameField = formClass.addField(ResourceId.generateId())
+                .setLabel("Village name")
+                .setCode("VILLAGE")
+                .setType(TextType.INSTANCE);
+
+        HrdCatalog catalog = new HrdCatalog();
+        Updater updater = new Updater(catalog);
+
+        HrdCollection collection = catalog.create(formClass);
+        
+        String villageNames[] = new String[] { "Rutshuru" , "Beni", "Goma" };
+
+        for (String villageName : villageNames) {
+            ResourceUpdate update = new ResourceUpdate();
+            update.setResourceId(ResourceId.generateId());
+            update.set(nameField.getId(), TextValue.valueOf(villageName));
+        
+            updater.execute(update);
+        }
+
+
+        QueryModel queryModel = new QueryModel(formClass.getId());
+        queryModel.selectResourceId().as("id");
+        queryModel.selectField("VILLAGE").as("village");
+
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = builder.build(queryModel);
+
+        
+        System.out.println(columnSet);
     }
 
     @Test

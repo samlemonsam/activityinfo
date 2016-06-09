@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
@@ -309,6 +308,16 @@ public class Updater {
         FormClass formClass = collection.getFormClass();
         Optional<Resource> existingResource = collection.get(update.getResourceId());
 
+        validateUpdate(formClass, existingResource, update);
+        
+        if(existingResource.isPresent()) {
+            collection.update(update);
+        } else {
+            collection.add(update);
+        }
+    }
+
+    public static void validateUpdate(FormClass formClass, Optional<Resource> existingResource, ResourceUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
 
         Map<ResourceId, FormField> fieldMap = new HashMap<>();
@@ -338,12 +347,6 @@ public class Updater {
                             formField.getCode(), formField.getId());
                 }
             }
-        }
-        
-        if(existingResource.isPresent()) {
-            collection.update(update);
-        } else {
-            collection.add(update);
         }
     }
 

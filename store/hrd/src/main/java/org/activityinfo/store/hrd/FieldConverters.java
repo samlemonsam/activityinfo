@@ -25,9 +25,9 @@ import java.util.Set;
 /**
  * Creates Field Observers for specific field types
  */
-class FieldConverters {
+public class FieldConverters {
 
-    static FieldConverter<?> forType(final FieldType type) {
+    public static FieldConverter<?> forType(final FieldType type) {
         if (type instanceof QuantityType) {
             return new QuantityConverter((QuantityType) type);
         } else if (type instanceof TextType) {
@@ -49,7 +49,7 @@ class FieldConverters {
         }
     }
     
-    static FieldConverter<?> forParentField() {
+    public static FieldConverter<?> forParentField() {
         return new FieldConverter<ReferenceValue>() {
             @Override
             public Object toHrdProperty(ReferenceValue value) {
