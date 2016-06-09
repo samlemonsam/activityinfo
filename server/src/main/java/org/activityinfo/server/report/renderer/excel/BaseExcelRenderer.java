@@ -25,6 +25,7 @@ package org.activityinfo.server.report.renderer.excel;
 import org.activityinfo.legacy.shared.reports.content.FilterDescription;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.WorkbookUtil;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -82,11 +83,11 @@ public abstract class BaseExcelRenderer<ElementT extends ReportElement> {
 
     public String composeSheetName() {
         if (element.getSheetTitle() != null) {
-            return element.getSheetTitle();
+            return WorkbookUtil.createSafeSheetName(element.getSheetTitle());
         } else if (element.getTitle() != null) {
-            return element.getTitle();
+            return WorkbookUtil.createSafeSheetName(element.getTitle());
         } else {
-            return "Sheet" + (book.getNumberOfSheets() + 1);
+            return WorkbookUtil.createSafeSheetName("Sheet" + (book.getNumberOfSheets() + 1));
         }
     }
 
