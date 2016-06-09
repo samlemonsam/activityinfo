@@ -7,6 +7,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
 import org.activityinfo.store.hrd.entity.Datastore;
@@ -56,10 +57,17 @@ public class CreateOrUpdateSubmission implements Operation {
         }
 
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
-            FormField field = formClass.getField(entry.getKey());
-            FieldConverter converter = FieldConverters.forType(field.getType());
-            if (entry.getValue() != null) {
-                updated.setProperty(field.getName(), converter.toHrdProperty(entry.getValue()));
+            // workaround for current UI
+            if(entry.getKey().equals(ResourceId.valueOf("keyId"))) {
+                TextValue keyText = (TextValue)entry.getValue(); 
+                updated.setProperty(entry.getKey().asString(), keyText.asString());
+                
+            } else {
+                FormField field = formClass.getField(entry.getKey());
+                FieldConverter converter = FieldConverters.forType(field.getType());
+                if (entry.getValue() != null) {
+                    updated.setProperty(field.getName(), converter.toHrdProperty(entry.getValue()));
+                }
             }
         }
         

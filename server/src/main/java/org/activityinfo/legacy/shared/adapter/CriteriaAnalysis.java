@@ -67,7 +67,8 @@ public class CriteriaAnalysis extends CriteriaVisitor {
                 if (id.getDomain() == CuidAdapter.SITE_DOMAIN) {
                     querySiteById = true;
                 }
-                if (id.getDomain() != CuidAdapter.ACTIVITY_CATEGORY_DOMAIN) {
+                if (id.getDomain() != CuidAdapter.ACTIVITY_CATEGORY_DOMAIN && 
+                    id.getDomain() != ResourceId.GENERATED_ID_DOMAIN) {
                     ids.put(id.getDomain(), CuidAdapter.getLegacyIdFromCuid(id));
                 }
                 if (querySiteById && id.getDomain() != CuidAdapter.SITE_DOMAIN) {

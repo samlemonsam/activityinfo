@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class GetFormInstance implements Command<FormInstanceListResult> {
 
+
     // todo : code it via type, need criteria but a lot of model classes are not serializable
     // have to ask Alex why
     public enum Type {
@@ -33,6 +34,11 @@ public class GetFormInstance implements Command<FormInstanceListResult> {
         this.instanceIds = Lists.newArrayList(instanceIds);
     }
 
+
+    public GetFormInstance(ResourceId instanceId) {
+        this(Lists.newArrayList(instanceId.asString()));
+    }
+    
     public List<String> getInstanceIds() {
         return instanceIds;
     }

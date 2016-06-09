@@ -3,7 +3,13 @@ package org.activityinfo.store.hrd.entity;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.FieldConverter;
+import org.activityinfo.store.hrd.FieldConverters;
 
 /**
  * Stores the current version of a Form Submission.
@@ -20,7 +26,7 @@ public class FormSubmission implements TypedEntity {
     public static final String PARENT_PROPERTY = "@parent";
     
     private FormSubmissionKey key;
-    private Entity entity;
+    private final Entity entity;
 
     public FormSubmission(FormSubmissionKey key) {
         this.key = key;
@@ -33,13 +39,43 @@ public class FormSubmission implements TypedEntity {
     
     public FormSubmission(Entity entity) {
         this.key = new FormSubmissionKey(entity.getKey());
+        this.entity = entity;
     }
 
-
+    public FormInstance toFormInstance(FormClass formClass) {
+        FormInstance formInstance = new FormInstance(key.getResourceId(), key.getCollectionId());
+        
+        if(formClass.getParentField().isPresent()) {
+            formInstance.setOwnerId(getParentId());
+        }
+        
+        if(entity.getProperty("keyId") != null) {
+            formInstance.setKeyId(ResourceId.valueOf((String) entity.getProperty("keyId")));
+        }
+        
+        for (FormField formField : formClass.getFields()) {
+            Object value = entity.getProperty(formField.getName());
+            if(value != null) {
+                FieldConverter<?> converter = FieldConverters.forType(formField.getType());
+                formInstance.set(formField.getId(), converter.toFieldValue(value));
+            }
+        }
+        return formInstance;
+    }
+    
     public FormSubmissionKey getKey() {
         return key;
     }
 
+    public ResourceId getParentId() {
+        String parentId = (String) entity.getProperty(PARENT_PROPERTY);
+        if(parentId == null) {
+            return null;
+        } else {
+            return ResourceId.valueOf(parentId);
+        }
+    }
+    
     public void setParentId(ResourceId parentId) {
         entity.setProperty(PARENT_PROPERTY, parentId.asString());
     }
@@ -55,5 +91,9 @@ public class FormSubmission implements TypedEntity {
 
     public Entity raw() {
         return entity;
+    }
+    
+    public static Query.FilterPredicate parentFilter(ResourceId parentId) {
+        return new Query.FilterPredicate(PARENT_PROPERTY, Query.FilterOperator.EQUAL, parentId.asString());
     }
 }

@@ -1,8 +1,8 @@
 package org.activityinfo.core.shared.criteria;
 
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -81,7 +81,7 @@ public class ParentCriteria implements Criteria {
 
     private final Parent parent;
 
-    private ParentCriteria(Parent parent) {
+    public ParentCriteria(Parent parent) {
         this.parent = parent;
     }
 

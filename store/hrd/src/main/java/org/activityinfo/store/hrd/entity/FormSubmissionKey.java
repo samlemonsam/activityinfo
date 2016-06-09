@@ -20,7 +20,7 @@ public class FormSubmissionKey implements TypedKey<FormSubmission> {
         Preconditions.checkArgument(parts.length == 2, malformedId(submissionId));
         
         Key parent = CollectionRootKey.key(ResourceId.valueOf(parts[0]));
-        this.key = KeyFactory.createKey(parent, FormSubmission.KIND, parts[0]);
+        this.key = KeyFactory.createKey(parent, FormSubmission.KIND, parts[1]);
     }
 
     public FormSubmissionKey(Key key) {
@@ -32,6 +32,10 @@ public class FormSubmissionKey implements TypedKey<FormSubmission> {
 
     public ResourceId getCollectionId() {
         return ResourceId.valueOf(key.getParent().getName());
+    }
+
+    public ResourceId getResourceId() {
+        return ResourceId.valueOf(getCollectionId() + "-" + key.getName());
     }
     
     private static String malformedId(ResourceId id) {
@@ -47,4 +51,5 @@ public class FormSubmissionKey implements TypedKey<FormSubmission> {
     public FormSubmission typeEntity(Entity entity) {
         return new FormSubmission(entity);
     }
+
 }

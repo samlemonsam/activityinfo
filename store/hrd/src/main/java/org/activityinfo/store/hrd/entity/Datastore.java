@@ -3,6 +3,7 @@ package org.activityinfo.store.hrd.entity;
 import com.google.appengine.api.datastore.*;
 import com.google.common.base.Optional;
 import org.activityinfo.store.hrd.op.Operation;
+import org.activityinfo.store.hrd.op.QueryOperation;
 
 import java.util.*;
 
@@ -59,6 +60,17 @@ public class Datastore {
         }
     }
     
+    public <T> T execute(QueryOperation<T> queryOperation) {
+        Transaction tx = datastoreService.beginTransaction();
+        Datastore wrapper = new Datastore(datastoreService, tx);
+        
+        try {
+            return queryOperation.execute(wrapper);
+        } finally {
+            tx.rollback();
+        }
+    }
+    
     public <T> T load(TypedKey<T> key) throws EntityNotFoundException {
         Entity entity = datastoreService.get(key.raw());
         return key.typeEntity(entity);
@@ -109,6 +121,10 @@ public class Datastore {
     
     public DatastoreService unwrap() {
         return datastoreService;
+    }
+
+    public PreparedQuery prepare(Query query) {
+        return datastoreService.prepare(tx, query);
     }
 
 }

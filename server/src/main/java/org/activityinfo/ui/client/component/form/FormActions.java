@@ -27,7 +27,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.IsResource;
-import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
@@ -58,11 +57,7 @@ public class FormActions {
         toPersist.add(model.getWorkingRootInstance()); // root instance
 
         for (Map.Entry<FormModel.SubformValueKey, FormInstance> entry : subformInstances.entrySet()) { // sub form instances
-            if (!ClassType.isRepeating(entry.getKey().getSubForm())) {
-                toPersist.add(entry.getKey().getTabInstance()); // keyes
-            }
-            toPersist.add(entry.getValue()); // values
-
+            toPersist.add(entry.getValue());
         }
 
         Promise<Void> persist = locator.persist(toPersist);

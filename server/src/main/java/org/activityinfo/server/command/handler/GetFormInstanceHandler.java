@@ -1,30 +1,28 @@
 package org.activityinfo.server.command.handler;
 
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetFormInstance;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.command.handler.json.JsonHelper;
-import org.activityinfo.server.database.hibernate.entity.FormInstanceEntity;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.hrd.HrdCatalog;
+import org.activityinfo.store.hrd.HrdCollection;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * TODO Revise this class! Implementation must be based on Criteria and Cloud Storage
- *
- * Created by yuriy on 3/1/2015.
- */
+
 public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
 
     private Provider<EntityManager> entityManager;
@@ -38,67 +36,57 @@ public class GetFormInstanceHandler implements CommandHandler<GetFormInstance> {
     @Override
     public CommandResult execute(GetFormInstance cmd, User user) throws CommandException {
 
-        Optional<ResourceCollection> collection = catalog.getCollection(ResourceId.valueOf(cmd.getClassId()));
+        if(cmd.getInstanceIds() != null & cmd.getInstanceIds().size() == 1) {
+            return fetchById(cmd.getInstanceIds().get(0));
+        }
+        
+        if(cmd.getOwnerIds() != null && cmd.getOwnerIds().size() == 1) {
+            ResourceId collectionId = ResourceId.valueOf(cmd.getClassId());
+            ResourceId parentId = ResourceId.valueOf(Iterables.getOnlyElement(cmd.getOwnerIds()));
+            return fetchByParent(collectionId, parentId);
+        }
+        
+        throw new UnsupportedOperationException();
+
+    }
+
+
+    private CommandResult fetchById(String id) {
+        ResourceId resourceId = ResourceId.valueOf(id);
+        Optional<ResourceCollection> collection = catalog.lookupCollection(resourceId);
         if(!collection.isPresent()) {
-            throw new IllegalArgumentException("No such collection: " + cmd.getClassId());
+            throw new IllegalArgumentException("No such resource: " + id);
         }
 
-        FormClass formClass = collection.get().getFormClass();
+        FormInstance instance;
+        HrdCollection hrdCollection = (HrdCollection) collection.get();
+        try {
+            instance = hrdCollection.getSubmission(resourceId);
+        } catch (EntityNotFoundException e) {
+            throw new UnsupportedOperationException(e);
+        }
+        return buildResult(Collections.singleton(instance));
+    }
+
+
+    private CommandResult fetchByParent(ResourceId collectionId, ResourceId parentId) {
+        Optional<ResourceCollection> collection = catalog.getCollection(collectionId);
+        if(!collection.isPresent()) {
+            throw new IllegalArgumentException("No such resource: " + collectionId);
+        }
         
+        HrdCollection hrdCollection = (HrdCollection) collection.get();
+        Iterable<FormInstance> instances = hrdCollection.getSubmissionsOfParent(parentId);
         
-        switch (cmd.getType()) {
-            case ID:
-                return fecthById(cmd);
-            case CLASS:
-                return fetchByClass(cmd);
-            case OWNER:
-                return fetchByOwner(cmd);
-        }
-        throw new CommandException("Unsupported GetFormInstance type:" + cmd.getType());
-
-    }
-
-    private CommandResult fetchByClass(GetFormInstance cmd) {
-        
-        List<FormInstanceEntity> entities = entityManager.get().createQuery(
-                "SELECT d FROM FormInstanceEntity d WHERE formInstanceClassId = :classId")
-                .setParameter("classId", cmd.getClassId())
-                .getResultList();
-        return new FormInstanceListResult(JsonHelper.readJsons(entities));
-    }
-
-    private CommandResult fetchByOwner(GetFormInstance cmd) {
-        final List<FormInstanceEntity> entities = Lists.newArrayList();
-
-        for (String ownerId : cmd.getOwnerIds()) {
-            if (Strings.isNullOrEmpty(cmd.getClassId())) {
-                entities.addAll(entityManager.get().createQuery(
-                        "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId")
-                        .setParameter("ownerId", ownerId)
-                        .getResultList());
-            } else {
-                entities.addAll(entityManager.get().createQuery(
-                        "SELECT d FROM FormInstanceEntity d WHERE formInstanceOwnerId = :ownerId AND formInstanceClassId = :classId")
-                        .setParameter("ownerId", ownerId)
-                        .setParameter("classId", cmd.getClassId())
-                        .getResultList());
-            }
-        }
-        return new FormInstanceListResult(JsonHelper.readJsons(entities));
-    }
-
-    private CommandResult fecthById(GetFormInstance cmd) {
-        List<FormInstanceEntity> entities = fetchEntities(cmd.getInstanceIds());
-        return new FormInstanceListResult(JsonHelper.readJsons(entities));
-    }
-
-    private List<FormInstanceEntity> fetchEntities(List<String> instanceIds) {
-        List<FormInstanceEntity> entities = Lists.newArrayList();
-        for (String instanceId : instanceIds) {
-            entities.add(entityManager.get().find(FormInstanceEntity.class, instanceId));
-        }
-        return entities;
+        return buildResult(instances);
     }
     
-    
+    private CommandResult buildResult(Iterable<FormInstance> instances) {
+        List<String> jsonList = Lists.newArrayList();
+        for (FormInstance instance : instances) {
+            jsonList.add(Resources.toJson(instance.asResource()));
+        }
+        return new FormInstanceListResult(jsonList);
+    }
+
 }

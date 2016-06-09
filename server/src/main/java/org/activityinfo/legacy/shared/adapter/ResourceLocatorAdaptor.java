@@ -13,10 +13,8 @@ import org.activityinfo.core.shared.criteria.RemoveFieldCriteriaVisitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
 import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
-import org.activityinfo.legacy.shared.command.GetActivityForm;
-import org.activityinfo.legacy.shared.command.GetSites;
-import org.activityinfo.legacy.shared.command.UpdateFormClass;
-import org.activityinfo.legacy.shared.command.UpdateFormInstance;
+import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -71,6 +69,15 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<FormInstance> getFormInstance(ResourceId instanceId) {
+        if(instanceId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+            return dispatcher.execute(new GetFormInstance(instanceId)).then(new Function<FormInstanceListResult, FormInstance>() {
+                @Nullable
+                @Override
+                public FormInstance apply(@Nullable FormInstanceListResult input) {
+                    return input.getFormInstanceList().get(0);
+                }
+            });
+        }
         if(instanceId.getDomain() == CuidAdapter.SITE_DOMAIN) {
             final Promise<SiteResult> site = dispatcher.execute(GetSites.byId(CuidAdapter.getLegacyIdFromCuid(instanceId)));
             final Promise<ActivityFormDTO> form = site.join(new Function<SiteResult, Promise<ActivityFormDTO>>() {

@@ -29,21 +29,21 @@ public class FieldConverters {
 
     public static FieldConverter<?> forType(final FieldType type) {
         if (type instanceof QuantityType) {
-            return new QuantityConverter((QuantityType) type);
+            return quantity((QuantityType) type);
         } else if (type instanceof TextType) {
-            return new TextConverter();
+            return TEXT;
         } else if (type instanceof BarcodeType) {
-            return new BarcodeConverter();
+            return BARCODE;
         } else if(type instanceof ReferenceType) {
-            return new ReferenceConverter();
+            return REFERENCE;
         } else if(type instanceof NarrativeType) {
-            return new NarrativeConverter();
+            return NARRATIVE;
         } else if(type instanceof GeoPointType) {
-            return new GeoPointConverter();
-        } else if(type instanceof LocalDateConverter) {
-            return new LocalDateConverter();
+            return GEO_POINT;
+        } else if(type instanceof LocalDate) {
+            return LOCAL_DATE;
         } else if(type.getTypeClass() instanceof RecordFieldTypeClass) {
-            return new RecordValueConverter((RecordFieldTypeClass) type.getTypeClass());
+            return recordType((RecordFieldTypeClass) type.getTypeClass());
         } else {
             throw new UnsupportedOperationException("Type: " + type);
         }
@@ -62,28 +62,24 @@ public class FieldConverters {
             }
         };
     }
+    
+    public static FieldConverter<Quantity> quantity(final QuantityType type) {
+        return new FieldConverter<Quantity>() {
 
-    private static class QuantityConverter implements FieldConverter<Quantity> {
+            @Override
+            public Double toHrdProperty(Quantity value) {
+                return value.getValue();
+            }
 
-        private final QuantityType type;
-
-        public QuantityConverter(QuantityType type) {
-            this.type = type;
-        }
-
-        @Override
-        public Double toHrdProperty(Quantity value) {
-            return value.getValue();
-        }
-
-        @Override
-        public Quantity toFieldValue(Object hrdValue) {
-            Number number = (Number) hrdValue;
-            return new Quantity(number.doubleValue(), type.getUnits());
-        }
+            @Override
+            public Quantity toFieldValue(Object hrdValue) {
+                Number number = (Number) hrdValue;
+                return new Quantity(number.doubleValue(), type.getUnits());
+            }
+        };
     }
-
-    private static class TextConverter implements FieldConverter<TextValue> {
+    
+    public static final FieldConverter<TextValue> TEXT = new FieldConverter<TextValue>() {
 
         @Override
         public Object toHrdProperty(TextValue value) {
@@ -94,10 +90,9 @@ public class FieldConverters {
         public TextValue toFieldValue(Object hrdValue) {
             return TextValue.valueOf((String) hrdValue);
         }
-    }
-
-
-    private static class BarcodeConverter implements FieldConverter<BarcodeValue> {
+    };
+    
+    public static final FieldConverter<BarcodeValue> BARCODE = new FieldConverter<BarcodeValue>() {
 
         @Override
         public Object toHrdProperty(BarcodeValue value) {
@@ -108,9 +103,10 @@ public class FieldConverters {
         public BarcodeValue toFieldValue(Object hrdValue) {
             return BarcodeValue.valueOf((String)hrdValue);
         }
-    }
+    };
     
-    private static class ReferenceConverter implements FieldConverter<ReferenceValue> {
+    public static final FieldConverter<ReferenceValue> REFERENCE = new FieldConverter<ReferenceValue>() {
+    
         @Override
         public Object toHrdProperty(ReferenceValue value) {
             if (value.getResourceIds().isEmpty()) {
@@ -141,9 +137,9 @@ public class FieldConverters {
             }
             return new ReferenceValue(resourceIdSet);
         }
-    }
-
-    private static class NarrativeConverter implements FieldConverter<NarrativeValue> {
+    };
+    
+    public static final FieldConverter<NarrativeValue> NARRATIVE = new FieldConverter<NarrativeValue>() {
         @Override
         public Object toHrdProperty(NarrativeValue value) {
             return new Text(value.getText());
@@ -157,9 +153,9 @@ public class FieldConverters {
                 return null;
             }
         }
-    }
+    };
     
-    private static class GeoPointConverter implements FieldConverter<GeoPoint> {
+    public static final FieldConverter<GeoPoint> GEO_POINT = new FieldConverter<GeoPoint>() {
         @Override
         public Object toHrdProperty(GeoPoint value) {
             return new GeoPt((float)value.getLatitude(), (float)value.getLongitude());
@@ -170,10 +166,10 @@ public class FieldConverters {
             GeoPoint point = (GeoPoint) hrdValue;
             return new GeoPoint(point.getLatitude(), point.getLongitude());
         }
-    }
+    };
     
-    private static class LocalDateConverter implements FieldConverter<LocalDate> {
-
+    public static final FieldConverter<LocalDate> LOCAL_DATE = new FieldConverter<LocalDate>() {
+     
         @Override
         public Object toHrdProperty(LocalDate value) {
             // Use simple YYYY-MM-DD
@@ -185,28 +181,22 @@ public class FieldConverters {
             String stringValue = (String) hrdValue;
             return LocalDate.parse(stringValue);
         }
-    }
+    };
     
-    
-    private static class RecordValueConverter implements FieldConverter<FieldValue> {
-        
-        private final RecordFieldTypeClass typeClass;
+    public static final FieldConverter<FieldValue> recordType(final RecordFieldTypeClass typeClass) {
+        return new FieldConverter<FieldValue>() {
+            @Override
+            public Object toHrdProperty(FieldValue value) {
+                Record recordValue = ((IsRecord) value).asRecord();
+                return RecordSerialization.toEmbeddedEntity(recordValue);
+            }
 
-        public RecordValueConverter(RecordFieldTypeClass typeClass) {
-            this.typeClass = typeClass;
-        }
-
-        @Override
-        public Object toHrdProperty(FieldValue value) {
-            Record recordValue = ((IsRecord) value).asRecord();
-            return RecordSerialization.toEmbeddedEntity(recordValue);
-        }
-
-        @Override
-        public FieldValue toFieldValue(Object hrdValue) {
-            EmbeddedEntity embeddedEntity = (EmbeddedEntity) hrdValue;
-            Record record = RecordSerialization.fromEmbeddedEntity(embeddedEntity);
-            return typeClass.deserialize(record);
-        }
+            @Override
+            public FieldValue toFieldValue(Object hrdValue) {
+                EmbeddedEntity embeddedEntity = (EmbeddedEntity) hrdValue;
+                Record record = RecordSerialization.fromEmbeddedEntity(embeddedEntity);
+                return typeClass.deserialize(record);
+            }
+        };
     }
 }

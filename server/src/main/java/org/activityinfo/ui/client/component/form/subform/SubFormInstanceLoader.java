@@ -29,6 +29,7 @@ import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
@@ -70,7 +71,11 @@ public class SubFormInstanceLoader {
     public Promise<Void> loadKeyedSubformInstances(final FormClass subForm) {
         final Promise<Void> result = new Promise<>();
 
-        ParentCriteria criteria = ParentCriteria.isChildOf(ClassType.REPEATING.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
+        ResourceId parentId = model.getWorkingRootInstance().getId();
+        ParentCriteria.Parent parent = new ParentCriteria.Parent(parentId, parentId);
+        parent.setClassId(subForm.getId());
+        
+        ParentCriteria criteria = new ParentCriteria(parent);
 
         model.getLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Void>() {
             @Override

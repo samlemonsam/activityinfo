@@ -239,6 +239,7 @@ public class FormModelTest extends CommandTestCase2 {
 
         subFormClass = new FormClass(ResourceId.generateId());
         subFormClass.setOwnerId(masterFormClass.getId());
+        subFormClass.setParentFormId(masterFormId);
         subFormChildField = subFormClass.addField();
         subFormChildField.setType(TextType.INSTANCE);
 
