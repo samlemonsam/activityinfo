@@ -30,6 +30,7 @@ import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.*;
 import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -129,6 +130,12 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         radioDatabase = new Radio();
         radioDatabase.setFieldLabel(I18N.CONSTANTS.database());
+        radioDatabase.addListener(Events.Change, new Listener<FieldEvent>() {
+            @Override
+            public void handleEvent(FieldEvent be) {
+                setState();
+            }
+        });
         radiogroupContainer.add(radioDatabase);
 
         panelDatabase = new HorizontalPanel();
@@ -139,6 +146,12 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         radioActivity = new Radio();
         radioActivity.setFieldLabel(I18N.CONSTANTS.activity());
+        radioActivity.addListener(Events.Change, new Listener<FieldEvent>() {
+            @Override
+            public void handleEvent(FieldEvent be) {
+                setState();
+            }
+        });
 
         labelActivity = new LabelField(I18N.CONSTANTS.activity());
         labelActivity.setWidth(100);
@@ -155,7 +168,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         radioProject.addListener(Events.Change, new Listener<FieldEvent>() {
             @Override
             public void handleEvent(FieldEvent be) {
-                comboboxProjects.setEnabled(radioProject.getValue());
+                setState();
             }
         });
 
@@ -211,6 +224,17 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
                 comboboxProjects.clearInvalid();
             }
         });
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                setState();
+            }
+        });
+    }
+
+    private void setState() {
+        comboboxProjects.setEnabled(radioProject.getValue());
+        comboboxActivities.setEnabled(radioActivity.getValue());
     }
 
     @Override
