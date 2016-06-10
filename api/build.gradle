@@ -1,0 +1,32 @@
+
+
+
+dependencies {
+    compile "io.swagger:swagger-codegen-cli:2.1.6"
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
+}
+
+task generateDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'io.swagger.codegen.SwaggerCodegen'
+    
+    args 'generate'
+    args '-i', 'api.yaml'
+    args '-l', 'html'
+    args '-o', "$buildDir/docs"
+    
+}
+
+task generateJavaClient(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'io.swagger.codegen.SwaggerCodegen'
+
+    args 'generate'
+    args '-i', 'api.yaml'
+    args '-l', 'java'
+    args '-c', "$projectDir/src/main/config/java.json"
+    args '-o', "$buildDir/generated/java"
+
+}
