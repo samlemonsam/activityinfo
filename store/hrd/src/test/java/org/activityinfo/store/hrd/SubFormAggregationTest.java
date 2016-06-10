@@ -56,10 +56,10 @@ public class SubFormAggregationTest {
         // and a repeating househould member form
 
 
-        FormClass siteForm = new FormClass(ResourceId.valueOf("SITE"));
+        FormClass siteForm = new FormClass(ResourceId.generateId());
         siteForm.setOwnerId(ResourceId.ROOT_ID);
 
-        FormClass monthlyForm = new FormClass(ResourceId.valueOf("MONTHLY"));
+        FormClass monthlyForm = new FormClass(ResourceId.generateId());
         monthlyForm.setParentFormId(siteForm.getId());
         monthlyForm.setOwnerId(siteForm.getId());
 
@@ -89,25 +89,25 @@ public class SubFormAggregationTest {
         catalog.create(monthlyForm);
 
         ResourceUpdate v1 = new ResourceUpdate();
-        v1.setResourceId(ResourceId.valueOf("V1"));
+        v1.setResourceId(ResourceId.generateSubmissionId(siteForm));
         v1.set(villageField.getId(), TextValue.valueOf("Rutshuru"));
 
         ResourceUpdate v2 = new ResourceUpdate();
-        v2.setResourceId(ResourceId.valueOf("V2"));
+        v2.setResourceId(ResourceId.generateSubmissionId(siteForm));
         v2.set(villageField.getId(), TextValue.valueOf("Beni"));
 
         ResourceUpdate month1 = new ResourceUpdate();
-        month1.setResourceId(ResourceId.valueOf("M1"));
+        month1.setResourceId(ResourceId.generateSubmissionId(monthlyForm));
         month1.setParentId(v1.getResourceId());
         month1.set(countField.getId(), new Quantity(40, "households"));
 
         ResourceUpdate month2 = new ResourceUpdate();
-        month2.setResourceId(ResourceId.valueOf("M2"));
+        month2.setResourceId(ResourceId.generateSubmissionId(monthlyForm));
         month2.setParentId(v1.getResourceId());
         month2.set(countField.getId(), new Quantity(30, "households"));
 
         ResourceUpdate month3 = new ResourceUpdate();
-        month3.setResourceId(ResourceId.valueOf("M3"));
+        month3.setResourceId(ResourceId.generateSubmissionId(monthlyForm));
         month3.setParentId(v2.getResourceId());
         month3.set(countField.getId(), new Quantity(47, "households"));
 

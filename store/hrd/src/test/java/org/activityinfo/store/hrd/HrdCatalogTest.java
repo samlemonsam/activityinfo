@@ -75,12 +75,12 @@ public class HrdCatalogTest {
         assertTrue(collection.isPresent());
 
         ResourceUpdate village1 = new ResourceUpdate();
-        village1.setResourceId(ResourceId.valueOf("V1"));
+        village1.setResourceId(ResourceId.generateSubmissionId(formClass));
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
 
         ResourceUpdate village2 = new ResourceUpdate();
-        village2.setResourceId(ResourceId.valueOf("V2"));
+        village2.setResourceId(ResourceId.generateSubmissionId(formClass));
         village2.set(villageField, TextValue.valueOf("Beni"));
         village2.set(countField, new Quantity(230));
 
@@ -122,7 +122,7 @@ public class HrdCatalogTest {
 
         for (String villageName : villageNames) {
             ResourceUpdate update = new ResourceUpdate();
-            update.setResourceId(ResourceId.generateId());
+            update.setResourceId(ResourceId.generateSubmissionId(formClass));
             update.set(nameField.getId(), TextValue.valueOf(villageName));
         
             updater.execute(update);

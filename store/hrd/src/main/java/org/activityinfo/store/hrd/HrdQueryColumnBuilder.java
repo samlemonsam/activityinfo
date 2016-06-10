@@ -73,7 +73,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();
-                ResourceId id = ResourceId.valueOf(entity.getKey().getName());
+                ResourceId id = ResourceId.valueOf(formClass.getId() + "-" + entity.getKey().getName());
                 for (CursorObserver<ResourceId> idObserver : idObservers) {
                     idObserver.onNext(id);
                 }

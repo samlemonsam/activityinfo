@@ -83,8 +83,9 @@ public class JoinedSubFormColumnViewSlot implements Slot<ColumnView> {
             }
 
             // Compute the statistic over this group
-            result[masterRow] = statistic.compute(subColumnValues, groupStart, groupEnd);
-
+            if(masterRow != -1) {
+                result[masterRow] = statistic.compute(subColumnValues, groupStart, groupEnd);
+            }
             // Move to the next group
             groupStart = groupEnd;
             
