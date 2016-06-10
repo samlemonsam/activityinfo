@@ -1,15 +1,17 @@
 package org.activityinfo.server.database.hibernate;
 
 import com.google.inject.Provider;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.CompositeCatalog;
-import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.MySqlCatalogProvider;
+import org.activityinfo.store.mysql.MySqlSession;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-public class HibernateCatalogProvider implements Provider<CollectionCatalog> {
+/**
+ * Expose the {@link MySqlSession} implementation specifically, as there are some remaining dependencies between
+ * the pivot table generator and the MySQL implementation. 
+ */
+public class HibernateCatalogProvider implements Provider<MySqlSession> {
 
     private final MySqlCatalogProvider catalogProvider;
     
@@ -23,10 +25,7 @@ public class HibernateCatalogProvider implements Provider<CollectionCatalog> {
     }
 
     @Override
-    public CollectionCatalog get() {
-        HrdCatalog datastoreCatalog = new HrdCatalog();
-        CollectionCatalog mysqlCatalog = catalogProvider.openCatalog(new HibernateQueryExecutor(entityManager));
-       
-        return new CompositeCatalog(datastoreCatalog, mysqlCatalog);
+    public MySqlSession get() {
+        return catalogProvider.openCatalog(new HibernateQueryExecutor(entityManager));
     }
 }

@@ -34,7 +34,6 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
-import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
@@ -86,8 +85,8 @@ public class PivotAdapter {
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
 
 
-    public PivotAdapter(CollectionCatalog catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
-        this.session = (MySqlSession) catalog;
+    public PivotAdapter(MySqlSession catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
+        this.session = catalog;
         this.command = command;
         this.filter = command.getFilter();
         this.userId = userId;
