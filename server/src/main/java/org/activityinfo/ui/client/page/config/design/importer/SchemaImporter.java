@@ -131,6 +131,8 @@ public class SchemaImporter {
     private Column attributeValue;
     private Column locationType;
     private Column reportingFrequency;
+    private Column fieldCode;
+    private Column fieldExpression;
 
     private int batchNumber;
     private int batchCount;
@@ -200,6 +202,8 @@ public class SchemaImporter {
                     indicator.setDescription(fieldDescription.get(row));
                     indicator.setUnits(fieldUnits.get(row));
                     indicator.set("activityId", activity);
+                    indicator.setNameInExpression(fieldCode.get(row));
+                    indicator.setExpression(fieldExpression.get(row));
                     if (isTruthy(fieldMandatory.get(row))) {
                         indicator.setMandatory(true);
                     }
@@ -362,6 +366,8 @@ public class SchemaImporter {
         multipleAllowed = findColumn("multipleAllowed", "false");
         attributeValue = findColumn("AttributeValue", 50);
         reportingFrequency = findColumn("ReportingFrequency", "once");
+        fieldCode = findColumn("Code", "");
+        fieldExpression = findColumn("Expression", "");
     }
 
     public void persist(AsyncCallback<Void> callback) {
