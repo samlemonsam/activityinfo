@@ -19,10 +19,10 @@ public class CountryTable implements SimpleTable {
 
     public static final String TABLE_NAME = "country";
 
-    public static final ResourceId FORM_CLASS_ID = ResourceId.valueOf("FF8081814AE2C808014AE2C80FE30001");
-    public static final ResourceId NAME_FIELD_ID = ResourceId.valueOf("FF8081814AE2C808014AE2C86AEE0002");
-    public static final ResourceId CODE_FIELD_ID = ResourceId.valueOf("FF8081814AE2C808014AE2CA840D0003");
-    public static final ResourceId BOUNDARY_FIELD_ID = ResourceId.valueOf("FF8081814AE3CC9B014AE3CCB2850001");
+    public static final ResourceId FORM_CLASS_ID = ResourceId.valueOf("country");
+    public static final ResourceId NAME_FIELD_ID = ResourceId.valueOf("name");
+    public static final ResourceId CODE_FIELD_ID = ResourceId.valueOf("code");
+    public static final ResourceId BOUNDARY_FIELD_ID = ResourceId.valueOf("boundary");
 
 
     @Override
@@ -41,7 +41,7 @@ public class CountryTable implements SimpleTable {
         isoField.setCode("code");
         isoField.setLabel(I18N.CONSTANTS.codeFieldLabel());
         isoField.setType(TextType.INSTANCE);
-
+    
         FormField boundaryField = new FormField(BOUNDARY_FIELD_ID);
         boundaryField.setCode("boundary");
         boundaryField.setLabel(I18N.CONSTANTS.boundaries());
