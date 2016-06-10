@@ -75,7 +75,9 @@ public class SchemaCsvWriter {
                 "Description",
                 "Units",
                 "AttributeId",
-                "AttributeValue");
+                "AttributeValue",
+                "Code",
+                "Expression");
     }
 
     private void writeElementLine(ActivityFormDTO activity, IndicatorDTO indicator) {
@@ -91,7 +93,10 @@ public class SchemaCsvWriter {
                 indicator.getDescription(),
                 indicator.getUnits(),
                 null,
-                null);
+                null,
+                indicator.getNameInExpression(),
+                indicator.getExpression()
+        );
     }
 
     private void writeElementLine(ActivityFormDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) {
@@ -107,7 +112,9 @@ public class SchemaCsvWriter {
                 null,
                 null,
                 attrib.getId(),
-                attrib.getName());
+                attrib.getName(),
+                null,
+                null);
     }
 
     private void writeLine(Object... columns) {
