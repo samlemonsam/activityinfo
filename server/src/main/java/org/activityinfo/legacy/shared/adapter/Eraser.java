@@ -22,14 +22,9 @@ package org.activityinfo.legacy.shared.adapter;
  */
 
 import com.google.common.collect.Lists;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.*;
-import org.activityinfo.legacy.shared.command.result.BatchResult;
-import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
-import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -97,53 +92,6 @@ public class Eraser {
             return Promise.rejected(new UnsupportedOperationException());
         }
 
-        final Promise<Void> result = new Promise<>();
-
-        dispatcher.execute(new BatchCommand(commands)).then(new AsyncCallback<BatchResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                result.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(BatchResult batchResult) {
-                dispatcher.execute(new GetFormInstance().setType(GetFormInstance.Type.OWNER).setOwnerIdList(instanceIds)).then(new AsyncCallback<FormInstanceListResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        result.onFailure(caught);
-                    }
-
-                    @Override
-                    public void onSuccess(FormInstanceListResult batchResult) {
-
-                        if (batchResult.getFormInstanceList().isEmpty()) {
-                            result.onSuccess(null);
-                            return;
-                        }
-
-                        List<ResourceId> ids = Lists.newArrayList();
-
-                        for (FormInstance instance : batchResult.getFormInstanceList()) {
-                            if (instance.getId().getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-                                ids.add(instance.getId());
-                            }
-                        }
-
-                        dispatcher.execute(new DeleteFormInstance().setInstanceIdList(ids)).then(new AsyncCallback<VoidResult>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                result.onFailure(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(VoidResult voidResult) {
-                                result.onSuccess(null);
-                            }
-                        });
-                    }
-                });
-            }
-        });
-        return result;
+        return dispatcher.execute(new BatchCommand(commands)).thenDiscardResult();
     }
 }
