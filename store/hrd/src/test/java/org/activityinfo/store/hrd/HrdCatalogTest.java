@@ -50,7 +50,7 @@ public class HrdCatalogTest {
     @Test
     public void simpleFormTest() {
 
-        ResourceId collectionId = ResourceId.valueOf("XYZ123");
+        ResourceId collectionId = ResourceId.generateId();
         ResourceId villageField = ResourceId.valueOf("FV");
         ResourceId countField = ResourceId.valueOf("FC");
         

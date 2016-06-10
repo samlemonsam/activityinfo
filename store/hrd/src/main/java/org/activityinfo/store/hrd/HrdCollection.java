@@ -43,7 +43,17 @@ public class HrdCollection implements ResourceCollection {
 
     @Override
     public Optional<Resource> get(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
+        FormSubmissionKey key = new FormSubmissionKey(resourceId);
+        Optional<FormSubmission> submission = datastore.loadIfPresent(key);
+
+        if(submission.isPresent()) {
+            FormInstance instance = submission.get().toFormInstance(formClass);
+            Resource resource = instance.asResource();
+            return Optional.of(resource);
+        
+        } else {
+            return Optional.absent();
+        }
     }
 
     @Override
