@@ -225,8 +225,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     private boolean validateChange(UserPermissionDTO user, String property) {
 
         // If the user doesn't have the manageUser permission, then it's
-        // definitely
-        // a no.
+        // definitely a no.
         if (!db.isManageUsersAllowed()) {
             return false;
         }
@@ -390,6 +389,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         model.setAllowDesign(false);
         model.setAllowManageAllUsers(false);
         model.setAllowManageUsers(false);
+        model.setPartner(db.getMyPartner());
 
         dispatcher.execute(new UpdateUserPermissions(db.getId(), model),
                 new MaskingAsyncMonitor(this, I18N.CONSTANTS.deleting()),
