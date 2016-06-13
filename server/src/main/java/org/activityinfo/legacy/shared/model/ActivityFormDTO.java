@@ -465,7 +465,7 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isAllowedToEdit(SiteDTO site) {
-        return editAllAllowed || site.getPartnerId() == currentPartnerId;
+        return editAllAllowed || (isEditAllowed() && site.getPartnerId() == currentPartnerId);
     }
 
 
