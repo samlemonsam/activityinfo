@@ -135,15 +135,16 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         this.view.setActionEnabled(UIActions.EDIT, false);
         this.view.setActionEnabled(UIActions.OPEN_TABLE, false);
 
-        initMenu();
+        initMenu(db.isDesignAllowed());
     }
 
-    private void initMenu() {
+    private void initMenu(boolean isDesignAllowed) {
         Menu newMenu = this.view.getNewMenu();
         if (newMenu == null) {
             return;
         }
 
+        newMenu.setEnabled(isDesignAllowed);
         newMenu.addListener(Events.BeforeShow, new Listener<BaseEvent>() {
             @Override
             public void handleEvent(BaseEvent be) {
