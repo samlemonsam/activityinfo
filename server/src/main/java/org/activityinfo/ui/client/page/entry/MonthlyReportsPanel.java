@@ -77,7 +77,6 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     private ActivityFormDTO currentActivity;
 
     private ActionToolBar toolBar;
-    private boolean readOnly;
 
 
     public MonthlyReportsPanel(Dispatcher service) {
@@ -163,6 +162,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         monthCombo.setMappedValue(startMonth);
         grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(activity)));
         grid.updateMonthColumns(startMonth);
+        grid.setReadOnly(currentActivity.isAllowedToEdit(site));
         proxy.setStartMonth(startMonth);
         proxy.setSiteId(site.getId());
         loader.load();
@@ -235,7 +235,6 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
         this.grid.setReadOnly(readOnly);
         //        this.toolBar.setActionEnabled(UIActions.SAVE, !readOnly);
     }
