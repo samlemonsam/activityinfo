@@ -52,8 +52,12 @@ public class PivotTestResource {
 
         for (ReportElement element : model.getElements()) {
             if (element instanceof PivotReportElement) {
-                results.add((PivotSites.PivotResult) dispatcher.execute(
-                        command(model, (PivotReportElement) element, newEngine, showDetails)));
+                PivotSites command = command(model, (PivotReportElement) element, newEngine, showDetails);
+                if (!command.isTooBroad()) {
+                    results.add(dispatcher.execute(command));
+                } else {
+                    results.add(new PivotSites.PivotResult());
+                }
             }
         }
         return results;
@@ -99,10 +103,8 @@ public class PivotTestResource {
         if(!newEngine) {
             command = new OldPivotSites(command);
         }
-        
-        List<PivotSites.PivotResult> results = Lists.newArrayList();
-        results.add(dispatcher.execute(command));
-        return results;
+
+        return Lists.newArrayList(command.isTooBroad() ? new PivotSites.PivotResult() : dispatcher.execute(command));
     }
 
     @GET
@@ -139,7 +141,7 @@ public class PivotTestResource {
         }
     }
 
-    private Command command(Report model, PivotReportElement<?> element, boolean newEngine, boolean showDetails) {
+    private PivotSites command(Report model, PivotReportElement<?> element, boolean newEngine, boolean showDetails) {
         Filter effectiveFilter = new Filter(model.getFilter(), element.getFilter());
 
         Set<Dimension> dimensions = Sets.newHashSet();

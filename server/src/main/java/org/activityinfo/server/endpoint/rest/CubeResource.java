@@ -1,5 +1,6 @@
 package org.activityinfo.server.endpoint.rest;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
@@ -79,6 +80,10 @@ public class CubeResource {
         PivotSites query = new PivotSites();
         query.setFilter(filter);
         query.setDimensions(pivotDimensions);
+
+        if (query.isTooBroad()) {
+            return Lists.newArrayList();
+        }
 
         PivotSites.PivotResult result = dispatcherSync.execute(query);
 

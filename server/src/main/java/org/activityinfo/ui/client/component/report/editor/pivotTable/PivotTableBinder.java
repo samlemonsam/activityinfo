@@ -44,7 +44,13 @@ public class PivotTableBinder extends ReportViewBinder<PivotContent, PivotReport
             }
         } else {
 
-            dispatcher.execute(new PivotSites(dimensions, filter), new AsyncCallback<PivotSites.PivotResult>() {
+            PivotSites query = new PivotSites(dimensions, filter);
+            if (query.isTooBroad()) {
+                callback.onSuccess(new PivotContent());
+                return;
+            }
+
+            dispatcher.execute(query, new AsyncCallback<PivotSites.PivotResult>() {
                 @Override
                 public void onFailure(Throwable throwable) {
                     callback.onFailure(throwable);

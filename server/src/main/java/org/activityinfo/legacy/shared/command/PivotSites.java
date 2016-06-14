@@ -28,6 +28,7 @@ import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -88,6 +89,12 @@ public class PivotSites implements Command<PivotResult> {
         this.valueType = valueType;
     }
 
+    public boolean isTooBroad() {
+        return !getFilter().isRestricted(DimensionType.Database) &&
+                !getFilter().isRestricted(DimensionType.Activity) &&
+                !getFilter().isRestricted(DimensionType.Indicator);
+    }
+
     @Override
     public String toString() {
         return "PivotSites [dimensions=" + dimensions + ", filter=" + filter + ", valueType=" + valueType + "]";
@@ -108,6 +115,7 @@ public class PivotSites implements Command<PivotResult> {
         private List<Bucket> buckets;
 
         public PivotResult() {
+            this(new ArrayList<Bucket>());
         }
 
         public PivotResult(List<Bucket> buckets) {
