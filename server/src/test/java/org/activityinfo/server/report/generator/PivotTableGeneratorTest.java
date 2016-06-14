@@ -23,6 +23,7 @@ package org.activityinfo.server.report.generator;
  */
 
 import org.activityinfo.legacy.shared.command.DimensionType;
+import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
@@ -85,7 +86,7 @@ public class PivotTableGeneratorTest {
 
         PivotTableGenerator generator = new PivotTableGenerator(dispatcher);
 
-        generator.generate(user, element, null, null);
+        generator.generate(user, element, dummyFilter(), null);
 
         Assert.assertNotNull("element content", element.getContent());
 
@@ -94,6 +95,12 @@ public class PivotTableGeneratorTest {
         Assert.assertEquals("rows sorted", "Nord Kivu", data.getRootRow()
                 .getChildren().get(0).getLabel());
         Assert.assertEquals("cols", 3, data.getRootColumn().getChildCount());
+    }
+
+    private Filter dummyFilter() {
+        Filter filter = new Filter();
+        filter.addRestriction(DimensionType.Activity, 1);
+        return filter;
     }
 
     @Test
@@ -128,7 +135,7 @@ public class PivotTableGeneratorTest {
 
         PivotTableGenerator generator = new PivotTableGenerator(dispatcher);
 
-        generator.generate(user, element, null, null);
+        generator.generate(user, element, dummyFilter(), null);
 
         Assert.assertNotNull("element content", element.getContent());
 
