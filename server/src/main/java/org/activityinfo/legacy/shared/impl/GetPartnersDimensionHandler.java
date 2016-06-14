@@ -43,21 +43,18 @@ public class GetPartnersDimensionHandler implements CommandHandlerAsync<GetPartn
                         ExecutionContext context,
                         final AsyncCallback<PartnerResult> callback) {
 
-        // if the filter doesn't contain any activity, database or indicator values, just return an empty list
-        if (!cmd.getFilter().isRestricted(DimensionType.Database) &&
-            !cmd.getFilter().isRestricted(DimensionType.Activity) &&
-            !cmd.getFilter().isRestricted(DimensionType.Indicator)) {
-
-            callback.onSuccess(new PartnerResult());
-            return;
-        }
-
         final Dimension dimension = new Dimension(DimensionType.Partner);
 
         PivotSites query = new PivotSites();
         query.setFilter(cmd.getFilter());
         query.setDimensions(dimension);
         query.setValueType(ValueType.TOTAL_SITES);
+
+        if (query.isTooBroad()) {
+            callback.onSuccess(new PartnerResult());
+            return;
+        }
+
         context.execute(query, new AsyncCallback<PivotSites.PivotResult>() {
 
             @Override

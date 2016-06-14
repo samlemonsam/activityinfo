@@ -50,7 +50,8 @@ public abstract class PivotGenerator<T extends PivotReportElement> extends BaseG
                                           List<Dimension> rowDims,
                                           List<Dimension> colDims) {
 
-        PivotResult result = getDispatcher().execute(new PivotSites(element.allDimensions(), filter));
+        PivotSites command = new PivotSites(element.allDimensions(), filter);
+        PivotResult result = command.isTooBroad() ? new PivotResult() : getDispatcher().execute(command);
 
         PivotTableDataBuilder builder = new PivotTableDataBuilder();
         return builder.build(rowDims, colDims, result.getBuckets());

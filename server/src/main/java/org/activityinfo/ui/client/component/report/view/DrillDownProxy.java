@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.component.report.view;
 
 import com.extjs.gxt.ui.client.data.RpcProxy;
+import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
@@ -55,6 +56,12 @@ public class DrillDownProxy extends RpcProxy<List<DrillDownRow>> {
     @Override
     protected void load(Object loadConfig, final AsyncCallback<List<DrillDownRow>> callback) {
         PivotSites query = new PivotSites(dims, filter);
+
+        if (query.isTooBroad()) {
+            callback.onSuccess(Lists.<DrillDownRow>newArrayList());
+            return;
+        }
+
         dispatcher.execute(query, new AsyncCallback<PivotSites.PivotResult>() {
             @Override
             public void onFailure(Throwable caught) {
