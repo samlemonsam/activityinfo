@@ -13,12 +13,13 @@ dependencies {
     compile 'com.google.apis:google-api-services-sqladmin:v1beta4-rev1-1.19.1'
     compile 'org.bouncycastle:bcprov-jdk16:1.46'
 
-
+    compile 'io.swagger:swagger-codegen-cli:2.2.0-SNAPSHOT'
 
 }
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven { url "http://nexus.bedatadriven.com/content/groups/public" }
     maven { url 'http://dl.bintray.com/steffenschaefer/maven' }
 }
