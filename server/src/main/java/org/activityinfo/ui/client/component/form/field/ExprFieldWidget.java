@@ -34,7 +34,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.impl.SiteFieldReaderFactory;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.eval.PartialEvaluator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
@@ -118,6 +120,9 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
                     return false;
                 }
             }
+
+            PartialEvaluator evaluator = new PartialEvaluator(validationFormClass, new SiteFieldReaderFactory());
+            evaluator.partiallyEvaluate(expr);
         } catch (Exception e) {
             e.printStackTrace();
 

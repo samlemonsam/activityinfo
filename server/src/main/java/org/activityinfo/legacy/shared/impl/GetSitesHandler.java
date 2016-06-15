@@ -818,9 +818,15 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                     List<CalculatedIndicatorReader> readers = Lists.newArrayList();
                     for(FormField field : activityFields) {
                         if(field.getType() instanceof CalculatedFieldType) {
-                            FieldReader<SiteDTO> reader = evaluator.partiallyEvaluate(field);
-                            if(reader.getType() instanceof QuantityType) {
-                                readers.add(new CalculatedIndicatorReader(field, reader));
+                            try {
+                                FieldReader<SiteDTO> reader = evaluator.partiallyEvaluate(field);
+                                if (reader.getType() instanceof QuantityType) {
+                                    readers.add(new CalculatedIndicatorReader(field, reader));
+                                }
+                            } catch (Exception e) {
+                                // we don't want to fail whole GetSites command due to invalid expression.
+                                Log.error("Failed to evaluate calculated field: " + field +
+                                        ", expression: " + ((CalculatedFieldType) field.getType()).getExpressionAsString(), e);
                             }
                         }
                     }
