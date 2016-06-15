@@ -108,7 +108,7 @@ public class ItextPivotTableRenderer implements ItextRenderer<PivotTableReportEl
 
         table.addCell(ThemeHelper.bodyCell(row.getLabel(), true, depth, row.isLeaf()));
 
-        NumberFormat format = NumberFormat.getIntegerInstance();
+        NumberFormat format = NumberFormat.getNumberInstance();
         format.setGroupingUsed(true);
 
         for (PivotTableData.Axis column : leafColumns) {
