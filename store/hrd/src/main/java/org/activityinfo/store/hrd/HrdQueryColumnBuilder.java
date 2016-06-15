@@ -8,7 +8,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.store.hrd.entity.FormSubmission;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -63,7 +63,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     @Override
     public void execute() throws IOException {
 
-        Query query = new Query(FormSubmission.KIND, collectionKey);
+        Query query = new Query(FormRecordEntity.KIND, collectionKey);
 
         Transaction tx = datastoreService.beginTransaction();
         try {

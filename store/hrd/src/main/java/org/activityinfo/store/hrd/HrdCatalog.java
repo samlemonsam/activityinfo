@@ -6,9 +6,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.hrd.entity.Datastore;
-import org.activityinfo.store.hrd.entity.FormClassEntity;
-import org.activityinfo.store.hrd.entity.FormClassKey;
-import org.activityinfo.store.hrd.op.CreateOrUpdateCollection;
+import org.activityinfo.store.hrd.entity.FormSchemaEntity;
+import org.activityinfo.store.hrd.entity.FormSchemaKey;
+import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 
 import java.util.*;
 
@@ -20,7 +20,7 @@ public class HrdCatalog implements CollectionCatalog {
     private Datastore datastore = new Datastore();
 
     public HrdCollection create(FormClass formClass) {
-        datastore.execute(new CreateOrUpdateCollection(formClass));
+        datastore.execute(new CreateOrUpdateForm(formClass));
         
         return new HrdCollection(datastore, formClass);
     }
@@ -28,7 +28,7 @@ public class HrdCatalog implements CollectionCatalog {
     @Override
     public Optional<ResourceCollection> getCollection(ResourceId collectionId) {
 
-        Optional<FormClassEntity> formClassEntity = datastore.loadIfPresent(new FormClassKey(collectionId));
+        Optional<FormSchemaEntity> formClassEntity = datastore.loadIfPresent(new FormSchemaKey(collectionId));
         
         if(!formClassEntity.isPresent()) {
             return Optional.absent();
@@ -55,14 +55,14 @@ public class HrdCatalog implements CollectionCatalog {
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
         
-        Set<FormClassKey> toLoad = new HashSet<>();
+        Set<FormSchemaKey> toLoad = new HashSet<>();
         for (ResourceId collectionId : collectionIds) {
-            toLoad.add(new FormClassKey(collectionId));
+            toLoad.add(new FormSchemaKey(collectionId));
         }
-        Map<FormClassKey, FormClassEntity> entityMap = datastore.get(toLoad);
+        Map<FormSchemaKey, FormSchemaEntity> entityMap = datastore.get(toLoad);
         Map<ResourceId, FormClass> formClassMap = new HashMap<>();
 
-        for (Map.Entry<FormClassKey, FormClassEntity> entry : entityMap.entrySet()) {
+        for (Map.Entry<FormSchemaKey, FormSchemaEntity> entry : entityMap.entrySet()) {
             formClassMap.put(entry.getKey().getCollectionId(), entry.getValue().readFormClass());
         }
         

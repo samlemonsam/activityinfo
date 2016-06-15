@@ -188,13 +188,13 @@ public class FieldConverters {
             @Override
             public Object toHrdProperty(FieldValue value) {
                 Record recordValue = ((IsRecord) value).asRecord();
-                return RecordSerialization.toEmbeddedEntity(recordValue);
+                return FormConverter.toEmbeddedEntity(recordValue);
             }
 
             @Override
             public FieldValue toFieldValue(Object hrdValue) {
                 EmbeddedEntity embeddedEntity = (EmbeddedEntity) hrdValue;
-                Record record = RecordSerialization.fromEmbeddedEntity(embeddedEntity);
+                Record record = FormConverter.fromEmbeddedEntity(embeddedEntity);
                 return typeClass.deserialize(record);
             }
         };

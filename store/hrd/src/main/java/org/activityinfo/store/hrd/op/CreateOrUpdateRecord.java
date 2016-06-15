@@ -11,20 +11,20 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
 import org.activityinfo.store.hrd.entity.Datastore;
-import org.activityinfo.store.hrd.entity.FormClassKey;
-import org.activityinfo.store.hrd.entity.FormSubmission;
-import org.activityinfo.store.hrd.entity.FormSubmissionKey;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordKey;
+import org.activityinfo.store.hrd.entity.FormSchemaKey;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 
 import java.util.Map;
 
 
-public class CreateOrUpdateSubmission implements Operation {
+public class CreateOrUpdateRecord implements Operation {
 
     private ResourceId collectionId;
     private ResourceUpdate update;
 
-    public CreateOrUpdateSubmission(ResourceId collectionId, ResourceUpdate update) {
+    public CreateOrUpdateRecord(ResourceId collectionId, ResourceUpdate update) {
         this.collectionId = collectionId;
         this.update = update;
     }
@@ -32,20 +32,20 @@ public class CreateOrUpdateSubmission implements Operation {
     @Override
     public void execute(Datastore datastore) throws EntityNotFoundException {
 
-        FormClass formClass = datastore.load(new FormClassKey(collectionId)).readFormClass();
-        FormSubmissionKey key = new FormSubmissionKey(update.getResourceId());
+        FormClass formClass = datastore.load(new FormSchemaKey(collectionId)).readFormClass();
+        FormRecordKey key = new FormRecordKey(update.getResourceId());
         if(!key.getCollectionId().equals(collectionId)) {
             throw new IllegalStateException();
         }
 
-        Optional<FormSubmission> existingEntity = datastore.loadIfPresent(key);
-        FormSubmission updated;
+        Optional<FormRecordEntity> existingEntity = datastore.loadIfPresent(key);
+        FormRecordEntity updated;
         
         if(existingEntity.isPresent()) {
             updated = existingEntity.get();
             
         } else {
-            updated = new FormSubmission(key);
+            updated = new FormRecordEntity(key);
 
             if (formClass.getParentFormId().isPresent()) {
                 ResourceId parentId = update.getParentId();

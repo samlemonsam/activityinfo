@@ -6,16 +6,16 @@ import org.activityinfo.model.resource.ResourceId;
 /**
  * Stores the current version of the collection
  */
-public class CollectionVersionEntity implements TypedEntity {
+public class FormVersionEntity implements TypedEntity {
 
     private final Entity entity;
 
-    public CollectionVersionEntity(Entity entity) {
+    public FormVersionEntity(Entity entity) {
         this.entity = entity;
     }
 
-    public CollectionVersionEntity(ResourceId collectionId) {
-        this.entity = new Entity(new CollectionVersionKey(collectionId).raw());
+    public FormVersionEntity(ResourceId collectionId) {
+        this.entity = new Entity(new FormVersionKey(collectionId).raw());
     }
 
     public long getVersion() {

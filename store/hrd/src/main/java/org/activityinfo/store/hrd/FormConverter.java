@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Serializes records between AppEngine Entities and back
  */
-public class RecordSerialization {
+public class FormConverter {
     
     public static EmbeddedEntity toEmbeddedEntity(PropertyBag record) {
         EmbeddedEntity entity = new EmbeddedEntity();

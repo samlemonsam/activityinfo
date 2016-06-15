@@ -6,23 +6,23 @@ import com.google.appengine.api.datastore.KeyFactory;
 import org.activityinfo.model.resource.ResourceId;
 
 
-public class CollectionVersionKey implements TypedKey<CollectionVersionEntity> {
+public class FormVersionKey implements TypedKey<FormVersionEntity> {
     
     public static final String KIND = "Version";
     
     private Key key;
     
-    public CollectionVersionKey(CollectionRootKey rootKey) {
+    public FormVersionKey(FormRootKey rootKey) {
         this.key = KeyFactory.createKey(rootKey.raw(), KIND, 1);
     }
 
-    public CollectionVersionKey(ResourceId collectionId) {
-        this(new CollectionRootKey(collectionId));
+    public FormVersionKey(ResourceId collectionId) {
+        this(new FormRootKey(collectionId));
     }
 
     @Override
-    public CollectionVersionEntity typeEntity(Entity entity) {
-        return new CollectionVersionEntity(entity);
+    public FormVersionEntity typeEntity(Entity entity) {
+        return new FormVersionEntity(entity);
     }
 
     @Override

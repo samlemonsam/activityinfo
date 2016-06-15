@@ -9,17 +9,17 @@ import org.activityinfo.model.resource.ResourceId;
  * Entity group that includes all entities related to a single collection. Ensures that
  * we can atomically update a collection.
  */
-public class CollectionRootKey {
+public class FormRootKey {
     
     public static final String KIND = "Collection";
 
     private Key key;
     
-    public CollectionRootKey(ResourceId collectionId) {
+    public FormRootKey(ResourceId collectionId) {
         this.key = key(collectionId);
     }
 
-    public CollectionRootKey(Key key) {
+    public FormRootKey(Key key) {
         Preconditions.checkArgument(key.getKind().equals(KIND));
         Preconditions.checkArgument(key.getParent() == null);
         this.key = key;
@@ -29,8 +29,8 @@ public class CollectionRootKey {
         return ResourceId.valueOf(key.getName());
     }
     
-    public FormClassKey classKey() {
-        return new FormClassKey(getCollectionId());
+    public FormSchemaKey classKey() {
+        return new FormSchemaKey(getCollectionId());
     }
     
     public Key raw() {

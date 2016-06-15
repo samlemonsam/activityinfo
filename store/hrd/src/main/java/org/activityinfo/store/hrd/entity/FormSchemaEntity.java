@@ -7,36 +7,36 @@ import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
-import org.activityinfo.store.hrd.RecordSerialization;
+import org.activityinfo.store.hrd.FormConverter;
 
 /**
  * Entity stored 
  */
-public class FormClassEntity implements TypedEntity {
+public class FormSchemaEntity implements TypedEntity {
 
     public static final String OWNER_PROPERTY = "owner";
 
-    public static final String CLASS_PROPERTY = "schema";
-    public static final String CLASS_KIND = "FormClass";
+    public static final String SCHEMA_PROPERTY = "schema";
+    public static final String KIND = "FormSchema";
 
-    private FormClassKey key;
+    private FormSchemaKey key;
     private Entity entity;
 
-    public FormClassEntity(Entity entity) {
-        this.key = new FormClassKey(entity.getKey());
+    public FormSchemaEntity(Entity entity) {
+        this.key = new FormSchemaKey(entity.getKey());
         this.entity = entity;
     }
     
-    public FormClassEntity(FormClass formClass) {
+    public FormSchemaEntity(FormClass formClass) {
 
         if(formClass.getOwnerId() == null) {
             throw new IllegalArgumentException("FormClass " + formClass.getId() + " has no @owner");
         }
         
-        this.key = new FormClassKey(formClass.getId());
+        this.key = new FormSchemaKey(formClass.getId());
         this.entity = new Entity(key.raw());
         entity.setProperty(OWNER_PROPERTY, formClass.getOwnerId().asString());
-        entity.setProperty(CLASS_PROPERTY, RecordSerialization.toEmbeddedEntity(formClass.asResource()));
+        entity.setProperty(SCHEMA_PROPERTY, FormConverter.toEmbeddedEntity(formClass.asResource()));
     }
     
     public long getSchemaVersion() {
@@ -49,14 +49,14 @@ public class FormClassEntity implements TypedEntity {
 
     public FormClass readFormClass() {
 
-        Object recordProperty = entity.getProperty(CLASS_PROPERTY);
+        Object recordProperty = entity.getProperty(SCHEMA_PROPERTY);
         if(recordProperty == null) {
             throw new IllegalStateException(String.format("Entity %s is missing record property '%s'",
-                    entity.getKey(), CLASS_PROPERTY));
+                    entity.getKey(), SCHEMA_PROPERTY));
         }
         if(!(recordProperty instanceof EmbeddedEntity)) {
             throw new IllegalArgumentException(String.format("Entity %s has record property '%s' of unexpected type '%s'.",
-                    entity.getKey(), CLASS_PROPERTY, recordProperty.getClass().getName()));
+                    entity.getKey(), SCHEMA_PROPERTY, recordProperty.getClass().getName()));
         }
 
         Object ownerValue = entity.getProperty(OWNER_PROPERTY);
@@ -65,7 +65,7 @@ public class FormClassEntity implements TypedEntity {
                     key, OWNER_PROPERTY, ownerValue));
         }
         
-        Record formClassRecord = RecordSerialization.fromEmbeddedEntity(((EmbeddedEntity) recordProperty));
+        Record formClassRecord = FormConverter.fromEmbeddedEntity(((EmbeddedEntity) recordProperty));
 
         Resource resource = Resources.createResource();
         resource.setId(key.getCollectionId());
@@ -81,6 +81,6 @@ public class FormClassEntity implements TypedEntity {
     }
 
     public void update(FormClass formClass) {
-        entity.setProperty(CLASS_PROPERTY, RecordSerialization.toEmbeddedEntity(formClass.asResource()));
+        entity.setProperty(SCHEMA_PROPERTY, FormConverter.toEmbeddedEntity(formClass.asResource()));
     }
 }

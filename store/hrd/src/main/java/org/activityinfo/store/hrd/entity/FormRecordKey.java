@@ -7,25 +7,25 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
- * Key for FormSubmissionEntities
+ * Key for FormRecords
  */
-public class FormSubmissionKey implements TypedKey<FormSubmission> {
+public class FormRecordKey implements TypedKey<FormRecordEntity> {
     
     private Key key;
     
-    public FormSubmissionKey(ResourceId submissionId) {
+    public FormRecordKey(ResourceId submissionId) {
         Preconditions.checkArgument(submissionId.getDomain() == ResourceId.GENERATED_ID_DOMAIN, malformedId(submissionId));
 
         String[] parts = submissionId.asString().split("-");
         Preconditions.checkArgument(parts.length == 2, malformedId(submissionId));
         
-        Key parent = CollectionRootKey.key(ResourceId.valueOf(parts[0]));
-        this.key = KeyFactory.createKey(parent, FormSubmission.KIND, parts[1]);
+        Key parent = FormRootKey.key(ResourceId.valueOf(parts[0]));
+        this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, parts[1]);
     }
 
-    public FormSubmissionKey(Key key) {
-        Preconditions.checkArgument(key.getParent().getKind().equals(CollectionRootKey.KIND));
-        Preconditions.checkArgument(key.getKind().equals(FormSubmission.KIND));
+    public FormRecordKey(Key key) {
+        Preconditions.checkArgument(key.getParent().getKind().equals(FormRootKey.KIND));
+        Preconditions.checkArgument(key.getKind().equals(FormRecordEntity.KIND));
         
         this.key = key;
     }
@@ -48,8 +48,8 @@ public class FormSubmissionKey implements TypedKey<FormSubmission> {
     }
 
     @Override
-    public FormSubmission typeEntity(Entity entity) {
-        return new FormSubmission(entity);
+    public FormRecordEntity typeEntity(Entity entity) {
+        return new FormRecordEntity(entity);
     }
 
 }

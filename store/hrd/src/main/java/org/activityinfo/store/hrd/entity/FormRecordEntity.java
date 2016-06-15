@@ -16,29 +16,29 @@ import org.activityinfo.store.hrd.FieldConverters;
  * 
  * <p>Member of the Collection entity group.</p>
  */
-public class FormSubmission implements TypedEntity {
+public class FormRecordEntity implements TypedEntity {
     
-    public static final String KIND = "Submission";
+    public static final String KIND = "FormRecord";
 
     /**
      * For sub form submissions, the parent form submission id. Indexed.
      */
     public static final String PARENT_PROPERTY = "@parent";
     
-    private FormSubmissionKey key;
+    private FormRecordKey key;
     private final Entity entity;
 
-    public FormSubmission(FormSubmissionKey key) {
+    public FormRecordEntity(FormRecordKey key) {
         this.key = key;
         this.entity = new Entity(key.raw());
     }
 
-    public FormSubmission(ResourceId submissionId) {
-        this(new FormSubmissionKey(submissionId));
+    public FormRecordEntity(ResourceId submissionId) {
+        this(new FormRecordKey(submissionId));
     }
     
-    public FormSubmission(Entity entity) {
-        this.key = new FormSubmissionKey(entity.getKey());
+    public FormRecordEntity(Entity entity) {
+        this.key = new FormRecordKey(entity.getKey());
         this.entity = entity;
     }
 
@@ -63,7 +63,7 @@ public class FormSubmission implements TypedEntity {
         return formInstance;
     }
     
-    public FormSubmissionKey getKey() {
+    public FormRecordKey getKey() {
         return key;
     }
 
@@ -81,7 +81,7 @@ public class FormSubmission implements TypedEntity {
     }
 
     public static Key key(ResourceId collectionId, ResourceId resourceId) {
-        Key parentKey = CollectionRootKey.key(collectionId);
+        Key parentKey = FormRootKey.key(collectionId);
         return KeyFactory.createKey(parentKey, KIND, resourceId.asString());
     }
 

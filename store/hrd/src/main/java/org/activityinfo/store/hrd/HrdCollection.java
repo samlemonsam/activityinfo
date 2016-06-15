@@ -13,12 +13,12 @@ import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.hrd.entity.CollectionRootKey;
 import org.activityinfo.store.hrd.entity.Datastore;
-import org.activityinfo.store.hrd.entity.FormSubmission;
-import org.activityinfo.store.hrd.entity.FormSubmissionKey;
-import org.activityinfo.store.hrd.op.CreateOrUpdateCollection;
-import org.activityinfo.store.hrd.op.CreateOrUpdateSubmission;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordKey;
+import org.activityinfo.store.hrd.entity.FormRootKey;
+import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
+import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QueryOperation;
 
 import java.util.List;
@@ -43,8 +43,8 @@ public class HrdCollection implements ResourceCollection {
 
     @Override
     public Optional<Resource> get(ResourceId resourceId) {
-        FormSubmissionKey key = new FormSubmissionKey(resourceId);
-        Optional<FormSubmission> submission = datastore.loadIfPresent(key);
+        FormRecordKey key = new FormRecordKey(resourceId);
+        Optional<FormRecordEntity> submission = datastore.loadIfPresent(key);
 
         if(submission.isPresent()) {
             FormInstance instance = submission.get().toFormInstance(formClass);
@@ -63,23 +63,23 @@ public class HrdCollection implements ResourceCollection {
 
     @Override
     public void updateFormClass(FormClass formClass) {
-        datastore.execute(new CreateOrUpdateCollection(formClass));
+        datastore.execute(new CreateOrUpdateForm(formClass));
     }
 
     @Override
     public void add(ResourceUpdate update) {
-        datastore.execute(new CreateOrUpdateSubmission(formClass.getId(), update));
+        datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
     }
 
     @Override
     public void update(final ResourceUpdate update) {
-        datastore.execute(new CreateOrUpdateSubmission(formClass.getId(), update));
+        datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
     }
     
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new HrdQueryColumnBuilder(datastore.unwrap(), CollectionRootKey.key(formClass.getId()), formClass);
+        return new HrdQueryColumnBuilder(datastore.unwrap(), FormRootKey.key(formClass.getId()), formClass);
     }
 
     @Override
@@ -88,14 +88,14 @@ public class HrdCollection implements ResourceCollection {
     }
 
     public FormInstance getSubmission(ResourceId resourceId) throws EntityNotFoundException {
-        FormSubmissionKey key = new FormSubmissionKey(resourceId);
-        FormSubmission submission = datastore.load(key);
+        FormRecordKey key = new FormRecordKey(resourceId);
+        FormRecordEntity submission = datastore.load(key);
         
         return submission.toFormInstance(formClass);
     }
 
     public Iterable<FormInstance> getSubmissionsOfParent(ResourceId parentId) {
-        return query(FormSubmission.parentFilter(parentId));
+        return query(FormRecordEntity.parentFilter(parentId));
     }
 
     public Iterable<FormInstance> getSubmissions() {
@@ -103,8 +103,8 @@ public class HrdCollection implements ResourceCollection {
     }
 
     private Iterable<FormInstance> query(Query.FilterPredicate filter) {
-        CollectionRootKey rootKey = new CollectionRootKey(formClass.getId());
-        final Query query = new Query(FormSubmission.KIND, rootKey.raw());
+        FormRootKey rootKey = new FormRootKey(formClass.getId());
+        final Query query = new Query(FormRecordEntity.KIND, rootKey.raw());
         query.setFilter(filter);
 
         return datastore.execute(new QueryOperation<List<FormInstance>>() {
@@ -112,7 +112,7 @@ public class HrdCollection implements ResourceCollection {
             public List<FormInstance> execute(Datastore datastore) {
                 List<FormInstance> instances = Lists.newArrayList();
                 for (Entity entity : datastore.prepare(query).asIterable()) {
-                    FormSubmission submission = new FormSubmission(entity);
+                    FormRecordEntity submission = new FormRecordEntity(entity);
                     instances.add(submission.toFormInstance(formClass));
                 }
                 return instances;

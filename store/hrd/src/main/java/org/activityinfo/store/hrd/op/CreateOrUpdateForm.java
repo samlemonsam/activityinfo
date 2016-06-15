@@ -6,20 +6,20 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.store.hrd.entity.*;
 
 
-public class CreateOrUpdateCollection implements Operation {
+public class CreateOrUpdateForm implements Operation {
     
     private FormClass formClass;
 
-    public CreateOrUpdateCollection(FormClass formClass) {
+    public CreateOrUpdateForm(FormClass formClass) {
         this.formClass = formClass;
     }
 
     @Override
     public void execute(Datastore datastore) throws EntityNotFoundException {
 
-        CollectionRootKey rootKey = new CollectionRootKey(formClass.getId());
+        FormRootKey rootKey = new FormRootKey(formClass.getId());
 
-        Optional<FormClassEntity> formClassEntity = datastore.loadIfPresent(rootKey.classKey());
+        Optional<FormSchemaEntity> formClassEntity = datastore.loadIfPresent(rootKey.classKey());
         
         if(formClassEntity.isPresent()) {
             update(datastore, formClassEntity.get());
@@ -29,19 +29,19 @@ public class CreateOrUpdateCollection implements Operation {
     }
 
     private void create(Datastore datastore) {
-        CollectionVersionEntity versionEntity = new CollectionVersionEntity(formClass.getId());
+        FormVersionEntity versionEntity = new FormVersionEntity(formClass.getId());
         versionEntity.setVersion(1);
         versionEntity.setSchemaVersion(1);
         
-        FormClassEntity formClassEntity = new FormClassEntity(formClass);
+        FormSchemaEntity formClassEntity = new FormSchemaEntity(formClass);
         formClassEntity.setSchemaVersion(1);
         
         datastore.put(versionEntity, formClassEntity);
     }
 
-    private void update(Datastore datastore, FormClassEntity formClassEntity) throws EntityNotFoundException {
+    private void update(Datastore datastore, FormSchemaEntity formClassEntity) throws EntityNotFoundException {
 
-        CollectionVersionEntity versionEntity = datastore.load(new CollectionVersionKey(formClass.getId()));
+        FormVersionEntity versionEntity = datastore.load(new FormVersionKey(formClass.getId()));
 
         // Increment the version counter
         long newVersion = versionEntity.getVersion() + 1;
