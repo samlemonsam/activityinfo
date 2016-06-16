@@ -35,6 +35,7 @@ public class OdkModule extends AbstractRestModule {
         // in separate classes for now because of the prefix-less urls..
         bindResource(FormResource.class);
         bindResource(FormListResource.class);
+        bindResource(DbFormListResource.class);
         bindResource(FormSubmissionResource.class);
     }
 }
