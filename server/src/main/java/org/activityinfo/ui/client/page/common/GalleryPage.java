@@ -76,17 +76,25 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
 
         heading = new Html();
         heading.setTagName("h3");
+        heading.setStyleAttribute("margin-bottom", "2px");
         add(heading);
 
         introPara = new Html();
         introPara.setTagName("p");
         introPara.setStyleName("gallery-intro");
         introPara.setStyleAttribute("margin-left", "15px");
+        introPara.setStyleAttribute("color", "grey");
+        introPara.setStyleAttribute("font-size", "80%");
         add(introPara);
+
+        Html space = new Html(" ");
+        space.setTagName("p");
+        add(space); // space
 
         permissionsInfo = new Html();
         permissionsInfo.setTagName("p");
         permissionsInfo.setStyleAttribute("margin-left", "15px");
+        permissionsInfo.setStyleAttribute("margin-top", "15px");
 
         add(permissionsInfo);
 
