@@ -40,6 +40,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
@@ -55,6 +56,8 @@ import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
 import org.activityinfo.ui.client.component.importDialog.ImportResultEvent;
 import org.activityinfo.ui.client.page.*;
+import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
+import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
@@ -277,7 +280,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     @Override
     public void shutdown() {
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -291,8 +293,41 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     }
 
     @Override
-    public void requestToNavigateAway(PageState place, NavigationCallback callback) {
-        callback.onDecided(true);
+    public void requestToNavigateAway(PageState place, final NavigationCallback callback) {
+        if (monthlyPanel.isModified()) {
+            final SavePromptMessageBox box = new SavePromptMessageBox();
+            box.show(new SaveChangesCallback() {
+                @Override
+                public void save(AsyncMonitor monitor) {
+                    monthlyPanel.save().then(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // handled by monitor
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            box.hide();
+                            callback.onDecided(true);
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                    box.hide();
+                    callback.onDecided(false);
+                }
+
+                @Override
+                public void discard() {
+                    box.hide();
+                    callback.onDecided(true);
+                }
+            });
+        } else {
+            callback.onDecided(true);
+        }
     }
 
     @Override

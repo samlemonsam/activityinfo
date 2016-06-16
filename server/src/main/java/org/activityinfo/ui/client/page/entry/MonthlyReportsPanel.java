@@ -55,6 +55,7 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
@@ -93,7 +94,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         store.addListener(Store.Update, new Listener<BaseEvent>() {
             @Override
             public void handleEvent(BaseEvent be) {
-                toolBar.setDirty(store.getModifiedRecords().size() != 0);
+                toolBar.setDirty(isModified());
             }
         });
 
@@ -101,6 +102,10 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         add(grid);
 
         addToolBar();
+    }
+
+    public boolean isModified() {
+        return store.getModifiedRecords().size() != 0;
     }
 
     private void addToolBar() {
@@ -206,7 +211,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         }
     }
 
-    private void save() {
+    public Promise<Void> save() {
         ArrayList<UpdateMonthlyReports.Change> changes = new ArrayList<UpdateMonthlyReports.Change>();
         for (Record record : store.getModifiedRecords()) {
             IndicatorRowDTO report = (IndicatorRowDTO) record.getModel();
@@ -218,20 +223,24 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                 changes.add(change);
             }
         }
+
+        final Promise<Void> promise = new Promise<>();
         service.execute(new UpdateMonthlyReports(currentSiteId, changes),
                 new MaskingAsyncMonitor(this, I18N.CONSTANTS.saving()),
                 new AsyncCallback<VoidResult>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // handled by monitor
+                        promise.onFailure(caught);
                     }
 
                     @Override
                     public void onSuccess(VoidResult result) {
                         store.commitChanges();
+                        promise.onSuccess(null);
                     }
                 });
+        return promise;
     }
 
     public void setReadOnly(boolean readOnly) {
