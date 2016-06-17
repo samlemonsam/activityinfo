@@ -43,6 +43,7 @@ import com.google.common.collect.Lists;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
@@ -56,6 +57,8 @@ import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
+import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
@@ -142,6 +145,42 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     public void load(final SiteDTO site) {
+        if (isModified()) {
+            final SavePromptMessageBox box = new SavePromptMessageBox();
+            box.show(new SaveChangesCallback() {
+                @Override
+                public void save(AsyncMonitor monitor) {
+                    MonthlyReportsPanel.this.save().then(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            box.hide();
+                            loadSite(site);
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                    box.hide();
+                    loadSite(site);
+                }
+
+                @Override
+                public void discard() {
+                    box.hide();
+                    loadSite(site);
+                }
+            });
+        } else {
+            loadSite(site);
+        }
+    }
+
+    private void loadSite(final SiteDTO site) {
         this.currentSiteId = site.getId();
         this.grid.getStore().removeAll();
 
