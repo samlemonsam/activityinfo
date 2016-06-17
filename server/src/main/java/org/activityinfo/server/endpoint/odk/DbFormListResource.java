@@ -16,7 +16,7 @@ import javax.ws.rs.core.UriInfo;
 /**
  * Created by yuriyz on 6/16/2016.
  */
-@Path("db")
+@Path("/db")
 public class DbFormListResource {
 
     private final FormLister formLister;
