@@ -1,6 +1,7 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -92,8 +93,16 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
         assertThat(column("visible"), hasValues(true, true, true, true));
+    }
+    
+    @Test
+    public void testBoundLocation() {
+        FormTree tree = this.queryFormTree(CuidAdapter.activityFormClass(41));
+        FormTree.Node locationNode = tree.getRootField(CuidAdapter.locationField(41));
 
-
+        ResourceId rangeId = Iterables.getOnlyElement(locationNode.getRange());
+        
+        assertThat(rangeId, equalTo(CuidAdapter.adminLevelFormClass(2)));
     }
 
     @Test

@@ -1,7 +1,6 @@
 package org.activityinfo.core.client;
 
 import com.google.common.base.Function;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.promise.Promise;
@@ -34,15 +33,6 @@ public class Resources {
             @Override
             public Promise<List<Projection>> apply(InstanceQuery instanceQuery) {
                 return resourceLocator.query(instanceQuery);
-            }
-        };
-    }
-
-    public Function<ResourceId, Promise<FormInstance>> fetchInstance() {
-        return new Function<ResourceId, Promise<FormInstance>>() {
-            @Override
-            public Promise<FormInstance> apply(ResourceId input) {
-                return resourceLocator.getFormInstance(input);
             }
         };
     }

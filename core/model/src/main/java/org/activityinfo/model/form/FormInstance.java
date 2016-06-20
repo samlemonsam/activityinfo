@@ -89,6 +89,10 @@ public class FormInstance implements IsResource {
         Resource resource = Resources.resourceFromJson(json);
         return FormInstance.fromResource(resource);
     }
+    
+    public static FormInstance fromJsonString(String json) {
+        return fromJson(json);
+    }
 
     public static FormInstance fromResource(Resource resource) {
         FormInstance instance = new FormInstance(resource.getId(), resource.getResourceId("classId"));
@@ -204,7 +208,6 @@ public class FormInstance implements IsResource {
         propertyBag.set(fieldId, new GeoPoint(latLng.getLat(), latLng.getLng()));
         return this;
     }
-
 
     public void set(@Nonnull ResourceId fieldId, Set<ResourceId> references) {
         set(fieldId, new ReferenceValue(references));

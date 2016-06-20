@@ -1,6 +1,7 @@
 package org.activityinfo.server.csp;
 
 import com.google.inject.servlet.ServletModule;
+import org.activityinfo.server.DeploymentEnvironment;
 
 /**
  * Applies a Content Security Policy
@@ -8,7 +9,9 @@ import com.google.inject.servlet.ServletModule;
 public class ContentSecurityModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        filter("/*").through(ContentSecurityFilter.class);
-        serve("/csp-violation").with(ContentSecurityServlet.class);
+        if(!DeploymentEnvironment.isAppEngineDevelopment()) {
+            filter("/*").through(ContentSecurityFilter.class);
+            serve("/csp-violation").with(ContentSecurityServlet.class);
+        }
     }
 }

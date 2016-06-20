@@ -1,8 +1,10 @@
-package org.activityinfo.model.query;
+package org.activityinfo.geoadmin.model;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import org.activityinfo.model.query.ColumnType;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.geo.Extents;
 
 
@@ -43,7 +45,7 @@ public class ColumnViewWrapper implements ColumnView {
     @Override
     public String getString(int row) {
         Preconditions.checkPositionIndex(row, numRows);
-        
+
         JsonElement jsonElement = array.get(row);
         if(jsonElement.isJsonNull()) {
             return null;

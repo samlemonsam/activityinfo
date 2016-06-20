@@ -71,8 +71,8 @@ public class FormResource {
      * @return this collection's {@link org.activityinfo.model.form.FormClass}
      */
     @GET
-    @Path("class")
-    public Response getFormClass() {
+    @Path("schema")
+    public Response getFormSchema() {
 
         assertVisible(resourceId);
 
@@ -81,6 +81,12 @@ public class FormResource {
         JsonObject object = Resources.toJsonObject(formClass.asResource());
 
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
+    }
+    
+    @GET
+    @Path("class")
+    public Response getFormClass() {
+        return getFormSchema();
     }
 
     @GET

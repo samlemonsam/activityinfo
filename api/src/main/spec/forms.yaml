@@ -1,0 +1,348 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: ActivityInfo API 3.0
+  description: ActivityInfo 3.0 AP
+  version: "1.0.0"
+# the domain of the service
+host: www.activityinfo.org
+schemes:
+  - https
+basePath: /resources
+produces:
+  - application/json
+paths:
+  /form/{formId}/schema:
+    get:
+      operationId: getFormSchema
+      summary: Retrieves the schema that describes this form's fields
+      description: |
+        A form in ActivityInfo is a set of records that have a common set of fields, or schema. 
+        A form can be a user-defined form created by a user, or it can be an application-defined like the set of
+         countries, which has the id `_countries`.
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the form
+          required: true
+          type: string
+      tags:
+        - forms
+      responses:
+        200:
+          description: The form's schema
+          schema:
+            $ref: '#/definitions/FormSchema'
+        401:
+          description: The authenticated user does not have permission to view this form
+        404:
+          description: The form does not exist.
+    put:
+      operationId: updateFormSchema
+      summary: Updates a form's schema
+      description: |
+        Updates the form
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: updatedSchema
+          in: body
+          description: Updates the schema describing this form's fields
+          schema:
+            $ref: '#/definitions/FormSchema'
+      responses:
+        200:
+          description: The form's schema was updated
+        400:
+          description: The update was invalid. Not all changes to a schema are permitted. For example, a field's
+            type cannot be changed.
+        401:
+          description: The authenticated user does not have permission to update this form
+        404:
+          description: The specified form does not exist
+          
+  /form/{formId}/tree:
+    get:
+      operationId: getSchemaTree
+      x-gwt-client: false
+      summary: Retrieves this form's schema, together with
+       the schemas of all related forms.
+      description: |
+        The fields defined in a form's schema may reference other forms, which in turn may refer to yet others.
+        As a convenience, this request returns the schemas of all forms reachable from this form.
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the form
+          required: true
+          type: string
+      tags:
+        - forms
+      responses:
+        200:
+          description: The form's class
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FormSchema'
+        401:
+          description: The authenticated user does not have permission to view this form
+        404:
+          description: The form does not exist.
+          
+
+  /form/{formId}/records:
+    post:
+      operationId: createRecord
+      summary: Creates a new record for this form
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: query
+          in: body
+          description: The record to create
+          schema:
+            $ref: '#/definitions/NewFormRecord'
+      responses:
+        200:
+          description: The record was updated
+        401:
+          description: The authenticated user does not have permission to view this form
+        404:
+          description: No form with `formId` exists.
+
+  /form/{formId}/record/{recordId}:
+    get:
+      operationId: getRecord
+      summary: Retrieves a single record of this form
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: recordId
+          in: path
+          description: Id of the record
+          type: string
+          required: true
+      responses:
+        200:
+          description: The requested record
+          schema:
+            $ref: "#/definitions/FormRecord"
+        401:
+          description: The authenticated user does not have permission to view this form or record
+        404:
+          description: No record with `formId` exists
+    put:
+      operationId: updateRecord
+      summary: Updates an individual record in this collection
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: recordId
+          in: path
+          description: Id of the record
+          type: string
+          required: true
+        - name: query
+          in: body
+          description: The record to update
+          schema:
+            $ref: '#/definitions/FormRecordUpdate'
+      responses:
+        200:
+          description: The requested record
+          schema:
+            $ref: "#/definitions/FormRecord"
+        401:
+          description: The authenticated user does not have permission to view this form or record
+        404:
+          description: No record with `formId` exists
+          
+  /query/columns:
+    post:
+      operationId: queryTableColumns
+      summary: Flattens records from one or more forms into a two-dimensional table, 
+        returning the results as a list of columns.
+      description: |
+        Though forms can contain rich, nested and linked data,
+        for the purposes of analysis a simple two-dimensional table is often required.
+      parameters:
+        - name: query
+          in: body
+          description: The shape of the table to retrieve
+          schema:
+            $ref: '#/definitions/TableQuery'
+      tags:
+        - forms
+      responses:
+        200:
+          description: The table as a list of columns
+          schema:
+            $ref: '#/definitions/ColumnSet'
+        401:
+          description: The authenticated user does not have permission to view this form
+        404:
+          description: No form with `formId` exists.
+
+definitions:
+  FormSchema:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier of this class.
+      parentFormId:
+        type: string
+        description: The id of the parent form, if this is a subform
+      label:
+        type: string
+        description: Short, human-readable name of the class
+      description:
+        type: string
+        description: Description of this class
+      elements:
+        type: array
+        items:
+          $ref: '#/definitions/Field'
+          
+  Field:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique, immutable identifier of this field. (Are field identifiers globally unique?)
+      code:
+        type: string
+        description: Short identifier
+      label:
+        type: string
+        description: Name of the field
+      description:
+        type: string
+      type: 
+        description: The type of value in this field
+        type: object
+        enum:
+        - text
+        - quantity
+      typeParameters:
+        description: Further properties of the field type
+      relevanceCondition:
+        description: A boolean-valued expression that determines whether the
+            field is shown
+        type: string
+      required:
+        description: True if a value for this field is required
+        type: boolean
+        
+  FormRecord:
+    type: object
+    properties:
+      recordId:
+        type: string
+        description: This record's id.
+      formId:
+        type: string
+        description: The id of the form to which this record belongs
+      parentRecordId:
+        type: string
+        description: The id of the parent FormRecord, if this record belongs to a subform
+      fields:
+        type: object
+        description: Dictionary of field values of this FormRecord
+
+  FormRecordUpdate:
+    type: object
+    properties:
+      deleted:
+        type: boolean
+        description: True if the record should be deleted
+      fieldValues:
+        type: object
+        description: Dictionary of the fields to update
+
+  NewFormRecord:
+    type: object
+    properties:
+      id:
+        type: string
+        description: client-generated id 
+      parentRecordId:
+        type: string
+        description: id of the parent FormRecord, if this is record is a member
+          of a subform
+      fieldValues:
+        type: object
+        description: Dictionary of the fields intial values
+
+  TableQuery:
+    type: object
+    properties:
+      rowSources:
+        type: array
+        items:
+          $ref: '#/definitions/TableRowSource'
+      columns:
+        $ref: '#/definitions/ColumnModel'
+      filter:
+        type: string
+        description: An boolean-valued expression to select which 
+            resources to include in the table
+      required:
+        -rowSources
+        -columns
+        
+  TableRowSource:
+    type: object
+    properties:
+      formId:
+        type: string
+        description: The id of a form to include as a source of rows for this table
+
+  ColumnModel:
+    type: object
+    properties:
+      id:
+        type: string
+        description: An arbitrary id to give this column in the
+          resulting `ColumnSet`
+      expression:
+        type: string
+        description: The query expression 
+
+    
+  ColumnSet:
+    type: object
+    properties:
+      numRows:
+        type: integer
+        description: The number of rows in each column
+      columns:
+        type: array
+        items:
+          $ref: '#/definitions/ColumnView'
+          
+  ColumnView:
+    type: object
+    properties:
+      numRows:
+        type: integer
+        description: The number of rows in this column
+      values:
+        type: array
+        items: 
+          type: string
+    

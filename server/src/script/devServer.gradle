@@ -68,13 +68,14 @@ task appengineDevMode(type: JavaExec) {
     classpath sourceSets.main.resources.srcDirs
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
+    classpath project(":store:offline").sourceSets.main.java.srcDirs
+    classpath project(":store:offline").sourceSets.main.resources.srcDirs
 
     // Compiled java classes and libraries second
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.gwt
     classpath configurations.gwtSdk
-
-
+    
 
     args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
     args '-war', "${buildDir}/explodedDevMode"

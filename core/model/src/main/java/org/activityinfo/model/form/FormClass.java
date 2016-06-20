@@ -336,6 +336,10 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         }
         return elements;
     }
+    
+    public String toJsonString() {
+        return Resources.toJson(asResource());
+    }
 
     @Override
     public Resource asResource() {
@@ -350,7 +354,11 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         resource.set("parentFormId", parentFormId);
         return resource;
     }
-
+    
+    public static FormClass fromJson(String json) {
+        return fromResource(Resources.resourceFromJson(json));
+    }
+    
     public List<FormElement> getBuiltInElements() {
         List<FormElement> builtIn = Lists.newArrayList();
         for (FormElement elem : elements) {

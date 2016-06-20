@@ -12,7 +12,7 @@ public class EmptyColumnView implements ColumnView, Serializable {
     protected EmptyColumnView() {
     }
 
-    public EmptyColumnView(int rowCount, ColumnType type) {
+    public EmptyColumnView(ColumnType type, int rowCount) {
         this.type = type;
         this.rowCount = rowCount;
     }

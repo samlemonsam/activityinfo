@@ -2,6 +2,7 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
@@ -45,16 +46,15 @@ import java.util.Set;
 public class ResourceLocatorAdaptor implements ResourceLocator {
 
     private final Dispatcher dispatcher;
-    private final ClassProvider classProvider;
+    private ActivityInfoClientAsync client = new ActivityInfoClientAsync();
 
     public ResourceLocatorAdaptor(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
-        this.classProvider = new ClassProvider(dispatcher);
     }
 
     @Override
     public Promise<FormClass> getFormClass(ResourceId classId) {
-        return classProvider.apply(classId);
+        return client.getFormSchema(classId.asString());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Observable<ColumnSet> queryTable(QueryModel queryModel) {
-        return new ObservablePromise<>(new HttpQueryExecutor().query(queryModel));
+        return new ObservablePromise<>(client.queryTableColumns(queryModel));
     }
 
     @Override

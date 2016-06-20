@@ -110,7 +110,6 @@ public class Updater {
         // if given explicitly
         validateExplicitClassAttribute(formClass, changeObject);
 
-
         // Build a lookup map to resolve the field name used in the JSON request.
         Map<String, FormField> idMap = new HashMap<>();
         Multimap<String, FormField> codeMap = HashMultimap.create();

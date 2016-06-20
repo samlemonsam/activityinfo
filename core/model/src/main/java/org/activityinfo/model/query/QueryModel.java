@@ -163,6 +163,10 @@ public class QueryModel implements IsRecord {
         record.set("filter", filter != null ? filter.asExpression() : null);
         return record;
     }
+    
+    public String toJsonString() {
+        return Resources.toJson(asRecord());
+    }
 
     public static QueryModel fromRecord(Record record) {
         QueryModel queryModel = new QueryModel();
