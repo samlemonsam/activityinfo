@@ -38,6 +38,7 @@ import com.extjs.gxt.ui.client.util.DateWrapper;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -146,6 +147,20 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
 
     public void load(final SiteDTO site) {
         if (isModified()) {
+            confirmUnsavedData(new Function() {
+                @Override
+                public Object apply(Object input) {
+                    loadSite(site);
+                    return null;
+                }
+            });
+        } else {
+            loadSite(site);
+        }
+    }
+
+    private void confirmUnsavedData(final Function function) {
+        if (isModified()) {
             final SavePromptMessageBox box = new SavePromptMessageBox();
             box.show(new SaveChangesCallback() {
                 @Override
@@ -158,7 +173,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                         @Override
                         public void onSuccess(Void result) {
                             box.hide();
-                            loadSite(site);
+                            function.apply(null);
                         }
                     });
                 }
@@ -166,17 +181,15 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                 @Override
                 public void cancel() {
                     box.hide();
-                    loadSite(site);
+                    function.apply(null);
                 }
 
                 @Override
                 public void discard() {
                     box.hide();
-                    loadSite(site);
+                    function.apply(null);
                 }
             });
-        } else {
-            loadSite(site);
         }
     }
 
@@ -290,6 +303,12 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     public void onNoSelection() {
         this.grid.getStore().removeAll();
         this.grid.getView().setEmptyText(I18N.MESSAGES.SelectSiteAbove());
+        confirmUnsavedData(new Function() {
+            @Override
+            public Object apply(Object input) {
+                return null;
+            }
+        });
     }
 
     private class ReportingPeriodProxy extends RpcProxy<MonthlyReportResult> {
