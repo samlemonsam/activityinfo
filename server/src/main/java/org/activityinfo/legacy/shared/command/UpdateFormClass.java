@@ -9,7 +9,7 @@ import org.activityinfo.model.resource.Resources;
 
 import java.util.List;
 
-public class UpdateFormClass implements Command<VoidResult> {
+public class UpdateFormClass implements MutatingCommand<VoidResult> {
 
     private int databaseId;
     private String formClassId;

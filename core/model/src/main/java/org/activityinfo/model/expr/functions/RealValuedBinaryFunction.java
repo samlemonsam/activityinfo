@@ -103,7 +103,10 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
             return new QuantityType().setUnits(applyUnits(t1.getUnits(), t2.getUnits()));
 
         } else {
-            throw new UnsupportedOperationException("todo");
+            throw new UnsupportedOperationException("TODO : not implemented, " +
+                    "arg 1 : " + argumentTypes.get(0) +
+                    "arg 2 : " + argumentTypes.get(1)
+            );
         }
     }
 

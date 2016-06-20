@@ -98,6 +98,12 @@ public class XPathBuilder {
                 case "containsAll":
                     appendFunction(function.getId(), arguments, xpath);
                     break;
+                case ">":
+                case ">=":
+                case "<":
+                case "<=":
+                    appendBinaryInfixTo(function.getId(), arguments, xpath);
+                    break;
                 default:
                     throw new XPathBuilderException("Unsupported function " + function.getId());
             }

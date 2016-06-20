@@ -85,7 +85,7 @@ public class PolygonLayerGenerator implements LayerGenerator {
 
         MagnitudeScaleBuilder scaleBuilder = new MagnitudeScaleBuilder(layer);
 
-        this.pivotResult = dispatcher.execute(query);
+        this.pivotResult = query.isTooBroad() ? new PivotResult() : dispatcher.execute(query);
         for (Bucket bucket : pivotResult.getBuckets()) {
             EntityCategory category = (EntityCategory) bucket.getCategory(adminDimension);
             if (category != null) {

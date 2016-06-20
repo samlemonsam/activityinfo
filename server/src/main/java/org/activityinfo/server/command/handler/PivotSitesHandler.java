@@ -4,7 +4,6 @@ import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
-import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.pivot.PivotAdapter;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.mysql.MySqlSession;
@@ -22,9 +21,6 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
     @Inject
     private Provider<MySqlSession> catalog;
 
-    @Inject
-    private DispatcherSync dispatcher;
-    
     @Override
     public CommandResult execute(final PivotSites cmd, final User user) throws CommandException {
 

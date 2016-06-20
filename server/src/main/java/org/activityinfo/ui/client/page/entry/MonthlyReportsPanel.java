@@ -38,11 +38,13 @@ import com.extjs.gxt.ui.client.util.DateWrapper;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
@@ -55,6 +57,9 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
+import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
@@ -77,7 +82,6 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     private ActivityFormDTO currentActivity;
 
     private ActionToolBar toolBar;
-    private boolean readOnly;
 
 
     public MonthlyReportsPanel(Dispatcher service) {
@@ -94,7 +98,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         store.addListener(Store.Update, new Listener<BaseEvent>() {
             @Override
             public void handleEvent(BaseEvent be) {
-                toolBar.setDirty(store.getModifiedRecords().size() != 0);
+                toolBar.setDirty(isModified());
             }
         });
 
@@ -102,6 +106,10 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         add(grid);
 
         addToolBar();
+    }
+
+    public boolean isModified() {
+        return store.getModifiedRecords().size() != 0;
     }
 
     private void addToolBar() {
@@ -138,6 +146,54 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     public void load(final SiteDTO site) {
+        if (isModified()) {
+            confirmUnsavedData(new Function() {
+                @Override
+                public Object apply(Object input) {
+                    loadSite(site);
+                    return null;
+                }
+            });
+        } else {
+            loadSite(site);
+        }
+    }
+
+    private void confirmUnsavedData(final Function function) {
+        if (isModified()) {
+            final SavePromptMessageBox box = new SavePromptMessageBox();
+            box.show(new SaveChangesCallback() {
+                @Override
+                public void save(AsyncMonitor monitor) {
+                    MonthlyReportsPanel.this.save().then(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            box.hide();
+                            function.apply(null);
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                    box.hide();
+                    function.apply(null);
+                }
+
+                @Override
+                public void discard() {
+                    box.hide();
+                    function.apply(null);
+                }
+            });
+        }
+    }
+
+    private void loadSite(final SiteDTO site) {
         this.currentSiteId = site.getId();
         this.grid.getStore().removeAll();
 
@@ -163,6 +219,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         monthCombo.setMappedValue(startMonth);
         grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(activity)));
         grid.updateMonthColumns(startMonth);
+        grid.setReadOnly(currentActivity.isAllowedToEdit(site));
         proxy.setStartMonth(startMonth);
         proxy.setSiteId(site.getId());
         loader.load();
@@ -206,7 +263,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         }
     }
 
-    private void save() {
+    public Promise<Void> save() {
         ArrayList<UpdateMonthlyReports.Change> changes = new ArrayList<UpdateMonthlyReports.Change>();
         for (Record record : store.getModifiedRecords()) {
             IndicatorRowDTO report = (IndicatorRowDTO) record.getModel();
@@ -218,24 +275,27 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                 changes.add(change);
             }
         }
+
+        final Promise<Void> promise = new Promise<>();
         service.execute(new UpdateMonthlyReports(currentSiteId, changes),
                 new MaskingAsyncMonitor(this, I18N.CONSTANTS.saving()),
                 new AsyncCallback<VoidResult>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // handled by monitor
+                        promise.onFailure(caught);
                     }
 
                     @Override
                     public void onSuccess(VoidResult result) {
                         store.commitChanges();
+                        promise.onSuccess(null);
                     }
                 });
+        return promise;
     }
 
     public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
         this.grid.setReadOnly(readOnly);
         //        this.toolBar.setActionEnabled(UIActions.SAVE, !readOnly);
     }
@@ -243,6 +303,12 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     public void onNoSelection() {
         this.grid.getStore().removeAll();
         this.grid.getView().setEmptyText(I18N.MESSAGES.SelectSiteAbove());
+        confirmUnsavedData(new Function() {
+            @Override
+            public Object apply(Object input) {
+                return null;
+            }
+        });
     }
 
     private class ReportingPeriodProxy extends RpcProxy<MonthlyReportResult> {

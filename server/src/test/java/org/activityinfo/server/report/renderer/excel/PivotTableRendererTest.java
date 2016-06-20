@@ -145,4 +145,13 @@ public class PivotTableRendererTest {
         renderer.render(book, element);
     }
 
+    @Test  // AI-1413
+    public void exportWithInvalidCharsInSheetnames() {
+        PivotTableReportElement element = new DummyPivotTableData2().testElement();
+        element.setTitle("CPSC: 4Ws");
+
+        ExcelPivotTableRenderer renderer = new ExcelPivotTableRenderer();
+        renderer.render(new HSSFWorkbook(), element);
+    }
+
 }

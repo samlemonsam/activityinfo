@@ -44,6 +44,7 @@ import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.date.DateUnit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SiteTimeTreeLoader extends BaseTreeLoader<ModelData> implements SiteTreeLoader {
@@ -116,6 +117,11 @@ public class SiteTimeTreeLoader extends BaseTreeLoader<ModelData> implements Sit
             pivot.setFilter(filter);
             pivot.setValueType(ValueType.TOTAL_SITES);
 
+            if (pivot.isTooBroad()) {
+                callback.onSuccess(new ArrayList<ModelData>());
+                return;
+            }
+
             dispatcher.execute(pivot, new AsyncCallback<PivotResult>() {
 
                 @Override
@@ -139,6 +145,11 @@ public class SiteTimeTreeLoader extends BaseTreeLoader<ModelData> implements Sit
             pivot.setDimensions(Sets.<Dimension>newHashSet(MONTH_DIMENSION));
             pivot.setFilter(narrowFilter(parentNode.getDateRange()));
             pivot.setValueType(ValueType.TOTAL_SITES);
+
+            if (pivot.isTooBroad()) {
+                callback.onSuccess(new ArrayList<ModelData>());
+                return;
+            }
 
             dispatcher.execute(pivot, new AsyncCallback<PivotResult>() {
 
