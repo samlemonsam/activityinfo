@@ -301,11 +301,11 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     public void onNoSelection() {
-        this.grid.getStore().removeAll();
-        this.grid.getView().setEmptyText(I18N.MESSAGES.SelectSiteAbove());
         confirmUnsavedData(new Function() {
             @Override
             public Object apply(Object input) {
+                MonthlyReportsPanel.this.grid.getStore().removeAll();
+                MonthlyReportsPanel.this.grid.getView().setEmptyText(I18N.MESSAGES.SelectSiteAbove());
                 return null;
             }
         });
