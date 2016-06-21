@@ -1,7 +1,6 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -43,8 +42,7 @@ import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 
 public class MySqlCatalogTest extends AbstractMySqlTest {
@@ -97,13 +95,21 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void testBoundLocation() {
-        FormTree tree = this.queryFormTree(CuidAdapter.activityFormClass(41));
+        ResourceId formClassId = CuidAdapter.activityFormClass(41);
+        FormTree tree = this.queryFormTree(formClassId);
         FormTree.Node locationNode = tree.getRootField(CuidAdapter.locationField(41));
 
-        ResourceId rangeId = Iterables.getOnlyElement(locationNode.getRange());
+        FormTreePrettyPrinter.print(tree);
+
+        assertTrue(locationNode.getRange().contains(CuidAdapter.adminLevelFormClass(2)));
+        assertTrue(locationNode.getRange().contains(CuidAdapter.locationFormClass(1)));
+
+        query(formClassId, "territoire.name", "territoire.province.name");
         
-        assertThat(rangeId, equalTo(CuidAdapter.adminLevelFormClass(2)));
-    }
+        assertThat(column("_id"), hasValues("s0000009001", "s0000009002", "s0000009003"));
+        assertThat(column("territoire.name"), hasValues("Bukavu", "Walungu", "Shabunda"));
+        assertThat(column("territoire.province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu"));
+    }   
 
     @Test
     public void testLocationPoints() {

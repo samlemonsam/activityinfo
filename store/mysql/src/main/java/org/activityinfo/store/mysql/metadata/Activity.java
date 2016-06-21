@@ -29,9 +29,10 @@ public class Activity implements Serializable {
      * activity references *multiple* location types
      */
     Set<Integer> locationTypeIds = Sets.newHashSet();
+    Set<ResourceId> locationRange = Sets.newHashSet();
     String category;
     String locationTypeName;
-    int adminLevelId;
+    Integer adminLevelId;
     String name;
     int ownerUserId;
     boolean published;
@@ -73,7 +74,7 @@ public class Activity implements Serializable {
         return locationTypeName;
     }
 
-    public int getAdminLevelId() {
+    public Integer getAdminLevelId() {
         return adminLevelId;
     }
 
@@ -151,11 +152,11 @@ public class Activity implements Serializable {
 
     public Collection<ResourceId> getLocationFormClassIds() {
         if(BETA.ENABLE_LOCATION_UNION_FIELDS) {
-            Set<ResourceId> locationFormClassIds = Sets.newHashSet();
-            for (Integer typeId : locationTypeIds) {
-                locationFormClassIds.add(CuidAdapter.locationFormClass(typeId));
-            }
-            return locationFormClassIds;
+            return locationRange;
+
+        } else if(adminLevelId != null) {
+            return Collections.singleton(CuidAdapter.adminLevelFormClass(adminLevelId));
+
         } else {
             return Collections.singleton(CuidAdapter.locationFormClass(locationTypeId));
         }

@@ -24,9 +24,9 @@ package org.activityinfo.server.command;
 
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import org.activityinfo.core.client.ResourceLocator;
+import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
+import org.activityinfo.legacy.shared.adapter.TestingResourceLocatorAdapter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -51,6 +51,9 @@ import static org.junit.Assert.*;
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class GetSchemaTest extends CommandTestCase2 {
 
+    @Inject
+    private TestingResourceLocatorAdapter resourceLocator;
+    
     @Before
     public void cleanUpScheduler() {
         JdbcScheduler.get().forceCleanup();
@@ -197,9 +200,8 @@ public class GetSchemaTest extends CommandTestCase2 {
     @Test
     public void newApiTest() {
 
-        ResourceLocator locator = new ResourceLocatorAdaptor(getDispatcher());
 
-        Promise<FormClass> userForm = locator.getFormClass(CuidAdapter.activityFormClass(1));
+        Promise<FormClass> userForm = resourceLocator.getFormClass(CuidAdapter.activityFormClass(1));
 
         assertThat(userForm, resolvesTo(CoreMatchers.<FormClass>notNullValue()));
     }

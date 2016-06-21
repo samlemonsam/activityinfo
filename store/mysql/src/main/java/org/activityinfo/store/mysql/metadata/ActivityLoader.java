@@ -246,9 +246,11 @@ public class ActivityLoader {
                     activity.databaseId = rs.getInt(6);
                     activity.databaseName = rs.getString(7);
                     activity.locationTypeId = rs.getInt(8);
-                    activity.locationTypeIds.add(activity.locationTypeId);
                     activity.locationTypeName = rs.getString(9);
                     activity.adminLevelId = rs.getInt(10);
+                    if(rs.wasNull()) {
+                        activity.adminLevelId = null;
+                    }
                     activity.ownerUserId = rs.getInt(13);
                     activity.published = rs.getInt(14) > 0;
                     activity.siteVersion = rs.getLong(15);
@@ -256,6 +258,13 @@ public class ActivityLoader {
                     activity.deleted = rs.getBoolean(17);
                     activity.ownerUserId = rs.getInt(18);
 
+
+                    activity.locationTypeIds.add(activity.locationTypeId);
+                    if(activity.adminLevelId == null) {
+                        activity.locationRange.add(CuidAdapter.locationFormClass(activity.locationTypeId));
+                    } else {
+                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(activity.adminLevelId));
+                    }
 
                     // Only use json form for forms that are explicitly non-classicView,
                     // otherwise we miss aggregation method.
@@ -280,16 +289,25 @@ public class ActivityLoader {
              * These need to be included in the range so that queries can be correctly run
              */
             try (ResultSet rs = executor.query(
-                    "SELECT DISTINCT S.ActivityId, L.LocationTypeId " +
+                    "SELECT DISTINCT S.ActivityId, L.LocationTypeId, T.BoundAdminLevelId " +
                             "FROM site S " +
                             "LEFT JOIN location L on (S.locationId=L.locationId) " +
+                            "LEFT JOIN locationtype T on (L.locationTypeId=T.LocationTypeId) " +
                             "WHERE S.ActivityId IN " + idList(activityIds))) {
 
                 while(rs.next()) {
                     int activityId = rs.getInt(1);
+                    Activity activity = activityMap.get(activityId);
+
                     int locationTypeId =  rs.getInt(2);
-                    
-                    activityMap.get(activityId).locationTypeIds.add(locationTypeId);
+                    activity.locationTypeIds.add(locationTypeId);
+
+                    int adminLevelId = rs.getInt(3);
+                    if(rs.wasNull()) {
+                        activity.locationRange.add(CuidAdapter.locationFormClass(locationTypeId));                        
+                    } else {
+                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(adminLevelId));
+                    }
                 }
             }
 

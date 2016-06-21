@@ -1,6 +1,7 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import org.activityinfo.core.client.InstanceQuery;
+import org.activityinfo.core.client.QueryModelAdapter;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
@@ -21,6 +22,7 @@ import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CompositeCatalog;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.MySqlSession;
+import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -153,13 +155,30 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
 
     @Override
     public Promise<QueryResult<Projection>> queryProjection(InstanceQuery query) {
-        throw new UnsupportedOperationException();
+        QueryModelAdapter adapter = new QueryModelAdapter();
+        QueryModel queryModel = adapter.build(query);
+
+        CollectionCatalog catalog = newCatalog();
+
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = columnSetBuilder.build(queryModel);
+
+        return Promise.resolved(adapter.toQueryResult(columnSet));
 
     }
 
     @Override
     public Promise<List<Projection>> query(InstanceQuery query) {
-        throw new UnsupportedOperationException();
+
+        QueryModelAdapter adapter = new QueryModelAdapter();
+        QueryModel queryModel = adapter.build(query);
+        
+        CollectionCatalog catalog = newCatalog();
+        
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = columnSetBuilder.build(queryModel);
+        
+        return Promise.resolved(adapter.toProjections(columnSet));
 
     }
 

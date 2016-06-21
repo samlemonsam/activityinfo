@@ -2,16 +2,20 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.Cursor;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.mapping.FieldMapping;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
+import org.activityinfo.store.mysql.side.BoundLocationBuilder;
 import org.activityinfo.store.mysql.side.SideColumnBuilder;
 
 import java.util.Map;
@@ -27,6 +31,8 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
     private final MySqlCursorBuilder baseCursor;
     private final SideColumnBuilder indicators;
     private final SideColumnBuilder attributes;
+    private BoundLocationBuilder boundLocation;
+    
 
     private Map<ResourceId, ActivityField> fieldMap = Maps.newHashMap();
     
@@ -37,6 +43,7 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         this.baseCursor = new MySqlCursorBuilder(tableMapping, executor);
         this.indicators = new SideColumnBuilder(tableMapping.getFormClass());
         this.attributes = new SideColumnBuilder(tableMapping.getFormClass());
+        this.boundLocation = new BoundLocationBuilder(activity.getId());
         
         for(ActivityField field : activity.getFields()) {
             fieldMap.put(field.getResourceId(), field);
@@ -57,8 +64,13 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
-        if(tableMapping.getMapping(fieldId) != null) {  
-            baseCursor.addField(fieldId, observer);
+        FieldMapping mapping = tableMapping.getMapping(fieldId);
+        if(mapping != null) {  
+            if(isBoundLocation(mapping)) {
+                boundLocation.addObserver(observer);
+            } else {
+                baseCursor.addField(fieldId, observer);
+            }
         } else {
             ActivityField field = fieldMap.get(fieldId);
             if(field == null) {
@@ -70,6 +82,19 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
                 attributes.add(field, observer);
             }
         }
+    }
+
+    private boolean isBoundLocation(FieldMapping mapping) {
+        if(!mapping.getFormField().getId().equals(CuidAdapter.locationField(activity.getId()))) {
+            return false;
+        }
+        ReferenceType referenceType = (ReferenceType) mapping.getFormField().getType();
+        for (ResourceId resourceId : referenceType.getRange()) {
+            if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -94,6 +119,11 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
             LOGGER.fine("Scanned site table in " + stopwatch);
 
             stopwatch.reset().start();
+            
+            if(boundLocation.hasObservers()) {
+                boundLocation.execute(executor);
+            }
+            
             
             // Run indicator loop
             if (!indicators.isEmpty()) {
