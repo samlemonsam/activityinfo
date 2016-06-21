@@ -5,26 +5,26 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.promise.Promise;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
 import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
-import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -77,7 +77,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultFemale"));
         importModel.setColumnAction(columnIndex("_CREATION_DATE"), target("Start Date"));
         importModel.setColumnAction(columnIndex("_SUBMISSION_DATE"), target("End Date"));
-        importModel.setColumnAction(columnIndex("district"), target("District Name"));
+        importModel.setColumnAction(columnIndex("district name"), target("District Name"));
         importModel.setColumnAction(columnIndex("upazila"), target("Upzilla Name"));
         importModel.setColumnAction(columnIndex("Partner"), target("Partner Name"));
 
@@ -117,7 +117,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultFemale"));
         importModel.setColumnAction(columnIndex("_CREATION_DATE"), target("Start Date"));
         importModel.setColumnAction(columnIndex("_SUBMISSION_DATE"), target("End Date"));
-        importModel.setColumnAction(columnIndex("district"), target("District Name"));
+        importModel.setColumnAction(columnIndex("district name"), target("District Name"));
         importModel.setColumnAction(columnIndex("upazila"), target("Upzilla Name"));
        // importModel.setColumnAction(columnIndex("Partner"), target("Partner Name"));
 
@@ -147,7 +147,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         guesser.guess();
 
         assertMapping("Partner", "Partner Name");
-        assertMapping("district", "District Name");
+        assertMapping("district name", "District Name");
         //assertMapping("upazila", "Upzilla Name");
     }
 
