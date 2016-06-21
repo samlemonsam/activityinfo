@@ -23,6 +23,7 @@ import org.activityinfo.service.store.CompositeCatalog;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.Updater;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -126,8 +127,20 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
-        throw new UnsupportedOperationException();
+
+        CollectionCatalog catalog = newCatalog();
+        Updater updater = new Updater(catalog);
+        
+        try {
+            for (IsResource resource : resources) {
+                updater.execute(resource);
+            }
+            return Promise.resolved(null);
+        } catch (Exception e) {
+            return Promise.rejected(e);
+        }
     }
+    
 
     @Override
     public Promise<Void> persistOperation(List<PromiseExecutionOperation> operations) {

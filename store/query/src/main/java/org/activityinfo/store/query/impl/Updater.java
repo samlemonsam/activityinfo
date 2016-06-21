@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -372,4 +373,25 @@ public class Updater {
         // TODO: check type-class specific properties
     }
 
+    public void execute(IsResource resource) {
+        execute(FormInstance.fromResource(resource.asResource()));
+    }
+    
+    public void execute(FormInstance formInstance) {
+
+        Optional<ResourceCollection> collection = catalog.getCollection(formInstance.getClassId());
+        if(!collection.isPresent()) {
+            throw new InvalidUpdateException("No such formId: " + formInstance.getClassId());
+        }
+
+        ResourceUpdate update = new ResourceUpdate();
+        update.setResourceId(formInstance.getId());
+
+        for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
+            if(!entry.getKey().asString().equals("classId")) {
+                update.set(entry.getKey(), entry.getValue());
+            }
+        }
+        executeUpdate(collection.get(), update);
+    }
 }
