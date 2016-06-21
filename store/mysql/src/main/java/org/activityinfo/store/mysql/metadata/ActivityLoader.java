@@ -15,6 +15,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -447,6 +448,10 @@ public class ActivityLoader {
                     formField.setType(new QuantityType()
                             .setUnits(rs.getString("units")));
                     break;
+                case "BARCODE":
+                    formField.setType(BarcodeType.INSTANCE);
+                    break;
+                
                 case "FREE_TEXT":
                     formField.setType(TextType.INSTANCE);
                     break;
