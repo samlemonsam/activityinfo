@@ -1,13 +1,13 @@
 package org.activityinfo.api.tools;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.*;
 
 public class DataTypeFactory {
     
@@ -30,7 +30,16 @@ public class DataTypeFactory {
         } else if(property instanceof ArrayProperty) {
             ArrayProperty arrayProperty = (ArrayProperty) property;
             return new ArrayType(get(arrayProperty.getItems()));
+        } else if(property instanceof StringProperty) {
+            return new PrimitiveDataType(ClassName.get(String.class));
+        } else if(property instanceof BooleanProperty) {
+            return new PrimitiveDataType(TypeName.BOOLEAN);
+        } else if(property instanceof BaseIntegerProperty) {
+            return new PrimitiveDataType(TypeName.INT);
+        } else if(property instanceof ObjectProperty) {
+            return new ObjectType();
         }
+        
         throw new UnsupportedOperationException(property.toString());
     }
 
@@ -48,7 +57,7 @@ public class DataTypeFactory {
                 throw new UnsupportedOperationException(parameter.toString());
             }
         } else {
-            return new StringDataType();
+            return new PrimitiveDataType(ClassName.get(String.class));
         }
     }
 }

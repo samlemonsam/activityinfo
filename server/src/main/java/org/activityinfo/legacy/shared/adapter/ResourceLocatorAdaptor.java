@@ -3,6 +3,7 @@ package org.activityinfo.legacy.shared.adapter;
 import com.google.common.base.Function;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
@@ -16,6 +17,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservablePromise;
 import org.activityinfo.promise.Promise;
@@ -25,8 +27,8 @@ import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,8 +70,27 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     public Promise<Void> persist(IsResource resource) {
         if(resource instanceof FormClass) {
             return client.updateFormSchema(resource.getId().asString(), (FormClass)resource);
+
+        } else if(resource instanceof FormInstance) {
+            FormInstance instance = (FormInstance) resource;
+            return client.updateRecord(
+                    instance.getClassId().asString(), 
+                    instance.getId().asString(),
+                    buildUpdate(instance))
+                    .thenDiscardResult();
         }
         return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    private FormRecordUpdateBuilder buildUpdate(FormInstance instance) {
+        FormRecordUpdateBuilder update = new FormRecordUpdateBuilder();
+        for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
+            String field = entry.getKey().asString();
+            if(!field.equals("classId")) {
+                update.setFieldValue(field, entry.getValue().toJsonElement());
+            }
+        }
+        return update;
     }
 
     @Override
@@ -120,12 +141,15 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         return query(query).then(new InstanceQueryResultAdapter(query));
     }
 
-    public Promise<Void> remove(ResourceId resourceId) {
-        return remove(Collections.singleton(resourceId));
+    public Promise<Void> remove(ResourceId formId, ResourceId resourceId) {
+        FormRecordUpdateBuilder builder = new FormRecordUpdateBuilder();
+        builder.setDeleted(true);
+
+        return client.updateRecord(formId.asString(), resourceId.asString(), builder).thenDiscardResult();
     }
 
     @Override
-    public Promise<Void> remove(Collection<ResourceId> resources) {
+    public Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 

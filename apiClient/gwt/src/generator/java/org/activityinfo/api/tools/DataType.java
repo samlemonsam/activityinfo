@@ -1,6 +1,7 @@
 package org.activityinfo.api.tools;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import org.activityinfo.promise.Promise;
@@ -24,7 +25,15 @@ public abstract class DataType {
     public abstract String toJsonString(String valueExpr);
 
     /**
+     * Returns a Java expression that evalutes to a Gson JsonElement instance
+     * @param propertyExpr
+     */
+    public abstract CodeBlock toJsonElement(String propertyExpr);
+
+    /**
      * Returns a Java expression that parses the Java string expression
      */
     public abstract String fromJsonString(String jsonStringExpr);
+
+
 }

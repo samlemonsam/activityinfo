@@ -99,9 +99,9 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     @Deprecated
     Promise<List<Projection>> query(InstanceQuery query);
 
-    Promise<Void> remove(ResourceId resourceId);
+    Promise<Void> remove(ResourceId formId, ResourceId resourceId);
 
-    Promise<Void> remove(Collection<ResourceId> resources);
+    Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources);
 
     /**
      * @param resourceIds

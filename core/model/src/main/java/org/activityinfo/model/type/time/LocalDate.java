@@ -1,6 +1,8 @@
 package org.activityinfo.model.type.time;
 
 import com.bedatadriven.rebar.time.CalendricalException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -104,6 +106,11 @@ public class LocalDate implements FieldValue, IsRecord, TemporalValue {
         }
         s.append(dayOfMonth);
         return s.toString();
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(toString());
     }
 
     /**

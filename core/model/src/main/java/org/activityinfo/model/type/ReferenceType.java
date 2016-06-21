@@ -2,15 +2,15 @@ package org.activityinfo.model.type;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A type that represents a link or reference to another {@code Resource}
@@ -65,6 +65,25 @@ public class ReferenceType implements ParametrizedFieldType {
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        if(value instanceof JsonPrimitive) {
+            ResourceId id = ResourceId.valueOf(value.getAsString());
+            return new ReferenceValue(id);
+        } else if(value instanceof JsonArray) {
+            Set<ResourceId> ids = new HashSet<>();
+            JsonArray array = (JsonArray) value;
+            for (JsonElement jsonElement : array) {
+                ResourceId id = ResourceId.valueOf(jsonElement.getAsString());
+                ids.add(id);
+            }
+            return new ReferenceValue(ids);
+        } else {
+            return null;
+        }
+        
     }
 
     public Cardinality getCardinality() {

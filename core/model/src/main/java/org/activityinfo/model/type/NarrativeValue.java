@@ -1,6 +1,8 @@
 package org.activityinfo.model.type;
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.primitive.HasStringValue;
@@ -28,6 +30,11 @@ public class NarrativeValue implements FieldValue, IsRecord, HasStringValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return NarrativeType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(text);
     }
 
 

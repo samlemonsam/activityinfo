@@ -64,7 +64,7 @@ public class FormActions {
         Promise<Void> remove = Promise.done();
 
         if (!model.getPersistedInstanceToRemoveByLocator().isEmpty()) {
-            remove = locator.remove(model.getPersistedInstanceToRemoveByLocator());
+            remove = locator.remove(null, model.getPersistedInstanceToRemoveByLocator());
         }
 
         Promise<Void> waitAll = Promise.waitAll(persist, remove);

@@ -1,5 +1,7 @@
 package org.activityinfo.model.type.geo;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
@@ -38,6 +40,16 @@ public class GeoPointType implements RecordFieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        JsonObject object = (JsonObject) value;
+        GeoPoint point = new GeoPoint(
+                object.get("latitude").getAsDouble(),
+                object.get("longitude").getAsDouble());
+        
+        return point;
     }
 
     /**

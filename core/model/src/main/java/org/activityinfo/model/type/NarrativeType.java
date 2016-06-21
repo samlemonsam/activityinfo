@@ -1,5 +1,6 @@
 package org.activityinfo.model.type;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
 
 /**
@@ -34,6 +35,11 @@ public class NarrativeType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        return NarrativeValue.valueOf(value.getAsString());
     }
 
     /**

@@ -12,8 +12,9 @@ import io.swagger.parser.SwaggerParser;
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +23,8 @@ import java.util.logging.Logger;
  */
 public class GwtClientGenerator {
 
-    public static final String CLIENT_PACKAGE = "org.activityinfo.api.client";
+    private static final String CLIENT_PACKAGE = "org.activityinfo.api.client";
+
     private final Swagger spec;
     private DataTypeFactory dataTypeFactory;
     private File outputDir;
@@ -43,13 +45,13 @@ public class GwtClientGenerator {
             System.err.println("Input file " + specFile.getAbsolutePath() + " does not exist.");
             System.exit(-1);
         }
-        
+
         if(!outputDir.exists()) {
             outputDir.mkdirs();
         }
-        
+
         System.out.println("Generating sources in " + outputDir);
-        
+
         GwtClientGenerator generator = new GwtClientGenerator(specFile, outputDir);
         generator.generate();
     }
@@ -60,12 +62,12 @@ public class GwtClientGenerator {
         dataTypeFactory = new DataTypeFactory(spec);
     }
 
-    public void generate() throws IOException {
+    private void generate() throws IOException {
         generateClientInterface();
         generateClientImpl();
         generateBuilders();
     }
-    
+
     private void generateClientInterface() throws IOException {
         TypeSpec.Builder clientInterface = TypeSpec.interfaceBuilder("ActivityInfoClientAsync")
                 .addModifiers(Modifier.PUBLIC);
@@ -79,7 +81,7 @@ public class GwtClientGenerator {
                 }
             }
         }
-        
+
         JavaFile javaFile = JavaFile.builder(CLIENT_PACKAGE, clientInterface.build()).build();
 
         javaFile.writeTo(outputDir);
@@ -99,7 +101,7 @@ public class GwtClientGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$T.getLogger(ActivityInfoClientAsync.class.getName())", Logger.class)
                 .build());
-        
+
         for (Map.Entry<String, Path> pathEntry : spec.getPaths().entrySet()) {
             Path path = pathEntry.getValue();
             for (Map.Entry<HttpMethod, Operation> entry : path.getOperationMap().entrySet()) {
@@ -116,11 +118,7 @@ public class GwtClientGenerator {
     }
 
     private boolean isIncluded(Operation operation) {
-        if(Boolean.FALSE.equals(operation.getVendorExtensions().get("x-gwt-client"))) {
-            return false;
-        }
-        
-        return true;
+        return !Boolean.FALSE.equals(operation.getVendorExtensions().get("x-gwt-client"));
     }
 
     private MethodSpec generateOperationMethod(String path, HttpMethod httpMethod, Operation operation,
@@ -130,7 +128,7 @@ public class GwtClientGenerator {
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(operation.getOperationId())
                 .returns(responseType.getPromisedReturnType());
-        
+
         if(implementation) {
             method.addModifiers(Modifier.PUBLIC);
         } else {
@@ -145,18 +143,18 @@ public class GwtClientGenerator {
             method.addJavadoc(operation.getDescription());
             method.addJavadoc("\n");
         }
-        
+
         Parameter bodyParameter = null;
-        
+
         for (Parameter parameter : operation.getParameters()) {
             DataType type = dataTypeFactory.get(parameter);
             ParameterSpec.Builder param = ParameterSpec.builder(type.getParameterType(), parameter.getName());
             method.addParameter(param.build());
-            
+
             if(parameter.getIn().equals("body")) {
                 bodyParameter = parameter;
             }
-            
+
             if(parameter.getDescription() != null) {
                 method.addJavadoc("@param ");
                 method.addJavadoc(parameter.getName());
@@ -164,9 +162,9 @@ public class GwtClientGenerator {
                 method.addJavadoc(parameter.getDescription());
                 method.addJavadoc("\n");
             }
-            
+
         }
-        
+
         if(implementation) {
             // Classes that we use
             ClassName requestBuilder = ClassName.get(RequestBuilder.class);
@@ -186,12 +184,11 @@ public class GwtClientGenerator {
 
             method.addStatement("return result");
         }
-        
+
         return method.build();
     }
-    
-    private TypeSpec generateCallback(Operation operation) {
 
+    private TypeSpec generateCallback(Operation operation) {
 
         TypeSpec.Builder callback = TypeSpec.anonymousClassBuilder("")
                 .superclass(RequestCallback.class);
@@ -206,7 +203,7 @@ public class GwtClientGenerator {
         for (Map.Entry<String, Response> entry : operation.getResponses().entrySet()) {
             Response expectedResponse = entry.getValue();
             int statusCode = Integer.parseInt(entry.getKey());
-            
+
             if(statusCode >= 200 && statusCode < 300) {
                 onReceived.beginControlFlow("if(response.getStatusCode() == $L)", statusCode);
                 if (expectedResponse.getSchema() == null) {
@@ -221,7 +218,7 @@ public class GwtClientGenerator {
         }
         // If the response did not match a success case, then treat it as an error
         onReceived.addStatement("result.reject(new RuntimeException(\"Status code: \" + response.getStatusCode()))");
-        
+
         MethodSpec.Builder onFailed = MethodSpec.methodBuilder("onError")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -232,10 +229,10 @@ public class GwtClientGenerator {
                 .addStatement("result.reject(error)")
                 .returns(void.class);
 
-        
+
         callback.addMethod(onReceived.build());
         callback.addMethod(onFailed.build());
-        
+
         return callback.build();
     }
 
@@ -269,50 +266,34 @@ public class GwtClientGenerator {
 
 
     private void generateBuilders() throws IOException {
+        Set<String> parameterModels = findParameterModelTypes();
+        for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
+            String modelName = entry.getKey();
+            if( !ProvidedModel.isProvided(modelName) &&
+                 parameterModels.contains(modelName)) {
+                
+                BuilderGenerator builderGenerator = new BuilderGenerator(dataTypeFactory, modelName, entry.getValue());
+                builderGenerator.writeTo(outputDir);
+            }
+        }
+    }
 
-        Map<String, RefModel> parameterModels = new HashMap<>();
+    private Set<String> findParameterModelTypes() {
+        Set<String> models = new HashSet<>();
 
-        // Find all the model types that are used as parameters for operations
-        // We want to create "Builder" classes for each
         for (Path path : spec.getPaths().values()) {
             for (Operation operation : path.getOperations()) {
                 for (Parameter parameter : operation.getParameters()) {
-                    if(parameter instanceof BodyParameter) {
+                    if (parameter instanceof BodyParameter) {
                         BodyParameter bodyParameter = (BodyParameter) parameter;
-                        if(bodyParameter.getSchema() instanceof RefModel) {
+                        if (bodyParameter.getSchema() instanceof RefModel) {
                             RefModel refModel = (RefModel) bodyParameter.getSchema();
-                            parameterModels.put(refModel.getSimpleRef(), refModel);
+                            models.add(refModel.getSimpleRef());
                         }
                     }
                 }
             }
         }
-        
-        // Generate a single class for each distinct RefModel parameter
-        for (RefModel refModel : parameterModels.values()) {
-            generateBuilder(refModel);
-        }
-    }
-
-    private void generateBuilder(RefModel refModel) throws IOException {
-        String className = refModel.getSimpleRef() + "Builder";
-        TypeSpec.Builder builderClass = TypeSpec.classBuilder(className)
-                .addModifiers(Modifier.PUBLIC);
-
-
-
-        MethodSpec.Builder toJsonStringMethod = MethodSpec.methodBuilder("toJsonString")
-                .addModifiers(Modifier.PUBLIC)
-                .returns(String.class);
-        
-        toJsonStringMethod.addStatement("throw new UnsupportedOperationException()");
-        
-        builderClass.addMethod(toJsonStringMethod.build());
-        
-        JavaFile javaFile = JavaFile.builder(ModelDataType.MODEL_PACKAGE, builderClass.build())
-                .build();
-
-        javaFile.writeTo(outputDir);
-
+        return models;
     }
 }

@@ -81,7 +81,7 @@ public class DeleteAction implements ConfirmDialog.Action {
 
     @Override
     public Promise<Void> execute() {
-        return tableView.getResourceLocator().remove(selection);
+        return tableView.getResourceLocator().remove(tableView.getRootFormClass().getId(), selection);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.activityinfo.api.tools;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
@@ -27,6 +28,11 @@ public class ArrayType extends DataType {
 
     @Override
     public String toJsonString(String valueExpr) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CodeBlock toJsonElement(String propertyExpr) {
         throw new UnsupportedOperationException();
     }
 

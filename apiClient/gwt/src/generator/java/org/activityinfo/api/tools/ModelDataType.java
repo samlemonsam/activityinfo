@@ -1,6 +1,7 @@
 package org.activityinfo.api.tools;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import io.swagger.models.Model;
 
@@ -36,6 +37,11 @@ public class ModelDataType extends DataType {
     @Override
     public String toJsonString(String valueExpr) {
         return valueExpr + ".toJsonString()";
+    }
+
+    @Override
+    public CodeBlock toJsonElement(String propertyExpr) {
+        return CodeBlock.of(propertyExpr + ".toJsonString()");
     }
 
     @Override

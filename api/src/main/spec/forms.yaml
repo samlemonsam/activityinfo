@@ -156,7 +156,7 @@ paths:
           description: Id of the record
           type: string
           required: true
-        - name: query
+        - name: update
           in: body
           description: The record to update
           schema:
@@ -234,12 +234,10 @@ definitions:
         type: string
       type: 
         description: The type of value in this field
-        type: object
+        type: string
         enum:
         - text
         - quantity
-      typeParameters:
-        description: Further properties of the field type
       relevanceCondition:
         description: A boolean-valued expression that determines whether the
             field is shown

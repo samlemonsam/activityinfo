@@ -45,6 +45,8 @@ public class SitePersisterTest extends CommandTestCase2 {
         siteFormInstance.set(CONTENU_DI_KIT_FIELD, CONTENU_DI_KIT_FIELD_ATTR_VALUE);
 
         // built-in values
+        siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), 
+                new ReferenceValue(CuidAdapter.partnerInstanceId(1)));
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),

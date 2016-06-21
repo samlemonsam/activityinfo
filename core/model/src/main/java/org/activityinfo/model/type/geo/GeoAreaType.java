@@ -1,5 +1,6 @@
 package org.activityinfo.model.type.geo;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -38,6 +39,11 @@ public class GeoAreaType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException("TODO");
     }
 
     /**

@@ -22,6 +22,7 @@ package org.activityinfo.model.type.subform;
 */
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
@@ -97,6 +98,11 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

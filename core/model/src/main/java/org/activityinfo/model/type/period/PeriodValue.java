@@ -21,6 +21,8 @@ package org.activityinfo.model.type.period;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -61,6 +63,11 @@ public class PeriodValue implements FieldValue, IsRecord, Serializable {
     @Override
     public FieldTypeClass getTypeClass() {
         return PeriodType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(Iso8601.asIso8601String(this));
     }
 
     @Override

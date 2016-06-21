@@ -18,6 +18,7 @@ import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.Updater;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -96,7 +97,16 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormRecord> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
+        try {
+            CollectionCatalog catalog = newCatalog();
+            Updater updater = new Updater(catalog);
+            updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
+
+            return Promise.resolved(null);
+            
+        } catch (Exception e) {
+            return Promise.rejected(e);
+        }
     }
 
     @Override

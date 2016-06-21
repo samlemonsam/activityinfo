@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
@@ -84,6 +88,23 @@ public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return ReferenceType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        if(resourceIds.isEmpty()) {
+            return JsonNull.INSTANCE;
+            
+        } else if(resourceIds.isEmpty()) {
+            return new JsonPrimitive(resourceIds.iterator().next().asString());
+        
+        } else {
+            JsonArray array = new JsonArray();
+            for (ResourceId resourceId : resourceIds) {
+                array.add(new JsonPrimitive(resourceId.asString()));
+            }
+            return array;
+        }
     }
 
     @Override

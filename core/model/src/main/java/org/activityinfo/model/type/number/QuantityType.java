@@ -1,5 +1,6 @@
 package org.activityinfo.model.type.number;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -80,6 +81,11 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        return new Quantity(value.getAsDouble(), units);
     }
 
     @Override

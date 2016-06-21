@@ -21,6 +21,9 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -104,6 +107,25 @@ public class AttachmentType implements ParametrizedFieldType {
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        AttachmentValue fieldValue = new AttachmentValue();
+        JsonArray array = (JsonArray) value;
+        for (JsonElement attachmentItem : array) {
+            JsonObject attachmentObject = (JsonObject) attachmentItem;
+            String mimeType = attachmentObject.get("mimeType").getAsString();
+            String filename = attachmentObject.get("filename").getAsString();
+            String blobId = attachmentObject.get("blobId").getAsString();
+
+            Attachment attachment = new Attachment(mimeType, filename, blobId);
+            attachment.setWidth(attachmentObject.get("width").getAsInt());
+            attachment.setHeight(attachmentObject.get("height").getAsInt());
+            
+            fieldValue.getValues().add(attachment);
+        }
+        return fieldValue;
     }
 
     public Cardinality getCardinality() {

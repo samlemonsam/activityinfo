@@ -1,5 +1,7 @@
 package org.activityinfo.model.type;
 
+import com.google.gson.JsonElement;
+
 import java.io.Serializable;
 
 /**
@@ -18,4 +20,6 @@ public interface FieldValue extends Serializable {
      * @return this value's {@code FieldTypeClass}
      */
     FieldTypeClass getTypeClass();
+    
+    JsonElement toJsonElement();
 }

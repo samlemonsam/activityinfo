@@ -2,6 +2,7 @@ package org.activityinfo.api.tools;
 
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -46,6 +47,11 @@ public class ProvidedModel extends DataType {
     @Override
     public String toJsonString(String valueExpr) {
         return valueExpr + ".toJsonString()";
+    }
+
+    @Override
+    public CodeBlock toJsonElement(String propertyExpr) {
+        return CodeBlock.of(propertyExpr + ".toJsonElement()");
     }
 
     @Override

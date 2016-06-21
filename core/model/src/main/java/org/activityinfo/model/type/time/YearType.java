@@ -20,11 +20,9 @@ package org.activityinfo.model.type.time;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.RecordFieldTypeClass;
-import org.activityinfo.model.type.SingletonTypeClass;
+import org.activityinfo.model.type.*;
 
 /**
  * Value type that represents a calendar year in the ISO-8601 calendar.
@@ -59,6 +57,11 @@ public class YearType implements FieldType, TemporalType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        return new YearValue(value.getAsInt());
     }
 
 }

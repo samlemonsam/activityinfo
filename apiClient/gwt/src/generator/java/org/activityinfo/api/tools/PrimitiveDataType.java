@@ -1,27 +1,36 @@
 package org.activityinfo.api.tools;
 
+import com.google.gson.JsonPrimitive;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
-public class VoidDataType extends DataType {
+
+public class PrimitiveDataType extends DataType {
+
+    private TypeName typeName;
+
+    public PrimitiveDataType(TypeName typeName) {
+        this.typeName = typeName;
+    }
+
     @Override
     public TypeName getReturnTypeName() {
-        return TypeName.VOID;
+        return typeName;
     }
 
     @Override
     public TypeName getParameterType() {
-        return TypeName.VOID;
+        return typeName;
     }
 
     @Override
     public String toJsonString(String valueExpr) {
-        throw new UnsupportedOperationException();
+        return valueExpr;
     }
 
     @Override
     public CodeBlock toJsonElement(String propertyExpr) {
-        throw new UnsupportedOperationException();
+        return CodeBlock.of("new $T($L)", JsonPrimitive.class, propertyExpr);
     }
 
     @Override

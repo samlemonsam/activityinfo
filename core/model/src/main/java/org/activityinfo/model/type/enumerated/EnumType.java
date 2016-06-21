@@ -1,13 +1,19 @@
 package org.activityinfo.model.type.enumerated;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EnumType implements ParametrizedFieldType {
 
@@ -78,6 +84,24 @@ public class EnumType implements ParametrizedFieldType {
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        if(value instanceof JsonPrimitive) {
+            ResourceId id = ResourceId.valueOf(value.getAsString());
+            return new EnumValue(id);
+        } else if(value instanceof JsonArray) {
+            Set<ResourceId> ids = new HashSet<>();
+            JsonArray array = (JsonArray) value;
+            for (JsonElement jsonElement : array) {
+                ResourceId id = ResourceId.valueOf(jsonElement.getAsString());
+                ids.add(id);
+            }
+            return new EnumValue(ids);
+        } else {
+            return null;
+        }
     }
 
     @Override

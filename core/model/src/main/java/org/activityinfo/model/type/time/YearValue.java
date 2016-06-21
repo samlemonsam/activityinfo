@@ -21,6 +21,8 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -57,6 +59,11 @@ public class YearValue implements FieldValue, IsRecord, TemporalValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return YearType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(year);
     }
 
     @Override

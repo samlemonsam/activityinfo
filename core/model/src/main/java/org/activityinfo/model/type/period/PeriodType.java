@@ -21,8 +21,12 @@ package org.activityinfo.model.type.period;
  * #L%
  */
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordFieldTypeClass;
 
 /**
  * @author yuriyz on 01/27/2015.
@@ -54,6 +58,11 @@ public class PeriodType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException("TODO");
     }
 
 }

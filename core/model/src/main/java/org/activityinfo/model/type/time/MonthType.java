@@ -21,6 +21,7 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.*;
 
@@ -57,5 +58,10 @@ public class MonthType implements FieldType, TemporalType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException();
     }
 }

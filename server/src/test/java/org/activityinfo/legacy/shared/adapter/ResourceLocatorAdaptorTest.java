@@ -32,7 +32,6 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -172,8 +171,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @Test
     public void persistLocation() {
 
-        FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS),
-                HEALTH_CENTER_CLASS);
+        FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS), HEALTH_CENTER_CLASS);
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "CS Ubuntu");
         instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new GeoPoint(-1, 13));
         instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entity(IRUMU));
@@ -192,7 +190,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getLongitude(), equalTo(13d));
 
         // remove location
-        assertResolves(locator.remove(instance.getId()));
+        assertResolves(locator.remove(HEALTH_CENTER_CLASS, instance.getId()));
 
         // check whether location is removed
         result = execute(query);
@@ -211,7 +209,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         final Projection firstProjection = projections.get(0);
 
-        assertResolves(locator.remove(firstProjection.getRootInstanceId()));
+        assertResolves(locator.remove(VILLAGE_CLASS, firstProjection.getRootInstanceId()));
 
         projections = assertResolves(locator.query(query));
         assertThat(projections.size(), equalTo(2)); // size is reduced
@@ -321,7 +319,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor();
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
-        assertResolves(adapter.remove(Arrays.asList(instanceToDelete)));
+        assertResolves(adapter.remove(CuidAdapter.locationFormClass(1), instanceToDelete));
 
         List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
 

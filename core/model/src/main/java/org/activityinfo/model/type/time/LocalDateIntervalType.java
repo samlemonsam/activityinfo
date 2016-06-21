@@ -1,7 +1,9 @@
 package org.activityinfo.model.type.time;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
 
 /**
  * Value type that represents a continuous interval between two {@link org.activityinfo.model.type.time.LocalDate}s,
@@ -29,6 +31,11 @@ public class LocalDateIntervalType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException("TODO");
     }
 
     /**

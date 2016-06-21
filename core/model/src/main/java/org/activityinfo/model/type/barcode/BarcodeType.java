@@ -1,5 +1,6 @@
 package org.activityinfo.model.type.barcode;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -40,6 +41,11 @@ public class BarcodeType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        return BarcodeValue.valueOf(value.getAsString());
     }
 
     @Override

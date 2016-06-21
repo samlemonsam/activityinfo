@@ -21,6 +21,8 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 
@@ -103,6 +105,17 @@ public class Attachment implements IsRecord {
         return rowValue;
     }
 
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("mimeType", mimeType);
+        object.addProperty("width", width);
+        object.addProperty("height", height);
+        object.addProperty("filename", filename);
+        object.addProperty("blobId", blobId);
+        return object;
+    }
+    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -118,4 +131,5 @@ public class Attachment implements IsRecord {
     public int hashCode() {
         return blobId != null ? blobId.hashCode() : 0;
     }
+
 }

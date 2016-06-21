@@ -5,6 +5,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
@@ -96,6 +100,21 @@ public class EnumValue implements FieldValue, IsRecord, HasSetFieldValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return EnumType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        if(valueIds.isEmpty()) {
+            return JsonNull.INSTANCE;
+        } else if(valueIds.size() == 1) {
+            return new JsonPrimitive(valueIds.iterator().next().asString());
+        } else {
+            JsonArray array = new JsonArray();
+            for (ResourceId valueId : valueIds) {
+                array.add(new JsonPrimitive(valueId.asString()));
+            }
+            return array;
+        }
     }
 
     @Override

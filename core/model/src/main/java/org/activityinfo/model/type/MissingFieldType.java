@@ -1,5 +1,7 @@
 package org.activityinfo.model.type;
 
+import com.google.gson.JsonElement;
+
 public class MissingFieldType implements FieldType {
 
     public static final MissingFieldType INSTANCE = new MissingFieldType();
@@ -23,6 +25,11 @@ public class MissingFieldType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException();
     }
 
     /**

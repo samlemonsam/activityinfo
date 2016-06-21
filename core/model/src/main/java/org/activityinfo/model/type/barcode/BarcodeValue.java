@@ -1,6 +1,8 @@
 package org.activityinfo.model.type.barcode;
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -42,6 +44,11 @@ public class BarcodeValue implements FieldValue, IsRecord, HasStringValue {
         return new Record()
                 .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
                 .set("code", code);
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(code);
     }
 
     public static BarcodeValue fromRecord(Record record) {

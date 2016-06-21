@@ -394,4 +394,26 @@ public class Updater {
         }
         executeUpdate(collection.get(), update);
     }
+
+    public void execute(ResourceId formId, ResourceId recordId, JsonObject jsonObject) {
+        Optional<ResourceCollection> collection = catalog.getCollection(formId);
+        if(!collection.isPresent()) {
+            throw new InvalidUpdateException("No such formId: " + formId);
+        }
+
+        ResourceUpdate update = new ResourceUpdate();
+        update.setResourceId(recordId);
+
+        FormClass formClass = collection.get().getFormClass();
+        JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
+        for (FormField formField : formClass.getFields()) {
+            if(fieldValues.has(formField.getName())) {
+                JsonElement updatedValueElement = fieldValues.get(formField.getName());
+                FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
+                update.getChangedFieldValues().put(formField.getId(), updatedValue);
+            }
+        }
+        
+        executeUpdate(collection.get(), update);
+    }
 }
