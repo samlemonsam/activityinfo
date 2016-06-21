@@ -3,6 +3,7 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
@@ -20,6 +21,7 @@ import org.activityinfo.model.formTree.TFormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.subform.ClassType;
@@ -29,7 +31,6 @@ import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -74,13 +75,9 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     public static final int IRUMU = 21;
 
 
-    private ResourceLocatorAdaptor resourceLocator;
-
-    @Before
-    public final void setup() {
-        resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-    }
-
+    @Inject
+    private TestingResourceLocatorAdapter resourceLocator;
+    
     @Test
     public void simpleAdminEntityQuery() {
         assertThat(queryByClass(adminLevelFormClass(PROVINCE_ADMIN_LEVEL_ID)), Matchers.hasSize(4));
@@ -136,7 +133,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         instance.set(projectField(NFI_DIST_ID), projectInstanceId(1));
         instance.set(field(NFI_DIST_FORM_CLASS, START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(NFI_DIST_FORM_CLASS, END_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(field(NFI_DIST_FORM_CLASS, COMMENT_FIELD), "My comment");
+        instance.set(field(NFI_DIST_FORM_CLASS, COMMENT_FIELD), NarrativeValue.valueOf("My comment"));
 
         assertResolves(resourceLocator.persist(instance));
 

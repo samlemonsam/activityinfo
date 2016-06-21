@@ -31,6 +31,7 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -116,13 +117,13 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
             }
             return Promise.resolved(null);
         } else {
-            return Promise.rejected(new UnsupportedOperationException());
+            return persist(Collections.singletonList(resource));
         }
     }
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources) {
-        throw new UnsupportedOperationException();
+        return persist(resources, null);
     }
 
     @Override

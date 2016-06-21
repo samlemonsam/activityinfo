@@ -338,7 +338,7 @@ public class Updater {
             
             valueMap.put(field.getId(), updatedValue);
         }
-
+        
         // Verify that all required fields are provided for new resources
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {

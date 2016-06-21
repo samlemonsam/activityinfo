@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -26,12 +27,14 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
 
     public static final int BAVON_USER_ID = 2;
 
+    @Inject
+    private TestingResourceLocatorAdapter locator;
+
+
     @Test @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void partnersFieldIsAlwaysVisible() {
 
         setUser(BAVON_USER_ID);
-
-        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
 
         FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(1)));
 
@@ -54,8 +57,6 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
     public void nullLocationTypeIsNotVisible() {
 
         setUser(9944);
-
-        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
 
         FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(11218)));
 
