@@ -22,6 +22,8 @@ package org.activityinfo.server.command;
  * #L%
  */
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -62,6 +64,13 @@ import javax.persistence.EntityManager;
 })
 public class CommandTestCase2 {
 
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+    @Before
+    public void setUpDatastore() {
+        helper.setUp();
+    }
 
     @BeforeClass
     public static void setupI18N() {

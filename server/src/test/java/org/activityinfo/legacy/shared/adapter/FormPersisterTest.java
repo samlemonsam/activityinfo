@@ -1,16 +1,13 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.collect.Iterables;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +16,6 @@ import java.util.List;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
@@ -31,7 +27,6 @@ public class FormPersisterTest extends CommandTestCase2 {
 
     @Before
     public void setUp() throws Exception {
-        locator = new ResourceLocatorAdaptor(getDispatcher());
         setUser(9944);
     }
 

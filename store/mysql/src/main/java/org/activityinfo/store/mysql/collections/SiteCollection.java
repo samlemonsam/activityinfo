@@ -16,10 +16,7 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.metadata.UserPermission;
-import org.activityinfo.store.mysql.update.AttributeValueTableUpdater;
-import org.activityinfo.store.mysql.update.BaseTableInserter;
-import org.activityinfo.store.mysql.update.BaseTableUpdater;
-import org.activityinfo.store.mysql.update.IndicatorValueTableUpdater;
+import org.activityinfo.store.mysql.update.*;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -108,9 +105,9 @@ public class SiteCollection implements ResourceCollection {
 
     @Override
     public void updateFormClass(FormClass formClass) {
-        throw new UnsupportedOperationException();
+        ActivityUpdater updater = new ActivityUpdater(activity, queryExecutor);
+        updater.update(formClass);
     }
-
 
     @Override
     public void add(ResourceUpdate update) {

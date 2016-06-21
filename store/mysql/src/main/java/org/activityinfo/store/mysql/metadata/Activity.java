@@ -36,7 +36,7 @@ public class Activity implements Serializable {
     int ownerUserId;
     boolean published;
     long schemaVersion;
-    long version;
+    long siteVersion;
     
     boolean deleted;
     
@@ -99,7 +99,7 @@ public class Activity implements Serializable {
     }
 
     public long getVersion() {
-        return version;
+        return Math.max(siteVersion, schemaVersion);
     }
 
     public Iterable<ActivityField> getIndicatorFields() {
@@ -206,7 +206,7 @@ public class Activity implements Serializable {
     }
     
     public ActivityVersion getActivityVersion() {
-        return new ActivityVersion(this.getId(), schemaVersion, version);
+        return new ActivityVersion(this.getId(), schemaVersion, siteVersion);
     }
     
     void addLink(int destinationIndicatorId, int sourceActivityId, int sourceReportingFrequency, int sourceIndicatorId) {

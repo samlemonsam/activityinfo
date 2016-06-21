@@ -174,7 +174,7 @@ public class ActivityLoader {
                     
                     // Update the cached activity with the data version number,
                     // which is version seperately from the schema itself.
-                    activity.version = activityVersion.getSiteVersion();
+                    activity.siteVersion = activityVersion.getSiteVersion();
                     
                     loaded.put(activityVersion.getId(), activity);
                 }
@@ -251,7 +251,7 @@ public class ActivityLoader {
                     activity.adminLevelId = rs.getInt(10);
                     activity.ownerUserId = rs.getInt(13);
                     activity.published = rs.getInt(14) > 0;
-                    activity.version = rs.getLong(15);
+                    activity.siteVersion = rs.getLong(15);
                     activity.schemaVersion = rs.getLong(16);
                     activity.deleted = rs.getBoolean(17);
                     activity.ownerUserId = rs.getInt(18);

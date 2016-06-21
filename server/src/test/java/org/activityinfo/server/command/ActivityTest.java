@@ -25,8 +25,9 @@ package org.activityinfo.server.command;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
+import org.activityinfo.legacy.shared.adapter.TestingResourceLocatorAdapter;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -63,6 +64,10 @@ import static org.junit.Assert.*;
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
 public class ActivityTest extends CommandTestCase2 {
+    
+    @Inject
+    private TestingResourceLocatorAdapter resourceLocator;
+    
 
     @Before
     public void setUser() {
@@ -180,7 +185,6 @@ public class ActivityTest extends CommandTestCase2 {
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(classId));
 
         // create three new fields with an order that mixes "attributes" and "indicators"
@@ -231,7 +235,6 @@ public class ActivityTest extends CommandTestCase2 {
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(classId));
 
         FormField newField = new FormField(ResourceId.generateFieldId(QuantityType.TYPE_CLASS));
@@ -265,7 +268,6 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void createAttributeGroup() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
 
         FormField newField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
@@ -310,7 +312,6 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void updateIndicator() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         TFormClass formClass = new TFormClass(assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1))));
 
         FormField beneficiaries = formClass.getFieldByLabel("beneficiaries");
@@ -325,13 +326,12 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void updateIndicatorWithLongUnits() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         TFormClass formClass = new TFormClass(assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1))));
 
         FormField beneficiaries = formClass.getFieldByLabel("beneficiaries");
         QuantityType updatedType = new QuantityType().setUnits("imperial tonne with very long qualifying text");
         beneficiaries.setType(updatedType);
-        resourceLocator.persist(formClass.getFormClass());
+        assertResolves(resourceLocator.persist(formClass.getFormClass()));
 
         ActivityFormDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("units", Matchers.equalTo(updatedType.getUnits())));
@@ -355,7 +355,6 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void deleteAttributeGroup() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
         FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
 
         // Remove attribute
@@ -366,7 +365,7 @@ public class ActivityTest extends CommandTestCase2 {
                 it.remove();
             }
         }
-        resourceLocator.persist(formClass);
+        assertResolves(resourceLocator.persist(formClass));
 
         // Ensure deleted
         ActivityFormDTO form = execute(new GetActivityForm(1));

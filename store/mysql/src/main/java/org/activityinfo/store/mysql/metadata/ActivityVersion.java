@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
 
-class ActivityVersion {
+public class ActivityVersion {
     private int id;
     private long schemaVersion;
     private long siteVersion;
