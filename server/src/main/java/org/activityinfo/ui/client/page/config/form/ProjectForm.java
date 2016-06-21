@@ -36,6 +36,7 @@ public class ProjectForm extends FormPanel {
     public static final int PROJECT_MAX_LENGTH = 255;
 
     private FormBinding binding;
+    private final TextField<String> nameField;
 
     public ProjectForm() {
         super();
@@ -44,7 +45,7 @@ public class ProjectForm extends FormPanel {
 
         UiConstants constants = GWT.create(UiConstants.class);
 
-        TextField<String> nameField = new TextField<String>();
+        nameField = new TextField<String>();
         nameField.setFieldLabel(constants.name());
         nameField.setMaxLength(PROJECT_MAX_LENGTH);
         nameField.setAllowBlank(false);
@@ -57,6 +58,10 @@ public class ProjectForm extends FormPanel {
         descriptionTextArea.setMaxLength(250);
         binding.addFieldBinding(new FieldBinding(descriptionTextArea, "description"));
         this.add(descriptionTextArea);
+    }
+
+    public TextField<String> getNameField() {
+        return nameField;
     }
 
     public FormBinding getBinding() {
