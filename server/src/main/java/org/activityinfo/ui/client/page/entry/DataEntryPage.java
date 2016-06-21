@@ -69,9 +69,9 @@ import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
+import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
-import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.Objects;
@@ -553,7 +553,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     protected void doImport() {
         final int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
-        final ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(dispatcher);
+        final ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor();
         ImportPresenter.showPresenter(CuidAdapter.activityFormClass(activityId), resourceLocator)
                        .then(new SuccessCallback<ImportPresenter>() {
                            @Override

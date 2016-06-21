@@ -26,6 +26,7 @@ sourceSets {
         java {
             srcDir "$buildDir/generated"
             compileClasspath += configurations.compile
+            compileClasspath += sourceSets.main.output
         }
     }
 }
@@ -45,7 +46,8 @@ dependencies {
 
 idea {
     module {
-        testSourceDirs += file('src/generator/java')
+        generatedSourceDirs += file("$buildDir/generated")
+
 
         scopes.PROVIDED.plus += [ configurations.gwt ]
         scopes.TEST.plus += [ configurations.generatorCompile ]
@@ -54,8 +56,9 @@ idea {
 
 jar {
     from project.sourceSets.main.allSource
-    from project.sourceSets.generated.allSource
     from project.sourceSets.main.output
+    from project.sourceSets.generated.allSource
+    from project.sourceSets.generated.output
 }
 
 task generateSources(type: JavaExec) {

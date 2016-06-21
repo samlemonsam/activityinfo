@@ -57,7 +57,7 @@ public class PrintFormPanel extends FlowPanel {
 
             @Override
             public Promise<FormInstance> get() {
-                return resourceLocator.getFormInstance(parseInstanceId());
+                return resourceLocator.getFormInstance(null, parseInstanceId());
             }
         });
         

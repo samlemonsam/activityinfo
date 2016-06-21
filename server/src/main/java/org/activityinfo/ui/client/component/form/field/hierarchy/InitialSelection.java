@@ -37,7 +37,7 @@ class InitialSelection {
     private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, Set<ResourceId> instanceIds) {
         InstanceQuery query = InstanceQuery
                 .select(LABEL_PROPERTY, PARENT_PROPERTY)
-                .where(new IdCriteria(instanceIds))
+                .where(new IdCriteria(null, instanceIds))
                 .build();
 
         return locator.query(query)

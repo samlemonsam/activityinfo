@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  */
 public class GwtClientGenerator {
 
+    public static final String CLIENT_PACKAGE = "org.activityinfo.api.client";
     private final Swagger spec;
     private DataTypeFactory dataTypeFactory;
     private File outputDir;
@@ -60,12 +61,33 @@ public class GwtClientGenerator {
     }
 
     public void generate() throws IOException {
-        generateClient();
+        generateClientInterface();
+        generateClientImpl();
         generateBuilders();
     }
+    
+    private void generateClientInterface() throws IOException {
+        TypeSpec.Builder clientInterface = TypeSpec.interfaceBuilder("ActivityInfoClientAsync")
+                .addModifiers(Modifier.PUBLIC);
 
-    private void generateClient() throws IOException {
-        TypeSpec.Builder clientClass = TypeSpec.classBuilder("ActivityInfoClientAsync")
+
+        for (Map.Entry<String, Path> pathEntry : spec.getPaths().entrySet()) {
+            Path path = pathEntry.getValue();
+            for (Map.Entry<HttpMethod, Operation> entry : path.getOperationMap().entrySet()) {
+                if(isIncluded(entry.getValue())) {
+                    clientInterface.addMethod(generateOperationMethod(pathEntry.getKey(), entry.getKey(), entry.getValue(), false));
+                }
+            }
+        }
+        
+        JavaFile javaFile = JavaFile.builder(CLIENT_PACKAGE, clientInterface.build()).build();
+
+        javaFile.writeTo(outputDir);
+    }
+
+    private void generateClientImpl() throws IOException {
+        TypeSpec.Builder clientClass = TypeSpec.classBuilder("ActivityInfoClientAsyncImpl")
+                .addSuperinterface(ClassName.get(CLIENT_PACKAGE, "ActivityInfoClientAsync"))
                 .addModifiers(Modifier.PUBLIC);
 
         clientClass.addField(FieldSpec.builder(String.class, "BASE_URL")
@@ -82,12 +104,12 @@ public class GwtClientGenerator {
             Path path = pathEntry.getValue();
             for (Map.Entry<HttpMethod, Operation> entry : path.getOperationMap().entrySet()) {
                 if(isIncluded(entry.getValue())) {
-                    clientClass.addMethod(generateOperationMethod(pathEntry.getKey(), entry.getKey(), entry.getValue()));
+                    clientClass.addMethod(generateOperationMethod(pathEntry.getKey(), entry.getKey(), entry.getValue(), true));
                 }
             }
         }
 
-        JavaFile javaFile = JavaFile.builder("org.activityinfo.api.client", clientClass.build())
+        JavaFile javaFile = JavaFile.builder(CLIENT_PACKAGE, clientClass.build())
                 .build();
 
         javaFile.writeTo(outputDir);
@@ -101,13 +123,19 @@ public class GwtClientGenerator {
         return true;
     }
 
-    private MethodSpec generateOperationMethod(String path, HttpMethod httpMethod, Operation operation) {
+    private MethodSpec generateOperationMethod(String path, HttpMethod httpMethod, Operation operation,
+                                               boolean implementation) {
 
         DataType responseType = findResponseType(operation);
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(operation.getOperationId())
-                .addModifiers(Modifier.PUBLIC)
                 .returns(responseType.getPromisedReturnType());
+        
+        if(implementation) {
+            method.addModifiers(Modifier.PUBLIC);
+        } else {
+            method.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+        }
 
         if(operation.getSummary() != null) {
             method.addJavadoc(operation.getSummary());
@@ -139,23 +167,25 @@ public class GwtClientGenerator {
             
         }
         
-        // Classes that we use
-        ClassName requestBuilder = ClassName.get(RequestBuilder.class);
+        if(implementation) {
+            // Classes that we use
+            ClassName requestBuilder = ClassName.get(RequestBuilder.class);
 
-        method.addStatement("final $T result = new Promise<>()", responseType.getPromisedReturnType());
-        
-        method.addStatement("final String url = $L", buildPathExpr(path));
-        method.addStatement("$T requestBuilder = new $T($T.$L, url)",
-                requestBuilder, requestBuilder, requestBuilder, httpMethod.name().toUpperCase());
-        
-        if(bodyParameter != null) {
-            DataType bodyType = dataTypeFactory.get(bodyParameter);
-            method.addStatement("requestBuilder.setRequestData($L)", bodyType.toJsonString(bodyParameter.getName()));
+            method.addStatement("final $T result = new Promise<>()", responseType.getPromisedReturnType());
+
+            method.addStatement("final String url = $L", buildPathExpr(path));
+            method.addStatement("$T requestBuilder = new $T($T.$L, url)",
+                    requestBuilder, requestBuilder, requestBuilder, httpMethod.name().toUpperCase());
+
+            if (bodyParameter != null) {
+                DataType bodyType = dataTypeFactory.get(bodyParameter);
+                method.addStatement("requestBuilder.setRequestData($L)", bodyType.toJsonString(bodyParameter.getName()));
+            }
+
+            method.addStatement("requestBuilder.setCallback($L)", generateCallback(operation));
+
+            method.addStatement("return result");
         }
-
-        method.addStatement("requestBuilder.setCallback($L)", generateCallback(operation));
-        
-        method.addStatement("return result");
         
         return method.build();
     }

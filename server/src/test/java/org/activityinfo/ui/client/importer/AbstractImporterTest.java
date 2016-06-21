@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.testing.StubScheduler;
 import com.google.gwt.junit.GWTMockUtilities;
-import com.google.inject.Inject;
 import org.activityinfo.core.shared.importing.model.ColumnAction;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
@@ -16,7 +15,6 @@ import org.activityinfo.core.shared.importing.strategy.ImportTarget;
 import org.activityinfo.core.shared.importing.validation.ValidatedRow;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
-import org.activityinfo.legacy.shared.adapter.TestingResourceLocatorAdapter;
 import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -29,10 +27,7 @@ import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 
 public class AbstractImporterTest extends CommandTestCase2 {
     public static final int COLUMN_WIDTH = 30;
-
     
-    @Inject
-    protected TestingResourceLocatorAdapter resourceLocator;
     
     protected AsyncFormTreeBuilder formTreeBuilder;
     protected ImportModel importModel;
@@ -42,7 +37,7 @@ public class AbstractImporterTest extends CommandTestCase2 {
 
     @Before
     public void setupAdapters() {
-        formTreeBuilder = new AsyncFormTreeBuilder(resourceLocator);
+        formTreeBuilder = new AsyncFormTreeBuilder(locator);
         scheduler = new StubScheduler();
 
         // disable GWT.create so that references in static initializers
@@ -168,7 +163,7 @@ public class AbstractImporterTest extends CommandTestCase2 {
     }
 
     protected void matchReferences() {
-//        importer = new Importer2(importModel.getFormTree(), resourceLocator);
+//        importer = new Importer2(importModel.getFormTree(), locator);
 //        runScheduledAndAssertResolves(importer.matchReferences());
     }
 

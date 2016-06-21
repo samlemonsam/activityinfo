@@ -85,7 +85,7 @@ public class FormModelTest extends CommandTestCase2 {
     @Before
     public final void setup() {
         helper.setUp();
-        resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
+        resourceLocator = new ResourceLocatorAdaptor();
     }
 
     @After
@@ -169,8 +169,8 @@ public class FormModelTest extends CommandTestCase2 {
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        FormInstance fetchedInstance1 = assertResolves(resourceLocator.getFormInstance(valueInstance1.getId()));
-        FormInstance fetchedInstance2 = assertResolves(resourceLocator.getFormInstance(valueInstance2.getId()));
+        FormInstance fetchedInstance1 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
+        FormInstance fetchedInstance2 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
 
         assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab1"));
         assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab2"));
@@ -191,8 +191,8 @@ public class FormModelTest extends CommandTestCase2 {
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        fetchedInstance1 = assertResolves(resourceLocator.getFormInstance(valueInstance1.getId()));
-        fetchedInstance2 = assertResolves(resourceLocator.getFormInstance(valueInstance2.getId()));
+        fetchedInstance1 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
+        fetchedInstance2 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
 
         assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab11"));
         assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab22"));

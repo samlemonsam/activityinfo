@@ -90,7 +90,7 @@ public class SubFormInstanceLoader {
 
                 for (final FormInstance valueInstance : instanceList) {
                     if (valueInstance.getKeyId().isPresent()) {
-                        model.getLocator().getFormInstance(valueInstance.getKeyId().get()).then(new AsyncCallback<FormInstance>() {
+                        model.getLocator().getFormInstance(null, valueInstance.getKeyId().get()).then(new AsyncCallback<FormInstance>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 result.onFailure(caught);

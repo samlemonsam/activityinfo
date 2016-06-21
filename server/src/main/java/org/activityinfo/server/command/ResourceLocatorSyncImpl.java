@@ -9,11 +9,9 @@ import org.activityinfo.legacy.client.remote.AbstractDispatcher;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.service.lookup.ReferenceChoice;
@@ -36,7 +34,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     public ResourceLocatorSyncImpl(DispatcherSync dispatcher) {
         this.dispatcherSync = dispatcher;
         this.dispatcherAsync = new AsyncDispatchAdapter();
-        this.locatorAsync = new ResourceLocatorAdaptor(dispatcherAsync);
+        this.locatorAsync = new ResourceLocatorAdaptor();
     }
 
     @Override
@@ -47,7 +45,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public FormInstance getFormInstance(ResourceId resourceId) {
-        Promise<FormInstance> formClass = locatorAsync.getFormInstance(resourceId);
+        Promise<FormInstance> formClass = locatorAsync.getFormInstance(null, resourceId);
         return assertResolved(formClass, resourceId.asString());
     }
 

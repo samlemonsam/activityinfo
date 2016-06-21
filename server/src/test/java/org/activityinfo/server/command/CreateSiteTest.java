@@ -24,7 +24,6 @@ package org.activityinfo.server.command;
 
 import com.extjs.gxt.ui.client.data.PagingLoadResult;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.CreateSite;
 import org.activityinfo.legacy.shared.command.GetSites;
@@ -58,6 +57,7 @@ import static org.junit.Assert.assertThat;
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class CreateSiteTest extends CommandTestCase2 {
 
+    
     @Test
     public void test() throws CommandException {
         LocationDTO location = LocationDTOs.newLocation();
@@ -79,8 +79,6 @@ public class CreateSiteTest extends CommandTestCase2 {
 
     @Test
     public void persistSite() {
-
-        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
 
         ResourceId locationClassId = CuidAdapter.locationFormClass(1);
         FormInstance location = new FormInstance(CuidAdapter.generateLocationCuid(), locationClassId);

@@ -1,9 +1,9 @@
 package org.activityinfo.core.shared.criteria;
 
 import com.google.common.collect.Sets;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -15,16 +15,20 @@ public class IdCriteria implements Criteria {
 
     private final Set<ResourceId> instanceIds;
     private boolean mappedToLegacyModel = true;
+    private ResourceId formId;
 
-    public IdCriteria(ResourceId... instanceIds) {
+    public IdCriteria(ResourceId formId, ResourceId instanceIds) {
+        this.formId = formId;
         this.instanceIds = Sets.newHashSet(instanceIds);
     }
 
-    public IdCriteria(Set<ResourceId> instanceIds) {
+    public IdCriteria(ResourceId formId, Set<ResourceId> instanceIds) {
+        this.formId = formId;
         this.instanceIds = instanceIds;
     }
 
-    public IdCriteria(Iterable<ResourceId> instanceIds) {
+    public IdCriteria(ResourceId formId, Iterable<ResourceId> instanceIds) {
+        this.formId = formId;
         this.instanceIds = Sets.newHashSet(instanceIds);
     }
 
@@ -58,6 +62,6 @@ public class IdCriteria implements Criteria {
 
     @Override
     public Criteria copy() {
-        return new IdCriteria(instanceIds);
+        return new IdCriteria(formId, instanceIds);
     }
 }

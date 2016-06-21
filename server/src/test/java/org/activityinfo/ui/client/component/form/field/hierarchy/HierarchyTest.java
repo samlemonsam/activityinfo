@@ -11,7 +11,6 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.LocationClassAdapter;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -51,10 +50,10 @@ public class HierarchyTest extends CommandTestCase2 {
 
     @Test
     public void buildViewModelTest() {
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
+        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor();
         FormClass campForm = assertResolves(resourceLocator.getFormClass(CAMP_CLASS));
 
-        FormField adminField = campForm.getField(LocationClassAdapter.getAdminFieldId(CAMP_CLASS));
+        FormField adminField = campForm.getField(CuidAdapter.field(CAMP_CLASS, CuidAdapter.ADMIN_FIELD));
 
         Set<ResourceId> fieldValue = Collections.singleton(entity(325703));
 

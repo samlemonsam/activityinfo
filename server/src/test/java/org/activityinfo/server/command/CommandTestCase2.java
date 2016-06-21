@@ -33,6 +33,8 @@ import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.AbstractDispatcher;
+import org.activityinfo.legacy.shared.adapter.ActivityInfoClientAsyncStub;
+import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -82,6 +84,14 @@ public class CommandTestCase2 {
 
     @Inject
     protected Injector injector;
+
+    protected ResourceLocatorAdaptor locator;
+    
+    @Before
+    public final void setUpResourceLocator() {
+        locator = new ResourceLocatorAdaptor(
+                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class)));
+    }
 
     protected void setUser(int userId) {
         AuthenticationModuleStub.setUserId(userId);

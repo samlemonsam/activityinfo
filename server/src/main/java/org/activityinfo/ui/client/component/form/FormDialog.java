@@ -21,8 +21,8 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
-import com.google.gwt.core.client.GWT;
 import com.google.common.collect.Lists;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -112,7 +112,7 @@ public class FormDialog {
 
             @Override
             public Promise<FormInstance> get() {
-                return resourceLocator.getFormInstance(instanceId);
+                return resourceLocator.getFormInstance(ResourceId.valueOf("TODO"), instanceId);
             }
         });
         dialog.show();

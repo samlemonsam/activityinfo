@@ -67,7 +67,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         assertThat(source.getRows().size(), equalTo(63));
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         dumpList("COLUMNS", source.getColumns());
 
@@ -112,7 +112,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
                 Resources.toString(getResource("org/activityinfo/core/shared/importing/qis.csv"), Charsets.UTF_8));
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultMale"));
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultFemale"));
         importModel.setColumnAction(columnIndex("_CREATION_DATE"), target("Start Date"));
@@ -137,7 +137,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
                 Resources.toString(getResource("org/activityinfo/core/shared/importing/qis.csv"), Charsets.UTF_8));
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         dumpList("COLUMNS", source.getColumns());
         dumpList("FIELDS", importer.getImportTargets());

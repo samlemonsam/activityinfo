@@ -1,27 +1,15 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.IdCriteria;
-import org.activityinfo.core.shared.criteria.RemoveFieldCriteriaVisitor;
-import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
-import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
-import org.activityinfo.legacy.shared.command.*;
-import org.activityinfo.legacy.shared.command.result.FormInstanceListResult;
-import org.activityinfo.legacy.shared.command.result.SiteResult;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
@@ -45,11 +33,14 @@ import java.util.Set;
  */
 public class ResourceLocatorAdaptor implements ResourceLocator {
 
-    private final Dispatcher dispatcher;
-    private ActivityInfoClientAsync client = new ActivityInfoClientAsync();
+    private ActivityInfoClientAsync client;
 
-    public ResourceLocatorAdaptor(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    public ResourceLocatorAdaptor() {
+        this.client = new ActivityInfoClientAsyncImpl();
+    }
+
+    public ResourceLocatorAdaptor(ActivityInfoClientAsync client) {
+        this.client = client;
     }
 
     @Override
@@ -68,82 +59,16 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<FormInstance> getFormInstance(ResourceId instanceId) {
-        if(instanceId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-            return dispatcher.execute(new GetFormInstance(instanceId)).then(new Function<FormInstanceListResult, FormInstance>() {
-                @Nullable
-                @Override
-                public FormInstance apply(@Nullable FormInstanceListResult input) {
-                    return input.getFormInstanceList().get(0);
-                }
-            });
-        }
-        if(instanceId.getDomain() == CuidAdapter.SITE_DOMAIN) {
-            final Promise<SiteResult> site = dispatcher.execute(GetSites.byId(CuidAdapter.getLegacyIdFromCuid(instanceId)));
-            final Promise<ActivityFormDTO> form = site.join(new Function<SiteResult, Promise<ActivityFormDTO>>() {
-                @Nullable
-                @Override
-                public Promise<ActivityFormDTO> apply(@Nullable SiteResult input) {
-                    if (input != null) {
-                        List<SiteDTO> data = input.getData();
-                        if (data != null && !data.isEmpty()) {
-                            SiteDTO siteDTO = data.get(0);
-                            if (siteDTO != null) {
-                                return dispatcher.execute(new GetActivityForm(siteDTO.getActivityId()));
-                            }
-                        }
-                    }
-
-                    return Promise.resolved(null);
-                }
-            });
-            return Promise.waitAll(site, form).then(new Function<Void, FormInstance>() {
-                @Nullable
-                @Override
-                public FormInstance apply(@Nullable Void input) {
-                    if (form != null) {
-                        ActivityFormDTO activityFormDTO = form.get();
-                        if (activityFormDTO != null) {
-                            SiteBinding binding = new SiteBindingFactory().apply(activityFormDTO);
-                            if (site != null) {
-                                SiteResult siteResult = site.get();
-                                if (siteResult != null) {
-                                    List<SiteDTO> data = siteResult.getData();
-                                    if (data != null && !data.isEmpty()) {
-                                        SiteDTO siteDTO = data.get(0);
-                                        if (siteDTO != null) {
-                                            return binding.newInstance(siteDTO);
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    return null;
-                }
-            });
-        }
-        return queryInstances(new IdCriteria(instanceId)).then(new SelectSingle());
+    public Promise<FormInstance> getFormInstance(ResourceId formId, ResourceId formRecordId) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
     @Override
     public Promise<Void> persist(IsResource resource) {
-        if (resource instanceof FormInstance) {
-            FormInstance instance = (FormInstance) resource;
-            if (instance.getId().getDomain() == CuidAdapter.SITE_DOMAIN) {
-                return new SitePersister(dispatcher).persist(instance);
-
-            } else if (instance.getId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
-                return new LocationPersister(dispatcher, instance).persist();
-            } else if (instance.getId().getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-                return dispatcher.execute(new UpdateFormInstance(instance)).thenDiscardResult();
-            }
-        } else if(resource instanceof FormClass) {
-            return dispatcher.execute(new UpdateFormClass((FormClass) resource)).thenDiscardResult();
+        if(resource instanceof FormClass) {
+            return client.updateFormSchema(resource.getId().asString(), (FormClass)resource);
         }
-        return Promise.rejected(new UnsupportedOperationException());
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
     @Override
@@ -153,23 +78,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
-
-        if (UpdateFormClass.isAllFormClasses(resources)) {
-            // goal is to force persistence order and guarantee that subform formclasses are saved before root form class is saved.
-            return dispatcher.execute(UpdateFormClass.batchCommandForMultipleFormClasses(resources)).thenDiscardResult();
-        }
-
-        final List<PromiseExecutionOperation> operations = Lists.newArrayList();
-
-        for (final IsResource resource : resources) {
-            operations.add(new PromiseExecutionOperation() {
-                @Override
-                public Promise<Void> apply(Void input) {
-                    return persist(resource);
-                }
-            });
-        }
-        return persistOperation(operations, monitor);
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
     @Override
@@ -188,20 +97,12 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<List<FormInstance>> queryInstances(Criteria criteria) {
-        return new QueryExecutor(dispatcher, criteria).execute();
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override
     public Promise<List<Projection>> query(final InstanceQuery query) {
-        query.setCriteria(query.getCriteria().copy()); // we don't want to modify original criteria to preserve data
-
-        Joiner joiner = new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria());
-        if (query.isFilterQuery()) {
-            // table filter : fetching unique values for given column
-            query.getCriteria().accept(new RemoveFieldCriteriaVisitor());
-            return joiner.apply(query).join(new ProjectionsByUniqueColumnFilter(query.getFilterFieldPath()));
-        }
-        return joiner.apply(query);
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override
@@ -215,7 +116,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> remove(Collection<ResourceId> resources) {
-        return new Eraser(dispatcher, resources).execute();
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
     @Override

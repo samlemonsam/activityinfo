@@ -72,6 +72,6 @@ public class AppModule extends AbstractGinModule {
 
     @Provides @Singleton
     public ResourceLocator provideResourceLocator(Dispatcher dispatcher) {
-        return new ResourceLocatorAdaptor(dispatcher);
+        return new ResourceLocatorAdaptor();
     }
 }

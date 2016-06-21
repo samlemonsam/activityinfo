@@ -1,14 +1,13 @@
-package org.activityinfo.core.client;
+package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.collect.Lists;
+import org.activityinfo.core.client.InstanceQuery;
+import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -24,15 +23,10 @@ import java.util.List;
  */
 public class InstanceQueryAdapter {
 
-    private FormClassProvider classProvider;
     private ResourceId classId;
     private QueryModel queryModel;
     
     private List<FieldPath> fieldPaths = Lists.newArrayList();
-
-    public InstanceQueryAdapter(FormClassProvider classProvider) {
-        this.classProvider = classProvider;
-    }
 
     public QueryModel build(InstanceQuery query) {
         
@@ -48,18 +42,7 @@ public class InstanceQueryAdapter {
         return queryModel;
     }
     
-    public QueryModel build(Criteria criteria) {
-        processCriteria(criteria);
-        
-        FormClass formClass = classProvider.getFormClass(classId);
-        for (FormField formField : formClass.getFields()) {
-            FieldPath fieldPath = new FieldPath(formField.getId());
-            fieldPaths.add(fieldPath);
-            queryModel.selectField(formField.getId()).as(fieldPath.toString());
-        }
-        return queryModel;
-    }
-
+    
     private void processCriteria(Criteria criteria) {
         if(criteria instanceof ClassCriteria) {
             classId = ((ClassCriteria) criteria).getClassId();

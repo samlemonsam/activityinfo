@@ -4,12 +4,12 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
@@ -52,7 +52,7 @@ public class ImportGeoTest extends AbstractImporterTest {
         source.parseAllRows();
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         assertThat(importer.getImportTargets(), contains(
                 hasProperty("label", Matchers.equalTo("Name")),

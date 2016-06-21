@@ -48,7 +48,7 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     Observable<ColumnSet> queryTable(QueryModel queryModel);
     
     @Deprecated
-    Promise<FormInstance> getFormInstance(ResourceId formId);
+    Promise<FormInstance> getFormInstance(ResourceId formId, ResourceId formRecordId);
 
     /**
      * Persists a resource to the server, creating or updating as necessary.

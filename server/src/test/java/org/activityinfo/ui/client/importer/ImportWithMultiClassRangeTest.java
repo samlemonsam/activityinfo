@@ -8,21 +8,20 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.core.shared.form.tree.Hierarchy;
 import org.activityinfo.core.shared.form.tree.HierarchyPrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.LocationClassAdapter;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.OnDataSet;
@@ -48,7 +47,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
     public static final ResourceId SCHOOL_FORM_CLASS = CuidAdapter.locationFormClass(2);
 
-    public static final ResourceId ADMIN_FIELD = LocationClassAdapter.getAdminFieldId(SCHOOL_FORM_CLASS);
+    public static final ResourceId ADMIN_FIELD = CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.ADMIN_FIELD);
 
 
     // admin levels
@@ -88,7 +87,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         HierarchyPrettyPrinter.prettyPrint(hierarchy);
 
         importModel = new ImportModel(formTree);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         // Step 1: User pastes in data to import
         PastedTable source = new PastedTable(
@@ -145,7 +144,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         FormTreePrettyPrinter.print(formTree);
 
         importModel = new ImportModel(formTree);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
 
         // Step 1: User pastes in data to import
@@ -174,7 +173,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
         assertResolves(importer.persist(importModel));
 
-        instances = assertResolves(resourceLocator.queryInstances(new ClassCriteria(SCHOOL_FORM_CLASS)));
+        instances = assertResolves(locator.queryInstances(new ClassCriteria(SCHOOL_FORM_CLASS)));
         assertThat(instances.size(), equalTo(8)); // we have 8 rows in school-import.csv
 
         assertThat(school("P"), equalTo(set(PROVINCE_KATANGA)));
@@ -190,7 +189,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
     private Set<ResourceId> school(String name) {
         for(FormInstance instance : instances) {
-            if(name.equals(instance.getString(LocationClassAdapter.getNameFieldId(SCHOOL_FORM_CLASS)))) {
+            if(name.equals(instance.getString(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.NAME_FIELD)))) {
                 Set<ResourceId> references = instance.getReferences(ADMIN_FIELD);
                 System.out.println(name +", references: " + references);
                 return references;

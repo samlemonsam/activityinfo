@@ -101,7 +101,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
         localServiceTestHelper.setUp();
         blobService.setTestBucketName();
-        locator = new ResourceLocatorAdaptor(getDispatcher());
+        locator = new ResourceLocatorAdaptor();
 
         user = new AuthenticatedUser("x", 1, "user1@user.com");
         noAccessUser = new AuthenticatedUser("x", 3, "stefan@user.com");
@@ -285,6 +285,6 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     }
 
     private FormInstance assertInstanceExists(ResourceId instanceId) {
-        return assertResolves(locator.getFormInstance(instanceId));
+        return assertResolves(locator.getFormInstance(null, instanceId));
     }
 }

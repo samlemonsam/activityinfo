@@ -41,7 +41,7 @@ public class SitePersisterTest extends CommandTestCase2 {
 
     @Before
     public final void setup() {
-        resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
+        resourceLocator = new ResourceLocatorAdaptor();
     }
 
     @Test
@@ -61,7 +61,7 @@ public class SitePersisterTest extends CommandTestCase2 {
         assertResolves(sitePersister.persist(siteFormInstance));
 
         // query by id
-        FormInstance fromServer = assertResolves(resourceLocator.getFormInstance(siteFormInstance.getId()));
+        FormInstance fromServer = assertResolves(resourceLocator.getFormInstance(null, siteFormInstance.getId()));
         Assert.assertNotNull(fromServer);
         Assert.assertEquals(fromServer.get(CONTENU_DI_KIT_FIELD), new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 

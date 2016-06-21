@@ -58,7 +58,7 @@ public class SiteDialogLauncher {
         super();
         this.dispatcher = dispatcher;
         this.eventBus = eventBus;
-        this.resourceLocator = new ResourceLocatorAdaptor(dispatcher);
+        this.resourceLocator = new ResourceLocatorAdaptor();
         this.stateProvider = stateProvider;
     }
 
@@ -164,7 +164,7 @@ public class SiteDialogLauncher {
                 }
 
                 if (!activity.getClassicView()) {// modern view
-                    resourceLocator.getFormInstance(site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
+                    resourceLocator.getFormInstance(activity.getFormClassId(), site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
                         @Override
                         public void onSuccess(FormInstance result) {
                             showModernFormDialog(activity.getName(), result, callback, false);

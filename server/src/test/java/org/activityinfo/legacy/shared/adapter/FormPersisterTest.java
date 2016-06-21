@@ -1,6 +1,5 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -24,8 +23,6 @@ import static org.junit.Assert.assertThat;
 @OnDataSet("/dbunit/chad-form.db.xml")
 public class FormPersisterTest extends CommandTestCase2 {
 
-    @Inject
-    private TestingResourceLocatorAdapter locator;
 
     @Before
     public void setUp() throws Exception {
