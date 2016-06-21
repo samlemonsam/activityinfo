@@ -40,7 +40,8 @@ public class ReferenceConverter implements FieldValueConverter {
     public Collection<Integer> toParameters(FieldValue value) {
         ReferenceValue referenceValue = (ReferenceValue) value;
         ResourceId resourceId = referenceValue.getResourceId();
-        Preconditions.checkArgument(resourceId.getDomain() == domain);
+        Preconditions.checkArgument(resourceId.getDomain() == domain, "id %s does not match expected domain %s",
+                resourceId.asString(), Character.toString(domain));
         return Collections.singleton(CuidAdapter.getLegacyIdFromCuid(resourceId));
     }
 }
