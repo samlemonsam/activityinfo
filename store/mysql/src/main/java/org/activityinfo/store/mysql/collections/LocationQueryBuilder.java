@@ -22,10 +22,12 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
     private int locationTypeId;
     private MySqlCursorBuilder baseTableBuilder;
     private AdminColumnBuilder adminColumnBuilder;
-    
+    private ResourceId formClassId;
+
     public LocationQueryBuilder(QueryExecutor executor, TableMapping tableMapping, CountryStructure country) {
         this.executor = executor;
         this.locationTypeId = CuidAdapter.getLegacyIdFromCuid(tableMapping.getFormClass().getId());
+        formClassId = CuidAdapter.locationFormClass(locationTypeId);
         baseTableBuilder = new MySqlCursorBuilder(tableMapping, executor);
         adminColumnBuilder = new AdminColumnBuilder(locationTypeId, country);
     }
@@ -42,7 +44,7 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
-        if(fieldId.equals(LocationCollection.ADMIN_FIELD_ID)) {
+        if(fieldId.equals(CuidAdapter.field(formClassId, CuidAdapter.ADMIN_FIELD))) {
             adminColumnBuilder.addObserver(observer);
         } else {
             baseTableBuilder.addField(fieldId, observer);

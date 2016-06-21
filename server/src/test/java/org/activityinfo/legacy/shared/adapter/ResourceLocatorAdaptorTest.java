@@ -138,6 +138,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertResolves(resourceLocator.persist(instance));
 
         TFormTree formTree = new TFormTree(assertResolves(new AsyncFormTreeBuilder(resourceLocator).apply(NFI_DIST_FORM_CLASS)));
+        
         InstanceQuery query = new InstanceQuery(Lists.newArrayList(formTree.getRootPaths()), new IdCriteria(instance.getId()));
 
         Projection firstRead = singleSiteProjection(query);

@@ -50,6 +50,11 @@ public class SqlUpdate {
     public void setIfChanged(String fieldName, String currentValue, String newValue, int maxLength) {
         setIfChanged(fieldName, truncate(currentValue, maxLength), truncate(newValue, maxLength));
     }
+
+
+    public void set(String fieldName, String value, int maxLength) {
+        setIfChanged(fieldName, null, value, maxLength);
+    }
     
     public static String truncate(String s, int maxLength) {
         if (s == null) {

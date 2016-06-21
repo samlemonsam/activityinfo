@@ -1,7 +1,7 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.QueryModelAdapter;
+import org.activityinfo.core.client.InstanceQueryAdapter;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
@@ -13,6 +13,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromiseExecutionOperation;
@@ -20,6 +21,7 @@ import org.activityinfo.promise.PromisesExecutionMonitor;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CompositeCatalog;
+import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -93,7 +95,18 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
 
     @Override
     public Promise<FormInstance> getFormInstance(ResourceId formId) {
-        throw new UnsupportedOperationException();
+        CollectionCatalog catalog = newCatalog();
+        
+        try {
+            ResourceCollection collection = catalog.lookupCollection(formId).get();
+            Resource resource = collection.get(formId).get();
+            FormInstance formInstance = FormInstance.fromResource(resource);
+            
+            return Promise.resolved(formInstance);
+            
+        } catch (Exception e) {
+            return Promise.rejected(e);
+        }
     }
 
     @Override
@@ -163,16 +176,24 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
 
     @Override
     public Promise<List<FormInstance>> queryInstances(Criteria criteria) {
-        throw new UnsupportedOperationException();
+        CollectionCatalog catalog = newCatalog();
+        
+        InstanceQueryAdapter adapter = new InstanceQueryAdapter(catalog);
+        QueryModel queryModel = adapter.build(criteria);
 
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
+        ColumnSet columnSet = columnSetBuilder.build(queryModel);
+
+        return Promise.resolved(adapter.toFormInstances(columnSet));
     }
 
     @Override
     public Promise<QueryResult<Projection>> queryProjection(InstanceQuery query) {
-        QueryModelAdapter adapter = new QueryModelAdapter();
+        CollectionCatalog catalog = newCatalog();
+
+        InstanceQueryAdapter adapter = new InstanceQueryAdapter(catalog);
         QueryModel queryModel = adapter.build(query);
 
-        CollectionCatalog catalog = newCatalog();
 
         ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
         ColumnSet columnSet = columnSetBuilder.build(queryModel);
@@ -184,22 +205,30 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
     @Override
     public Promise<List<Projection>> query(InstanceQuery query) {
 
-        QueryModelAdapter adapter = new QueryModelAdapter();
-        QueryModel queryModel = adapter.build(query);
-        
         CollectionCatalog catalog = newCatalog();
+
+        InstanceQueryAdapter adapter = new InstanceQueryAdapter(catalog);
+        QueryModel queryModel = adapter.build(query);
         
         ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
         ColumnSet columnSet = columnSetBuilder.build(queryModel);
         
         return Promise.resolved(adapter.toProjections(columnSet));
-
     }
 
     @Override
     public Promise<Void> remove(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
+        
 
+        ResourceUpdate update = new ResourceUpdate();
+        update.setResourceId(resourceId);
+        update.setDeleted(true);
+
+        CollectionCatalog catalog = newCatalog();
+        Updater updater = new Updater(catalog);
+        updater.execute(update);
+
+        return Promise.resolved(null);
     }
 
     @Override
