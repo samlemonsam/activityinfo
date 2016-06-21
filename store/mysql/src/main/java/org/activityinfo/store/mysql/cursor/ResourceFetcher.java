@@ -67,6 +67,7 @@ public class ResourceFetcher {
             Resource resource = Resources.createResource();
             resource.setId(resourceId);
             resource.setOwnerId(formClass.getId());
+            resource.set("classId", formClass.getId().asString());
 
             for (FormField formField : formClass.getFields()) {
                 resource.set(formField.getId(), fields.get(formField.getId()).value);

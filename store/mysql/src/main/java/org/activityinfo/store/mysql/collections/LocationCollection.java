@@ -208,28 +208,36 @@ public class LocationCollection implements ResourceCollection {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getResourceId());
-
+        
         SqlUpdate sql = SqlUpdate.update("location");
         sql.where("locationId", locationId);
         sql.set("timeEdited", System.currentTimeMillis());
         sql.set("version", newVersion);
-        sql.set("name", getName(update), 50);
-        sql.set("axe", getAxe(update), 50);
 
-        GeoPoint point = getPoint(update);
-        if (point != null) {
-            sql.set("x", point.getLongitude());
-            sql.set("y", point.getLatitude());
+        if(update.isDeleted()) {
+            sql.set("workflowStatusId", "rejected");
+
         } else {
-            sql.set("x", null);
-            sql.set("y", null);
+
+            sql.set("name", getName(update), 50);
+            sql.set("axe", getAxe(update), 50);
+
+            GeoPoint point = getPoint(update);
+            if (point != null) {
+                sql.set("x", point.getLongitude());
+                sql.set("y", point.getLatitude());
+            } else {
+                sql.set("x", null);
+                sql.set("y", null);
+            }
         }
         sql.execute(executor);
 
-        Set<Integer> adminEntities = fetchParents(getAdminEntities(update));
+        if(!update.isDeleted()) {
+            Set<Integer> adminEntities = fetchParents(getAdminEntities(update));
 
-        updateAdminLinks(locationId, adminEntities);
-
+            updateAdminLinks(locationId, adminEntities);
+        }
     }
 
     private Set<Integer> fetchParents(Set<Integer> adminEntities) {
@@ -264,20 +272,24 @@ public class LocationCollection implements ResourceCollection {
     }
 
     private void insertAdminLinks(int locationId, Set<Integer> adminEntities) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO locationadminlink (locationId, adminEntityId)");
-        sql.append("VALUES ");
+        if(!adminEntities.isEmpty()) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("INSERT INTO locationadminlink (locationId, adminEntityId) ");
+            sql.append("VALUES ");
 
-        boolean needsComma = false;
-        for (Integer adminEntity : adminEntities) {
-            if(needsComma) {
-                sql.append(", ");
+            boolean needsComma = false;
+            for (Integer adminEntity : adminEntities) {
+                if (needsComma) {
+                    sql.append(", ");
+                }
+                sql.append("(").append(locationId).append(", ").append(adminEntity).append(")");
+                needsComma = true;
             }
-            sql.append("(").append(locationId).append(", ").append(adminEntity).append(")");
-            needsComma = true;
-        }
 
-        executor.update(sql.toString(), Collections.emptyList());
+            System.out.println(sql.toString());
+
+            executor.update(sql.toString(), Collections.emptyList());
+        }
     }
 
     private void updateAdminLinks(int locationId, Set<Integer> adminEntities) {
@@ -310,10 +322,12 @@ public class LocationCollection implements ResourceCollection {
     }
 
     private Set<Integer> getAdminEntities(ResourceUpdate update) {
-        ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
         Set<Integer> set = Sets.newHashSet();
-        for (ResourceId resourceId : value.getResourceIds()) {
-            set.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
+        ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
+        if(value != null) {
+            for (ResourceId resourceId : value.getResourceIds()) {
+                set.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
+            }
         }
         return set;
     }

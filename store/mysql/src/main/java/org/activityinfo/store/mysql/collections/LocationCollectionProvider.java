@@ -6,6 +6,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +28,18 @@ public class LocationCollectionProvider implements CollectionProvider {
 
     @Override
     public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
+        if (id.getDomain() == CuidAdapter.LOCATION_DOMAIN) {
+            int locationId = CuidAdapter.getLegacyIdFromCuid(id);
+            try (ResultSet rs = queryExecutor.query("SELECT locationTypeId FROM location WHERE locationId = " + locationId)) {
+                if (rs.next()) {
+                    int locationTypeId = rs.getInt(1);
+                    return Optional.of(CuidAdapter.locationFormClass(locationTypeId));
+                }
+            }
+        }
         return Optional.absent();
     }
-
+    
     @Override
     public Map<ResourceId, ResourceCollection> openCollections(QueryExecutor executor, Set<ResourceId> collectionIds) throws SQLException {
         Map<ResourceId, ResourceCollection> result = new HashMap<>();

@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.base.Optional;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.InstanceQueryAdapter;
 import org.activityinfo.core.client.QueryResult;
@@ -98,8 +99,11 @@ public class TestingResourceLocatorAdapter implements ResourceLocator {
         CollectionCatalog catalog = newCatalog();
         
         try {
-            ResourceCollection collection = catalog.lookupCollection(formId).get();
-            Resource resource = collection.get(formId).get();
+            Optional<ResourceCollection> collection = catalog.lookupCollection(formId);
+            if(!collection.isPresent()) {
+                throw new RuntimeException("Could not find collection for resource id " + formId);
+            }
+            Resource resource = collection.get().get(formId).get();
             FormInstance formInstance = FormInstance.fromResource(resource);
             
             return Promise.resolved(formInstance);
