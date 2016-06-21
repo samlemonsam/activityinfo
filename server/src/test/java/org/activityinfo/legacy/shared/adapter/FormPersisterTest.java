@@ -39,6 +39,11 @@ public class FormPersisterTest extends CommandTestCase2 {
         assertResolves(locator.persist(formClass));
 
         FormClass formClass2 = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(11218)));
+        
+        System.out.println(formClass.getFields());
+        System.out.println(formClass2.getFields());
+
+
         assertThat(formClass2.getFields().size(), equalTo(formClass.getFields().size()));
     }
 

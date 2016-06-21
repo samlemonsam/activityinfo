@@ -269,9 +269,10 @@ public class ActivityLoader {
 
                     // Only use json form for forms that are explicitly non-classicView,
                     // otherwise we miss aggregation method.
-                    boolean classicView = rs.getBoolean(19);
+                    activity.classicView = rs.getBoolean(19);
+                    
                     FormClass serializedFormClass = null;
-                    if(!classicView) {
+                    if(!activity.classicView) {
                         serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
                     }
                     if (serializedFormClass == null) {

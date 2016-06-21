@@ -40,7 +40,10 @@ public class Activity implements Serializable {
     long siteVersion;
     
     boolean deleted;
-    
+
+    boolean classicView;
+
+
     List<ActivityField> fields = Lists.newArrayList();
 
     /**
@@ -49,7 +52,7 @@ public class Activity implements Serializable {
     Multimap<Integer, Integer> linkedIndicators = HashMultimap.create();
     
     Map<Integer, LinkedActivity> linkedActivities = Maps.newHashMap();
-    
+
     public int getId() {
         return activityId;
     }
@@ -68,6 +71,10 @@ public class Activity implements Serializable {
 
     public String getCategory() {
         return category;
+    }
+
+    public boolean isClassicView() {
+        return classicView;
     }
 
     public String getLocationTypeName() {

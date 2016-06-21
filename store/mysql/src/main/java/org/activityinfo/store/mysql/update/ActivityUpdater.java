@@ -17,8 +17,6 @@ import org.activityinfo.store.mysql.metadata.ActivityField;
 
 import java.util.*;
 
-import static org.activityinfo.model.util.StringUtil.truncate;
-
 
 public class ActivityUpdater {
 
@@ -48,7 +46,7 @@ public class ActivityUpdater {
     private void updateActivityRow(FormClass formClass) {
         SqlUpdate activityUpdate = SqlUpdate.update("activity");
         activityUpdate.where("activityId", activity.getId());
-        activityUpdate.set("name", truncate(formClass.getLabel()));
+        activityUpdate.setIfChanged("name", formClass.getLabel(), formClass.getLabel(), 255);
         activityUpdate.set("formClass", formClass.toJsonString());
         activityUpdate.set("version", newVersion);
         activityUpdate.set("schemaVersion", newVersion);

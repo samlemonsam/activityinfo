@@ -112,6 +112,11 @@ public class LoadDataSet extends Statement {
             IDatabaseConnection dbUnitConnection = new MySqlConnection(
                     connection, null);
             op.execute(dbUnitConnection, dataSet);
+            
+            // Fix for test files
+            try(java.sql.Statement statement = connection.createStatement()) {
+                statement.execute("update indicator set deleted=1 where datedeleted is not null");
+            }
         }
     }
 
