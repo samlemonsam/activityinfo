@@ -49,8 +49,7 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
                                    DeleteSiteHandlerAsync deleteSiteHandler,
                                    GetSiteAttachmentsHandler getSiteAttachmentsHandler,
                                    GetActivityFormHandler getActivityHandler,
-                                   BatchCommandHandlerAsync batchCommandHandler,
-                                   GetFormClassHandlerAsync getFormClassHandler) {
+                                   BatchCommandHandlerAsync batchCommandHandler) {
 
         registry = new HandlerRegistry();
         registry.registerHandler(GetSchema.class, schemaHandler);
@@ -71,7 +70,6 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
 
         // new
         registry.registerHandler(GetActivityForm.class, getActivityHandler);
-        registry.registerHandler(GetFormClass.class, getFormClassHandler);
         registry.registerHandler(BatchCommand.class, batchCommandHandler);
     }
 

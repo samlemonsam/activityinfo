@@ -78,7 +78,6 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
 public class CustomerCalcIndicatorTest extends CommandTestCase2 {
-    
 
 
     public static final Dimension INDICATOR_DIMENSION = new Dimension(DimensionType.Indicator);
@@ -86,6 +85,7 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
     public static final Dimension YEAR_DIMENSION = new DateDimension(DateUnit.YEAR);
 
     public static final double EPSILON = 0.000000000000001;
+    
     FormClass formClass;
     private KeyGenerator keyGenerator = new KeyGenerator();
 
@@ -362,7 +362,7 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
 
         FormClass formClass = assertResolves(locator.getFormClass(classId));
 
-        FormField typeField = new FormField(quantityId());
+        FormField typeField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
         typeField.setType(new EnumType(Cardinality.SINGLE,
                 Arrays.asList(new EnumItem(EnumItem.generateId(), "Budgeted"),
                         new EnumItem(EnumItem.generateId(), "Spent"))));

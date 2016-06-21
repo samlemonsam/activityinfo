@@ -40,7 +40,6 @@ import org.activityinfo.legacy.shared.util.BackOff;
 import org.activityinfo.legacy.shared.util.ExponentialBackOff;
 import org.activityinfo.legacy.shared.util.NanoClock;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.server.endpoint.gwtrpc.AdvisoryLock;
 import org.activityinfo.ui.client.MockEventBus;
 import org.easymock.Capture;
 import org.easymock.IAnswer;
@@ -72,7 +71,7 @@ public class RemoteDispatcherTest {
                 "alex@alex.com");
 
         BackOff backOff = new ExponentialBackOff.Builder()
-                .setInitialIntervalMillis(AdvisoryLock.ADVISORY_GET_LOCK_TIMEOUT)
+                .setInitialIntervalMillis(MergingDispatcher.ADVISORY_GET_LOCK_TIMEOUT)
                 .setMultiplier(2) // increase in 2 times
                 .setNanoClock(new NanoClock() {
                     @Override

@@ -24,7 +24,7 @@ package org.activityinfo.legacy.client.remote;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.exception.CommandTimeoutException;
+import org.activityinfo.legacy.shared.exception.CommandException;
 
 /**
  * @author yuriyz on 10/27/2014.
@@ -36,7 +36,7 @@ public class TimeoutDispatcherMock extends AbstractDispatcher {
     @Override
     public <T extends CommandResult> void execute(Command<T> command, AsyncCallback<T> callback) {
         executeCounter++;
-        callback.onFailure(new CommandTimeoutException());
+        callback.onFailure(new CommandException());
     }
 
     public int getExecuteCounter() {

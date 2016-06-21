@@ -30,11 +30,10 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.exception.CommandTimeoutException;
+import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
 import org.activityinfo.legacy.shared.util.BackOff;
 import org.activityinfo.legacy.shared.util.Commands;
 import org.activityinfo.legacy.shared.util.ExponentialBackOff;
-import org.activityinfo.server.endpoint.gwtrpc.AdvisoryLock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +48,8 @@ import java.util.List;
  */
 public class MergingDispatcher extends AbstractDispatcher {
 
+    public static final int ADVISORY_GET_LOCK_TIMEOUT = 10;
+    
     private Dispatcher dispatcher;
 
     private Scheduler scheduler;
@@ -69,7 +70,7 @@ public class MergingDispatcher extends AbstractDispatcher {
     @Inject
     public MergingDispatcher(Dispatcher dispatcher, Scheduler scheduler) {
         this(dispatcher, scheduler, new ExponentialBackOff.Builder()
-                .setInitialIntervalMillis(AdvisoryLock.ADVISORY_GET_LOCK_TIMEOUT * 1000)
+                .setInitialIntervalMillis(ADVISORY_GET_LOCK_TIMEOUT * 1000)
                 .setMultiplier(2) // increase in 2 times
                 .build());
     }
@@ -139,7 +140,7 @@ public class MergingDispatcher extends AbstractDispatcher {
 
             @Override
             public void onFailure(Throwable caught) {
-                if (caught instanceof CommandTimeoutException) {
+                if (caught instanceof UnexpectedCommandException) {
                     Log.debug("Request timed out, retrying...");
                     retry(request, retryCountDown);
                 } else {

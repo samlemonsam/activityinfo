@@ -68,7 +68,6 @@ public class FormModelTest extends CommandTestCase2 {
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     
-    private ResourceLocatorAdaptor resourceLocator;
 
     private FormClass masterFormClass;
     private FormClass subFormClass;
@@ -85,7 +84,7 @@ public class FormModelTest extends CommandTestCase2 {
     @Before
     public final void setup() {
         helper.setUp();
-        resourceLocator = new ResourceLocatorAdaptor();
+        locator = new ResourceLocatorAdaptor();
     }
 
     @After
@@ -98,7 +97,7 @@ public class FormModelTest extends CommandTestCase2 {
         
         setupForms();
         
-        FormModel formModel = new FormModel(resourceLocator, new GxtStateProvider());
+        FormModel formModel = new FormModel(locator, new GxtStateProvider());
         assertResolves(formModel.loadFormClassWithDependentSubForms(masterFormClass.getId()));
 
         assertEquals(formModel.getRootFormClass().getId(), masterFormClass.getId());
@@ -122,7 +121,7 @@ public class FormModelTest extends CommandTestCase2 {
         FormField subformOwnerField = formClass.addField(CuidAdapter.generateIndicatorId());
         subformOwnerField.setType(new SubFormReferenceType(subform.getId()));
 
-        resourceLocator.persist(formClass).then(new AsyncCallback<Void>() {
+        locator.persist(formClass).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 // expected result
@@ -142,7 +141,7 @@ public class FormModelTest extends CommandTestCase2 {
 
         FormInstance rootInstance = new FormInstance(ResourceId.generateSubmissionId(masterFormClass), masterFormClass.getId());
 
-        FormModel formModel = new FormModel(resourceLocator, new GxtStateProvider());
+        FormModel formModel = new FormModel(locator, new GxtStateProvider());
         formModel.setWorkingRootInstance(rootInstance);
         
         Date fixedDate = InstanceGeneratorTest.fixedDate(2, 2, 2016);
@@ -165,12 +164,12 @@ public class FormModelTest extends CommandTestCase2 {
         valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab2"));
 
         // persist all value and tab/key instances
-        FormActions actions = new FormActions(resourceLocator, formModel);
+        FormActions actions = new FormActions(locator, formModel);
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        FormInstance fetchedInstance1 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
-        FormInstance fetchedInstance2 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
+        FormInstance fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
+        FormInstance fetchedInstance2 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
 
         assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab1"));
         assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab2"));
@@ -191,14 +190,14 @@ public class FormModelTest extends CommandTestCase2 {
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        fetchedInstance1 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
-        fetchedInstance2 = assertResolves(resourceLocator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
+        fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
+        fetchedInstance2 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
 
         assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab11"));
         assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab22"));
 
         // check subform loader
-        FormModel emptyModel = new FormModel(resourceLocator, new GxtStateProvider());
+        FormModel emptyModel = new FormModel(locator, new GxtStateProvider());
         emptyModel.setWorkingRootInstance(rootInstance);
 
         // load subform instances into empty model
@@ -245,8 +244,8 @@ public class FormModelTest extends CommandTestCase2 {
         subFormField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         subFormField.setType(new SubFormReferenceType(subFormClass.getId()));
 
-        assertResolves(resourceLocator.persist(subFormClass));
-        assertResolves(resourceLocator.persist(masterFormClass));
+        assertResolves(locator.persist(subFormClass));
+        assertResolves(locator.persist(masterFormClass));
         
     }
 }

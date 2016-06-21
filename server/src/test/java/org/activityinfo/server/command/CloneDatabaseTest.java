@@ -25,7 +25,6 @@ import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
-import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -42,10 +41,9 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * @author yuriyz on 11/26/2014.
@@ -173,8 +171,8 @@ public class CloneDatabaseTest extends CommandTestCase2 {
             assertActivityClone(sourceActivity, targetActivity);
 
             // form class level
-            FormClass sourceFormClass = execute(new GetFormClass(sourceActivity.getResourceId())).getFormClass();
-            FormClass targetFormClass = execute(new GetFormClass(targetActivity.getResourceId())).getFormClass();
+            FormClass sourceFormClass = assertResolves(locator.getFormClass(sourceActivity.getResourceId()));
+            FormClass targetFormClass = assertResolves(locator.getFormClass(targetActivity.getResourceId()));
             assertFormClass(sourceFormClass, targetFormClass);
         }
     }

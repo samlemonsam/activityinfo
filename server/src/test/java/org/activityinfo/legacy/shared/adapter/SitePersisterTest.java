@@ -20,7 +20,6 @@ import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,16 +36,10 @@ public class SitePersisterTest extends CommandTestCase2 {
     private static final ResourceId CONTENU_DI_KIT_FIELD = CuidAdapter.attributeGroupField(2);
     private static final ResourceId CONTENU_DI_KIT_FIELD_ATTR_VALUE = CuidAdapter.attributeId(3);
 
-    private ResourceLocatorAdaptor resourceLocator;
-
-    @Before
-    public final void setup() {
-        resourceLocator = new ResourceLocatorAdaptor();
-    }
 
     @Test
     public void test() {
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(PEAR_Activity));
+        FormClass formClass = assertResolves(locator.getFormClass(PEAR_Activity));
 
         FormInstance siteFormInstance = new FormInstance(CuidAdapter.generateSiteCuid(), formClass.getId());
         siteFormInstance.set(CONTENU_DI_KIT_FIELD, CONTENU_DI_KIT_FIELD_ATTR_VALUE);
@@ -57,22 +50,21 @@ public class SitePersisterTest extends CommandTestCase2 {
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
                 new ReferenceValue(CuidAdapter.locationInstanceId(1)));
 
-        SitePersister sitePersister = new SitePersister(getDispatcher());
-        assertResolves(sitePersister.persist(siteFormInstance));
+        assertResolves(locator.persist(siteFormInstance));
 
         // query by id
-        FormInstance fromServer = assertResolves(resourceLocator.getFormInstance(null, siteFormInstance.getId()));
+        FormInstance fromServer = assertResolves(locator.getFormInstance(null, siteFormInstance.getId()));
         Assert.assertNotNull(fromServer);
         Assert.assertEquals(fromServer.get(CONTENU_DI_KIT_FIELD), new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 
-        FormTree formTree = assertResolves(new AsyncFormTreeBuilder(resourceLocator).apply(formClass.getId()));
+        FormTree formTree = assertResolves(new AsyncFormTreeBuilder(locator).apply(formClass.getId()));
 
         final List<FieldPath> paths = Lists.newArrayList(formTree.getRootPaths());
         Assert.assertTrue(paths.contains(new FieldPath(CONTENU_DI_KIT_FIELD)));
 
         // query projection
         InstanceQuery query = new InstanceQuery(paths, new ClassCriteria(PEAR_Activity));
-        Projection projection = byId(assertResolves(resourceLocator.queryProjection(query)).getItems(), siteFormInstance.getId());
+        Projection projection = byId(assertResolves(locator.queryProjection(query)).getItems(), siteFormInstance.getId());
         Assert.assertNotNull(projection);
         Assert.assertEquals(projection.getReferenceValue(CONTENU_DI_KIT_FIELD).iterator().next(), CONTENU_DI_KIT_FIELD_ATTR_VALUE);
 

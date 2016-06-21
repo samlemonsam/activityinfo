@@ -11,7 +11,6 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -50,21 +49,20 @@ public class HierarchyTest extends CommandTestCase2 {
 
     @Test
     public void buildViewModelTest() {
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor();
-        FormClass campForm = assertResolves(resourceLocator.getFormClass(CAMP_CLASS));
+        FormClass campForm = assertResolves(locator.getFormClass(CAMP_CLASS));
 
         FormField adminField = campForm.getField(CuidAdapter.field(CAMP_CLASS, CuidAdapter.ADMIN_FIELD));
 
         Set<ResourceId> fieldValue = Collections.singleton(entity(325703));
 
-        Hierarchy tree = assertResolves(Hierarchy.get(resourceLocator, (ReferenceType) adminField.getType()));
+        Hierarchy tree = assertResolves(Hierarchy.get(locator, (ReferenceType) adminField.getType()));
         prettyPrintTree(tree);
 
         assertThat(tree.getRoots(), hasSize(1));
 
         createWidgets(tree);
 
-        Presenter presenter = new Presenter(resourceLocator, tree, widgets, new ValueUpdater() {
+        Presenter presenter = new Presenter(locator, tree, widgets, new ValueUpdater() {
             @Override
             public void update(Object value) {
                 System.out.println("VALUE = " + value);

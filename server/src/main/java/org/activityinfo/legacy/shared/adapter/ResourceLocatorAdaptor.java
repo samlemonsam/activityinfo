@@ -1,5 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.base.Function;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.core.client.InstanceQuery;
@@ -102,7 +103,16 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<List<Projection>> query(final InstanceQuery query) {
-        return Promise.rejected(new UnsupportedOperationException());
+        final InstanceQueryAdapter adapter = new InstanceQueryAdapter();
+        QueryModel queryModel = adapter.build(query);
+
+        return client.queryTableColumns(queryModel).then(new Function<ColumnSet, List<Projection>>() {
+            @Nullable
+            @Override
+            public List<Projection> apply(@Nullable ColumnSet input) {
+                return adapter.toProjections(input);
+            }
+        });
     }
 
     @Override

@@ -10,7 +10,6 @@ import com.google.inject.util.Providers;
 import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.io.xform.form.XForm;
-import org.activityinfo.legacy.shared.command.GetFormClass;
 import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
@@ -118,7 +117,7 @@ public class FormResourceTest extends CommandTestCase2 {
 
         setUser(USER_ID);
 
-        FormClass formClass = execute(new GetFormClass(CuidAdapter.activityFormClass(ACTIVITY_ID))).getFormClass();
+        FormClass formClass = resourceLocator.getFormClass(CuidAdapter.activityFormClass(ACTIVITY_ID));
         FormField field = new FormField(ResourceId.generateFieldId(QuantityType.TYPE_CLASS));
         field.setLabel("Question");
         field.setType(new QuantityType());
