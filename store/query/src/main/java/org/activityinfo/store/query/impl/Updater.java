@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -306,7 +307,7 @@ public class Updater {
     private void executeUpdate(ResourceCollection collection, ResourceUpdate update) {
         
         FormClass formClass = collection.getFormClass();
-        Optional<Resource> existingResource = collection.get(update.getResourceId());
+        Optional<FormRecord> existingResource = collection.get(update.getResourceId());
 
         validateUpdate(formClass, existingResource, update);
         
@@ -317,7 +318,7 @@ public class Updater {
         }
     }
 
-    public static void validateUpdate(FormClass formClass, Optional<Resource> existingResource, ResourceUpdate update) {
+    public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, ResourceUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
 
         Map<ResourceId, FormField> fieldMap = new HashMap<>();
@@ -403,6 +404,10 @@ public class Updater {
 
         ResourceUpdate update = new ResourceUpdate();
         update.setResourceId(recordId);
+        
+        if(jsonObject.has("deleted")) {
+            update.setDeleted(jsonObject.get("deleted").getAsBoolean());
+        }
 
         FormClass formClass = collection.get().getFormClass();
         JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");

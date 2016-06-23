@@ -3,6 +3,7 @@ package org.activityinfo.store.query.impl.eval;
 import com.google.appengine.repackaged.com.google.api.client.util.Lists;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.Resource;
@@ -80,7 +81,7 @@ class CatalogStub implements CollectionCatalog {
         }
 
         @Override
-        public Optional<Resource> get(ResourceId resourceId) {
+        public Optional<FormRecord> get(ResourceId resourceId) {
             throw new UnsupportedOperationException();
         }
 

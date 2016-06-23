@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
@@ -11,6 +12,7 @@ import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.cursor.ResourceFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
@@ -36,20 +38,8 @@ public class SimpleTableCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
-        Resource resource = Resources.createResource();
-        resource.setId(resourceId);
-        resource.setOwnerId(getFormClass().getId());
-
-        try {
-            if(mapping.queryFields(executor, resource)) {
-                return Optional.of(resource);
-            }
-            
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return Optional.absent();
+    public Optional<FormRecord> get(ResourceId resourceId) {
+        return ResourceFetcher.fetch(this, resourceId);
     }
 
     @Override

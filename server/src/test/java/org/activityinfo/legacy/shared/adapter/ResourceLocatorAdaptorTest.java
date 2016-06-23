@@ -19,6 +19,7 @@ import org.activityinfo.model.formTree.TFormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
@@ -317,11 +318,10 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @Test
     public void deleteLocation() {
 
-        ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor();
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
-        assertResolves(adapter.remove(CuidAdapter.locationFormClass(1), instanceToDelete));
+        assertResolves(locator.remove(CuidAdapter.locationFormClass(1), instanceToDelete));
 
-        List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
+        List<FormInstance> formInstances = assertResolves(locator.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
 
         for (FormInstance instance : formInstances) {
             if (instance.getId().equals(instanceToDelete)) {
@@ -335,7 +335,6 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         ResourceId partnerClassId = CuidAdapter.partnerFormClass(PEAR_DATABASE_ID);
 
-        ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor();
         FieldPath villageName = new FieldPath(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.NAME_FIELD));
         FieldPath provinceName = new FieldPath(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.ADMIN_FIELD), field(PROVINCE_CLASS, CuidAdapter.NAME_FIELD));
         FieldPath partnerName = new FieldPath(field(CuidAdapter.activityFormClass(NFI_DIST_ID), PARTNER_FIELD), field(partnerClassId, NAME_FIELD));
@@ -344,7 +343,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         FieldPath endDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.END_DATE_FIELD));
 
 
-        List<Projection> projections = assertResolves(adapter.query(
+        List<Projection> projections = assertResolves(locator.query(
                 new InstanceQuery(
                         asList(partnerName, villageName, provinceName, indicator1, endDate),
                         new ClassCriteria(NFI_DIST_FORM_CLASS))));
@@ -354,8 +353,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         final Projection firstProjection = projections.get(0);
         assertThat(projections.size(), equalTo(3));
         assertThat(firstProjection.getStringValue(provinceName), equalTo("Sud Kivu"));
-        assertEquals(firstProjection.getValue(startDate), null);
-        assertEquals(firstProjection.getValue(endDate), new LocalDate(2009, 1, 2));
+        assertThat(firstProjection.getValue(startDate), nullValue());
+        assertThat(firstProjection.getValue(endDate), equalTo((FieldValue)new LocalDate(2009, 1, 2)));
     }
 
 }

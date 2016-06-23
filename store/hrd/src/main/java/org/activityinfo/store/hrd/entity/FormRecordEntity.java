@@ -7,6 +7,7 @@ import com.google.appengine.api.datastore.Query;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
@@ -41,28 +42,28 @@ public class FormRecordEntity implements TypedEntity {
         this.key = new FormRecordKey(entity.getKey());
         this.entity = entity;
     }
+    
+    public FormRecord toFormRecord(FormClass formClass) {
+        FormRecord.Builder record = FormRecord.builder();
 
-    public FormInstance toFormInstance(FormClass formClass) {
-        FormInstance formInstance = new FormInstance(key.getResourceId(), key.getCollectionId());
-        
         if(formClass.getParentField().isPresent()) {
-            formInstance.setOwnerId(getParentId());
+            record.setParentRecordId(getParentId());
         }
-        
-        if(entity.getProperty("keyId") != null) {
-            formInstance.setKeyId(ResourceId.valueOf((String) entity.getProperty("keyId")));
-        }
-        
+//
+//        if(entity.getProperty("keyId") != null) {
+//            formInstance.setKeyId(ResourceId.valueOf((String) entity.getProperty("keyId")));
+//        }
+
         for (FormField formField : formClass.getFields()) {
             Object value = entity.getProperty(formField.getName());
             if(value != null) {
                 FieldConverter<?> converter = FieldConverters.forType(formField.getType());
-                formInstance.set(formField.getId(), converter.toFieldValue(value));
+                record.setFieldValue(formField.getId(), converter.toFieldValue(value));
             }
         }
-        return formInstance;
+        return record.build();    
     }
-    
+
     public FormRecordKey getKey() {
         return key;
     }

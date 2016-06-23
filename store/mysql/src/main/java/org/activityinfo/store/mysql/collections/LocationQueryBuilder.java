@@ -52,7 +52,7 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() {
  
         // Emit all of the base columns 
         Cursor cursor = baseTableBuilder.open();

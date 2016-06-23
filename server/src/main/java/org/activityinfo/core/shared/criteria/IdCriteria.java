@@ -32,6 +32,10 @@ public class IdCriteria implements Criteria {
         this.instanceIds = Sets.newHashSet(instanceIds);
     }
 
+    public ResourceId getFormId() {
+        return formId;
+    }
+
     public Set<ResourceId> getInstanceIds() {
         return instanceIds;
     }

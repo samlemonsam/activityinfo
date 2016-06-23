@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
@@ -9,6 +10,7 @@ import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.cursor.ResourceFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 
@@ -31,8 +33,8 @@ public class TargetCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
+    public Optional<FormRecord> get(ResourceId resourceId) {
+        return ResourceFetcher.fetch(this, resourceId);
     }
 
     @Override

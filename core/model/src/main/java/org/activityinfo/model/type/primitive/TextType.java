@@ -35,6 +35,9 @@ public class TextType implements FieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
+        if(value == null) {
+            return null;
+        }
         return TextValue.valueOf(value.getAsString());
     }
 

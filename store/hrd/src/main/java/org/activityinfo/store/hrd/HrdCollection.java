@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
@@ -42,14 +43,13 @@ public class HrdCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
+    public Optional<FormRecord> get(ResourceId resourceId) {
         FormRecordKey key = new FormRecordKey(resourceId);
         Optional<FormRecordEntity> submission = datastore.loadIfPresent(key);
 
         if(submission.isPresent()) {
-            FormInstance instance = submission.get().toFormInstance(formClass);
-            Resource resource = instance.asResource();
-            return Optional.of(resource);
+            FormRecord record = submission.get().toFormRecord(formClass);
+            return Optional.of(record);
         
         } else {
             return Optional.absent();
@@ -87,33 +87,33 @@ public class HrdCollection implements ResourceCollection {
         return 0;
     }
 
-    public FormInstance getSubmission(ResourceId resourceId) throws EntityNotFoundException {
+    public FormRecord getSubmission(ResourceId resourceId) throws EntityNotFoundException {
         FormRecordKey key = new FormRecordKey(resourceId);
         FormRecordEntity submission = datastore.load(key);
         
-        return submission.toFormInstance(formClass);
+        return submission.toFormRecord(formClass);
     }
 
-    public Iterable<FormInstance> getSubmissionsOfParent(ResourceId parentId) {
+    public Iterable<FormRecord> getSubmissionsOfParent(ResourceId parentId) {
         return query(FormRecordEntity.parentFilter(parentId));
     }
 
-    public Iterable<FormInstance> getSubmissions() {
+    public Iterable<FormRecord> getSubmissions() {
         return query(null);
     }
 
-    private Iterable<FormInstance> query(Query.FilterPredicate filter) {
+    private Iterable<FormRecord> query(Query.FilterPredicate filter) {
         FormRootKey rootKey = new FormRootKey(formClass.getId());
         final Query query = new Query(FormRecordEntity.KIND, rootKey.raw());
         query.setFilter(filter);
 
-        return datastore.execute(new QueryOperation<List<FormInstance>>() {
+        return datastore.execute(new QueryOperation<List<FormRecord>>() {
             @Override
-            public List<FormInstance> execute(Datastore datastore) {
-                List<FormInstance> instances = Lists.newArrayList();
+            public List<FormRecord> execute(Datastore datastore) {
+                List<FormRecord> instances = Lists.newArrayList();
                 for (Entity entity : datastore.prepare(query).asIterable()) {
                     FormRecordEntity submission = new FormRecordEntity(entity);
-                    instances.add(submission.toFormInstance(formClass));
+                    instances.add(submission.toFormRecord(formClass));
                 }
                 return instances;
             }

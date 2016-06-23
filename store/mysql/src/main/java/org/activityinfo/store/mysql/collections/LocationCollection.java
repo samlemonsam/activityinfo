@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -145,13 +146,9 @@ public class LocationCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
+    public Optional<FormRecord> get(ResourceId resourceId) {
         ResourceFetcher fetcher = new ResourceFetcher(this);
-        try {
-            return fetcher.get(resourceId);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to fetch resource " + resourceId, e);
-        }
+        return fetcher.get(resourceId);
     }
 
     @Override

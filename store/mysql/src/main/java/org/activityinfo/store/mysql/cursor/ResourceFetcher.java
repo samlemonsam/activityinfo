@@ -1,19 +1,15 @@
 package org.activityinfo.store.mysql.cursor;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.service.store.ResourceCollection;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Fetches a single form record using the ColumnSetBuilder
@@ -22,18 +18,36 @@ public class ResourceFetcher {
     
     private ResourceCollection collection;
 
-    private class CollectingObserver<T> implements CursorObserver<T> {
+    private class IdCollector implements CursorObserver<ResourceId> {
 
-        private T value;
+        private ResourceId value;
         
         @Override
-        public void onNext(T value) {
+        public void onNext(ResourceId value) {
             this.value = value;
         }
 
         @Override
         public void done() {
+        }
+    }
+    
+    private class FieldCollector implements CursorObserver<FieldValue> {
+        private ResourceId fieldId;
+        private FormRecord.Builder builder;
 
+        public FieldCollector(ResourceId fieldId, FormRecord.Builder builder) {
+            this.fieldId = fieldId;
+            this.builder = builder;
+        }
+
+        @Override
+        public void onNext(FieldValue value) {
+            builder.setFieldValue(fieldId, value);
+        }
+
+        @Override
+        public void done() {
         }
     }
     
@@ -41,39 +55,36 @@ public class ResourceFetcher {
         this.collection = collection;
     }
 
-    public Optional<Resource> get(ResourceId resourceId) throws IOException {
+    public static Optional<FormRecord> fetch(ResourceCollection collection, ResourceId id) {
+        ResourceFetcher fetcher = new ResourceFetcher(collection);
+        return fetcher.get(id);
+    }
+    
+    public Optional<FormRecord> get(ResourceId resourceId) {
         FormClass formClass = collection.getFormClass();
+        FormRecord.Builder formRecord = FormRecord.builder();
+        formRecord.setRecordId(resourceId);
+        formRecord.setFormId(formClass.getId());
 
-        CollectingObserver<ResourceId> id = new CollectingObserver<>();
-        Map<ResourceId, CollectingObserver<FieldValue>> fields = Maps.newHashMap();
+        IdCollector id = new IdCollector();
 
-        ColumnQueryBuilder builder = collection.newColumnQuery();
-        builder.addResourceId(id);
-        builder.only(resourceId);
+        ColumnQueryBuilder query = collection.newColumnQuery();
+        query.addResourceId(id);
+        query.only(resourceId);
 
         for (FormField formField : formClass.getFields()) {
-            CollectingObserver<FieldValue> fieldValue = new CollectingObserver<>();
-            builder.addField(formField.getId(), fieldValue);
-            fields.put(formField.getId(), fieldValue);
+            if(!(formField.getType() instanceof CalculatedFieldType)) {
+                query.addField(formField.getId(), new FieldCollector(formField.getId(), formRecord));
+            }
         }
 
-        builder.execute();
+        query.execute();
 
         if (id.value == null) {
             return Optional.absent();
 
         } else {
-
-            Resource resource = Resources.createResource();
-            resource.setId(resourceId);
-            resource.setOwnerId(formClass.getId());
-            resource.set("classId", formClass.getId().asString());
-
-            for (FormField formField : formClass.getFields()) {
-                resource.set(formField.getId(), fields.get(formField.getId()).value);
-            }
-            return Optional.of(resource);
-
+            return Optional.of(formRecord.build());
         }
     }
 }

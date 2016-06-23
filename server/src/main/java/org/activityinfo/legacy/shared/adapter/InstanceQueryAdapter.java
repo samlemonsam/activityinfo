@@ -1,21 +1,30 @@
 package org.activityinfo.legacy.shared.adapter;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.core.shared.criteria.IdCriteria;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -30,7 +39,17 @@ public class InstanceQueryAdapter {
 
     public QueryModel build(InstanceQuery query) {
         
-        processCriteria(query.getCriteria());
+        if(query.getCriteria() instanceof ClassCriteria) {
+            ClassCriteria classCriteria = (ClassCriteria) query.getCriteria();
+            classId = classCriteria.getClassId();
+            queryModel = new QueryModel(classCriteria.getClassId());
+            
+        } else if(query.getCriteria() instanceof IdCriteria) {
+            IdCriteria criteria = (IdCriteria) query.getCriteria();
+            classId = criteria.getFormId();
+            queryModel = new QueryModel(classId);
+            queryModel.setFilter(Exprs.idEqualTo(criteria.getInstanceIds()));
+        }
         
         queryModel = new QueryModel(classId);
         queryModel.selectResourceId().as("_id");
@@ -42,13 +61,32 @@ public class InstanceQueryAdapter {
         return queryModel;
     }
     
-    
-    private void processCriteria(Criteria criteria) {
-        if(criteria instanceof ClassCriteria) {
-            classId = ((ClassCriteria) criteria).getClassId();
-        } else {
-            throw new UnsupportedOperationException("criteria: " + criteria);
+    public QueryModel build(FormClass formClass) {
+        this.classId = formClass.getId();
+        queryModel = new QueryModel(classId);
+        queryModel.selectResourceId().as("_id");
+        for (FormField formField : formClass.getFields()) {
+            if(formField.getType() instanceof GeoPointType) {
+                // Callers are expecting to get a single value with a GeoPoint,
+                // but the table query engine would be the lat/lng into two seperate values
+                // I don't think it's used, so we'll ignore them here.
+            } else {
+                FieldPath fieldPath = new FieldPath(formField.getId());
+                fieldPaths.add(fieldPath);
+                queryModel.selectField(formField.getId()).as(fieldPath.toString());
+            }
         }
+        return queryModel;
+    }
+    
+    public Function<ColumnSet, List<Projection>> toProjections() {
+        return new Function<ColumnSet, List<Projection>>() {
+            @Nullable
+            @Override
+            public List<Projection> apply(@Nullable ColumnSet input) {
+                return toProjections(input);
+            }
+        };
     }
 
     public List<Projection> toProjections(ColumnSet columnSet) {
@@ -135,8 +173,6 @@ public class InstanceQueryAdapter {
         }
     }
 
-
-
     private void populateBoolean(FieldPath fieldPath, ColumnView view, List<Projection> projections) {
         for (int i = 0; i < view.numRows(); i++) {
             int value = view.getBoolean(i);
@@ -146,9 +182,17 @@ public class InstanceQueryAdapter {
         }
     }
 
-
     public QueryResult<Projection> toQueryResult(ColumnSet columnSet) {
         throw new UnsupportedOperationException();
     }
 
+    public Function<? super ColumnSet, List<FormInstance>> toFormInstances() {
+        return new Function<ColumnSet, List<FormInstance>>() {
+            @Nullable
+            @Override
+            public List<FormInstance> apply(@Nullable ColumnSet input) {
+                return toFormInstances(input);
+            }
+        };
+    }
 }

@@ -61,7 +61,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() {
 
         Query query = new Query(FormRecordEntity.KIND, collectionKey);
 

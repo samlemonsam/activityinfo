@@ -1,7 +1,13 @@
 package org.activityinfo.model.form;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+
+import java.util.Map;
 
 public class FormRecord {
     
@@ -10,6 +16,9 @@ public class FormRecord {
     private String parentRecordId;
     private JsonObject fields;
 
+    private FormRecord() {
+    }
+    
     public String getRecordId() {
         return recordId;
     }
@@ -21,7 +30,7 @@ public class FormRecord {
     public String getParentRecordId() {
         return parentRecordId;
     }
-
+    
     public JsonObject getFields() {
         return fields;
     }
@@ -42,4 +51,72 @@ public class FormRecord {
 
         return formRecord;
     }
+    
+    public static FormRecord fromInstance(FormInstance instance) {
+        FormRecord record = new FormRecord();
+        record.recordId = instance.getId().asString();
+        record.formId = instance.getClassId().asString();
+        record.fields = new JsonObject();
+
+        for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
+            String field = entry.getKey().asString();
+            if(!field.equals("classId")) {
+                record.fields.add(field, entry.getValue().toJsonElement());
+            }
+        }
+        return record;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        
+        private FormRecord record;
+
+        public Builder() {
+            record = new FormRecord();
+            record.fields = new JsonObject();
+        }
+
+        public Builder setRecordId(ResourceId id) {
+            this.record.recordId = id.asString();
+            return this;
+        }
+        
+        public Builder setFormId(ResourceId id) {
+            this.record.formId = id.asString();
+            return this;
+        }
+        
+        public Builder setParentRecordId(ResourceId id) {
+            this.record.parentRecordId = id.asString();
+            return this;
+        }
+        
+        public Builder setFieldValue(ResourceId fieldId, String value) {
+            if(value == null) {
+                this.record.fields.remove(fieldId.asString());
+            } else {
+                this.record.fields.addProperty(fieldId.asString(), value);
+            }
+            return this;
+        }
+        
+        public Builder setFieldValue(ResourceId fieldId, FieldValue value) {
+            if(value == null) {
+                this.record.fields.remove(fieldId.asString());
+            } else {
+                this.record.fields.add(fieldId.asString(), value.toJsonElement());
+            }
+            return this;
+        }
+        
+        public FormRecord build() {
+            return record;
+        }
+
+    }
+    
 }

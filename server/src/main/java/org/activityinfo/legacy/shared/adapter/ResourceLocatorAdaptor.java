@@ -1,6 +1,8 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
+import com.google.gson.JsonElement;
+import com.google.gwt.core.shared.GWT;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.api.client.FormRecordUpdateBuilder;
@@ -10,8 +12,11 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
@@ -39,6 +44,9 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     private ActivityInfoClientAsync client;
 
     public ResourceLocatorAdaptor() {
+        if(!GWT.isClient()) {
+            throw new IllegalStateException("Can only be called in client code.");
+        }
         this.client = new ActivityInfoClientAsyncImpl();
     }
 
@@ -62,8 +70,22 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<FormInstance> getFormInstance(ResourceId formId, ResourceId formRecordId) {
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    public Promise<FormInstance> getFormInstance(final ResourceId formId, final ResourceId formRecordId) {
+        final Promise<FormClass> formClass = client.getFormSchema(formId.asString());
+        final Promise<FormRecord> record = client.getRecord(formId.asString(), formRecordId.asString());
+
+        return Promise.waitAll(formClass, record).then(new Function<Void, FormInstance>() {
+            @Nullable
+            @Override
+            public FormInstance apply(@Nullable Void input) {
+                FormInstance instance = new FormInstance(formRecordId, formId);
+                for (FormField field : formClass.get().getFields()) {
+                    JsonElement fieldValue = record.get().getFields().get(field.getName());
+                    instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+                }
+                return instance;
+            }
+        });
     }
 
     @Override
@@ -74,7 +96,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         } else if(resource instanceof FormInstance) {
             FormInstance instance = (FormInstance) resource;
             return client.updateRecord(
-                    instance.getClassId().asString(), 
+                    instance.getClassId().asString(),
                     instance.getId().asString(),
                     buildUpdate(instance))
                     .thenDiscardResult();
@@ -119,7 +141,20 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<List<FormInstance>> queryInstances(Criteria criteria) {
-        return Promise.rejected(new UnsupportedOperationException());
+        if(criteria instanceof ClassCriteria) {
+            return getFormClass(((ClassCriteria) criteria).getClassId()).join(new Function<FormClass, Promise<List<FormInstance>>>() {
+                @Nullable
+                @Override
+                public Promise<List<FormInstance>> apply(@Nullable FormClass input) {
+                    InstanceQueryAdapter adapter = new InstanceQueryAdapter();
+                    QueryModel queryModel = adapter.build(input);
+
+                    return client.queryTableColumns(queryModel).then(adapter.toFormInstances());
+                }
+            });
+        } else {
+            return Promise.rejected(new UnsupportedOperationException("criteria: " + criteria));
+        }
     }
 
     @Override
@@ -127,13 +162,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         final InstanceQueryAdapter adapter = new InstanceQueryAdapter();
         QueryModel queryModel = adapter.build(query);
 
-        return client.queryTableColumns(queryModel).then(new Function<ColumnSet, List<Projection>>() {
-            @Nullable
-            @Override
-            public List<Projection> apply(@Nullable ColumnSet input) {
-                return adapter.toProjections(input);
-            }
-        });
+        return client.queryTableColumns(queryModel).then(adapter.toProjections());
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
@@ -13,6 +14,7 @@ import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.cursor.ResourceFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
@@ -84,20 +86,9 @@ public class SiteCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
-        Resource resource = Resources.createResource();
-        resource.setId(resourceId);
-        resource.setOwnerId(getFormClass().getId());
-
-        try {
-            if(!baseMapping.queryFields(queryExecutor, resource)) {
-                return Optional.absent();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return Optional.of(resource);
+    public Optional<FormRecord> get(ResourceId resourceId) {
+        ResourceFetcher fetcher = new ResourceFetcher(this);
+        return fetcher.get(resourceId);
     }
 
     @Override

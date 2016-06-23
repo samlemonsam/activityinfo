@@ -3,6 +3,7 @@ package org.activityinfo.geoadmin.source;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
@@ -35,7 +36,7 @@ public class FeatureSourceCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
+    public Optional<FormRecord> get(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 
