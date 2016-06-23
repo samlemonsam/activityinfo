@@ -27,8 +27,6 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.code.appengine.awt.image.BufferedImage;
 import com.google.code.appengine.imageio.ImageIO;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
@@ -110,7 +108,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
                 "attachment;filename=" + FILE_NAME,
                 MimeTypeUtil.mimeTypeFromFileName(FILE_NAME),
                 blobId, resourceId,
-                ByteSource.wrap(ByteStreams.toByteArray(GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"))));
+                GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"));
     }
 
     @After
@@ -221,7 +219,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
                 "attachment;filename=" + FILE_NAME,
                 MimeTypeUtil.mimeTypeFromFileName(FILE_NAME),
                 blobId, formClass.getId(),
-                ByteSource.wrap(ByteStreams.toByteArray(GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"))));
+                GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"));
 
         FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
                 formClass.getId());

@@ -10,20 +10,19 @@ import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 
 import javax.persistence.EntityManager;
@@ -49,12 +48,12 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     public static final int MAX_BLOB_LENGTH_IN_MEGABYTES = 10;
 
     private AppIdentityService appIdentityService;
-    private final EntityManager em;
+    private final Provider<EntityManager> em;
 
     private String bucketName;
 
     @Inject
-    public GcsBlobFieldStorageService(DeploymentConfiguration config, EntityManager em) {
+    public GcsBlobFieldStorageService(DeploymentConfiguration config, Provider<EntityManager> em) {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
 
@@ -63,8 +62,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                 LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property " + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
                 return;
             }
-            this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
-                    new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
+            this.appIdentityService = /*DeploymentEnvironment.isAppEngineDevelopment() ?
+                    new DevAppIdentityService(config) : */AppIdentityServiceFactory.getAppIdentityService();
             LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
         } catch (Exception e) {
             // ignore: fails in local tests, bug in LocalServiceTestHelper?
@@ -94,10 +93,9 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         }
     }
 
-    @Override
     public void put(AuthenticatedUser user, String contentDisposition, String mimeType, BlobId blobId,
                     ResourceId resourceId,
-                    ByteSource byteSource) throws IOException {
+                    InputStream inputStream) throws IOException {
 
         ResourceId userId = CuidAdapter.userId(user.getUserId());
 
@@ -115,7 +113,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         GcsOutputChannel channel = GcsServiceFactory.createGcsService().createOrReplace(new GcsFilename(bucketName, blobId.asString()), gcsFileOptions);
 
         try (OutputStream outputStream = Channels.newOutputStream(channel)) {
-            byteSource.copyTo(outputStream);
+            IOUtils.copy(inputStream, outputStream);
         }
     }
 
@@ -193,7 +191,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         return Response.ok().build();
     }
 
-    private BlobKey blobKey(BlobId blobId) {
+    public BlobKey blobKey(BlobId blobId) {
         BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
         return blobstoreService.createGsBlobKey("/gs/" + bucketName + "/" + blobId.asString());
     }
@@ -221,7 +219,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
                 build();
     }
 
-    private void assertHasAccess(AuthenticatedUser user, BlobId blobId, ResourceId resourceId) {
+    public void assertHasAccess(AuthenticatedUser user, BlobId blobId, ResourceId resourceId) {
         try {
             GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId.asString()));
             if (hasAccess(CuidAdapter.userId(user.getUserId()), resourceId, blobId, metadata)) {
@@ -245,6 +243,10 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
     }
 
     public boolean hasAccess(ResourceId userId, ResourceId resourceId, BlobId blobId, GcsFileMetadata metadata) {
+        if (metadata == null) {
+            return false;
+        }
+
         String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER);
         String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_CREATOR);
 
@@ -261,9 +263,9 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
     private boolean hasAccessToResource(ResourceId userId, ResourceId resourceId) {
         if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            Activity activity = em.find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
+            Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
 
-            if (PermissionOracle.using(em).isViewAllowed(activity.getDatabase(), em.getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
+            if (PermissionOracle.using(em.get()).isViewAllowed(activity.getDatabase(), em.get().getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
                 return true;
             }
         } else {
@@ -272,7 +274,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         return false;
     }
 
-    private void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
+    public void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
         if (appIdentityService == null) {
             throw new WebApplicationException(SERVICE_UNAVAILABLE);
         }
@@ -287,7 +289,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         }
     }
 
-    private void assertBlobExists(BlobId blobId) {
+    public void assertBlobExists(BlobId blobId) {
         try {
             // fetch just one byte of blob to make sure it exists
             BlobstoreServiceFactory.getBlobstoreService().fetchData(blobKey(blobId), 0, 1);
@@ -296,4 +298,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         }
     }
 
+    public String getBucketName() {
+        return bucketName;
+    }
 }

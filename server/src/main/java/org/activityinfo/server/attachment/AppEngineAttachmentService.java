@@ -104,7 +104,7 @@ public class AppEngineAttachmentService implements AttachmentService {
         };
     }
 
-    private static class InMemoryFileItem implements FileItem {
+    public static class InMemoryFileItem implements FileItem {
 
         private ByteArrayOutputStream baos = new ByteArrayOutputStream();
         private boolean formField;

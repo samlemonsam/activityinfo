@@ -42,6 +42,7 @@ public class UploadUrls {
         if (appUrl.endsWith("/")) {
             appUrl = appUrl.substring(0, appUrl.length() - 1);
         }
-        return appUrl + UploadUrls.getBaseUrl(blobId, resourceId) + "/blobUrl";
+        //return appUrl + UploadUrls.getBaseUrl(blobId, resourceId) + "/blobUrl";
+        return appUrl + "/service/appengine?blobId=" + blobId + "&resourceId=" + resourceId.asString();
     }
 }
