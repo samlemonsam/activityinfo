@@ -2,7 +2,6 @@ package org.activityinfo.test.steps.common;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -29,7 +28,6 @@ import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
-import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -394,13 +392,7 @@ public class DataEntrySteps {
 
         ClientResponse clientResponse = client.resource(blobLink).get(ClientResponse.class);
 
-        assertEquals(Response.Status.SEE_OTHER.getStatusCode(), clientResponse.getStatus());
-
-        String signedUrl = clientResponse.getHeaders().getFirst("Location");
-        assertTrue(!Strings.isNullOrEmpty(signedUrl));
-
-        byte[] bytes = IOUtils.toByteArray(new URL(signedUrl));
-        assertTrue(bytes.length > 100);
+        assertEquals(Response.Status.OK.getStatusCode(), clientResponse.getStatus());
     }
 
     @Then("^\"([^\"]*)\" field's downloadable link is forbidden for anonymous access.$")
