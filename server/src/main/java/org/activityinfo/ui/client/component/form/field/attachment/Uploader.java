@@ -76,6 +76,26 @@ public class Uploader {
     }
 
     public void upload() {
+        uploadViaAppEngine();
+        //uploadToGcsDirectly();
+    }
+
+    private void uploadViaAppEngine() {
+        hiddenFieldsContainer.clear();
+
+        newAttachment();
+
+        hiddenFieldsContainer.add(new Hidden("blobId", attachment.getBlobId()));
+        hiddenFieldsContainer.add(new Hidden("fileName", attachment.getFilename()));
+        hiddenFieldsContainer.add(new Hidden("mimeType", attachment.getMimeType()));
+        hiddenFieldsContainer.add(new Hidden("resourceId", resourceId.asString()));
+
+        formPanel.setAction("/service/appengine");
+        formPanel.setMethod("POST");
+        uploadCallback.upload();
+    }
+
+    private void uploadToGcsDirectly() {
         try {
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, URL.encode(createUploadUrl()));
             requestBuilder.sendRequest(null, new RequestCallback() {
@@ -109,7 +129,7 @@ public class Uploader {
         }
     }
 
-    private String createUploadUrl() {
+    private void newAttachment() {
         String blobId = ResourceId.generateId().asString();
         String fileName = fileName();
         String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName, "application/octet-stream");
@@ -117,8 +137,12 @@ public class Uploader {
         attachment.setMimeType(mimeType);
         attachment.setFilename(fileName);
         attachment.setBlobId(blobId);
+    }
 
-        return "/service/blob/credentials/" + blobId + "/" + resourceId.asString() + "/" + fileName;
+    private String createUploadUrl() {
+        newAttachment();
+
+        return "/service/blob/credentials/" + attachment.getBlobId() + "/" + resourceId.asString() + "/" + attachment.getFilename();
     }
 
     public String getBaseUrl() {
