@@ -48,7 +48,7 @@ public class GcsBlobServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             BlobId blobId = new BlobId(request.getParameter("blobId"));
-            ResourceId resourceId = ResourceId.valueOf("resourceId");
+            ResourceId resourceId = ResourceId.valueOf(request.getParameter("resourceId"));
 
             Preconditions.checkState(!Strings.isNullOrEmpty(blobId.asString()));
             Preconditions.checkState(!Strings.isNullOrEmpty(resourceId.asString()));
