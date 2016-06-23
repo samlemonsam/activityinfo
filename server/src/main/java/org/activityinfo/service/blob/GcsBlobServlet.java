@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -45,24 +46,32 @@ public class GcsBlobServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            BlobId blobId = new BlobId(request.getParameter("blobId"));
+            ResourceId resourceId = ResourceId.valueOf("resourceId");
 
-        BlobId blobId = new BlobId(request.getParameter("blobId"));
-        ResourceId resourceId = ResourceId.valueOf("resourceId");
+            Preconditions.checkState(!Strings.isNullOrEmpty(blobId.asString()));
+            Preconditions.checkState(!Strings.isNullOrEmpty(resourceId.asString()));
 
-        Preconditions.checkState(!Strings.isNullOrEmpty(blobId.asString()));
-        Preconditions.checkState(!Strings.isNullOrEmpty(resourceId.asString()));
+            AuthenticatedUser user = authProvider.get();
+            service.assertNotAnonymousUser(user);
+            service.assertHasAccess(user, blobId, resourceId);
+            service.assertBlobExists(blobId);
 
-        AuthenticatedUser user = authProvider.get();
-        service.assertNotAnonymousUser(user);
-        service.assertHasAccess(user, blobId, resourceId);
-        service.assertBlobExists(blobId);
+            GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(service.getBucketName(), blobId.asString()));
 
-        GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(service.getBucketName(), blobId.asString()));
+            response.setHeader("Content-Disposition", metadata.getOptions().getContentDisposition());
+            response.setContentType(metadata.getOptions().getMimeType());
 
-        response.setHeader("Content-Disposition", metadata.getOptions().getContentDisposition());
-        response.setContentType(metadata.getOptions().getMimeType());
+            BlobstoreServiceFactory.getBlobstoreService().serve(service.blobKey(blobId), response);
+        } catch (WebApplicationException e) {
+            sendError(response, e);
+        }
+    }
 
-        BlobstoreServiceFactory.getBlobstoreService().serve(service.blobKey(blobId), response);
+    private void sendError(HttpServletResponse response, WebApplicationException e) throws IOException {
+        LOGGER.log(Level.FINE, e.getMessage(), e);
+        response.sendError(e.getResponse().getStatus(), e.getResponse().getEntity() != null ? e.getResponse().getEntity().toString() : "");
     }
 
     @Override
@@ -82,6 +91,8 @@ public class GcsBlobServlet extends HttpServlet {
 
             service.put(authProvider.get(), "attachment; filename=\"" + fileName + "\"",
                     mimeType, blobId, resourceId, fileItem.getInputStream());
+        } catch (WebApplicationException e) {
+            sendError(response, e);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error handling upload", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
