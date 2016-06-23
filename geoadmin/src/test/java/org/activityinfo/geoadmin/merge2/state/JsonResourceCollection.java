@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
@@ -83,7 +84,7 @@ public class JsonResourceCollection implements ResourceCollection {
     }
 
     @Override
-    public Optional<Resource> get(ResourceId resourceId) {
+    public Optional<FormRecord> get(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 
@@ -148,7 +149,7 @@ public class JsonResourceCollection implements ResourceCollection {
         }
 
         @Override
-        public void execute() throws IOException {
+        public void execute() {
             for(int i=0;i<instances.size();++i) {
                 JsonObject instance = instances.get(i).getAsJsonObject();
                 for (CursorObserver<JsonObject> binding : bindings) {

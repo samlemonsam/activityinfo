@@ -77,8 +77,13 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
 
     
     @Override
-    public void execute() throws IOException {
-        SimpleFeatureIterator it = featureSource.getFeatures().features();
+    public void execute() {
+        SimpleFeatureIterator it;
+        try {
+            it = featureSource.getFeatures().features();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         while(it.hasNext()) {
             SimpleFeature feature = it.next();
             ResourceId id = ResourceId.valueOf(feature.getID());
