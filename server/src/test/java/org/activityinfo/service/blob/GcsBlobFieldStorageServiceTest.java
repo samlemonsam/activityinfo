@@ -33,7 +33,6 @@ import com.google.inject.Inject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
@@ -87,7 +86,6 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     private AuthenticatedUser noAccessUser;
     private BlobId blobId;
     private ResourceId resourceId = CuidAdapter.activityFormClass(1);
-    private ResourceLocatorAdaptor locator;
 
     @BeforeClass
     public static void setupI18N() {
@@ -101,7 +99,6 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
         localServiceTestHelper.setUp();
         blobService.setTestBucketName();
-        locator = new ResourceLocatorAdaptor();
 
         user = new AuthenticatedUser("x", 1, "user1@user.com");
         noAccessUser = new AuthenticatedUser("x", 3, "stefan@user.com");
