@@ -405,13 +405,12 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter by date")
     String filterByDate();
-    
+
     @DefaultStringValue("Filter by end date")
     String filterByEndDate();
 
     @DefaultStringValue("Filter by start date")
     String filterByStartDate();
-
 
     @DefaultStringValue("Filter by geography")
     String filterByGeography();
@@ -1076,10 +1075,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Range")
     String range();
 
-    @DefaultStringValue("« Previous")
+    @DefaultStringValue("Â« Previous")
     String previousButton();
 
-    @DefaultStringValue("Next »")
+    @DefaultStringValue("Next Â»")
     String nextButton();
 
     @DefaultStringValue("Choose columns")
@@ -1558,7 +1557,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Click to link")
     String clickToLink();
-
 
     @DefaultStringValue("clear")
     String clear();

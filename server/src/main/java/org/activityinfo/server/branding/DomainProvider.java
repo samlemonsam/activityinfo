@@ -61,7 +61,6 @@ public class DomainProvider implements Provider<Domain> {
             result = new Domain();
             result.setTitle("ActivityInfo");
             result.setHost(host);
-            result.setPort(request.get().getServerPort());
             result.setSignUpAllowed(true);
         } else {
             entityManager.get().detach(result);

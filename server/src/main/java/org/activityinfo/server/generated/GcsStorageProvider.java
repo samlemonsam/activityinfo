@@ -28,9 +28,9 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.model.auth.AuthenticatedUser;
-import org.activityinfo.server.database.hibernate.entity.Domain;
 import org.activityinfo.service.DeploymentConfiguration;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.logging.Logger;
@@ -42,17 +42,16 @@ public class GcsStorageProvider implements StorageProvider {
     public static final String BUCKET_PROPERTY = "generated.resources.bucket";
     
     private final SecureRandom random = new SecureRandom();
-    private Provider<Domain> domainProvider;
     private final Provider<AuthenticatedUser> authProvider;
-
+    private final Provider<HttpServletRequest> requestProvider;
     private final String bucket;
 
 
     @Inject
-    public GcsStorageProvider(Provider<Domain> domainProvider,
-                              Provider<AuthenticatedUser> authProvider,
-                              DeploymentConfiguration deploymentConfiguration) {
-        this.domainProvider = domainProvider;
+    public GcsStorageProvider(Provider<AuthenticatedUser> authProvider,
+                              DeploymentConfiguration deploymentConfiguration,
+                              Provider<HttpServletRequest> requestProvider) {
+        this.requestProvider = requestProvider;
         this.authProvider = authProvider;
 
         if (deploymentConfiguration.hasProperty(BUCKET_PROPERTY)) {
@@ -75,7 +74,7 @@ public class GcsStorageProvider implements StorageProvider {
         
         LOGGER.info("Created GeneratedResource " + id + " for user " + authProvider.get().getEmail());
 
-        return new GcsGeneratedResource(domainProvider.get(), bucket, metadata);
+        return new GcsGeneratedResource(bucket, metadata, requestProvider);
     }
 
     @Override
@@ -89,7 +88,7 @@ public class GcsStorageProvider implements StorageProvider {
             throw new IllegalArgumentException("GeneratedResource not found: " + e.getKey());
         }
 
-        return new GcsGeneratedResource(domainProvider.get(), bucket, metadata);
+        return new GcsGeneratedResource(bucket, metadata, requestProvider);
     }
 }
     

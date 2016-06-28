@@ -22,7 +22,10 @@ package org.activityinfo.server.database.hibernate.entity;
  * #L%
  */
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
 import java.io.Serializable;
 
 /**
@@ -40,7 +43,6 @@ public class Domain implements Serializable {
 
     private String host;
     private String title;
-    private int port;
 
     private String scaffolding;
     private String homePageBody;
@@ -96,26 +98,6 @@ public class Domain implements Serializable {
 
     public void setSignUpAllowed(boolean signUpAllowed) {
         this.signUpAllowed = signUpAllowed;
-    }
-
-    @Transient
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-    
-    @Transient
-    public String getRootUrl() {
-        StringBuilder sb = new StringBuilder();
-        if(host.equals("localhost")) {
-            sb.append("http://localhost:").append(port);
-        } else {
-            sb.append("https://").append(host);
-        }
-        return sb.toString();
     }
 
     @Override
