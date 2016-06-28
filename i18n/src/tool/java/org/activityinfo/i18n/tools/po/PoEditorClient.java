@@ -59,7 +59,6 @@ public class PoEditorClient {
     
     public Map<String, PoTerm> getTerms(int projectId) throws IOException {
         ObjectNode response = viewTerms(projectId, null);
-        System.out.println(response);
         PoTerm[] terms = objectMapper.readValue(response.path("list"), PoTerm[].class);
 
         Map<String, PoTerm> map = new HashMap<>();
@@ -132,7 +131,6 @@ public class PoEditorClient {
 
     public TranslationSet getTranslations(int projectId, String language) throws IOException {
         ObjectNode response = viewTerms(projectId, language);
-        System.out.println(response.toString());
 
         try {
             PoTermTranslation[] terms = objectMapper.readValue(response.path("list"), PoTermTranslation[].class);
