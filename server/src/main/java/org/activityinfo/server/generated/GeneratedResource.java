@@ -32,7 +32,7 @@ public interface GeneratedResource {
 
     /**
      * @return true if the resource has been generated and is ready to read.
-     */ 
+     */
     public boolean isComplete();
 
     /**

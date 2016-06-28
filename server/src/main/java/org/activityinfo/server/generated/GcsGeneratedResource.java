@@ -5,12 +5,12 @@ import com.google.appengine.tools.cloudstorage.GcsInputChannel;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.common.io.ByteStreams;
-import com.google.inject.Provider;
+import org.activityinfo.server.database.hibernate.entity.Domain;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,15 +27,14 @@ class GcsGeneratedResource implements GeneratedResource {
 
     private static final Logger LOGGER = Logger.getLogger(GcsGeneratedResource.class.getName());
     
+    private Domain domain;
     private String bucket;
     private GcsGeneratedMetadata metadata;
-    private Provider<HttpServletRequest> request;
-    
-    GcsGeneratedResource(String bucket, GcsGeneratedMetadata metadata,
-                         Provider<HttpServletRequest> request) {
+
+    GcsGeneratedResource(Domain domain, String bucket, GcsGeneratedMetadata metadata) {
+        this.domain = domain;
         this.bucket = bucket;
         this.metadata = metadata;
-        this.request = request;
     }
 
     @Override
@@ -50,26 +49,13 @@ class GcsGeneratedResource implements GeneratedResource {
 
     @Override
     public String getDownloadUri() {
-        StringBuilder url = new StringBuilder();
-        if(request.get().isSecure()) {
-            url.append("https://");
-        } else {
-            url.append("http://");
-        } 
-        url.append(request.get().getServerName());
-        
-        int defaultPort = request.get().isSecure() ? 443 : 80;
-        int port = request.get().getServerPort();
-        
-        if(port != defaultPort) {
-            url.append(":").append(port);
-        }
-        return url
-        .append("/generated/")
-        .append(metadata.getId())
-        .append("/")
-        .append(metadata.getFilename())
-        .toString();
+        return UriBuilder.fromUri(domain.getRootUrl())
+                .port(domain.getPort())
+                .path("generated")
+                .path(metadata.getId())
+                .path(metadata.getFilename())
+                .build()
+                .toString();
     }
 
     @Override
