@@ -8,7 +8,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.formTree.*;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -30,10 +33,7 @@ import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.xlsform.XlsFormBuilder;
 
 import javax.inject.Provider;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -53,17 +53,14 @@ public class FormResource {
 
     private final ResourceId resourceId;
     private final Gson prettyPrintingGson;
-    private final FormClassProvider formClassProvider;
 
     public FormResource(ResourceId resourceId, 
                         Provider<CollectionCatalog> catalog, 
-                        Provider<AuthenticatedUser> userProvider, 
-                        FormClassProvider formClassProvider) {
+                        Provider<AuthenticatedUser> userProvider) {
         this.resourceId = resourceId;
         this.catalog = catalog;
         this.userProvider = userProvider;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
-        this.formClassProvider = formClassProvider;
     }
 
     /**
@@ -83,6 +80,22 @@ public class FormResource {
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }
     
+    @PUT
+    @Path("schema")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateFormSchema(String updatedSchemaJson) {
+        
+        FormClass updatedSchema = FormClass.fromJson(updatedSchemaJson);
+        Optional<ResourceCollection> collection = catalog.get().getCollection(resourceId);
+        if(!collection.isPresent()) {
+            return Response.status(Response.Status.NOT_FOUND).entity("No such collection: "  + resourceId).build();
+        }
+        
+        collection.get().updateFormClass(updatedSchema);
+        
+        return Response.ok().build();
+    }
+    
     @GET
     @Path("class")
     public Response getFormClass() {
@@ -94,7 +107,7 @@ public class FormResource {
     public Response getXlsForm() {
         assertVisible(resourceId);
 
-        final XlsFormBuilder xlsForm = new XlsFormBuilder(formClassProvider);
+        final XlsFormBuilder xlsForm = new XlsFormBuilder(catalog.get());
         xlsForm.build(resourceId);
 
         StreamingOutput output = new StreamingOutput() {

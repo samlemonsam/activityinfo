@@ -7,21 +7,30 @@ import com.google.gwt.json.client.JSONValue;
 import org.activityinfo.model.query.*;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 class ColumnSetParser {
 
+    private static final Logger LOGGER = Logger.getLogger(ColumnSetParser.class.getName());
+    
     static ColumnSet fromJson(String json) {
-        JSONObject jsonObject = JSONParser.parseStrict(json).isObject();
-        int rowsCount = (int) jsonObject.get("rows").isNumber().doubleValue();
-        
-        Map<String, ColumnView> views = Maps.newHashMap();
+        try {
+            JSONObject jsonObject = JSONParser.parseStrict(json).isObject();
+            int rowsCount = (int) jsonObject.get("rows").isNumber().doubleValue();
 
-        JSONObject jsonColumns = jsonObject.get("columns").isObject();
-        for (String columnId : jsonColumns.keySet()) {
-            views.put(columnId, parseColumn(rowsCount, jsonColumns.get(columnId).isObject()));
+            Map<String, ColumnView> views = Maps.newHashMap();
+
+            JSONObject jsonColumns = jsonObject.get("columns").isObject();
+            for (String columnId : jsonColumns.keySet()) {
+                views.put(columnId, parseColumn(rowsCount, jsonColumns.get(columnId).isObject()));
+            }
+            return new ColumnSet(rowsCount, views);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to parse column set: " + e.getMessage() + "\n" + json, e);
+            throw e;
         }
-        return new ColumnSet(rowsCount, views);
     }
 
     private static ColumnView parseColumn(int rowsCount, JSONObject jsonColumn) {
@@ -31,7 +40,7 @@ class ColumnSetParser {
         
         switch (storage) {
             case "array":
-                return new ColumnArrayView(type, jsonColumn.get("values").isObject().getJavaScriptObject());
+                return new ColumnArrayView(type, jsonColumn.get("values").isArray().getJavaScriptObject());
             case "empty":
                 return new EmptyColumnView(type, rowsCount);
             case "constant":

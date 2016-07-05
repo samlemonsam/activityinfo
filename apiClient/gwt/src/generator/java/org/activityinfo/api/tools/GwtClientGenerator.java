@@ -3,6 +3,7 @@ package org.activityinfo.api.tools;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
 import com.squareup.javapoet.*;
 import io.swagger.models.*;
 import io.swagger.models.parameters.BodyParameter;
@@ -177,11 +178,17 @@ public class GwtClientGenerator {
 
             if (bodyParameter != null) {
                 DataType bodyType = dataTypeFactory.get(bodyParameter);
+                method.addStatement("requestBuilder.setHeader($S, $S)", "Content-Type", "application/json");
                 method.addStatement("requestBuilder.setRequestData($L)", bodyType.toJsonString(bodyParameter.getName()));
             }
 
             method.addStatement("requestBuilder.setCallback($L)", generateCallback(operation));
-
+            method.beginControlFlow("try");
+            method.addStatement("requestBuilder.send()");
+            method.nextControlFlow("catch($T e)", RequestException.class);
+            method.addStatement("result.reject(e)");
+            method.endControlFlow();
+            
             method.addStatement("return result");
         }
 
@@ -217,7 +224,12 @@ public class GwtClientGenerator {
             }
         }
         // If the response did not match a success case, then treat it as an error
-        onReceived.addStatement("result.reject(new RuntimeException(\"Status code: \" + response.getStatusCode()))");
+        
+        onReceived.addStatement("LOGGER.log($T.SEVERE, \"Request to \" + url + \" failed with status \" + " +
+                "response.getStatusCode() + \": \" + response.getStatusText())",
+                ClassName.get(Level.class));
+        
+        onReceived.addStatement("result.reject(new ApiException(response.getStatusCode()))");
 
         MethodSpec.Builder onFailed = MethodSpec.methodBuilder("onError")
                 .addAnnotation(Override.class)

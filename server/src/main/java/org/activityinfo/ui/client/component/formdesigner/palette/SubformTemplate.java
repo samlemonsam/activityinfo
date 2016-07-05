@@ -40,7 +40,6 @@ public class SubformTemplate implements Template<FormField> {
         FormField field = new FormField(ResourceId.generateFieldId(SubFormReferenceType.TYPE_CLASS));
         field.setLabel("Sub Form");
         field.setType(new SubFormReferenceType());
-
         return field;
     }
 }

@@ -34,7 +34,7 @@ import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.period.PredefinedPeriods;
+import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldPanel;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -67,7 +67,7 @@ public class FormDesignerModel {
         final FormClass formClass = new FormClass(ResourceId.generateId());
 
         formClass.setOwnerId(rootFormClass.getId());
-        formClass.setSubformType(PredefinedPeriods.MONTHLY.getResourceId());
+        formClass.setSubformType(ClassType.REPEATING.createSubformKind().getDefinition().getId());
 
         registerSubform(formFieldId, formClass);
         return formClass;

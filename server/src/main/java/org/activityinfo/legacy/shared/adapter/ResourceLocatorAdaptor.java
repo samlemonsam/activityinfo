@@ -1,6 +1,7 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gwt.core.shared.GWT;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
@@ -12,7 +13,6 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -122,7 +122,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
+        List<Promise<Void>> promises = Lists.newArrayList();
+        for (IsResource resource : resources) {
+            promises.add(persist(resource));
+        }
+        return Promise.waitAll(promises);
     }
 
     @Override

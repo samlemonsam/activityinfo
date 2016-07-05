@@ -1,5 +1,6 @@
 
 evaluationDependsOn ":ui:app"
+evaluationDependsOn ":apiClient:gwt"
 
 apply plugin: 'gwt'
 apply plugin: 'war'
