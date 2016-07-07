@@ -24,9 +24,11 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
@@ -50,16 +52,19 @@ public class FormResource {
 
     private final Provider<CollectionCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
+    private final PermissionOracle permissionOracle;
 
     private final ResourceId resourceId;
     private final Gson prettyPrintingGson;
 
-    public FormResource(ResourceId resourceId, 
-                        Provider<CollectionCatalog> catalog, 
-                        Provider<AuthenticatedUser> userProvider) {
+    public FormResource(ResourceId resourceId,
+                        Provider<CollectionCatalog> catalog,
+                        Provider<AuthenticatedUser> userProvider, 
+                        PermissionOracle permissionOracle) {
         this.resourceId = resourceId;
         this.catalog = catalog;
         this.userProvider = userProvider;
+        this.permissionOracle = permissionOracle;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -84,14 +89,23 @@ public class FormResource {
     @Path("schema")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateFormSchema(String updatedSchemaJson) {
+
+        FormClass formClass = FormClass.fromJson(updatedSchemaJson);
         
-        FormClass updatedSchema = FormClass.fromJson(updatedSchemaJson);
-        Optional<ResourceCollection> collection = catalog.get().getCollection(resourceId);
-        if(!collection.isPresent()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("No such collection: "  + resourceId).build();
+        // Check first to see if this collection exists
+        Optional<ResourceCollection> collection = catalog.get().getCollection(formClass.getId());
+        if(collection.isPresent()) {
+            FormClass existingFormClass = collection.get().getFormClass();
+            permissionOracle.assertDesignPrivileges(existingFormClass, userProvider.get());
+
+            collection.get().updateFormClass(formClass);
+
+        } else {
+            // Check that we have the permission to create in this database
+            permissionOracle.assertDesignPrivileges(formClass, userProvider.get());
+
+            ((MySqlSession)catalog.get()).createOrUpdateFormSchema(formClass);
         }
-        
-        collection.get().updateFormClass(updatedSchema);
         
         return Response.ok().build();
     }

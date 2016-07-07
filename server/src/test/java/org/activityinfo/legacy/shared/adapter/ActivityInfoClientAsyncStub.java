@@ -9,14 +9,11 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.CompositeCatalog;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
@@ -42,11 +39,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         }
 
         // Create a fresh catalog to simulate a new request
-        CompositeCatalog catalog = new CompositeCatalog(
-                new HrdCatalog(),
-                new MySqlSession(new HibernateQueryExecutor(entityManager)));
-
-        return catalog;
+        return new MySqlSession(new HibernateQueryExecutor(entityManager));
     }
 
     @Override

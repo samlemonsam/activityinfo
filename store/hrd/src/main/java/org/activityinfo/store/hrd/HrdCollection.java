@@ -6,9 +6,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.service.store.CollectionPermissions;
@@ -39,7 +37,7 @@ public class HrdCollection implements ResourceCollection {
 
     @Override
     public CollectionPermissions getPermissions(int userId) {
-        throw new UnsupportedOperationException();
+        return CollectionPermissions.full();
     }
 
     @Override

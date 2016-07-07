@@ -178,6 +178,9 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                     if (formField.getType() instanceof SubFormReferenceType) {
                         ResourceId subFormId = ((SubFormReferenceType) formField.getType()).getClassId();
                         FormClass subForm = (FormClass) formDesigner.getModel().getElementContainer(subFormId);
+                        if(subForm == null) {
+                            throw new IllegalStateException("Subform " + subFormId + " does not exist.");
+                        }
                         fillPanel(subForm, formDesigner);
                     }
                 } else if (element instanceof FormSection) {

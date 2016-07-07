@@ -19,4 +19,6 @@ public interface CollectionCatalog extends FormClassProvider {
     Optional<ResourceCollection> lookupCollection(ResourceId resourceId); 
 
     Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds);
+    
+    
 }

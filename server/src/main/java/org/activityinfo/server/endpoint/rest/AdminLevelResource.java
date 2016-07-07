@@ -33,6 +33,7 @@ import com.vividsolutions.jts.io.ParseException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.model.*;
 import org.activityinfo.server.util.monitoring.Timed;
@@ -90,7 +91,8 @@ public class AdminLevelResource {
 
     @Path("/form")
     public FormResource getForm() {
-        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), catalog, userProvider);
+        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), catalog, userProvider,
+                new PermissionOracle(entityManager.get()));
     }
     
     @DELETE

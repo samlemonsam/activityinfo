@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
+import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 
 public class PermissionOracle {
 
@@ -95,6 +96,8 @@ public class PermissionOracle {
             if (activity != null) {
                 return activity.getDatabase();
             }
+        } else if(ownerId.getDomain() == DATABASE_DOMAIN) {
+            return em.get().getReference(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
         }
         throw new IllegalArgumentException(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
                 "a database", formClass.getLabel(), formClass.getId(), formClass.getOwnerId()));
@@ -343,5 +346,9 @@ public class PermissionOracle {
             throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
                     "view form class " + formClass.getId() + " in database " + database.getId());
         }
+    }
+
+    public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
+        assertDesignPrivileges(formClass, em.get().getReference(User.class, user.getId()));
     }
 }

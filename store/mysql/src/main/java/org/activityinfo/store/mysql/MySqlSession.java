@@ -6,11 +6,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.service.store.ResourceNotFound;
+import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
@@ -46,6 +48,7 @@ public class MySqlSession implements CollectionCatalog {
         providers.add(new TargetCollectionProvider());
         providers.add(new ActivityCollectionProvider(activityLoader));
         providers.add(new LocationCollectionProvider());
+        providers.add(new HrdProvider());
 
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<ResourceCollection>>() {
@@ -143,5 +146,20 @@ public class MySqlSession implements CollectionCatalog {
     @Override
     public FormClass getFormClass(ResourceId formClassId) {
         return getCollection(formClassId).get().getFormClass();
+    }
+
+
+    public void createOrUpdateFormSchema(FormClass formClass) {
+        if(formClass.getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            // Only update of activity's schemas is currently supported
+            Optional<ResourceCollection> collection = getCollection(formClass.getId());
+            if(!collection.isPresent()) {
+                throw new UnsupportedOperationException("Activity " + formClass.getId() + " does not exist.");
+            }
+            collection.get().updateFormClass(formClass);
+        } else {
+            HrdCatalog catalog = new HrdCatalog();
+            catalog.create(formClass);
+        }
     }
 }

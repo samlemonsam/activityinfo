@@ -37,6 +37,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
@@ -158,7 +159,7 @@ public class RootResource {
 
     @Path("/form/{id}")
     public FormResource getForm(@PathParam("id") ResourceId id) {
-        return new FormResource(id, catalog, userProvider);
+        return new FormResource(id, catalog, userProvider, new PermissionOracle(entityManager.get()));
     }
     
     @Path("/query")
