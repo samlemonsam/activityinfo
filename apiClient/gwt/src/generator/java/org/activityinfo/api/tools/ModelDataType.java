@@ -1,5 +1,6 @@
 package org.activityinfo.api.tools;
 
+import com.google.gson.JsonParser;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
@@ -45,7 +46,18 @@ public class ModelDataType extends DataType {
     }
 
     @Override
-    public String fromJsonString(String jsonStringExpr) {
-        throw new UnsupportedOperationException();
+    public CodeBlock fromJsonString(CodeBlock jsonStringExpr) {
+        return CodeBlock.of("$T.fromJson(new $T().parse($L))", 
+            getReturnTypeName(), 
+            JsonParser.class,
+            jsonStringExpr);
+    }
+
+    @Override
+    public CodeBlock fromJsonElement(CodeBlock jsonElementExpr) {
+        return CodeBlock.of("$T.fromJson(new $T().parse($L))", 
+            getReturnTypeName(), 
+            JsonParser.class, 
+            jsonElementExpr);
     }
 }

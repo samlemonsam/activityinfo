@@ -32,8 +32,17 @@ public abstract class DataType {
 
     /**
      * Returns a Java expression that parses the Java string expression
+     * @param jsonStringExpr
      */
-    public abstract String fromJsonString(String jsonStringExpr);
+    public abstract CodeBlock fromJsonString(CodeBlock jsonStringExpr);
 
+    public final CodeBlock fromJsonString(String jsonStringExpr) {
+        return fromJsonString(CodeBlock.of(jsonStringExpr));
+    }
 
+    public abstract CodeBlock fromJsonElement(CodeBlock jsonElementExpr);
+    
+    public CodeBlock fromJsonArray(CodeBlock jsonArrayExpr) {
+        throw new UnsupportedOperationException("TODO: this = " + this);
+    }
 }

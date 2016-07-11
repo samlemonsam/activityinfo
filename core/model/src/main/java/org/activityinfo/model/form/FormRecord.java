@@ -1,5 +1,6 @@
 package org.activityinfo.model.form;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -7,6 +8,8 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class FormRecord {
@@ -35,14 +38,19 @@ public class FormRecord {
         return fields;
     }
 
+    
     public static FormRecord fromJson(String json) {
         JsonParser parser = new JsonParser();
-        JsonObject jsonObject = parser.parse(json).getAsJsonObject();
-        
+        return fromJson(parser.parse(json));
+    }
+    
+    public static FormRecord fromJson(JsonElement element) {
+        JsonObject jsonObject = element.getAsJsonObject();
+
         FormRecord formRecord = new FormRecord();
         formRecord.recordId = jsonObject.get("recordId").getAsString();
         formRecord.formId = jsonObject.get("formId").getAsString();
-        
+
         if(jsonObject.has("parentRecordId")) {
             formRecord.parentRecordId = jsonObject.get("parentRecordId").getAsString();
         }
@@ -52,6 +60,14 @@ public class FormRecord {
         return formRecord;
     }
     
+    public static List<FormRecord> fromJsonArray(JsonArray array) {
+        List<FormRecord> list = new ArrayList<>();
+        for (JsonElement jsonElement : array) {
+            list.add(fromJson(jsonElement));
+        }
+        return list;
+    }
+
     public static FormRecord fromInstance(FormInstance instance) {
         FormRecord record = new FormRecord();
         record.recordId = instance.getId().asString();

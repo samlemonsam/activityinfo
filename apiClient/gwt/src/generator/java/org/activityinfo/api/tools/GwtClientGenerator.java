@@ -1,5 +1,7 @@
 package org.activityinfo.api.tools;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -8,6 +10,7 @@ import com.squareup.javapoet.*;
 import io.swagger.models.*;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 
 import javax.lang.model.element.Modifier;
@@ -24,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class GwtClientGenerator {
 
-    private static final String CLIENT_PACKAGE = "org.activityinfo.api.client";
+    public static final String CLIENT_PACKAGE = "org.activityinfo.api.client";
 
     private final Swagger spec;
     private DataTypeFactory dataTypeFactory;
@@ -67,6 +70,7 @@ public class GwtClientGenerator {
         generateClientInterface();
         generateClientImpl();
         generateBuilders();
+        generateModels();
     }
 
     private void generateClientInterface() throws IOException {
@@ -102,6 +106,12 @@ public class GwtClientGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$T.getLogger(ActivityInfoClientAsync.class.getName())", Logger.class)
                 .build());
+
+        clientClass.addField(FieldSpec.builder(JsonParser.class, "JSON_PARSER")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+            .initializer("new $T()", JsonParser.class)
+            .build());
+
 
         for (Map.Entry<String, Path> pathEntry : spec.getPaths().entrySet()) {
             Path path = pathEntry.getValue();
@@ -217,7 +227,7 @@ public class GwtClientGenerator {
                     onReceived.addStatement("result.resolve(null)");
                 } else {
                     DataType returnType = dataTypeFactory.get(expectedResponse.getSchema());
-                    onReceived.addStatement("result.resolve($L)", returnType.fromJsonString("response.getText()"));
+                    onReceived.addStatement("result.resolve($L)", returnType.fromJsonString(CodeBlock.of("response.getText()")));
                 }
                 onReceived.addStatement("return");
                 onReceived.endControlFlow();
@@ -289,7 +299,7 @@ public class GwtClientGenerator {
             }
         }
     }
-
+    
     private Set<String> findParameterModelTypes() {
         Set<String> models = new HashSet<>();
 
@@ -302,6 +312,37 @@ public class GwtClientGenerator {
                             RefModel refModel = (RefModel) bodyParameter.getSchema();
                             models.add(refModel.getSimpleRef());
                         }
+                    }
+                }
+            }
+        }
+        return models;
+    }
+    
+    private void generateModels() throws IOException {
+        Set<String> returnModels = findReturnModelTypes();
+
+        for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
+            String modelName = entry.getKey();
+            if( !ProvidedModel.isProvided(modelName) &&
+                    returnModels.contains(modelName)) {
+
+                ModelGenerator builderGenerator = new ModelGenerator(dataTypeFactory, modelName, entry.getValue());
+                builderGenerator.writeTo(outputDir);
+            }
+        }
+    }
+
+
+    private Set<String> findReturnModelTypes() {
+        Set<String> models = new HashSet<>();
+
+        for (Path path : spec.getPaths().values()) {
+            for (Operation operation : path.getOperations()) {
+                for (Response response : operation.getResponses().values()) {
+                    if (response.getSchema() instanceof RefProperty) {
+                        RefProperty refProperty = (RefProperty) response.getSchema();
+                        models.add(refProperty.getSimpleRef());
                     }
                 }
             }

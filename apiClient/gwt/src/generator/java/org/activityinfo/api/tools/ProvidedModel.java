@@ -55,11 +55,26 @@ public class ProvidedModel extends DataType {
     }
 
     @Override
-    public String fromJsonString(String jsonStringExpr) {
+    public CodeBlock fromJsonString(CodeBlock jsonStringExpr) {
         if(name.equals("ColumnSet")) {
-            return "ColumnSetParser.fromJson(" + jsonStringExpr + ")";
+            return CodeBlock.of("ColumnSetParser.fromJson($L)", jsonStringExpr); 
         } else {
-            return MODELS.get(name).simpleName() + ".fromJson(" + jsonStringExpr + ")";
+            return CodeBlock.of("$T.fromJson($L)", MODELS.get(name), jsonStringExpr);
         }
+    }
+
+    @Override
+    public CodeBlock fromJsonElement(CodeBlock jsonElementExpr) {
+        return fromJsonString(jsonElementExpr);
+    }
+
+    @Override
+    public CodeBlock fromJsonArray(CodeBlock jsonArrayExpr) {
+        return CodeBlock.of("$T.fromJsonArray($L)", MODELS.get(name), jsonArrayExpr);
+    }
+
+    @Override
+    public String toString() {
+        return "ProvidedModel{" + name + "}";
     }
 }

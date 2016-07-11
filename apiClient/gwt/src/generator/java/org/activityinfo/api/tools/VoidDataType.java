@@ -25,7 +25,12 @@ public class VoidDataType extends DataType {
     }
 
     @Override
-    public String fromJsonString(String jsonStringExpr) {
+    public CodeBlock fromJsonString(CodeBlock jsonStringExpr) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CodeBlock fromJsonElement(CodeBlock jsonElementExpr) {
         throw new UnsupportedOperationException();
     }
 }

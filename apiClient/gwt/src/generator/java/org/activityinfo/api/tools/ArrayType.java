@@ -37,7 +37,12 @@ public class ArrayType extends DataType {
     }
 
     @Override
-    public String fromJsonString(String jsonStringExpr) {
+    public CodeBlock fromJsonString(CodeBlock jsonStringExpr) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CodeBlock fromJsonElement(CodeBlock jsonElementExpr) {
+        return baseType.fromJsonArray(CodeBlock.of("$L.getAsJsonArray()", jsonElementExpr));
     }
 }

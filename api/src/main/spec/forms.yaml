@@ -96,6 +96,29 @@ paths:
           
 
   /form/{formId}/records:
+    get:
+      operationId: getRecords
+      summary: Retrieves records for this field
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: filter
+          in: query
+          description: A boolean-valued expression used to filter returned records.
+          required: false
+          type: string
+      responses:
+        200:
+          description: The requested records
+          schema:
+            $ref: "#/definitions/FormRecordSet"
+        401:
+          description: The authenticated user does not have permission to view this form 
+        404:
+          description: No form with `formId` exists
     post:
       operationId: createRecord
       summary: Creates a new record for this form
@@ -105,7 +128,7 @@ paths:
           description: Id of the path
           required: true
           type: string
-        - name: query
+        - name: newRecord
           in: body
           description: The record to create
           schema:
@@ -261,7 +284,18 @@ definitions:
       fields:
         type: object
         description: Dictionary of field values of this FormRecord
-
+        
+  FormRecordSet:
+    type: object
+    properties:
+      formId:
+        type: string
+        description: The id of the form to which this record belongs
+      records:
+        type: array
+        items:
+          $ref: '#/definitions/FormRecord'
+        
   FormRecordUpdate:
     type: object
     properties:
