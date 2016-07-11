@@ -10,8 +10,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
+import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -59,8 +59,14 @@ public class MySqlSession implements CollectionCatalog {
                     if (provider.accept(id)) {
                         try {
                             Stopwatch stopwatch = Stopwatch.createStarted();
-                            Optional<ResourceCollection> result = Optional.of(provider.openCollection(executor, id));
-
+                            ResourceCollection collection;
+                            try {
+                                collection = provider.openCollection(executor, id);
+                            } catch (FormNotFoundException e) {
+                                return Optional.absent();
+                            }
+                            Optional<ResourceCollection> result = Optional.of(collection);
+                            
                             LOGGER.log(Level.INFO, "Opened collection " + id + " in " + stopwatch);
                             
                             return result;
@@ -136,7 +142,7 @@ public class MySqlSession implements CollectionCatalog {
         // Finally, verify that all collections were loaded
         for (ResourceId collectionId : collectionIds) {
             if(!resultMap.containsKey(collectionId)) {
-                throw new ResourceNotFound(collectionId);
+                throw new FormNotFoundException(collectionId);
             }
         }
         

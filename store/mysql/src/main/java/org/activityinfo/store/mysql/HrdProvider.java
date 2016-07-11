@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.service.store.ResourceCollection;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.collections.CollectionProvider;
@@ -25,7 +26,7 @@ public class HrdProvider implements CollectionProvider {
     public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
         Optional<ResourceCollection> collection = catalog.getCollection(formClassId);
         if(!collection.isPresent()) {
-            throw new RuntimeException("No such collection");
+            throw new FormNotFoundException(formClassId);
         }
         return collection.get();
     }

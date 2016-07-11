@@ -2,19 +2,22 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
+import org.activityinfo.io.xform.form.XForm;
+import org.activityinfo.io.xform.manifest.MediaFile;
+import org.activityinfo.io.xform.manifest.XFormManifest;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.ResourceLocatorSyncImpl;
-import org.activityinfo.io.xform.manifest.MediaFile;
-import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
-import org.activityinfo.io.xform.manifest.XFormManifest;
-import org.activityinfo.service.store.ResourceNotFound;
+import org.activityinfo.service.store.FormNotFoundException;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -53,7 +56,7 @@ public class FormResource {
         FormClass formClass;
         try {
             formClass = locator.getFormClass(CuidAdapter.activityFormClass(id));
-        } catch (ResourceNotFound resourceNotFound) {
+        } catch (FormNotFoundException formNotFoundException) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
         return formClass;

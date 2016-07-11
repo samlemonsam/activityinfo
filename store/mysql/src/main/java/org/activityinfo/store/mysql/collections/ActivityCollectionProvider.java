@@ -3,8 +3,8 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.ActivityTableMappingBuilder;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -45,7 +45,7 @@ public class ActivityCollectionProvider implements CollectionProvider {
         
         Activity activity = map.get(activityId);
         if(activity == null) {
-            throw new ResourceNotFound(formClassId);
+            throw new FormNotFoundException(formClassId);
         }
         return new SiteCollection(activity, buildMapping(activity, formClassId), executor, 
                 activityLoader.getPermissionCache());

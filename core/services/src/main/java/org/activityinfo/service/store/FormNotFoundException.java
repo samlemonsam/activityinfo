@@ -2,14 +2,14 @@ package org.activityinfo.service.store;
 
 import org.activityinfo.model.resource.ResourceId;
 
-public class ResourceNotFound extends RuntimeException {
+public class FormNotFoundException extends RuntimeException {
 
     private String resourceId;
 
-    public ResourceNotFound() {
+    public FormNotFoundException() {
     }
 
-    public ResourceNotFound(ResourceId resourceId) {
+    public FormNotFoundException(ResourceId resourceId) {
         super("Could not find resource [" + resourceId + "]");
         this.resourceId = resourceId.asString();
     }

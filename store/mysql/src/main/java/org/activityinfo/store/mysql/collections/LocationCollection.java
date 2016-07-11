@@ -9,7 +9,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.Cardinality;
@@ -22,8 +21,8 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
+import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.service.store.ResourceNotFound;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.ResourceFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -32,7 +31,6 @@ import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -66,7 +64,7 @@ public class LocationCollection implements ResourceCollection {
 
         try (ResultSet rs = executor.query(sql)) {
             if (!rs.next()) {
-                throw new ResourceNotFound(formClassId);
+                throw new FormNotFoundException(formClassId);
             }
             countryId = rs.getInt("countryId");
             Preconditions.checkState(!rs.wasNull());
