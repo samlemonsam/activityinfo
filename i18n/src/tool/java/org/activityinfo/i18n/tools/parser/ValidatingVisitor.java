@@ -64,6 +64,11 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
         // Check that each {placeholder} in the translated string has a corresponding
         // argument in the message method.
         for (MessageFormatUtils.ArgumentChunk argumentChunk : argumentChunks) {
+            if (!validateFormat(argumentChunk)) {
+                System.err.println(String.format("Invalid format string %s[%s]: [%s]",
+                        key, input.getLanguage(), inputMessage));
+                return false;
+            }
             if(argumentChunk.getArgumentNumber() >= decl.getParameters().size()) {
                 System.err.println(String.format("Invalid translation %s[%s]: not enough arguments for [%s]",
                         key, input.getLanguage(), inputMessage));
@@ -86,6 +91,28 @@ public class ValidatingVisitor extends VoidVisitorAdapter<Void> {
                 }
             }
         }
+        return true;
+    }
+
+    private boolean validateFormat(MessageFormatUtils.ArgumentChunk argumentChunk) {
+        if(argumentChunk.getFormat() == null) {
+            return true;
+        }
+        switch (argumentChunk.getFormat()) {
+            case "date":
+            case "localdate":
+                return validateDateFormat(argumentChunk.getSubFormat());
+
+            case "number":
+                return true;
+
+            default:
+                return false;
+        }
+
+    }
+
+    private boolean validateDateFormat(String subFormat) {
         return true;
     }
 }
