@@ -5,8 +5,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.gson.*;
 import org.activityinfo.api.client.FormRecordSetBuilder;
-import org.activityinfo.api.client.NewFormRecord;
-import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -112,6 +110,28 @@ public class FormResource {
         }
         
         return Response.ok().build();
+    }
+    
+    @GET
+    @Path("record/{recordId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRecord(@PathParam("recordId") String recordId) {
+        
+        ResourceCollection collection = assertVisible(resourceId);
+
+
+        Optional<FormRecord> record = collection.get(ResourceId.valueOf(recordId));
+        if(!record.isPresent()) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("Record " + recordId + " does not exist.")
+                    .build();
+        }
+
+        return Response.ok()
+                .entity(record.get().toJsonElement().toString())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
     }
     
     @GET
@@ -305,7 +325,7 @@ public class FormResource {
         return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
     }
 
-    private void assertVisible(ResourceId collectionId) {
+    private ResourceCollection assertVisible(ResourceId collectionId) {
         Optional<ResourceCollection> collection = this.catalog.get().getCollection(resourceId);
         if(!collection.isPresent()) {
             throw new WebApplicationException(
@@ -321,5 +341,6 @@ public class FormResource {
                             .build());
 
         }
+        return collection.get();
     }
 }

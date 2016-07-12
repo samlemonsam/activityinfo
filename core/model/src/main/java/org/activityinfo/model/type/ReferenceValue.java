@@ -93,7 +93,7 @@ public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
     @Override
     public JsonElement toJsonElement() {
         if(resourceIds.isEmpty()) {
-            return new JsonNull();
+            return JsonNull.INSTANCE;
             
         } else if(resourceIds.isEmpty()) {
             return new JsonPrimitive(resourceIds.iterator().next().asString());

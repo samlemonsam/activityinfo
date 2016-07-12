@@ -1,24 +1,18 @@
 package org.activityinfo.api.tools;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.*;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.squareup.javapoet.*;
 import io.swagger.models.*;
-import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.Response;
 import io.swagger.models.parameters.Parameter;
-import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,9 +102,9 @@ public class GwtClientGenerator {
                 .build());
 
         clientClass.addField(FieldSpec.builder(JsonParser.class, "JSON_PARSER")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-            .initializer("new $T()", JsonParser.class)
-            .build());
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new $T()", JsonParser.class)
+                .build());
 
 
         for (Map.Entry<String, Path> pathEntry : spec.getPaths().entrySet()) {
@@ -165,7 +159,6 @@ public class GwtClientGenerator {
             if(parameter.getIn().equals("body")) {
                 bodyParameter = parameter;
             }
-
             if(parameter.getDescription() != null) {
                 method.addJavadoc("@param ");
                 method.addJavadoc(parameter.getName());
@@ -173,18 +166,22 @@ public class GwtClientGenerator {
                 method.addJavadoc(parameter.getDescription());
                 method.addJavadoc("\n");
             }
-
         }
 
         if(implementation) {
             // Classes that we use
             ClassName requestBuilder = ClassName.get(RequestBuilder.class);
 
+            method.addStatement("$T urlBuilder = new $T(BASE_URL)", StringBuilder.class, StringBuilder.class);
+            addPathParts(method, path);
+            addQueryParameters(method, operation);
+            method.addStatement("final String url = urlBuilder.toString()");
+
             method.addStatement("final $T result = new Promise<>()", responseType.getPromisedReturnType());
 
-            method.addStatement("final String url = $L", buildPathExpr(path));
             method.addStatement("$T requestBuilder = new $T($T.$L, url)",
                     requestBuilder, requestBuilder, requestBuilder, httpMethod.name().toUpperCase());
+
 
             if (bodyParameter != null) {
                 DataType bodyType = dataTypeFactory.get(bodyParameter);
@@ -198,12 +195,13 @@ public class GwtClientGenerator {
             method.nextControlFlow("catch($T e)", RequestException.class);
             method.addStatement("result.reject(e)");
             method.endControlFlow();
-            
+
             method.addStatement("return result");
         }
 
         return method.build();
     }
+
 
     private TypeSpec generateCallback(Operation operation) {
 
@@ -234,11 +232,11 @@ public class GwtClientGenerator {
             }
         }
         // If the response did not match a success case, then treat it as an error
-        
+
         onReceived.addStatement("LOGGER.log($T.SEVERE, \"Request to \" + url + \" failed with status \" + " +
-                "response.getStatusCode() + \": \" + response.getStatusText())",
+                        "response.getStatusCode() + \": \" + response.getStatusText())",
                 ClassName.get(Level.class));
-        
+
         onReceived.addStatement("result.reject(new ApiException(response.getStatusCode()))");
 
         MethodSpec.Builder onFailed = MethodSpec.methodBuilder("onError")
@@ -258,23 +256,47 @@ public class GwtClientGenerator {
         return callback.build();
     }
 
-    private String buildPathExpr(String path) {
+    private void addPathParts(MethodSpec.Builder method, String path) {
         String[] parts = path.split("/");
-        StringBuilder expr = new StringBuilder();
-        expr.append("BASE_URL");
         for (String part : parts) {
             if(!part.isEmpty()) {
-                expr.append(" + ");
                 if(part.startsWith("{")) {
                     String paramName = part.substring("{".length(), part.length() - "}".length());
-                    expr.append("\"/\" + ");
-                    expr.append(paramName);
+                    method.addStatement("urlBuilder.append($S).append($L)", "/", paramName);
                 } else {
-                    expr.append("\"/").append(part).append("\"");
+                    method.addStatement("urlBuilder.append($S)", "/" + part);
                 }
             }
         }
-        return expr.toString();
+    }
+
+    private List<Parameter> queryParameters(Operation operation) {
+        List<Parameter> list = new ArrayList<>();
+        for (Parameter parameter : operation.getParameters()) {
+            if (parameter.getIn().equals("query")) {
+                list.add(parameter);
+            }
+        }
+        return list;
+    }
+
+    private void addQueryParameters(MethodSpec.Builder method, Operation operation) {
+        List<Parameter> queryParameters = queryParameters(operation);
+        if(queryParameters.size() == 1) {
+            Parameter queryParameter = queryParameters.get(0);
+            if (queryParameter.getRequired()) {
+                method.addStatement("assert $L != null", queryParameter.getName());
+            } else {
+                method.beginControlFlow("if($L != null)", queryParameter.getName());
+            }
+            method.addStatement("urlBuilder.append($S).append($T.encode($L))",
+                    "?" + queryParameter.getName() + "=", UriUtils.class, queryParameter.getName());
+            if (!queryParameter.getRequired()) {
+                method.endControlFlow();
+            }
+        } else if(queryParameters.size() > 1) {
+            throw new UnsupportedOperationException("TODO");
+        }
     }
 
     private DataType findResponseType(Operation operation) {
@@ -288,39 +310,17 @@ public class GwtClientGenerator {
 
 
     private void generateBuilders() throws IOException {
-        Set<String> parameterModels = findParameterModelTypes();
         for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
             String modelName = entry.getKey();
             if( !ProvidedModel.isProvided(modelName)) {
-                
+
                 BuilderGenerator builderGenerator = new BuilderGenerator(dataTypeFactory, modelName, entry.getValue());
                 builderGenerator.writeTo(outputDir);
             }
         }
     }
-    
-    private Set<String> findParameterModelTypes() {
-        Set<String> models = new HashSet<>();
 
-        for (Path path : spec.getPaths().values()) {
-            for (Operation operation : path.getOperations()) {
-                for (Parameter parameter : operation.getParameters()) {
-                    if (parameter instanceof BodyParameter) {
-                        BodyParameter bodyParameter = (BodyParameter) parameter;
-                        if (bodyParameter.getSchema() instanceof RefModel) {
-                            RefModel refModel = (RefModel) bodyParameter.getSchema();
-                            models.add(refModel.getSimpleRef());
-                        }
-                    }
-                }
-            }
-        }
-        return models;
-    }
-    
     private void generateModels() throws IOException {
-        Set<String> returnModels = findReturnModelTypes();
-
         for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
             String modelName = entry.getKey();
             if( !ProvidedModel.isProvided(modelName)) {
@@ -331,20 +331,4 @@ public class GwtClientGenerator {
         }
     }
 
-
-    private Set<String> findReturnModelTypes() {
-        Set<String> models = new HashSet<>();
-
-        for (Path path : spec.getPaths().values()) {
-            for (Operation operation : path.getOperations()) {
-                for (Response response : operation.getResponses().values()) {
-                    if (response.getSchema() instanceof RefProperty) {
-                        RefProperty refProperty = (RefProperty) response.getSchema();
-                        models.add(refProperty.getSimpleRef());
-                    }
-                }
-            }
-        }
-        return models;
-    }
 }

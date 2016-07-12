@@ -69,6 +69,9 @@ public class SubFormReferenceType implements ParametrizedFieldType {
         public FieldValue deserialize(Record record) {
             return Quantity.fromRecord(record);
         }
+        
+        
+        
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
@@ -102,7 +105,8 @@ public class SubFormReferenceType implements ParametrizedFieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
-        throw new UnsupportedOperationException();
+        // Subforms don't have values in their parent.
+        return null;
     }
 
     @Override

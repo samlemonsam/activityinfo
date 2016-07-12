@@ -151,7 +151,11 @@ public class MySqlSession implements CollectionCatalog {
 
     @Override
     public FormClass getFormClass(ResourceId formClassId) {
-        return getCollection(formClassId).get().getFormClass();
+        Optional<ResourceCollection> collection = getCollection(formClassId);
+        if(!collection.isPresent()) {
+            throw new IllegalStateException("FormClass " + formClassId + " does not exist.");
+        }
+        return collection.get().getFormClass();
     }
 
 

@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl;
 
+import com.google.api.client.json.Json;
 import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
@@ -102,7 +103,7 @@ public class UpdaterTest {
         JsonObject change = new JsonObject();
         change.addProperty("@id", "A");
         change.addProperty("@class", "XYZ123");
-        change.add("Q1", new JsonNull());
+        change.add("Q1", JsonNull.INSTANCE);
 
         ResourceUpdate update = Updater.parseChange(formClass, change);
 

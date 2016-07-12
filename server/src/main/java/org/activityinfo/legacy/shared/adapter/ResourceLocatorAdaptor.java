@@ -100,7 +100,9 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
         for (FormField field : formClass.getFields()) {
             JsonElement fieldValue = record.getFields().get(field.getName());
-            instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+            if(fieldValue != null && !fieldValue.isJsonNull()) {
+                instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+            }
         }
         return instance;
     }
