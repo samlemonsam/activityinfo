@@ -162,11 +162,7 @@ public class ExprParser {
     }
 
     public static ExprNode parse(String expression) {
-        try {
-            ExprParser parser = new ExprParser(new ExprLexer(expression));
-            return parser.parse();
-        } catch(Exception e) {
-            throw new RuntimeException("Failed to parse expression: '" + expression + "'", e);
-        }
+        ExprParser parser = new ExprParser(new ExprLexer(expression));
+        return parser.parse();
     }
 }

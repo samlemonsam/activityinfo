@@ -50,8 +50,7 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     @Deprecated
     Promise<FormInstance> getFormInstance(ResourceId formId, ResourceId formRecordId);
 
-    Promise<List<FormInstance>> getSubFormInstances(ResourceId parentFormId, ResourceId parentRecordId, 
-                                                    ResourceId subFormFieldId);
+    Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId);
     
     /**
      * Persists a resource to the server, creating or updating as necessary.

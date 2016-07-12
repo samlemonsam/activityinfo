@@ -1,8 +1,11 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Optional;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.form.FormClass;
@@ -14,6 +17,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.hrd.HrdCollection;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
@@ -65,10 +69,11 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
             tx.begin();
 
             Optional<ResourceCollection> collection = catalog.getCollection(updatedSchema.getId());
-            if(!collection.isPresent()) {
-                throw new RuntimeException("No such form " + updatedSchema.getId());
+            if(collection.isPresent()) {
+                collection.get().updateFormClass(updatedSchema);
+            } else {
+                ((MySqlSession) catalog).createOrUpdateFormSchema(updatedSchema);
             }
-            collection.get().updateFormClass(updatedSchema);
 
             tx.commit();
 
@@ -119,7 +124,40 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
+        try {
+            CollectionCatalog catalog = newCatalog();
+            Updater updater = new Updater(catalog);
+            updater.create(ResourceId.valueOf(formId), query.toJsonObject());
+
+            return Promise.resolved(null);
+
+        } catch (Exception e) {
+            return Promise.rejected(e);
+        }
+    }
+
+
+    @Override
+    public Promise<FormRecordSet> getRecords(String formId, String parentId) {
+        CollectionCatalog catalog = newCatalog();
+        Optional<ResourceCollection> collection = catalog.getCollection(ResourceId.valueOf(formId));
+
+        JsonArray recordArray = new JsonArray();
+        
+        if(collection.isPresent()) {
+            if(collection.get() instanceof HrdCollection) {
+                HrdCollection hrdCollection = (HrdCollection) collection.get();
+                Iterable<FormRecord> records = hrdCollection.getSubmissionsOfParent(ResourceId.valueOf(parentId));
+                for (FormRecord record : records) {
+                    recordArray.add(record.toJsonElement());
+                }
+            }
+        }
+        JsonObject object = new JsonObject();
+        object.addProperty("formId", formId);
+        object.add("records", recordArray);
+        
+        return Promise.resolved(FormRecordSet.fromJson(object));
     }
 
     @Override

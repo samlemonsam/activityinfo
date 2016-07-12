@@ -1,9 +1,11 @@
 package org.activityinfo.api.tools;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.javapoet.*;
 import io.swagger.models.Model;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 
@@ -73,6 +75,9 @@ public class BuilderGenerator {
                 if(entry.getValue() instanceof ObjectProperty) {
                     addObjectProperty(entry.getKey());
 
+                } else if(entry.getValue() instanceof ArrayProperty) {
+                    addArrayProperty(entry.getKey(), entry.getValue());
+                    
                 } else {
                     addSimpleProperty(entry.getKey(), entry.getValue());
                 }
@@ -83,7 +88,6 @@ public class BuilderGenerator {
         }
     }
 
-
     public void writeTo(File outputDir) throws IOException {
         
         builderClass.addMethod(constructor.build());
@@ -91,6 +95,40 @@ public class BuilderGenerator {
         JavaFile javaFile = JavaFile.builder(ModelDataType.MODEL_PACKAGE, builderClass.build()).build();
         javaFile.writeTo(outputDir);
     }
+
+
+    private void addArrayProperty(String propertyName, Property property) {
+
+        ArrayType dataType = (ArrayType) dataTypeFactory.get(property);
+
+        // Add a field of type JsonArray and initialize it to an empty object
+        builderClass.addField(FieldSpec.builder(ClassName.get(JsonArray.class), propertyName, Modifier.PRIVATE)
+                .initializer("new $T()", JsonArray.class)
+                .build());
+        
+        // Assign the empty object to the owner
+        // For example:
+        // jsonObject.add("update", updateObject)
+        constructor.addStatement("jsonObject.add($S, $L)", propertyName, propertyName);
+
+        // Compose the javadoc
+        StringBuilder javadoc = new StringBuilder();
+        javadoc.append("Adds a ").append(singular(propertyName)).append(".\n\n");
+        if(property.getDescription() != null) {
+            javadoc.append("@param value ").append(property.getDescription()).append("\n");
+        }
+        
+        // Create an add method
+        // Generate a setter for JsonElement
+        builderClass.addMethod(MethodSpec.methodBuilder(accessor("add", singular(propertyName)))
+                .addJavadoc(javadoc.toString())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(dataType.getBaseType().getParameterType(), "value")
+                .addStatement("$L.add($L)", propertyName, dataType.getBaseType().toJsonElement("value"))
+                .returns(void.class)
+                .build());
+    }
+
 
     /**
      * Adds an "object" property, which functions like an property bag.
@@ -138,14 +176,25 @@ public class BuilderGenerator {
 
     private void addSimpleProperty(String propertyName, Property property) {
         DataType propertyType = dataTypeFactory.get(property);
+
+        StringBuilder javadoc = new StringBuilder();
+        javadoc.append("Sets the ").append(propertyName).append(".\n\n");
+       
+        if(property.getDescription() != null) {
+            javadoc.append("@param ").append(propertyName).append(" ")
+                    .append(property.getDescription()).append("\n");
+        }
         
         builderClass.addMethod(MethodSpec.methodBuilder(accessor("set", propertyName))
+                .addJavadoc(javadoc.toString())
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(propertyType.getParameterType(), propertyName)
                 .addStatement("this.jsonObject.add($S, $L)", propertyName, propertyType.toJsonElement(propertyName))
                 .returns(void.class)
                 .build());
     }
+
+
 
     private String singular(String propertyName) {
         if(propertyName.endsWith("s")) {

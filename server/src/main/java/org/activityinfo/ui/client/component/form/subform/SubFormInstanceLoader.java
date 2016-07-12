@@ -54,7 +54,7 @@ public class SubFormInstanceLoader {
     public Promise<List<FormInstance>> loadCollectionInstances(final FormClass subForm) {
         ParentCriteria criteria = ParentCriteria.isChildOf(
                 ClassType.REPEATING.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
-        return model.getLocator().queryInstances(criteria)
+        return model.getLocator().getSubFormInstances(subForm.getId(), model.getWorkingRootInstance().getId())
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override
                     public List<FormInstance> apply(List<FormInstance> instanceList) {
@@ -72,12 +72,7 @@ public class SubFormInstanceLoader {
         final Promise<Void> result = new Promise<>();
 
         ResourceId parentId = model.getWorkingRootInstance().getId();
-        ParentCriteria.Parent parent = new ParentCriteria.Parent(parentId, parentId);
-        parent.setClassId(subForm.getId());
-        
-        ParentCriteria criteria = new ParentCriteria(parent);
-
-        model.getLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Void>() {
+        return model.getLocator().getSubFormInstances(subForm.getId(), parentId).then(new Function<List<FormInstance>, Void>() {
             @Override
             public Void apply(final List<FormInstance> instanceList) {
 
@@ -90,7 +85,7 @@ public class SubFormInstanceLoader {
 
                 for (final FormInstance valueInstance : instanceList) {
                     if (valueInstance.getKeyId().isPresent()) {
-                        model.getLocator().getFormInstance(null, valueInstance.getKeyId().get()).then(new AsyncCallback<FormInstance>() {
+                        model.getLocator().getFormInstance(subForm.getId(), valueInstance.getKeyId().get()).then(new AsyncCallback<FormInstance>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 result.onFailure(caught);
@@ -113,7 +108,6 @@ public class SubFormInstanceLoader {
                 return null;
             }
         });
-        return result;
     }
 
     public boolean isPersisted(FormInstance instance) {

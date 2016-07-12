@@ -60,6 +60,21 @@ public class FormRecord {
         return formRecord;
     }
     
+    public JsonObject toJsonElement() {
+        
+        assert recordId != null;
+        assert formId != null;
+        
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("recordId", recordId);
+        jsonObject.addProperty("formId", formId);
+        if(parentRecordId != null) {
+            jsonObject.addProperty("parentRecordId", parentRecordId);
+        }
+        jsonObject.add("fields", fields);
+        return jsonObject;
+    }
+    
     public static List<FormRecord> fromJsonArray(JsonArray array) {
         List<FormRecord> list = new ArrayList<>();
         for (JsonElement jsonElement : array) {
@@ -130,6 +145,9 @@ public class FormRecord {
         }
         
         public FormRecord build() {
+            assert record.recordId != null;
+            assert record.formId != null;
+            
             return record;
         }
 

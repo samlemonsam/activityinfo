@@ -7,6 +7,7 @@ import com.squareup.javapoet.TypeName;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public class ProvidedModel extends DataType {
         MODELS.put("FormSchema", ClassName.get(FormClass.class));
         MODELS.put("FormRecord", ClassName.get(FormRecord.class));
         MODELS.put("ColumnSet", ClassName.get(ColumnSet.class));
+        MODELS.put("ColumnView", ClassName.get(ColumnView.class));
         MODELS.put("TableQuery", ClassName.get(QueryModel.class));
     }
 

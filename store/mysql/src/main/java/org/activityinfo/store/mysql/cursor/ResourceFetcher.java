@@ -7,6 +7,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.service.store.ResourceCollection;
@@ -73,7 +74,7 @@ public class ResourceFetcher {
         query.only(resourceId);
 
         for (FormField formField : formClass.getFields()) {
-            if(!(formField.getType() instanceof CalculatedFieldType)) {
+            if(hasValues(formField)) {
                 query.addField(formField.getId(), new FieldCollector(formField.getId(), formRecord));
             }
         }
@@ -86,5 +87,15 @@ public class ResourceFetcher {
         } else {
             return Optional.of(formRecord.build());
         }
+    }
+
+    private boolean hasValues(FormField formField) {
+        if (formField.getType() instanceof CalculatedFieldType) {
+            return false;
+        } 
+        if (formField.getType() instanceof SubFormReferenceType) {
+            return false;
+        }
+        return true;
     }
 }

@@ -344,8 +344,8 @@ public class Updater {
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
                 if (formField.isRequired() && valueMap.get(formField.getId()) == null) {
-                    throw new InvalidUpdateException("Required field '%s' [%s] is missing",
-                            formField.getCode(), formField.getId());
+                    throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
+                            formField.getCode(), formField.getId(), formClass.getId().asString());
                 }
             }
         }
@@ -396,6 +396,12 @@ public class Updater {
         executeUpdate(collection.get(), update);
     }
 
+
+    public void create(ResourceId formId, JsonObject jsonObject) {
+        String id = jsonObject.get("id").getAsString();
+        execute(formId, ResourceId.valueOf(id), jsonObject);
+    }
+
     public void execute(ResourceId formId, ResourceId recordId, JsonObject jsonObject) {
         Optional<ResourceCollection> collection = catalog.getCollection(formId);
         if(!collection.isPresent()) {
@@ -407,6 +413,10 @@ public class Updater {
         
         if(jsonObject.has("deleted")) {
             update.setDeleted(jsonObject.get("deleted").getAsBoolean());
+        }
+        
+        if(jsonObject.has("parentRecordId")) {
+            update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").getAsString()));
         }
 
         FormClass formClass = collection.get().getFormClass();

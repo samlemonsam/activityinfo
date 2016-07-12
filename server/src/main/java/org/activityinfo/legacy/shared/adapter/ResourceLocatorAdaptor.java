@@ -1,12 +1,11 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gwt.core.shared.GWT;
-import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
-import org.activityinfo.api.client.FormRecordUpdateBuilder;
+import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
@@ -31,10 +30,7 @@ import org.activityinfo.promise.PromisesExecutionGuard;
 import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Exposes a legacy {@code Dispatcher} implementation as new {@code ResourceLocator}
@@ -78,15 +74,37 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
             @Nullable
             @Override
             public FormInstance apply(@Nullable Void input) {
-                FormInstance instance = new FormInstance(formRecordId, formId);
-                for (FormField field : formClass.get().getFields()) {
-                    JsonElement fieldValue = record.get().getFields().get(field.getName());
-                    instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
-                }
-                return instance;
+               return toFormInstance(formClass.get(), record.get());
             }
         });
     }
+
+    @Override
+    public Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId) {
+        final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString());
+        final Promise<FormClass> subFormClass = getFormClass(subFormId);
+        return Promise.waitAll(records, subFormClass).then(new Function<Void, List<FormInstance>>() {
+            @Nullable
+            @Override
+            public List<FormInstance> apply(@Nullable Void aVoid) {
+                List<FormInstance> instances = new ArrayList<FormInstance>();
+                for (FormRecord record : records.get().getRecords()) {
+                    instances.add(toFormInstance(subFormClass.get(), record));
+                }
+                return instances;
+            }
+        });
+    }
+
+    public FormInstance toFormInstance(FormClass formClass, FormRecord record) {
+        FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
+        for (FormField field : formClass.getFields()) {
+            JsonElement fieldValue = record.getFields().get(field.getName());
+            instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+        }
+        return instance;
+    }
+
 
     @Override
     public Promise<Void> persist(IsResource resource) {
@@ -95,17 +113,18 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
         } else if(resource instanceof FormInstance) {
             FormInstance instance = (FormInstance) resource;
-            return client.updateRecord(
+            return client.createRecord(
                     instance.getClassId().asString(),
-                    instance.getId().asString(),
                     buildUpdate(instance))
                     .thenDiscardResult();
         }
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
-    private FormRecordUpdateBuilder buildUpdate(FormInstance instance) {
-        FormRecordUpdateBuilder update = new FormRecordUpdateBuilder();
+    private NewFormRecordBuilder buildUpdate(FormInstance instance) {
+        NewFormRecordBuilder update = new NewFormRecordBuilder();
+        update.setId(instance.getId().asString());
+        update.setParentRecordId(instance.getOwnerId().asString());
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {

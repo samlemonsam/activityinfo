@@ -90,9 +90,6 @@ public class CollectionScan {
      */
     public Slot<ColumnView> addField(ExprNode fieldExpr) {
 
-        // compose a unique key for this column (we don't want to fetch twice!)
-        String columnKey = fieldExpr.toString();
-
         // if the column's already been added, just return
         if(columnMap.containsKey(fieldExpr)) {
             return columnMap.get(fieldExpr);
@@ -101,27 +98,6 @@ public class CollectionScan {
         PendingSlot<ColumnView> slot = new PendingSlot<>();
         columnMap.put(fieldExpr, slot);
         return slot;
-    }
-
-    private FormField resolveField(FormClass formClass, ExprNode fieldExpr) {
-        if(fieldExpr instanceof SymbolExpr) {
-            SymbolExpr symbol = (SymbolExpr) fieldExpr;
-            ResourceId fieldId = ResourceId.valueOf(symbol.getName());
-            return formClass.getField(fieldId);
-
-        } else if(fieldExpr instanceof CompoundExpr) {
-            CompoundExpr compound = (CompoundExpr) fieldExpr;
-            FormField parent = resolveField(formClass, compound.getValue());
-            if(!(parent.getType() instanceof RecordFieldType)) {
-                throw new IllegalArgumentException("Cannot resolve " + compound + ": field " + parent.getId() +
-                        " is not record-valued.");
-            }
-            FormClass parentFormClass = ((RecordFieldType) parent.getType()).getFormClass();
-            return resolveField(parentFormClass, compound.getField());
-
-        } else {
-            throw new UnsupportedOperationException("fieldExpr: " + fieldExpr);
-        }
     }
 
 

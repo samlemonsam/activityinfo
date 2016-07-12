@@ -34,6 +34,6 @@ public class ObjectType extends DataType {
 
     @Override
     public CodeBlock fromJsonElement(CodeBlock jsonElementExpr) {
-        throw new UnsupportedOperationException();
+        return CodeBlock.of("$L.getAsJsonObject()", jsonElementExpr);
     }
 }

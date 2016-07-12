@@ -291,8 +291,7 @@ public class GwtClientGenerator {
         Set<String> parameterModels = findParameterModelTypes();
         for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
             String modelName = entry.getKey();
-            if( !ProvidedModel.isProvided(modelName) &&
-                 parameterModels.contains(modelName)) {
+            if( !ProvidedModel.isProvided(modelName)) {
                 
                 BuilderGenerator builderGenerator = new BuilderGenerator(dataTypeFactory, modelName, entry.getValue());
                 builderGenerator.writeTo(outputDir);
@@ -324,8 +323,7 @@ public class GwtClientGenerator {
 
         for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
             String modelName = entry.getKey();
-            if( !ProvidedModel.isProvided(modelName) &&
-                    returnModels.contains(modelName)) {
+            if( !ProvidedModel.isProvided(modelName)) {
 
                 ModelGenerator builderGenerator = new ModelGenerator(dataTypeFactory, modelName, entry.getValue());
                 builderGenerator.writeTo(outputDir);

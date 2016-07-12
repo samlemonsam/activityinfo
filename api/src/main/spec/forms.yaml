@@ -105,9 +105,9 @@ paths:
           description: Id of the path
           required: true
           type: string
-        - name: filter
+        - name: parentId
           in: query
-          description: A boolean-valued expression used to filter returned records.
+          description: The id of the parent record
           required: false
           type: string
       responses:

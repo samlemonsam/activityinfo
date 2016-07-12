@@ -7,6 +7,8 @@ import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceUpdate;
 
+import java.util.Iterator;
+
 /**
  * Internal interface used to construct table queries.
  */
@@ -23,7 +25,7 @@ public interface ResourceCollection {
      * @return the Resource
      */
     Optional<FormRecord> get(ResourceId resourceId);
-
+    
     /**
      * @return this collection's schema
      */
@@ -57,4 +59,6 @@ public interface ResourceCollection {
      * @return the current version of this collection to lookup.
      */
     long cacheVersion();
+
+    
 }

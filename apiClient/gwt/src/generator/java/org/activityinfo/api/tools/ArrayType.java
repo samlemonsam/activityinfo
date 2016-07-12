@@ -15,6 +15,10 @@ public class ArrayType extends DataType {
         this.baseType = baseType;
     }
 
+    public DataType getBaseType() {
+        return baseType;
+    }
+
     @Override
     public TypeName getReturnTypeName() {
         ClassName list = ClassName.get(List.class);

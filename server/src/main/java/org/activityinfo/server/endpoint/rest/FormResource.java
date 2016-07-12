@@ -3,11 +3,13 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+import org.activityinfo.api.client.FormRecordSetBuilder;
+import org.activityinfo.api.client.NewFormRecord;
+import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -28,8 +30,10 @@ import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.store.hrd.HrdCollection;
 import org.activityinfo.store.mysql.MySqlSession;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.xlsform.XlsFormBuilder;
@@ -106,6 +110,46 @@ public class FormResource {
 
             ((MySqlSession)catalog.get()).createOrUpdateFormSchema(formClass);
         }
+        
+        return Response.ok().build();
+    }
+    
+    @GET
+    @Path("records")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRecords(@QueryParam("parentId") String parentId) {
+
+        assertVisible(resourceId);
+        
+        Optional<ResourceCollection> collection = catalog.get().getCollection(resourceId);
+        if(!collection.isPresent()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        HrdCollection hrdCollection = (HrdCollection) collection.get();
+        Iterable<FormRecord> records = hrdCollection.getSubmissionsOfParent(ResourceId.valueOf(parentId));
+
+        FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
+        recordSet.setFormId(resourceId.asString());
+        
+        for (FormRecord record : records) {
+            recordSet.addRecord(record);
+        }        
+        return Response.ok(recordSet.toJsonString(), MediaType.APPLICATION_JSON_TYPE).build();
+    }
+    
+    @POST
+    @Path("records")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createRecord(String body) {
+        
+        assertVisible(resourceId);
+        
+        JsonElement jsonObject = new JsonParser().parse(body);
+
+        Updater updater = new Updater(catalog.get());
+        updater.create(resourceId, jsonObject.getAsJsonObject());
         
         return Response.ok().build();
     }

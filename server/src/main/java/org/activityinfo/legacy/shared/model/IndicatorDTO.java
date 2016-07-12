@@ -396,9 +396,13 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
             field.setType(new QuantityType().setUnits(units));
 
         } else if (getTypeId().equals(SubFormReferenceType.TYPE_CLASS.getId())) {
-            Record typeRecord = Resources.recordFromJson(getTypeJson());
-            field.setType(SubFormReferenceType.TYPE_CLASS.deserializeType(typeRecord));
-
+            if(getTypeJson() != null) {
+                Record typeRecord = Resources.recordFromJson(getTypeJson());
+                field.setType(SubFormReferenceType.TYPE_CLASS.deserializeType(typeRecord));
+            } else {
+                field.setType(SubFormReferenceType.TYPE_CLASS.createType());
+            }
+            
         } else {
             field.setType(getType().createType());
 
