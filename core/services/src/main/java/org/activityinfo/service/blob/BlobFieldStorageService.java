@@ -1,6 +1,5 @@
 package org.activityinfo.service.blob;
 
-import com.google.common.io.ByteSource;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
@@ -30,20 +29,6 @@ public interface BlobFieldStorageService {
     Response getBlobUrl(@InjectParam AuthenticatedUser user,
                         @PathParam("blobId") BlobId blobId,
                         @PathParam("resourceId") ResourceId resourceId);
-
-    /**
-     * Uploads a blob with the specified id to GCS
-     *
-     * @param authenticatedUser
-     * @param contentDisposition
-     * @param mimeType
-     * @param blobId
-     * @param byteSource
-     * @throws IOException
-     */
-    void put(AuthenticatedUser authenticatedUser, String contentDisposition, String mimeType, BlobId blobId,
-             ResourceId resourceId,
-             ByteSource byteSource) throws IOException;
 
 
     @GET

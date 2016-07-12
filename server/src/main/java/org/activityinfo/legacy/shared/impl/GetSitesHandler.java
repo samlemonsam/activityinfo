@@ -413,6 +413,8 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 query.orderBy("LocationName", ascending);
             } else if (field.equals("partner")) {
                 query.orderBy("PartnerName", ascending);
+            } else if (field.equals("project")) {
+                query.orderBy("ProjectName", ascending);
             } else if (field.equals("locationAxe")) {
                 query.orderBy("LocationAxe", ascending);
             } else if (field.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {

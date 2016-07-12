@@ -5,7 +5,6 @@ import com.google.appengine.tools.cloudstorage.GcsInputChannel;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.common.io.ByteStreams;
-import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.Domain;
 
 import javax.ws.rs.WebApplicationException;
@@ -15,7 +14,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.channels.Channels;
 import java.util.logging.Logger;
 
@@ -51,21 +49,13 @@ class GcsGeneratedResource implements GeneratedResource {
 
     @Override
     public String getDownloadUri() {
-        if(DeploymentEnvironment.isAppEngineDevelopment()) {
-            // In the development environment, we need to serve the resource
-            // ourselves because the resource is not actually in a real Google Cloud storage bucket
-            return UriBuilder.fromUri(domain.getRootUrl())
-                    .port(domain.getPort())
-                    .path("generated")
-                    .path(metadata.getId())
-                    .path(metadata.getFilename())
-                    .build()
-                    .toString();
-        } else {
-            
-            // But in production we can send the client directly to the resource using a signed url
-            return getSignedDownloadUri().toString();            
-        }
+        return UriBuilder.fromUri(domain.getRootUrl())
+                .port(domain.getPort())
+                .path("generated")
+                .path(metadata.getId())
+                .path(metadata.getFilename())
+                .build()
+                .toString();
     }
 
     @Override
@@ -86,20 +76,7 @@ class GcsGeneratedResource implements GeneratedResource {
 
     @Override
     public Response serve() throws IOException {
-        if(DeploymentEnvironment.isAppEngineDevelopment()) {
             return serveContent();
-        } else {
-            return serveRedirect();
-        }
-    }
-    
-    public Response serveRedirect() throws IOException {
-        return Response.temporaryRedirect(getSignedDownloadUri()).build();
-    }
-
-    private URI getSignedDownloadUri() {
-        GcsAppIdentityServiceUrlSigner signer = new GcsAppIdentityServiceUrlSigner();
-        return signer.signUri("GET", bucket + "/" + metadata.getUrlEscapedGcsPath());
     }
 
     public Response serveContent() throws IOException {

@@ -6,7 +6,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
@@ -33,8 +32,8 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.odk.xform.LegacyXFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstanceImpl;
-import org.activityinfo.service.blob.BlobFieldStorageService;
 import org.activityinfo.service.blob.BlobId;
+import org.activityinfo.service.blob.GcsBlobFieldStorageService;
 import org.w3c.dom.Element;
 
 import javax.inject.Provider;
@@ -66,7 +65,7 @@ public class FormSubmissionResource {
     final private AuthenticationTokenService authenticationTokenService;
     final private ServerSideAuthProvider authProvider;                  // Necessary for 2.8 XForms, remove afterwards
     final private Provider<EntityManager> entityManager;                  // Necessary for 2.8 XForms, remove afterwards
-    final private BlobFieldStorageService blobFieldStorageService;
+    final private GcsBlobFieldStorageService blobFieldStorageService;
     final private InstanceIdService instanceIdService;
     final private SubmissionArchiver submissionArchiver;
 
@@ -76,7 +75,7 @@ public class FormSubmissionResource {
                                   AuthenticationTokenService authenticationTokenService,
                                   ServerSideAuthProvider authProvider,  // Necessary for 2.8 XForms, remove afterwards
                                   Provider<EntityManager> entityManager,  // Necessary for 2.8 XForms, remove afterwards
-                                  BlobFieldStorageService blobFieldStorageService,
+                                  GcsBlobFieldStorageService blobFieldStorageService,
                                   InstanceIdService instanceIdService,
                                   SubmissionArchiver submissionArchiver) {
         this.dispatcher = dispatcher;
@@ -215,7 +214,7 @@ public class FormSubmissionResource {
 
                 blobFieldStorageService.put(user, bodyPart.getDisposition(), mimeType,
                         new BlobId(attachment.getBlobId()), instance.getFormClassId(),
-                        ByteSource.wrap(ByteStreams.toByteArray(bodyPart.getInputStream())));
+                        bodyPart.getInputStream());
 
             } catch (MessagingException messagingException) {
                 LOGGER.log(Level.SEVERE, "Unable to parse input", messagingException);

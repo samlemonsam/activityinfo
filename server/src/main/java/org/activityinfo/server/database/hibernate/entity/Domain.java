@@ -100,6 +100,9 @@ public class Domain implements Serializable {
 
     @Transient
     public int getPort() {
+        if(port == 0) {
+            throw new IllegalStateException("port == 0");
+        }
         return port;
     }
 

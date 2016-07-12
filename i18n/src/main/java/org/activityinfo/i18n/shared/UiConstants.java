@@ -334,6 +334,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("A partner with this name already exists in your database.")
     String duplicatePartner();
 
+    @DefaultStringValue("This name already exists in your database.")
+    String duplicateName();
+
     @DefaultStringValue("E")
     String eastHemiChars();
 

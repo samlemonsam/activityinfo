@@ -9,6 +9,7 @@ public enum ApplicationLocale {
     ES("Español"),
     FR("Français"),
     NL("Nederlands"),
+    VI("Vietnamese"),
     AR("العربية"),
     FA("فارسی");
     

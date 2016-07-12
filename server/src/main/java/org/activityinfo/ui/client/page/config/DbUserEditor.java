@@ -389,7 +389,6 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         model.setAllowDesign(false);
         model.setAllowManageAllUsers(false);
         model.setAllowManageUsers(false);
-        model.setPartner(db.getMyPartner());
 
         dispatcher.execute(new UpdateUserPermissions(db.getId(), model),
                 new MaskingAsyncMonitor(this, I18N.CONSTANTS.deleting()),

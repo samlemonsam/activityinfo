@@ -23,21 +23,15 @@ package org.activityinfo.ui.client.component.form.field.attachment;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
-import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.service.blob.UploadCredentials;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 /**
  * @author yuriyz on 11/16/2015.
@@ -76,40 +70,25 @@ public class Uploader {
     }
 
     public void upload() {
-        try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, URL.encode(createUploadUrl()));
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-
-                    Resource resource = Resources.resourceFromJson(response.getText());
-                    UploadCredentials uploadCredentials = UploadCredentials.fromRecord(resource);
-
-                    hiddenFieldsContainer.clear();
-
-                    Map<String, String> formFields = uploadCredentials.getFormFields();
-                    for (Map.Entry<String, String> field : formFields.entrySet()) {
-                        hiddenFieldsContainer.add(new Hidden(field.getKey(), field.getValue()));
-                    }
-
-                    formPanel.setAction(uploadCredentials.getUrl());
-                    formPanel.setMethod(uploadCredentials.getMethod());
-                    uploadCallback.upload();
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    Log.error("Failed to send request", exception);
-                    uploadCallback.onFailure(exception);
-                }
-            });
-        } catch (Exception e) {
-            Log.error("Failed to send request", e);
-            uploadCallback.onFailure(e);
-        }
+        uploadViaAppEngine();
     }
 
-    private String createUploadUrl() {
+    private void uploadViaAppEngine() {
+        hiddenFieldsContainer.clear();
+
+        newAttachment();
+
+        hiddenFieldsContainer.add(new Hidden("blobId", attachment.getBlobId()));
+        hiddenFieldsContainer.add(new Hidden("fileName", attachment.getFilename()));
+        hiddenFieldsContainer.add(new Hidden("mimeType", attachment.getMimeType()));
+        hiddenFieldsContainer.add(new Hidden("resourceId", resourceId.asString()));
+
+        formPanel.setAction("/service/appengine");
+        formPanel.setMethod("POST");
+        uploadCallback.upload();
+    }
+
+    private void newAttachment() {
         String blobId = ResourceId.generateId().asString();
         String fileName = fileName();
         String mimeType = MimeTypeUtil.mimeTypeFromFileName(fileName, "application/octet-stream");
@@ -117,8 +96,6 @@ public class Uploader {
         attachment.setMimeType(mimeType);
         attachment.setFilename(fileName);
         attachment.setBlobId(blobId);
-
-        return "/service/blob/credentials/" + blobId + "/" + resourceId.asString() + "/" + fileName;
     }
 
     public String getBaseUrl() {
