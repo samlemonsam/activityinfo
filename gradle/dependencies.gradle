@@ -47,7 +47,7 @@ ext {
             leaflet:        'org.discotools.gwt.leaflet:gwtl-core:0.3-SNAPSHOT',
             guice:          "com.google.gwt.inject:gin:2.1.2",
             guava:          "com.google.guava:guava-gwt:${guavaVersion}",
-            gson:           "gson-gwt:gson-gwt:1.0",
+            gson:           "gson-gwt:gson-gwt:2.1",
             gears:          'com.google.gwt.google-apis:gwt-gears:1.2.1',
 
         ],
