@@ -4,9 +4,9 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +34,6 @@ class CodeEnumFieldValueParser implements FieldValueParser {
             if (resourceId != null) resourceIds.add(resourceId);
         }
 
-        return new ReferenceValue(resourceIds); // ReferenceValue not EnumFieldValue, since that way it'll at least work
+        return new EnumValue(resourceIds);
     }
 }

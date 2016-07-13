@@ -1,4 +1,4 @@
-package org.activityinfo.server.command;
+package org.activityinfo.server.endpoint.odk;
 
 import com.google.inject.ImplementedBy;
 import org.activityinfo.model.form.FormClass;
@@ -16,8 +16,6 @@ public interface ResourceLocatorSync extends FormClassProvider {
     void persist(FormInstance formInstance);
 
     FormClass getFormClass(ResourceId resourceId);
-
-    FormInstance getFormInstance(ResourceId resourceId);
 
     List<ReferenceChoice> getReferenceChoices(Set<ResourceId> range);
 }

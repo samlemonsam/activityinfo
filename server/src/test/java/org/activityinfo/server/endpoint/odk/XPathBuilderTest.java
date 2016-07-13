@@ -36,7 +36,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.CommandTestCase2;
-import org.activityinfo.server.command.ResourceLocatorSyncImpl;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +62,7 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
     @Before
     public void setUp() throws IOException {
-        factory = new OdkFormFieldBuilderFactory(new ResourceLocatorSyncImpl(getDispatcherSync()));
+        factory = new OdkFormFieldBuilderFactory(injector.getInstance(ResourceLocatorSync.class));
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
@@ -26,7 +27,6 @@ import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.command.ResourceLocatorSync;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.odk.xform.LegacyXFormInstance;
@@ -34,6 +34,7 @@ import org.activityinfo.server.endpoint.odk.xform.XFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstanceImpl;
 import org.activityinfo.service.blob.BlobId;
 import org.activityinfo.service.blob.GcsBlobFieldStorageService;
+import org.activityinfo.service.lookup.ReferenceChoice;
 import org.w3c.dom.Element;
 
 import javax.inject.Provider;
@@ -44,6 +45,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,9 +58,9 @@ import static org.activityinfo.server.endpoint.odk.OdkFieldValueParserFactory.fr
 import static org.activityinfo.server.endpoint.odk.OdkHelper.isLocation;
 
 @Path("/submission")
-public class FormSubmissionResource {
+public class XFormSubmissionResource {
 
-    private static final Logger LOGGER = Logger.getLogger(FormSubmissionResource.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(XFormSubmissionResource.class.getName());
 
     final private DispatcherSync dispatcher;
     final private ResourceLocatorSync locator;
@@ -70,14 +72,14 @@ public class FormSubmissionResource {
     final private SubmissionArchiver submissionArchiver;
 
     @Inject
-    public FormSubmissionResource(DispatcherSync dispatcher,
-                                  ResourceLocatorSync locator,
-                                  AuthenticationTokenService authenticationTokenService,
-                                  ServerSideAuthProvider authProvider,  // Necessary for 2.8 XForms, remove afterwards
-                                  Provider<EntityManager> entityManager,  // Necessary for 2.8 XForms, remove afterwards
-                                  GcsBlobFieldStorageService blobFieldStorageService,
-                                  InstanceIdService instanceIdService,
-                                  SubmissionArchiver submissionArchiver) {
+    public XFormSubmissionResource(DispatcherSync dispatcher,
+                                   ResourceLocatorSync locator,
+                                   AuthenticationTokenService authenticationTokenService,
+                                   ServerSideAuthProvider authProvider,  // Necessary for 2.8 XForms, remove afterwards
+                                   Provider<EntityManager> entityManager,  // Necessary for 2.8 XForms, remove afterwards
+                                   GcsBlobFieldStorageService blobFieldStorageService,
+                                   InstanceIdService instanceIdService,
+                                   SubmissionArchiver submissionArchiver) {
         this.dispatcher = dispatcher;
         this.locator = locator;
         this.authenticationTokenService = authenticationTokenService;
@@ -153,6 +155,8 @@ public class FormSubmissionResource {
                 }
             }
         }
+    
+        ensurePartnerIsSet(formClass, formInstance);
 
         if (!instanceIdService.exists(instanceId)) {
             for (FieldValue fieldValue : formInstance.getFieldValueMap().values()) {
@@ -169,6 +173,26 @@ public class FormSubmissionResource {
         submissionArchiver.backup(formClass.getId(), formId, ByteSource.wrap(bytes));
 
         return Response.status(CREATED).build();
+    }
+
+    private void ensurePartnerIsSet(FormClass formClass, FormInstance formInstance) {
+
+        ResourceId partnerFieldId = CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD);
+        if(formInstance.get(partnerFieldId) != null) {
+            return;
+        }
+        
+        // Otherwise, find the default partner
+        FormField partnerField = formClass.getField(partnerFieldId);
+        ReferenceType partnerFieldType = (ReferenceType) partnerField.getType();
+
+        List<ReferenceChoice> choices = locator.getReferenceChoices(partnerFieldType.getRange());
+        if(choices.size() != 1) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+            .entity("No partner selected").build());
+        }
+
+        formInstance.set(partnerFieldId, new ReferenceValue(choices.get(0).getId()));
     }
 
     private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element, boolean legacy) {

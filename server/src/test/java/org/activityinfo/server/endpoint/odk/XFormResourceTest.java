@@ -18,9 +18,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.CommandTestCase2;
-import org.activityinfo.server.command.ResourceLocatorSyncImpl;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.service.store.CollectionCatalog;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,18 +58,21 @@ import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("AppEngineForbiddenCode")
 @RunWith(InjectionSupport.class)
-public class FormResourceTest extends CommandTestCase2 {
+public class XFormResourceTest extends CommandTestCase2 {
 
     public static final int ACTIVITY_ID = 11218;
     public static final int USER_ID = 9944;
 
-    private FormResource formResource;
-    private FormSubmissionResource formSubmissionResource;
+    private XFormResources formResource;
+    private XFormSubmissionResource formSubmissionResource;
     private ResourceLocatorSyncImpl resourceLocator;
 
     @Before
     public void setUp() throws IOException {
-        resourceLocator = new ResourceLocatorSyncImpl(getDispatcherSync());
+        
+
+        
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(CollectionCatalog.class));
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);
@@ -81,8 +84,8 @@ public class FormResourceTest extends CommandTestCase2 {
         SubmissionArchiver backupService = new SubmissionArchiver(
                 new DeploymentConfiguration(new Properties()));
 
-        formResource = new FormResource(resourceLocator, authProvider, fieldFactory, tokenService);
-        formSubmissionResource = new FormSubmissionResource(
+        formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService);
+        formSubmissionResource = new XFormSubmissionResource(
                 getDispatcherSync(), resourceLocator, tokenService, null, null, blobstore, idService, backupService);
     }
 
@@ -97,7 +100,7 @@ public class FormResourceTest extends CommandTestCase2 {
     }
 
     private void validate(Response form) throws JAXBException, URISyntaxException, IOException, InterruptedException, ParserConfigurationException, SAXException {
-        File file = TestOutput.getFile(FormResourceTest.class, "form", ".xml");
+        File file = TestOutput.getFile(XFormResourceTest.class, "form", ".xml");
         JAXBContext context = JAXBContext.newInstance(XForm.class);
         Marshaller marshaller = context.createMarshaller();
 
@@ -150,7 +153,7 @@ public class FormResourceTest extends CommandTestCase2 {
 
     @Test @OnDataSet("/dbunit/chad-form.db.xml")
     public void parse() throws IOException {
-        byte bytes[] = asByteSource(getResource(FormResourceTest.class, "form.mime")).read();
+        byte bytes[] = asByteSource(getResource(XFormResourceTest.class, "form.mime")).read();
 
         Response response = formSubmissionResource.submit(bytes);
         assertEquals(CREATED, fromStatusCode(response.getStatus()));
@@ -171,7 +174,7 @@ public class FormResourceTest extends CommandTestCase2 {
 
     @Test @OnDataSet("/dbunit/chad-form.db.xml")
     public void parseWithBlankComments() throws IOException {
-        byte bytes[] = asByteSource(getResource(FormResourceTest.class, "form-no-comments.mime")).read();
+        byte bytes[] = asByteSource(getResource(XFormResourceTest.class, "form-no-comments.mime")).read();
 
         Response response = formSubmissionResource.submit(bytes);
         assertEquals(CREATED, fromStatusCode(response.getStatus()));
@@ -196,7 +199,7 @@ public class FormResourceTest extends CommandTestCase2 {
     public void validate(File file) throws URISyntaxException, IOException, InterruptedException {
 
 
-        URL validatorJar = Resources.getResource(FormResourceTest.class, "odk-validate-1.4.3.jar");
+        URL validatorJar = Resources.getResource(XFormResourceTest.class, "odk-validate-1.4.3.jar");
         String[] command = {"java", "-jar", Paths.get(validatorJar.toURI()).toString(), file.getAbsolutePath()};
 
         System.out.println(Joiner.on(' ').join(command));

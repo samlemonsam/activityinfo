@@ -17,7 +17,6 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.server.command.ResourceLocatorSync;
 import org.activityinfo.service.lookup.ReferenceChoice;
 
 import java.util.ArrayList;

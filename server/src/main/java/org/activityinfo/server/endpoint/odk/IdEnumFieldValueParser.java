@@ -3,7 +3,7 @@ package org.activityinfo.server.endpoint.odk;
 import com.google.api.client.util.Lists;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.List;
 
@@ -20,6 +20,6 @@ class IdEnumFieldValueParser implements FieldValueParser {
             resourceIds.add(ResourceId.valueOf(item));
         }
 
-        return new ReferenceValue(resourceIds); // ReferenceValue not EnumFieldValue, since that way it'll at least work
+        return new EnumValue(resourceIds); 
     }
 }

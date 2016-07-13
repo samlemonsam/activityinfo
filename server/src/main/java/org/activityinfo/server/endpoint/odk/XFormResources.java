@@ -8,7 +8,6 @@ import org.activityinfo.io.xform.manifest.XFormManifest;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.server.command.ResourceLocatorSyncImpl;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
 import org.activityinfo.service.store.FormNotFoundException;
 
@@ -23,9 +22,9 @@ import java.util.logging.Logger;
 
 
 @Path("/forms")
-public class FormResource {
+public class XFormResources {
 
-    private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(XFormResources.class.getName());
 
     private ResourceLocatorSyncImpl locator;
     private OdkFormFieldBuilderFactory factory;
@@ -34,8 +33,8 @@ public class FormResource {
     private ItemSetBuilder itemSetBuilder;
 
     @Inject
-    public FormResource(ResourceLocatorSyncImpl locator, OdkAuthProvider authProvider, OdkFormFieldBuilderFactory factory,
-                        AuthenticationTokenService authenticationTokenService, ItemSetBuilder itemSetBuilder) {
+    public XFormResources(ResourceLocatorSyncImpl locator, OdkAuthProvider authProvider, OdkFormFieldBuilderFactory factory,
+                          AuthenticationTokenService authenticationTokenService, ItemSetBuilder itemSetBuilder) {
         this.locator = locator;
         this.authProvider = authProvider;
         this.factory = factory;
@@ -44,8 +43,8 @@ public class FormResource {
     }
 
     @VisibleForTesting
-    FormResource(ResourceLocatorSyncImpl locator, Provider<AuthenticatedUser> authProvider, OdkFormFieldBuilderFactory factory,
-                 AuthenticationTokenService authenticationTokenService) {
+    XFormResources(ResourceLocatorSyncImpl locator, Provider<AuthenticatedUser> authProvider, OdkFormFieldBuilderFactory factory,
+                   AuthenticationTokenService authenticationTokenService) {
         this.locator = locator;
         this.authProvider = authProvider;
         this.factory = factory;
@@ -99,7 +98,7 @@ public class FormResource {
         itemSet.setFilename("itemsets.csv");
         itemSet.setHash("md5:00000000000000000000000000000000");
         itemSet.setDownloadUrl(uri.getBaseUriBuilder()
-                .path(FormResource.class)
+                .path(XFormResources.class)
                 .path(Integer.toString(id))
                 .path("itemsets.csv")
                 .build());
