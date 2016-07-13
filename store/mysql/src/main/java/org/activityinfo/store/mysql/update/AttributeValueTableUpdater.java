@@ -35,10 +35,12 @@ public class AttributeValueTableUpdater {
         attributeGroupsToClear.add(attributeGroupId);
 
         EnumValue enumValue = (EnumValue) value;
-        for (ResourceId resourceId : enumValue.getResourceIds()) {
-            Preconditions.checkArgument(resourceId.getDomain() == CuidAdapter.ATTRIBUTE_DOMAIN);
-            int attributeId = CuidAdapter.getLegacyIdFromCuid(resourceId);
-            attributesToSet.add(attributeId);
+        if(enumValue != null) {
+            for (ResourceId resourceId : enumValue.getResourceIds()) {
+                Preconditions.checkArgument(resourceId.getDomain() == CuidAdapter.ATTRIBUTE_DOMAIN);
+                int attributeId = CuidAdapter.getLegacyIdFromCuid(resourceId);
+                attributesToSet.add(attributeId);
+            }
         }
     }
     

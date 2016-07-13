@@ -2,8 +2,8 @@ package org.activityinfo.store.mysql.update;
 
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.FieldMapping;
@@ -69,7 +69,7 @@ public class BaseTableUpdater {
     }
 
 
-    public void update(QueryExecutor executor, ResourceUpdate update) {
+    public void update(QueryExecutor executor, RecordUpdate update) {
         Preconditions.checkArgument(update.getResourceId().getDomain() == mapping.getPrimaryKey().getDomain(),
                 "Resource Id mismatch, expected domain '%c', got id '%s'",
                 mapping.getPrimaryKey().getDomain(),

@@ -9,8 +9,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
@@ -171,7 +171,7 @@ public class LocationCollection implements ResourceCollection {
     }
 
     @Override
-    public void add(ResourceUpdate update) {
+    public void add(RecordUpdate update) {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getResourceId());
@@ -199,7 +199,7 @@ public class LocationCollection implements ResourceCollection {
 
 
     @Override
-    public void update(ResourceUpdate update) {
+    public void update(RecordUpdate update) {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getResourceId());
@@ -294,7 +294,7 @@ public class LocationCollection implements ResourceCollection {
         insertAdminLinks(locationId, adminEntities);
     }
 
-    private String getName(ResourceUpdate update) {
+    private String getName(RecordUpdate update) {
         FieldValue fieldValue = update.getChangedFieldValues().get(nameFieldId);
         if (fieldValue == null) {
             return null;
@@ -303,7 +303,7 @@ public class LocationCollection implements ResourceCollection {
         }
     }
 
-    private String getAxe(ResourceUpdate update) {
+    private String getAxe(RecordUpdate update) {
         FieldValue fieldValue = update.getChangedFieldValues().get(axeFieldId);
         if (fieldValue == null) {
             return null;
@@ -312,11 +312,11 @@ public class LocationCollection implements ResourceCollection {
         }
     }
 
-    private GeoPoint getPoint(ResourceUpdate update) {
+    private GeoPoint getPoint(RecordUpdate update) {
         return (GeoPoint) update.getChangedFieldValues().get(pointFieldId);
     }
 
-    private Set<Integer> getAdminEntities(ResourceUpdate update) {
+    private Set<Integer> getAdminEntities(RecordUpdate update) {
         Set<Integer> set = Sets.newHashSet();
         ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
         if(value != null) {

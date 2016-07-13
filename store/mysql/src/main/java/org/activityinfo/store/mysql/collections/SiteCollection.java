@@ -4,10 +4,8 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CollectionPermissions;
@@ -103,7 +101,7 @@ public class SiteCollection implements ResourceCollection {
     }
 
     @Override
-    public void add(ResourceUpdate update) {
+    public void add(RecordUpdate update) {
         ResourceId formClassId = getFormClass().getId();
         BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getResourceId());
         baseTable.addValue("ActivityId", activity.getId());
@@ -138,6 +136,7 @@ public class SiteCollection implements ResourceCollection {
                 indicatorValues.setDate2(change.getValue());
             }
         }
+        incrementSiteVersion();
         baseTable.executeInsert(queryExecutor);
         attributeValues.executeUpdates(queryExecutor);
         indicatorValues.insert(queryExecutor);
@@ -216,11 +215,12 @@ public class SiteCollection implements ResourceCollection {
 
 
     @Override
-    public void update(ResourceUpdate update) {
+    public void update(RecordUpdate update) {
         BaseTableUpdater baseTable = new BaseTableUpdater(baseMapping, update.getResourceId());
         IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getResourceId());
         AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getResourceId());
 
+        
         if(update.isDeleted()) {
             baseTable.delete();
         } else {
@@ -236,6 +236,7 @@ public class SiteCollection implements ResourceCollection {
             }
         }
         try {
+            incrementSiteVersion();
             baseTable.executeUpdates(queryExecutor);
             indicatorValues.execute(queryExecutor);
             attributeValues.executeUpdates(queryExecutor);
@@ -247,6 +248,15 @@ public class SiteCollection implements ResourceCollection {
     @Override
     public ColumnQueryBuilder newColumnQuery() {
         return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
+    }
+    
+    public void incrementSiteVersion() {
+        long newVersion = activity.getVersion() + 1;
+        SqlUpdate.update("activity")
+                .set("version",  newVersion)
+                .set("siteVersion", newVersion)
+                .where("activityId", activity.getId())
+                .execute(queryExecutor);
     }
 
     @Override

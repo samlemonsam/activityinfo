@@ -115,8 +115,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @Test
     @OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
     public void persistSiteWithCalculatedIndicators() {
-        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
-                NFI_DIST_FORM_CLASS);
+        int siteId = new KeyGenerator().generateInt();
+        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, siteId), NFI_DIST_FORM_CLASS);
 
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
@@ -165,7 +165,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     private Projection singleSiteProjection(InstanceQuery query) {
         List<Projection> projections = assertResolves(locator.query(query));
-        assertEquals(projections.size(), 1);
+        assertThat(projections.size(), equalTo(1));
         return projections.get(0);
     }
 

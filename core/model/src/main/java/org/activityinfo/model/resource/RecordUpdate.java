@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Describes an update to a Resource
  */
-public class ResourceUpdate {
+public class RecordUpdate {
     
     private ResourceId resourceId;
     private ResourceId parentId;

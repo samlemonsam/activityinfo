@@ -1,14 +1,13 @@
 package org.activityinfo.store.query.impl;
 
-import com.google.api.client.json.Json;
 import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
@@ -105,7 +104,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.add("Q1", JsonNull.INSTANCE);
 
-        ResourceUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change);
 
         assertTrue(update.getChangedFieldValues().containsKey(fieldId));
     }
@@ -121,7 +120,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", 41.3);
 
-        ResourceUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change);
         
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -137,7 +136,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "41.3");
 
-        ResourceUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -153,7 +152,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "4.1.3");
 
-        ResourceUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -169,7 +168,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "Hello world");
 
-        ResourceUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }

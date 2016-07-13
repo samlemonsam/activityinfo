@@ -18,6 +18,7 @@ import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -99,14 +100,14 @@ public class Updater {
         
 
         FormClass formClass = collection.get().getFormClass();
-        ResourceUpdate update = parseChange(formClass, changeObject);
+        RecordUpdate update = parseChange(formClass, changeObject);
 
 
         executeUpdate(collection.get(), update);
     }
 
     @VisibleForTesting
-    static ResourceUpdate parseChange(FormClass formClass, JsonObject changeObject) {
+    static RecordUpdate parseChange(FormClass formClass, JsonObject changeObject) {
         
         // This resource exists, make sure the existing class matches the provided @class
         // if given explicitly
@@ -121,7 +122,7 @@ public class Updater {
             codeMap.put(formField.getCode(), formField);
         }
 
-        ResourceUpdate update = new ResourceUpdate();
+        RecordUpdate update = new RecordUpdate();
         update.setResourceId(parseId(changeObject, "@id"));
         update.setDeleted(parseDeletedFlag(changeObject));
 
@@ -295,7 +296,7 @@ public class Updater {
                 jsonValue, Joiner.on(", ").join(type.getValues())));
     }
 
-    public void execute(ResourceUpdate update) {
+    public void execute(RecordUpdate update) {
         Optional<ResourceCollection> collection = catalog.lookupCollection(update.getResourceId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such resource: " + update.getResourceId());
@@ -304,7 +305,7 @@ public class Updater {
         executeUpdate(collection.get(), update);
     }
 
-    private void executeUpdate(ResourceCollection collection, ResourceUpdate update) {
+    private void executeUpdate(ResourceCollection collection, RecordUpdate update) {
         
         FormClass formClass = collection.getFormClass();
         Optional<FormRecord> existingResource = collection.get(update.getResourceId());
@@ -318,7 +319,7 @@ public class Updater {
         }
     }
 
-    public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, ResourceUpdate update) {
+    public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
 
         Map<ResourceId, FormField> fieldMap = new HashMap<>();
@@ -362,6 +363,13 @@ public class Updater {
                                 field.getId(), field.getCode()));
             }
         } else {
+            if ( field.getType() instanceof CalculatedFieldType) {
+                throw new InvalidUpdateException(
+                        format("Field %s ('%s') is a calculated field and its value cannot be set. Found %s",
+                                field.getId(),
+                                field.getLabel(),
+                                updatedValue));
+            }
             if (!field.getType().getTypeClass().equals(updatedValue.getTypeClass())) {
                 throw new InvalidUpdateException(
                         format("Updated value for field %s ('%s') has invalid type. Expected %s, found %s.",
@@ -385,7 +393,7 @@ public class Updater {
             throw new InvalidUpdateException("No such formId: " + formInstance.getClassId());
         }
 
-        ResourceUpdate update = new ResourceUpdate();
+        RecordUpdate update = new RecordUpdate();
         update.setResourceId(formInstance.getId());
 
         for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
@@ -399,22 +407,26 @@ public class Updater {
 
     public void create(ResourceId formId, JsonObject jsonObject) {
         String id = jsonObject.get("id").getAsString();
-        execute(formId, ResourceId.valueOf(id), jsonObject);
+        createOrUpdate(formId, ResourceId.valueOf(id), jsonObject, true);
     }
 
     public void execute(ResourceId formId, ResourceId recordId, JsonObject jsonObject) {
+        createOrUpdate(formId, recordId, jsonObject, false);
+    }
+
+    private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonObject jsonObject, boolean create) {
         Optional<ResourceCollection> collection = catalog.getCollection(formId);
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formId);
         }
 
-        ResourceUpdate update = new ResourceUpdate();
+        RecordUpdate update = new RecordUpdate();
         update.setResourceId(recordId);
-        
+
         if(jsonObject.has("deleted")) {
             update.setDeleted(jsonObject.get("deleted").getAsBoolean());
         }
-        
+
         if(jsonObject.has("parentRecordId")) {
             update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").getAsString()));
         }
@@ -422,13 +434,18 @@ public class Updater {
         FormClass formClass = collection.get().getFormClass();
         JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
         for (FormField formField : formClass.getFields()) {
-            if(fieldValues.has(formField.getName())) {
-                JsonElement updatedValueElement = fieldValues.get(formField.getName());
-                FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
-                update.getChangedFieldValues().put(formField.getId(), updatedValue);
+            if(!(formField.getType() instanceof CalculatedFieldType)) {
+                if (fieldValues.has(formField.getName())) {
+                    JsonElement updatedValueElement = fieldValues.get(formField.getName());
+                    FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
+                    update.getChangedFieldValues().put(formField.getId(), updatedValue);
+
+                } else if (create) {
+                    update.getChangedFieldValues().put(formField.getId(), null);
+                }
             }
         }
-        
+
         executeUpdate(collection.get(), update);
     }
 }

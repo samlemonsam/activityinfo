@@ -98,7 +98,7 @@ paths:
   /form/{formId}/records:
     get:
       operationId: getRecords
-      summary: Retrieves records for this field
+      summary: Retrieves records for this form
       parameters:
         - name: formId
           in: path
@@ -107,7 +107,7 @@ paths:
           type: string
         - name: parentId
           in: query
-          description: The id of the parent record
+          description: Limits the records to those which are sub-records of this parent record id.
           required: false
           type: string
       responses:

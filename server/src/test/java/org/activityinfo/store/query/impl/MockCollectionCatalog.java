@@ -3,9 +3,8 @@ package org.activityinfo.store.query.impl;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
@@ -68,12 +67,12 @@ public class MockCollectionCatalog implements CollectionCatalog {
         }
 
         @Override
-        public void update(ResourceUpdate update) {
+        public void update(RecordUpdate update) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void add(ResourceUpdate update) {
+        public void add(RecordUpdate update) {
             throw new UnsupportedOperationException();
         }
 

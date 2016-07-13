@@ -3,9 +3,8 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
@@ -48,12 +47,12 @@ public class TargetCollection implements ResourceCollection {
     }
 
     @Override
-    public void add(ResourceUpdate update) {
+    public void add(RecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void update(ResourceUpdate update) {
+    public void update(RecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 

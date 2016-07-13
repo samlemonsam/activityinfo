@@ -6,9 +6,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.*;
 
@@ -96,12 +95,12 @@ class CatalogStub implements CollectionCatalog {
         }
 
         @Override
-        public void add(ResourceUpdate update) {
+        public void add(RecordUpdate update) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void update(ResourceUpdate update) {
+        public void update(RecordUpdate update) {
             throw new UnsupportedOperationException();
         }
 

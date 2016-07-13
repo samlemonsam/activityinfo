@@ -3,10 +3,8 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
@@ -16,8 +14,6 @@ import org.activityinfo.store.mysql.cursor.ResourceFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
-
-import java.sql.SQLException;
 
 
 public class SimpleTableCollection implements ResourceCollection {
@@ -53,13 +49,13 @@ public class SimpleTableCollection implements ResourceCollection {
     }
 
     @Override
-    public void update(ResourceUpdate update) {
+    public void update(RecordUpdate update) {
         BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getResourceId());
         updater.update(executor, update);
     }
 
     @Override
-    public void add(ResourceUpdate update) {
+    public void add(RecordUpdate update) {
         BaseTableInserter inserter = new BaseTableInserter(mapping, update.getResourceId());
         inserter.insert(executor, update);
     }

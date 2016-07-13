@@ -9,8 +9,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
@@ -88,25 +88,25 @@ public class SubFormAggregationTest {
         catalog.create(siteForm);
         catalog.create(monthlyForm);
 
-        ResourceUpdate v1 = new ResourceUpdate();
+        RecordUpdate v1 = new RecordUpdate();
         v1.setResourceId(ResourceId.generateSubmissionId(siteForm));
         v1.set(villageField.getId(), TextValue.valueOf("Rutshuru"));
 
-        ResourceUpdate v2 = new ResourceUpdate();
+        RecordUpdate v2 = new RecordUpdate();
         v2.setResourceId(ResourceId.generateSubmissionId(siteForm));
         v2.set(villageField.getId(), TextValue.valueOf("Beni"));
 
-        ResourceUpdate month1 = new ResourceUpdate();
+        RecordUpdate month1 = new RecordUpdate();
         month1.setResourceId(ResourceId.generateSubmissionId(monthlyForm));
         month1.setParentId(v1.getResourceId());
         month1.set(countField.getId(), new Quantity(40, "households"));
 
-        ResourceUpdate month2 = new ResourceUpdate();
+        RecordUpdate month2 = new RecordUpdate();
         month2.setResourceId(ResourceId.generateSubmissionId(monthlyForm));
         month2.setParentId(v1.getResourceId());
         month2.set(countField.getId(), new Quantity(30, "households"));
 
-        ResourceUpdate month3 = new ResourceUpdate();
+        RecordUpdate month3 = new RecordUpdate();
         month3.setResourceId(ResourceId.generateSubmissionId(monthlyForm));
         month3.setParentId(v2.getResourceId());
         month3.set(countField.getId(), new Quantity(47, "households"));

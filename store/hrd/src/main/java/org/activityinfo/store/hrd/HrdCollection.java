@@ -7,8 +7,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.ResourceCollection;
@@ -65,12 +65,12 @@ public class HrdCollection implements ResourceCollection {
     }
 
     @Override
-    public void add(ResourceUpdate update) {
+    public void add(RecordUpdate update) {
         datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
     }
 
     @Override
-    public void update(final ResourceUpdate update) {
+    public void update(final RecordUpdate update) {
         datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
     }
     

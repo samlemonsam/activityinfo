@@ -8,8 +8,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -74,12 +74,12 @@ public class HrdCatalogTest {
         
         assertTrue(collection.isPresent());
 
-        ResourceUpdate village1 = new ResourceUpdate();
+        RecordUpdate village1 = new RecordUpdate();
         village1.setResourceId(ResourceId.generateSubmissionId(formClass));
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
 
-        ResourceUpdate village2 = new ResourceUpdate();
+        RecordUpdate village2 = new RecordUpdate();
         village2.setResourceId(ResourceId.generateSubmissionId(formClass));
         village2.set(villageField, TextValue.valueOf("Beni"));
         village2.set(countField, new Quantity(230));
@@ -121,7 +121,7 @@ public class HrdCatalogTest {
         String villageNames[] = new String[] { "Rutshuru" , "Beni", "Goma" };
 
         for (String villageName : villageNames) {
-            ResourceUpdate update = new ResourceUpdate();
+            RecordUpdate update = new RecordUpdate();
             update.setResourceId(ResourceId.generateSubmissionId(formClass));
             update.set(nameField.getId(), TextValue.valueOf(villageName));
         
@@ -177,21 +177,21 @@ public class HrdCatalogTest {
         catalog.create(memberForm);
 
 
-        ResourceUpdate hh1 = new ResourceUpdate();
+        RecordUpdate hh1 = new RecordUpdate();
         hh1.setResourceId(ResourceId.generateSubmissionId(hhForm));
         hh1.set(hhIdField.getId(), TextValue.valueOf("HH1"));
 
-        ResourceUpdate hh2 = new ResourceUpdate();
+        RecordUpdate hh2 = new RecordUpdate();
         hh2.setResourceId(ResourceId.generateSubmissionId(hhForm));
         hh2.set(hhIdField.getId(), TextValue.valueOf("HH2"));
         
-        ResourceUpdate father1 = new ResourceUpdate();
+        RecordUpdate father1 = new RecordUpdate();
         father1.setResourceId(ResourceId.generateSubmissionId(memberForm));
         father1.setParentId(hh1.getResourceId());
         father1.set(nameField.getId(), TextValue.valueOf("Homer"));
         father1.set(ageField.getId(), new Quantity(40, "years"));
         
-        ResourceUpdate father2 = new ResourceUpdate();
+        RecordUpdate father2 = new RecordUpdate();
         father2.setResourceId(ResourceId.generateSubmissionId(memberForm));
         father2.setParentId(hh2.getResourceId());
         father2.set(nameField.getId(), TextValue.valueOf("Ned"));

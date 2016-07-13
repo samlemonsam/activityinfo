@@ -4,8 +4,8 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.FieldConverter;
@@ -22,9 +22,9 @@ import java.util.Map;
 public class CreateOrUpdateRecord implements Operation {
 
     private ResourceId collectionId;
-    private ResourceUpdate update;
+    private RecordUpdate update;
 
-    public CreateOrUpdateRecord(ResourceId collectionId, ResourceUpdate update) {
+    public CreateOrUpdateRecord(ResourceId collectionId, RecordUpdate update) {
         this.collectionId = collectionId;
         this.update = update;
     }

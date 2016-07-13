@@ -9,8 +9,8 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -56,7 +56,7 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
         
  
         // Translate the form instance to a ResourceUpdate
-        ResourceUpdate update = new ResourceUpdate();
+        RecordUpdate update = new RecordUpdate();
         update.setResourceId(formInstance.getId());
         update.setParentId(formInstance.getOwnerId());
 

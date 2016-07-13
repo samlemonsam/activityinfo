@@ -3,11 +3,8 @@ package org.activityinfo.service.store;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
-
-import java.util.Iterator;
 
 /**
  * Internal interface used to construct table queries.
@@ -39,7 +36,7 @@ public interface ResourceCollection {
      * @param update the properties of the new resource
      * @throws java.lang.IllegalStateException if a resource with the given {@code resourceId} already exists              
      */
-    void add(ResourceUpdate update);
+    void add(RecordUpdate update);
     
     /**
      * Updates an existing resource within the collection
@@ -47,7 +44,7 @@ public interface ResourceCollection {
      * @param update the changes to apply to the resource
      * @throws java.lang.IllegalStateException if the resource does not exist, or if the update               
      */
-    void update(ResourceUpdate update);
+    void update(RecordUpdate update);
 
     
 

@@ -1,13 +1,11 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.form.FormClass;
@@ -18,7 +16,6 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -49,9 +46,11 @@ public class InstanceQueryAdapter {
             classId = criteria.getFormId();
             queryModel = new QueryModel(classId);
             queryModel.setFilter(Exprs.idEqualTo(criteria.getInstanceIds()));
+      
+        } else {
+            throw new UnsupportedOperationException("query: " + query);
         }
         
-        queryModel = new QueryModel(classId);
         queryModel.selectResourceId().as("_id");
         for (FieldPath fieldPath : query.getFieldPaths()) { 
             fieldPaths.add(fieldPath);
