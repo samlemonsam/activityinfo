@@ -26,8 +26,6 @@ import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.MessageBox;
-import com.google.common.base.Function;
-import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -57,8 +55,6 @@ import org.activityinfo.ui.client.page.config.design.UniqueNameValidator;
 import org.activityinfo.ui.client.page.config.form.ProjectForm;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
 
 /*
  * Displays a grid where users can add, remove and change projects
@@ -66,24 +62,6 @@ import java.util.Set;
 public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implements DbPage {
 
     public static final PageId PAGE_ID = new PageId("projects");
-
-    public static class UniqueNamesFunction implements Function<Void, Set<String>> {
-
-        private final Collection<ProjectDTO> projects;
-
-        public UniqueNamesFunction(Collection<ProjectDTO> projects) {
-            this.projects = projects;
-        }
-
-        @Override
-        public Set<String> apply(Void input) {
-            Set<String> names = Sets.newHashSet();
-            for (ProjectDTO project : projects) {
-                names.add(project.getName());
-            }
-            return names;
-        }
-    }
 
     @ImplementedBy(DbProjectGrid.class)
     public interface View extends GridView<DbProjectEditor, ProjectDTO> {
@@ -138,7 +116,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
         dialog.setHeight(300);
         dialog.getForm().getBinding().bind(model);
         dialog.getForm().getNameField().setValidator(
-                new CompositeValidator(new BlankValidator(), new UniqueNameValidator(new UniqueNamesFunction(store.getModels()))));
+                new CompositeValidator(new BlankValidator(), new UniqueNameValidator(store.getModels())));
         dialog.show(new FormDialogCallback() {
 
             @Override
