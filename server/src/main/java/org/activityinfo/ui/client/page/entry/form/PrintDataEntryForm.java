@@ -30,10 +30,7 @@ import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
-import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import org.activityinfo.i18n.shared.I18N;
@@ -42,6 +39,8 @@ import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
+
+import java.util.List;
 
 public class PrintDataEntryForm extends Window {
 
@@ -146,11 +145,25 @@ public class PrintDataEntryForm extends Window {
                            .replace("{$activityName}", activity.getName())
                            .replace("{$projectName}", addProjects(activity))
                            .replace("{$indicators}", addIndicators(activity))
-                           .replace("{$attributes}", addAttributes(activity));
+                           .replace("{$attributes}", addAttributes(activity))
+                           .replace("{$location}", location(activity));
 
         html = new StringBuilder();
         html.append(contents);
         return html.toString();
+    }
+
+    private String location(ActivityFormDTO activity) {
+        List<AdminLevelDTO> adminLevels = activity.getAdminLevels();
+        if (adminLevels.isEmpty()) {
+            return SiteFormResources.INSTANCE.collectionFormDrcLocation().getText();
+        } else {
+            String content = "";
+            for (AdminLevelDTO adminLevel : adminLevels) {
+                content += SiteFormResources.INSTANCE.locationTableTr().getText().replace("{$name}", adminLevel.getName());
+            }
+            return content;
+        }
     }
 
     private String addProjects(ActivityFormDTO activity) {
@@ -162,19 +175,7 @@ public class PrintDataEntryForm extends Window {
     }
 
     private String getFormContents() {
-        TextResource formPage = SiteFormResources.INSTANCE.collectionForm();
-        return formPage.getText();
-    }
-
-    private void schedulePrint() {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                doPrint(getFrameElement());
-            }
-        });
-
+        return SiteFormResources.INSTANCE.collectionForm().getText();
     }
 
     private static native void doPrint(IFrameElement frame) /*-{
