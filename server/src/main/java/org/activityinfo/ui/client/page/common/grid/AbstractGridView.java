@@ -25,11 +25,15 @@ package org.activityinfo.ui.client.page.common.grid;
 import com.extjs.gxt.ui.client.data.Loader;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.data.PagingLoader;
+import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
 import com.extjs.gxt.ui.client.event.SelectionChangedListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Dialog;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.CellSelectionModel;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridSelectionModel;
@@ -37,7 +41,11 @@ import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
+import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
+
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.fromString;
 
 public abstract class AbstractGridView<M extends ModelData, P extends GridPresenter<M>> extends ContentPanel
         implements GridView<P, M> {
@@ -103,8 +111,24 @@ public abstract class AbstractGridView<M extends ModelData, P extends GridPresen
     }
 
     @Override
-    public void confirmDeleteSelected(ConfirmCallback callback) {
-        callback.confirmed();
+    public void confirmDeleteSelected(final ConfirmCallback callback) {
+        M selection = getSelection();
+        if (selection instanceof ActivityDTO) {
+            ActivityDTO activity = (ActivityDTO) selection;
+            MessageBox.confirm(
+                    fromString(ClientContext.getAppTitle()),
+                    I18N.MESSAGES.confirmDeleteForm(activity.getName()),
+                    new Listener<MessageBoxEvent>() {
+                        @Override
+                        public void handleEvent(MessageBoxEvent be) {
+                            if (be.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                                callback.confirmed();
+                            }
+                        }
+                    });
+        } else {
+            callback.confirmed();
+        }
     }
 
     @Override
