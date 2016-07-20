@@ -144,6 +144,7 @@ public class PrintDataEntryForm extends Window {
                            .replace("{$databaseName}", activity.getDatabaseName())
                            .replace("{$activityName}", activity.getName())
                            .replace("{$projectName}", addProjects(activity))
+                           .replace("{$partnerName}", addPartners(activity))
                            .replace("{$indicators}", addIndicators(activity))
                            .replace("{$attributes}", addAttributes(activity))
                            .replace("{$location}", location(activity));
@@ -170,6 +171,14 @@ public class PrintDataEntryForm extends Window {
         String result = "";
         for (ProjectDTO projectDTO : activity.getProjects()) {
             result += projectDTO.getName() + ",";
+        }
+        return result;
+    }
+
+    private String addPartners(ActivityFormDTO activity) {
+        String result = "";
+        for (PartnerDTO partner : activity.getPartnerRange()) {
+            result += partner.getName() + ",";
         }
         return result;
     }
