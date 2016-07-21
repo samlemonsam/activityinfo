@@ -41,11 +41,6 @@ public class IdCriteria implements Criteria {
     }
 
     @Override
-    public void accept(CriteriaVisitor visitor) {
-        visitor.visitInstanceIdCriteria(this);
-    }
-
-    @Override
     public boolean apply(@Nonnull FormInstance instance) {
         return instanceIds.contains(instance.getId());
     }

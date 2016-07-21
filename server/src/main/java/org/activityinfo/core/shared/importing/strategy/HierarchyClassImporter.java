@@ -30,7 +30,6 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Pair;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.FormClassSet;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.model.form.FormInstance;
@@ -67,7 +66,7 @@ public class HierarchyClassImporter implements FieldImporter {
     @Override
     public Promise<Void> prepare(ResourceLocator locator, List<? extends SourceRow> batch) {
         final List<Promise<Void>> promises = Lists.newArrayList();
-        for (final ResourceId range : FormClassSet.of(rootField.getRange()).getElements()) {
+        for (final ResourceId range : rootField.getRange()) {
             InstanceQuery query = new InstanceQuery(Lists.newArrayList(referenceFields.keySet()), new ClassCriteria(range));
             final Promise<List<Projection>> promise = locator.query(query);
             promise.then(new Function<List<Projection>, Void>() {

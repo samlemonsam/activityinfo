@@ -85,11 +85,6 @@ public class ParentCriteria implements Criteria {
         this.parent = parent;
     }
 
-    @Override
-    public void accept(CriteriaVisitor visitor) {
-        visitor.visitParentCriteria(this);
-    }
-
     public boolean selectsRoot() {
         return parent.getParentId() == null;
     }

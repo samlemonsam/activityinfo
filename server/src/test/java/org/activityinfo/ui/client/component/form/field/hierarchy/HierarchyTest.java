@@ -8,8 +8,6 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -73,7 +71,7 @@ public class HierarchyTest extends CommandTestCase2 {
         assertThat(presenter.getSelectionLabel(CAMP_DISTRICT_CLASS), equalTo("District 5"));
 
         // now try to get options for the root level
-        List<Projection> choices = assertResolves(widgets.get(REGION).choices.get());
+        List<Choice> choices = assertResolves(widgets.get(REGION).choices.get());
         System.out.println(choices);
 
         assertThat(choices, hasSize(3));
@@ -87,7 +85,7 @@ public class HierarchyTest extends CommandTestCase2 {
 
         assertThat(widgets.get(GOVERNORATE_ID).choices, Matchers.notNullValue());
 
-        List<Projection> governorateChoices = assertResolves(widgets.get(GOVERNORATE_ID).choices.get());
+        List<Choice> governorateChoices = assertResolves(widgets.get(GOVERNORATE_ID).choices.get());
         System.out.println(governorateChoices);
         assertThat(governorateChoices, hasSize(4));
     }
@@ -130,7 +128,7 @@ public class HierarchyTest extends CommandTestCase2 {
             this.label = label;
         }
 
-        private Supplier<Promise<List<Projection>>> choices;
+        private Supplier<Promise<List<Choice>>> choices;
 
         @Override
         public void clearSelection() {
@@ -148,21 +146,21 @@ public class HierarchyTest extends CommandTestCase2 {
         }
 
         @Override
-        public void setSelection(Projection selection) {
-            this.selection = selection.getStringValue(ApplicationProperties.LABEL_PROPERTY);
+        public void setSelection(Choice selection) {
+            this.selection = selection.getLabel();
         }
 
         @Override
-        public void setChoices(Supplier<Promise<List<Projection>>> choices) {
+        public void setChoices(Supplier<Promise<List<Choice>>> choices) {
             this.choices = choices;
         }
 
         public void setSelection(String label) {
-            List<Projection> choices = assertResolves(this.choices.get());
-            for(Projection projection : choices) {
-                if(Objects.equals(projection.getStringValue(ApplicationProperties.LABEL_PROPERTY), label)) {
+            List<Choice> choices = assertResolves(this.choices.get());
+            for(Choice choice : choices) {
+                if(Objects.equals(choice.getLabel(), label)) {
                     this.selection = label;
-                    SelectionEvent.fire(this, projection);
+                    SelectionEvent.fire(this, choice);
                     return;
                 }
             }
@@ -170,7 +168,7 @@ public class HierarchyTest extends CommandTestCase2 {
         }
 
         @Override
-        public HandlerRegistration addSelectionHandler(SelectionHandler<Projection> handler) {
+        public HandlerRegistration addSelectionHandler(SelectionHandler<Choice> handler) {
             return eventBus.addHandler(SelectionEvent.getType(), handler);
         }
 

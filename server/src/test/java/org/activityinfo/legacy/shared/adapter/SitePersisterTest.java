@@ -55,7 +55,7 @@ public class SitePersisterTest extends CommandTestCase2 {
         assertResolves(locator.persist(siteFormInstance));
 
         // query by id
-        FormInstance fromServer = assertResolves(locator.getFormInstance(null, siteFormInstance.getId()));
+        FormInstance fromServer = assertResolves(locator.getFormInstance(siteFormInstance.getClassId(), siteFormInstance.getId()));
         Assert.assertNotNull(fromServer);
         Assert.assertEquals(fromServer.get(CONTENU_DI_KIT_FIELD), new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 

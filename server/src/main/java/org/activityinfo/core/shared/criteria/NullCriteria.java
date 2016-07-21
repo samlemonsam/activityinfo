@@ -17,11 +17,6 @@ public class NullCriteria implements Criteria {
     }
 
     @Override
-    public void accept(CriteriaVisitor visitor) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean apply(@Nonnull FormInstance instance) {
         return true;
     }

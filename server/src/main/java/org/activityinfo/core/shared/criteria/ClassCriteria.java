@@ -1,12 +1,10 @@
 package org.activityinfo.core.shared.criteria;
 
-import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,11 +21,6 @@ public class ClassCriteria implements Criteria {
         this.classId = resourceId;
     }
 
-    @Override
-    public void accept(CriteriaVisitor visitor) {
-        visitor.visitClassCriteria(this);
-    }
-
 
     @Override
     public boolean apply(@Nonnull FormInstance input) {
@@ -36,7 +29,7 @@ public class ClassCriteria implements Criteria {
 
     @Override
     public boolean apply(@Nonnull Projection projection) {
-        return classId.equals(projection.getRootClassId());
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -45,15 +38,7 @@ public class ClassCriteria implements Criteria {
     }
 
     public static Criteria union(Set<ResourceId> range) {
-        if(range.size() == 1) {
-            return new ClassCriteria(range.iterator().next());
-        } else {
-            List<ClassCriteria> criteriaList = Lists.newArrayList();
-            for(ResourceId classResourceId : range) {
-                criteriaList.add(new ClassCriteria(classResourceId));
-            }
-            return new CriteriaUnion(criteriaList);
-        }
+        throw new UnsupportedOperationException();
     }
 
     public ResourceId getClassId() {

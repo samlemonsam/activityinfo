@@ -10,7 +10,6 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
@@ -34,11 +33,6 @@ public interface ResourceLocator extends AsyncFormClassProvider {
      */
     Promise<FormClass> getFormClass(ResourceId formId);
 
-    /**
-     * Fetches a single resource.
-     * @param resourceId the id of the resource to fetch
-     */
-    Observable<Resource> fetchResource(ResourceId resourceId);
 
     /**
      * Queries a flat, two dimensional view of collections.

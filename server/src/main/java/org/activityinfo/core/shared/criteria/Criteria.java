@@ -12,8 +12,6 @@ import javax.annotation.Nonnull;
  */
 public interface Criteria {
 
-    void accept(CriteriaVisitor visitor);
-
     boolean apply(@Nonnull FormInstance instance);
 
     boolean apply(@Nonnull Projection projection);

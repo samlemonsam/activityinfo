@@ -1,12 +1,8 @@
 package org.activityinfo.ui.client.component.form.field.hierarchy;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
@@ -14,56 +10,65 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.activityinfo.core.shared.application.ApplicationProperties.LABEL_PROPERTY;
-import static org.activityinfo.core.shared.application.ApplicationProperties.PARENT_PROPERTY;
-
 class InitialSelection {
 
     private final Hierarchy hierarchy;
-    private final Map<ResourceId, Projection> selection = Maps.newHashMap();
+    private final Map<ResourceId, Choice> selection = Maps.newHashMap();
 
     public InitialSelection(Hierarchy hierarchy) {
         this.hierarchy = hierarchy;
     }
 
-    public Promise<Void> fetch(ResourceLocator locator, Set<ResourceId> ids) {
-        if(ids == null || ids.isEmpty()) {
+    public Promise<Void> fetch(ResourceLocator locator, Set<ResourceId> recordIds) {
+        if(recordIds == null || recordIds.isEmpty()) {
             return Promise.done();
         } else {
-            return fetchLabelAndParentIds(locator, ids);
+            return fetchLabelAndParentIds(locator, recordIds);
         }
     }
 
-    private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, Set<ResourceId> instanceIds) {
-        InstanceQuery query = InstanceQuery
-                .select(LABEL_PROPERTY, PARENT_PROPERTY)
-                .where(new IdCriteria(null, instanceIds))
-                .build();
-
-        return locator.query(query)
-                  .join(new Function<List<Projection>, Promise<Void>>() {
-                      @Override
-                      public Promise<Void> apply(List<Projection> projections) {
-
-                          Set<ResourceId> parents = populateSelection(projections);
-                          if (parents.isEmpty()) {
-                              return Promise.done();
-                          } else {
-                              return fetchLabelAndParentIds(locator, parents);
-                          }
-                      }
-                  });
+    private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, Set<ResourceId> recordIds) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+        
+//        QueryModel queryModel = new QueryModel();
+//        for (Level level : hierarchy.getLevels()) {
+//            queryModel.addRowSource(level.getClassId());
+//        }
+//        queryModel.selectResourceId().as("id");
+//        queryModel.selectExpr("label").as("label");
+//        queryModel.selectExpr("parent").as("parent");
+//        queryModel.setFilter(Exprs.idEqualTo(recordIds));
+//        
+//        queryModel.setFilter();
+//        
+//        InstanceQuery query = InstanceQuery
+//                .select(LABEL_PROPERTY, PARENT_PROPERTY)
+//                .where(new IdCriteria(null, recordIds))
+//                .build();
+//
+//        return locator.query(query)
+//                  .join(new Function<List<Projection>, Promise<Void>>() {
+//                      @Override
+//                      public Promise<Void> apply(List<Projection> projections) {
+//
+//                          Set<ResourceId> parents = populateSelection(projections);
+//                          if (parents.isEmpty()) {
+//                              return Promise.done();
+//                          } else {
+//                              return fetchLabelAndParentIds(locator, parents);
+//                          }
+//                      }
+//                  });
     }
 
-    private Set<ResourceId> populateSelection(List<Projection> projections) {
+    private Set<ResourceId> populateSelection(List<Choice> choices) {
         Set<ResourceId> parents = Sets.newHashSet();
-        for(Projection projection : projections) {
-            Level level = hierarchy.getLevel(projection.getRootClassId());
+        for(Choice choice : choices) {
+            Level level = hierarchy.getLevel(choice.getRootClassId());
             if(level != null) {
-                selection.put(projection.getRootClassId(), projection);
+                selection.put(choice.getRootClassId(), choice);
                 if(!level.isRoot()) {
-                    ResourceId parentId = projection.getReferenceValue(PARENT_PROPERTY)
-                                                    .iterator().next();
+                    ResourceId parentId = choice.getParentId();
                     assert parentId != null;
                     parents.add(parentId);
                 }
@@ -73,7 +78,7 @@ class InitialSelection {
         return parents;
     }
 
-    public Map<ResourceId, Projection> getSelection() {
+    public Map<ResourceId, Choice> getSelection() {
         return selection;
     }
 }

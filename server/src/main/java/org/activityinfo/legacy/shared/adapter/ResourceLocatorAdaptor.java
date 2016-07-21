@@ -1,11 +1,9 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gwt.core.shared.GWT;
-import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
@@ -19,7 +17,6 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.observable.Observable;
@@ -53,11 +50,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<FormClass> getFormClass(ResourceId classId) {
         return client.getFormSchema(classId.asString());
-    }
-
-    @Override
-    public Observable<Resource> fetchResource(ResourceId resourceId) {
-        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

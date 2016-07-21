@@ -45,6 +45,10 @@ public class QueryModel implements IsRecord {
     public List<ColumnModel> getColumns() {
         return columns;
     }
+    
+    public void addRowSource(ResourceId formId) {
+        rowSources.add(new RowSource(formId));
+    }
 
     /**
      * Adds a {@code ColumnModel} to this {@code TableModel} using the given
