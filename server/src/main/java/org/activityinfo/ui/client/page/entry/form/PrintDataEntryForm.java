@@ -42,6 +42,8 @@ import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 
 import java.util.List;
 
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.htmlEscape;
+
 public class PrintDataEntryForm extends Window {
 
     private StringBuilder html;
@@ -140,9 +142,9 @@ public class PrintDataEntryForm extends Window {
 
         String contents = getFormContents();
 
-        contents = contents.replace("{$activityName}", activity.getName())
-                           .replace("{$databaseName}", activity.getDatabaseName())
-                           .replace("{$activityName}", activity.getName())
+        contents = contents.replace("{$activityName}", htmlEscape(activity.getName()))
+                           .replace("{$databaseName}", htmlEscape(activity.getDatabaseName()))
+                           .replace("{$activityName}", htmlEscape(activity.getName()))
                            .replace("{$projectName}", addProjects(activity))
                            .replace("{$partnerName}", addPartners(activity))
                            .replace("{$indicators}", addIndicators(activity))
@@ -161,7 +163,7 @@ public class PrintDataEntryForm extends Window {
         } else {
             String content = "";
             for (AdminLevelDTO adminLevel : adminLevels) {
-                content += SiteFormResources.INSTANCE.locationTableTr().getText().replace("{$name}", adminLevel.getName());
+                content += SiteFormResources.INSTANCE.locationTableTr().getText().replace("{$name}", htmlEscape(adminLevel.getName()));
             }
             return content;
         }
@@ -170,7 +172,7 @@ public class PrintDataEntryForm extends Window {
     private String addProjects(ActivityFormDTO activity) {
         String result = "";
         for (ProjectDTO projectDTO : activity.getProjects()) {
-            result += projectDTO.getName() + ",";
+            result += htmlEscape(projectDTO.getName()) + ",";
         }
         return result;
     }
@@ -178,7 +180,7 @@ public class PrintDataEntryForm extends Window {
     private String addPartners(ActivityFormDTO activity) {
         String result = "";
         for (PartnerDTO partner : activity.getPartnerRange()) {
-            result += partner.getName() + ",";
+            result += htmlEscape(partner.getName()) + ",";
         }
         return result;
     }
@@ -203,7 +205,7 @@ public class PrintDataEntryForm extends Window {
         for (IndicatorGroup group : activity.groupIndicators()) {
 
             if (group.getName() != null) {
-                builder.append("<tr><td colspan='3'><h3 class='indicatorGroup'> " + group.getName() + "</h3><td></tr>");
+                builder.append("<tr><td colspan='3'><h3 class='indicatorGroup'> " + htmlEscape(group.getName()) + "</h3><td></tr>");
             }
 
             builder.append("<tr>");
@@ -224,9 +226,9 @@ public class PrintDataEntryForm extends Window {
 
     private void addIndicator(IndicatorDTO indicator, StringBuilder builder) {
         builder.append("<tr>");
-        builder.append("<td>" + indicator.getName() + "</td>");
+        builder.append("<td>" + htmlEscape(indicator.getName()) + "</td>");
         builder.append("<td>&nbsp;</td>");
-        builder.append("<td>" + indicator.getUnits() + "</td>");
+        builder.append("<td>" + htmlEscape(indicator.getUnits()) + "</td>");
         builder.append("</tr>");
     }
 
@@ -236,7 +238,7 @@ public class PrintDataEntryForm extends Window {
         for (AttributeGroupDTO attributeGroup : activity.getAttributeGroups()) {
 
             builder.append("<tr>");
-            builder.append("<td id=\"field-set\" valign=\"top\">" + attributeGroup.getName() + ":</td><td>");
+            builder.append("<td id=\"field-set\" valign=\"top\">" + htmlEscape(attributeGroup.getName()) + ":</td><td>");
 
             attributeCheckBoxGroup(attributeGroup, builder);
             builder.append("</td></tr>");
@@ -247,7 +249,7 @@ public class PrintDataEntryForm extends Window {
     private void attributeCheckBoxGroup(AttributeGroupDTO group, StringBuilder builder) {
 
         for (AttributeDTO attribture : group.getAttributes()) {
-            builder.append("[  ] " + attribture.getName() + "<br />");
+            builder.append("[  ] " + htmlEscape(attribture.getName()) + "<br />");
         }
 
     }
