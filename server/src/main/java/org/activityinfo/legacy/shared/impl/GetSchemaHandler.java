@@ -74,6 +74,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             .appendColumn("y1", "y1")
                             .appendColumn("x2", "x2")
                             .appendColumn("y2", "y2")
+                            .appendColumn("ISO2", "ISO2")
                             .from("country"),
                     new RowHandler() {
                         @Override
@@ -81,6 +82,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             CountryDTO country = new CountryDTO();
                             country.setId(rs.getInt("id"));
                             country.setName(rs.getString("name"));
+                            country.setCodeISO(rs.getString("ISO2"));
 
                             Extents bounds = new Extents(rs.getDouble("y1"),
                                     rs.getDouble("y2"),
