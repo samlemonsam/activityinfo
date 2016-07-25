@@ -8,7 +8,6 @@ import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.FormClass;
@@ -28,7 +27,10 @@ import org.activityinfo.promise.PromisesExecutionGuard;
 import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Exposes a legacy {@code Dispatcher} implementation as new {@code ResourceLocator}
@@ -180,19 +182,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         }
     }
 
-    @Override
-    public Promise<List<Projection>> query(final InstanceQuery query) {
-        final InstanceQueryAdapter adapter = new InstanceQueryAdapter();
-        QueryModel queryModel = adapter.build(query);
-
-        return client.queryTableColumns(queryModel).then(adapter.toProjections());
-    }
-
-    @Override
-    public Promise<QueryResult<Projection>> queryProjection(InstanceQuery query) {
-        return query(query).then(new InstanceQueryResultAdapter(query));
-    }
-
     public Promise<Void> remove(ResourceId formId, ResourceId resourceId) {
         FormRecordUpdateBuilder builder = new FormRecordUpdateBuilder();
         builder.setDeleted(true);
@@ -205,8 +194,4 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
-    @Override
-    public Promise<List<FormInstance>> queryInstances(Set<ResourceId> formClassIds) {
-        return queryInstances(ClassCriteria.union(formClassIds));
-    }
 }

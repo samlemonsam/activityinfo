@@ -2,15 +2,12 @@ package org.activityinfo.legacy.shared.adapter;
 
 
 import com.google.common.base.Joiner;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.query.ColumnSet;
@@ -36,7 +33,6 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -237,27 +233,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         System.out.println(Joiner.on("\n").join(list));
         return list;
     }
-
-
-    @Test
-    public void locationProjection() {
-
-        FieldPath villageName = new FieldPath(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.NAME_FIELD));
-        FieldPath provinceName = new FieldPath(
-                CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.ADMIN_FIELD),
-                field(PROVINCE_CLASS, CuidAdapter.NAME_FIELD));
-
-        List<Projection> projections = assertResolves(locator.query(
-                new InstanceQuery(
-                        asList(villageName, provinceName),
-                        new ClassCriteria(VILLAGE_CLASS))));
-
-        System.out.println(Joiner.on("\n").join(projections));
-
-        assertThat(projections.size(), equalTo(4));
-        assertThat(projections.get(0).getStringValue(provinceName), equalTo("Sud Kivu"));
-    }
-
+    
 
     @Test
     public void deleteLocation() {
@@ -272,33 +248,6 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
                 throw new AssertionError();
             }
         }
-    }
-
-    @Test
-    public void siteProjections() {
-
-        ResourceId partnerClassId = CuidAdapter.partnerFormClass(PEAR_DATABASE_ID);
-
-        FieldPath villageName = new FieldPath(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.NAME_FIELD));
-        FieldPath provinceName = new FieldPath(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.ADMIN_FIELD), field(PROVINCE_CLASS, CuidAdapter.NAME_FIELD));
-        FieldPath partnerName = new FieldPath(field(CuidAdapter.activityFormClass(NFI_DIST_ID), PARTNER_FIELD), field(partnerClassId, NAME_FIELD));
-        FieldPath indicator1 = new FieldPath(indicatorField(1));
-        FieldPath startDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.START_DATE_FIELD));
-        FieldPath endDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.END_DATE_FIELD));
-
-
-        List<Projection> projections = assertResolves(locator.query(
-                new InstanceQuery(
-                        asList(partnerName, villageName, provinceName, indicator1, endDate),
-                        new ClassCriteria(NFI_DIST_FORM_CLASS))));
-
-        System.out.println(Joiner.on("\n").join(projections));
-
-        final Projection firstProjection = projections.get(0);
-        assertThat(projections.size(), equalTo(3));
-        assertThat(firstProjection.getStringValue(provinceName), equalTo("Sud Kivu"));
-        assertThat(firstProjection.getValue(startDate), nullValue());
-        assertThat(firstProjection.getValue(endDate), equalTo((FieldValue)new LocalDate(2009, 1, 2)));
     }
 
 }

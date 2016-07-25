@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.field;
  */
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
@@ -32,8 +33,9 @@ import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
@@ -54,7 +56,6 @@ import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFie
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author yuriyz on 1/28/14.
@@ -165,13 +166,20 @@ public class FormFieldWidgetFactory {
         if (type.getRange().isEmpty()) {
             return Promise.resolved(NullFieldWidget.INSTANCE);
         }
+        if(type.getRange().size() > 1) {
+            return Promise.rejected(new UnsupportedOperationException("TODO"));
+        }
+        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr("label").as("label");
+        
         return resourceLocator
-                .queryInstances(type.getRange())
-                .then(new Function<List<FormInstance>, FormFieldWidget>() {
+                .queryTable(queryModel)
+                .then(new Function<ColumnSet, FormFieldWidget>() {
                     @Override
-                    public FormFieldWidget apply(List<FormInstance> input) {
+                    public FormFieldWidget apply(ColumnSet input) {
 
-                        int size = input.size();
+                        int size = input.getNumRows();
 
                         boolean isProjectField = !type.getRange().isEmpty() &&
                                 type.getRange().iterator().next().getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
@@ -181,15 +189,15 @@ public class FormFieldWidgetFactory {
 
                         if (size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
-                            return new CheckBoxFieldWidget(type, input, valueUpdater);
+                            return new CheckBoxFieldWidget(type, new OptionSet(input), valueUpdater);
 
                         } else if (size < MEDIUM_BALANCE_NUMBER) {
                             // Dropdown list
-                            return new ComboBoxFieldWidget(input, valueUpdater);
+                            return new ComboBoxFieldWidget(new OptionSet(input), valueUpdater);
 
                         } else {
                             // Suggest box
-                            return new SuggestBoxWidget(input, valueUpdater);
+                            return new SuggestBoxWidget(new OptionSet(input), valueUpdater);
                         }
                     }
                 });

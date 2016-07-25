@@ -1,7 +1,6 @@
 package org.activityinfo.core.client;
 
 
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -19,7 +18,6 @@ import org.activityinfo.promise.PromisesExecutionMonitor;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public interface ResourceLocator extends AsyncFormClassProvider {
 
@@ -81,30 +79,8 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     @Deprecated
     Promise<List<FormInstance>> queryInstances(Criteria criteria);
 
-    /**
-     * 
-     * @param query
-     * @deprecated use {@link #queryTable(ColumnModel)}
-     */
-    @Deprecated
-    Promise<QueryResult<Projection>> queryProjection(InstanceQuery query);
-
-    /**
-     * 
-     * @param query
-     * @deprecated use {@link #queryTable(ColumnModel)}
-     */
-    @Deprecated
-    Promise<List<Projection>> query(InstanceQuery query);
-
     Promise<Void> remove(ResourceId formId, ResourceId resourceId);
 
     Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources);
-
-    /**
-     * @param resourceIds
-     * @deprecated use {@link #queryTable(ColumnModel)}
-     */
-    @Deprecated
-    Promise<List<FormInstance>> queryInstances(Set<ResourceId> resourceIds);
+    
 }

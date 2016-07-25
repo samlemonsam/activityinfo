@@ -27,14 +27,11 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,15 +42,15 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
     private final ListBox dropBox;
     private final ValueUpdater<ReferenceValue> valueUpdater;
 
-    public ComboBoxFieldWidget(final List<FormInstance> range, final ValueUpdater<ReferenceValue> valueUpdater) {
+    public ComboBoxFieldWidget(final OptionSet range, final ValueUpdater<ReferenceValue> valueUpdater) {
         this.valueUpdater = valueUpdater;
         dropBox = new ListBox(false);
         dropBox.addStyleName("form-control");
 
-        for (FormInstance instance : range) {
+        for (int i = 0; i < range.getCount(); i++) {
             dropBox.addItem(
-                    FormInstanceLabeler.getLabel(instance),
-                    instance.getId().asString());
+                    range.getLabel(i),
+                    range.getId(i));
         }
         dropBox.addChangeHandler(new ChangeHandler() {
             @Override
