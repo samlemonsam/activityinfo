@@ -1,11 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -23,10 +18,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -65,20 +61,9 @@ public class SitePersisterTest extends CommandTestCase2 {
         Assert.assertTrue(paths.contains(new FieldPath(CONTENU_DI_KIT_FIELD)));
 
         // query projection
-        InstanceQuery query = new InstanceQuery(paths, new ClassCriteria(PEAR_Activity));
-        Projection projection = byId(assertResolves(locator.queryProjection(query)).getItems(), siteFormInstance.getId());
-        Assert.assertNotNull(projection);
-        Assert.assertEquals(projection.getReferenceValue(CONTENU_DI_KIT_FIELD).iterator().next(), CONTENU_DI_KIT_FIELD_ATTR_VALUE);
-
-    }
-
-    private Projection byId(List<Projection> list, final ResourceId id) {
-        return Iterables.find(list, new Predicate<Projection>() {
-            @Override
-            public boolean apply(@Nullable Projection input) {
-                return input.getRootInstanceId().equals(id);
-            }
-        });
+        FormInstance instance = assertResolves(locator.getFormInstance(formClass.getId(), siteFormInstance.getId()));
+        EnumValue fieldValue = (EnumValue) instance.get(CONTENU_DI_KIT_FIELD);
+        assertThat(fieldValue.getValueId(), equalTo(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
     }
 
 }
