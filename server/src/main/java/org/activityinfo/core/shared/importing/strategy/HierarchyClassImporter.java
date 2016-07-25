@@ -70,7 +70,7 @@ public class HierarchyClassImporter implements FieldImporter {
             QueryModel queryModel = new QueryModel(formId);
             queryModel.selectResourceId().as("_id");
             for (FieldPath referenceFieldPath : referenceFields.keySet()) {
-                queryModel.selectField(referenceFieldPath);
+                queryModel.selectField(referenceFieldPath).as(referenceFieldPath.toString());
             }
             promises.add(locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
                 @Override

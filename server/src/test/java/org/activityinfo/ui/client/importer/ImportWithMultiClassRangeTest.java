@@ -7,7 +7,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.form.tree.Hierarchy;
 import org.activityinfo.core.shared.form.tree.HierarchyPrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
@@ -23,7 +22,12 @@ import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
 import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
@@ -31,7 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
@@ -72,8 +75,8 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
     public static final ResourceId SECTEUR_TUMBWE = CuidAdapter.entity(142803);
     public static final ResourceId GROUPEMENT_LAMBO_KATENGA = CuidAdapter.entity(148235);
     public static final ResourceId ZONE_SANTE_NYEMBA = CuidAdapter.entity(212931);
+    private ColumnSet resultSet;
 
-    private List<FormInstance> instances;
 
     @Test
     public void testSimple() throws IOException {
@@ -173,9 +176,13 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
         assertResolves(importer.persist(importModel));
 
-        instances = assertResolves(locator.queryInstances(new ClassCriteria(SCHOOL_FORM_CLASS)));
-        assertThat(instances.size(), equalTo(8)); // we have 8 rows in school-import.csv
+        QueryModel resultQuery = new QueryModel(SCHOOL_FORM_CLASS);
+        resultQuery.selectResourceId().as("id");
+        resultQuery.selectField(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.NAME_FIELD)).as("name");
 
+        resultSet = assertResolves(locator.queryTable(resultQuery));
+        assertThat(resultSet.getNumRows(), equalTo(8)); // we have 8 rows in school-import.csv
+        
         assertThat(school("P"), equalTo(set(PROVINCE_KATANGA)));
         assertThat(school("D"), equalTo(set(DISTRICT_TANGANIKA)));
         assertThat(school("T"), equalTo(set(TERRITOIRE_KALEMIE)));
@@ -184,18 +191,29 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         assertThat(school("GZ"), equalTo(set(GROUPEMENT_LAMBO_KATENGA, ZONE_SANTE_NYEMBA)));
         assertThat(school("TZ"), equalTo(set(TERRITOIRE_KALEMIE, ZONE_SANTE_NYEMBA)));
 
-
     }
+    
 
     private Set<ResourceId> school(String name) {
-        for(FormInstance instance : instances) {
-            if(name.equals(instance.getString(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.NAME_FIELD)))) {
-                Set<ResourceId> references = instance.getReferences(ADMIN_FIELD);
-                System.out.println(name +", references: " + references);
-                return references;
-            }
+        
+        // Find id of the school with this name
+        ResourceId id = null;
+        ColumnView nameColumn = resultSet.getColumnView("name");
+        ColumnView idColumn = resultSet.getColumnView("id");
+        
+        for (int i = 0; i < resultSet.getNumRows(); i++) {
+            if (name.equals(nameColumn.getString(i))) {
+                id = ResourceId.valueOf(idColumn.getString(i));
+                break;
+            }    
         }
-        throw new AssertionError("No instance with name " + name);
+        if(id == null) {
+            throw new AssertionError("No school named '" + name + "'");
+        }
+
+        Promise<FormInstance> record = locator.getFormInstance(SCHOOL_FORM_CLASS, id);
+        ReferenceValue value = (ReferenceValue) record.get().get(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.ADMIN_FIELD));
+        return value.getResourceIds();
     }
 
     public static Set<ResourceId> set(ResourceId... resourceIds) {
