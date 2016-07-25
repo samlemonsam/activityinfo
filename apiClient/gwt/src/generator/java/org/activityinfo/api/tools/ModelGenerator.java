@@ -1,16 +1,18 @@
 package org.activityinfo.api.tools;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.javapoet.*;
 import io.swagger.models.Model;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.Property;
-import org.activityinfo.model.form.annotation.Field;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -25,6 +27,7 @@ public class ModelGenerator {
     private final TypeSpec.Builder classBuilder;
     private final MethodSpec.Builder constructor;
     private final MethodSpec.Builder parseMethod;
+    private final MethodSpec.Builder parseArrayMethod;
 
     public ModelGenerator(DataTypeFactory dataTypeFactory, String modelName, Model model) {
 
@@ -46,7 +49,16 @@ public class ModelGenerator {
                 .addStatement("$T jsonObject = jsonElement.getAsJsonObject()", JsonObject.class)
                 .addStatement("$T model = new $T()", className, className)
                 .returns(className);
-
+        
+        parseArrayMethod = MethodSpec.methodBuilder("fromJsonArray")
+                .addParameter(ClassName.get(JsonArray.class), "jsonArray")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addStatement("$T<$T> list = new $T<$T>()", List.class, className, ArrayList.class, className)
+                .beginControlFlow("for($T element : jsonArray)", JsonElement.class)
+                .addStatement("list.add(fromJson(element))")
+                .endControlFlow()
+                .addStatement("return list")
+                .returns(ParameterizedTypeName.get(ClassName.get(List.class), className));
 
         for (Map.Entry<String, Property> entry : model.getProperties().entrySet()) {
             handleProperty(entry.getKey(), entry.getValue());
@@ -92,6 +104,7 @@ public class ModelGenerator {
         
         classBuilder.addMethod(constructor.build());
         classBuilder.addMethod(parseMethod.build());
+        classBuilder.addMethod(parseArrayMethod.build());
 
         JavaFile javaFile = JavaFile.builder(ModelDataType.MODEL_PACKAGE, classBuilder.build()).build();
         javaFile.writeTo(outputDir);

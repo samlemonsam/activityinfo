@@ -42,7 +42,7 @@ public class ModelDataType extends DataType {
 
     @Override
     public CodeBlock toJsonElement(String propertyExpr) {
-        return CodeBlock.of(propertyExpr + ".toJsonString()");
+        return CodeBlock.of(propertyExpr + ".toJsonObject()");
     }
 
     @Override
@@ -55,9 +55,15 @@ public class ModelDataType extends DataType {
 
     @Override
     public CodeBlock fromJsonElement(CodeBlock jsonElementExpr) {
-        return CodeBlock.of("$T.fromJson(new $T().parse($L))", 
+        return CodeBlock.of("$T.fromJson($L)", 
             getReturnTypeName(), 
-            JsonParser.class, 
             jsonElementExpr);
+    }
+
+    @Override
+    public CodeBlock fromJsonArray(CodeBlock jsonArrayExpr) {
+        return CodeBlock.of("$T.fromJsonArray($L)",
+                getReturnTypeName(),
+                jsonArrayExpr);
     }
 }

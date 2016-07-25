@@ -125,8 +125,13 @@ public class BuilderGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(dataType.getBaseType().getParameterType(), "value")
                 .addStatement("$L.add($L)", propertyName, dataType.getBaseType().toJsonElement("value"))
-                .returns(void.class)
+                .addStatement("return this")
+                .returns(builderClass())
                 .build());
+    }
+
+    private ClassName builderClass() {
+        return ClassName.get(ModelDataType.MODEL_PACKAGE, className);
     }
 
 
@@ -159,7 +164,8 @@ public class BuilderGenerator {
                     .addParameter(ClassName.get(String.class), nameParameter)
                     .addParameter(type, valueParameter)
                     .addStatement("$L.addProperty($L, $L)", propertyName, nameParameter, valueParameter)
-                    .returns(void.class)
+                    .addStatement("return this")
+                    .returns(builderClass())
                     .build());
         }
         
@@ -169,7 +175,8 @@ public class BuilderGenerator {
                 .addParameter(ClassName.get(String.class), nameParameter)
                 .addParameter(ClassName.get(JsonElement.class), valueParameter)
                 .addStatement("$L.add($L, $L)", propertyName, nameParameter, valueParameter)
-                .returns(void.class)
+                .addStatement("return this")
+                .returns(builderClass())
                 .build());
     }
 
@@ -190,15 +197,20 @@ public class BuilderGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(propertyType.getParameterType(), propertyName)
                 .addStatement("this.jsonObject.add($S, $L)", propertyName, propertyType.toJsonElement(propertyName))
-                .returns(void.class)
+                .addStatement("return this")
+                .returns(builderClass())
                 .build());
     }
 
 
 
     private String singular(String propertyName) {
-        if(propertyName.endsWith("s")) {
+        if(propertyName.endsWith("ies")) {
+            return propertyName.substring(0, propertyName.length() - "ies".length()) + "y";
+        } else if(propertyName.endsWith("s")) {
             return propertyName.substring(0, propertyName.length()-1);
+        } else if(propertyName.equals("children")) {
+            return "child";
         }
         throw new IllegalArgumentException("Not plural: " + propertyName);
     }
