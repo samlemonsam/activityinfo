@@ -85,7 +85,7 @@ public class LocationCollection implements ResourceCollection {
         axeFieldId = CuidAdapter.field(formClassId, CuidAdapter.AXE_FIELD);
         FormField axeField = new FormField(axeFieldId);
         axeField.setCode("axe");
-        axeField.setLabel(I18N.CONSTANTS.axe());
+        axeField.setLabel(I18N.CONSTANTS.alternateName());
         axeField.setRequired(false);
         axeField.setType(TextType.INSTANCE);
 
