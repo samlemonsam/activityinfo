@@ -53,7 +53,7 @@ public class PartnerForm extends FormPanel {
         this.add(nameField);
 
         TextField<String> fullField = new TextField<String>();
-        fullField.setFieldLabel(constants.fullName());
+        fullField.setFieldLabel(constants.description());
         fullField.setMaxLength(64);
         binding.addFieldBinding(new FieldBinding(fullField, "fullName"));
         this.add(fullField);

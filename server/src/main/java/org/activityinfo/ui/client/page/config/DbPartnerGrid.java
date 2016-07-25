@@ -88,7 +88,7 @@ public class DbPartnerGrid extends AbstractGridView<PartnerDTO, DbPartnerEditor>
         List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
         columns.add(new ColumnConfig("name", messages.name(), 150));
-        columns.add(new ColumnConfig("fullName", messages.fullName(), 300));
+        columns.add(new ColumnConfig("fullName", messages.description(), 300));
 
         return new ColumnModel(columns);
     }
