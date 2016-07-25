@@ -8,8 +8,8 @@ public class MySqlCatalogProvider {
     public MySqlCatalogProvider() {
     }
 
-    public MySqlSession openCatalog(final QueryExecutor executor) {
-        return new MySqlSession(executor);
+    public MySqlCatalog openCatalog(final QueryExecutor executor) {
+        return new MySqlCatalog(executor);
     }
 
 }

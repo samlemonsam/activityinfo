@@ -16,8 +16,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.service.store.CollectionPermissions;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.collections.DatabaseTable;
 import org.activityinfo.store.mysql.metadata.Activity;
@@ -230,7 +230,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void siteFormClassWithNullaryLocations() {
 
-        FormClass formClass = catalogProvider.getCollection(activityFormClass(ADVOCACY)).get().getFormClass();
+        FormClass formClass = catalogProvider.getForm(activityFormClass(ADVOCACY)).get().getFormClass();
        
         // Make a list of field codes
         Set<String> codes = new HashSet<>();
@@ -296,8 +296,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void ownerPermissions() {
         
         int ownerUserId = 1;
-        CollectionPermissions permissions = 
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(ownerUserId);
+        FormPermissions permissions = 
+                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(ownerUserId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -308,8 +308,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void noPermissions() {
         int userId = 21;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
@@ -321,8 +321,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void revokedPermissions() {
         int christianUserId = 5;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(christianUserId);
+        FormPermissions permissions =
+                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(christianUserId);
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
@@ -333,8 +333,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void editPartnerPermissions() {
         int userId = 4;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -347,8 +347,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void editAllPermissions() {
         int userId = 3;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -359,8 +359,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void viewAllPermissions() {
         int userId = 2;
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -370,8 +370,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void publicPermission() {
         ResourceId publicFormClassId = activityFormClass(41);
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(publicFormClassId).get().getPermissions(999);
+        FormPermissions permissions =
+                catalogProvider.getForm(publicFormClassId).get().getPermissions(999);
         
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.getVisibilityFilter(), nullValue());
@@ -422,7 +422,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void nonExistingSite() {
 
-        Optional<ResourceCollection> collection = catalogProvider.lookupCollection(CuidAdapter.locationFormClass(9444441));
+        Optional<FormAccessor> collection = catalogProvider.lookupForm(CuidAdapter.locationFormClass(9444441));
     
         assertFalse(collection.isPresent());
     }

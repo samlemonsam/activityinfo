@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.sun.jersey.api.core.HttpRequestContext;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 
@@ -17,9 +17,9 @@ import java.io.OutputStream;
 
 public class QueryResource {
 
-    private final Provider<CollectionCatalog> catalog;
+    private final Provider<FormCatalog> catalog;
 
-    public QueryResource(Provider<CollectionCatalog> catalog) {
+    public QueryResource(Provider<FormCatalog> catalog) {
         this.catalog = catalog;
     }
 

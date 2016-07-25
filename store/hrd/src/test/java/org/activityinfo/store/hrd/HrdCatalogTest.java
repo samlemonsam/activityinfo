@@ -15,7 +15,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.After;
@@ -70,7 +70,7 @@ public class HrdCatalogTest {
         HrdCatalog catalog = new HrdCatalog();
         catalog.create(formClass);
 
-        Optional<ResourceCollection> collection = catalog.getCollection(collectionId);
+        Optional<FormAccessor> collection = catalog.getForm(collectionId);
         
         assertTrue(collection.isPresent());
 
@@ -116,7 +116,7 @@ public class HrdCatalogTest {
         HrdCatalog catalog = new HrdCatalog();
         Updater updater = new Updater(catalog);
 
-        HrdCollection collection = catalog.create(formClass);
+        HrdFormAccessor collection = catalog.create(formClass);
         
         String villageNames[] = new String[] { "Rutshuru" , "Beni", "Goma" };
 
@@ -197,13 +197,13 @@ public class HrdCatalogTest {
         father2.set(nameField.getId(), TextValue.valueOf("Ned"));
         father2.set(ageField.getId(), new Quantity(41, "years"));
         
-        Optional<ResourceCollection> hhCollection = catalog.getCollection(hhForm.getId());
+        Optional<FormAccessor> hhCollection = catalog.getForm(hhForm.getId());
         assertTrue(hhCollection.isPresent());
         
         hhCollection.get().add(hh1);
         hhCollection.get().add(hh2);
 
-        Optional<ResourceCollection> memberCollection = catalog.getCollection(memberForm.getId());
+        Optional<FormAccessor> memberCollection = catalog.getForm(memberForm.getId());
         assertTrue(memberCollection.isPresent());
         
         memberCollection.get().add(father1);

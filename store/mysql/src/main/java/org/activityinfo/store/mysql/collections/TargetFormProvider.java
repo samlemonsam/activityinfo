@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 
@@ -20,38 +20,38 @@ import java.util.Set;
 /**
  * We consider that there is one target form class per database.
  */
-public class TargetCollectionProvider implements CollectionProvider {
+public class TargetFormProvider implements FormProvider {
     @Override
-    public boolean accept(ResourceId formClassId) {
-        return formClassId.getDomain() == CuidAdapter.TARGET_FORM_CLASS_DOMAIN;
+    public boolean accept(ResourceId formId) {
+        return formId.getDomain() == CuidAdapter.TARGET_FORM_CLASS_DOMAIN;
     }
 
     @Override
-    public ResourceCollection openCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
-        Map<ResourceId, ResourceCollection> result = openCollections(executor, Collections.singleton(formClassId));
-        ResourceCollection collection = result.get(formClassId);
+    public FormAccessor openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+        Map<ResourceId, FormAccessor> result = openForms(executor, Collections.singleton(formId));
+        FormAccessor collection = result.get(formId);
         if(collection == null) {
-            throw new IllegalArgumentException("no such target collection: " + formClassId);
+            throw new IllegalArgumentException("no such target collection: " + formId);
         }
         return collection;
     }
 
     @Override
-    public Optional<ResourceId> lookupCollection(QueryExecutor executor, ResourceId resourceId) throws SQLException {
+    public Optional<ResourceId> lookupForm(QueryExecutor executor, ResourceId recordId) throws SQLException {
         return Optional.absent();
     }
 
     @Override
-    public Map<ResourceId, ResourceCollection> openCollections(QueryExecutor executor, Set<ResourceId> resourceIds) throws SQLException {
+    public Map<ResourceId, FormAccessor> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
         
         Set<Integer> targetIds = Sets.newHashSet();
-        for (ResourceId resourceId : resourceIds) {
+        for (ResourceId resourceId : formIds) {
             if(accept(resourceId)) {
                 targetIds.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
             }
         }
         
-        Map<ResourceId, ResourceCollection> collectionMap = Maps.newHashMap();
+        Map<ResourceId, FormAccessor> collectionMap = Maps.newHashMap();
 
         if(!targetIds.isEmpty()) {
             
@@ -85,7 +85,7 @@ public class TargetCollectionProvider implements CollectionProvider {
             }
 
             for (DatabaseTargetForm target : targetMap.values()) {
-                collectionMap.put(target.getFormClassId(), new TargetCollection(executor, target));
+                collectionMap.put(target.getFormClassId(), new TargetFormAccessor(executor, target));
             }
         }
         

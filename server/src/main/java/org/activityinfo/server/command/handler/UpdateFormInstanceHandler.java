@@ -14,7 +14,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.hrd.HrdCatalog;
 
 import javax.persistence.EntityManager;
@@ -68,7 +68,7 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
         }
 
         HrdCatalog catalog = new HrdCatalog();
-        Optional<ResourceCollection> collection = catalog.getCollection(formInstance.getClassId());
+        Optional<FormAccessor> collection = catalog.getForm(formInstance.getClassId());
         if(!collection.isPresent()) {
             throw new IllegalStateException("Could not get Resource Collection: " + collection);
         }

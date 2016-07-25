@@ -34,7 +34,7 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
-import org.activityinfo.store.mysql.MySqlSession;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
@@ -58,7 +58,7 @@ public class PivotAdapter {
     private static final Logger LOGGER = Logger.getLogger(PivotAdapter.class.getName());
     public static final String SITE_ID_KEY = "__site_id";
 
-    private final MySqlSession session;
+    private final MySqlCatalog session;
     private final PivotSites command;
     private final Filter filter;
     private final int userId;
@@ -85,7 +85,7 @@ public class PivotAdapter {
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
 
 
-    public PivotAdapter(MySqlSession catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
+    public PivotAdapter(MySqlCatalog catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
         this.session = catalog;
         this.command = command;
         this.filter = command.getFilter();

@@ -10,14 +10,14 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 
 /**
  * Fetches a single form record using the ColumnSetBuilder
  */
-public class ResourceFetcher {
+public class RecordFetcher {
     
-    private ResourceCollection collection;
+    private FormAccessor collection;
 
     private class IdCollector implements CursorObserver<ResourceId> {
 
@@ -52,12 +52,12 @@ public class ResourceFetcher {
         }
     }
     
-    public ResourceFetcher(ResourceCollection collection) {
+    public RecordFetcher(FormAccessor collection) {
         this.collection = collection;
     }
 
-    public static Optional<FormRecord> fetch(ResourceCollection collection, ResourceId id) {
-        ResourceFetcher fetcher = new ResourceFetcher(collection);
+    public static Optional<FormRecord> fetch(FormAccessor collection, ResourceId id) {
+        RecordFetcher fetcher = new RecordFetcher(collection);
         return fetcher.get(id);
     }
     

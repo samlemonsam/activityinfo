@@ -22,7 +22,7 @@ import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.hrd.HrdCatalog;
 
 import javax.inject.Provider;
@@ -66,7 +66,7 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
         } else {
 
             HrdCatalog catalog = new HrdCatalog();
-            Optional<ResourceCollection> collection = catalog.getCollection(ResourceId.valueOf(cmd.getResourceId()));
+            Optional<FormAccessor> collection = catalog.getForm(ResourceId.valueOf(cmd.getResourceId()));
             if(!collection.isPresent()) {
                 throw new UnexpectedCommandException("FormClass " + cmd.getResourceId() + " does not exist");
             }

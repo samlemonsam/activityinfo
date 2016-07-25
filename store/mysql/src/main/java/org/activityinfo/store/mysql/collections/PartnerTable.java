@@ -30,10 +30,10 @@ public class PartnerTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId classId) throws SQLException {
-        int databaseId = CuidAdapter.getLegacyIdFromCuid(classId);
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(formId);
         
-        TableMappingBuilder mapping = TableMappingBuilder.newMapping(classId, "partner");
+        TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, "partner");
         mapping.setFormLabel("Partner");
         mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.PARTNER_DOMAIN, "partnerId");
@@ -41,7 +41,7 @@ public class PartnerTable implements SimpleTable {
         mapping.setBaseFilter("pd.databaseId=" + databaseId);
         mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
         
-        FormField nameField = new FormField(field(classId, NAME_FIELD))
+        FormField nameField = new FormField(field(formId, NAME_FIELD))
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
@@ -51,7 +51,7 @@ public class PartnerTable implements SimpleTable {
         mapping.addTextField(nameField, "name");
         
         
-        FormField fullNameField = new FormField(field(classId, FULL_NAME_FIELD))
+        FormField fullNameField = new FormField(field(formId, FULL_NAME_FIELD))
                 .setLabel("Full Name")
             //    .setSuperProperty(ApplicationProperties.DESCRIPTION_PROPERTY)
                 .setRequired(false)

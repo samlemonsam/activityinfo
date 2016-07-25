@@ -9,12 +9,12 @@ import org.activityinfo.model.resource.ResourceId;
 /**
  * Internal interface used to construct table queries.
  */
-public interface ResourceCollection {
+public interface FormAccessor {
 
     /**
      * Fetches the permissions which apply to the given user for this collection.
      */
-    CollectionPermissions getPermissions(int userId);
+    FormPermissions getPermissions(int userId);
     
     /**
      * Retrieves a single resource from the ResourceStore.

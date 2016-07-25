@@ -10,7 +10,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
@@ -31,7 +31,7 @@ public abstract class AbstractMySqlTest {
     public static DbUnit dbunit;
     public static ColumnSetBuilder executor;
     public ColumnSet columnSet;
-    public static CollectionCatalog catalogProvider;
+    public static FormCatalog catalogProvider;
 
     @BeforeClass
     public static void initLocale() throws Throwable {

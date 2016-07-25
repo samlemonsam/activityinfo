@@ -22,10 +22,10 @@ import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class JsonResourceCollection implements ResourceCollection {
+public class JsonFormAccessor implements FormAccessor {
     
     private int id;
     private int parentId;
@@ -43,7 +43,7 @@ public class JsonResourceCollection implements ResourceCollection {
     private final FormClass formClass;
     private final JsonArray instances;
     
-    public JsonResourceCollection(String resourceName) throws IOException {
+    public JsonFormAccessor(String resourceName) throws IOException {
         formClass = loadFormClass(resourceName);
         instances = loadInstances(resourceName);
     }
@@ -79,8 +79,8 @@ public class JsonResourceCollection implements ResourceCollection {
 
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
-        return CollectionPermissions.full();
+    public FormPermissions getPermissions(int userId) {
+        return FormPermissions.full();
     }
 
     @Override

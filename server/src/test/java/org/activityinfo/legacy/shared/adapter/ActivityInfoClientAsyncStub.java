@@ -15,10 +15,10 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.hrd.HrdCollection;
-import org.activityinfo.store.mysql.MySqlSession;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.hrd.HrdFormAccessor;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 
@@ -35,7 +35,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         this.entityManager = entityManager;
     }
 
-    private CollectionCatalog newCatalog() {
+    private FormCatalog newCatalog() {
 
         // Reset the current transaction
         if(entityManager.get().getTransaction().isActive()) {
@@ -43,12 +43,12 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         }
 
         // Create a fresh catalog to simulate a new request
-        return new MySqlSession(new HibernateQueryExecutor(entityManager));
+        return new MySqlCatalog(new HibernateQueryExecutor(entityManager));
     }
 
     @Override
     public Promise<FormClass> getFormSchema(String formId) {
-        CollectionCatalog catalog = newCatalog();
+        FormCatalog catalog = newCatalog();
 
         FormClass formClass;
         try {
@@ -62,17 +62,17 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> updateFormSchema(String formId, FormClass updatedSchema) {
-        CollectionCatalog catalog = newCatalog();
+        FormCatalog catalog = newCatalog();
 
         try {
             EntityTransaction tx = entityManager.get().getTransaction();
             tx.begin();
 
-            Optional<ResourceCollection> collection = catalog.getCollection(updatedSchema.getId());
+            Optional<FormAccessor> collection = catalog.getForm(updatedSchema.getId());
             if(collection.isPresent()) {
                 collection.get().updateFormClass(updatedSchema);
             } else {
-                ((MySqlSession) catalog).createOrUpdateFormSchema(updatedSchema);
+                ((MySqlCatalog) catalog).createOrUpdateFormSchema(updatedSchema);
             }
 
             tx.commit();
@@ -90,10 +90,15 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
 
     @Override
+    public Promise<org.activityinfo.api.client.FormCatalog> getFormCatalog(String parent) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
     public Promise<FormRecord> getRecord(String formId, String recordId) {
         try {
-            CollectionCatalog catalog = newCatalog();
-            Optional<ResourceCollection> collection = catalog.getCollection(ResourceId.valueOf(formId));
+            FormCatalog catalog = newCatalog();
+            Optional<FormAccessor> collection = catalog.getForm(ResourceId.valueOf(formId));
             if(!collection.isPresent()) {
                 throw new RuntimeException("No such form " + formId);
             }
@@ -111,7 +116,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<FormRecord> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
-            CollectionCatalog catalog = newCatalog();
+            FormCatalog catalog = newCatalog();
             Updater updater = new Updater(catalog);
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
@@ -125,7 +130,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
-            CollectionCatalog catalog = newCatalog();
+            FormCatalog catalog = newCatalog();
             Updater updater = new Updater(catalog);
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
@@ -139,15 +144,15 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormRecordSet> getRecords(String formId, String parentId) {
-        CollectionCatalog catalog = newCatalog();
-        Optional<ResourceCollection> collection = catalog.getCollection(ResourceId.valueOf(formId));
+        FormCatalog catalog = newCatalog();
+        Optional<FormAccessor> collection = catalog.getForm(ResourceId.valueOf(formId));
 
         JsonArray recordArray = new JsonArray();
         
         if(collection.isPresent()) {
-            if(collection.get() instanceof HrdCollection) {
-                HrdCollection hrdCollection = (HrdCollection) collection.get();
-                Iterable<FormRecord> records = hrdCollection.getSubmissionsOfParent(ResourceId.valueOf(parentId));
+            if(collection.get() instanceof HrdFormAccessor) {
+                HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
+                Iterable<FormRecord> records = hrdForm.getSubmissionsOfParent(ResourceId.valueOf(parentId));
                 for (FormRecord record : records) {
                     recordArray.add(record.toJsonElement());
                 }
@@ -163,7 +168,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
         try {
-            CollectionCatalog catalog = newCatalog();
+            FormCatalog catalog = newCatalog();
             ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
 
             return Promise.resolved(builder.build(query));

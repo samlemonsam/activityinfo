@@ -1,8 +1,5 @@
 package org.activityinfo.store.mysql;
 
-/**
- * Created by alex on 1/12/15.
- */
 public class Join {
     private Join parent;
     private String key;

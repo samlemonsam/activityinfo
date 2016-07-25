@@ -42,28 +42,28 @@ public class AdminEntityTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
 
-        int levelId = CuidAdapter.getLegacyIdFromCuid(formClassId);
+        int levelId = CuidAdapter.getLegacyIdFromCuid(formId);
         AdminLevel level = LEVEL_CACHE.getIfPresent(levelId);
         if(level == null) {
             level = AdminLevel.fetch(executor, levelId);
             LEVEL_CACHE.put(levelId, level);
         }
 
-        FormField label = new FormField(CuidAdapter.field(formClassId, CuidAdapter.NAME_FIELD));
+        FormField label = new FormField(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD));
         label.setLabel(I18N.CONSTANTS.name());
         label.setCode("name");
         label.setRequired(true);
         label.setType(TextType.INSTANCE);
 
-        FormField code = new FormField(CuidAdapter.field(formClassId, CuidAdapter.CODE_FIELD));
+        FormField code = new FormField(CuidAdapter.field(formId, CuidAdapter.CODE_FIELD));
         code.setCode("code");
         code.setLabel(I18N.CONSTANTS.codeFieldLabel());
         code.setRequired(false);
         code.setType(TextType.INSTANCE);            
         
-        FormField bounds = new FormField(CuidAdapter.field(formClassId, CuidAdapter.GEOMETRY_FIELD));
+        FormField bounds = new FormField(CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD));
         bounds.setCode("boundary");
         bounds.setLabel(I18N.CONSTANTS.geography());
         bounds.setRequired(true);
@@ -71,7 +71,7 @@ public class AdminEntityTable implements SimpleTable {
         
         FormField parent = null;
         if(level.hasParent()) {
-            parent = new FormField(CuidAdapter.field(formClassId, CuidAdapter.PARTNER_FIELD));
+            parent = new FormField(CuidAdapter.field(formId, CuidAdapter.PARTNER_FIELD));
             parent.setCode("parent");
             parent.setLabel(level.getParentName());
             parent.setRequired(true);
@@ -79,7 +79,7 @@ public class AdminEntityTable implements SimpleTable {
         }
 
         // TODO: geometry
-        TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, ADMIN_ENTITY_TABLE);
+        TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, ADMIN_ENTITY_TABLE);
         mapping.setOwnerId(ResourceId.ROOT_ID);
         mapping.setPrimaryKeyMapping(CuidAdapter.ADMIN_ENTITY_DOMAIN, "adminEntityId");
         mapping.setBaseFilter("base.AdminLevelId=" + levelId + " AND base.deleted=0");

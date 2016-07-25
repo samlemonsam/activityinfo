@@ -5,35 +5,35 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.cursor.ResourceFetcher;
+import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 
 
-public class TargetCollection implements ResourceCollection {
+public class TargetFormAccessor implements FormAccessor {
     
     private final QueryExecutor executor;
     private final DatabaseTargetForm target;
     private final TableMapping mapping;
     
-    public TargetCollection(QueryExecutor executor, DatabaseTargetForm target) {
+    public TargetFormAccessor(QueryExecutor executor, DatabaseTargetForm target) {
         this.target = target;
         this.executor = executor;
         this.mapping = target.buildMapping();
     }
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
-        return CollectionPermissions.readonly();
+    public FormPermissions getPermissions(int userId) {
+        return FormPermissions.readonly();
     }
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        return ResourceFetcher.fetch(this, resourceId);
+        return RecordFetcher.fetch(this, resourceId);
     }
 
     @Override

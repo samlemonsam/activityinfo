@@ -70,8 +70,8 @@ public class DatabaseTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) {
-        Preconditions.checkArgument(formClassId.equals(FORM_CLASS_ID));
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) {
+        Preconditions.checkArgument(formId.equals(FORM_CLASS_ID));
         return mapping;
     }
 

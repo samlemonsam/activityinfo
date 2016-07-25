@@ -17,7 +17,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -111,11 +111,11 @@ public class SubFormAggregationTest {
         month3.setParentId(v2.getResourceId());
         month3.set(countField.getId(), new Quantity(47, "households"));
 
-        ResourceCollection siteCollection = catalog.getCollection(siteForm.getId()).get();
+        FormAccessor siteCollection = catalog.getForm(siteForm.getId()).get();
         siteCollection.add(v1);
         siteCollection.add(v2);
 
-        Optional<ResourceCollection> monthCollection = catalog.getCollection(monthlyForm.getId());
+        Optional<FormAccessor> monthCollection = catalog.getForm(monthlyForm.getId());
         assertTrue(monthCollection.isPresent());
 
         monthCollection.get().add(month1);

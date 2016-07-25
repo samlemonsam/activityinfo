@@ -25,11 +25,11 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.CollectionPermissions;
-import org.activityinfo.service.store.ResourceCollection;
-import org.activityinfo.store.hrd.HrdCollection;
-import org.activityinfo.store.mysql.MySqlSession;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.store.hrd.HrdFormAccessor;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
@@ -52,7 +52,7 @@ public class FormResource {
 
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
 
-    private final Provider<CollectionCatalog> catalog;
+    private final Provider<FormCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
     private final PermissionOracle permissionOracle;
 
@@ -60,7 +60,7 @@ public class FormResource {
     private final Gson prettyPrintingGson;
 
     public FormResource(ResourceId resourceId,
-                        Provider<CollectionCatalog> catalog,
+                        Provider<FormCatalog> catalog,
                         Provider<AuthenticatedUser> userProvider, 
                         PermissionOracle permissionOracle) {
         this.resourceId = resourceId;
@@ -95,7 +95,7 @@ public class FormResource {
         FormClass formClass = FormClass.fromJson(updatedSchemaJson);
         
         // Check first to see if this collection exists
-        Optional<ResourceCollection> collection = catalog.get().getCollection(formClass.getId());
+        Optional<FormAccessor> collection = catalog.get().getForm(formClass.getId());
         if(collection.isPresent()) {
             FormClass existingFormClass = collection.get().getFormClass();
             permissionOracle.assertDesignPrivileges(existingFormClass, userProvider.get());
@@ -106,7 +106,7 @@ public class FormResource {
             // Check that we have the permission to create in this database
             permissionOracle.assertDesignPrivileges(formClass, userProvider.get());
 
-            ((MySqlSession)catalog.get()).createOrUpdateFormSchema(formClass);
+            ((MySqlCatalog)catalog.get()).createOrUpdateFormSchema(formClass);
         }
         
         return Response.ok().build();
@@ -117,7 +117,7 @@ public class FormResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRecord(@PathParam("recordId") String recordId) {
         
-        ResourceCollection collection = assertVisible(resourceId);
+        FormAccessor collection = assertVisible(resourceId);
 
 
         Optional<FormRecord> record = collection.get(ResourceId.valueOf(recordId));
@@ -141,13 +141,13 @@ public class FormResource {
 
         assertVisible(resourceId);
         
-        Optional<ResourceCollection> collection = catalog.get().getCollection(resourceId);
+        Optional<FormAccessor> collection = catalog.get().getForm(resourceId);
         if(!collection.isPresent()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        HrdCollection hrdCollection = (HrdCollection) collection.get();
-        Iterable<FormRecord> records = hrdCollection.getSubmissionsOfParent(ResourceId.valueOf(parentId));
+        HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
+        Iterable<FormRecord> records = hrdForm.getSubmissionsOfParent(ResourceId.valueOf(parentId));
 
         FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
         recordSet.setFormId(resourceId.asString());
@@ -325,15 +325,15 @@ public class FormResource {
         return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
     }
 
-    private ResourceCollection assertVisible(ResourceId collectionId) {
-        Optional<ResourceCollection> collection = this.catalog.get().getCollection(resourceId);
+    private FormAccessor assertVisible(ResourceId collectionId) {
+        Optional<FormAccessor> collection = this.catalog.get().getForm(resourceId);
         if(!collection.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.NOT_FOUND)
                             .entity(format("Collection %s does not exist.", collectionId.asString()))
                             .build());
         }
-        CollectionPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
+        FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
         if(!permissions.isVisible()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.FORBIDDEN)

@@ -1,13 +1,11 @@
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.service.store.CollectionPermissions;
-
-import java.util.Collections;
+import org.activityinfo.service.store.FormPermissions;
 
 /**
  * Provides permissions on a collection for a specific User
  */
 public interface Authorizer {
     
-    CollectionPermissions getPermissions(int userId);
+    FormPermissions getPermissions(int userId);
 }

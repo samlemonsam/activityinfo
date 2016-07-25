@@ -8,11 +8,11 @@ import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.cursor.ResourceFetcher;
+import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
@@ -27,16 +27,16 @@ import java.util.Map;
 /**
  * Collection of Sites
  */
-public class SiteCollection implements ResourceCollection {
+public class SiteFormAccessor implements FormAccessor {
     
     private final Activity activity;
     private final TableMapping baseMapping;
     private final QueryExecutor queryExecutor;
     private final PermissionsCache permissionsCache;
 
-    public SiteCollection(Activity activity, TableMapping baseMapping, 
-                          QueryExecutor queryExecutor, 
-                          PermissionsCache permissionsCache) {
+    public SiteFormAccessor(Activity activity, TableMapping baseMapping,
+                            QueryExecutor queryExecutor,
+                            PermissionsCache permissionsCache) {
         this.activity = activity;
         this.baseMapping = baseMapping;
         this.queryExecutor = queryExecutor;
@@ -44,14 +44,14 @@ public class SiteCollection implements ResourceCollection {
     }
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
+    public FormPermissions getPermissions(int userId) {
         if(activity.getOwnerUserId() == userId) {
-           return CollectionPermissions.full(); 
+           return FormPermissions.full(); 
         } else {
 
             UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
 
-            CollectionPermissions permissions = new CollectionPermissions();
+            FormPermissions permissions = new FormPermissions();
 
             String partnerFilter = String.format("%s=%s",
                     CuidAdapter.partnerField(activity.getId()),
@@ -85,7 +85,7 @@ public class SiteCollection implements ResourceCollection {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        ResourceFetcher fetcher = new ResourceFetcher(this);
+        RecordFetcher fetcher = new RecordFetcher(this);
         return fetcher.get(resourceId);
     }
 

@@ -37,7 +37,7 @@ import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.model.*;
 import org.activityinfo.server.util.monitoring.Timed;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -61,7 +61,7 @@ public class AdminLevelResource {
     private static final Logger LOGGER = Logger.getLogger(AdminLevelResource.class.getName());
 
     private final Provider<EntityManager> entityManager;
-    private final Provider<CollectionCatalog> catalog;
+    private final Provider<FormCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
     private final AdminLevel level;
 
@@ -69,7 +69,7 @@ public class AdminLevelResource {
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
-    public AdminLevelResource(Provider<CollectionCatalog> catalog, Provider<EntityManager> entityManager, Provider<AuthenticatedUser> userProvider, AdminLevel level) {
+    public AdminLevelResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager, Provider<AuthenticatedUser> userProvider, AdminLevel level) {
         super();
         this.catalog = catalog;
         this.entityManager = entityManager;

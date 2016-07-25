@@ -6,9 +6,9 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.PropertyDescriptor;
@@ -16,22 +16,22 @@ import org.opengis.feature.type.PropertyDescriptor;
 import java.util.List;
 
 
-public class FeatureSourceCollection implements ResourceCollection {
+public class FeatureSourceAccessor implements FormAccessor {
 
     public static final String FIELD_ID_PREFIX = "ATTRIB";
     
     private final ResourceId resourceId;
     private final SimpleFeatureSource featureSource;
 
-    public FeatureSourceCollection(ResourceId resourceId, SimpleFeatureSource featureSource) {
+    public FeatureSourceAccessor(ResourceId resourceId, SimpleFeatureSource featureSource) {
         this.resourceId = resourceId;
         this.featureSource = featureSource;
     }
 
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
-        return CollectionPermissions.full();
+    public FormPermissions getPermissions(int userId) {
+        return FormPermissions.full();
     }
 
     @Override

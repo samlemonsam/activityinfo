@@ -5,9 +5,9 @@ import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.expr.ExprValue;
 
 /**
- * Describes collection-level permissions for a specific user
+ * Describes form-level permissions for a specific user
  */
-public final class CollectionPermissions implements IsRecord {
+public final class FormPermissions implements IsRecord {
 
     private boolean visible;
     private String visibilityFilter;
@@ -23,7 +23,7 @@ public final class CollectionPermissions implements IsRecord {
         return visible;
     }
 
-    public CollectionPermissions setVisible(boolean visible) {
+    public FormPermissions setVisible(boolean visible) {
         this.visible = visible;
         return this;
     }
@@ -32,7 +32,7 @@ public final class CollectionPermissions implements IsRecord {
         return visibilityFilter;
     }
 
-    public CollectionPermissions setVisibilityFilter(String visibilityFilter) {
+    public FormPermissions setVisibilityFilter(String visibilityFilter) {
         this.visibilityFilter = visibilityFilter;
         return this;
     }
@@ -42,7 +42,7 @@ public final class CollectionPermissions implements IsRecord {
     }
 
     
-    public CollectionPermissions setEditAllowed(boolean editAllowed) {
+    public FormPermissions setEditAllowed(boolean editAllowed) {
         this.editAllowed = editAllowed;
         return this;
     }
@@ -70,20 +70,20 @@ public final class CollectionPermissions implements IsRecord {
         return record;
     }
     
-    public static CollectionPermissions none() {
-        return new CollectionPermissions()
+    public static FormPermissions none() {
+        return new FormPermissions()
                 .setVisible(false)
                 .setEditAllowed(false);
     }
     
-    public static CollectionPermissions readonly() {
-        return new CollectionPermissions()
+    public static FormPermissions readonly() {
+        return new FormPermissions()
                 .setVisible(true)
                 .setEditAllowed(false);
     }
     
-    public static CollectionPermissions full() {
-        return new CollectionPermissions()
+    public static FormPermissions full() {
+        return new FormPermissions()
                 .setVisible(true)
                 .setEditAllowed(true);
     }

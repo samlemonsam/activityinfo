@@ -12,7 +12,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 
@@ -23,10 +23,10 @@ public class ColumnSetBuilder {
 
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
-    private final CollectionCatalog resourceStore;
+    private final FormCatalog resourceStore;
     private final FormTreeBuilder formTreeService;
 
-    public ColumnSetBuilder(CollectionCatalog resourceStore) {
+    public ColumnSetBuilder(FormCatalog resourceStore) {
         this.resourceStore = resourceStore;
         this.formTreeService = new FormTreeBuilder(resourceStore);
     }
@@ -41,7 +41,7 @@ public class ColumnSetBuilder {
 
         // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
-        CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
+        FormScanBatch batch = new FormScanBatch(resourceStore);
         QueryEvaluator evaluator = new QueryEvaluator(tree, formClass, batch);
 
         Function<ColumnView, ColumnView> filter = evaluator.filter(table.getFilter());

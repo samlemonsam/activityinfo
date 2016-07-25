@@ -20,7 +20,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.service.DeploymentConfiguration;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,7 +72,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         
 
         
-        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(CollectionCatalog.class));
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class));
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);

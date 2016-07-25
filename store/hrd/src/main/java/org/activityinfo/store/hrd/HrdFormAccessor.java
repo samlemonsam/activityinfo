@@ -9,9 +9,9 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.hrd.entity.Datastore;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordKey;
@@ -23,21 +23,21 @@ import org.activityinfo.store.hrd.op.QueryOperation;
 import java.util.List;
 
 /**
- * Collection-backed by the AppEngine High-Replication Datastore (HRD)
+ * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)
  */
-public class HrdCollection implements ResourceCollection {
+public class HrdFormAccessor implements FormAccessor {
 
     private Datastore datastore;
     private FormClass formClass;
 
-    public HrdCollection(Datastore datastore, FormClass formClass) {
+    public HrdFormAccessor(Datastore datastore, FormClass formClass) {
         this.datastore = datastore;
         this.formClass = formClass;
     }
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
-        return CollectionPermissions.full();
+    public FormPermissions getPermissions(int userId) {
+        return FormPermissions.full();
     }
 
     @Override

@@ -10,8 +10,8 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.ResourceStore;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
@@ -32,7 +32,7 @@ public class ResourceStoreStub implements ResourceStore {
 
 
     private final FeatureSourceCatalog featureSourceCatalog;
-    private final CollectionCatalogStub testCatalog; 
+    private final FormCatalogStub testCatalog; 
     private final MergedCatalog catalog = new MergedCatalog();
 
     public ResourceStoreStub() throws IOException {
@@ -41,7 +41,7 @@ public class ResourceStoreStub implements ResourceStore {
         addShapefile(GADM_PROVINCE_SOURCE_ID);
         
         // Madagascar Admin Levels
-        testCatalog = new CollectionCatalogStub();
+        testCatalog = new FormCatalogStub();
         testCatalog.addJsonCollection("adminLevel/E0000001379");
         testCatalog.addJsonCollection("adminLevel/E0000001508");
         testCatalog.addJsonCollection("adminLevel/E0000001511");
@@ -65,31 +65,31 @@ public class ResourceStoreStub implements ResourceStore {
         return new ConstantObservable<>(columnSetBuilder.build(queryModel));
     }
     
-    private class MergedCatalog implements CollectionCatalog {
+    private class MergedCatalog implements FormCatalog {
 
         @Override
-        public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
-            if (testCatalog.contains(resourceId)) {
-                return testCatalog.getCollection(resourceId);
+        public Optional<FormAccessor> getForm(ResourceId formId) {
+            if (testCatalog.contains(formId)) {
+                return testCatalog.getForm(formId);
             } else {
-                return featureSourceCatalog.getCollection(resourceId);
+                return featureSourceCatalog.getForm(formId);
             }
         }
 
         @Override
-        public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+        public Optional<FormAccessor> lookupForm(ResourceId recordId) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
+        public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
             throw new UnsupportedOperationException();
         }
 
 
         @Override
         public FormClass getFormClass(ResourceId resourceId) {
-            return getCollection(resourceId).get().getFormClass();
+            return getForm(resourceId).get().getFormClass();
         }
     }
 

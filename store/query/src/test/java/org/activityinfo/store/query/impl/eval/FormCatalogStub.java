@@ -11,24 +11,20 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.*;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by alex on 6-4-16.
- */
-class CatalogStub implements CollectionCatalog {
+class FormCatalogStub implements FormCatalog {
 
-    private Map<ResourceId, CollectionStub> collectionMap = new HashMap<>();
+    private Map<ResourceId, AccessorStub> formMap = new HashMap<>();
 
 
-    public CollectionStub addForm(FormClass formClass) {
-        CollectionStub collectionStub = new CollectionStub(formClass);
-        collectionMap.put(formClass.getId(), collectionStub);
-        return collectionStub;
+    public AccessorStub addForm(FormClass formClass) {
+        AccessorStub accessorStub = new AccessorStub(formClass);
+        formMap.put(formClass.getId(), accessorStub);
+        return accessorStub;
     }
 
     public FormTree getTree(ResourceId resourceId) {
@@ -37,46 +33,46 @@ class CatalogStub implements CollectionCatalog {
     }
 
     @Override
-    public Optional<ResourceCollection> getCollection(ResourceId collectionId) {
-        return Optional.<ResourceCollection>fromNullable(collectionMap.get(collectionId));
+    public Optional<FormAccessor> getForm(ResourceId formId) {
+        return Optional.<FormAccessor>fromNullable(formMap.get(formId));
     }
 
     @Override
-    public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
+    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public FormClass getFormClass(ResourceId resourceId) {
-        CollectionStub collection = collectionMap.get(resourceId);
-        if(collection == null) {
+        AccessorStub form = formMap.get(resourceId);
+        if(form == null) {
             throw new IllegalArgumentException();
         }
-        return collection.getFormClass();
+        return form.getFormClass();
     }
 
-    public class CollectionStub implements ResourceCollection {
+    public class AccessorStub implements FormAccessor {
 
         private FormClass formClass;
         private int numRows = 10;
 
-        public CollectionStub(FormClass formClass) {
+        public AccessorStub(FormClass formClass) {
             this.formClass = formClass;
         }
 
-        public CollectionStub withRowCount(int numRows) {
+        public AccessorStub withRowCount(int numRows) {
             this.numRows = numRows;
             return this;
         }
 
         @Override
-        public CollectionPermissions getPermissions(int userId) {
-            return CollectionPermissions.full();
+        public FormPermissions getPermissions(int userId) {
+            return FormPermissions.full();
         }
 
         @Override
@@ -118,9 +114,9 @@ class CatalogStub implements CollectionCatalog {
     private class QueryBuilderStub implements ColumnQueryBuilder {
 
         private List<CursorObserver<ResourceId>> idObservers = Lists.newArrayList();
-        private CollectionStub collection;
+        private AccessorStub collection;
 
-        public QueryBuilderStub(CollectionStub collection) {
+        public QueryBuilderStub(AccessorStub collection) {
             this.collection = collection;
         }
 
@@ -141,7 +137,7 @@ class CatalogStub implements CollectionCatalog {
         }
 
         @Override
-        public void execute() throws IOException {
+        public void execute() {
             for (int i = 0; i < collection.numRows; i++) {
                 for (CursorObserver<ResourceId> idObserver : idObservers) {
                     idObserver.onNext(ResourceId.valueOf(collection.formClass.getId() + "_R" + i));

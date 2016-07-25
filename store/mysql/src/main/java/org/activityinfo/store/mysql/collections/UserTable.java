@@ -44,7 +44,7 @@ public class UserTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) {
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) {
         return mapping;
     }
 

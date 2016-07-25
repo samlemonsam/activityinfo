@@ -4,15 +4,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.RecordFieldType;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
 import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
 import org.activityinfo.store.query.impl.builders.RowCountBuilder;
@@ -26,12 +22,12 @@ import java.util.logging.Logger;
 /**
  * Constructs a set of ColumnViews with a single pass over a collection.
  */
-public class CollectionScan {
+public class FormScan {
 
-    private static final Logger LOGGER = Logger.getLogger(CollectionScan.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
     private static final SymbolExpr PK_COLUMN_KEY = new SymbolExpr("@id");
 
-    private final ResourceCollection collection;
+    private final FormAccessor collection;
     private final ResourceId collectionId;
     private final long cacheVersion;
 
@@ -41,7 +37,7 @@ public class CollectionScan {
 
     private Optional<PendingSlot<Integer>> rowCount = Optional.absent();
 
-    public CollectionScan(ResourceCollection collection) {
+    public FormScan(FormAccessor collection) {
         this.collection = collection;
         this.collectionId = collection.getFormClass().getId();
         this.cacheVersion = collection.cacheVersion();

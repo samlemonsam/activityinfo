@@ -11,7 +11,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.lookup.ReferenceChoice;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 
@@ -24,10 +24,10 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     private static final Logger LOGGER = Logger.getLogger(ResourceLocatorSyncImpl.class.getName());
 
-    private Provider<CollectionCatalog> catalog;
+    private Provider<FormCatalog> catalog;
 
     @Inject
-    public ResourceLocatorSyncImpl(Provider<CollectionCatalog> catalog) {
+    public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog) {
         this.catalog = catalog;
     }
 

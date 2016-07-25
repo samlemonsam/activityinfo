@@ -31,7 +31,7 @@ public class CountryTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
         FormField nameField = new FormField(NAME_FIELD_ID);
         nameField.setCode("label");
         nameField.setLabel(I18N.CONSTANTS.name());

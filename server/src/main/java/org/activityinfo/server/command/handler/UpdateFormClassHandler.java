@@ -15,9 +15,9 @@ import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.hrd.HrdCatalog;
-import org.activityinfo.store.mysql.MySqlSession;
+import org.activityinfo.store.mysql.MySqlCatalog;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,11 +26,11 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
     private static final Logger LOGGER = Logger.getLogger(UpdateFormClassHandler.class.getName());
 
-    private Provider<MySqlSession> catalogProvider;
+    private Provider<MySqlCatalog> catalogProvider;
     private final PermissionOracle permissionOracle;
 
     @Inject
-    public UpdateFormClassHandler(Provider<MySqlSession> catalogProvider, PermissionOracle permissionOracle) {
+    public UpdateFormClassHandler(Provider<MySqlCatalog> catalogProvider, PermissionOracle permissionOracle) {
         this.catalogProvider = catalogProvider;
         this.permissionOracle = permissionOracle;
     }
@@ -67,7 +67,7 @@ public class UpdateFormClassHandler implements CommandHandler<UpdateFormClass> {
 
     private void validateSubformClassExist(ResourceId classId) {
         HrdCatalog catalog = new HrdCatalog();
-        Optional<ResourceCollection> collection = catalog.getCollection(classId);
+        Optional<FormAccessor> collection = catalog.getForm(classId);
         if (!collection.isPresent()) {
             LOGGER.log(Level.SEVERE, "Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());
             throw new CommandException("Invalid SubFormClass reference. SubFormClass does not exist, id:" + classId.asString());

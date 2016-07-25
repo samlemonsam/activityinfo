@@ -24,8 +24,8 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,9 +42,9 @@ public class Updater {
     
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
     
-    private final CollectionCatalog catalog;
+    private final FormCatalog catalog;
 
-    public Updater(CollectionCatalog catalog) {
+    public Updater(FormCatalog catalog) {
         this.catalog = catalog;
     }
 
@@ -80,7 +80,7 @@ public class Updater {
         ResourceId resourceId = parseId(changeObject, "@id");
 
         // First determine whether the resource already exists. 
-        Optional<ResourceCollection> collection = catalog.lookupCollection(resourceId);
+        Optional<FormAccessor> collection = catalog.lookupForm(resourceId);
         
         if(!collection.isPresent()) {
             // If the resource is not present, then we need the @class attribute in order to 
@@ -91,7 +91,7 @@ public class Updater {
             } 
             
             ResourceId collectionId = parseId(changeObject, "@class");
-            collection = catalog.getCollection(collectionId);
+            collection = catalog.getForm(collectionId);
             
             if(!collection.isPresent()) {
                 throw new InvalidUpdateException(format("@class '%s' does not exist.", collectionId));
@@ -297,7 +297,7 @@ public class Updater {
     }
 
     public void execute(RecordUpdate update) {
-        Optional<ResourceCollection> collection = catalog.lookupCollection(update.getResourceId());
+        Optional<FormAccessor> collection = catalog.lookupForm(update.getResourceId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such resource: " + update.getResourceId());
         }
@@ -305,7 +305,7 @@ public class Updater {
         executeUpdate(collection.get(), update);
     }
 
-    private void executeUpdate(ResourceCollection collection, RecordUpdate update) {
+    private void executeUpdate(FormAccessor collection, RecordUpdate update) {
         
         FormClass formClass = collection.getFormClass();
         Optional<FormRecord> existingResource = collection.get(update.getResourceId());
@@ -388,7 +388,7 @@ public class Updater {
     
     public void execute(FormInstance formInstance) {
 
-        Optional<ResourceCollection> collection = catalog.getCollection(formInstance.getClassId());
+        Optional<FormAccessor> collection = catalog.getForm(formInstance.getClassId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formInstance.getClassId());
         }
@@ -415,7 +415,7 @@ public class Updater {
     }
 
     private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonObject jsonObject, boolean create) {
-        Optional<ResourceCollection> collection = catalog.getCollection(formId);
+        Optional<FormAccessor> collection = catalog.getForm(formId);
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formId);
         }

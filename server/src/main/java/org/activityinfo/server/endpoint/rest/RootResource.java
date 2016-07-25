@@ -43,7 +43,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.service.DeploymentConfiguration;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
@@ -62,13 +62,13 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-    private Provider<CollectionCatalog> catalog;
+    private Provider<FormCatalog> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
-                        Provider<CollectionCatalog> catalog,
+                        Provider<FormCatalog> catalog,
                         DispatcherSync dispatcher,
                         DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider, ServerSideAuthProvider authProvider) {
         super();
@@ -210,5 +210,9 @@ public class RootResource {
         return new PivotTestResource( dispatcher, authProvider);
     }
     
+    @Path("/catalog")
+    public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
+        return new CatalogResource();
+    }
     
 }

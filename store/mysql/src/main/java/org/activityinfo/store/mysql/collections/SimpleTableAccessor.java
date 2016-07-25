@@ -5,37 +5,37 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.cursor.ResourceFetcher;
+import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
 
 
-public class SimpleTableCollection implements ResourceCollection {
+public class SimpleTableAccessor implements FormAccessor {
 
     private final TableMapping mapping;
     private Authorizer authorizer;
     private QueryExecutor executor;
 
-    public SimpleTableCollection(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
+    public SimpleTableAccessor(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
         this.mapping = mapping;
         this.authorizer = authorizer;
         this.executor = executor;
     }
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
+    public FormPermissions getPermissions(int userId) {
         return authorizer.getPermissions(userId);
     }
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        return ResourceFetcher.fetch(this, resourceId);
+        return RecordFetcher.fetch(this, resourceId);
     }
 
     @Override

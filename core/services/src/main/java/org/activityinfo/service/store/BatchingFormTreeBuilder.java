@@ -15,11 +15,11 @@ public class BatchingFormTreeBuilder {
 
     private static final Logger LOGGER = Logger.getLogger(BatchingFormTreeBuilder.class.getName());
 
-    private final CollectionCatalog catalog;
+    private final FormCatalog catalog;
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
     
-    public BatchingFormTreeBuilder(CollectionCatalog catalog) {
+    public BatchingFormTreeBuilder(FormCatalog catalog) {
         this.catalog = catalog;
     }
 

@@ -19,12 +19,12 @@ import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.CollectionPermissions;
 import org.activityinfo.service.store.ColumnQueryBuilder;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormNotFoundException;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.cursor.ResourceFetcher;
+import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.Set;
 
 
-public class LocationCollection implements ResourceCollection {
+public class LocationFormAccessor implements FormAccessor {
 
 
     public static final String TABLE_NAME = "location";
@@ -52,7 +52,7 @@ public class LocationCollection implements ResourceCollection {
     private final ResourceId adminFieldId;
     private final ResourceId pointFieldId;
 
-    public LocationCollection(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public LocationFormAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
 
         this.executor = executor;
 
@@ -139,13 +139,13 @@ public class LocationCollection implements ResourceCollection {
     }
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
-        return CollectionPermissions.readonly();
+    public FormPermissions getPermissions(int userId) {
+        return FormPermissions.readonly();
     }
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        ResourceFetcher fetcher = new ResourceFetcher(this);
+        RecordFetcher fetcher = new RecordFetcher(this);
         return fetcher.get(resourceId);
     }
 

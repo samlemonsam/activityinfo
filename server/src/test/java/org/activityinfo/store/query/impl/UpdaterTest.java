@@ -11,8 +11,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class UpdaterTest {
 
     @Before
     public void setUp() {
-        MockCollectionCatalog catalog = new MockCollectionCatalog();
+        MockFormCatalog catalog = new MockFormCatalog();
         updater = new Updater(catalog);
     }
 
@@ -174,10 +174,10 @@ public class UpdaterTest {
     }
 
 
-    private CollectionCatalog emptyCatalog() {
-        CollectionCatalog catalog = EasyMock.createMock(CollectionCatalog.class);
-        expect(catalog.lookupCollection(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<ResourceCollection>absent());
-        expect(catalog.getCollection(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<ResourceCollection>absent());
+    private FormCatalog emptyCatalog() {
+        FormCatalog catalog = EasyMock.createMock(FormCatalog.class);
+        expect(catalog.lookupForm(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<FormAccessor>absent());
+        expect(catalog.getForm(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<FormAccessor>absent());
         replay(catalog);
         return catalog;
     }

@@ -6,7 +6,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.store.query.impl.CollectionScanBatch;
+import org.activityinfo.store.query.impl.FormScanBatch;
 import org.activityinfo.store.query.impl.Slot;
 import org.junit.Test;
 
@@ -31,10 +31,10 @@ public class QueryEvaluatorTest {
                 .setLabel("Field B")
                 .setType(new CalculatedFieldType("A"));
 
-        CatalogStub catalog = new CatalogStub();
+        FormCatalogStub catalog = new FormCatalogStub();
         catalog.addForm(formClass).withRowCount(10);
 
-        CollectionScanBatch batch = new CollectionScanBatch(catalog);
+        FormScanBatch batch = new FormScanBatch(catalog);
         QueryEvaluator evaluator = new QueryEvaluator(catalog.getTree(formClass.getId()), formClass, batch);
 
         Slot<ColumnView> a = evaluator.evaluateExpression(new SymbolExpr("A"));

@@ -14,7 +14,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
 import org.activityinfo.store.query.impl.eval.JoinNode;
 import org.activityinfo.store.query.impl.eval.JoinType;
@@ -31,38 +31,38 @@ import java.util.logging.Logger;
  * A single query might involve several related tables, and we want
  * to run the table scans in parallel.
  */
-public class CollectionScanBatch {
+public class FormScanBatch {
 
-    private static final Logger LOGGER = Logger.getLogger(CollectionScanBatch.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FormScanBatch.class.getName());
     
     private AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
 
-    private final CollectionCatalog store;
+    private final FormCatalog store;
 
     /**
      * We want to do one pass over each FormClass so
      * keep track of what we need
      */
-    private Map<ResourceId, CollectionScan> tableMap = Maps.newHashMap();
+    private Map<ResourceId, FormScan> tableMap = Maps.newHashMap();
 
 
-    public CollectionScanBatch(CollectionCatalog store) {
+    public FormScanBatch(FormCatalog store) {
         this.store = store;
     }
 
 
-    private CollectionScan getTable(FormTree.Node node) {
+    private FormScan getTable(FormTree.Node node) {
         return getTable(node.getDefiningFormClass().getId());
     }
 
-    private CollectionScan getTable(FormClass formClass) {
+    private FormScan getTable(FormClass formClass) {
         return getTable(formClass.getId());
     }
 
-    private CollectionScan getTable(ResourceId formClassId) {
-        CollectionScan scan = tableMap.get(formClassId);
+    private FormScan getTable(ResourceId formClassId) {
+        FormScan scan = tableMap.get(formClassId);
         if(scan == null) {
-            scan = new CollectionScan(store.getCollection(formClassId).get());
+            scan = new FormScan(store.getForm(formClassId).get());
             tableMap.put(formClassId, scan);
         }
         return scan;
@@ -144,8 +144,8 @@ public class CollectionScanBatch {
 
     private Slot<ColumnView> addSubFormJoinedColumn(NodeMatch match) {
         JoinNode node = match.getJoins().get(0);
-        CollectionScan left = getTable(node.getLeftFormId());
-        CollectionScan right = getTable(node.getFormClassId());
+        FormScan left = getTable(node.getLeftFormId());
+        FormScan right = getTable(node.getFormClassId());
 
         Slot<PrimaryKeyMap> primaryKey = left.addPrimaryKey();
         Slot<ColumnView> parentColumn = right.addField(new SymbolExpr("@parent"));
@@ -157,8 +157,8 @@ public class CollectionScanBatch {
     }
 
     private ReferenceJoin addJoinLink(JoinNode node) {
-        CollectionScan left = getTable(node.getLeftFormId());
-        CollectionScan right = getTable(node.getFormClassId());
+        FormScan left = getTable(node.getLeftFormId());
+        FormScan right = getTable(node.getFormClassId());
 
         Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField());
         Slot<PrimaryKeyMap> primaryKey = right.addPrimaryKey();
@@ -173,7 +173,7 @@ public class CollectionScanBatch {
 
     /**
      * Adds a request for a "constant" column to the query batch. We don't actually need any data from
-     * the collection, but we do need the row count of the base table.
+     * the form, but we do need the row count of the base table.
      * @param rootFormClass
      * @param value
      * @return
@@ -184,7 +184,7 @@ public class CollectionScanBatch {
 
     /**
      * Adds a request for a "constant" String column to the query batch. We don't actually need any data from
-     * the collection, but we do need the row count of the base table.
+     * the form, but we do need the row count of the base table.
      * @param rootFormClass
      * @param value
      * @return
@@ -211,7 +211,7 @@ public class CollectionScanBatch {
         resolveFromCache();
         
         // Now hit the database for anything remaining...
-        for(CollectionScan scan : tableMap.values()) {
+        for(FormScan scan : tableMap.values()) {
             scan.execute();
         }
         
@@ -234,8 +234,8 @@ public class CollectionScanBatch {
             Set<String> toFetch = new HashSet<>();
 
             // Collect the keys we need from all enqueued tables
-            for (CollectionScan collectionScan : tableMap.values()) {
-                toFetch.addAll(collectionScan.getCacheKeys());
+            for (FormScan formScan : tableMap.values()) {
+                toFetch.addAll(formScan.getCacheKeys());
             }
             
             if(!toFetch.isEmpty()) {
@@ -247,8 +247,8 @@ public class CollectionScanBatch {
 
                 // Now populate the individual collection scans with what we got back from memcache 
                 // with a little luck nothing will be left to query directly from the database
-                for (CollectionScan collectionScan : tableMap.values()) {
-                    collectionScan.updateFromCache(cached);
+                for (FormScan formScan : tableMap.values()) {
+                    formScan.updateFromCache(cached);
                 }
             }
             
@@ -261,8 +261,8 @@ public class CollectionScanBatch {
     private void cacheResult() {
         Map<String, Object> toPut = Maps.newHashMap();
 
-        for (CollectionScan collectionScan : tableMap.values()) {
-            toPut.putAll(collectionScan.getValuesToCache());
+        for (FormScan formScan : tableMap.values()) {
+            toPut.putAll(formScan.getValuesToCache());
         }
         
         if(!toPut.isEmpty()) {
