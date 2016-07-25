@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gwt.core.shared.GWT;
+import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
@@ -53,8 +54,13 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Observable<ColumnSet> queryTable(QueryModel queryModel) {
+    public Observable<ColumnSet> getTable(QueryModel queryModel) {
         return new ObservablePromise<>(client.queryTableColumns(queryModel));
+    }
+
+    @Override
+    public Promise<ColumnSet> queryTable(QueryModel queryModel) {
+        return client.queryTableColumns(queryModel);
     }
 
     @Override

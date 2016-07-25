@@ -22,9 +22,10 @@ package org.activityinfo.core.shared.importing.strategy;
  */
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 import java.util.Map;
@@ -42,14 +43,16 @@ public class InstanceScoreSourceBuilder {
         this.sourceColumns = sourceColumns;
     }
 
-    public InstanceScoreSource build(List<Projection> projections) {
-        final List<ResourceId> instanceResourceIdList = Lists.newArrayList();
+    public InstanceScoreSource build(ColumnSet columnSet) {
+        final List<ResourceId> recordIdList = Lists.newArrayList();
         final List<String[]> referenceValueList = Lists.newArrayList();
 
-        for (Projection projection : projections) {
-            instanceResourceIdList.add(projection.getRootInstanceId());
-            referenceValueList.add(SingleClassImporter.toArray(projection, referenceFields, sourceColumns.size()));
+        ColumnView id = columnSet.getColumnView("_id");
+        
+        for (int i = 0; i < columnSet.getNumRows(); i++) {
+            recordIdList.add(ResourceId.valueOf(id.getString(i)));
+            referenceValueList.add(SingleClassImporter.toArray(columnSet, i, referenceFields, sourceColumns.size()));
         }
-        return new InstanceScoreSource(sourceColumns, instanceResourceIdList, referenceValueList);
+        return new InstanceScoreSource(sourceColumns, recordIdList, referenceValueList);
     }
 }

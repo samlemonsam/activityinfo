@@ -158,7 +158,7 @@ class Presenter {
             public Promise<List<Choice>> get() {
 
                 final Promise<List<Choice>> result = new Promise<>();
-                locator.queryTable(queryModel).transform(new Function<ColumnSet, List<Choice>>() {
+                locator.getTable(queryModel).transform(new Function<ColumnSet, List<Choice>>() {
                     @Nullable
                     @Override
                     public List<Choice> apply(ColumnSet input) {

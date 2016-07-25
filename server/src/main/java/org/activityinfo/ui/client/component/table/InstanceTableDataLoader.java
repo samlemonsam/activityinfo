@@ -160,7 +160,7 @@ public class InstanceTableDataLoader {
             queryModel.selectField(column.getNode().getFieldId()).as(column.getNode().getFieldId().asString());
         }
 
-        Observable<ColumnSet> observable = table.getResourceLocator().queryTable(queryModel);
+        Observable<ColumnSet> observable = table.getResourceLocator().getTable(queryModel);
         observable.subscribe(new Observer<ColumnSet>() {
             @Override
             public void onChange(Observable<ColumnSet> observable) {

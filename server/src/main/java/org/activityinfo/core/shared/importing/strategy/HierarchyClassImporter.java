@@ -25,17 +25,16 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.Pair;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
@@ -66,19 +65,22 @@ public class HierarchyClassImporter implements FieldImporter {
     @Override
     public Promise<Void> prepare(ResourceLocator locator, List<? extends SourceRow> batch) {
         final List<Promise<Void>> promises = Lists.newArrayList();
-        for (final ResourceId range : rootField.getRange()) {
-            InstanceQuery query = new InstanceQuery(Lists.newArrayList(referenceFields.keySet()), new ClassCriteria(range));
-            final Promise<List<Projection>> promise = locator.query(query);
-            promise.then(new Function<List<Projection>, Void>() {
+
+        for (final ResourceId formId : rootField.getRange()) {
+            QueryModel queryModel = new QueryModel(formId);
+            queryModel.selectResourceId().as("_id");
+            for (FieldPath referenceFieldPath : referenceFields.keySet()) {
+                queryModel.selectField(referenceFieldPath);
+            }
+            promises.add(locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
                 @Override
-                public Void apply(List<Projection> projections) {
-                    scoreSources.put(range, new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(projections));
+                public Void apply(ColumnSet columnSet) {
+                    scoreSources.put(formId, new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet));
                     return null;
                 }
-            });
-            promises.add(promise.thenDiscardResult());
+            }));
         }
-
+        
         return Promise.waitAll(promises);
     }
 

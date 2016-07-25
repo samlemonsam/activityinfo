@@ -2,17 +2,15 @@ package org.activityinfo.core.shared.importing.strategy;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -22,7 +20,7 @@ import java.util.Map;
 
 public class SingleClassImporter implements FieldImporter {
 
-    private ResourceId rangeClassId;
+    private ResourceId rangeFormId;
     private ResourceId fieldId;
 
     private boolean required;
@@ -42,13 +40,13 @@ public class SingleClassImporter implements FieldImporter {
     private InstanceScoreSource scoreSource;
     private InstanceScorer instanceScorer = null;
 
-    public SingleClassImporter(ResourceId rangeClassId,
+    public SingleClassImporter(ResourceId rangeFormId,
                                boolean required,
                                List<ColumnAccessor> sourceColumns,
                                Map<FieldPath, Integer> referenceFields,
                                List<FieldImporterColumn> fieldImporterColumns,
                                ResourceId fieldId) {
-        this.rangeClassId = rangeClassId;
+        this.rangeFormId = rangeFormId;
         this.required = required;
         this.sources = sourceColumns;
         this.referenceFields = referenceFields;
@@ -59,34 +57,36 @@ public class SingleClassImporter implements FieldImporter {
     @Override
     public Promise<Void> prepare(ResourceLocator locator, List<? extends SourceRow> batch) {
 
-        InstanceQuery query = new InstanceQuery(
-                Lists.newArrayList(referenceFields.keySet()),
-                new ClassCriteria(rangeClassId));
-        return locator.query(query).then(new Function<List<Projection>, Void>() {
+        QueryModel queryModel = new QueryModel(rangeFormId);
+        queryModel.selectResourceId().as("_id");
+        for (FieldPath fieldPath : referenceFields.keySet()) {
+            queryModel.selectField(fieldPath);
+        }
+
+        return locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
             @Nullable
             @Override
-            public Void apply(List<Projection> projections) {
-                scoreSource = new InstanceScoreSourceBuilder(referenceFields, sources).build(projections);
+            public Void apply(@Nullable ColumnSet input) {
+                scoreSource = new InstanceScoreSourceBuilder(referenceFields, sources).build(input);
                 instanceScorer = new InstanceScorer(scoreSource);
                 return null;
             }
         });
     }
-
-    public static String[] toArray(Projection projection, Map<FieldPath, Integer> referenceFields, int arraySize) {
-        String[] values = new String[arraySize];
-        for (Map.Entry<FieldPath, FieldValue> entry : projection.getValueMap().entrySet()) {
-            Integer index = referenceFields.get(entry.getKey());
-            if (index != null) {
-                Object value = entry.getValue();
-                if (value instanceof TextValue) {
-                    values[index] = ((TextValue) value).asString();
+    
+    public static String[] toArray(ColumnSet columnSet, int row, Map<FieldPath, Integer> referenceFields, int size) {
+        String[] values = new String[size];
+        for (Map.Entry<FieldPath, Integer> entry : referenceFields.entrySet()) {
+            ColumnView columnView = columnSet.getColumnView(entry.getKey().toString());
+            if(columnView != null) {
+                String stringValue = columnView.getString(row);
+                if (stringValue != null) {
+                    values[entry.getValue()] = stringValue;
                 }
             }
         }
         return values;
     }
-
 
     @Override
     public void validateInstance(SourceRow row, List<ValidationResult> results) {
@@ -130,4 +130,5 @@ public class SingleClassImporter implements FieldImporter {
     public List<FieldImporterColumn> getColumns() {
         return fieldImporterColumns;
     }
+
 }

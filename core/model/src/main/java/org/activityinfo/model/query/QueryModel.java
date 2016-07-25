@@ -31,11 +31,11 @@ public class QueryModel implements IsRecord {
     }
 
     /**
-     * Creates a new TableModel using the given {@code classId} as the
+     * Creates a new TableModel using the given {@code formId} as the
      * root FormClassId
      */
-    public QueryModel(ResourceId classId) {
-        rowSources.add(new RowSource(classId));
+    public QueryModel(ResourceId formId) {
+        rowSources.add(new RowSource(formId));
     }
 
     public List<RowSource> getRowSources() {

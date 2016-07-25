@@ -24,10 +24,7 @@ package org.activityinfo.ui.client.importer;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.strategy.*;
@@ -36,6 +33,8 @@ import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
@@ -104,33 +103,37 @@ public class InstanceScoreTest extends AbstractImporterTest {
         Map<FieldPath, Integer> referenceFields = targetCollector.getPathMap(mappedColumns, sourceColumns);
 
         // Province level
-        List<Projection> projections = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.PROVINCE_LEVEL));
-        InstanceScoreSource scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(projections);
+        ColumnSet columnSet = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.PROVINCE_LEVEL));
+        InstanceScoreSource scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet);
         InstanceScorer.Score score = score(source.getRows().get(0), scoreSource);
         assertScore(score, "Katanga");
 
         // District level
-        projections = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.DISTRICT_LEVEL));
-        scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(projections);
+        columnSet = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.DISTRICT_LEVEL));
+        scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet);
         score = score(source.getRows().get(1), scoreSource);
         assertScore(score, "Katanga");
         assertScore(score, "Tanganika");
 
 
         // Territoire level
-        projections = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.TERRITOIRE_LEVEL));
-        scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(projections);
+        columnSet = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.TERRITOIRE_LEVEL));
+        scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet);
         score = score(source.getRows().get(2), scoreSource);
         assertScore(score, "Katanga");
         assertScore(score, "Tanganika");
         assertScore(score, "Kalemie");
         assertThat(scoreSource.getReferenceInstanceIds().get(score.getBestMatchIndex()), equalTo(ImportWithMultiClassRangeTest.TERRITOIRE_KALEMIE));
-
     }
 
-    private Promise<List<Projection>> query(Map<FieldPath, Integer> referenceFields, int adminLevel) {
-        ResourceId range = CuidAdapter.adminLevelFormClass(adminLevel);
-        return locator.query(new InstanceQuery(Lists.newArrayList(referenceFields.keySet()), new ClassCriteria(range)));
+    private Promise<ColumnSet> query(Map<FieldPath, Integer> referenceFields, int adminLevel) {
+        ResourceId formId = CuidAdapter.adminLevelFormClass(adminLevel);
+        QueryModel queryModel = new QueryModel(formId);
+        queryModel.selectResourceId().as("_id");
+        for (FieldPath fieldPath : referenceFields.keySet()) {
+            queryModel.selectField(fieldPath).as(fieldPath.toString());
+        }
+        return locator.queryTable(queryModel);
     }
 
     private InstanceScorer.Score score(SourceRow row, InstanceScoreSource scoreSource) {

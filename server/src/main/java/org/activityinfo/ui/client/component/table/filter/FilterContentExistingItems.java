@@ -48,7 +48,9 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
@@ -186,7 +188,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 model.selectField(column.getFieldPaths().get(0));
 
                 final Promise<List<RowView>> result = new Promise<>();
-                table.getResourceLocator().queryTable(model).subscribe(new Observer<ColumnSet>() {
+                table.getResourceLocator().getTable(model).subscribe(new Observer<ColumnSet>() {
                     @Override
                     public void onChange(Observable<ColumnSet> observable) {
                         if (!observable.isLoading()) {
