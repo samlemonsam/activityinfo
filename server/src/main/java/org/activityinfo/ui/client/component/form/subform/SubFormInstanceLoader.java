@@ -25,12 +25,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 
@@ -52,8 +50,6 @@ public class SubFormInstanceLoader {
     }
 
     public Promise<List<FormInstance>> loadCollectionInstances(final FormClass subForm) {
-        ParentCriteria criteria = ParentCriteria.isChildOf(
-                ClassType.REPEATING.getResourceId(), model.getWorkingRootInstance().getId(), subForm.getId());
         return model.getLocator().getSubFormInstances(subForm.getId(), model.getWorkingRootInstance().getId())
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override

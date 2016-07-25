@@ -190,9 +190,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         assertThat(school("G"), equalTo(set(GROUPEMENT_LAMBO_KATENGA)));
         assertThat(school("GZ"), equalTo(set(GROUPEMENT_LAMBO_KATENGA, ZONE_SANTE_NYEMBA)));
         assertThat(school("TZ"), equalTo(set(TERRITOIRE_KALEMIE, ZONE_SANTE_NYEMBA)));
-
     }
-    
 
     private Set<ResourceId> school(String name) {
         

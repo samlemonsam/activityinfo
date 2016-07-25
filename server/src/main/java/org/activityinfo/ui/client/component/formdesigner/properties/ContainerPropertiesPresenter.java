@@ -30,11 +30,8 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormInstance;
@@ -46,7 +43,6 @@ import org.activityinfo.model.type.subform.SubFormType;
 import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
-import org.activityinfo.ui.client.widget.form.ValidationStateType;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -146,23 +142,7 @@ public class ContainerPropertiesPresenter {
      * @param subform subform class
      */
     private void setStateOfSubformTypeControl(FormClass subform) {
-        formDesigner.getResourceLocator().queryInstances(new ClassCriteria(subform.getId())).then(new AsyncCallback<List<FormInstance>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Log.error(caught.getMessage(), caught);
-            }
-
-            @Override
-            public void onSuccess(List<FormInstance> result) {
-                boolean enabled = result.size() == 0;
-                view.getSubformType().setEnabled(enabled);
-
-                if (!enabled) {
-                    view.getSubformTypeGroup().validationStateType(ValidationStateType.WARNING);
-                    view.getSubformTypeGroup().showValidationMessage(I18N.CONSTANTS.subformTypeChangeDisabled());
-                }
-            }
-        });
+        // TODO: Allow changing of subform type?
     }
 
     private boolean isSubform(FieldsHolder fieldsHolder) {

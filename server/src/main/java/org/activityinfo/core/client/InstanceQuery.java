@@ -1,10 +1,9 @@
 package org.activityinfo.core.client;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.NullCriteria;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 
@@ -137,7 +136,7 @@ public class InstanceQuery {
 
         public InstanceQuery build() {
             if (criteria == null) {
-                criteria = NullCriteria.INSTANCE;
+                throw new IllegalStateException("No criteria is specified");
             }
             return new InstanceQuery(paths, criteria, offset, maxCount);
         }
