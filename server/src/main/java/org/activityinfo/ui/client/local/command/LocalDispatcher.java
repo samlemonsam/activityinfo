@@ -33,6 +33,7 @@ import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.AbstractDispatcher;
 import org.activityinfo.legacy.client.remote.Remote;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.MutatingCommand;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -71,10 +72,27 @@ public class LocalDispatcher extends AbstractDispatcher {
     @Override
     public <R extends CommandResult> void execute(Command<R> command, final AsyncCallback<R> callback) {
 
-        if (registry.hasHandler(command)) {
+        if (hasOfflineHandler(command)) {
             executeOffline(command, callback);
         } else {
             executeRemotely(command, callback);
+        }
+    }
+
+    private boolean hasOfflineHandler(Command command) {
+        if (command instanceof BatchCommand) {
+            for (Command subCommand : ((BatchCommand) command).getCommands()) {
+                if (subCommand instanceof BatchCommand && !hasOfflineHandler(subCommand)) {
+                    return false;
+                }
+
+                if (!registry.hasHandler(subCommand)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return registry.hasHandler(command);
         }
     }
 
