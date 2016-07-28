@@ -21,15 +21,17 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.FormModel;
@@ -41,31 +43,28 @@ import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.Button;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author yuriyz on 01/18/2016.
  */
-public class SubFormRepeatingManipulator {
+public class RepeatingSubFormPanel implements IsWidget {
 
-    public static final ResourceId SORT_FIELD_ID = ResourceId.valueOf("sort");
-
+    private final FlowPanel panel;
+    
     private final FormClass subForm;
     private final FormModel formModel;
-    private final FlowPanel rootPanel;
     private final Button addButton;
     private final SubFormInstanceLoader loader;
     private final int depth;
 
     private final Map<FormModel.SubformValueKey, SimpleFormPanel> forms = Maps.newHashMap();
 
-    public SubFormRepeatingManipulator(FormClass subForm, FormModel formModel, FlowPanel rootPanel, int depth) {
+    public RepeatingSubFormPanel(FormClass subForm, FormModel formModel, int depth) {
         this.subForm = subForm;
         this.formModel = formModel;
-        this.rootPanel = rootPanel;
+        this.panel = new FlowPanel();
         this.loader = new SubFormInstanceLoader(formModel);
         this.depth = depth;
 
@@ -74,7 +73,7 @@ public class SubFormRepeatingManipulator {
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addForm(newKey(), SubFormRepeatingManipulator.this.rootPanel.getWidgetIndex(addButton));
+                addForm(newKey(), RepeatingSubFormPanel.this.panel.getWidgetIndex(addButton));
                 setDeleteButtonsState();
             }
         });
@@ -127,37 +126,16 @@ public class SubFormRepeatingManipulator {
         });
     }
 
-    private List<FormModel.SubformValueKey> getSortedKeys() {
-        List<FormModel.SubformValueKey> keys = Lists.newArrayList(formModel.getKeysBySubForm(subForm));
-
-        Collections.sort(keys, new Comparator<FormModel.SubformValueKey>() {
-            @Override
-            public int compare(FormModel.SubformValueKey o1, FormModel.SubformValueKey o2) {
-                Double d1 = o1.getTabInstance().getDouble(SORT_FIELD_ID);
-                Double d2 = o2.getTabInstance().getDouble(SORT_FIELD_ID);
-                if (d1 != null && d2 != null) {
-                    return d1.compareTo(d2);
-                }
-                return 0;
-            }
-        });
-        return keys;
-    }
 
     private void render() {
-        List<FormModel.SubformValueKey> keys = getSortedKeys();
 
-        if (keys.isEmpty()) {
-            keys.add(newKey()); // generate new key if we don't have any existing data yets
-        }
+        panel.add(PanelFiller.createHeader(depth, subForm.getLabel()));
 
-        rootPanel.add(PanelFiller.createHeader(depth, subForm.getLabel()));
+//        for (FormModel.SubformValueKey key : keys) {
+//            addForm(key);
+//        }
 
-        for (FormModel.SubformValueKey key : keys) {
-            addForm(key);
-        }
-
-        rootPanel.add(addButton);
+        panel.add(addButton);
 
     }
 
@@ -186,7 +164,7 @@ public class SubFormRepeatingManipulator {
         formPanel.addDeleteButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                rootPanel.remove(formPanel);
+                panel.remove(formPanel);
                 forms.remove(key);
 
                 if (loader.isPersisted(formModel.getSubFormInstances().get(key))) { // schedule deletion only if instance is persisted
@@ -204,15 +182,15 @@ public class SubFormRepeatingManipulator {
         forms.put(key, formPanel);
 
         if (panelIndex == -1) {
-            rootPanel.add(formPanel);
+            panel.add(formPanel);
         } else {
-            rootPanel.insert(formPanel, panelIndex);
+            panel.insert(formPanel, panelIndex);
         }
 
         setDeleteButtonsState();
 
         // set sort field
-      //  formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, rootPanel.getWidgetIndex(formPanel));
+      //  formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, panel.getWidgetIndex(formPanel));
     }
 
     private void setDeleteButtonsState() {
@@ -224,5 +202,10 @@ public class SubFormRepeatingManipulator {
 
     public Map<FormModel.SubformValueKey, SimpleFormPanel> getForms() {
         return forms;
+    }
+
+    @Override
+    public Widget asWidget() {
+        return panel;
     }
 }

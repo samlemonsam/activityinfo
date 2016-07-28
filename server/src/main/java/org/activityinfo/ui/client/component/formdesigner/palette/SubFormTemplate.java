@@ -22,24 +22,37 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
  */
 
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 /**
  * @author yuriyz on 01/21/2015.
  */
-public class SubformTemplate implements Template<FormField> {
+public class SubFormTemplate implements Template<FormField> {
+
+    private final String label;
+    private final SubFormKind kind;
+
+    public SubFormTemplate(String label, SubFormKind kind) {
+        this.label = label;
+        this.kind = kind;
+    }
 
     @Override
     public String getLabel() {
-        return "Sub Form";
+        return label;
     }
 
     @Override
     public FormField create() {
         FormField field = new FormField(ResourceId.generateFieldId(SubFormReferenceType.TYPE_CLASS));
-        field.setLabel("Sub Form");
+        field.setLabel(label);
         field.setType(new SubFormReferenceType());
         return field;
+    }
+
+    public SubFormKind getKind() {
+        return kind;
     }
 }

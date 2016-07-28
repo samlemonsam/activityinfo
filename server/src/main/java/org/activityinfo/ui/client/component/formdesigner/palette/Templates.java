@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.component.formdesigner.palette;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -48,7 +49,8 @@ public class Templates {
         items.add(new TypeClassTemplate(CalculatedFieldType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeCalculated()));
         items.add(new LabelTemplate());
         items.add(new SectionTemplate());
-        items.add(new SubformTemplate());
+        items.add(new SubFormTemplate(I18N.CONSTANTS.repeating(), SubFormKind.REPEATING));
+        items.add(new SubFormTemplate(I18N.CONSTANTS.monthly(), SubFormKind.MONTHLY));
         items.add(new TypeClassTemplate(ReferenceType.TYPE_CLASS, I18N.CONSTANTS.reference()));
 
         return items;

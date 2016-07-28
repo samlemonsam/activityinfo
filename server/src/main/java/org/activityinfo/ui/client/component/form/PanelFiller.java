@@ -22,19 +22,13 @@ package org.activityinfo.ui.client.component.form;
  */
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
-import org.activityinfo.ui.client.component.form.subform.SubFormRepeatingManipulator;
-import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
+import org.activityinfo.ui.client.component.form.subform.PeriodSubFormPanel;
+import org.activityinfo.ui.client.component.form.subform.RepeatingSubFormPanel;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 
 /**
@@ -45,16 +39,14 @@ public class PanelFiller {
     private final FlowPanel panel;
     private final FormModel model;
     private final FormWidgetCreator widgetCreator;
-    private final SubFormsHandler subFormsHandler;
     private final RelevanceHandler relevanceHandler;
 
     private boolean headingVisible = false;
 
-    public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator, SubFormsHandler subFormsHandler, RelevanceHandler relevanceHandler) {
+    public PanelFiller(FlowPanel panel, FormModel model, FormWidgetCreator widgetCreator, RelevanceHandler relevanceHandler) {
         this.panel = panel;
         this.model = model;
         this.widgetCreator = widgetCreator;
-        this.subFormsHandler = subFormsHandler;
         this.relevanceHandler = relevanceHandler;
     }
 
@@ -81,42 +73,20 @@ public class PanelFiller {
                 FormField formField = (FormField) element;
                 if (formField.isVisible()) {
                     if (formField.getType() instanceof SubFormReferenceType) {
+
                         final FormClass subForm = model.getSubFormByOwnerFieldId(formField.getId());
+                       
+                        final FlowPanel subFormFieldPanel = new FlowPanel();
+                        subFormFieldPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
+                        subFormFieldPanel.add(createHeader(depth + 1, subForm.getLabel()));
 
+                        if (subForm.getSubFormKind() == SubFormKind.REPEATING) {
+                            subFormFieldPanel.add(new RepeatingSubFormPanel(subForm, model, depth + 1));
 
-                        if (ClassType.isRepeating(subForm)) { // unkeyed subforms -> simple repeating
-                            SubFormRepeatingManipulator manipulator = new SubFormRepeatingManipulator(subForm, model, panel, depth + 1);
-                            manipulator.show();
-
-                            subFormsHandler.getSubForms().put(subForm, manipulator);
-                        } else { // keyed subforms
-                            final SubFormTabsManipulator subFormTabsManipulator = new SubFormTabsManipulator(model.getLocator(), model.getStateProvider(), relevanceHandler);
-
-                            final FlowPanel subformPanel = new FlowPanel();
-                            subformPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
-
-                            panel.add(createHeader(depth + 1, subForm.getLabel()));
-                            panel.add(subformPanel);
-
-                            new SubFormInstanceLoader(model).loadKeyedSubformInstances(subForm).then(new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    Log.error(caught.getMessage(), caught);
-
-                                    subformPanel.add(new Label(I18N.CONSTANTS.failedToLoadSubformInstances()));
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    subformPanel.add(subFormTabsManipulator.getPresenter().getView());
-                                    subFormTabsManipulator.getPresenter().getView().addStyleName(FormPanelStyles.INSTANCE.subformTabs());
-
-                                    subFormTabsManipulator.show(subForm, model);
-
-                                    add(subForm, depth + 1, subformPanel);
-                                }
-                            });
+                        } else { 
+                            subFormFieldPanel.add(new PeriodSubFormPanel(model, subForm, relevanceHandler));
                         }
+                        panel.add(subFormFieldPanel);
                     } else {
                         panel.add(widgetCreator.get(formField.getId()));
                     }

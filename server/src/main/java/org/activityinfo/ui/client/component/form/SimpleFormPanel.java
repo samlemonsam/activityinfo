@@ -47,7 +47,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private final FormActions formActions;
     private final ResourceLocator locator;
     private final RelevanceHandler relevanceHandler;
-    private final SubFormsHandler subFormsHandler;
     private final PanelFiller panelFiller;
     private Optional<Button> deleteButton = Optional.absent();
 
@@ -74,7 +73,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.model = new FormModel(locator, stateProvider);
         this.withScroll = withScroll;
         this.relevanceHandler = new RelevanceHandler(this);
-        this.subFormsHandler = new SubFormsHandler();
         this.widgetCreator = new FormWidgetCreator(model, containerFactory, widgetFactory);
 
         this.panel = new FlowPanel();
@@ -82,7 +80,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         this.panel.addStyleName("hide-button-on-over");
         this.scrollPanel = new ScrollPanel(panel);
         this.formActions = new FormActions(locator, model);
-        this.panelFiller = new PanelFiller(panel, model, widgetCreator, subFormsHandler, relevanceHandler);
+        this.panelFiller = new PanelFiller(panel, model, widgetCreator, relevanceHandler);
     }
 
     public Button addDeleteButton() { // used for collection subforms
@@ -179,7 +177,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
             validateField(widgetCreator.get(field.getId()));
         } else {
             FormClass formClass = model.getClassByField(field.getId());
-            if (formClass.getSubformType().isPresent()) {
+            if (formClass.isSubForm()) {
                 widgetCreator.get(field.getId()).setInvalid(I18N.CONSTANTS.subFormTabNotSelected());
                 widgetCreator.get(field.getId()).getFieldWidget().clearValue();
             }
@@ -252,12 +250,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 valid = false;
             }
         }
-
-        boolean isSubFormValid = subFormsHandler.validate();
-        if (valid) {
-            valid = isSubFormValid;
-        }
-
         return valid;
     }
 

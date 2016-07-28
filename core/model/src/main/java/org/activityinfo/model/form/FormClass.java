@@ -9,7 +9,6 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.subform.SubFormTypeRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,7 +50,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     private final Set<ResourceLock> locks = Sets.newHashSet();
 
     private ResourceId parentFormId = null;
-    private Optional<ResourceId> subformType = Optional.absent();
+    private SubFormKind subFormKind = null;
 
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
@@ -288,16 +287,20 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         this.parentFormId = parentFormId;
         return this;
     }
-
-    public Optional<ResourceId> getSubformType() {
-        return subformType;
+    
+    public boolean isSubForm() {
+        return subFormKind != null;
     }
 
-    public FormClass setSubformType(ResourceId subformType) {
-        // type must be in registry
-        Preconditions.checkState(SubFormTypeRegistry.get().getType(subformType) != null);
+    public SubFormKind getSubFormKind() {
+        if(!isSubForm()) {
+            throw new IllegalStateException("Not a sub form");
+        }
+        return subFormKind;
+    }
 
-        this.subformType = Optional.fromNullable(subformType);
+    public FormClass setSubFormKind(SubFormKind subFormKind) {
+        this.subFormKind = subFormKind;
         return this;
     }
 
@@ -313,8 +316,11 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         formClass.setLabel(Strings.nullToEmpty(resource.isString(LABEL_FIELD_ID)));
         formClass.elements.addAll(fromRecords(resource.getRecordList("elements")));
         formClass.locks.addAll(ResourceLock.fromRecords(resource.getRecordList("locks")));
-        formClass.subformType = resource.isString("subformType") != null ?
-                Optional.of(ResourceId.valueOf(resource.isString("subformType"))) : Optional.<ResourceId>absent();
+        
+        String subFormKind = resource.isString("subFormKind");
+        if(subFormKind != null) {
+            formClass.subFormKind = SubFormKind.valueOf(subFormKind.toUpperCase());
+        }
         formClass.parentFormId = resource.isResourceId("parentFormId");
 
         return formClass;
@@ -350,7 +356,7 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         resource.set(LABEL_FIELD_ID, label);
         resource.set("elements", Resources.asRecordList(elements));
         resource.set("locks", Resources.asRecordList(locks));
-        resource.set("subformType", subformType.isPresent() ? subformType.get().asString() : null);
+        resource.set("subFormKind", subFormKind == null ? null : subFormKind.name().toLowerCase());
         resource.set("parentFormId", parentFormId);
         return resource;
     }

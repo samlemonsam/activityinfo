@@ -189,15 +189,18 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             containerMap.put(formLabel.getId(), fieldWidgetContainer);
             drop(fieldWidgetContainer, context, formLabel);
 
-        } else if (template instanceof SubformTemplate) {
-            final FormField formField = ((SubformTemplate)template).create();
+        } else if (template instanceof SubFormTemplate) {
+            final FormField formField = ((SubFormTemplate)template).create();
 
             vetoDropIfNeeded(context);
 
-            FormClass subForm = formDesigner.getModel().registerNewSubform(formField.getId());
+            FormClass subForm = formDesigner.getModel().registerNewSubform(
+                    formField.getId(), 
+                    ((SubFormTemplate) template).getKind());
             subForm.setOwnerId(formDesigner.getRootFormClass().getId());
             subForm.setParentFormId(formDesigner.getRootFormClass().getId());
             subForm.setLabel(formField.getLabel());
+            
 
             SubFormReferenceType type = (SubFormReferenceType) formField.getType();
             type.setClassId(subForm.getId());

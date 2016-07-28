@@ -15,19 +15,5 @@
                  validationStateType="ERROR" validationMessage="{i18n.invalidLabel}" visible="false">
       <a:TextBox ui:field="label" width="100%"/>
     </f:FormGroup>
-
-    <g:HTMLPanel ui:field="subformGroup">
-
-      <!-- Subform kind -->
-      <f:FormGroup ui:field="subformTypeGroup" label="{i18n.type}" columnLabelWidth="4">
-        <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformType" enabled="false"/>
-      </f:FormGroup>
-
-      <!-- Subform sub kind -->
-      <f:FormGroup ui:field="subformSubTypeGroup" label="{i18n.subType}" columnLabelWidth="4">
-        <g:ListBox addStyleNames="form-control" multipleSelect="false" ui:field="subformSubType"/>
-      </f:FormGroup>
-
-    </g:HTMLPanel>
   </g:HTMLPanel>
 </ui:UiBinder>

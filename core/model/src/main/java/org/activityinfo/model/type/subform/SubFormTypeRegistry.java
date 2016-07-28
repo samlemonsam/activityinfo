@@ -40,7 +40,6 @@ public class SubFormTypeRegistry {
 
     private SubFormTypeRegistry() {
 
-        register(ClassType.REPEATING.createSubformKind());
 
         register(new PeriodSubFormType(PredefinedPeriods.YEARLY));
         register(new PeriodSubFormType(PredefinedPeriods.MONTHLY));

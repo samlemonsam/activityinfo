@@ -24,7 +24,6 @@ package org.activityinfo.ui.client.component.formdesigner.container;
 import com.google.common.base.Strings;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -32,9 +31,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.ClassType;
-import org.activityinfo.ui.client.component.form.FormModel;
-import org.activityinfo.ui.client.component.form.subform.SubFormTabsManipulator;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerExtended;
@@ -102,7 +98,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass subForm, ResourceId parentId) {
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, subForm, parentId);
         container.isSubform = true;
-        container.getPanel().getPanel().getSubformTabs().setVisible(!ClassType.isRepeating(subForm));
         container.getPanel().getPanel().setOnRemoveConfirmationCallback(new ClickHandler() {
             @Override
             public void onClick(final ClickEvent event) {
@@ -133,28 +128,28 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     public void syncWithModel(final boolean force) {
         panel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(elementContainer.getLabel())).asString() + "</h3>");
 
-        if (isSubform) {
-            final FormClass subForm = (FormClass) elementContainer;
-            final FormModel formModel = new FormModel(formDesigner.getResourceLocator(), formDesigner.getStateProvider());
-
-            panel.getPanel().getSubformTabs().setVisible(!ClassType.isRepeating(subForm));
-            if (!ClassType.isRepeating(subForm)) { // keyed subforms
-                final SubFormTabsManipulator tabsManipulator = new SubFormTabsManipulator(formDesigner, panel.getPanel().getSubformTabs());
-
-                if (panel.getPanel().getSubformTabs().isAttached()) {
-                    tabsManipulator.show(subForm, formModel, force);
-                } else {
-                    panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
-                        @Override
-                        public void onAttachOrDetach(AttachEvent event) {
-                            if (event.isAttached()) {
-                                tabsManipulator.show(subForm, formModel, force);
-                            }
-                        }
-                    });
-                }
-            }
-        }
+//        if (isSubform) {
+//            final FormClass subForm = (FormClass) elementContainer;
+//            final FormModel formModel = new FormModel(formDesigner.getResourceLocator(), formDesigner.getStateProvider());
+//
+//            panel.getPanel().getSubformTabs().setKind(subForm.getSubFormKind());
+//            if (subForm.getSubFormKind() != SubFormKind.REPEATING) { // keyed subforms
+//                final PeriodSubFormPanel tabsManipulator = new PeriodSubFormPanel(formDesigner, panel.getPanel().getSubformTabs());
+//
+//                if (panel.getPanel().getSubformTabs().isAttached()) {
+//                    tabsManipulator.show(subForm, formModel, force);
+//                } else {
+//                    panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
+//                        @Override
+//                        public void onAttachOrDetach(AttachEvent event) {
+//                            if (event.isAttached()) {
+//                                tabsManipulator.show(subForm, formModel, force);
+//                            }
+//                        }
+//                    });
+//                }
+//            }
+//        }
     }
 
     @Override

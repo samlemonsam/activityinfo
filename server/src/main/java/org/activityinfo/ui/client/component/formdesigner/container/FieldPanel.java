@@ -28,7 +28,6 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.ui.client.component.form.subform.SubFormTabs;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
@@ -51,7 +50,7 @@ public class FieldPanel {
 
     // workaround to avoid parent FocusPanel onClick handling
     // Example: Subform focus panel contains field focus panel.
-    //          If click on field focus panel click is invoked for both field and subform focus panels.
+    //          If click on field focus panel click is invoked for both field and subform focus panels.\
     // Requirement: show properties only for field or only for subform.
     // Solution: we mark parent focus panel with FieldsHolderPanel.FIELDS_HOLDER_ATTRIBUTE_NAME
     //           and setting ignoreClickOneTime for parent to true. So it makes illusion that click event
@@ -68,8 +67,6 @@ public class FieldPanel {
     SimplePanel widgetContainer;
     @UiField
     Label dragHandle;
-    @UiField
-    SubFormTabs subformTabs;
     @UiField
     FlowPanel subformContainer;
 
@@ -169,10 +166,6 @@ public class FieldPanel {
 
     public SimplePanel getWidgetContainer() {
         return widgetContainer;
-    }
-
-    public SubFormTabs getSubformTabs() {
-        return subformTabs;
     }
 
     public String getSelectedClassName() {

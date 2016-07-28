@@ -29,12 +29,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.FocusPanel;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormElement;
-import org.activityinfo.model.form.FormElementContainer;
-import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.ClassType;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldPanel;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
@@ -63,11 +59,11 @@ public class FormDesignerModel {
         return rootFormClass;
     }
 
-    public FormClass registerNewSubform(ResourceId formFieldId) {
+    public FormClass registerNewSubform(ResourceId formFieldId, SubFormKind subFormKind) {
         final FormClass formClass = new FormClass(ResourceId.generateId());
 
         formClass.setOwnerId(rootFormClass.getId());
-        formClass.setSubformType(ClassType.REPEATING.createSubformKind().getDefinition().getId());
+        formClass.setSubFormKind(subFormKind);
 
         registerSubform(formFieldId, formClass);
         return formClass;
