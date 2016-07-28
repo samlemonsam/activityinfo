@@ -217,6 +217,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Are you sure you want to remove this report from the dashboard?")
     String confirmRemoveFromDashboard();
 
+    @DefaultStringValue("Unable to share report. It is blank (no indicators/fields selected.)")
+    String unableToShareReport();
+
     @DefaultStringValue("Connection problem")
     String connectionProblem();
 
