@@ -5,6 +5,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -33,6 +34,8 @@ public class MySqlCatalog implements FormCatalog {
     private final QueryExecutor executor;
     private LoadingCache<ResourceId, Optional<FormAccessor>> sessionCache;
     private final ActivityLoader activityLoader;
+    
+    private GeodbFolder geodbFolder;
 
     public MySqlCatalog(final QueryExecutor executor) {
 
@@ -50,6 +53,8 @@ public class MySqlCatalog implements FormCatalog {
         providers.add(new LocationFormProvider());
         providers.add(new HrdProvider());
 
+        geodbFolder = new GeodbFolder(executor);
+        
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormAccessor>>() {
             @Override
@@ -147,6 +152,29 @@ public class MySqlCatalog implements FormCatalog {
         }
         
         return resultMap;
+    }
+
+    @Override
+    public List<CatalogEntry> getRootEntries() {
+        
+        List<CatalogEntry> entries = new ArrayList<>();
+        entries.add(geodbFolder.getRootEntry());
+
+        return entries;
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId) {
+        
+        try {
+            List<CatalogEntry> entries = new ArrayList<>();
+            entries.addAll(geodbFolder.getChildren(parentId));
+
+            return entries;
+            
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

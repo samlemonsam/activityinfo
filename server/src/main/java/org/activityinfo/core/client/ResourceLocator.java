@@ -2,6 +2,7 @@ package org.activityinfo.core.client;
 
 
 import org.activityinfo.core.shared.criteria.Criteria;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormClassProvider;
@@ -82,5 +83,7 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     Promise<Void> remove(ResourceId formId, ResourceId resourceId);
 
     Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources);
+    
+    Promise<List<CatalogEntry>> getCatalogEntries(String parentId);
     
 }

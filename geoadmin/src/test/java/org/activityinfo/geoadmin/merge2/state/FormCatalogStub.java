@@ -1,15 +1,14 @@
 package org.activityinfo.geoadmin.merge2.state;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class FormCatalogStub implements FormCatalog {
     
@@ -29,6 +28,16 @@ public class FormCatalogStub implements FormCatalog {
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CatalogEntry> getRootEntries() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId) {
+        return null;
     }
 
     @Override

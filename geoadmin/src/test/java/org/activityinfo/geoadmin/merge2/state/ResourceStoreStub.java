@@ -2,6 +2,7 @@ package org.activityinfo.geoadmin.merge2.state;
 
 import com.google.common.base.Optional;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -18,6 +19,8 @@ import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.io.Resources.getResource;
@@ -84,6 +87,16 @@ public class ResourceStoreStub implements ResourceStore {
         @Override
         public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<CatalogEntry> getRootEntries() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<CatalogEntry> getChildren(String parentId) {
+            return Collections.emptyList();
         }
 
 

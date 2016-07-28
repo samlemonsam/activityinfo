@@ -30,7 +30,6 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import org.activityinfo.core.shared.criteria.ParentCriteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
@@ -178,13 +177,10 @@ public class ContainerPropertiesPresenter {
         view.getSubformSubType().clear();
         view.getSubformSubTypeGroup().setVisible(true);
 
-        // restricted by activity form class (means by db of that activity but we don't want to mess code with legacy here,
-        // so deal with it in QueryExecutor)
-        ResourceId restrictedBy = formDesigner.getModel().getRootFormClass().getId();
-
-        ParentCriteria criteria = ParentCriteria.isChildOf(classType.getResourceId(), restrictedBy);
-
-        formDesigner.getResourceLocator().queryInstances(criteria).then(new Function<List<FormInstance>, Object>() {
+        // TODO: Is this id of the root form instance?
+        ResourceId parentId = classType.getResourceId();
+        
+        formDesigner.getResourceLocator().getSubFormInstances(subForm.getId(), parentId).then(new Function<List<FormInstance>, Object>() {
             @Override
             public Object apply(List<FormInstance> instances) {
                 int index = 0;

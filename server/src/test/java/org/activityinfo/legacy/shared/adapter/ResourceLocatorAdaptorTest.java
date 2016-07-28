@@ -1,8 +1,6 @@
 package org.activityinfo.legacy.shared.adapter;
 
 
-import com.google.common.base.Joiner;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
@@ -19,18 +17,15 @@ import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
@@ -65,21 +60,6 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     public static final int IRUMU = 21;
 
     
-    @Test
-    public void simpleAdminEntityQuery() {
-        assertThat(queryByClass(adminLevelFormClass(PROVINCE_ADMIN_LEVEL_ID)), Matchers.hasSize(4));
-    }
-
-    @Test
-    public void simplePartnerQuery() {
-        assertThat(queryByClass(partnerFormClass(PEAR_DATABASE_ID)), Matchers.hasSize(3));
-    }
-
-    @Test
-    public void simpleLocationQuery() {
-        assertThat(queryByClass(locationFormClass(HEALTH_CENTER_LOCATION_TYPE)), Matchers.hasSize(4));
-    }
-
     @Test
     @OnDataSet("/dbunit/jordan-locations.db.xml")
     public void getLocation() {
@@ -225,26 +205,20 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getAdminEntity(2).getId(), equalTo(12));
     }
 
-    private List<FormInstance> queryByClass(ResourceId classId) {
-        Promise<List<FormInstance>> promise = locator.queryInstances(new ClassCriteria(classId));
-
-        List<FormInstance> list = assertResolves(promise);
-
-        System.out.println(Joiner.on("\n").join(list));
-        return list;
-    }
-    
-
     @Test
     public void deleteLocation() {
 
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
         assertResolves(locator.remove(CuidAdapter.locationFormClass(1), instanceToDelete));
 
-        List<FormInstance> formInstances = assertResolves(locator.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
+        QueryModel queryModel = new QueryModel(CuidAdapter.locationFormClass(1));
+        queryModel.selectResourceId().as("id");
 
-        for (FormInstance instance : formInstances) {
-            if (instance.getId().equals(instanceToDelete)) {
+        ColumnSet columnSet = assertResolves(locator.queryTable(queryModel));
+        ColumnView idColumn = columnSet.getColumnView("id");
+
+        for (int i = 0; i < idColumn.numRows(); i++) {
+            if(idColumn.getString(i).equals(instanceToDelete.asString())) {
                 throw new AssertionError();
             }
         }

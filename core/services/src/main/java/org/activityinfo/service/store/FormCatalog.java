@@ -1,11 +1,13 @@
 package org.activityinfo.service.store;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,5 +22,7 @@ public interface FormCatalog extends FormClassProvider {
 
     Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds);
     
+    List<CatalogEntry> getRootEntries();
     
+    List<CatalogEntry> getChildren(String parentId);
 }

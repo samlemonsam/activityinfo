@@ -235,7 +235,9 @@ paths:
         200:
           description: The catalog 
           schema:
-            $ref: '#/definitions/FormCatalog'
+            type: array
+            items: 
+              $ref: '#/definitions/FormCatalogEntry'
 
 definitions:
   FormSchema:
@@ -394,15 +396,7 @@ definitions:
         type: array
         items: 
           type: string
-    
-  FormCatalog:
-    type: object
-    properties:
-      entries:
-        type: array
-        items: 
-          $ref: '#/definitions/FormCatalogEntry'
-          
+
   FormCatalogEntry:
     type: object
     properties:

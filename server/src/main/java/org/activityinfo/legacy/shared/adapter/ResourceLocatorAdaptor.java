@@ -10,10 +10,7 @@ import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
@@ -192,6 +189,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public Promise<List<CatalogEntry>> getCatalogEntries(String parentId) {
+        return client.getFormCatalog(parentId);
     }
 
 }

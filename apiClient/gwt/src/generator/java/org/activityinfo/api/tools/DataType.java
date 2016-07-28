@@ -1,5 +1,6 @@
 package org.activityinfo.api.tools;
 
+import com.google.gson.JsonParser;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -36,13 +37,13 @@ public abstract class DataType {
      */
     public abstract CodeBlock fromJsonString(CodeBlock jsonStringExpr);
 
-    public final CodeBlock fromJsonString(String jsonStringExpr) {
-        return fromJsonString(CodeBlock.of(jsonStringExpr));
-    }
-
     public abstract CodeBlock fromJsonElement(CodeBlock jsonElementExpr);
     
     public CodeBlock fromJsonArray(CodeBlock jsonArrayExpr) {
         throw new UnsupportedOperationException("TODO: this = " + this);
+    }
+
+    protected final CodeBlock parse(CodeBlock jsonStringExpr) {
+        return CodeBlock.of("new $T().parse($L)", JsonParser.class, jsonStringExpr);
     }
 }

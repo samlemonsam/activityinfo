@@ -4,7 +4,11 @@ import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
-import org.activityinfo.api.client.*;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
+import org.activityinfo.api.client.NewFormRecordBuilder;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
@@ -88,7 +92,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
 
     @Override
-    public Promise<List<FormCatalogEntry>> getFormCatalog(String parent) {
+    public Promise<List<CatalogEntry>> getFormCatalog(String parent) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 

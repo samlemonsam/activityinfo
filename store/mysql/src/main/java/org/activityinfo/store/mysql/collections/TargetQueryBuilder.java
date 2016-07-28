@@ -15,7 +15,6 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;

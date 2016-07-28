@@ -2,6 +2,7 @@ package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.query.RowSource;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -78,6 +80,16 @@ public class FeatureSourceCatalog implements FormCatalog {
             }
         }
         return map;
+    }
+
+    @Override
+    public List<CatalogEntry> getRootEntries() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId) {
+        return null;
     }
 
     @Override

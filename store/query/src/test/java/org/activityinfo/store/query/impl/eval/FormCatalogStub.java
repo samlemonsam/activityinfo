@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl.eval;
 
 import com.google.appengine.repackaged.com.google.api.client.util.Lists;
 import com.google.common.base.Optional;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
@@ -44,6 +45,16 @@ class FormCatalogStub implements FormCatalog {
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CatalogEntry> getRootEntries() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId) {
         throw new UnsupportedOperationException();
     }
 

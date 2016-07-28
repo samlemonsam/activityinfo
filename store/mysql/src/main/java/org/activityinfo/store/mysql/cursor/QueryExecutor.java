@@ -9,7 +9,9 @@ import java.util.List;
  */
 public interface QueryExecutor {
 
-    ResultSet query(String sql);
+    ResultSet query(String sql, Object... parameters);
+    
+    ResultSet query(String sql, List<?> parameters);
 
     int update(String sql, List<?> parameters);
 }

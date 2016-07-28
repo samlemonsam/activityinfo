@@ -38,6 +38,8 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.CatalogEntry;
+import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.widget.ModalDialog;
 
@@ -54,7 +56,8 @@ public class ChooseFormDialog extends Composite {
     interface OurUiBinder extends UiBinder<Widget, ChooseFormDialog> {
     }
 
-    private final MultiSelectionModel<ChooseFormTreeModel.Node> selectionModel = new MultiSelectionModel<>(ChooseFormTreeModel.Node.KEY_PROVIDER);
+    private final MultiSelectionModel<CatalogEntry> selectionModel = 
+            new MultiSelectionModel<>(ChooseFormTreeModel.KEY_PROVIDER);
     private final ModalDialog dialog;
     private HandlerRegistration okClickRegistration;
 
@@ -86,10 +89,10 @@ public class ChooseFormDialog extends Composite {
         });
     }
 
-    private Set<ChooseFormTreeModel.Node> getSelectedLeafNodes() {
-        Set<ChooseFormTreeModel.Node> set = Sets.newHashSet();
-        for (ChooseFormTreeModel.Node node : selectionModel.getSelectedSet()) {
-            if (node.isLeaf()) {
+    private Set<CatalogEntry> getSelectedLeafNodes() {
+        Set<CatalogEntry> set = Sets.newHashSet();
+        for (CatalogEntry node : selectionModel.getSelectedSet()) {
+            if (node.getType() == CatalogEntryType.FORM) {
                 set.add(node);
             }
         }
@@ -98,7 +101,7 @@ public class ChooseFormDialog extends Composite {
 
     private CellBrowser createBrowser(ResourceLocator resourceLocator) {
         ChooseFormTreeModel model = new ChooseFormTreeModel(resourceLocator, selectionModel);
-        return new CellBrowser.Builder<ChooseFormTreeModel.Node>(model, null)
+        return new CellBrowser.Builder<CatalogEntry>(model, null)
                 .loadingIndicator(new Label(I18N.CONSTANTS.loading()))
                 .pageSize(9999)
                 .build();
@@ -118,8 +121,8 @@ public class ChooseFormDialog extends Composite {
 
     public List<ResourceId> getFormClassIds() {
         List<ResourceId> ids = Lists.newArrayList();
-        for (ChooseFormTreeModel.Node node : getSelectedLeafNodes()) {
-            ids.add(node.getId());
+        for (CatalogEntry node : getSelectedLeafNodes()) {
+            ids.add(ResourceId.valueOf(node.getId()));
         }
         return ids;
     }

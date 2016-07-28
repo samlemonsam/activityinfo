@@ -212,7 +212,7 @@ public class RootResource {
     
     @Path("/catalog")
     public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
-        return new CatalogResource();
+        return new CatalogResource(catalog);
     }
     
 }

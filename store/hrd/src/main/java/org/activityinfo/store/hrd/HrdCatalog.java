@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.FormAccessor;
@@ -67,6 +68,16 @@ public class HrdCatalog implements FormCatalog {
         }
         
         return formClassMap;
+    }
+
+    @Override
+    public List<CatalogEntry> getRootEntries() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId) {
+        return Collections.emptyList();
     }
 
     @Override

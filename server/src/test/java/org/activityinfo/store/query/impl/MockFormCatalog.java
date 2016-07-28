@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -11,6 +12,8 @@ import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormPermissions;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 
@@ -33,6 +36,16 @@ public class MockFormCatalog implements FormCatalog {
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CatalogEntry> getRootEntries() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId) {
         throw new UnsupportedOperationException();
     }
 

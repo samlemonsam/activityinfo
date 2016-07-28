@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -66,10 +67,14 @@ public class DbUnit {
     public QueryExecutor getExecutor() {
         return new QueryExecutor() {
             @Override
-            public ResultSet query(String sql) {
-                Statement statement;
+            public ResultSet query(String sql, Object... parameters) {
+                return query(sql, Arrays.asList(parameters));
+            }
+
+            @Override
+            public ResultSet query(String sql, List<?> parameters) {
                 try {
-                    statement = connection.createStatement();
+                    PreparedStatement statement = prepare(sql, parameters);
                     return statement.executeQuery(sql);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -82,10 +87,7 @@ public class DbUnit {
                 System.out.println(sql);
                 
                 try {
-                    PreparedStatement statement = connection.prepareStatement(sql);
-                    for (int i = 0; i < parameters.size(); ++i) {
-                        statement.setObject(i + 1, parameters.get(i));
-                    }
+                    PreparedStatement statement = prepare(sql, parameters);
                     int rowsAffected = statement.executeUpdate();
                     
                     return rowsAffected;
@@ -93,6 +95,14 @@ public class DbUnit {
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
+            }
+
+            private PreparedStatement prepare(String sql, List<?> parameters) throws SQLException {
+                PreparedStatement statement = connection.prepareStatement(sql);
+                for (int i = 0; i < parameters.size(); ++i) {
+                    statement.setObject(i + 1, parameters.get(i));
+                }
+                return statement;
             }
         };
     }

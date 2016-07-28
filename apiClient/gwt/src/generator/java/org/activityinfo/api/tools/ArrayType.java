@@ -42,7 +42,7 @@ public class ArrayType extends DataType {
 
     @Override
     public CodeBlock fromJsonString(CodeBlock jsonStringExpr) {
-        throw new UnsupportedOperationException();
+        return fromJsonElement(parse(jsonStringExpr));
     }
 
     @Override

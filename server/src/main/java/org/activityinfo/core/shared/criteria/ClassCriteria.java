@@ -1,6 +1,5 @@
 package org.activityinfo.core.shared.criteria;
 
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -25,11 +24,6 @@ public class ClassCriteria implements Criteria {
     @Override
     public boolean apply(@Nonnull FormInstance input) {
         return classId.equals(input.getClassId());
-    }
-
-    @Override
-    public boolean apply(@Nonnull Projection projection) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

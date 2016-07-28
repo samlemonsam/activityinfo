@@ -4,6 +4,7 @@ package org.activityinfo.api.tools;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
@@ -23,6 +24,7 @@ public class ProvidedModel extends DataType {
         MODELS.put("ColumnSet", ClassName.get(ColumnSet.class));
         MODELS.put("ColumnView", ClassName.get(ColumnView.class));
         MODELS.put("TableQuery", ClassName.get(QueryModel.class));
+        MODELS.put("FormCatalogEntry", ClassName.get(CatalogEntry.class));
     }
 
     public static boolean isProvided(String name) {
