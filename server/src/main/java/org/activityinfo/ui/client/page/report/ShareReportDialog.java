@@ -157,6 +157,11 @@ public class ShareReportDialog extends Dialog {
     }
 
     public void show(final Report report) {
+        if (report.getIndicators().isEmpty()) {
+            MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.unableToShareReport(), null);
+            return;
+        }
+
         super.show();
 
         this.currentReport = report;
