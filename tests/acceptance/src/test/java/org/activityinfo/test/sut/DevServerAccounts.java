@@ -101,7 +101,8 @@ public class DevServerAccounts implements Accounts {
             insertUsers(Arrays.asList(email));
         }
 
-        return new UserAccount(email, DEV_PASSWORD);
+//        return new UserAccount(email, DEV_PASSWORD);
+        return new UserAccount("user_a444982268f42fd5@mailinator.com", DEV_PASSWORD);
     }
 
     public void flush() {
