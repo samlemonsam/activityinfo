@@ -26,7 +26,6 @@ import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.app.Section;
 import org.activityinfo.ui.client.page.config.ConfigFrameSet;
-import org.activityinfo.ui.client.page.config.DbListPageState;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +49,7 @@ public class IndicatorLinkPlace implements PageState {
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof DbListPageState;
+        return obj != null && obj instanceof IndicatorLinkPlace;
     }
 
     @Override
