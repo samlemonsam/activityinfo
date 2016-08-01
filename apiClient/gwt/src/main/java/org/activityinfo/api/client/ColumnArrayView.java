@@ -44,7 +44,7 @@ class ColumnArrayView implements ColumnView {
 
     @Override
     public double getDouble(int row) {
-        return Double.NaN;
+        return getDouble(array, row);
     }
 
     @Override
