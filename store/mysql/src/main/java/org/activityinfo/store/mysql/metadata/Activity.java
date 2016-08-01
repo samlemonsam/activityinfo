@@ -17,7 +17,6 @@ public class Activity implements Serializable {
 
     int activityId;
     int databaseId;
-    int databaseOwnerId;
     String databaseName;
     int reportingFrequency;
     int locationTypeId;
@@ -45,6 +44,7 @@ public class Activity implements Serializable {
 
 
     List<ActivityField> fields = Lists.newArrayList();
+    Map<ResourceId, Integer> fieldsOrder = Maps.newHashMap();
 
     /**
      * Map from destination indicator to it source indicators
@@ -87,6 +87,10 @@ public class Activity implements Serializable {
 
     public List<ActivityField> getFields() {
         return fields;
+    }
+
+    public Map<ResourceId, Integer> getFieldsOrder() {
+        return fieldsOrder;
     }
 
     public String getName() {

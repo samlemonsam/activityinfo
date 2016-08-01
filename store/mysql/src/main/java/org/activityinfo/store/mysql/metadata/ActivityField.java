@@ -25,6 +25,7 @@ public class ActivityField implements Serializable {
         this.id = id;
         this.category = category;
         this.formField = formField;
+        this.sortOrder = sortOrder;
     }
 
     public int getId() {

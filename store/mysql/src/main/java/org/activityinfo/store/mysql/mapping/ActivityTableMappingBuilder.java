@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.mapping;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -16,9 +17,7 @@ import org.activityinfo.store.mysql.metadata.ActivityField;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 
@@ -75,6 +74,8 @@ public class ActivityTableMappingBuilder {
         
         mapping.addComments();
 
+        sortFormClassFields(mapping.formClass, activity.getFieldsOrder());
+
         return mapping;
     }
 
@@ -96,10 +97,22 @@ public class ActivityTableMappingBuilder {
         for (ActivityField indicatorField : activity.getIndicatorFields()) {
             mapping.addIndicatorOrAttributeField(indicatorField);
         }
+
+        sortFormClassFields(mapping.formClass, activity.getFieldsOrder());
         
         return mapping;
     }
 
+    private static void sortFormClassFields(FormClass formClass, final Map<ResourceId, Integer> sortMap) {
+        Collections.sort(formClass.getElements(), new Comparator<FormElement>() {
+            @Override
+            public int compare(FormElement o1, FormElement o2) {
+                Integer c1 = sortMap.get(o1.getId());
+                Integer c2 = sortMap.get(o2.getId());
+                return c1 != null && c2 != null ? c1.compareTo(c2) : 0;
+            }
+        });
+    }
 
     public void addDateFields() {
         FormField date1 = new FormField(field(classId, START_DATE_FIELD))

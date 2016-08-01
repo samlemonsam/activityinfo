@@ -357,6 +357,7 @@ public class ActivityLoader {
     private void addFields(Activity activity, FormClass formClass) {
         int sortOrder = 1;
         for (FormField formField : formClass.getFields()) {
+            activity.fieldsOrder.put(formField.getId(), sortOrder); // include also built-in fields
             switch (formField.getId().getDomain()) {
                 case CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN:
                 case CuidAdapter.INDICATOR_DOMAIN:
