@@ -122,7 +122,7 @@ Feature: Site API
     country:
       id: 1
       name: RDC
-      code: null
+      code: "CD"
     partners: 
       - id: $Default
         name: Default

@@ -35,6 +35,8 @@ public class PartnerForm extends FormPanel {
 
     private FormBinding binding;
 
+    private final TextField<String> nameField;
+
     public PartnerForm() {
         super();
 
@@ -42,7 +44,7 @@ public class PartnerForm extends FormPanel {
 
         UiConstants constants = GWT.create(UiConstants.class);
 
-        TextField<String> nameField = new TextField<String>();
+        nameField = new TextField<String>();
         nameField.setFieldLabel(constants.name());
         nameField.setMaxLength(PartnerDTO.NAME_MAX_LENGTH);
         nameField.setAllowBlank(false);
@@ -51,10 +53,14 @@ public class PartnerForm extends FormPanel {
         this.add(nameField);
 
         TextField<String> fullField = new TextField<String>();
-        fullField.setFieldLabel(constants.fullName());
+        fullField.setFieldLabel(constants.description());
         fullField.setMaxLength(64);
         binding.addFieldBinding(new FieldBinding(fullField, "fullName"));
         this.add(fullField);
+    }
+
+    public TextField<String> getNameField() {
+        return nameField;
     }
 
     public FormBinding getBinding() {

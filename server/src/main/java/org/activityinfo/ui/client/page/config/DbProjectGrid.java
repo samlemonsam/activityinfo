@@ -99,7 +99,7 @@ public class DbProjectGrid extends AbstractGridView<ProjectDTO, DbProjectEditor>
         ProjectForm form = new ProjectForm();
         form.getBinding().bind(project);
         form.getNameField().setValidator(
-                new CompositeValidator(new BlankValidator(), new UniqueNameValidator(new DbProjectEditor.UniqueNamesFunction(grid.getStore().getModels()))));
+                new CompositeValidator(new BlankValidator(), new UniqueNameValidator(new UniqueNameValidator.UniqueNamesFunction(grid.getStore().getModels()))));
         FormDialogImpl<ProjectForm> dlg = new FormDialogImpl<ProjectForm>(form);
         dlg.setWidth(450);
         dlg.setHeight(300);

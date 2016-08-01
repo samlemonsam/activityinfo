@@ -508,8 +508,8 @@ public class UiApplicationDriver extends ApplicationDriver {
     @Override
     public LinkIndicatorsPage getLinkIndicatorPage() {
         ensureLoggedIn();
-
-        return applicationPage.navigateToDesignTab().linkIndicators();
+        currentPage = applicationPage.navigateToDesignTab().linkIndicators();
+        return (LinkIndicatorsPage) currentPage;
     }
 
     @Override
@@ -710,11 +710,15 @@ public class UiApplicationDriver extends ApplicationDriver {
     public void assertLinkedIndicatorsMarked(List<IndicatorLink> linkedIndicatorRows, boolean marked) {
         LinkIndicatorsPage linkIndicatorsPage = getLinkIndicatorPage();
         linkIndicatorsPage.getSourceDb().waitUntilAtLeastOneRowIsLoaded();
+        linkIndicatorsPage.getTargetDb().waitUntilAtLeastOneRowIsLoaded();
 
         for (IndicatorLink row : linkedIndicatorRows) {
 
             Preconditions.checkState(linkIndicatorsPage.getSourceDb().findCell(aliasTable.getAlias(row.getSourceDb())).hasIcon(), marked);
             Preconditions.checkState(linkIndicatorsPage.getTargetDb().findCell(aliasTable.getAlias(row.getDestDb())).hasIcon(), marked);
+
+            linkIndicatorsPage.getSourceDb().clickCell(aliasTable.getAlias(row.getSourceDb()));
+            linkIndicatorsPage.getTargetDb().clickCell(aliasTable.getAlias(row.getDestDb()));
 
             GxtGrid sourceIndicator = linkIndicatorsPage.getSourceIndicator().waitUntilAtLeastOneRowIsLoaded();
             GxtGrid targetIndicator = linkIndicatorsPage.getTargetIndicator().waitUntilAtLeastOneRowIsLoaded();
@@ -722,6 +726,7 @@ public class UiApplicationDriver extends ApplicationDriver {
             Preconditions.checkState(sourceIndicator.findCell(aliasTable.getAlias(row.getSourceIndicator())).hasIcon(), marked);
             Preconditions.checkState(targetIndicator.findCell(aliasTable.getAlias(row.getDestIndicator())).hasIcon(), marked);
         }
+
     }
 
     public void assertDataEntryTableForForm(String formName, DataTable expectedTable) {

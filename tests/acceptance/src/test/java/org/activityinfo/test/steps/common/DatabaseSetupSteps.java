@@ -20,6 +20,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.test.driver.*;
 import org.activityinfo.test.driver.model.IndicatorLink;
 import org.activityinfo.test.pageobject.bootstrap.BsModal;
+import org.activityinfo.test.pageobject.web.design.LinkIndicatorsPage;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -636,7 +637,8 @@ public class DatabaseSetupSteps {
 
     @Then("^source indicator link database shows:$")
     public void source_indicator_link_database_shows(DataTable expectedTable) throws Throwable {
-        DataTable dataTable = driver.getLinkIndicatorPage().getSourceIndicator().extractData(false);
+        LinkIndicatorsPage page = (LinkIndicatorsPage) driver.getCurrentPage();
+        DataTable dataTable = page.getSourceIndicator().extractData(false);
         driver.setup().getAliasTable().deAlias(dataTable).unorderedDiff(expectedTable);
     }
 

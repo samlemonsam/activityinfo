@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.page.config;
  */
 
 import com.extjs.gxt.ui.client.data.DataReader;
+import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -37,7 +38,6 @@ import org.activityinfo.ui.client.page.common.nav.Navigator;
 import org.activityinfo.ui.client.page.config.link.IndicatorLinkPlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -112,16 +112,14 @@ public class ConfigNavigator implements Navigator {
     }
 
     private void loadDbList(final AsyncCallback<List<Link>> callback, SchemaDTO result) {
-        List<Link> list = new ArrayList<Link>();
+        List<Link> list = Lists.newArrayList();
         for (UserDatabaseDTO db : result.getDatabases()) {
-            if (db.isDesignAllowed() || db.isManageUsersAllowed()) {
-                Link link = Link.to(new DbPageState(DbConfigPresenter.PAGE_ID, db.getId()))
-                                .labeled(db.getName())
-                                .withIcon(icons.database())
-                                .build();
-                link.set("db", db);
-                list.add(link);
-            }
+            Link link = Link.to(new DbPageState(DbConfigPresenter.PAGE_ID, db.getId()))
+                    .labeled(db.getName())
+                    .withIcon(icons.database())
+                    .build();
+            link.set("db", db);
+            list.add(link);
         }
         callback.onSuccess(list);
     }
