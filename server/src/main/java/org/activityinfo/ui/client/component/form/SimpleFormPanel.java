@@ -107,19 +107,23 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     @Override
     public Promise<Void> show(final FormInstance instance) {
         model.setWorkingRootInstance(instance);
-        return model.loadFormClassWithDependentSubForms(instance.getClassId()).then(new Function<Void, Promise<Void>>() {
-            @Nullable
+
+        final Promise<Void> result = new Promise<>();
+
+        model.loadFormClassWithDependentSubForms(instance.getClassId()).then(new Function<Void, Void>() {
             @Override
-            public Promise<Void> apply(@Nullable Void input) {
-                return buildForm(model.getRootFormClass());
-            }
-        }).join(new Function<Promise<Void>, Promise<Void>>() {
-            @Nullable
-            @Override
-            public Promise<Void> apply(@Nullable Promise<Void> input) {
-                return setValue(instance);
+            public Void apply(Void input) {
+                buildForm(model.getRootFormClass()).then(new Function<Void, Object>() {
+                    @Override
+                    public Object apply(Void input) {
+                        setValue(instance).then(result);
+                        return null;
+                    }
+                });
+                return null;
             }
         });
+        return result;
     }
 
     private Promise<Void> buildForm(final FormClass formClass) {
