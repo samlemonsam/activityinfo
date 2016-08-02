@@ -52,7 +52,7 @@ public class EditHeaderAction implements TableHeaderAction {
         final RowView selectedRow = table.getSelectionModel().getSelectedSet().iterator().next();
         final FormDialog dialog = new FormDialog(table.getResourceLocator(), table.getStateProvider());
         dialog.setDialogTitle(I18N.CONSTANTS.editSubmission());
-        dialog.show(selectedRow.getResourceId(), new FormDialogCallback() {
+        dialog.show(selectedRow.getResourceId(), table.getRootFormClass().getId(), new FormDialogCallback() {
             @Override
             public void onPersisted(List<FormInstance> instance) {
                 table.reload();

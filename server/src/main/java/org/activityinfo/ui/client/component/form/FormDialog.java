@@ -106,13 +106,13 @@ public class FormDialog {
     }
 
 
-    public void show(final ResourceId instanceId, FormDialogCallback callback) {
+    public void show(final ResourceId instanceId, final ResourceId formId, FormDialogCallback callback) {
         this.callback = callback;
         loadingPanel.show(new Provider<Promise<FormInstance>>() {
 
             @Override
             public Promise<FormInstance> get() {
-                return resourceLocator.getFormInstance(ResourceId.valueOf("TODO"), instanceId);
+                return resourceLocator.getFormInstance(formId, instanceId);
             }
         });
         dialog.show();
