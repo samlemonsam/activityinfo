@@ -282,20 +282,21 @@ public class GwtClientGenerator {
 
     private void addQueryParameters(MethodSpec.Builder method, Operation operation) {
         List<Parameter> queryParameters = queryParameters(operation);
-        if(queryParameters.size() == 1) {
-            Parameter queryParameter = queryParameters.get(0);
+
+        int i = 0;
+        for (Parameter queryParameter : queryParameters) {
             if (queryParameter.getRequired()) {
                 method.addStatement("assert $L != null", queryParameter.getName());
             } else {
                 method.beginControlFlow("if($L != null)", queryParameter.getName());
             }
+            String parametersSeparator = i == 0 ? "?" : "&";
             method.addStatement("urlBuilder.append($S).append($T.encode($L))",
-                    "?" + queryParameter.getName() + "=", UriUtils.class, queryParameter.getName());
+                    parametersSeparator + queryParameter.getName() + "=", UriUtils.class, queryParameter.getName());
             if (!queryParameter.getRequired()) {
                 method.endControlFlow();
             }
-        } else if(queryParameters.size() > 1) {
-            throw new UnsupportedOperationException("TODO");
+            i++;
         }
     }
 

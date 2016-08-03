@@ -110,6 +110,11 @@ paths:
           description: Limits the records to those which are sub-records of this parent record id.
           required: false
           type: string
+        - name: keyId
+          in: query
+          description: Limits the records to those which are sub-records of this key id.
+          required: false
+          type: string
       responses:
         200:
           description: The requested records
