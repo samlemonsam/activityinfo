@@ -55,10 +55,8 @@ public class FormRecordEntity implements TypedEntity {
         if(formClass.getParentField().isPresent()) {
             record.setParentRecordId(getParentId());
         }
-//
-//        if(entity.getProperty("keyId") != null) {
-//            formInstance.setKeyId(ResourceId.valueOf((String) entity.getProperty("keyId")));
-//        }
+
+        record.setKeyId(getKeyId());
 
         for (FormField formField : formClass.getFields()) {
             Object value = entity.getProperty(formField.getName());

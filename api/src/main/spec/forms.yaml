@@ -305,6 +305,9 @@ definitions:
       parentRecordId:
         type: string
         description: The id of the parent FormRecord, if this record belongs to a subform
+      keyId:
+        type: string
+        description: The key id, if this record belongs to a subform
       fields:
         type: object
         description: Dictionary of field values of this FormRecord
@@ -340,6 +343,9 @@ definitions:
         type: string
         description: id of the parent FormRecord, if this is record is a member
           of a subform
+      keyId:
+        type: string
+        description: key id, if this is record is a member of a subform
       fieldValues:
         type: object
         description: Dictionary of the fields intial values

@@ -12,6 +12,7 @@ public class RecordUpdate {
     
     private ResourceId resourceId;
     private ResourceId parentId;
+    private ResourceId keyId;
     private boolean deleted = false;
     private Map<ResourceId, FieldValue> changedFieldValues = new HashMap<>();
     
@@ -29,6 +30,14 @@ public class RecordUpdate {
 
     public void setParentId(ResourceId parentId) {
         this.parentId = parentId;
+    }
+
+    public ResourceId getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(ResourceId keyId) {
+        this.keyId = keyId;
     }
 
     public void set(ResourceId fieldId, FieldValue value) {

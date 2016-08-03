@@ -52,7 +52,11 @@ public class CreateOrUpdateRecord implements Operation {
                 if (parentId == null) {
                     throw new InvalidUpdateException("@parent is required for subform submissions");
                 }
+                if (update.getKeyId() == null) {
+                    throw new InvalidUpdateException("@key is required for subform submissions");
+                }
                 updated.setParentId(parentId);
+                updated.setKeyId(update.getKeyId());
             }
         }
 

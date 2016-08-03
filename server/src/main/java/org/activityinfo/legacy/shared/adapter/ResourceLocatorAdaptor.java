@@ -78,7 +78,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId) {
-        final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString());
+        final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString(), null);
         final Promise<FormClass> subFormClass = getFormClass(subFormId);
         return Promise.waitAll(records, subFormClass).then(new Function<Void, List<FormInstance>>() {
             @Nullable
@@ -124,6 +124,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         NewFormRecordBuilder update = new NewFormRecordBuilder();
         update.setId(instance.getId().asString());
         update.setParentRecordId(instance.getOwnerId().asString());
+        update.setKeyId(instance.getKeyId().isPresent() ? instance.getKeyId().get().asString() : null);
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
