@@ -14,9 +14,9 @@ public class MonthCursor implements PeriodCursor {
     }
 
     @Override
-    public PeriodTab get(int i) {
+    public Tab get(int i) {
         Month month = currentMonth.plus(i);
-        return new PeriodTab(month.toString(), month.toString());
+        return new Tab(month.toString(), month.toString());
     }
 
     @Override

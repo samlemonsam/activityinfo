@@ -137,7 +137,7 @@ public class FormResource {
     @GET
     @Path("records")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRecords(@QueryParam("parentId") String parentId) {
+    public Response getRecords(@QueryParam("parentId") String parentId, @QueryParam("keyId") String keyId) {
 
         assertVisible(resourceId);
         
@@ -147,7 +147,7 @@ public class FormResource {
         }
 
         HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
-        Iterable<FormRecord> records = hrdForm.getSubmissionsOfParent(ResourceId.valueOf(parentId));
+        Iterable<FormRecord> records = hrdForm.getSubmissions(ResourceId.valueOf(parentId), ResourceId.valueOf(keyId));
 
         FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
         recordSet.setFormId(resourceId.asString());

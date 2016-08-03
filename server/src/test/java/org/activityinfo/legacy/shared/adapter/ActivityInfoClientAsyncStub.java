@@ -143,9 +143,8 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         }
     }
 
-
     @Override
-    public Promise<FormRecordSet> getRecords(String formId, String parentId) {
+    public Promise<FormRecordSet> getRecords(String formId, String parentId, String keyId) {
         FormCatalog catalog = newCatalog();
         Optional<FormAccessor> collection = catalog.getForm(ResourceId.valueOf(formId));
 

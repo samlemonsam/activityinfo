@@ -96,11 +96,18 @@ public class HrdFormAccessor implements FormAccessor {
         return query(FormRecordEntity.parentFilter(parentId));
     }
 
+    public Iterable<FormRecord> getSubmissions(ResourceId parentId, ResourceId keyId) {
+        return query(new Query.CompositeFilter(Query.CompositeFilterOperator.AND, Lists.<Query.Filter>newArrayList(
+                FormRecordEntity.parentFilter(parentId),
+                FormRecordEntity.keyFilter(keyId)
+        )));
+    }
+
     public Iterable<FormRecord> getSubmissions() {
         return query(null);
     }
 
-    private Iterable<FormRecord> query(Query.FilterPredicate filter) {
+    private Iterable<FormRecord> query(Query.Filter filter) {
         FormRootKey rootKey = new FormRootKey(formClass.getId());
         final Query query = new Query(FormRecordEntity.KIND, rootKey.raw());
         query.setFilter(filter);

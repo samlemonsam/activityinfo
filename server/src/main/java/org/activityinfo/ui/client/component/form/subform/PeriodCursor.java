@@ -9,7 +9,7 @@ public interface PeriodCursor {
     /**
      * Gets the {@code i}-th period, relative to the current position.
      */
-    PeriodTab get(int i);
+    Tab get(int i);
 
     /**
      * Advances (or retreats) the cursor {@code count} periods relative to the current

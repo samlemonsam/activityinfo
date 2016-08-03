@@ -6,7 +6,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.FieldConverter;
@@ -25,7 +24,12 @@ public class FormRecordEntity implements TypedEntity {
      * For sub form submissions, the parent form submission id. Indexed.
      */
     public static final String PARENT_PROPERTY = "@parent";
-    
+
+    /**
+     * For sub form submission keys, like "2016", "July 2015", "London"
+     */
+    public static final String SUBFORM_KEY_PROPERTY = "@subformKey";
+
     private FormRecordKey key;
     private final Entity entity;
 
@@ -78,6 +82,19 @@ public class FormRecordEntity implements TypedEntity {
             return ResourceId.valueOf(parentId);
         }
     }
+
+    public ResourceId getKeyId() {
+        String keyId = (String) entity.getProperty(SUBFORM_KEY_PROPERTY);
+        if(keyId == null) {
+            return null;
+        } else {
+            return ResourceId.valueOf(keyId);
+        }
+    }
+
+    public void setKeyId(ResourceId keyId) {
+        entity.setProperty(SUBFORM_KEY_PROPERTY, keyId.asString());
+    }
     
     public void setParentId(ResourceId parentId) {
         entity.setProperty(PARENT_PROPERTY, parentId.asString());
@@ -99,4 +116,9 @@ public class FormRecordEntity implements TypedEntity {
     public static Query.FilterPredicate parentFilter(ResourceId parentId) {
         return new Query.FilterPredicate(PARENT_PROPERTY, Query.FilterOperator.EQUAL, parentId.asString());
     }
+
+    public static Query.FilterPredicate keyFilter(ResourceId keyId) {
+        return new Query.FilterPredicate(SUBFORM_KEY_PROPERTY, Query.FilterOperator.EQUAL, keyId.asString());
+    }
+
 }

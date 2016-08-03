@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import org.activityinfo.model.form.SubFormKind;
 
 
-public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<PeriodTab> {
+public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<Tab> {
 
     public interface Templates extends SafeHtmlTemplates {
 
@@ -87,7 +87,7 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
         list.append(TEMPLATES.button(-1, "<"));
 
         for(int i=0;i<tabCount;++i) {
-            PeriodTab tab = cursor.get(i);
+            Tab tab = cursor.get(i);
             list.append(TEMPLATES.tab(tab.getId(), tab.getLabel()));
         }
         list.append(TEMPLATES.button(+5, ">"));
@@ -96,22 +96,22 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
     }
 
     @Override
-    public PeriodTab getValue() {
+    public Tab getValue() {
         return null;
     }
 
     @Override
-    public void setValue(PeriodTab value) {
+    public void setValue(Tab value) {
         
     }
 
     @Override
-    public void setValue(PeriodTab value, boolean fireEvents) {
+    public void setValue(Tab value, boolean fireEvents) {
 
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<PeriodTab> handler) {
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Tab> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
     
