@@ -31,6 +31,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.form.subform.PeriodTabStrip;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerExtended;
@@ -128,28 +129,12 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     public void syncWithModel(final boolean force) {
         panel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(elementContainer.getLabel())).asString() + "</h3>");
 
-//        if (isSubform) {
-//            final FormClass subForm = (FormClass) elementContainer;
-//            final FormModel formModel = new FormModel(formDesigner.getResourceLocator(), formDesigner.getStateProvider());
-//
-//            panel.getPanel().getSubformTabs().setKind(subForm.getSubFormKind());
-//            if (subForm.getSubFormKind() != SubFormKind.REPEATING) { // keyed subforms
-//                final PeriodSubFormPanel tabsManipulator = new PeriodSubFormPanel(formDesigner, panel.getPanel().getSubformTabs());
-//
-//                if (panel.getPanel().getSubformTabs().isAttached()) {
-//                    tabsManipulator.show(subForm, formModel, force);
-//                } else {
-//                    panel.getPanel().getSubformTabs().addAttachHandler(new AttachEvent.Handler() {
-//                        @Override
-//                        public void onAttachOrDetach(AttachEvent event) {
-//                            if (event.isAttached()) {
-//                                tabsManipulator.show(subForm, formModel, force);
-//                            }
-//                        }
-//                    });
-//                }
-//            }
-//        }
+        if (isSubform) {
+            final FormClass subForm = (FormClass) elementContainer;
+            if (subForm.getSubFormKind().isPeriod()) {
+                panel.getPanel().getSubformContainer().add(new PeriodTabStrip(subForm.getSubFormKind()));
+            }
+        }
     }
 
     @Override

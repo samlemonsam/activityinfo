@@ -40,9 +40,6 @@ import org.activityinfo.model.form.SubFormKind;
 
 public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<PeriodTab> {
 
-
-    private SubFormKind kind;
-
     public interface Templates extends SafeHtmlTemplates {
 
         @Template("<li><a href=\"#\" data-period=\"{0}\">{1}</a></li>")
@@ -57,13 +54,14 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
     }
     
     private static final Templates TEMPLATES = GWT.create(Templates.class);
-    
+
+    private SubFormKind kind;
     private int tabCount = 5;
     private PeriodCursor cursor = new MonthCursor();
     
     public PeriodTabStrip(SubFormKind kind) {
         super(SafeHtmlUtils.EMPTY_SAFE_HTML);
-        this.kind = kind;
+        setKind(kind);
         sinkEvents(Event.CLICK);
         
         addDomHandler(this, ClickEvent.getType());
@@ -71,6 +69,7 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
     }
 
     public void setKind(SubFormKind kind) {
+        this.kind = kind;
         switch (kind) {
             case MONTHLY:
                 setVisible(true);
