@@ -28,4 +28,20 @@ public class Tab {
     public SubFormKind getKind() {
         return kind;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tab tab = (Tab) o;
+
+        return !(id != null ? !id.equals(tab.id) : tab.id != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

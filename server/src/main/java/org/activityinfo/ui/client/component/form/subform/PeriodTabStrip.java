@@ -22,8 +22,8 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.gargoylesoftware.htmlunit.javascript.host.Event;
-import com.google.api.client.util.Preconditions;
-import com.google.appengine.repackaged.com.google.api.client.util.Strings;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -44,10 +44,10 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
 
     public interface Templates extends SafeHtmlTemplates {
 
-        @Template("<li><a href=\"#\" data-period=\"{0}\">{1}</a></li>")
-        SafeHtml tab(String periodId, String label);
+        @Template("<li class=\"{2}\"><a href=\"javascript:\" data-period=\"{0}\" >{1}</a></li>")
+        SafeHtml tab(String periodId, String label, String cssClass);
 
-        @Template("<li><a href=\"#\" data-cursor=\"{0}\">{1}</a></li>")
+        @Template("<li><a href=\"javascript:\" data-cursor=\"{0}\">{1}</a></li>")
         SafeHtml button(int cursorChange, String label);
         
         @Template("<ul class=\"nav nav-pills\">{0}</ul>")
@@ -94,7 +94,8 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
 
         for(int i=0;i<tabCount;++i) {
             Tab tab = cursor.get(i);
-            list.append(TEMPLATES.tab(tab.getId(), tab.getLabel()));
+            String cssClass = tab.equals(getValue()) ? "active" : "";
+            list.append(TEMPLATES.tab(tab.getId(), tab.getLabel(), cssClass));
         }
         list.append(TEMPLATES.button(+1, ">"));
         list.append(TEMPLATES.button(+5, ">>"));
@@ -142,6 +143,8 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
         String dataPeriod = element.getAttribute("data-period");
         if (!Strings.isNullOrEmpty(dataPeriod)) {
             this.value = cursor.get(dataPeriod);
+            render();
+            ValueChangeEvent.fire(this, value);
         }
     }
 

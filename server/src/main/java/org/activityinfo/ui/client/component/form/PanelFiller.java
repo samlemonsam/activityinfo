@@ -83,8 +83,11 @@ public class PanelFiller {
                         if (subForm.getSubFormKind() == SubFormKind.REPEATING) {
                             subFormFieldPanel.add(new RepeatingSubFormPanel(subForm, model, depth + 1));
 
-                        } else { 
-                            subFormFieldPanel.add(new PeriodSubFormPanel(model, subForm, relevanceHandler));
+                        } else {
+                            PeriodSubFormPanel subformPanel = new PeriodSubFormPanel(model, subForm, relevanceHandler);
+                            add(subForm, depth + 1, subformPanel.getPanel());
+
+                            subFormFieldPanel.add(subformPanel);
                         }
                         panel.add(subFormFieldPanel);
                     } else {

@@ -21,18 +21,14 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
-import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.RelevanceHandler;
-import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -41,45 +37,31 @@ import javax.annotation.Nullable;
 public class PeriodSubFormPanel implements IsWidget {
 
     private final FlowPanel panel;
-    private FormClass subForm;
+    private final FormClass subForm;
     private final PeriodTabStrip tabStrip;
-    
-    private final ResourceLocator resourceLocator;
-    
-    private boolean designMode;
-    private Optional<RelevanceHandler> relevanceHandler = Optional.absent();
+    private final RelevanceHandler relevanceHandler;
 
     @Nullable
     private PeriodValue periodValue = null; // if not null then period instance generator is in use
 
     private FormModel formModel;
-    private FormDesigner formDesigner;
-    
-    private PeriodSubFormPanel(ResourceLocator locator, FormClass subForm) {
-        this.panel = new FlowPanel();
+
+    public PeriodSubFormPanel(FormModel formModel, FormClass subForm, RelevanceHandler relevanceHandler) {
         this.subForm = subForm;
+        this.formModel = formModel;
+        this.relevanceHandler = relevanceHandler;
+
+        this.panel = new FlowPanel();
         this.tabStrip = new PeriodTabStrip(subForm.getSubFormKind());
         this.panel.add(tabStrip);
-        this.resourceLocator = locator;
-    }
-
-    public PeriodSubFormPanel(FormModel formModel,
-                              FormClass subForm,
-                              RelevanceHandler relevanceHandler) {
-        this(formModel.getLocator(), subForm);
-        this.designMode = false;
-        this.relevanceHandler = Optional.of(relevanceHandler);
-        this.designMode = false;
-    }
-
-    public PeriodSubFormPanel(@Nonnull FormDesigner formDesigner, FormClass subForm) {
-        this(formDesigner.getResourceLocator(), subForm);
-        this.formDesigner = formDesigner;
-        this.designMode = true;
     }
 
     @Override
     public Widget asWidget() {
+        return panel;
+    }
+
+    public FlowPanel getPanel() {
         return panel;
     }
 }
