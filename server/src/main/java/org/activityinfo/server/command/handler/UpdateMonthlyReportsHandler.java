@@ -25,7 +25,7 @@ package org.activityinfo.server.command.handler;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
@@ -38,7 +38,6 @@ import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;
 import javax.persistence.EntityManager;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Map;
 
 import static org.activityinfo.legacy.shared.model.IndicatorDTO.getPropertyName;

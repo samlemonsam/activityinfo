@@ -42,6 +42,7 @@ import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.Collector;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.OnDataSet;

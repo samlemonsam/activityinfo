@@ -23,10 +23,7 @@ package org.activityinfo.server.command.handler;
  */
 
 import org.activityinfo.legacy.shared.command.Command;
-import org.activityinfo.legacy.shared.command.Month;
-import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.impl.AuthorizationHandler;
-import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
+import org.activityinfo.model.date.Month;
 
 import java.util.Calendar;
 import java.util.Date;

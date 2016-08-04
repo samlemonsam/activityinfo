@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;

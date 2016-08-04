@@ -1,4 +1,4 @@
-package org.activityinfo.legacy.shared.command;
+package org.activityinfo.model.date;
 
 /*
  * #%L

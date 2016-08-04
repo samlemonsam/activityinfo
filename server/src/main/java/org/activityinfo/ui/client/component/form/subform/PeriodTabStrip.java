@@ -22,6 +22,8 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.gargoylesoftware.htmlunit.javascript.host.Event;
+import com.google.api.client.util.Preconditions;
+import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -57,10 +59,14 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
 
     private SubFormKind kind;
     private int tabCount = 5;
-    private PeriodCursor cursor = new MonthCursor();
+    private PeriodCursor cursor;
+    private Tab value;
     
     public PeriodTabStrip(SubFormKind kind) {
         super(SafeHtmlUtils.EMPTY_SAFE_HTML);
+
+        Preconditions.checkNotNull(kind);
+
         setKind(kind);
         sinkEvents(Event.CLICK);
         
@@ -90,24 +96,31 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
             Tab tab = cursor.get(i);
             list.append(TEMPLATES.tab(tab.getId(), tab.getLabel()));
         }
-        list.append(TEMPLATES.button(+5, ">"));
-        list.append(TEMPLATES.button(+1, ">>"));
+        list.append(TEMPLATES.button(+1, ">"));
+        list.append(TEMPLATES.button(+5, ">>"));
         getElement().setInnerSafeHtml(TEMPLATES.tabList(list.toSafeHtml()));
     }
 
     @Override
     public Tab getValue() {
-        return null;
+        return value;
     }
 
     @Override
     public void setValue(Tab value) {
-        
+        setValue(value, false);
     }
 
     @Override
     public void setValue(Tab value, boolean fireEvents) {
+        this.value = value;
 
+        cursor.setCurrentPeriod(cursor.getValue(value.getId()));
+        render();
+
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, value);
+        }
     }
 
     @Override
@@ -118,23 +131,21 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
     @Override
     public void onClick(ClickEvent event) {
         Element element = event.getNativeEvent().getEventTarget().cast();
-        if(element.getAttribute("data-cursor") != null) {
-            int change = Integer.parseInt(element.getAttribute("data-cursor"));
+        String dataCursor = element.getAttribute("data-cursor");
+        if (!Strings.isNullOrEmpty(dataCursor)) {
+            int change = Integer.parseInt(dataCursor);
             cursor.advance(change);
             render();
+            return;
         }
-        GWT.log("clicked...");  
+
+        String dataPeriod = element.getAttribute("data-period");
+        if (!Strings.isNullOrEmpty(dataPeriod)) {
+            this.value = cursor.get(dataPeriod);
+        }
     }
 
-//    private void applyInstanceValues(FormInstance instance) {
-//        Set<FieldContainer> containers = formModel.getContainersOfClass(subForm.getId());
-//        for (FieldContainer fieldContainer : containers) {
-//            FieldValue fieldValue = instance.get(fieldContainer.getField().getId());
-//            if (fieldValue != null) {
-//                fieldContainer.getFieldWidget().setValue(fieldValue);
-//            } else {
-//                fieldContainer.getFieldWidget().clearValue();
-//            }
-//        }
-//    }
+    public SubFormKind getKind() {
+        return kind;
+    }
 }

@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import org.activityinfo.legacy.shared.command.result.VoidResult;
+import org.activityinfo.model.date.Month;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -25,7 +25,7 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
 import com.google.common.base.Objects;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 

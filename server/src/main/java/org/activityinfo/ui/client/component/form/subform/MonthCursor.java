@@ -1,11 +1,12 @@
 package org.activityinfo.ui.client.component.form.subform;
 
 
-import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.model.date.Month;
+import org.activityinfo.model.form.SubFormKind;
 
 import java.util.Date;
 
-public class MonthCursor implements PeriodCursor {
+public class MonthCursor implements PeriodCursor<Month> {
 
     private Month currentMonth;
 
@@ -15,12 +16,33 @@ public class MonthCursor implements PeriodCursor {
 
     @Override
     public Tab get(int i) {
-        Month month = currentMonth.plus(i);
-        return new Tab(month.toString(), month.toString());
+        return get(currentMonth.plus(i));
+    }
+
+    public Tab get(Month month) {
+        return new Tab(month.toString(), month.toString(), SubFormKind.MONTHLY);
+    }
+
+    public Tab get(String dataPeriod) {
+        return get(getValue(dataPeriod));
     }
 
     @Override
     public void advance(int count) {
         currentMonth = currentMonth.plus(count);
+    }
+
+    @Override
+    public Month getValue(String dataPeriod) {
+        return Month.parseMonth(dataPeriod);
+    }
+
+    @Override
+    public Month getCurrentPeriod() {
+        return currentMonth;
+    }
+
+    public void setCurrentPeriod(Month currentMonth) {
+        this.currentMonth = currentMonth;
     }
 }
