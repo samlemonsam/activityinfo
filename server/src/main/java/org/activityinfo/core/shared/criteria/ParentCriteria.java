@@ -98,7 +98,7 @@ public class ParentCriteria implements Criteria {
 
     @Override
     public boolean apply(@Nonnull FormInstance instance) {
-        return Objects.equals(parent.getParentId(), instance.getOwnerId());
+        return Objects.equals(parent.getParentId(), instance.getParentRecordId());
     }
 
     @Override

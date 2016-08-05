@@ -33,6 +33,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
 
@@ -73,24 +74,24 @@ import java.util.Set;
 public class FormModel {
 
     /**
-     * Key for subform value instance.
+     * Key for subform value instances.
      */
     public static class SubformValueKey {
 
         private final FormClass subForm;
-        private final FormInstance tabInstance;
+        private final FormInstance rootInstance;
 
-        public SubformValueKey(FormClass subForm, FormInstance tabInstance) {
+        public SubformValueKey(FormClass subForm, FormInstance rootInstance) {
             this.subForm = subForm;
-            this.tabInstance = tabInstance;
+            this.rootInstance = rootInstance;
         }
 
         public FormClass getSubForm() {
             return subForm;
         }
 
-        public FormInstance getTabInstance() {
-            return tabInstance;
+        public FormInstance getRootInstance() {
+            return rootInstance;
         }
 
         @Override
@@ -100,24 +101,15 @@ public class FormModel {
 
             SubformValueKey that = (SubformValueKey) o;
 
-            return !(subForm != null ? !subForm.equals(that.subForm) : that.subForm != null) && !(tabInstance != null ? !tabInstance.equals(that.tabInstance) : that.tabInstance != null);
+            return !(subForm != null ? !subForm.equals(that.subForm) : that.subForm != null) && !(rootInstance != null ? !rootInstance.equals(that.rootInstance) : that.rootInstance != null);
 
         }
 
         @Override
         public int hashCode() {
             int result = subForm != null ? subForm.hashCode() : 0;
-            result = 31 * result + (tabInstance != null ? tabInstance.hashCode() : 0);
+            result = 31 * result + (rootInstance != null ? rootInstance.hashCode() : 0);
             return result;
-        }
-
-        /**
-         * Value instance id is composition of subform class id and key id (selected tab instance id).
-         *
-         * @return value instance id.
-         */
-        public ResourceId generateValueInstanceId() {
-            return tabInstance.getId();
         }
     }
 
@@ -134,11 +126,6 @@ public class FormModel {
      * Keeps formfieldId to owner FormClass
      */
     private final Map<ResourceId, FormClass> formFieldToFormClass = Maps.newHashMap();
-
-    /**
-     * Keeps selected instance (tab) for given sub form class.
-     */
-    private final BiMap<FormClass, FormInstance> selectedInstances = HashBiMap.create();
 
     private final Set<ResourceId> persistedInstanceToRemoveByLocator = Sets.newHashSet();
 
@@ -161,9 +148,9 @@ public class FormModel {
     private FormInstance workingRootInstance;
 
     /**
-     * Keeps reporting instance to value instance (e.g. Period instance to values of subform for this period).
+     * Subform value instances for given Subform Class and Root instance
      */
-    private final BiMap<SubformValueKey, FormInstance> subFormInstances = HashBiMap.create();
+    private final BiMap<SubformValueKey, List<FormInstance>> subFormInstances = HashBiMap.create();
 
     /**
      * Keeps formClass to create FieldContainers map.
@@ -262,69 +249,65 @@ public class FormModel {
         this.workingRootInstance = workingRootInstance;
     }
 
-    public Optional<FormInstance> getWorkingInstance(ResourceId formFieldId) {
+    public Optional<FormInstance> getSubformValueInstance(FormClass subformClass, FormInstance rootInstance, ResourceId keyId) {
+        List<FormInstance> formInstances = subFormInstances.get(new SubformValueKey(subformClass, rootInstance));
+        if (formInstances != null) {
+            for (FormInstance instance : formInstances) {
+                if (instance.getKeyId().get().equals(keyId)) {
+                    return Optional.of(instance);
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<FormInstance> getWorkingInstance(ResourceId formFieldId, ResourceId keyId) {
         FormClass classByField = getClassByField(formFieldId);
         if (classByField.equals(rootFormClass)) {
             return Optional.of(getWorkingRootInstance());
         }
-        FormInstance selectedTab = selectedInstances.get(classByField);
+        if (classByField.isSubForm()) {
+            Optional<FormInstance> valueInstance = getSubformValueInstance(classByField, getWorkingRootInstance(), keyId);
+            if (valueInstance.isPresent()) {
+                return valueInstance;
+            } else {
+                FormInstance newInstance = new FormInstance(ResourceId.generateId(), classByField.getId());
+                newInstance.setParentRecordId(getWorkingRootInstance().getId());
+                newInstance.setKeyId(keyId);
 
-        if (selectedTab == null) {
-            return Optional.absent(); // on initial form creation we may have nothing selected
-        }
+                SubformValueKey valueKey = new SubformValueKey(classByField, getWorkingRootInstance());
+                List<FormInstance> allInstances = subFormInstances.get(valueKey);
+                if (allInstances == null) {
+                    allInstances = Lists.newArrayList();
+                    subFormInstances.put(valueKey, allInstances);
+                }
+                allInstances.add(newInstance);
 
-        return Optional.of(createSubFormValueInstanceIfAbsent(new SubformValueKey(classByField, selectedTab)));
-    }
-
-    public BiMap<SubformValueKey, FormInstance> getSubFormInstances() {
-        return subFormInstances;
-    }
-
-    /**
-     * Returns list of tabs mentioned in subFormInstances map. Or in other words involved in interaction by user during the session.
-     *
-     * @return list of tabs mentioned in subFormInstances map
-     */
-    public List<FormInstance> getSubformPresentTabs() {
-        List<FormInstance> result = Lists.newArrayList();
-
-        for (SubformValueKey key : subFormInstances.keySet()) {
-            result.add(key.getTabInstance());
-        }
-        return result;
-    }
-
-    public Set<SubformValueKey> getKeysBySubForm(FormClass subForm) {
-        Set<SubformValueKey> set = Sets.newHashSet();
-
-        for (SubformValueKey key : subFormInstances.keySet()) {
-            if (key.getSubForm().equals(subForm)) {
-                set.add(key);
+                return Optional.of(newInstance);
             }
         }
-
-        return set;
+        throw new RuntimeException("Failed to identify working instance for field: " + formFieldId + ", keyId: " + keyId);
     }
 
-    public void setSelectedInstance(FormInstance tabInstance, FormClass subForm) {
-        selectedInstances.put(subForm, tabInstance);
-        createSubFormValueInstanceIfAbsent(new SubformValueKey(subForm, tabInstance));
-    }
-
-    private FormInstance createSubFormValueInstanceIfAbsent(SubformValueKey key) {
-        FormInstance valueInstance = subFormInstances.get(key);
-        if (valueInstance == null) {
-            valueInstance = new FormInstance(key.generateValueInstanceId(), key.getSubForm().getId());
-            valueInstance.setOwnerId(getWorkingRootInstance().getId());
-            valueInstance.setKeyId(key.getTabInstance().getId());
-            subFormInstances.put(key, valueInstance);
-        }
-        return valueInstance;
+    public BiMap<SubformValueKey, List<FormInstance>> getSubFormInstances() {
+        return subFormInstances;
     }
 
     public Set<FieldContainer> getContainersOfClass(ResourceId classId) {
         Set<FieldContainer> containers = classToFields.get(classId);
         return containers != null ? containers : Collections.<FieldContainer>emptySet();
+    }
+
+    public void applyInstanceValues(FormInstance instance, FormClass formClass) {
+        Set<FieldContainer> containers = getContainersOfClass(formClass.getId());
+        for (FieldContainer fieldContainer : containers) {
+            FieldValue fieldValue = instance.get(fieldContainer.getField().getId());
+            if (fieldValue != null) {
+                fieldContainer.getFieldWidget().setValue(fieldValue);
+            } else {
+                fieldContainer.getFieldWidget().clearValue();
+            }
+        }
     }
 
     public FormModel addContainerOfClass(ResourceId classId, FieldContainer fieldContainer) {

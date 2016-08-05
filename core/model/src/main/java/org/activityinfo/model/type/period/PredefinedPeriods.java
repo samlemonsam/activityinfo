@@ -28,6 +28,7 @@ import org.activityinfo.model.resource.ResourceIdPrefixType;
 /**
  * @author yuriyz on 01/27/2015.
  */
+@Deprecated // todo remove!
 public enum PredefinedPeriods {
 
     YEARLY(new PeriodValue().setYear(1)),

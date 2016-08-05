@@ -129,7 +129,7 @@ public class FormDialog {
         dialog.getStatusLabel().setText(I18N.CONSTANTS.saving());
         dialog.getPrimaryButton().setEnabled(false);
         formPanel.getRelevanceHandler().resetValuesForFieldsWithAppliedRelevance();
-        formPanel.getFormActions().save().then(new AsyncCallback<Void>() {
+        formPanel.getFormActions().save().then(new AsyncCallback<List<FormInstance>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -139,12 +139,9 @@ public class FormDialog {
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(List<FormInstance> result) {
                 dialog.hide();
-                List<FormInstance> callbackList = Lists.newArrayList(formPanel.getModel().getWorkingRootInstance());
-                callbackList.addAll(formPanel.getModel().getSubFormInstances().values());
-                callbackList.addAll(formPanel.getModel().getSubformPresentTabs());
-                callback.onPersisted(callbackList);
+                callback.onPersisted(result);
             }
         });
     }

@@ -51,7 +51,7 @@ public class FormInstance implements IsResource {
 
     private ResourceId id;
     private ResourceId classId;
-    private ResourceId ownerId;
+    private ResourceId parentRecordId;
     private Optional<ResourceId> keyId = Optional.absent();
     private PropertyBag propertyBag;
 
@@ -66,7 +66,7 @@ public class FormInstance implements IsResource {
         Preconditions.checkNotNull(id, classId);
         this.id = id;
         this.classId = classId;
-        this.ownerId = classId;
+        this.parentRecordId = classId;
         this.propertyBag = new PropertyBag();
     }
 
@@ -97,7 +97,7 @@ public class FormInstance implements IsResource {
     public static FormInstance fromResource(Resource resource) {
         FormInstance instance = new FormInstance(resource.getId(), resource.getResourceId("classId"));
         if (resource.getOwnerId() != null) { // owner may be null for FieldTypes
-            instance.setOwnerId(resource.getOwnerId());
+            instance.setParentRecordId(resource.getOwnerId());
         }
         instance.setKeyId(resource.isString("keyId") != null ? ResourceId.valueOf(resource.isString("keyId")) : null);
         instance.propertyBag.setAll(resource);
@@ -108,7 +108,7 @@ public class FormInstance implements IsResource {
     public Resource asResource() {
         Resource resource = Resources.createResource();
         resource.setId(id);
-        resource.setOwnerId(ownerId);
+        resource.setOwnerId(parentRecordId);
         resource.set("classId", classId);
         resource.set("keyId", keyId.isPresent() ? keyId.get().asString() : null);
         resource.setAll(propertyBag);
@@ -119,14 +119,14 @@ public class FormInstance implements IsResource {
         return classId;
     }
 
-    public FormInstance setOwnerId(ResourceId ownerId) {
-        assert ownerId != null;
-        this.ownerId = ownerId;
+    public FormInstance setParentRecordId(ResourceId parentRecordId) {
+        assert parentRecordId != null;
+        this.parentRecordId = parentRecordId;
         return this;
     }
 
-    public ResourceId getOwnerId() {
-        return ownerId;
+    public ResourceId getParentRecordId() {
+        return parentRecordId;
     }
 
     public FormInstance setKeyId(ResourceId keyId) {
@@ -342,7 +342,7 @@ public class FormInstance implements IsResource {
         return "FormInstance{" +
                 "id=" + id +
                 ", classId=" + classId +
-                ", ownerId=" + ownerId +
+                ", parentRecordId=" + parentRecordId +
                 ", keyId=" + keyId +
                 ", propertyBag=" + propertyBag +
                 '}';

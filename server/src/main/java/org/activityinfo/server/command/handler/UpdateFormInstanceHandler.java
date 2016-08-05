@@ -46,7 +46,7 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
         FormInstance formInstance = validateFormInstance(cmd.getJson());
 
         // Check permission to edit
-        ResourceId parentId = formInstance.getOwnerId();
+        ResourceId parentId = formInstance.getParentRecordId();
         if(parentId.getDomain() != CuidAdapter.SITE_DOMAIN) {
             throw new UnsupportedOperationException("Permission check only implemented for subform instances of sites");
         }
@@ -58,7 +58,7 @@ public class UpdateFormInstanceHandler implements CommandHandler<UpdateFormInsta
         // Translate the form instance to a ResourceUpdate
         RecordUpdate update = new RecordUpdate();
         update.setResourceId(formInstance.getId());
-        update.setParentId(formInstance.getOwnerId());
+        update.setParentId(formInstance.getParentRecordId());
 
         for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
             if(!entry.getKey().equals(ResourceId.valueOf("classId")) &&

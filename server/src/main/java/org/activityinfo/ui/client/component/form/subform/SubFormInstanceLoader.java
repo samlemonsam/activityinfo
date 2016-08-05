@@ -22,13 +22,9 @@ package org.activityinfo.ui.client.component.form.subform;
  */
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 
@@ -43,67 +39,23 @@ public class SubFormInstanceLoader {
     private final FormModel model;
 
     // keep copy of persisted instances, we need to track persisted instance to remove them on save if they were deleted by user.
+    // todo remove !!! we need to track changed and new instances
     private final Set<FormInstance> persisted = Sets.newHashSet();
 
     public SubFormInstanceLoader(FormModel model) {
         this.model = model;
     }
 
-    public Promise<List<FormInstance>> loadCollectionInstances(final FormClass subForm) {
+    public Promise<List<FormInstance>> load(final FormClass subForm) {
         return model.getLocator().getSubFormInstances(subForm.getId(), model.getWorkingRootInstance().getId())
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override
                     public List<FormInstance> apply(List<FormInstance> instanceList) {
-                        for (FormInstance instance : instanceList) {
-                             model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, instance), instance);
-                             persisted.add(instance);
-                        }
-
+                        model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, model.getWorkingRootInstance()), instanceList);
+                        persisted.addAll(instanceList);
                         return instanceList;
                     }
                 });
-    }
-
-    public Promise<Void> loadKeyedSubformInstances(final FormClass subForm) {
-        final Promise<Void> result = new Promise<>();
-
-        ResourceId parentId = model.getWorkingRootInstance().getId();
-        return model.getLocator().getSubFormInstances(subForm.getId(), parentId).then(new Function<List<FormInstance>, Void>() {
-            @Override
-            public Void apply(final List<FormInstance> instanceList) {
-
-                if (instanceList.isEmpty()) {
-                    result.onSuccess(null);
-                    return null;
-                }
-
-                final List<Integer> counter = Lists.newArrayList();
-
-                for (final FormInstance valueInstance : instanceList) {
-                    if (valueInstance.getKeyId().isPresent()) {
-                        model.getLocator().getFormInstance(subForm.getId(), valueInstance.getKeyId().get()).then(new AsyncCallback<FormInstance>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                result.onFailure(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(FormInstance key) {
-                                model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, key), valueInstance);
-                                persisted.add(valueInstance);
-                                counter.add(1);
-                                if (counter.size() == instanceList.size()) {
-                                    result.onSuccess(null);
-                                }
-                            }
-                        });
-                    } else {
-                        Log.error("Key is not found for instance: " + valueInstance.getId());
-                    }
-                }
-                return null;
-            }
-        });
     }
 
     public boolean isPersisted(FormInstance instance) {

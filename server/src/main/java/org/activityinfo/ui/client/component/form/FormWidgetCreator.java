@@ -35,6 +35,9 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
+import org.activityinfo.ui.client.component.form.subform.PeriodSubFormPanel;
+import org.activityinfo.ui.client.component.form.subform.RepeatingSubFormPanel;
+import org.activityinfo.ui.client.component.form.subform.SubFormPanel;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +55,7 @@ public class FormWidgetCreator {
     private final FormFieldWidgetFactory widgetFactory;
 
     private final Map<ResourceId, FieldContainer> containers = Maps.newHashMap();
+    private final Map<FormClass, SubFormPanel> subformPanels = Maps.newHashMap();
 
     private final FormModel model;
 
@@ -70,6 +74,21 @@ public class FormWidgetCreator {
                 showFieldMessage(event);
             }
         });
+    }
+
+    public SubFormPanel createSubformPanel(FormClass subForm, int depth, RelevanceHandler relevanceHandler, PanelFiller filler) {
+        final SubFormPanel panel;
+        if (subForm.getSubFormKind() == SubFormKind.REPEATING) {
+            panel = new RepeatingSubFormPanel(subForm, model, depth);
+        } else {
+            panel = new PeriodSubFormPanel(model, subForm, relevanceHandler, filler, depth);
+        }
+        subformPanels.put(subForm, panel);
+        return panel;
+    }
+
+    public SubFormPanel getSubformPanel(FormClass subForm) {
+        return subformPanels.get(subForm);
     }
 
     public Promise<Void> createWidgets(final FormClass formClass, final FieldUpdated fieldUpdated) {

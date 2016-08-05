@@ -18,6 +18,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.lock.LockEvaluator;
 import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -25,6 +26,9 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
+import org.activityinfo.ui.client.component.form.subform.PeriodSubFormPanel;
+import org.activityinfo.ui.client.component.form.subform.SubFormPanel;
+import org.activityinfo.ui.client.component.form.subform.Tab;
 import org.activityinfo.ui.client.widget.ButtonWithIcon;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 import org.activityinfo.ui.icons.Icons;
@@ -170,8 +174,28 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         });
     }
 
+    /**
+     * Returns selected key/tab for given field or otherwise null if nothing is selected or it is root instance (no key).
+     *
+     * @return selected key/tab for given field or otherwise null if nothing is selected or it is root instance (no key).
+     */
+    public ResourceId getSelectedKey(FormField field) {
+        FormClass formClass = model.getClassByField(field.getId());
+        if (formClass.isSubForm()) {
+            SubFormPanel subformPanel = widgetCreator.getSubformPanel(formClass);
+            if (subformPanel instanceof PeriodSubFormPanel) {
+                PeriodSubFormPanel periodSubFormPanel = (PeriodSubFormPanel) subformPanel;
+                Tab selectedTab = periodSubFormPanel.getSelectedTab();
+                if (selectedTab != null) {
+                    return ResourceId.valueOf(selectedTab.getId());
+                }
+            }
+        }
+        return null;
+    }
+
     public void onFieldUpdated(FormField field, FieldValue newValue) {
-        Optional<FormInstance> workingInstance = model.getWorkingInstance(field.getId());
+        Optional<FormInstance> workingInstance = model.getWorkingInstance(field.getId(), getSelectedKey(field));
 
         if (workingInstance.isPresent()) {
             if (!Objects.equals(workingInstance.get().get(field.getId()), newValue)) {
@@ -258,7 +282,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     private FieldValue getCurrentValue(FormField field) {
-        Optional<FormInstance> instance = model.getWorkingInstance(field.getId());
+        Optional<FormInstance> instance = model.getWorkingInstance(field.getId(), getSelectedKey(field));
         return instance.isPresent() ? instance.get().get(field.getId()) : null;
     }
 

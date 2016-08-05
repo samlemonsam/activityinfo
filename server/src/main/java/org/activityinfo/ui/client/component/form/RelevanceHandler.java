@@ -64,8 +64,9 @@ public class RelevanceHandler {
                 ExprNode expr = parser.parse();
                 FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
                 if (fieldContainer != null) {
-                    Optional<FormInstance> instance = simpleFormPanel.getModel().getWorkingInstance(field.getId());
-                    FormClass formClass = simpleFormPanel.getModel().getClassByField(field.getId());
+                    FormModel model = simpleFormPanel.getModel();
+                    Optional<FormInstance> instance = model.getWorkingInstance(field.getId(), simpleFormPanel.getSelectedKey(field));
+                    FormClass formClass = model.getClassByField(field.getId());
                     boolean relevant;
                     if (instance.isPresent()) {
                         relevant = expr.evaluateAsBoolean(new FormEvalContext(formClass, instance.get()));

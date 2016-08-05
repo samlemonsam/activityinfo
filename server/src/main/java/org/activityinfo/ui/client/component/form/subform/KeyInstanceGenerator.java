@@ -29,6 +29,7 @@ import org.activityinfo.model.type.period.Iso8601;
 /**
  * @author yuriyz on 01/20/2016.
  */
+@Deprecated // todo remove!
 public class KeyInstanceGenerator {
 
     private KeyInstanceGenerator() {
@@ -37,10 +38,6 @@ public class KeyInstanceGenerator {
     public static ResourceId periodId(DateRange range, ResourceId subformId) {
         return ResourceId.valueOf(subformId.asString() + "-" +
                 Iso8601.asString(range.getStart()) + "_" + Iso8601.asString(range.getEnd()));
-    }
-
-    public static FormInstance newUnkeyedInstance(ResourceId subFormId) {
-        return new FormInstance(ResourceId.generateSubmissionId(subFormId), subFormId);
     }
 
     public static FormInstance newKeyedInstance(DateRange dateRange, ResourceId subFormId) {

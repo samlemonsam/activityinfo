@@ -95,6 +95,15 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     public FormInstance toFormInstance(FormClass formClass, FormRecord record) {
         FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
+
+        if (record.getParentRecordId() != null) {
+            instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
+        }
+
+        if (record.getKeyId() != null) {
+            instance.setKeyId(ResourceId.valueOf(record.getKeyId()));
+        }
+
         for (FormField field : formClass.getFields()) {
             JsonElement fieldValue = record.getFields().get(field.getName());
             if(fieldValue != null && !fieldValue.isJsonNull()) {
@@ -123,7 +132,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     private NewFormRecordBuilder buildUpdate(FormInstance instance) {
         NewFormRecordBuilder update = new NewFormRecordBuilder();
         update.setId(instance.getId().asString());
-        update.setParentRecordId(instance.getOwnerId().asString());
+        update.setParentRecordId(instance.getParentRecordId().asString());
         update.setKeyId(instance.getKeyId().isPresent() ? instance.getKeyId().get().asString() : null);
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();

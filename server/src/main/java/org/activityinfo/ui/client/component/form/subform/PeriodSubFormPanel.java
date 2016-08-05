@@ -21,35 +21,56 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
+import org.activityinfo.ui.client.component.form.PanelFiller;
 import org.activityinfo.ui.client.component.form.RelevanceHandler;
+import org.activityinfo.ui.client.widget.LoadingPanel;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 02/17/2015.
  */
-public class PeriodSubFormPanel implements IsWidget {
+public class PeriodSubFormPanel implements SubFormPanel {
 
     private final FlowPanel panel;
     private final FormClass subForm;
-    private final PeriodTabStrip tabStrip;
     private final RelevanceHandler relevanceHandler;
-    private FormModel formModel;
+    private final FormModel formModel;
+    private final PanelFiller panelFiller;
+    private final int depth;
+    private final LoadingPanel<Void> loadingPanel;
+    private PeriodTabStrip tabStrip;
 
-    public PeriodSubFormPanel(FormModel formModel, FormClass subForm, RelevanceHandler relevanceHandler) {
+    public PeriodSubFormPanel(FormModel formModel, FormClass subForm, RelevanceHandler relevanceHandler, PanelFiller panelFiller, int depth) {
         this.subForm = subForm;
         this.formModel = formModel;
         this.relevanceHandler = relevanceHandler;
+        this.panelFiller = panelFiller;
+        this.depth = depth;
 
-        this.tabStrip = createTabStrip();
+        this.loadingPanel = new LoadingPanel<>();
+        this.loadingPanel.setDisplayWidget(this);
+        this.loadingPanel.showWithoutLoad();
+
         this.panel = new FlowPanel();
-        this.panel.add(tabStrip);
+    }
+
+    private void onInstanceLoaded() {
+        tabStrip = createTabStrip();
+        panel.add(tabStrip);
+        panelFiller.add(subForm, depth, panel);
     }
 
     private PeriodTabStrip createTabStrip() {
@@ -72,7 +93,10 @@ public class PeriodSubFormPanel implements IsWidget {
     private void onTabChange() {
         Tab tab = tabStrip.getValue();
 
-
+        Optional<FormInstance> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), ResourceId.valueOf(tab.getId()));
+        if (instance.isPresent()) {
+            formModel.applyInstanceValues(instance.get(), subForm);
+        }
 
         formModel.getStateProvider().set("subform.kind." + tab.getKind().name(), tab.getId());
     }
@@ -82,7 +106,22 @@ public class PeriodSubFormPanel implements IsWidget {
         return panel;
     }
 
-    public FlowPanel getPanel() {
-        return panel;
+    public LoadingPanel<Void> getLoadingPanel() {
+        return loadingPanel;
+    }
+
+    @Override
+    public Promise<Void> show(Void value) {
+        return new SubFormInstanceLoader(formModel).load(subForm).then(new Function<List<FormInstance>, Void>() {
+            @Override
+            public Void apply(List<FormInstance> input) {
+                onInstanceLoaded();
+                return null;
+            }
+        });
+    }
+
+    public Tab getSelectedTab() {
+        return tabStrip.getValue();
     }
 }

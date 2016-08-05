@@ -27,8 +27,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.ui.client.component.form.subform.PeriodSubFormPanel;
-import org.activityinfo.ui.client.component.form.subform.RepeatingSubFormPanel;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 
 /**
@@ -79,16 +77,8 @@ public class PanelFiller {
                         final FlowPanel subFormFieldPanel = new FlowPanel();
                         subFormFieldPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
                         subFormFieldPanel.add(createHeader(depth + 1, subForm.getLabel()));
+                        subFormFieldPanel.add(widgetCreator.createSubformPanel(subForm, depth + 1, relevanceHandler, this).getLoadingPanel());
 
-                        if (subForm.getSubFormKind() == SubFormKind.REPEATING) {
-                            subFormFieldPanel.add(new RepeatingSubFormPanel(subForm, model, depth + 1));
-
-                        } else {
-                            PeriodSubFormPanel subformPanel = new PeriodSubFormPanel(model, subForm, relevanceHandler);
-                            add(subForm, depth + 1, subformPanel.getPanel());
-
-                            subFormFieldPanel.add(subformPanel);
-                        }
                         panel.add(subFormFieldPanel);
                     } else {
                         panel.add(widgetCreator.get(formField.getId()));

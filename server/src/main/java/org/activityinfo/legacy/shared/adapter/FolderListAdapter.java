@@ -65,9 +65,9 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
 
                 if (!Strings.isNullOrEmpty(activity.getCategory())) {
                     categories.add(activity.getCategory());
-                    activityClass.setOwnerId(activityCategoryFolderId(db.getId(), activity.getCategory()));
+                    activityClass.setParentRecordId(activityCategoryFolderId(db.getId(), activity.getCategory()));
                 } else {
-                    activityClass.setOwnerId(databaseId(db.getId()));
+                    activityClass.setParentRecordId(databaseId(db.getId()));
                 }
 
                 activityClass.set(FormClass.LABEL_FIELD_ID, activity.getName());
@@ -80,7 +80,7 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
             for (String category : categories) {
                 FormInstance categoryFolder = new FormInstance(activityCategoryFolderId(db.getId(), category),
                         FolderClass.CLASS_ID);
-                categoryFolder.setOwnerId(dbFolder.getId());
+                categoryFolder.setParentRecordId(dbFolder.getId());
                 categoryFolder.set(FolderClass.LABEL_FIELD_ID, category);
 
                 if (criteria.apply(categoryFolder)) {
@@ -96,7 +96,7 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
                     FormInstance instance = new FormInstance(CuidAdapter.locationFormClass(locationType.getId()),
                             FormClass.CLASS_ID);
                     instance.set(FormClass.LABEL_FIELD_ID, locationType.getName());
-                    instance.setOwnerId(CuidAdapter.cuid(DATABASE_DOMAIN, locationType.getDatabaseId()));
+                    instance.setParentRecordId(CuidAdapter.cuid(DATABASE_DOMAIN, locationType.getDatabaseId()));
 
                     if (criteria.apply(instance)) {
                         instances.add(instance);
@@ -110,7 +110,7 @@ public class FolderListAdapter implements Function<SchemaDTO, List<FormInstance>
 
     public static FormInstance newFolder(UserDatabaseDTO db) {
         FormInstance folder = new FormInstance(cuid(DATABASE_DOMAIN, db.getId()), FolderClass.CLASS_ID);
-        folder.setOwnerId(HOME_ID);
+        folder.setParentRecordId(HOME_ID);
         folder.set(FolderClass.LABEL_FIELD_ID, db.getName());
         folder.set(FolderClass.DESCRIPTION_FIELD_ID, db.getFullName());
         return folder;

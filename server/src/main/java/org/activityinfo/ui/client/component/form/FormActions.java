@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
@@ -47,17 +46,18 @@ public class FormActions {
         this.model = model;
     }
 
-    public Promise<Void> save() {
+    public Promise<List<FormInstance>> save() {
 
         model.getEventBus().fireEvent(new BeforeSaveEvent());
 
-        BiMap<FormModel.SubformValueKey, FormInstance> subformInstances = model.getSubFormInstances();
+        BiMap<FormModel.SubformValueKey, List<FormInstance>> subformInstances = model.getSubFormInstances();
 
-        List<IsResource> toPersist = Lists.newArrayList();
+        final List<FormInstance> toPersist = Lists.newArrayList();
         toPersist.add(model.getWorkingRootInstance()); // root instance
 
-        for (Map.Entry<FormModel.SubformValueKey, FormInstance> entry : subformInstances.entrySet()) { // sub form instances
-            toPersist.add(entry.getValue());
+        // todo we must persist only changed and new instances, not all!!!
+        for (Map.Entry<FormModel.SubformValueKey, List<FormInstance>> entry : subformInstances.entrySet()) { // sub form instances
+            toPersist.addAll(entry.getValue());
         }
 
         Promise<Void> persist = locator.persist(toPersist);
@@ -67,21 +67,23 @@ public class FormActions {
             remove = locator.remove(null, model.getPersistedInstanceToRemoveByLocator());
         }
 
-        Promise<Void> waitAll = Promise.waitAll(persist, remove);
+        final Promise<List<FormInstance>> result = new Promise<>();
 
-        waitAll.then(new AsyncCallback<Void>() {
+        Promise.waitAll(persist, remove).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 model.getEventBus().fireEvent(new SaveFailedEvent(caught));
+                result.onFailure(caught);
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(Void input) {
                 model.getPersistedInstanceToRemoveByLocator().clear();
+                result.onSuccess(toPersist);
             }
         });
 
-        return waitAll;
+        return result;
     }
 
 
