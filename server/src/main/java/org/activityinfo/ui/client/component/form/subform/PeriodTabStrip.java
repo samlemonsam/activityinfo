@@ -124,6 +124,10 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
         }
     }
 
+    public void setValue(String dataPeriod, boolean fireEvent) {
+        setValue(cursor.get(dataPeriod), fireEvent);
+    }
+
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Tab> handler) {
         return addHandler(handler, ValueChangeEvent.getType());

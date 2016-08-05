@@ -21,15 +21,15 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
+import com.google.common.base.Strings;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.RelevanceHandler;
-
-import javax.annotation.Nullable;
 
 /**
  * @author yuriyz on 02/17/2015.
@@ -40,10 +40,6 @@ public class PeriodSubFormPanel implements IsWidget {
     private final FormClass subForm;
     private final PeriodTabStrip tabStrip;
     private final RelevanceHandler relevanceHandler;
-
-    @Nullable
-    private PeriodValue periodValue = null; // if not null then period instance generator is in use
-
     private FormModel formModel;
 
     public PeriodSubFormPanel(FormModel formModel, FormClass subForm, RelevanceHandler relevanceHandler) {
@@ -51,9 +47,34 @@ public class PeriodSubFormPanel implements IsWidget {
         this.formModel = formModel;
         this.relevanceHandler = relevanceHandler;
 
+        this.tabStrip = createTabStrip();
         this.panel = new FlowPanel();
-        this.tabStrip = new PeriodTabStrip(subForm.getSubFormKind());
         this.panel.add(tabStrip);
+    }
+
+    private PeriodTabStrip createTabStrip() {
+        PeriodTabStrip tabStrip = new PeriodTabStrip(subForm.getSubFormKind());
+        tabStrip.addValueChangeHandler(new ValueChangeHandler<Tab>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Tab> event) {
+                onTabChange();
+            }
+        });
+
+        String key = formModel.getStateProvider().getString("subform.kind." + subForm.getSubFormKind().name());
+        if (!Strings.isNullOrEmpty(key)) {
+            tabStrip.setValue(key, false);
+        }
+
+        return tabStrip;
+    }
+
+    private void onTabChange() {
+        Tab tab = tabStrip.getValue();
+
+
+
+        formModel.getStateProvider().set("subform.kind." + tab.getKind().name(), tab.getId());
     }
 
     @Override
