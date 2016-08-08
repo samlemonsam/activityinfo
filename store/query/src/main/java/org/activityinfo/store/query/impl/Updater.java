@@ -423,15 +423,15 @@ public class Updater {
         RecordUpdate update = new RecordUpdate();
         update.setResourceId(recordId);
 
-        if(jsonObject.has("deleted")) {
+        if(jsonObject.has("deleted") && !jsonObject.get("deleted").isJsonNull()) {
             update.setDeleted(jsonObject.get("deleted").getAsBoolean());
         }
 
-        if(jsonObject.has("parentRecordId")) {
+        if (jsonObject.has("parentRecordId") && !jsonObject.get("parentRecordId").isJsonNull()) {
             update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").getAsString()));
         }
 
-        if(jsonObject.has("keyId")) {
+        if (jsonObject.has("keyId") && !jsonObject.get("keyId").isJsonNull()) {
             update.setKeyId(ResourceId.valueOf(jsonObject.get("keyId").getAsString()));
         }
 

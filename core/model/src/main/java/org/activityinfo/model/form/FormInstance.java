@@ -352,9 +352,9 @@ public class FormInstance implements IsResource {
         return propertyBag.isEmpty();
     }
 
-    public boolean isEmpty(String... builtInFields) {
+    public boolean isEmpty(String... fieldsToIgnore) {
         PropertyBag copy = propertyBag.copy();
-        for (String field : builtInFields) {
+        for (String field : fieldsToIgnore) {
             copy.remove(field);
         }
         return copy.isEmpty();

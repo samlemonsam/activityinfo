@@ -29,7 +29,6 @@ import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.date.EpiWeek;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.period.PeriodValue;
 import org.activityinfo.model.type.period.PredefinedPeriods;
@@ -42,6 +41,7 @@ import java.util.List;
 /**
  * @author yuriyz on 02/05/2015.
  */
+@Deprecated
 public class PeriodInstanceKeyedGenerator {
 
     private static final int MAXIMUM_SIZE = 100000;
@@ -104,7 +104,7 @@ public class PeriodInstanceKeyedGenerator {
         for (int i = 0; i < count; i++) {
             DateRange dateRange = generateDateRange(period, pointToCalculate, direction);
             pointToCalculate = dateRange.midDate();
-            result.add(createInstance(dateRange, period, direction));
+            //result.add(createInstance(dateRange, period, direction));
         }
 
         if (direction == Direction.BACK) {
@@ -166,14 +166,6 @@ public class PeriodInstanceKeyedGenerator {
         LocalDate startDate = instance.getDate(PERIOD_START_DATE_ID);
         LocalDate endDate = instance.getDate(PERIOD_END_DATE_ID);
         return new DateRange(startDate.atMidnightInMyTimezone(), endDate.atMidnightInMyTimezone());
-    }
-
-    private FormInstance createInstance(DateRange range, PeriodValue period, Direction direction) {
-        FormInstance instance = KeyInstanceGenerator.newKeyedInstance(range, subFormClassId);
-        instance.set(PERIOD_START_DATE_ID, range.getStart());
-        instance.set(PERIOD_END_DATE_ID, range.getEnd());
-        FormInstanceLabeler.setLabel(instance, getLabel(range, period, direction));
-        return instance;
     }
 
     private String getLabel(DateRange range, PeriodValue period, Direction direction) {

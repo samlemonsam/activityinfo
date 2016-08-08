@@ -14,11 +14,9 @@ public class FormRecordKey implements TypedKey<FormRecordEntity> {
     private Key key;
     
     public FormRecordKey(ResourceId submissionId) {
-        Preconditions.checkArgument(submissionId.getDomain() == ResourceId.GENERATED_ID_DOMAIN, malformedId(submissionId));
+        ResourceId.checkSubmissionId(submissionId);
 
         String[] parts = submissionId.asString().split("-");
-        Preconditions.checkArgument(parts.length == 2, malformedId(submissionId));
-        
         Key parent = FormRootKey.key(ResourceId.valueOf(parts[0]));
         this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, parts[1]);
     }
@@ -36,10 +34,6 @@ public class FormRecordKey implements TypedKey<FormRecordEntity> {
 
     public ResourceId getResourceId() {
         return ResourceId.valueOf(getCollectionId() + "-" + key.getName());
-    }
-    
-    private static String malformedId(ResourceId id) {
-        return String.format("Invalid id: '%s'. Expected format: c{collectionId}-{submissionId}", id.asString());
     }
 
     @Override

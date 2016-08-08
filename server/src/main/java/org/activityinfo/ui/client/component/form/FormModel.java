@@ -24,7 +24,10 @@ package org.activityinfo.ui.client.component.form;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
@@ -128,6 +131,7 @@ public class FormModel {
     private final Map<ResourceId, FormClass> formFieldToFormClass = Maps.newHashMap();
 
     private final Set<ResourceId> persistedInstanceToRemoveByLocator = Sets.newHashSet();
+    private final Set<FormInstance> changedInstances = Sets.newHashSet();
 
     private FormClass rootFormClass;
 
@@ -150,7 +154,7 @@ public class FormModel {
     /**
      * Subform value instances for given Subform Class and Root instance
      */
-    private final BiMap<SubformValueKey, List<FormInstance>> subFormInstances = HashBiMap.create();
+    private final Map<SubformValueKey, List<FormInstance>> subFormInstances = Maps.newHashMap();
 
     /**
      * Keeps formClass to create FieldContainers map.
@@ -271,7 +275,7 @@ public class FormModel {
             if (valueInstance.isPresent()) {
                 return valueInstance;
             } else {
-                FormInstance newInstance = new FormInstance(ResourceId.generateId(), classByField.getId());
+                FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(classByField.getId()), classByField.getId());
                 newInstance.setParentRecordId(getWorkingRootInstance().getId());
                 newInstance.setKeyId(keyId);
 
@@ -289,7 +293,7 @@ public class FormModel {
         throw new RuntimeException("Failed to identify working instance for field: " + formFieldId + ", keyId: " + keyId);
     }
 
-    public BiMap<SubformValueKey, List<FormInstance>> getSubFormInstances() {
+    public Map<SubformValueKey, List<FormInstance>> getSubFormInstances() {
         return subFormInstances;
     }
 
@@ -299,14 +303,19 @@ public class FormModel {
     }
 
     public void applyInstanceValues(FormInstance instance, FormClass formClass) {
-        Set<FieldContainer> containers = getContainersOfClass(formClass.getId());
-        for (FieldContainer fieldContainer : containers) {
+        for (FieldContainer fieldContainer : getContainersOfClass(formClass.getId())) {
             FieldValue fieldValue = instance.get(fieldContainer.getField().getId());
             if (fieldValue != null) {
                 fieldContainer.getFieldWidget().setValue(fieldValue);
             } else {
                 fieldContainer.getFieldWidget().clearValue();
             }
+        }
+    }
+
+    public void clearFieldValues(FormClass formClass) {
+        for (FieldContainer fieldContainer : getContainersOfClass(formClass.getId())) {
+            fieldContainer.getFieldWidget().clearValue();
         }
     }
 
@@ -330,5 +339,9 @@ public class FormModel {
 
     public StateProvider getStateProvider() {
         return stateProvider;
+    }
+
+    public Set<FormInstance> getChangedInstances() {
+        return changedInstances;
     }
 }

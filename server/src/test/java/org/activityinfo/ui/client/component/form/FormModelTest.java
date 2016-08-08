@@ -23,7 +23,6 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.common.collect.BiMap;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.fixtures.InjectionSupport;
@@ -50,6 +49,7 @@ import org.junit.runner.RunWith;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.junit.Assert.assertEquals;
@@ -196,7 +196,7 @@ public class FormModelTest extends CommandTestCase2 {
 
         // load subform instances into empty model
         assertResolves(new SubFormInstanceLoader(emptyModel).load(subFormClass));
-        BiMap<FormModel.SubformValueKey, List<FormInstance>> loadedInstances = emptyModel.getSubFormInstances();
+        Map<FormModel.SubformValueKey, List<FormInstance>> loadedInstances = emptyModel.getSubFormInstances();
 
         assertEquals(loadedInstances.size(), 2);
         assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab1).get(), valueInstance1);

@@ -203,6 +203,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 relevanceHandler.onValueChange(); // skip handler must be applied after workingInstance is updated
             }
             validateField(widgetCreator.get(field.getId()));
+            model.getChangedInstances().add(workingInstance.get());
         } else {
             FormClass formClass = model.getClassByField(field.getId());
             if (formClass.isSubForm()) {

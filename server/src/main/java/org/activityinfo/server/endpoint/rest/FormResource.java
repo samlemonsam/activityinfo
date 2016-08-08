@@ -3,6 +3,7 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.gson.*;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.model.auth.AuthenticatedUser;
@@ -147,7 +148,9 @@ public class FormResource {
         }
 
         HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
-        Iterable<FormRecord> records = hrdForm.getSubmissions(ResourceId.valueOf(parentId), ResourceId.valueOf(keyId));
+        Iterable<FormRecord> records = hrdForm.getSubmissions(
+                ResourceId.valueOf(parentId),
+                Strings.isNullOrEmpty(keyId) ? null : ResourceId.valueOf(keyId));
 
         FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
         recordSet.setFormId(resourceId.asString());

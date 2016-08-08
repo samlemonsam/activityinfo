@@ -39,7 +39,6 @@ public class SubFormInstanceLoader {
     private final FormModel model;
 
     // keep copy of persisted instances, we need to track persisted instance to remove them on save if they were deleted by user.
-    // todo remove !!! we need to track changed and new instances
     private final Set<FormInstance> persisted = Sets.newHashSet();
 
     public SubFormInstanceLoader(FormModel model) {

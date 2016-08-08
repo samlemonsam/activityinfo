@@ -38,12 +38,12 @@ import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
 import org.activityinfo.ui.client.component.form.PanelFiller;
 import org.activityinfo.ui.client.component.form.SimpleFormPanel;
-import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
-import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.Button;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -83,23 +83,6 @@ public class RepeatingSubFormPanel implements SubFormPanel {
                 setDeleteButtonsState();
             }
         });
-
-        bindEvents();
-    }
-
-    private void bindEvents() {
-        formModel.getEventBus().addHandler(BeforeSaveEvent.TYPE, new BeforeSaveEvent.Handler() {
-            @Override
-            public void handle(BeforeSaveEvent event) {
-                removeEmptyInstances();
-            }
-        });
-        formModel.getEventBus().addHandler(SaveFailedEvent.TYPE, new SaveFailedEvent.Handler() {
-            @Override
-            public void handle(SaveFailedEvent event) {
-                // todo
-            }
-        });
     }
 
     private List<FormInstance> getInstances() {
@@ -109,18 +92,6 @@ public class RepeatingSubFormPanel implements SubFormPanel {
             formModel.getSubFormInstances().put(key(), formInstances);
         }
         return formInstances;
-    }
-
-    private void removeEmptyInstances() {
-        List<FormInstance> toRemove = Lists.newArrayList();
-        List<FormInstance> formInstances = getInstances();
-        for (FormInstance instance : formInstances) {
-            if (instance.isEmpty("classId", "keyId", "sort")) {
-                toRemove.add(instance);
-            }
-        }
-        formInstances.removeAll(toRemove);
-
     }
 
     public void show() {
@@ -142,7 +113,22 @@ public class RepeatingSubFormPanel implements SubFormPanel {
 
         panel.add(PanelFiller.createHeader(depth, subForm.getLabel()));
 
-        for (FormInstance instance : getInstances()) {
+        List<FormInstance> instances = getInstances();
+
+        if (instances.isEmpty()) {
+            instances.add(newValueInstance()); // generate new instance if we don't have any existing data yet
+        }
+
+        Collections.sort(instances, new Comparator<FormInstance>() {
+            @Override
+            public int compare(FormInstance o1, FormInstance o2) {
+                Double d1 = o1.getDouble(ResourceId.valueOf("sort"));
+                Double d2 = o2.getDouble(ResourceId.valueOf("sort"));
+                return d1 != null && d2 != null ? d1.compareTo(d2) : 0;
+            }
+        });
+
+        for (FormInstance instance : instances) {
             addForm(instance);
         }
 
@@ -155,7 +141,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
     }
 
     private FormInstance newValueInstance() {
-        FormInstance newInstance = new FormInstance(ResourceId.generateId(), subForm.getId());
+        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId()), subForm.getId());
         newInstance.setParentRecordId(formModel.getWorkingRootInstance().getId());
         newInstance.setKeyId(ResourceId.generateId());
 
@@ -209,7 +195,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         setDeleteButtonsState();
 
         // set sort field
-        //  formModel.getSubFormInstances().get(key).set(SORT_FIELD_ID, panel.getWidgetIndex(formPanel));
+        instance.set(ResourceId.valueOf("sort"), (double) panel.getWidgetIndex(formPanel));
     }
 
     private void setDeleteButtonsState() {

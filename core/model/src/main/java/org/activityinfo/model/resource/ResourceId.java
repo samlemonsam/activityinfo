@@ -1,6 +1,7 @@
 package org.activityinfo.model.resource;
 
 
+import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -67,6 +68,17 @@ public final class ResourceId implements Serializable {
 
     private ResourceId(@Nonnull String text) {
         this.text = text;
+    }
+
+    public static String malformedSubmissionId(ResourceId submissionId) {
+        return "Invalid id: '" + submissionId.asString() + "'. Expected format: c{collectionId}-{submissionId}";
+    }
+
+    public static void checkSubmissionId(ResourceId submissionId) {
+        Preconditions.checkArgument(submissionId.getDomain() == ResourceId.GENERATED_ID_DOMAIN, malformedSubmissionId(submissionId));
+
+        String[] parts = submissionId.asString().split("-");
+        Preconditions.checkArgument(parts.length == 2, malformedSubmissionId(submissionId));
     }
 
     @JsonValue

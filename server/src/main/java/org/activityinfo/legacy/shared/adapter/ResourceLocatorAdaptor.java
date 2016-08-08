@@ -133,7 +133,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         NewFormRecordBuilder update = new NewFormRecordBuilder();
         update.setId(instance.getId().asString());
         update.setParentRecordId(instance.getParentRecordId().asString());
-        update.setKeyId(instance.getKeyId().isPresent() ? instance.getKeyId().get().asString() : null);
+
+        if (instance.getKeyId().isPresent()) {
+            update.setKeyId(instance.getKeyId().get().asString());
+        }
+
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {

@@ -71,6 +71,19 @@ public class PeriodSubFormPanel implements SubFormPanel {
         tabStrip = createTabStrip();
         panel.add(tabStrip);
         panelFiller.add(subForm, depth, panel);
+
+        if (tabStrip.getValue() != null) {
+            applyInstance(tabStrip.getValue());
+        }
+    }
+
+    private void applyInstance(Tab tab) {
+        Optional<FormInstance> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), ResourceId.valueOf(tab.getId()));
+        if (instance.isPresent()) {
+            formModel.applyInstanceValues(instance.get(), subForm);
+        } else {
+            formModel.clearFieldValues(subForm);
+        }
     }
 
     private PeriodTabStrip createTabStrip() {
@@ -93,10 +106,7 @@ public class PeriodSubFormPanel implements SubFormPanel {
     private void onTabChange() {
         Tab tab = tabStrip.getValue();
 
-        Optional<FormInstance> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), ResourceId.valueOf(tab.getId()));
-        if (instance.isPresent()) {
-            formModel.applyInstanceValues(instance.get(), subForm);
-        }
+        applyInstance(tab);
 
         formModel.getStateProvider().set("subform.kind." + tab.getKind().name(), tab.getId());
     }

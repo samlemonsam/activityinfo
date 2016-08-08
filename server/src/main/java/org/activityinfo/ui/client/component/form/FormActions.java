@@ -21,17 +21,15 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
-import com.google.common.collect.BiMap;
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
-import org.activityinfo.ui.client.component.form.event.SaveFailedEvent;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz on 02/18/2015.
@@ -48,23 +46,20 @@ public class FormActions {
 
     public Promise<List<FormInstance>> save() {
 
-        model.getEventBus().fireEvent(new BeforeSaveEvent());
+        final List<FormInstance> instancesToPersist = getInstancesToPersist();
 
-        BiMap<FormModel.SubformValueKey, List<FormInstance>> subformInstances = model.getSubFormInstances();
-
-        final List<FormInstance> toPersist = Lists.newArrayList();
-        toPersist.add(model.getWorkingRootInstance()); // root instance
-
-        // todo we must persist only changed and new instances, not all!!!
-        for (Map.Entry<FormModel.SubformValueKey, List<FormInstance>> entry : subformInstances.entrySet()) { // sub form instances
-            toPersist.addAll(entry.getValue());
-        }
-
-        Promise<Void> persist = locator.persist(toPersist);
+        Promise<Void> persist = locator.persist(instancesToPersist);
         Promise<Void> remove = Promise.done();
 
         if (!model.getPersistedInstanceToRemoveByLocator().isEmpty()) {
             remove = locator.remove(null, model.getPersistedInstanceToRemoveByLocator());
+            remove.then(new Function<Void, Object>() {
+                @Override
+                public Object apply(Void input) {
+                    model.getPersistedInstanceToRemoveByLocator().clear();
+                    return null;
+                }
+            });
         }
 
         final Promise<List<FormInstance>> result = new Promise<>();
@@ -72,19 +67,32 @@ public class FormActions {
         Promise.waitAll(persist, remove).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                model.getEventBus().fireEvent(new SaveFailedEvent(caught));
                 result.onFailure(caught);
             }
 
             @Override
             public void onSuccess(Void input) {
-                model.getPersistedInstanceToRemoveByLocator().clear();
-                result.onSuccess(toPersist);
+                model.getChangedInstances().clear();
+                result.onSuccess(instancesToPersist);
             }
         });
 
         return result;
     }
 
+    private List<FormInstance> getInstancesToPersist() {
+        final List<FormInstance> toPersist = Lists.newArrayList();
+
+        for (FormInstance instance : model.getChangedInstances()) {
+            if (!instance.isEmpty("classId", "keyId", "sort")) {
+                if (instance.getId().getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+                    ResourceId.checkSubmissionId(instance.getId());
+                }
+
+                toPersist.add(instance);
+            }
+        }
+        return toPersist;
+    }
 
 }

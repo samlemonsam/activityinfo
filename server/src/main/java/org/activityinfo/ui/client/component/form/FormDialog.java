@@ -21,7 +21,6 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
-import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -129,21 +128,28 @@ public class FormDialog {
         dialog.getStatusLabel().setText(I18N.CONSTANTS.saving());
         dialog.getPrimaryButton().setEnabled(false);
         formPanel.getRelevanceHandler().resetValuesForFieldsWithAppliedRelevance();
-        formPanel.getFormActions().save().then(new AsyncCallback<List<FormInstance>>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                Log.error("Save failed", caught);
-                dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(caught));
-                dialog.getPrimaryButton().setEnabled(true);
-            }
+        try {
+            formPanel.getFormActions().save().then(new AsyncCallback<List<FormInstance>>() {
 
-            @Override
-            public void onSuccess(List<FormInstance> result) {
-                dialog.hide();
-                callback.onPersisted(result);
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Log.error("Save failed", caught);
+                    dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(caught));
+                    dialog.getPrimaryButton().setEnabled(true);
+                }
+
+                @Override
+                public void onSuccess(List<FormInstance> result) {
+                    dialog.hide();
+                    callback.onPersisted(result);
+                }
+            });
+        } catch (Exception e) {
+            Log.error("Save failed.", e);
+            dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(e));
+            dialog.getPrimaryButton().setEnabled(true);
+        }
     }
 
 }
