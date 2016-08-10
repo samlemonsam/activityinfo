@@ -28,6 +28,7 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 
 import java.util.List;
 
@@ -46,21 +47,12 @@ public class FormActions {
 
     public Promise<List<FormInstance>> save() {
 
+        model.getEventBus().fireEvent(new BeforeSaveEvent());
+
         final List<FormInstance> instancesToPersist = getInstancesToPersist();
 
         Promise<Void> persist = locator.persist(instancesToPersist);
-        Promise<Void> remove = Promise.done();
-
-        if (!model.getPersistedInstanceToRemoveByLocator().isEmpty()) {
-            remove = locator.remove(null, model.getPersistedInstanceToRemoveByLocator());
-            remove.then(new Function<Void, Object>() {
-                @Override
-                public Object apply(Void input) {
-                    model.getPersistedInstanceToRemoveByLocator().clear();
-                    return null;
-                }
-            });
-        }
+        Promise<Void> remove = remove();
 
         final Promise<List<FormInstance>> result = new Promise<>();
 
@@ -78,6 +70,26 @@ public class FormActions {
         });
 
         return result;
+    }
+
+    private Promise<Void> remove() {
+        Promise<Void> remove = Promise.done();
+
+        if (!model.getPersistedInstanceToRemoveByLocator().isEmpty()) {
+            List<Promise<Void>> removePromises = Lists.newArrayList();
+            for (FormInstance instance : model.getPersistedInstanceToRemoveByLocator()) {
+                removePromises.add(locator.remove(instance.getClassId(), instance.getId()));
+            }
+            remove = Promise.waitAll(removePromises);
+            remove.then(new Function<Void, Object>() {
+                @Override
+                public Object apply(Void input) {
+                    model.getPersistedInstanceToRemoveByLocator().clear();
+                    return null;
+                }
+            });
+        }
+        return remove;
     }
 
     private List<FormInstance> getInstancesToPersist() {

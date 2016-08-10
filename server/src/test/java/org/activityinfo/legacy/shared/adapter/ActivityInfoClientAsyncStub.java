@@ -116,7 +116,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormRecord> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
+    public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
             Updater updater = new Updater(catalog);

@@ -202,7 +202,12 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources) {
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
+        // todo one call instead of multiple
+        List<Promise<Void>> promises = Lists.newArrayList();
+        for (ResourceId resourceId : resources) {
+            promises.add(remove(formId, resourceId));
+        }
+        return Promise.waitAll(promises);
     }
 
     @Override

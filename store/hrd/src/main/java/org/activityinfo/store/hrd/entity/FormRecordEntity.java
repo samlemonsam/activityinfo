@@ -30,6 +30,8 @@ public class FormRecordEntity implements TypedEntity {
      */
     public static final String SUBFORM_KEY_PROPERTY = "@subformKey";
 
+    public static final String DELETED = "@deleted";
+
     private FormRecordKey key;
     private final Entity entity;
 
@@ -93,7 +95,20 @@ public class FormRecordEntity implements TypedEntity {
     public void setKeyId(ResourceId keyId) {
         entity.setProperty(SUBFORM_KEY_PROPERTY, keyId.asString());
     }
-    
+
+    public boolean getDeleted() {
+        Boolean deleted = (Boolean) entity.getProperty(DELETED);
+        if(deleted == null) {
+            return false;
+        } else {
+            return deleted;
+        }
+    }
+
+    public void setDeleted(boolean deleted) {
+        entity.setProperty(DELETED, deleted);
+    }
+
     public void setParentId(ResourceId parentId) {
         entity.setProperty(PARENT_PROPERTY, parentId.asString());
     }
@@ -117,6 +132,10 @@ public class FormRecordEntity implements TypedEntity {
 
     public static Query.FilterPredicate keyFilter(ResourceId keyId) {
         return new Query.FilterPredicate(SUBFORM_KEY_PROPERTY, Query.FilterOperator.EQUAL, keyId.asString());
+    }
+
+    public static Query.FilterPredicate deletedFilter(boolean deleted) {
+        return new Query.FilterPredicate(DELETED, Query.FilterOperator.EQUAL, deleted);
     }
 
 }

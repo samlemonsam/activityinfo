@@ -93,29 +93,20 @@ public class HrdFormAccessor implements FormAccessor {
     }
 
     public Iterable<FormRecord> getSubmissionsOfParent(ResourceId parentId) {
-        return query(FormRecordEntity.parentFilter(parentId));
+        return getSubmissions(parentId, null);
     }
 
     public Iterable<FormRecord> getSubmissions(ResourceId parentId, ResourceId keyId) {
         List<Query.Filter> filters = Lists.newArrayList();
+        filters.add(FormRecordEntity.deletedFilter(false));
+
         if (parentId != null) {
             filters.add(FormRecordEntity.parentFilter(parentId));
         }
         if (keyId != null) {
             filters.add(FormRecordEntity.keyFilter(keyId));
         }
-        if (filters.isEmpty()) {
-            return query(null);
-        }
-        if (filters.size() == 1) {
-            // need to unwrap and pass filter directly because AND composite requires at least two parameters
-            return query(filters.get(0));
-        }
         return query(new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters));
-    }
-
-    public Iterable<FormRecord> getSubmissions() {
-        return query(null);
     }
 
     private Iterable<FormRecord> query(Query.Filter filter) {

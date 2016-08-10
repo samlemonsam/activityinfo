@@ -79,7 +79,7 @@ public class FormWidgetCreator {
     public SubFormPanel createSubformPanel(FormClass subForm, int depth, RelevanceHandler relevanceHandler, PanelFiller filler) {
         final SubFormPanel panel;
         if (subForm.getSubFormKind() == SubFormKind.REPEATING) {
-            panel = new RepeatingSubFormPanel(subForm, model, depth);
+            panel = new RepeatingSubFormPanel(subForm, model);
         } else {
             panel = new PeriodSubFormPanel(model, subForm, relevanceHandler, filler, depth);
         }

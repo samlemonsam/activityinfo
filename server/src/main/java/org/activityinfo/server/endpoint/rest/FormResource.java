@@ -176,6 +176,22 @@ public class FormResource {
         
         return Response.ok().build();
     }
+
+    @PUT
+    @Path("record/{recordId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateRecord(@PathParam("recordId") String recordId, String body) {
+
+        assertVisible(resourceId);
+
+        JsonElement jsonObject = new JsonParser().parse(body);
+
+        Updater updater = new Updater(catalog.get());
+        updater.execute(resourceId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
+
+        return Response.ok().build();
+    }
     
     @GET
     @Path("class")

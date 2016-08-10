@@ -50,7 +50,7 @@ public class SubFormInstanceLoader {
                 .then(new Function<List<FormInstance>, List<FormInstance>>() {
                     @Override
                     public List<FormInstance> apply(List<FormInstance> instanceList) {
-                        model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, model.getWorkingRootInstance()), instanceList);
+                        model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, model.getWorkingRootInstance()), Sets.newHashSet(instanceList));
                         persisted.addAll(instanceList);
                         return instanceList;
                     }

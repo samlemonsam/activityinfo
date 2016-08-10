@@ -130,7 +130,7 @@ public class FormModel {
      */
     private final Map<ResourceId, FormClass> formFieldToFormClass = Maps.newHashMap();
 
-    private final Set<ResourceId> persistedInstanceToRemoveByLocator = Sets.newHashSet();
+    private final Set<FormInstance> persistedInstanceToRemoveByLocator = Sets.newHashSet();
     private final Set<FormInstance> changedInstances = Sets.newHashSet();
 
     private FormClass rootFormClass;
@@ -154,7 +154,7 @@ public class FormModel {
     /**
      * Subform value instances for given Subform Class and Root instance
      */
-    private final Map<SubformValueKey, List<FormInstance>> subFormInstances = Maps.newHashMap();
+    private final Map<SubformValueKey, Set<FormInstance>> subFormInstances = Maps.newHashMap();
 
     /**
      * Keeps formClass to create FieldContainers map.
@@ -254,7 +254,7 @@ public class FormModel {
     }
 
     public Optional<FormInstance> getSubformValueInstance(FormClass subformClass, FormInstance rootInstance, ResourceId keyId) {
-        List<FormInstance> formInstances = subFormInstances.get(new SubformValueKey(subformClass, rootInstance));
+        Set<FormInstance> formInstances = subFormInstances.get(new SubformValueKey(subformClass, rootInstance));
         if (formInstances != null) {
             for (FormInstance instance : formInstances) {
                 if (instance.getKeyId().get().equals(keyId)) {
@@ -280,9 +280,9 @@ public class FormModel {
                 newInstance.setKeyId(keyId);
 
                 SubformValueKey valueKey = new SubformValueKey(classByField, getWorkingRootInstance());
-                List<FormInstance> allInstances = subFormInstances.get(valueKey);
+                Set<FormInstance> allInstances = subFormInstances.get(valueKey);
                 if (allInstances == null) {
-                    allInstances = Lists.newArrayList();
+                    allInstances = Sets.newHashSet();
                     subFormInstances.put(valueKey, allInstances);
                 }
                 allInstances.add(newInstance);
@@ -293,7 +293,7 @@ public class FormModel {
         throw new RuntimeException("Failed to identify working instance for field: " + formFieldId + ", keyId: " + keyId);
     }
 
-    public Map<SubformValueKey, List<FormInstance>> getSubFormInstances() {
+    public Map<SubformValueKey, Set<FormInstance>> getSubFormInstances() {
         return subFormInstances;
     }
 
@@ -333,7 +333,7 @@ public class FormModel {
         return originalRootInstance;
     }
 
-    public Set<ResourceId> getPersistedInstanceToRemoveByLocator() {
+    public Set<FormInstance> getPersistedInstanceToRemoveByLocator() {
         return persistedInstanceToRemoveByLocator;
     }
 

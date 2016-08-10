@@ -191,9 +191,7 @@ paths:
             $ref: '#/definitions/FormRecordUpdate'
       responses:
         200:
-          description: The requested record
-          schema:
-            $ref: "#/definitions/FormRecord"
+          description: The record was updated
         401:
           description: The authenticated user does not have permission to view this form or record
         404:

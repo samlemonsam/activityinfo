@@ -60,6 +60,8 @@ public class CreateOrUpdateRecord implements Operation {
             }
         }
 
+        updated.setDeleted(update.isDeleted());
+
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
             // workaround for current UI
             if(entry.getKey().equals(ResourceId.valueOf("keyId"))) {

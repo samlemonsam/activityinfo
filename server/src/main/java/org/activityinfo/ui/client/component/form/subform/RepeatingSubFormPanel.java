@@ -21,11 +21,12 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
@@ -36,16 +37,13 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.FormPanelStyles;
-import org.activityinfo.ui.client.component.form.PanelFiller;
 import org.activityinfo.ui.client.component.form.SimpleFormPanel;
+import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
 import org.activityinfo.ui.client.style.ElementStyle;
 import org.activityinfo.ui.client.widget.Button;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author yuriyz on 01/18/2016.
@@ -58,17 +56,15 @@ public class RepeatingSubFormPanel implements SubFormPanel {
     private final FormModel formModel;
     private final Button addButton;
     private final SubFormInstanceLoader loader;
-    private final int depth;
     private final LoadingPanel<Void> loadingPanel;
 
     private final Map<FormInstance, SimpleFormPanel> forms = Maps.newHashMap();
 
-    public RepeatingSubFormPanel(FormClass subForm, FormModel formModel, int depth) {
+    public RepeatingSubFormPanel(FormClass subForm, FormModel formModel) {
         this.subForm = subForm;
         this.formModel = formModel;
         this.panel = new FlowPanel();
         this.loader = new SubFormInstanceLoader(formModel);
-        this.depth = depth;
 
         this.loadingPanel = new LoadingPanel<>();
         this.loadingPanel.setDisplayWidget(this);
@@ -83,48 +79,42 @@ public class RepeatingSubFormPanel implements SubFormPanel {
                 setDeleteButtonsState();
             }
         });
+
+        bindEvents();
     }
 
-    private List<FormInstance> getInstances() {
-        List<FormInstance> formInstances = formModel.getSubFormInstances().get(key());
-        if (formInstances == null) {
-            formInstances = Lists.newArrayList();
-            formModel.getSubFormInstances().put(key(), formInstances);
-        }
-        return formInstances;
-    }
-
-    public void show() {
-        loader.load(subForm).then(new AsyncCallback<List<FormInstance>>() {
+    private void bindEvents() {
+        formModel.getEventBus().addHandler(BeforeSaveEvent.TYPE, new BeforeSaveEvent.Handler() {
             @Override
-            public void onFailure(Throwable caught) {
-                Log.error(caught.getMessage(), caught);
-            }
-
-            @Override
-            public void onSuccess(List<FormInstance> result) {
-                render();
+            public void handle(BeforeSaveEvent event) {
+                for (SimpleFormPanel panel : forms.values()) {
+                    formModel.getChangedInstances().addAll(panel.getModel().getChangedInstances());
+                }
             }
         });
     }
 
+    private Set<FormInstance> getInstances() {
+        Set<FormInstance> formInstances = formModel.getSubFormInstances().get(key());
+        if (formInstances == null) {
+            formInstances = Sets.newHashSet(newValueInstance());
+            formModel.getSubFormInstances().put(key(), formInstances);
+        }
+        if (formInstances.isEmpty()) {
+            formInstances.add(newValueInstance());
+        }
+        return formInstances;
+    }
 
     private void render() {
-
-        panel.add(PanelFiller.createHeader(depth, subForm.getLabel()));
-
-        List<FormInstance> instances = getInstances();
-
-        if (instances.isEmpty()) {
-            instances.add(newValueInstance()); // generate new instance if we don't have any existing data yet
-        }
+        List<FormInstance> instances = Lists.newArrayList(getInstances());
 
         Collections.sort(instances, new Comparator<FormInstance>() {
             @Override
             public int compare(FormInstance o1, FormInstance o2) {
-                Double d1 = o1.getDouble(ResourceId.valueOf("sort"));
-                Double d2 = o2.getDouble(ResourceId.valueOf("sort"));
-                return d1 != null && d2 != null ? d1.compareTo(d2) : 0;
+                Integer d1 = getSortIndex(o1.getKeyId().get());
+                Integer d2 = getSortIndex(o2.getKeyId().get());
+                return d1.compareTo(d2);
             }
         });
 
@@ -133,26 +123,39 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         }
 
         panel.add(addButton);
+    }
 
+    private int getSortIndex(ResourceId keyId) {
+        try {
+            return Integer.parseInt(keyId.asString().split("-")[1]);
+        } catch (Exception e) {
+            Log.error("Failed to extract sort index from keyId: " + keyId.asString() + ", subFormClassId: " + subForm.getId(), e);
+            return 0;
+        }
     }
 
     private void addForm(final FormInstance formInstance) {
         addForm(formInstance, -1);
     }
 
+    private ResourceId newKeyId(int sortIndex) {
+        return ResourceId.valueOf(ResourceId.generateId().asString() + "-" + sortIndex);
+    }
+
     private FormInstance newValueInstance() {
         FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId()), subForm.getId());
         newInstance.setParentRecordId(formModel.getWorkingRootInstance().getId());
-        newInstance.setKeyId(ResourceId.generateId());
 
         FormModel.SubformValueKey key = key();
 
-        List<FormInstance> instances = formModel.getSubFormInstances().get(key);
+        Set<FormInstance> instances = formModel.getSubFormInstances().get(key);
         if (instances == null) {
-            instances = Lists.newArrayList();
+            instances = Sets.newHashSet();
             formModel.getSubFormInstances().put(key, instances);
         }
+
         instances.add(newInstance);
+        formModel.getChangedInstances().add(newInstance);
 
         return newInstance;
     }
@@ -173,10 +176,11 @@ public class RepeatingSubFormPanel implements SubFormPanel {
                 forms.remove(instance);
 
                 if (loader.isPersisted(instance)) { // schedule deletion only if instance is persisted
-                    formModel.getPersistedInstanceToRemoveByLocator().add(instance.getId());
+                    formModel.getPersistedInstanceToRemoveByLocator().add(instance);
                 }
 
                 getInstances().remove(instance);
+                formModel.getChangedInstances().remove(instance);
 
                 setDeleteButtonsState();
             }
@@ -193,9 +197,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         }
 
         setDeleteButtonsState();
-
-        // set sort field
-        instance.set(ResourceId.valueOf("sort"), (double) panel.getWidgetIndex(formPanel));
+        instance.setKeyId(newKeyId(panel.getWidgetIndex(formPanel))); // renew sort index
     }
 
     private void setDeleteButtonsState() {
@@ -216,7 +218,13 @@ public class RepeatingSubFormPanel implements SubFormPanel {
 
     @Override
     public Promise<Void> show(Void value) {
-        return loader.load(subForm).thenDiscardResult();
+        return loader.load(subForm).then(new Function<List<FormInstance>, Void>() {
+            @Override
+            public Void apply(List<FormInstance> input) {
+                render();
+                return null;
+            }
+        });
     }
 
     @Override
