@@ -327,7 +327,6 @@ public class IndicatorTreePanel extends ContentPanel {
                 for (FormField formField : formClass.getFields()) {
                     if(formField.getType() instanceof QuantityType ||
                        formField.getType() instanceof CalculatedFieldType) {
-                        QuantityType type = (QuantityType) formField.getType();
                         IndicatorDTO indicator = new IndicatorDTO();
                         indicator.setId(CuidAdapter.getLegacyIdFromCuid(formField.getId()));
                         indicator.setName(formField.getLabel());
