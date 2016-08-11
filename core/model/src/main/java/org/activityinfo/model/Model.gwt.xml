@@ -28,6 +28,8 @@
   <inherits name="org.activityinfo.Promises"/>
   <inherits name="com.google.gwt.json.JSON"/>
 
+  <super-source path="jre"/>
+
   <source path="auth"/>
   <source path="date"/>
   <source path="shared"/>

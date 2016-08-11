@@ -51,18 +51,6 @@ import java.util.Map;
  */
 public class CalendarUtils {
 
-    // for mock purpose
-    public interface DayOfWeekProvider {
-        DayOfWeek dayOfWeek(Date date);
-    }
-
-    public static final DayOfWeekProvider GWT_DAY_OF_WEEK_PROVIDER = new DayOfWeekProvider() {
-        @Override
-        public DayOfWeek dayOfWeek(Date date) {
-            return DayOfWeek.dayOfWeek(date);
-        }
-    };
-
     public static final DateShifter GWT_DATE_SHIFTER = new DateShifter() {
         @Override
         public void addMonthsToDate(Date date, int add) {
@@ -87,25 +75,21 @@ public class CalendarUtils {
     }
 
     public static EpiWeek epiWeek(Date date) {
-        return epiWeek(date, GWT_DAY_OF_WEEK_PROVIDER);
-    }
-
-    public static EpiWeek epiWeek(Date date, DayOfWeekProvider dayOfWeekProvider) {
         Date target = CalendarUtil.copyDate(date);
         CalendarUtil.resetTime(target);
 
         int dayInMonth = date.getDate();
         int year = date.getYear() + 1900;
 
-        DayOfWeek dayOfWeek = dayOfWeekProvider.dayOfWeek(date);
-        Date firstDayOfEpicWeekInYear = firstDayOfEpicWeekInYear(dayOfWeekProvider, year);
+        DayOfWeek dayOfWeek = DayOfWeek.dayOfWeek(date);
+        Date firstDayOfEpicWeekInYear = firstDayOfEpicWeekInYear(year);
 
         // Number of days between first day of epic week in year and target date
         int daysBetween = CalendarUtil.getDaysBetween(firstDayOfEpicWeekInYear, target);
         if (daysBetween < 0 ||
                 (daysBetween == 0 && (dayInMonth < 4) && (dayOfWeek == DayOfWeek.FRIDAY || dayOfWeek == DayOfWeek.SATURDAY))) {
             Date lastDayInPreviousYear = new LocalDate(year - 1, 12, 31).atMidnightInMyTimezone();
-            EpiWeek epiWeek = epiWeek(lastDayInPreviousYear, dayOfWeekProvider);
+            EpiWeek epiWeek = epiWeek(lastDayInPreviousYear);
             epiWeek.setYear(year - 1);
             return epiWeek;
         }
@@ -135,13 +119,12 @@ public class CalendarUtils {
                 .setYear(year);
     }
 
-    public static Date firstDayOfEpicWeekInYear(DayOfWeekProvider dayOfWeekProvider, int year) {
-        Preconditions.checkNotNull(dayOfWeekProvider);
+    public static Date firstDayOfEpicWeekInYear(int year) {
         Preconditions.checkState(year > 0, "Year can't be less than zero.");
 
 
         Date january4 = new LocalDate(year, 1, 4).atMidnightInMyTimezone();
-        DayOfWeek dayOfWeekOfJan4 = dayOfWeekProvider.dayOfWeek(january4);
+        DayOfWeek dayOfWeekOfJan4 = DayOfWeek.dayOfWeek(january4);
         switch (dayOfWeekOfJan4) {
             case SUNDAY:
                 return january4;
@@ -159,27 +142,23 @@ public class CalendarUtils {
 
     }
 
-    public static DateRange rangeByEpiWeek(EpiWeek epiWeek) {
-        return rangeByEpiWeek(GWT_DAY_OF_WEEK_PROVIDER, epiWeek);
+    public static DateRange rangeByEpiWeekFromDate(Date date) {
+        EpiWeek epiWeek = epiWeek(date);
+        return rangeByEpiWeek(epiWeek);
     }
 
-    public static DateRange rangeByEpiWeekFromDate(DayOfWeekProvider dayOfWeekProvider, Date date) {
-        EpiWeek epiWeek = epiWeek(date, dayOfWeekProvider);
-        return rangeByEpiWeek(dayOfWeekProvider, epiWeek);
-    }
-
-    public static DateRange rangeByEpiBiWeekFromDate(DayOfWeekProvider dayOfWeekProvider, Date date) {
-        EpiWeek epiWeek = epiWeek(date, dayOfWeekProvider);
-        DateRange firstRange = rangeByEpiWeek(dayOfWeekProvider, epiWeek);
-        DateRange secondRange = rangeByEpiWeek(dayOfWeekProvider, epiWeek.setWeekInYear(epiWeek.getWeekInYear() + 1));
+    public static DateRange rangeByEpiBiWeekFromDate(Date date) {
+        EpiWeek epiWeek = epiWeek(date);
+        DateRange firstRange = rangeByEpiWeek(epiWeek);
+        DateRange secondRange = rangeByEpiWeek(epiWeek.setWeekInYear(epiWeek.getWeekInYear() + 1));
         return new DateRange(firstRange.getStart(), secondRange.getEnd());
     }
 
-    public static DateRange rangeByEpiWeek(DayOfWeekProvider dayOfWeekProvider, EpiWeek epiWeek) {
+    public static DateRange rangeByEpiWeek(EpiWeek epiWeek) {
         Date date = new LocalDate(epiWeek.getYear(), 1, 1).atMidnightInMyTimezone();
         int dayInYearInsideWeek = epiWeek.getWeekInYear() * 7 - 4;
         CalendarUtil.addDaysToDate(date, dayInYearInsideWeek);
-        DayOfWeek dateOfWeek = dayOfWeekProvider.dayOfWeek(date);
+        DayOfWeek dateOfWeek = DayOfWeek.dayOfWeek(date);
 
         Date startDate = CalendarUtil.copyDate(date);
         CalendarUtil.addDaysToDate(startDate, -dateOfWeek.getValue());

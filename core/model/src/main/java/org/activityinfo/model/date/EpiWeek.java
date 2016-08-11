@@ -44,8 +44,20 @@ public class EpiWeek implements Serializable {
         this.weekInYear = weekInYear;
         this.year = year;
 
-        Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
-        Preconditions.checkState(year > 0, "Year must be more than zero. Year: " + year);
+        checkState();
+    }
+
+    private void checkState() {
+        checkState(true, true);
+    }
+
+    private void checkState(boolean checkYear, boolean checkWeek) {
+        if (checkWeek) {
+            Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
+        }
+        if (checkYear) {
+            Preconditions.checkState(year > 0, "Year must be more than zero. Year: " + year);
+        }
     }
 
     public int getWeekInYear() {
@@ -54,7 +66,7 @@ public class EpiWeek implements Serializable {
 
     public EpiWeek setWeekInYear(int weekInYear) {
         this.weekInYear = weekInYear;
-        Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
+        checkState(false, true);
         return this;
     }
 
@@ -64,9 +76,22 @@ public class EpiWeek implements Serializable {
 
     public EpiWeek setYear(int year) {
         this.year = year;
-        Preconditions.checkState(year > 0, "Year must be more than zero. Year: " + year);
+        checkState(true, false);
         return this;
     }
+
+    public EpiWeek plus(int count) {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    public EpiWeek next() {
+        return plus(+1);
+    }
+
+    public EpiWeek previous() {
+        return plus(-1);
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -74,10 +99,7 @@ public class EpiWeek implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         EpiWeek epiWeek = (EpiWeek) o;
-        if (weekInYear != epiWeek.weekInYear) return false;
-        if (year != epiWeek.year) return false;
-
-        return true;
+        return weekInYear == epiWeek.weekInYear && year == epiWeek.year;
     }
 
     @Override
@@ -89,9 +111,20 @@ public class EpiWeek implements Serializable {
 
     @Override
     public String toString() {
-        return "EpiWeek{" +
-                "weekInYear=" + weekInYear +
-                ", year=" + year +
-                '}';
+        return year + "W" + weekInYear;
+    }
+
+    /**
+     * @param epiWeekAsString (e.g. 2015W1, 2016W30)
+     * @return epi week
+     */
+    public static EpiWeek parse(String epiWeekAsString) {
+        String[] tokens = epiWeekAsString.split("W");
+        if (tokens.length != 2) {
+            throw new NumberFormatException();
+        }
+        String year = tokens[0];
+        String weekInYear = tokens[1];
+        return new EpiWeek(Integer.parseInt(weekInYear), Integer.parseInt(year));
     }
 }

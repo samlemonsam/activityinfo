@@ -40,14 +40,10 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.ui.client.component.form.subform.PeriodInstanceKeyedGenerator;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
-import org.activityinfo.ui.client.component.formdesigner.InstanceGeneratorTest;
 import org.junit.*;
 import org.junit.runner.RunWith;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -202,16 +198,6 @@ public class FormModelTest extends CommandTestCase2 {
         assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab1).get(), valueInstance1);
         assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab2).get(), valueInstance2);
     }
-
-    private PeriodInstanceKeyedGenerator periodJvmGenerator(ResourceId subFormClassId) {
-        return new PeriodInstanceKeyedGenerator(subFormClassId, new PeriodInstanceKeyedGenerator.Formatter() {
-            @Override
-            public String format(String pattern, Date date) {
-                return new SimpleDateFormat(pattern).format(date);
-            }
-        }, InstanceGeneratorTest.jvmDayOfWeekProvider());
-    }
-
 
     /**
      * Sets up test fixtures. Must be called by each test to ensure that it runs AFTER

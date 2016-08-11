@@ -21,13 +21,14 @@ package org.activityinfo.model.date;
  * #L%
  */
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
  * @author yuriyz on 07/03/2015.
- * @author yuriyz on 02/26/2015.
  */
 public enum DayOfWeek {
     SUNDAY(0),
@@ -58,7 +59,13 @@ public enum DayOfWeek {
     }
 
     public static DayOfWeek dayOfWeek(Date date) {
-        return DayOfWeek.fromValue(Integer.parseInt(DateTimeFormat.getFormat("c").format(date)));
+        if (GWT.isClient()) {
+            return DayOfWeek.fromValue(Integer.parseInt(DateTimeFormat.getFormat("c").format(date)));
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            return DayOfWeek.fromValue(calendar.get(Calendar.DAY_OF_WEEK) - 1);
+        }
     }
 
 }

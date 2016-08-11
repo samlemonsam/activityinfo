@@ -23,7 +23,7 @@ package org.activityinfo.model.type.time;
 
 import com.google.gwt.core.shared.GWT;
 
-import java.util.GregorianCalendar;
+import java.util.Calendar;
 
 /**
  * Encapsulates time/date computations for which we need to provide
@@ -38,11 +38,11 @@ class TimeUtils {
             return new LocalDate(month.getYear(), month.getMonthOfYear(), lastDay);
 
         } else {
-            GregorianCalendar calendar = new GregorianCalendar();
+            Calendar calendar = Calendar.getInstance();
             calendar.set(month.getYear(), month.getMonthOfYear() - 1, 1);
 
             return new LocalDate(month.getYear(), month.getMonthOfYear(),
-                    calendar.getActualMaximum(GregorianCalendar.DAY_OF_MONTH));
+                    calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         }
     }
 
