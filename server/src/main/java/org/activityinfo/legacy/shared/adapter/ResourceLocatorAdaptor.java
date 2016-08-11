@@ -15,7 +15,10 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ParametrizedFieldTypeClass;
+import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservablePromise;
 import org.activityinfo.promise.Promise;
@@ -49,6 +52,13 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<FormClass> getFormClass(ResourceId classId) {
+        // TODO: Do not treat type parameters as a FormClass.
+        if(classId.asString().startsWith("_type:")) {
+            String typeId = classId.asString().substring("_type:".length());
+            FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(typeId);
+            ParametrizedFieldTypeClass parametrizedFieldTypeClass = (ParametrizedFieldTypeClass) typeClass;
+            return Promise.resolved(parametrizedFieldTypeClass.getParameterFormClass());
+        }
         return client.getFormSchema(classId.asString());
     }
 
