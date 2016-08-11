@@ -31,6 +31,7 @@ import com.extjs.gxt.ui.client.widget.Text;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout.VBoxLayoutAlign;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayoutData;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
@@ -43,8 +44,10 @@ import java.util.List;
 public class IndicatorPage extends WizardPage {
     // List of all indicators
     private IndicatorTreePanel treePanel;
+    private ResourceLocator locator;
 
-    public IndicatorPage(Dispatcher service) {
+    public IndicatorPage(Dispatcher service, ResourceLocator locator) {
+        this.locator = locator;
 
         VBoxLayout pageLayout = new VBoxLayout();
         pageLayout.setVBoxLayoutAlign(VBoxLayoutAlign.STRETCH);
@@ -58,7 +61,7 @@ public class IndicatorPage extends WizardPage {
         VBoxLayoutData indicatorLayout = new VBoxLayoutData();
         indicatorLayout.setFlex(1);
 
-        treePanel = new IndicatorTreePanel(service, false);
+        treePanel = new IndicatorTreePanel(service, locator);
         treePanel.setHeaderVisible(false);
         treePanel.setLeafCheckableOnly();
         treePanel.addCheckChangedListener(new Listener<TreePanelEvent>() {

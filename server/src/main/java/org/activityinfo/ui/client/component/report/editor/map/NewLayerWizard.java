@@ -25,6 +25,7 @@ package org.activityinfo.ui.client.component.report.editor.map;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.reports.model.layers.MapLayer;
@@ -39,11 +40,13 @@ import org.activityinfo.ui.client.widget.wizard.WizardPage;
 public final class NewLayerWizard extends Wizard {
 
     private IndicatorPage indicatorPage;
+    private ResourceLocator locator;
     private LayerTypePage layerTypePage;
     private AdminLevelPage adminLevelPage;
 
-    public NewLayerWizard(Dispatcher dispatcher) {
-        indicatorPage = new IndicatorPage(dispatcher);
+    public NewLayerWizard(Dispatcher dispatcher, ResourceLocator locator) {
+        indicatorPage = new IndicatorPage(dispatcher, locator);
+        this.locator = locator;
         indicatorPage.addListener(Events.SelectionChange, new Listener<BaseEvent>() {
 
             @Override

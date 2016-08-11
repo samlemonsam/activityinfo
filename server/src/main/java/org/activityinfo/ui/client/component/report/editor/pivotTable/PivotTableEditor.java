@@ -29,6 +29,7 @@ import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -49,6 +50,7 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
 
     private final EventBus eventBus;
     private final Dispatcher service;
+    private ResourceLocator locator;
     private final StateProvider stateMgr;
 
     private PivotTrayPanel pivotPanel;
@@ -63,9 +65,10 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
     private PivotTableReportElement model;
 
     @Inject
-    public PivotTableEditor(EventBus eventBus, Dispatcher service, StateProvider stateMgr) {
+    public PivotTableEditor(EventBus eventBus, Dispatcher service, ResourceLocator locator, StateProvider stateMgr) {
         this.eventBus = eventBus;
         this.service = service;
+        this.locator = locator;
         this.stateMgr = stateMgr;
 
         initializeComponent();
@@ -75,14 +78,6 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
         createGridContainer();
 
         this.pruner = new DimensionPruner(eventBus, service);
-
-        // initialDrillDownListener = new Listener<PivotCellEvent>() {
-        // @Override
-        // public void handleEvent(PivotCellEvent be) {
-        // createDrilldownPanel(be);
-        // }
-        // };
-        // eventBus.addListener(AppEvents.DRILL_DOWN, initialDrillDownListener);
 
     }
 
@@ -106,7 +101,7 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
     }
 
     private void createFilterPane() {
-        filterPane = new PivotFilterPanel(eventBus, service);
+        filterPane = new PivotFilterPanel(eventBus, service, locator);
         filterPane.applyBaseFilter(new Filter());
 
         BorderLayoutData west = new BorderLayoutData(Style.LayoutRegion.WEST);

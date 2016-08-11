@@ -23,19 +23,22 @@ package org.activityinfo.ui.client.page.report.template;
  */
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
-import org.activityinfo.legacy.shared.reports.model.layers.MapLayer;
 import org.activityinfo.ui.client.component.report.editor.map.NewLayerWizard;
 import org.activityinfo.ui.client.widget.wizard.WizardCallback;
 import org.activityinfo.ui.client.widget.wizard.WizardDialog;
 
 public class MapTemplate extends ReportElementTemplate {
 
-    public MapTemplate(Dispatcher dispatcher) {
+    private ResourceLocator locator;
+
+    public MapTemplate(Dispatcher dispatcher, ResourceLocator locator) {
         super(dispatcher);
+        this.locator = locator;
         setName(I18N.CONSTANTS.maps());
         setDescription(I18N.CONSTANTS.mapsDescription());
         setImagePath("map.png");
@@ -44,7 +47,7 @@ public class MapTemplate extends ReportElementTemplate {
     @Override
     public void createElement(final AsyncCallback<ReportElement> callback) {
 
-        final NewLayerWizard wizard = new NewLayerWizard(dispatcher);
+        final NewLayerWizard wizard = new NewLayerWizard(dispatcher, locator);
         WizardDialog dialog = new WizardDialog(wizard);
         dialog.setHeadingText(I18N.CONSTANTS.newMap());
         dialog.show(new WizardCallback() {
@@ -57,19 +60,5 @@ public class MapTemplate extends ReportElementTemplate {
                 callback.onSuccess(map);
             }
         });
-
-        // dialog.addValueChangeHandler(new ValueChangeHandler<MapLayer>() {
-        //
-        // @Override
-        // public void onValueChange(ValueChangeEvent<MapLayer> event) {
-        // createMap(callback, event.getValue());
-        // }
-        // });
-
     }
-
-    private void createMap(final AsyncCallback<ReportElement> callback, MapLayer layer) {
-
-    }
-
 }
