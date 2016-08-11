@@ -28,9 +28,9 @@ package org.activityinfo.legacy.client;
 
 import com.google.common.base.Function;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.promise.Promise;
 
 /**
  * Executes {@link org.activityinfo.legacy.shared.command.Command}s on behalf of client
@@ -73,4 +73,6 @@ public interface Dispatcher extends Function<Command, Promise<CommandResult>> {
      * @return
      */
     <T extends CommandResult> Promise<T> execute(Command<T> command);
+    
+    
 }

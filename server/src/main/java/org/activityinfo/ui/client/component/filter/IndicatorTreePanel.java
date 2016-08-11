@@ -45,6 +45,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
@@ -53,10 +54,18 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +79,7 @@ import java.util.Set;
 public class IndicatorTreePanel extends ContentPanel {
 
     private final Dispatcher dispatcher;
+    private ResourceLocator resourceLocator;
 
     private final TreeStore<ModelData> store;
     private final TreePanel<ModelData> tree;
@@ -91,8 +101,9 @@ public class IndicatorTreePanel extends ContentPanel {
      */
     private Set<Integer> selection = Sets.newHashSet();
 
-    public IndicatorTreePanel(Dispatcher dispatcher, final boolean multipleSelection) {
+    public IndicatorTreePanel(Dispatcher dispatcher, ResourceLocator resourceLocator) {
         this.dispatcher = dispatcher;
+        this.resourceLocator = resourceLocator;
 
         this.setHeadingText(I18N.CONSTANTS.indicators());
         this.setIcon(IconImageBundle.ICONS.indicator());
@@ -258,6 +269,11 @@ public class IndicatorTreePanel extends ContentPanel {
             } else if (parent instanceof IndicatorGroup) {
 
                 callback.onSuccess(createIndicatorList((IndicatorGroup) parent));
+            
+            } else if (parent instanceof SubFormModel) {
+                
+                loadFields(((SubFormModel) parent).getSubFormId()).then(callback);    
+         
             }
         }
     }
@@ -293,6 +309,42 @@ public class IndicatorTreePanel extends ContentPanel {
     }
 
     private Promise<List<ModelData>> loadActivityChildren(ActivityDTO activity) {
+    
+        if(activity.getClassicView()) {
+            return loadClassicActivityChildren(activity);
+        } else {
+            return loadFields(activity.getFormClassId());
+        }
+    }
+
+    private Promise<List<ModelData>> loadFields(ResourceId formId) {
+
+        return resourceLocator.getFormClass(formId).then(new Function<FormClass, List<ModelData>>() {
+            @Nullable
+            @Override
+            public List<ModelData> apply(@Nullable FormClass formClass) {
+                List<ModelData> children = new ArrayList<ModelData>();
+                for (FormField formField : formClass.getFields()) {
+                    if(formField.getType() instanceof QuantityType ||
+                       formField.getType() instanceof CalculatedFieldType) {
+                        QuantityType type = (QuantityType) formField.getType();
+                        IndicatorDTO indicator = new IndicatorDTO();
+                        indicator.setId(CuidAdapter.getLegacyIdFromCuid(formField.getId()));
+                        indicator.setName(formField.getLabel());
+                        children.add(indicator);
+                    } else if(formField.getType() instanceof SubFormReferenceType) {
+                        SubFormModel subFormModel = new SubFormModel();
+                        subFormModel.setName(formField.getLabel());
+                        subFormModel.setSubFormId(((SubFormReferenceType) formField.getType()).getClassId());
+                        children.add(subFormModel);
+                    }
+                }
+                return children;
+            }
+        });
+    }
+
+    private Promise<List<ModelData>> loadClassicActivityChildren(ActivityDTO activity) {
         return dispatcher.execute(new GetActivityForm(activity.getId())).then(new Function<ActivityFormDTO, List<ModelData>>() {
 
             @Override
@@ -410,10 +462,6 @@ public class IndicatorTreePanel extends ContentPanel {
             }
             return true;
         }
-    }
-
-    public boolean isMultipleSelection() {
-        return multipleSelection;
     }
 
     public void clearSelection() {

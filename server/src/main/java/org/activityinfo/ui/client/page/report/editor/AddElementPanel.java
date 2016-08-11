@@ -35,6 +35,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
@@ -48,6 +49,7 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 public class AddElementPanel extends LayoutContainer {
 
+    private ResourceLocator resourceLocator;
     private EditorProvider editorProvider;
     private AddCallback addCallback;
     private Provider<ElementDialog> dialogProvider;
@@ -58,8 +60,10 @@ public class AddElementPanel extends LayoutContainer {
 
     @Inject
     public AddElementPanel(final Dispatcher dispatcher,
+                           final ResourceLocator resourceLocator,
                            EditorProvider editorProvider,
                            Provider<ElementDialog> dialogProvider) {
+        this.resourceLocator = resourceLocator;
         this.editorProvider = editorProvider;
         this.dialogProvider = dialogProvider;
 
@@ -91,7 +95,7 @@ public class AddElementPanel extends LayoutContainer {
 
             @Override
             public void componentSelected(ButtonEvent ce) {
-                addElement(new MapTemplate(dispatcher));
+                addElement(new MapTemplate(dispatcher, resourceLocator));
             }
         }));
         add(createAddButton(I18N.CONSTANTS.addText(),

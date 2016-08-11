@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.layout.AccordionLayout;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.Filter;
@@ -42,13 +43,13 @@ public class PivotFilterPanel extends ContentPanel implements HasReportElement<P
 
     private PivotReportElement model;
 
-    public PivotFilterPanel(EventBus eventBus, Dispatcher dispatcher) {
+    public PivotFilterPanel(EventBus eventBus, Dispatcher dispatcher, ResourceLocator locator) {
         this.reportEventBus = new ReportEventBus(eventBus, this);
 
         setLayout(new AccordionLayout());
         setHeadingText(I18N.CONSTANTS.filter());
 
-        IndicatorFilterPanel indicatorPanel = new IndicatorFilterPanel(dispatcher, true);
+        IndicatorFilterPanel indicatorPanel = new IndicatorFilterPanel(dispatcher, locator);
         indicatorPanel.setHeaderVisible(true);
         add(indicatorPanel);
 

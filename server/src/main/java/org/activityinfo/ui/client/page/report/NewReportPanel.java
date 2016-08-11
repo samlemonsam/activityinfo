@@ -30,6 +30,7 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.ListView;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.CreateReport;
@@ -47,7 +48,7 @@ public class NewReportPanel extends ContentPanel {
     private EventBus eventBus;
     private Dispatcher dispatcher;
 
-    public NewReportPanel(EventBus eventBus, Dispatcher dispatcher) {
+    public NewReportPanel(EventBus eventBus, Dispatcher dispatcher, ResourceLocator locator) {
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
 
@@ -57,7 +58,7 @@ public class NewReportPanel extends ContentPanel {
         store = new ListStore<>();
         store.add(new ChartTemplate(dispatcher));
         store.add(new PivotTableTemplate(dispatcher));
-        store.add(new MapTemplate(dispatcher));
+        store.add(new MapTemplate(dispatcher, locator));
         store.add(new CompositeTemplate(dispatcher));
 
         ListView<ReportTemplate> view = new ListView<ReportTemplate>();
