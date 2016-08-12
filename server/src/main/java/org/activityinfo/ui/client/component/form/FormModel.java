@@ -275,7 +275,7 @@ public class FormModel {
             if (valueInstance.isPresent()) {
                 return valueInstance;
             } else {
-                FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(classByField.getId(), keyId), classByField.getId());
+                FormInstance newInstance = new FormInstance(ResourceId.generatedPeriodSubmissionId(classByField.getId(), getWorkingRootInstance().getId(), keyId), classByField.getId());
                 newInstance.setParentRecordId(getWorkingRootInstance().getId());
 
                 SubformValueKey valueKey = new SubformValueKey(classByField, getWorkingRootInstance());

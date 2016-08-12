@@ -45,8 +45,8 @@ public final class ResourceId implements Serializable {
         return valueOf(GENERATED_ID_DOMAIN + generateCuid());
     }
 
-    public static ResourceId generateSubmissionId(ResourceId formId, String keyId) {
-        return valueOf(generateSubmissionId(formId).asString() + "-" + keyId);
+    public static ResourceId generatedPeriodSubmissionId(ResourceId formId, ResourceId rootInstanceId, String keyId) {
+        return ResourceId.valueOf(formId.asString() + "-" + rootInstanceId.asString() + "-" + keyId);
     }
 
     public static ResourceId generateSubmissionId(ResourceId collectionId) {

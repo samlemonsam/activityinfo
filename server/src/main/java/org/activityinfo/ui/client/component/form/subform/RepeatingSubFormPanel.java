@@ -123,9 +123,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
     }
 
     private static Long getCreationTime(FormInstance instance) {
-        String id = instance.getId().asString();
-        int indexOf = id.lastIndexOf("-");
-        return Long.parseLong(id.substring(indexOf + 1));
+        return 0L; // todo
     }
 
     private void addForm(final FormInstance formInstance) {
@@ -133,7 +131,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
     }
 
     private FormInstance newValueInstance() {
-        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId(), Long.toString(new Date().getTime())), subForm.getId());
+        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId()), subForm.getId());
         newInstance.setParentRecordId(formModel.getWorkingRootInstance().getId());
 
         FormModel.SubformValueKey key = key();
