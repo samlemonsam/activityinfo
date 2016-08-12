@@ -30,7 +30,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -112,9 +111,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         Collections.sort(instances, new Comparator<FormInstance>() {
             @Override
             public int compare(FormInstance o1, FormInstance o2) {
-                Integer d1 = getSortIndex(o1.getKeyId().get());
-                Integer d2 = getSortIndex(o2.getKeyId().get());
-                return d1.compareTo(d2);
+                return getCreationTime(o1).compareTo(getCreationTime(o2));
             }
         });
 
@@ -125,25 +122,18 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         panel.add(addButton);
     }
 
-    private int getSortIndex(ResourceId keyId) {
-        try {
-            return Integer.parseInt(keyId.asString().split("-")[1]);
-        } catch (Exception e) {
-            Log.error("Failed to extract sort index from keyId: " + keyId.asString() + ", subFormClassId: " + subForm.getId(), e);
-            return 0;
-        }
+    private static Long getCreationTime(FormInstance instance) {
+        String id = instance.getId().asString();
+        int indexOf = id.lastIndexOf("-");
+        return Long.parseLong(id.substring(indexOf + 1));
     }
 
     private void addForm(final FormInstance formInstance) {
         addForm(formInstance, -1);
     }
 
-    private ResourceId newKeyId(int sortIndex) {
-        return ResourceId.valueOf(ResourceId.generateId().asString() + "-" + sortIndex);
-    }
-
     private FormInstance newValueInstance() {
-        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId()), subForm.getId());
+        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId(), Long.toString(new Date().getTime())), subForm.getId());
         newInstance.setParentRecordId(formModel.getWorkingRootInstance().getId());
 
         FormModel.SubformValueKey key = key();
@@ -197,7 +187,6 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         }
 
         setDeleteButtonsState();
-        instance.setKeyId(newKeyId(panel.getWidgetIndex(formPanel))); // renew sort index
     }
 
     private void setDeleteButtonsState() {

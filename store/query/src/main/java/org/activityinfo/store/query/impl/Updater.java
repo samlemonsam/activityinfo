@@ -431,10 +431,6 @@ public class Updater {
             update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").getAsString()));
         }
 
-        if (jsonObject.has("keyId") && !jsonObject.get("keyId").isJsonNull()) {
-            update.setKeyId(ResourceId.valueOf(jsonObject.get("keyId").getAsString()));
-        }
-
         FormClass formClass = collection.get().getFormClass();
         JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
         for (FormField formField : formClass.getFields()) {

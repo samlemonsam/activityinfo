@@ -23,7 +23,7 @@ package org.activityinfo.model.date;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.Lists;
-import org.junit.Ignore;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -35,22 +35,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author yuriyz on 07/06/2015.
  */
-@Ignore
 public class CalendarUtilsTest {
-
-    @Test
-    public void firstDateOfYear() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, 2015);
-        calendar.set(Calendar.DAY_OF_YEAR, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        Date date = calendar.getTime();
-        assertEquals(date, CalendarUtils.getFirstDateOfYear(date));
-    }
 
     @Test
     public void firstDayOfEpicWeekInYear() {

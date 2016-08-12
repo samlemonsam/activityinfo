@@ -30,7 +30,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.PanelFiller;
@@ -78,7 +77,7 @@ public class PeriodSubFormPanel implements SubFormPanel {
     }
 
     private void applyInstance(Tab tab) {
-        Optional<FormInstance> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), ResourceId.valueOf(tab.getId()));
+        Optional<FormInstance> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), tab.getId());
         if (instance.isPresent()) {
             formModel.applyInstanceValues(instance.get(), subForm);
         } else {

@@ -179,7 +179,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
      *
      * @return selected key/tab for given field or otherwise null if nothing is selected or it is root instance (no key).
      */
-    public ResourceId getSelectedKey(FormField field) {
+    public String getSelectedKey(FormField field) {
         FormClass formClass = model.getClassByField(field.getId());
         if (formClass.isSubForm()) {
             SubFormPanel subformPanel = widgetCreator.getSubformPanel(formClass);
@@ -187,7 +187,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 PeriodSubFormPanel periodSubFormPanel = (PeriodSubFormPanel) subformPanel;
                 Tab selectedTab = periodSubFormPanel.getSelectedTab();
                 if (selectedTab != null) {
-                    return ResourceId.valueOf(selectedTab.getId());
+                    return selectedTab.getId();
                 }
             }
         }

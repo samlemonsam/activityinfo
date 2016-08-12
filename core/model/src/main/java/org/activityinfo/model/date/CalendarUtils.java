@@ -66,14 +66,6 @@ public class CalendarUtils {
     private CalendarUtils() {
     }
 
-    public static Date getFirstDateOfYear(Date date) {
-        return new LocalDate(date.getYear() + 1900, 1, 1).atMidnightInMyTimezone();
-    }
-
-    public static Date getFirstDateOfYear(int year) {
-        return new LocalDate(year, 1, 1).atMidnightInMyTimezone();
-    }
-
     public static EpiWeek epiWeek(Date date) {
         Date target = CalendarUtil.copyDate(date);
         CalendarUtil.resetTime(target);

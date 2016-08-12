@@ -144,8 +144,8 @@ public class FormModelTest extends CommandTestCase2 {
         FormModel formModel = new FormModel(locator, new GxtStateProvider());
         formModel.setWorkingRootInstance(rootInstance);
 
-        ResourceId tab1 = ResourceId.valueOf(new Month(2015, 3).toString());
-        ResourceId tab2 = ResourceId.valueOf(new Month(2015, 8).toString());
+        String tab1 = new Month(2015, 3).toString();
+        String tab2 = new Month(2015, 8).toString();
 
         // Tab1
         FormInstance valueInstance1 = formModel.getWorkingInstance(subFormChildField.getId(), tab1).get();

@@ -45,6 +45,10 @@ public final class ResourceId implements Serializable {
         return valueOf(GENERATED_ID_DOMAIN + generateCuid());
     }
 
+    public static ResourceId generateSubmissionId(ResourceId formId, String keyId) {
+        return valueOf(generateSubmissionId(formId).asString() + "-" + keyId);
+    }
+
     public static ResourceId generateSubmissionId(ResourceId collectionId) {
         switch (collectionId.getDomain()) {
             case CuidAdapter.ACTIVITY_DOMAIN:
@@ -78,7 +82,7 @@ public final class ResourceId implements Serializable {
         Preconditions.checkArgument(submissionId.getDomain() == ResourceId.GENERATED_ID_DOMAIN, malformedSubmissionId(submissionId));
 
         String[] parts = submissionId.asString().split("-");
-        Preconditions.checkArgument(parts.length == 2, malformedSubmissionId(submissionId));
+        Preconditions.checkArgument(parts.length >= 2, malformedSubmissionId(submissionId));
     }
 
     @JsonValue

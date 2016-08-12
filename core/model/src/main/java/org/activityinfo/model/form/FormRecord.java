@@ -16,7 +16,6 @@ public class FormRecord {
     private String recordId;
     private String formId;
     private String parentRecordId;
-    private String keyId;
     private JsonObject fields;
 
     private FormRecord() {
@@ -32,10 +31,6 @@ public class FormRecord {
 
     public String getParentRecordId() {
         return parentRecordId;
-    }
-
-    public String getKeyId() {
-        return keyId;
     }
 
     public JsonObject getFields() {
@@ -58,9 +53,6 @@ public class FormRecord {
         if(jsonObject.has("parentRecordId")) {
             formRecord.parentRecordId = jsonObject.get("parentRecordId").getAsString();
         }
-        if (jsonObject.has("keyId")) {
-            formRecord.keyId = jsonObject.get("keyId").getAsString();
-        }
 
         formRecord.fields = jsonObject.get("fields").getAsJsonObject();
 
@@ -77,9 +69,6 @@ public class FormRecord {
         jsonObject.addProperty("formId", formId);
         if(parentRecordId != null) {
             jsonObject.addProperty("parentRecordId", parentRecordId);
-        }
-        if(keyId != null) {
-            jsonObject.addProperty("keyId", keyId);
         }
         jsonObject.add("fields", fields);
         return jsonObject;
@@ -98,7 +87,6 @@ public class FormRecord {
         record.recordId = instance.getId().asString();
         record.formId = instance.getClassId().asString();
         record.fields = new JsonObject();
-        record.keyId = instance.getKeyId().isPresent() ? instance.getKeyId().get().asString() : null;
 
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
@@ -134,11 +122,6 @@ public class FormRecord {
         
         public Builder setParentRecordId(ResourceId id) {
             this.record.parentRecordId = id.asString();
-            return this;
-        }
-
-        public Builder setKeyId(ResourceId id) {
-            this.record.keyId = id.asString();
             return this;
         }
         

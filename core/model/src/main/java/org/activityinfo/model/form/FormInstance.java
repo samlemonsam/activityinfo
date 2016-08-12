@@ -21,7 +21,6 @@ package org.activityinfo.model.form;
  * #L%
  */
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.*;
@@ -52,7 +51,6 @@ public class FormInstance implements IsResource {
     private ResourceId id;
     private ResourceId classId;
     private ResourceId parentRecordId;
-    private Optional<ResourceId> keyId = Optional.absent();
     private PropertyBag propertyBag;
 
     /**
@@ -99,7 +97,6 @@ public class FormInstance implements IsResource {
         if (resource.getOwnerId() != null) { // owner may be null for FieldTypes
             instance.setParentRecordId(resource.getOwnerId());
         }
-        instance.setKeyId(resource.isString("keyId") != null ? ResourceId.valueOf(resource.isString("keyId")) : null);
         instance.propertyBag.setAll(resource);
         return instance;
     }
@@ -110,7 +107,6 @@ public class FormInstance implements IsResource {
         resource.setId(id);
         resource.setOwnerId(parentRecordId);
         resource.set("classId", classId);
-        resource.set("keyId", keyId.isPresent() ? keyId.get().asString() : null);
         resource.setAll(propertyBag);
         return resource;
     }
@@ -127,15 +123,6 @@ public class FormInstance implements IsResource {
 
     public ResourceId getParentRecordId() {
         return parentRecordId;
-    }
-
-    public FormInstance setKeyId(ResourceId keyId) {
-        this.keyId = Optional.fromNullable(keyId);
-        return this;
-    }
-
-    public Optional<ResourceId> getKeyId() {
-        return keyId;
     }
 
     public Map<ResourceId, Object> getValueMap() {
@@ -343,7 +330,6 @@ public class FormInstance implements IsResource {
                 "id=" + id +
                 ", classId=" + classId +
                 ", parentRecordId=" + parentRecordId +
-                ", keyId=" + keyId +
                 ", propertyBag=" + propertyBag +
                 '}';
     }

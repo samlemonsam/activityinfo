@@ -18,7 +18,8 @@ public class FormRecordKey implements TypedKey<FormRecordEntity> {
 
         String[] parts = submissionId.asString().split("-");
         Key parent = FormRootKey.key(ResourceId.valueOf(parts[0]));
-        this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, parts[1]);
+        String name = submissionId.asString().substring(submissionId.asString().indexOf("-") + 1);
+        this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, name);
     }
 
     public FormRecordKey(Key key) {

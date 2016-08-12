@@ -253,11 +253,11 @@ public class FormModel {
         this.workingRootInstance = workingRootInstance;
     }
 
-    public Optional<FormInstance> getSubformValueInstance(FormClass subformClass, FormInstance rootInstance, ResourceId keyId) {
+    public Optional<FormInstance> getSubformValueInstance(FormClass subformClass, FormInstance rootInstance, String keyId) {
         Set<FormInstance> formInstances = subFormInstances.get(new SubformValueKey(subformClass, rootInstance));
         if (formInstances != null) {
             for (FormInstance instance : formInstances) {
-                if (instance.getKeyId().get().equals(keyId)) {
+                if (instance.getId().asString().endsWith(keyId)) {
                     return Optional.of(instance);
                 }
             }
@@ -265,7 +265,7 @@ public class FormModel {
         return Optional.absent();
     }
 
-    public Optional<FormInstance> getWorkingInstance(ResourceId formFieldId, ResourceId keyId) {
+    public Optional<FormInstance> getWorkingInstance(ResourceId formFieldId, String keyId) {
         FormClass classByField = getClassByField(formFieldId);
         if (classByField.equals(rootFormClass)) {
             return Optional.of(getWorkingRootInstance());
@@ -275,9 +275,8 @@ public class FormModel {
             if (valueInstance.isPresent()) {
                 return valueInstance;
             } else {
-                FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(classByField.getId()), classByField.getId());
+                FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(classByField.getId(), keyId), classByField.getId());
                 newInstance.setParentRecordId(getWorkingRootInstance().getId());
-                newInstance.setKeyId(keyId);
 
                 SubformValueKey valueKey = new SubformValueKey(classByField, getWorkingRootInstance());
                 Set<FormInstance> allInstances = subFormInstances.get(valueKey);

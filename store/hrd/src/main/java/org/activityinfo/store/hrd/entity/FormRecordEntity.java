@@ -25,11 +25,6 @@ public class FormRecordEntity implements TypedEntity {
      */
     public static final String PARENT_PROPERTY = "@parent";
 
-    /**
-     * For sub form submission keys, like "2016", "July 2015", "London"
-     */
-    public static final String SUBFORM_KEY_PROPERTY = "@subformKey";
-
     public static final String DELETED = "@deleted";
 
     private FormRecordKey key;
@@ -58,8 +53,6 @@ public class FormRecordEntity implements TypedEntity {
             record.setParentRecordId(getParentId());
         }
 
-        record.setKeyId(getKeyId());
-
         for (FormField formField : formClass.getFields()) {
             Object value = entity.getProperty(formField.getName());
             if(value != null) {
@@ -81,19 +74,6 @@ public class FormRecordEntity implements TypedEntity {
         } else {
             return ResourceId.valueOf(parentId);
         }
-    }
-
-    public ResourceId getKeyId() {
-        String keyId = (String) entity.getProperty(SUBFORM_KEY_PROPERTY);
-        if(keyId == null) {
-            return null;
-        } else {
-            return ResourceId.valueOf(keyId);
-        }
-    }
-
-    public void setKeyId(ResourceId keyId) {
-        entity.setProperty(SUBFORM_KEY_PROPERTY, keyId.asString());
     }
 
     public boolean getDeleted() {
@@ -128,10 +108,6 @@ public class FormRecordEntity implements TypedEntity {
     
     public static Query.FilterPredicate parentFilter(ResourceId parentId) {
         return new Query.FilterPredicate(PARENT_PROPERTY, Query.FilterOperator.EQUAL, parentId.asString());
-    }
-
-    public static Query.FilterPredicate keyFilter(ResourceId keyId) {
-        return new Query.FilterPredicate(SUBFORM_KEY_PROPERTY, Query.FilterOperator.EQUAL, keyId.asString());
     }
 
     public static Query.FilterPredicate deletedFilter(boolean deleted) {

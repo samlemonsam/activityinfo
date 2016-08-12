@@ -88,7 +88,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId) {
-        final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString(), null);
+        final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString());
         final Promise<FormClass> subFormClass = getFormClass(subFormId);
         return Promise.waitAll(records, subFormClass).then(new Function<Void, List<FormInstance>>() {
             @Nullable
@@ -108,10 +108,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
         if (record.getParentRecordId() != null) {
             instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
-        }
-
-        if (record.getKeyId() != null) {
-            instance.setKeyId(ResourceId.valueOf(record.getKeyId()));
         }
 
         for (FormField field : formClass.getFields()) {
@@ -143,10 +139,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         NewFormRecordBuilder update = new NewFormRecordBuilder();
         update.setId(instance.getId().asString());
         update.setParentRecordId(instance.getParentRecordId().asString());
-
-        if (instance.getKeyId().isPresent()) {
-            update.setKeyId(instance.getKeyId().get().asString());
-        }
 
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
