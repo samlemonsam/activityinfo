@@ -22,12 +22,8 @@ package org.activityinfo.model.date;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import com.google.common.collect.Lists;
 
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -79,19 +75,6 @@ public class CalendarUtilsTest {
         assertWeekOfYear(2011, 12, 31, 52, 2011);
     }
 
-    @Test
-    public void rangeByDate() {
-        assertRangeByDate(2013, 1, new LocalDate(2012, 12, 30), new LocalDate(2013, 1, 5));
-        assertRangeByDate(2013, 9, new LocalDate(2013, 2, 24), new LocalDate(2013, 3, 2));
-        assertRangeByDate(2013, 27, new LocalDate(2013, 6, 30), new LocalDate(2013, 7, 6));
-        assertRangeByDate(2013, 52, new LocalDate(2013, 12, 22), new LocalDate(2013, 12, 28));
-    }
-
-    private static void assertRangeByDate(int year, int weekInYear, LocalDate startDate, LocalDate endDate) {
-        DateRange range = CalendarUtils.rangeByEpiWeek(new EpiWeek(weekInYear, year));
-        assertEquals(range, new DateRange(startDate.atMidnightInMyTimezone(), endDate.atMidnightInMyTimezone()));
-    }
-
     private static void assertWeekOfYear(int year, int month, int dayOfMonth, int expectedWeek, int expectedYear) {
         Date date = new LocalDate(year, month, dayOfMonth).atMidnightInMyTimezone();
         EpiWeek epiWeek = CalendarUtils.epiWeek(date);
@@ -106,37 +89,5 @@ public class CalendarUtilsTest {
     private void assertFirstDayOfEpicWeekInYear(int year, int expectedYear, int expectedMonth, int expectedDayOfMonth) {
         LocalDate localDate = new LocalDate(expectedYear, expectedMonth, expectedDayOfMonth);
         assertEquals(firstDayOfEpicWeekInYear(year), localDate.atMidnightInMyTimezone());
-    }
-
-    public static DateShifter jvmDateShifter() {
-        return new DateShifter() {
-            @Override
-            public void addMonthsToDate(Date date, int add) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(date);
-                c.add(Calendar.MONTH, add);
-                date.setTime(c.getTime().getTime());
-            }
-
-            @Override
-            public void addDaysToDate(Date date, int add) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(date);
-                c.add(Calendar.DAY_OF_MONTH, add);
-                date.setTime(c.getTime().getTime());
-            }
-        };
-    }
-
-    @Test
-    public void lastFourQuarters() {
-
-        LocalDate date = new LocalDate(2015, 6, 7);
-        ArrayList<LocalDateRange> ranges = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap(date, jvmDateShifter()).values());
-
-        assertEquals(ranges.get(0), new LocalDateRange(new LocalDate(2015, 4, 1), new LocalDate(2015, 6, 30)));
-        assertEquals(ranges.get(1), new LocalDateRange(new LocalDate(2015, 1, 1), new LocalDate(2015, 3, 31)));
-        assertEquals(ranges.get(2), new LocalDateRange(new LocalDate(2014, 10, 1), new LocalDate(2014, 12, 31)));
-        assertEquals(ranges.get(3), new LocalDateRange(new LocalDate(2014, 7, 1), new LocalDate(2014, 9, 30)));
     }
 }

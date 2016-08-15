@@ -96,10 +96,6 @@ public class LocalDateRange implements Serializable {
         return false;
     }
 
-    public boolean isIn(org.activityinfo.model.type.time.LocalDate date) { // some date we have to consolidate and leave only one LocalDate
-        return isIn(CalendarUtils.convert(date));
-    }
-
     public boolean isEmpty() { // both not null
         return minDate == null && maxDate == null;
     }

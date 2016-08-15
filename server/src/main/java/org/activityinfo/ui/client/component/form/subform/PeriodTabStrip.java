@@ -85,6 +85,10 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
                 setVisible(true);
                 cursor = new DailyCursor();
                 break;
+            case WEEKLY:
+                setVisible(true);
+                cursor = new WeeklyCursor();
+                break;
             default:
                 setVisible(false);
         }

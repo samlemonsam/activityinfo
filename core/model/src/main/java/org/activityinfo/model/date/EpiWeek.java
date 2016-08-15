@@ -21,9 +21,13 @@ package org.activityinfo.model.date;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Preconditions;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Each epi week begins on a Sunday and ends on a Saturday.
@@ -34,9 +38,14 @@ import java.io.Serializable;
  */
 public class EpiWeek implements Serializable {
 
+    public static final int WEEKS_IN_YEAR = 52;
+
     private int weekInYear;
     private int year;
 
+    /**
+     * Uninitialized epi week.
+     */
     public EpiWeek() {
     }
 
@@ -44,7 +53,19 @@ public class EpiWeek implements Serializable {
         this.weekInYear = weekInYear;
         this.year = year;
 
+        normalize();
         checkState();
+    }
+
+    private void normalize() {
+        while (weekInYear > WEEKS_IN_YEAR) {
+            year++;
+            weekInYear -= WEEKS_IN_YEAR;
+        }
+        while (weekInYear < 1) {
+            year--;
+            weekInYear += WEEKS_IN_YEAR;
+        }
     }
 
     private void checkState() {
@@ -81,7 +102,7 @@ public class EpiWeek implements Serializable {
     }
 
     public EpiWeek plus(int count) {
-        throw new UnsupportedOperationException("todo");
+        return new EpiWeek(weekInYear + count, year);
     }
 
     public EpiWeek next() {
@@ -126,5 +147,23 @@ public class EpiWeek implements Serializable {
         String year = tokens[0];
         String weekInYear = tokens[1];
         return new EpiWeek(Integer.parseInt(weekInYear), Integer.parseInt(year));
+    }
+
+    public DateRange getDateRange() {
+        Date date = new LocalDate(getYear(), 1, 1).atMidnightInMyTimezone();
+        int dayInYearInsideWeek = getWeekInYear() * 7 - 4;
+
+        if (GWT.isClient()) {
+            CalendarUtil.addDaysToDate(date, dayInYearInsideWeek);
+            DayOfWeek dateOfWeek = DayOfWeek.dayOfWeek(date);
+
+            Date startDate = CalendarUtil.copyDate(date);
+            CalendarUtil.addDaysToDate(startDate, -dateOfWeek.getValue());
+            Date endDate = CalendarUtil.copyDate(date);
+            CalendarUtil.addDaysToDate(endDate, 6 - dateOfWeek.getValue());
+            return new DateRange(startDate, endDate);
+        } else {
+            throw new UnsupportedOperationException("todo");
+        }
     }
 }
