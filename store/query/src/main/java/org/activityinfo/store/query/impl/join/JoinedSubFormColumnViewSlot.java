@@ -63,7 +63,7 @@ public class JoinedSubFormColumnViewSlot implements Slot<ColumnView> {
         int numMasterRows = parentLookup.getNumRows();
 
         // Sort the data values by master row index
-        HeapsortTandem.heapsortAscending(masterRowId, subColumnValues, numSubRows);
+        HeapsortTandem.heapsortDescending(masterRowId, subColumnValues, numSubRows);
         
   
         // Allocate the output for the results

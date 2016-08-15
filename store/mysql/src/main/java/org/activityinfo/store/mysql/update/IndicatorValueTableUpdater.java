@@ -83,6 +83,14 @@ public class IndicatorValueTableUpdater {
     }
     
     public void insertReportingPeriod(QueryExecutor executor) {
+        
+        // We are relaxing the requirement that all sites have start/end date fields
+        // But we are not ready to remove the date1/date2 fields from the reportingperiod table
+        if(date1 == null) {
+            date1 = new Date(0);
+            date2 = new Date(0);
+        }
+        
         reportingPeriodId = new KeyGenerator().generateInt();
         executor.update("INSERT INTO reportingperiod (siteId, reportingPeriodId, date1, date2, dateCreated, dateEdited) " +
                         "VALUES (?, ?, ?, ?, ?, ?)",

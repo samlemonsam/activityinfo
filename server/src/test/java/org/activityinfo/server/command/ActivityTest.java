@@ -30,10 +30,7 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormElement;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.TFormClass;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -43,7 +40,10 @@ import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.database.OnDataSet;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +56,7 @@ import java.util.Map;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -367,6 +368,45 @@ public class ActivityTest extends CommandTestCase2 {
         assertTrue("Cause attribute is gone", form.getAttributeGroupById(1) == null);
 
     }
+    
+    @Test
+    public void newFormWithoutDates() {
+        
+        // Create an activity in the same way that the Design Presenter does...
+        
+        ActivityDTO newEntity = new ActivityDTO();
+        newEntity.setName("My Form");
+        newEntity.set("databaseId", 1);
+        newEntity.set("classicView", false);
+        newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
+        newEntity.set("locationTypeId", 2 /* Nullary location type for RDC in schema.db.xml */);
+        newEntity.set("published", 0);
+        CreateResult createResult = execute(new CreateEntity(newEntity));
+        
+        // Some definitions...
+        int activityId = createResult.getNewId();
+        ResourceId formId = CuidAdapter.activityFormClass(activityId);
+        ResourceId startDateId = CuidAdapter.field(formId, CuidAdapter.START_DATE_FIELD);
+        ResourceId endDateId = CuidAdapter.field(formId, CuidAdapter.END_DATE_FIELD);
+        
+        // Now delete the date fields in the form designer...
+
+        FormClass formClass = assertResolves(locator.getFormClass(formId));
+        formClass.removeField(startDateId);
+        formClass.removeField(endDateId);
+        assertResolves(locator.persist(formClass));
+
+        // Now verify that the form class no longer has the date fields
+        formClass = assertResolves(locator.getFormClass(formId));
+        assertThat(formClass.getFields(), not(hasItem(withId(startDateId))));
+        assertThat(formClass.getFields(), not(hasItem(withId(endDateId))));
+        
+        // Now submit a new entry without dates...
+        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(formId), formId);
+        newInstance.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerInstanceId(1));
+
+        assertResolves(locator.persist(newInstance));
+    }
 
     private static void assertHasFieldWithLabel(FormClass formClass, String label) {
         for (FormField field : formClass.getFields()) {
@@ -375,5 +415,20 @@ public class ActivityTest extends CommandTestCase2 {
             }
         }
         throw new RuntimeException("No field with label: " + label);
+    }
+    
+    private static Matcher<FormField> withId(final ResourceId id) {
+        return new TypeSafeMatcher<FormField>() {
+            @Override
+            protected boolean matchesSafely(FormField formField) {
+                return formField.getId().equals(id);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("field with id ");
+                description.appendValue(id.asString());
+            }
+        };
     }
 }
