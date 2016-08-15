@@ -89,8 +89,15 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
                 setVisible(true);
                 cursor = new WeeklyCursor();
                 break;
+            case BIWEEKLY:
+                setVisible(true);
+                cursor = new BiWeeklyCursor();
+                break;
             default:
                 setVisible(false);
+        }
+        if (cursor != null) { // avoid state when tab is not selected (data entered on UI is not bound to any key)
+            setValue(cursor.getCurrentPeriod().toString(), false);
         }
         render();
     }

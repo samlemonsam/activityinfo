@@ -49,6 +49,10 @@ public class EpiWeek implements Serializable {
     public EpiWeek() {
     }
 
+    public EpiWeek(EpiWeek week) {
+        this(week.getWeekInYear(), week.getYear());
+    }
+
     public EpiWeek(int weekInYear, int year) {
         this.weekInYear = weekInYear;
         this.year = year;
