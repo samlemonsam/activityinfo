@@ -1,4 +1,4 @@
-package org.activityinfo.model.jre.java.util;
+package java.util;
 
 import java.util.Date;
 
