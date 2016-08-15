@@ -3,6 +3,7 @@ package org.activityinfo.store.mysql.metadata;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.collections.BETA;
@@ -42,8 +43,12 @@ public class Activity implements Serializable {
 
     boolean classicView;
 
+    FormClass serializedFormClass;
+
 
     List<ActivityField> fields = Lists.newArrayList();
+    
+    
     Map<ResourceId, Integer> fieldsOrder = Maps.newHashMap();
 
     /**
@@ -252,4 +257,7 @@ public class Activity implements Serializable {
         return linked;
     }
 
+    public FormClass getSerializedFormClass() {
+        return serializedFormClass;
+    }
 }

@@ -46,6 +46,11 @@ public class ActivityTableMappingBuilder {
     }
 
     public static ActivityTableMappingBuilder site(Activity activity) {
+        
+        if(activity.getSerializedFormClass() != null) {
+            return newForm(activity);
+        }
+        
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
         mapping.baseTable = "site";
@@ -76,6 +81,37 @@ public class ActivityTableMappingBuilder {
 
         sortFormClassFields(mapping.formClass, activity.getFieldsOrder());
 
+        return mapping;
+    }
+
+    private static ActivityTableMappingBuilder newForm(Activity activity) {
+        ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
+        mapping.activity = activity;
+        mapping.baseTable = "site";
+        mapping.baseFromClause = "site base";
+        mapping.baseFilter = "base.deleted=0     AND base.activityId=" + activity.getId();
+        mapping.classId = CuidAdapter.activityFormClass(activity.getId());
+        mapping.formClass = activity.getSerializedFormClass();
+        mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.SITE_DOMAIN, "siteId");
+
+        // Add mappings between fields and the base 'site' table, if they are present in the form class.
+        for (FormField formField : mapping.formClass.getFields()) {
+            if(formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.START_DATE_FIELD))) {
+                mapping.addStartDateMapping(formField);
+            
+            } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.END_DATE_FIELD))) {
+                mapping.addEndDateMapping(formField);
+
+            } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.PARTNER_FIELD))) {
+                mapping.addPartnerField(formField);
+
+            } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.PROJECT_FIELD))) {
+                mapping.addProjectField(formField);
+            
+            } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.COMMENT_FIELD))) {
+                mapping.addComments(formField);
+            }
+        }
         return mapping;
     }
 
@@ -121,7 +157,7 @@ public class ActivityTableMappingBuilder {
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true);
         formClass.addElement(date1);
-        mappings.add(new FieldMapping(date1, "date1", DateConverter.INSTANCE));
+        addStartDateMapping(date1);
 
         FormField date2 = new FormField(field(classId, END_DATE_FIELD))
                 .setLabel("End Date")
@@ -129,9 +165,17 @@ public class ActivityTableMappingBuilder {
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true);
         formClass.addElement(date2);
+        addEndDateMapping(date2);
+    }
+
+    private void addStartDateMapping(FormField date1) {
+        mappings.add(new FieldMapping(date1, "date1", DateConverter.INSTANCE));
+    }
+
+    private void addEndDateMapping(FormField date2) {
         mappings.add(new FieldMapping(date2, "date2", DateConverter.INSTANCE));
     }
-    
+
     public void addSiteField() {
         FormField siteField = new FormField(field(classId, SITE_FIELD));
         siteField.setLabel("Site");
@@ -162,6 +206,10 @@ public class ActivityTableMappingBuilder {
                 .setType(ReferenceType.single(activity.getPartnerFormClassId()))
                 .setRequired(true);
         formClass.addElement(partnerField);
+        addPartnerField(partnerField);
+    }
+
+    private void addPartnerField(FormField partnerField) {
         mappings.add(new FieldMapping(partnerField, "partnerId", new ReferenceConverter(PARTNER_DOMAIN)));
     }
 
@@ -172,9 +220,13 @@ public class ActivityTableMappingBuilder {
                 .setType(ReferenceType.single(activity.getProjectFormClassId()))
                 .setRequired(false);
         formClass.addElement(projectField);
+        addProjectField(projectField);
+    }
+
+    private void addProjectField(FormField projectField) {
         mappings.add(new FieldMapping(projectField, "projectId", new ReferenceConverter(PROJECT_DOMAIN)));
     }
-    
+
     public void addComments(){
         FormField commentsField = new FormField(field(classId, COMMENT_FIELD))
                 .setLabel("Comments")
@@ -183,6 +235,10 @@ public class ActivityTableMappingBuilder {
                 .setRequired(false);
         
         formClass.addElement(commentsField);
+        addComments(commentsField);
+    }
+
+    private void addComments(FormField commentsField) {
         mappings.add(new FieldMapping(commentsField, "comments", new FieldValueConverter() {
             @Override
             public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {

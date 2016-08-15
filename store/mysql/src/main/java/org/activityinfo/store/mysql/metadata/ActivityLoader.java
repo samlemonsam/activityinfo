@@ -40,8 +40,6 @@ public class ActivityLoader {
 
     private static final Logger LOGGER = Logger.getLogger(ActivityLoader.class.getName());
 
-    private static final String MEMCACHE_KEY_PREFIX = "activity:metadata:";
-
     private final MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
     private final QueryExecutor executor;
     private final ParentKeyCache parentKeys;
@@ -279,6 +277,7 @@ public class ActivityLoader {
                         classicActivityIds.add(activity.getId());
                     } else {
                         addFields(activity, serializedFormClass);
+                        activity.serializedFormClass = serializedFormClass;
                     }
 
                     activityMap.put(activity.getId(), activity);

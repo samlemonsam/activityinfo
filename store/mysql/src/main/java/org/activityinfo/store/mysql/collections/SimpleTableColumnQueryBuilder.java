@@ -21,7 +21,7 @@ public class SimpleTableColumnQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void only(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
+        cursorBuilder.only(resourceId);
     }
 
     @Override
