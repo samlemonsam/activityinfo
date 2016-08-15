@@ -23,9 +23,15 @@ package org.activityinfo.model.date;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
+import org.activityinfo.model.util.Pair;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The first epi week of the year ends, by definition, on the first Saturday of January,
@@ -156,4 +162,43 @@ public class CalendarUtils {
         return new LocalDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
     }
 
+    public static List<LocalDateRange> getLastFourQuarters() {
+        return Lists.newArrayList(getLastFourQuarterMap().values());
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap() {
+        return getLastFourQuarterMap(new LocalDate());
+    }
+
+    public static Map<Pair<Integer, Integer>, LocalDateRange> getLastFourQuarterMap(LocalDate date) {
+        int year = date.getYear();
+        int quarter = date.getMonthOfYear() / 3;
+
+        Map<Pair<Integer, Integer>, LocalDateRange> result = Maps.newLinkedHashMap();
+
+        for (int i = 0; i < 4; ++i) {
+            quarter = quarter - 1;
+            if (quarter < 0) {
+                year = year - 1;
+                quarter = 3;
+            }
+            result.put(Pair.newPair(year, quarter), createQuarterRange(year, quarter));
+        }
+        return result;
+    }
+
+    public static LocalDateRange createQuarterRange(int year, int quarter) {
+        Date from = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
+        Date to = new LocalDate(year, quarter * 3, 1).atMidnightInMyTimezone();
+
+        if (GWT.isClient()) {
+            CalendarUtil.addMonthsToDate(from, 1);
+            CalendarUtil.addMonthsToDate(to, 4);
+            CalendarUtil.addDaysToDate(to, -1);
+        } else {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        return new LocalDateRange(from, to);
+    }
 }
