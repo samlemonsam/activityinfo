@@ -120,7 +120,7 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
             // try to check variable names
             List<SymbolExpr> symbolExprList = Lists.newArrayList();
             gatherSymbolExprs(expr, symbolExprList);
-            if(SYMBOL_CHECKING_DISABLED) {
+            if(!SYMBOL_CHECKING_DISABLED) {
                 List<String> existingIndicatorCodes = existingFieldCodes();
                 for (SymbolExpr placeholderExpr : symbolExprList) {
                     if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
