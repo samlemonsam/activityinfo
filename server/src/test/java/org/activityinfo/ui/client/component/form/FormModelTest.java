@@ -31,6 +31,7 @@ import org.activityinfo.model.date.Month;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
@@ -128,6 +129,13 @@ public class FormModelTest extends CommandTestCase2 {
         });
     }
 
+    private FormModel newFormModel() {
+        FormModel model = new FormModel(locator, new GxtStateProvider());
+        model.put(masterFormClass);
+        model.putSubform(subFormField.getId(), subFormClass);
+        return model;
+    }
+
     @Test
     public void subformInstancesPersistence() {
         
@@ -141,7 +149,7 @@ public class FormModelTest extends CommandTestCase2 {
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.LOCATION_FIELD),
                 new ReferenceValue(CuidAdapter.locationInstanceId(1)));
         
-        FormModel formModel = new FormModel(locator, new GxtStateProvider());
+        FormModel formModel = newFormModel();
         formModel.setWorkingRootInstance(rootInstance);
 
         String tab1 = new Month(2015, 3).toString();
@@ -154,6 +162,9 @@ public class FormModelTest extends CommandTestCase2 {
         // Tab2
         FormInstance valueInstance2 = formModel.getWorkingInstance(subFormChildField.getId(), tab2).get();
         valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab2"));
+
+        formModel.getChangedInstances().add(valueInstance1);
+        formModel.getChangedInstances().add(valueInstance2);
 
         // persist all value and tab/key instances
         FormActions actions = new FormActions(locator, formModel);
@@ -176,6 +187,9 @@ public class FormModelTest extends CommandTestCase2 {
         valueInstance2 = formModel.getWorkingInstance(subFormChildField.getId(), tab2).get();
         valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab22"));
 
+        formModel.getChangedInstances().add(valueInstance1);
+        formModel.getChangedInstances().add(valueInstance2);
+
         // persist updates
         assertResolves(actions.save());
 
@@ -194,7 +208,7 @@ public class FormModelTest extends CommandTestCase2 {
         assertResolves(new SubFormInstanceLoader(emptyModel).load(subFormClass));
         Map<FormModel.SubformValueKey, Set<FormInstance>> loadedInstances = emptyModel.getSubFormInstances();
 
-        assertEquals(loadedInstances.size(), 2);
+        assertEquals(1, loadedInstances.size());
         assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab1).get(), valueInstance1);
         assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab2).get(), valueInstance2);
     }
@@ -218,6 +232,7 @@ public class FormModelTest extends CommandTestCase2 {
         subFormClass = new FormClass(ResourceId.generateId());
         subFormClass.setOwnerId(masterFormClass.getId());
         subFormClass.setParentFormId(masterFormId);
+        subFormClass.setSubFormKind(SubFormKind.MONTHLY);
         subFormChildField = subFormClass.addField();
         subFormChildField.setType(TextType.INSTANCE);
 

@@ -172,9 +172,7 @@ public class FormModel {
             @Override
             public FormClass apply(FormClass input) {
                 FormModel.this.rootFormClass = input;
-                for (FormField formField : input.getFields()) {
-                    formFieldToFormClass.put(formField.getId(), input);
-                }
+                put(input);
                 return input;
             }
         }).join(new Function<FormClass, Promise<Void>>() {
@@ -189,10 +187,7 @@ public class FormModel {
                             @Nullable
                             @Override
                             public Object apply(FormClass subForm) {
-                                ownerFormFieldToSubFormClass.put(formField.getId(), subForm);
-                                for (FormField field : subForm.getFields()) {
-                                    formFieldToFormClass.put(field.getId(), subForm);
-                                }
+                                putSubform(formField.getId(), subForm);
                                 return null;
                             }
                         });
@@ -202,6 +197,17 @@ public class FormModel {
                 return Promise.waitAll(promises);
             }
         });
+    }
+
+    public void putSubform(ResourceId ownderFieldId, FormClass formClass) {
+        ownerFormFieldToSubFormClass.put(ownderFieldId, formClass);
+        put(formClass);
+    }
+
+    public void put(FormClass formClass) {
+        for (FormField field : formClass.getFields()) {
+            formFieldToFormClass.put(field.getId(), formClass);
+        }
     }
 
     public List<FormField> getAllFormsFields() {
