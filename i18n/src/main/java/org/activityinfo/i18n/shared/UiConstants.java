@@ -1646,4 +1646,19 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("You do not have permission to edit the design of this database.")
     String noDbDesignPermissions();
+
+    @DefaultStringValue("Repeating Sub-Form")
+    String repeatingSubform();
+
+    @DefaultStringValue("Monthly Sub-Form")
+    String monthlySubform();
+
+    @DefaultStringValue("Weekly Sub-Form")
+    String weeklySubform();
+
+    @DefaultStringValue("Fortnightly Sub-Form")
+    String fortnightlySubform();
+
+    @DefaultStringValue("Daily Sub-Form")
+    String dailySubform();
 }

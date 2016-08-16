@@ -49,11 +49,11 @@ public class Templates {
         items.add(new TypeClassTemplate(CalculatedFieldType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeCalculated()));
         items.add(new LabelTemplate());
         items.add(new SectionTemplate());
-        items.add(new SubFormTemplate(I18N.CONSTANTS.repeating(), SubFormKind.REPEATING));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.monthly(), SubFormKind.MONTHLY));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.weekly(), SubFormKind.WEEKLY));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.fortnightly(), SubFormKind.BIWEEKLY));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.daily(), SubFormKind.DAILY));
+        items.add(new SubFormTemplate(I18N.CONSTANTS.repeatingSubform(), SubFormKind.REPEATING));
+        items.add(new SubFormTemplate(I18N.CONSTANTS.monthlySubform(), SubFormKind.MONTHLY));
+        items.add(new SubFormTemplate(I18N.CONSTANTS.weeklySubform(), SubFormKind.WEEKLY));
+        items.add(new SubFormTemplate(I18N.CONSTANTS.fortnightlySubform(), SubFormKind.BIWEEKLY));
+        items.add(new SubFormTemplate(I18N.CONSTANTS.dailySubform(), SubFormKind.DAILY));
 
         items.add(new TypeClassTemplate(ReferenceType.TYPE_CLASS, I18N.CONSTANTS.reference()));
 
