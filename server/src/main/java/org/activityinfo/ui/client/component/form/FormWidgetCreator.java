@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.form;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.ValueUpdater;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -41,6 +42,7 @@ import org.activityinfo.ui.client.component.form.subform.SubFormPanel;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 02/17/2015.
@@ -89,6 +91,16 @@ public class FormWidgetCreator {
 
     public SubFormPanel getSubformPanel(FormClass subForm) {
         return subformPanels.get(subForm);
+    }
+
+    public Set<RepeatingSubFormPanel> getRepeatingSubformPanels() {
+        Set<RepeatingSubFormPanel> set = Sets.newHashSet();
+        for (Map.Entry<FormClass, SubFormPanel> entry : subformPanels.entrySet()) {
+            if (entry.getKey().isSubForm()) {
+                set.add((RepeatingSubFormPanel) entry.getValue());
+            }
+        }
+        return set;
     }
 
     public Promise<Void> createWidgets(final FormClass formClass, final FieldUpdated fieldUpdated) {

@@ -18,7 +18,6 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.lock.LockEvaluator;
 import org.activityinfo.model.resource.Resource;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -27,6 +26,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.form.subform.PeriodSubFormPanel;
+import org.activityinfo.ui.client.component.form.subform.RepeatingSubFormPanel;
 import org.activityinfo.ui.client.component.form.subform.SubFormPanel;
 import org.activityinfo.ui.client.component.form.subform.Tab;
 import org.activityinfo.ui.client.widget.ButtonWithIcon;
@@ -279,6 +279,17 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
                 valid = false;
             }
         }
+
+        if (valid) { // trigger subform validation
+            for (RepeatingSubFormPanel panel : this.widgetCreator.getRepeatingSubformPanels()) {
+                for (SimpleFormPanel singlePanel : panel.getForms().values()) {
+                    if (!singlePanel.validate()) {
+                        valid = false;
+                    }
+                }
+            }
+        }
+
         return valid;
     }
 
