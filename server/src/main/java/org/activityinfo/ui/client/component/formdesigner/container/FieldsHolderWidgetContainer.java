@@ -108,6 +108,9 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             }
         });
 
+        if (subForm.getSubFormKind().isPeriod()) {
+            container.getPanel().getPanel().getSubformContainer().add(new PeriodTabStrip(subForm.getSubFormKind()));
+        }
         container.syncWithModel(); // force ui update
         return container;
     }
@@ -128,13 +131,6 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
 
     public void syncWithModel(final boolean force) {
         panel.getPanel().getLabel().setHTML("<h3>" + SafeHtmlUtils.fromString(Strings.nullToEmpty(elementContainer.getLabel())).asString() + "</h3>");
-
-        if (isSubform) {
-            final FormClass subForm = (FormClass) elementContainer;
-            if (subForm.getSubFormKind().isPeriod()) {
-                panel.getPanel().getSubformContainer().add(new PeriodTabStrip(subForm.getSubFormKind()));
-            }
-        }
     }
 
     @Override
