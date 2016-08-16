@@ -75,7 +75,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         });
 
         FlowPanel dropPanel = createDropPanel();
-        panel.getPanel().getWidgetContainer().add(dropPanel);
+        panel.getPanel().getSubformContainer().add(dropPanel);
         dropController = formDesigner.getDropControllerRegistry().register(elementContainer.getId(), dropPanel, formDesigner);
         dropController.getContainerMap().put(elementContainer.getId(), this); // register yourself
 
@@ -108,8 +108,9 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
             }
         });
 
+        container.getPanel().getPanel().getWidgetContainer().setVisible(false);
         if (subForm.getSubFormKind().isPeriod()) {
-            container.getPanel().getPanel().getSubformContainer().add(new PeriodTabStrip(subForm.getSubFormKind()));
+            container.getPanel().getPanel().getSubformTabContainer().add(new PeriodTabStrip(subForm.getSubFormKind()));
         }
         container.syncWithModel(); // force ui update
         return container;

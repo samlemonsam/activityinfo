@@ -69,6 +69,8 @@ public class FieldPanel {
     Label dragHandle;
     @UiField
     FlowPanel subformContainer;
+    @UiField
+    FlowPanel subformTabContainer;
 
     public FieldPanel(FormDesigner formDesigner) {
         uiBinder.createAndBindUi(this);
@@ -186,6 +188,10 @@ public class FieldPanel {
 
     public FlowPanel getSubformContainer() {
         return subformContainer;
+    }
+
+    public FlowPanel getSubformTabContainer() {
+        return subformTabContainer;
     }
 
     public ClickHandler getClickHandler() {

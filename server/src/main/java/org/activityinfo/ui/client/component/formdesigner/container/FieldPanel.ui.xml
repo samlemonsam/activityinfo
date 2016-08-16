@@ -8,11 +8,8 @@
 
   <g:FocusPanel ui:field="focusPanel" addStyleNames="{style.widgetContainer} form-group">
     <g:HTMLPanel width="100%">
-      <g:HTML addStyleNames="h5" ui:field="label"/>
-      <g:FlowPanel ui:field="subformContainer">
-      </g:FlowPanel>
       <div class="row" width="100%">
-        <g:SimplePanel ui:field="widgetContainer" addStyleNames="col-xs-10"/>
+        <g:HTML addStyleNames="h5 col-xs-10" ui:field="label"/>
         <div class="col-xs-1">
           <g:Button text="x" ui:field="removeButton" addStyleNames="close pull-right btn-link"/>
         </div>
@@ -20,6 +17,14 @@
           <g:Label text="|||" ui:field="dragHandle"/>
         </div>
       </div>
+
+      <div class="row" width="100%">
+        <g:SimplePanel ui:field="widgetContainer" addStyleNames="col-xs-10"/>
+      </div>
+      <g:FlowPanel ui:field="subformTabContainer">
+      </g:FlowPanel>
+      <g:FlowPanel ui:field="subformContainer">
+      </g:FlowPanel>
     </g:HTMLPanel>
   </g:FocusPanel>
 </ui:UiBinder>
