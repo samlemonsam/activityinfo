@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -34,6 +35,7 @@ import org.activityinfo.store.mysql.update.SqlUpdate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 
@@ -148,6 +150,11 @@ public class LocationFormAccessor implements FormAccessor {
     public Optional<FormRecord> get(ResourceId resourceId) {
         RecordFetcher fetcher = new RecordFetcher(this);
         return fetcher.get(resourceId);
+    }
+
+    @Override
+    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

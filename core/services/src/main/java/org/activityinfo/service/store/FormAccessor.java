@@ -1,10 +1,13 @@
 package org.activityinfo.service.store;
 
 import com.google.common.base.Optional;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+
+import java.util.List;
 
 /**
  * Internal interface used to construct table queries.
@@ -23,11 +26,15 @@ public interface FormAccessor {
      */
     Optional<FormRecord> get(ResourceId resourceId);
     
+    List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId);
+    
     /**
      * @return this collection's schema
      */
     FormClass getFormClass();
 
+    
+    
     void updateFormClass(FormClass formClass);
     
     /**

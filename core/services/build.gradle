@@ -5,6 +5,7 @@ apply plugin: 'gwt-base'
 
 dependencies {
   compile project(':core:model')
+  compile project(':apiClient:gwt')
   gwt     libraries.gwt.user
   compile libraries.jersey.core
   compile libraries.jersey.server

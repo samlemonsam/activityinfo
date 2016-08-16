@@ -1,6 +1,7 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -22,6 +23,7 @@ import org.activityinfo.store.mysql.update.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -87,6 +89,17 @@ public class SiteFormAccessor implements FormAccessor {
     public Optional<FormRecord> get(ResourceId resourceId) {
         RecordFetcher fetcher = new RecordFetcher(this);
         return fetcher.get(resourceId);
+    }
+
+    @Override
+    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+        SiteHistoryReader reader = new SiteHistoryReader(queryExecutor, activity, getFormClass(),
+                CuidAdapter.getLegacyIdFromCuid(resourceId));
+        try {
+            return reader.read();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

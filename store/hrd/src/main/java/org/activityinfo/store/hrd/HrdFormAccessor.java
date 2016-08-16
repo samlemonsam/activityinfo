@@ -5,6 +5,7 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -52,6 +53,11 @@ public class HrdFormAccessor implements FormAccessor {
         } else {
             return Optional.absent();
         }
+    }
+
+    @Override
+    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

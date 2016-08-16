@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Optional;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -67,6 +68,11 @@ public class MockFormCatalog implements FormCatalog {
         @Override
         public Optional<FormRecord> get(ResourceId resourceId) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+            return Collections.emptyList();
         }
 
         @Override

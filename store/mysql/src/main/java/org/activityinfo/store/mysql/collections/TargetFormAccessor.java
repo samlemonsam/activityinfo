@@ -1,6 +1,7 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -12,6 +13,8 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
+
+import java.util.List;
 
 
 public class TargetFormAccessor implements FormAccessor {
@@ -34,6 +37,11 @@ public class TargetFormAccessor implements FormAccessor {
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
         return RecordFetcher.fetch(this, resourceId);
+    }
+
+    @Override
+    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

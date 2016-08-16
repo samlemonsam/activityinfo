@@ -25,29 +25,28 @@ package org.activityinfo.ui.client.page.entry.sitehistory;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.TabItem;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.common.base.Strings;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.api.client.FormHistoryEntry;
+import org.activityinfo.api.client.FormValueChange;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.command.GetActivityForm;
-import org.activityinfo.legacy.shared.command.GetLocations;
-import org.activityinfo.legacy.shared.command.GetSiteHistory;
-import org.activityinfo.legacy.shared.command.GetSiteHistory.GetSiteHistoryResult;
-import org.activityinfo.legacy.shared.command.result.LocationResult;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.legacy.shared.model.SiteHistoryDTO;
+import org.activityinfo.model.type.time.LocalDate;
 
+import java.util.Date;
 import java.util.List;
 
 public class SiteHistoryTab extends TabItem {
 
-    private final Html content;
-    private final Dispatcher dispatcher;
+    static final Date HISTORY_AVAILABLE_FROM = new LocalDate(2012, 12, 20).atMidnightInMyTimezone();
 
-    public SiteHistoryTab(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    private final Html content;
+    private ResourceLocator resourceLocator;
+
+    public SiteHistoryTab(ResourceLocator resourceLocator) {
+        this.resourceLocator = resourceLocator;
 
         this.setScrollMode(Scroll.AUTO);
 
@@ -58,72 +57,85 @@ public class SiteHistoryTab extends TabItem {
         add(content);
     }
 
-    // retrieve all needed data: sitehistoryresult, schema, and locations
     public void setSite(final SiteDTO site) {
-        renderLoading();
 
-        dispatcher.execute(new GetSiteHistory(site.getId()), new AsyncCallback<GetSiteHistoryResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                renderNotAvailable(site);
-            }
+        renderStatus(I18N.CONSTANTS.loading());
 
-            @Override
-            public void onSuccess(final GetSiteHistoryResult historyResult) {
-                if (historyResult != null && historyResult.hasHistories()) {
-                    dispatcher.execute(new GetLocations(historyResult.collectLocationIds()),
-                            new AsyncCallback<LocationResult>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    renderNotAvailable(site);
-                                }
+        resourceLocator.getFormRecordHistory(site.getFormClassId(), site.getInstanceId())
+                .then(new AsyncCallback<List<FormHistoryEntry>>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        renderStatus(I18N.CONSTANTS.serverError());
+                    }
 
-                                @Override
-                                public void onSuccess(final LocationResult locationsResult) {
-                                    dispatcher.execute(new GetActivityForm(site.getActivityId()), new AsyncCallback<ActivityFormDTO>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            renderNotAvailable(site);
-                                        }
+                    @Override
+                    public void onSuccess(List<FormHistoryEntry> entries) {
+                        render(site, entries);
+                    }
+                });
+    }
 
-                                        @Override
-                                        public void onSuccess(ActivityFormDTO schema) {
-                                            if (schema == null || locationsResult == null || locationsResult.getData() == null ||
-                                                    historyResult.getSiteHistories() == null) {
-                                                content.setHtml(SafeHtmlUtils.EMPTY_SAFE_HTML);
-                                                return;
-                                            }
+    private void renderStatus(String message) {
+        SafeHtmlBuilder html = new SafeHtmlBuilder();
+        appendItemSpan(html, message);
+        content.setHtml(html.toSafeHtml());
+    }
 
-                                            render(schema,
-                                                    locationsResult.getData(),
-                                                    site,
-                                                    historyResult.getSiteHistories());
-                                        }
-                                    });
-                                }
-                            });
+    private void render(SiteDTO site, List<FormHistoryEntry> entries) {
+
+        SafeHtmlBuilder html = new SafeHtmlBuilder();
+
+        if(site.getDateCreated().before(HISTORY_AVAILABLE_FROM)) {
+            appendItemSpan(html, I18N.MESSAGES.siteHistoryDateCreated(site.getDateCreated()));
+            html.appendHtmlConstant("<br>");
+            html.appendEscaped(I18N.MESSAGES.siteHistoryAvailableFrom(HISTORY_AVAILABLE_FROM));
+        }
+
+        for (FormHistoryEntry entry : entries) {
+            appendTo(entry, html);
+        }
+        content.setHtml(html.toSafeHtml());
+    }
+
+    private void appendItemSpan(SafeHtmlBuilder html, String string) {
+        html.appendHtmlConstant("<span style='color: #15428B; font-weight: bold;'>");
+        html.appendEscaped(string);
+        html.appendHtmlConstant("</span>");
+    }
+
+    private void appendTo(FormHistoryEntry entry, SafeHtmlBuilder html) {
+        Date changeTime = new Date(entry.getTime() * 1000L);
+
+        html.appendHtmlConstant("<p>");
+        html.appendHtmlConstant("<span style='color: #15428B; font-weight: bold;'>");
+        if(entry.getChangeType().equals("created")) {
+            appendItemSpan(html,
+                    I18N.MESSAGES.siteHistoryCreated(changeTime, entry.getUserName(), entry.getUserEmail()));
+        } else {
+            appendItemSpan(html, 
+                    I18N.MESSAGES.siteHistoryUpdated(changeTime, entry.getUserName(), entry.getUserEmail()));
+        }
+        html.appendHtmlConstant("<br>");
+
+        if(!entry.getValues().isEmpty()) {
+            html.appendHtmlConstant("<ul style='margin:0px 0px 10px 20px; font-size: 11px;'>");
+            for (FormValueChange change : entry.getValues()) {
+                html.appendHtmlConstant("<li>");
+                html.appendEscaped(change.getFieldLabel());
+                html.appendEscaped(": ");
+                html.appendEscaped(change.getNewValueLabel());
+
+                html.appendEscaped(" (");
+                if(Strings.isNullOrEmpty(change.getOldValueLabel())) {
+                    html.appendEscaped(I18N.MESSAGES.siteHistoryOldValueBlank());
                 } else {
-                    renderNotAvailable(site);
+                    html.appendEscaped(I18N.MESSAGES.siteHistoryOldValue(change.getOldValueLabel()));
                 }
+                html.appendEscaped(")");
+                html.appendHtmlConstant("</li>");
             }
-        });
+            html.appendHtmlConstant("</ul>");
+        }
     }
 
-    private void render(final ActivityFormDTO schema,
-                        final List<LocationDTO> locations,
-                        final SiteDTO site,
-                        final List<SiteHistoryDTO> histories) {
-        content.setHtml(SafeHtmlUtils.fromTrustedString(
-                new SiteHistoryRenderer().render(schema, locations, site, histories)));
-    }
-
-    private void renderNotAvailable(final SiteDTO site) {
-        content.setHtml(SafeHtmlUtils.fromTrustedString(
-                new SiteHistoryRenderer().renderNotAvailable(site)));
-    }
-
-    private void renderLoading() {
-        content.setHtml(SafeHtmlUtils.fromTrustedString(
-                new SiteHistoryRenderer().renderLoading()));
-    }
 }
