@@ -60,6 +60,7 @@ task appengineExplodeDevMode(type: Copy) {
 task appengineDevMode(type: JavaExec) {
     dependsOn appengineDownloadSdk
     dependsOn appengineExplodeDevMode
+    dependsOn compileJava
 
     main = 'com.google.gwt.dev.DevMode'
     
