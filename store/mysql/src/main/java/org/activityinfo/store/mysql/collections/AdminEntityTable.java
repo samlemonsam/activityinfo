@@ -55,6 +55,7 @@ public class AdminEntityTable implements SimpleTable {
         label.setLabel(I18N.CONSTANTS.name());
         label.setCode("name");
         label.setRequired(true);
+        label.addSuperProperty(ResourceId.valueOf("label"));
         label.setType(TextType.INSTANCE);
 
         FormField code = new FormField(CuidAdapter.field(formId, CuidAdapter.CODE_FIELD));

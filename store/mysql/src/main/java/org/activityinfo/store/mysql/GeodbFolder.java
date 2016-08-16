@@ -70,7 +70,7 @@ public class GeodbFolder {
                 "databaseId IS NULL AND " +
                 "countryId IN (SELECT countryId FROM country WHERE iso2 = ?)  ", countryId)) {
             while(rs.next()) {
-                String formId = CuidAdapter.adminLevelFormClass(rs.getInt(1)).asString();
+                String formId = CuidAdapter.locationFormClass(rs.getInt(1)).asString();
                 String label = rs.getString(2);
                 entries.add(new CatalogEntry(formId, label, CatalogEntryType.FORM));
             }
