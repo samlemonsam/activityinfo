@@ -36,6 +36,7 @@ public class MySqlCatalog implements FormCatalog {
     private final ActivityLoader activityLoader;
     
     private GeodbFolder geodbFolder;
+    private DatabasesFolder databasesFolder;
 
     public MySqlCatalog(final QueryExecutor executor) {
 
@@ -54,6 +55,7 @@ public class MySqlCatalog implements FormCatalog {
         providers.add(new HrdProvider());
 
         geodbFolder = new GeodbFolder(executor);
+        databasesFolder = new DatabasesFolder(executor);
         
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormAccessor>>() {
@@ -159,6 +161,7 @@ public class MySqlCatalog implements FormCatalog {
         
         List<CatalogEntry> entries = new ArrayList<>();
         entries.add(geodbFolder.getRootEntry());
+        entries.add(databasesFolder.getRootEntry());
 
         return entries;
     }
@@ -169,6 +172,7 @@ public class MySqlCatalog implements FormCatalog {
         try {
             List<CatalogEntry> entries = new ArrayList<>();
             entries.addAll(geodbFolder.getChildren(parentId));
+            entries.addAll(databasesFolder.getChildren(parentId));
 
             return entries;
             
