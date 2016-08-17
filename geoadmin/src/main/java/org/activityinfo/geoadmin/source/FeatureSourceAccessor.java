@@ -1,6 +1,7 @@
 package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Optional;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -36,6 +37,11 @@ public class FeatureSourceAccessor implements FormAccessor {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 

@@ -39,6 +39,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -108,13 +109,17 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private ActionToolBar toolBar;
     private ContentPanel betaLinkPanel;
+    private ResourceLocator resourceLocator;
 
 
     @Inject
-    public DataEntryPage(final EventBus eventBus, Dispatcher dispatcher, StateProvider stateProvider) {
+    public DataEntryPage(final EventBus eventBus, 
+                         Dispatcher dispatcher, ResourceLocator resourceLocator, 
+                         StateProvider stateProvider) {
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
         this.stateProvider = stateProvider;
+        this.resourceLocator = resourceLocator;
 
         setLayout(new BorderLayout());
 
@@ -167,7 +172,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         attachmentsTab = new AttachmentsTab(dispatcher, eventBus);
 
-        siteHistoryTab = new SiteHistoryTab(dispatcher);
+        siteHistoryTab = new SiteHistoryTab(resourceLocator);
 
         tabPanel = new CollapsibleTabPanel();
         tabPanel.add(detailTab);

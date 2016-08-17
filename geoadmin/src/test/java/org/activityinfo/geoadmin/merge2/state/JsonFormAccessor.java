@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -85,6 +86,11 @@ public class JsonFormAccessor implements FormAccessor {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 

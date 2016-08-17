@@ -4,10 +4,7 @@ import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
-import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.FormRecordSet;
-import org.activityinfo.api.client.FormRecordUpdateBuilder;
-import org.activityinfo.api.client.NewFormRecordBuilder;
+import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -26,6 +23,7 @@ import org.activityinfo.store.query.impl.Updater;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import java.util.Collections;
 import java.util.List;
 
 public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
@@ -127,6 +125,11 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         } catch (Exception e) {
             return Promise.rejected(e);
         }
+    }
+
+    @Override
+    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
+        return Promise.resolved(Collections.<FormHistoryEntry>emptyList());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.activityinfo.core.client;
 
 
+import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
@@ -46,6 +47,8 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     Promise<FormInstance> getFormInstance(ResourceId formId, ResourceId formRecordId);
 
     Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId);
+    
+    Promise<List<FormHistoryEntry>> getFormRecordHistory(ResourceId formId, ResourceId recordId);
     
     /**
      * Persists a resource to the server, creating or updating as necessary.

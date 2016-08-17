@@ -103,6 +103,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         });
     }
 
+    @Override
+    public Promise<List<FormHistoryEntry>> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
+        return client.getRecordHistory(formId.asString(), recordId.asString());
+    }
+
     public FormInstance toFormInstance(FormClass formClass, FormRecord record) {
         FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
 

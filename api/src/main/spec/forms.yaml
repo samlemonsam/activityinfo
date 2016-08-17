@@ -165,6 +165,34 @@ paths:
           description: The authenticated user does not have permission to view this form or record
         404:
           description: No record with `formId` exists
+          
+  /form/{formId}/record/{recordId}/history:
+    get:
+      operationId: getRecordHistory
+      summary: Retrieves the history of changes to a single record.
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: recordId
+          in: path
+          description: Id of the record
+          type: string
+          required: true
+      responses:
+        200:
+          description: The requested record
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/FormHistoryEntry'
+        401:
+          description: The authenticated user does not have permission to view this form or record
+        404:
+          description: No record with `formId` exists
+          
     put:
       operationId: updateRecord
       summary: Updates an individual record in this collection
@@ -400,6 +428,56 @@ definitions:
         type: array
         items: 
           type: string
+
+
+  FormHistoryEntry:
+    type: object
+    properties:
+      formId:
+        type: string
+        description: id of the form
+      recordId:
+        type: string
+        description: id of the record
+      time:
+        type: integer
+        description: the time, in seconds since 1970-01-01, that the change was made
+      changeType:
+        type: string
+        enum:
+          - created
+          - updated
+          - deleted
+      userName:
+        type: string
+        description: the name of the user who made the change
+      userEmail:
+        type: string
+        description: the email address of the user who made the change
+      values:
+        type: array
+        items:
+          $ref: '#/definitions/FormValueChange'
+      
+  FormValueChange:
+    type: object
+    properties:
+      fieldId:
+        type: string
+        description: the id of the field changed
+      fieldLabel:
+        type: string
+        description: the current label of the field changed
+      oldValue:
+        description: the old value of the field
+      oldValueLabel:
+        type: string
+        description: human-readable string of the old value of the field
+      newValue:
+        description: the new value of the field
+      newValueLabel:
+        type: string
+        description: human-readable string of the new value of the field
 
   FormCatalogEntry:
     type: object

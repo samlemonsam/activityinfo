@@ -4,6 +4,7 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.gson.*;
+import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -133,7 +135,27 @@ public class FormResource {
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build();
     }
-    
+
+    @GET
+    @Path("record/{recordId}/history")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRecordHistory(@PathParam("recordId") String recordId) {
+
+        FormAccessor collection = assertVisible(resourceId);
+        List<FormHistoryEntryBuilder> entries = collection.getHistory(ResourceId.valueOf(recordId));
+
+        JsonArray array = new JsonArray();
+        for (FormHistoryEntryBuilder entry : entries) {
+            array.add(entry.toJsonObject());
+        }
+        
+        return Response.ok()
+                .entity(array.toString())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
+    }
+
+
     @GET
     @Path("records")
     @Produces(MediaType.APPLICATION_JSON)

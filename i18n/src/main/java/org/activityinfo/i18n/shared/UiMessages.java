@@ -94,6 +94,9 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the entry.")
     String siteHistoryCreated(Date date, String userName, String userEmail);
 
+    @DefaultMessage("Added on {0,date,dd-MM-yyyy}.")
+    String siteHistoryDateCreated(Date date);
+
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated the entry:")
     String siteHistoryUpdated(Date date, String userName, String userEmail);
 
