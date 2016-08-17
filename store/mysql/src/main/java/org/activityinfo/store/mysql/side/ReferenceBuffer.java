@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.side;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
@@ -24,7 +25,12 @@ public class ReferenceBuffer implements ValueBuffer {
 
     @Override
     public void set(ResultSet rs) throws SQLException {
-        value = ReferenceValue.fromJson(rs.getString(STRING_VALUE_COLUMN));
+        String json = rs.getString(STRING_VALUE_COLUMN);
+        if (!Strings.isNullOrEmpty(json)) {
+            value = ReferenceValue.fromJson(json);
+        } else {
+            value = null;
+        }
     }
 
     @Override
