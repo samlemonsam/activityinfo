@@ -3,10 +3,13 @@ package org.activityinfo.store.mysql.update;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
@@ -102,17 +105,19 @@ public class IndicatorValueTableUpdater {
             clearValue(executor, update);
         } else if(update.value instanceof Quantity) {
             executeQuantityUpdate(executor, update);
-        } else if(update.value instanceof TextValue) {
+        } else if(update.value instanceof TextValue || update.value instanceof BarcodeValue) {
             executeTextUpdate(executor, update);
-        } else if(update.value instanceof ReferenceValue) {
-            executeReferenceUpdate(executor, update);
+        } else if(update.value instanceof ReferenceValue ||
+                update.value instanceof LocalDate ||
+                update.value instanceof AttachmentValue) {
+            executeJsonUpdate(executor, update);
         }
     }
 
-    private void executeReferenceUpdate(QueryExecutor executor, IndicatorUpdate update) {
-        ReferenceValue referenceValue = (ReferenceValue) update.value;
+    private void executeJsonUpdate(QueryExecutor executor, IndicatorUpdate update) {
+        IsRecord record = (IsRecord) update.value;
         executor.update("REPLACE INTO indicatorvalue (reportingPeriodId, indicatorId, TextValue) VALUES (?, ?, ?)",
-                Arrays.asList(reportingPeriodId, update.indicatorId, Resources.toJson(referenceValue.asRecord())));
+                Arrays.asList(reportingPeriodId, update.indicatorId, Resources.toJson(record.asRecord())));
     }
 
     private void executeQuantityUpdate(QueryExecutor executor, IndicatorUpdate update) {

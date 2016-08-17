@@ -10,7 +10,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -74,8 +76,8 @@ public class SideColumnBuilder {
         } else if(type instanceof EnumType) {
             return new AttributeBuffer((EnumType) type);
 
-        } else if (type instanceof ReferenceType) {
-            return new ReferenceBuffer();
+        } else if (type instanceof ReferenceType || type instanceof AttachmentType) {
+            return new JsonValueBuffer((ParametrizedFieldType) type);
 
         } else {
             throw new IllegalArgumentException("type: " + type);
