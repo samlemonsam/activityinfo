@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
@@ -22,16 +24,14 @@ import java.util.List;
  */
 public class IndicatorValueTableUpdater {
 
-
     private final int siteId;
     private int reportingPeriodId;
 
     private Date date1;
     private Date date2;
-
-
     
     private static class IndicatorUpdate {
+
         private int indicatorId;
         private FieldValue value;
 
@@ -104,7 +104,15 @@ public class IndicatorValueTableUpdater {
             executeQuantityUpdate(executor, update);
         } else if(update.value instanceof TextValue) {
             executeTextUpdate(executor, update);
+        } else if(update.value instanceof ReferenceValue) {
+            executeReferenceUpdate(executor, update);
         }
+    }
+
+    private void executeReferenceUpdate(QueryExecutor executor, IndicatorUpdate update) {
+        ReferenceValue referenceValue = (ReferenceValue) update.value;
+        executor.update("REPLACE INTO indicatorvalue (reportingPeriodId, indicatorId, TextValue) VALUES (?, ?, ?)",
+                Arrays.asList(reportingPeriodId, update.indicatorId, Resources.toJson(referenceValue.asRecord())));
     }
 
     private void executeQuantityUpdate(QueryExecutor executor, IndicatorUpdate update) {
