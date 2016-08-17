@@ -96,7 +96,7 @@ public class FormWidgetCreator {
     public Set<RepeatingSubFormPanel> getRepeatingSubformPanels() {
         Set<RepeatingSubFormPanel> set = Sets.newHashSet();
         for (Map.Entry<FormClass, SubFormPanel> entry : subformPanels.entrySet()) {
-            if (entry.getKey().isSubForm()) {
+            if (entry.getKey().isSubForm() && entry.getKey().getSubFormKind() == SubFormKind.REPEATING) {
                 set.add((RepeatingSubFormPanel) entry.getValue());
             }
         }
