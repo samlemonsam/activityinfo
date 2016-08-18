@@ -31,7 +31,7 @@ public abstract class AbstractMySqlTest {
     public static DbUnit dbunit;
     public static ColumnSetBuilder executor;
     public ColumnSet columnSet;
-    public static FormCatalog catalogProvider;
+    public static MySqlCatalog catalog;
 
     @BeforeClass
     public static void initLocale() throws Throwable {
@@ -50,15 +50,15 @@ public abstract class AbstractMySqlTest {
         helper.tearDown();
     }
     
-    public static void resetDatabase() throws Throwable {
+    public static void resetDatabase(String resourceName) throws Throwable {
 
         System.out.println("Running setup...");
         dbunit = new DbUnit();
         dbunit.openDatabase();
         dbunit.dropAllRows();
-        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "catalog-test.db.xml"));
-        catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        executor = new ColumnSetBuilder(catalogProvider);
+        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, resourceName));
+        catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
+        executor = new ColumnSetBuilder(catalog);
         CountryStructure.clearCache();
     }
 

@@ -1,16 +1,12 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Optional;
-import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -71,7 +67,7 @@ public class MockFormCatalog implements FormCatalog {
         }
 
         @Override
-        public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+        public List<RecordVersion> getVersions(ResourceId resourceId) {
             return Collections.emptyList();
         }
 

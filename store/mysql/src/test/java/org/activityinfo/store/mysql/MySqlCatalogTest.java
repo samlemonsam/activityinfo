@@ -51,7 +51,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
  
     @BeforeClass
     public static void initDatabase() throws Throwable {
-        resetDatabase();
+        resetDatabase("catalog-test.db.xml");
     }
     
     @Test
@@ -141,7 +141,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
 
     private FormTree queryFormTree(ResourceId classId) {
-        FormTreeBuilder builder = new FormTreeBuilder(catalogProvider);
+        FormTreeBuilder builder = new FormTreeBuilder(catalog);
         FormTree formTree = builder.queryTree(classId);
         JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
         formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
@@ -216,7 +216,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.execute(update);
 
         query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
@@ -230,7 +230,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void siteFormClassWithNullaryLocations() {
 
-        FormClass formClass = catalogProvider.getForm(activityFormClass(ADVOCACY)).get().getFormClass();
+        FormClass formClass = catalog.getForm(activityFormClass(ADVOCACY)).get().getFormClass();
        
         // Make a list of field codes
         Set<String> codes = new HashSet<>();
@@ -243,7 +243,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testReportingPeriod() {
 
-        FormTreeBuilder treeBuilder = new FormTreeBuilder(catalogProvider);
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog);
         FormTree formTree = treeBuilder.queryTree(CuidAdapter.reportingPeriodFormClass(3));
 
         FormTreePrettyPrinter.print(formTree);
@@ -297,7 +297,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         
         int ownerUserId = 1;
         FormPermissions permissions = 
-                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(ownerUserId);
+                catalog.getForm(activityFormClass(1)).get().getPermissions(ownerUserId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -309,7 +309,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         int userId = 21;
 
         FormPermissions permissions =
-                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
@@ -322,7 +322,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         int christianUserId = 5;
 
         FormPermissions permissions =
-                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(christianUserId);
+                catalog.getForm(activityFormClass(1)).get().getPermissions(christianUserId);
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
@@ -334,7 +334,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         int userId = 4;
 
         FormPermissions permissions =
-                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -348,7 +348,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         int userId = 3;
 
         FormPermissions permissions =
-                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -360,7 +360,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void viewAllPermissions() {
         int userId = 2;
         FormPermissions permissions =
-                catalogProvider.getForm(activityFormClass(1)).get().getPermissions(userId);
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -371,7 +371,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void publicPermission() {
         ResourceId publicFormClassId = activityFormClass(41);
         FormPermissions permissions =
-                catalogProvider.getForm(publicFormClassId).get().getPermissions(999);
+                catalog.getForm(publicFormClassId).get().getPermissions(999);
         
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.getVisibilityFilter(), nullValue());
@@ -386,7 +386,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         ResourceId provinceId = adminLevelFormClass(1);
         ResourceId monthlyId = reportingPeriodFormClass(4000);
         
-        Map<ResourceId, FormClass> formClasses = catalogProvider.getFormClasses(
+        Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(
                 asList(activity1, activity2, provinceId, monthlyId));
 
         FormClass activityFormClass1 = formClasses.get(activity1);
@@ -407,7 +407,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void batchOpenAdminLevels() {
 
-        Map<ResourceId, FormClass> formClasses = catalogProvider.getFormClasses(asList(
+        Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(asList(
                 adminLevelFormClass(1),
                 adminLevelFormClass(2)));
 
@@ -422,7 +422,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void nonExistingSite() {
 
-        Optional<FormAccessor> collection = catalogProvider.lookupForm(CuidAdapter.locationFormClass(9444441));
+        Optional<FormAccessor> collection = catalog.lookupForm(CuidAdapter.locationFormClass(9444441));
     
         assertFalse(collection.isPresent());
     }

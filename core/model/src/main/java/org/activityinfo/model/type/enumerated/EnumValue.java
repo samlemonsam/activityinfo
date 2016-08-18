@@ -16,9 +16,7 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.HasSetFieldValue;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EnumValue implements FieldValue, IsRecord, HasSetFieldValue {
 
@@ -61,12 +59,17 @@ public class EnumValue implements FieldValue, IsRecord, HasSetFieldValue {
     }
 
     public Set<EnumItem> getValuesAsItems(EnumType enumType) {
+        
+        Map<ResourceId, EnumItem> map = new HashMap<>();
+        for (EnumItem enumItem : enumType.getValues()) {
+            map.put(enumItem.getId(), enumItem);
+        }
+        
         Set<EnumItem> items = Sets.newHashSet();
         for (final ResourceId resourceId : getResourceIds()) {
-            for (EnumItem enumItem : enumType.getValues()) {
-                if (enumItem.getId().equals(resourceId)) {
-                    items.add(enumItem);
-                }
+            EnumItem item = map.get(resourceId);
+            if(item != null) {
+                items.add(item);
             }
         }
         return items;

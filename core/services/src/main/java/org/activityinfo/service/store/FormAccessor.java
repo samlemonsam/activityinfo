@@ -1,7 +1,6 @@
 package org.activityinfo.service.store;
 
 import com.google.common.base.Optional;
-import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -25,8 +24,11 @@ public interface FormAccessor {
      * @return the Resource
      */
     Optional<FormRecord> get(ResourceId resourceId);
-    
-    List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId);
+
+    /**
+     * Retrieves a list of versions of this record.
+     */
+    List<RecordVersion> getVersions(ResourceId resourceId);
     
     /**
      * @return this collection's schema

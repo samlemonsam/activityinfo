@@ -17,7 +17,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
     @Before
     public void setupDatabase() throws Throwable {
-        resetDatabase();
+        resetDatabase("catalog-test.db.xml");
     }
     
     @Test
@@ -31,7 +31,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("BENE", 45000);
         changeObject.addProperty("location", locationInstanceId(3).asString());
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE");
@@ -47,7 +47,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", "s0000000001");
         changeObject.addProperty("partner", partnerInstanceId(2).asString());
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE");
@@ -63,7 +63,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
         changeObject.addProperty("name", "Nouveau Irumu");
         
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
         
         query(adminLevelFormClass(2), "_id", "name");
@@ -78,7 +78,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
 
         query(adminLevelFormClass(2), "_id", "name");
@@ -93,7 +93,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", "s0000000001");
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
         
         query(activityFormClass(1), "_id");
@@ -110,7 +110,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
 
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE", "cause");
@@ -128,7 +128,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
         changeObject.addProperty(attributeGroupField(2).asString(), "Casserole");
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id",  "cause", "[contenu du kit]");
@@ -149,7 +149,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         change.addProperty("date1", "2015-01-01");
         change.addProperty("date2", "2015-01-31");
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog);
         updater.executeChange(change);
 
         query(activityFormClass(ADVOCACY), "_id", "partner");

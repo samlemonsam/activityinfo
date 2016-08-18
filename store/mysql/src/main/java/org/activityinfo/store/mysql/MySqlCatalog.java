@@ -189,6 +189,10 @@ public class MySqlCatalog implements FormCatalog {
         }
         return collection.get().getFormClass();
     }
+    
+    QueryExecutor getExecutor() {
+        return executor;
+    }
 
 
     public void createOrUpdateFormSchema(FormClass formClass) {

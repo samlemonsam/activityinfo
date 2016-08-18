@@ -1,7 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
-import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -12,6 +11,7 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -92,7 +92,7 @@ public class SiteFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId resourceId) {
         SiteHistoryReader reader = new SiteHistoryReader(queryExecutor, activity, getFormClass(),
                 CuidAdapter.getLegacyIdFromCuid(resourceId));
         try {

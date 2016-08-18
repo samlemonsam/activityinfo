@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -20,10 +19,7 @@ import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
-import org.activityinfo.service.store.FormNotFoundException;
-import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -153,7 +149,7 @@ public class LocationFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId resourceId) {
         throw new UnsupportedOperationException();
     }
 

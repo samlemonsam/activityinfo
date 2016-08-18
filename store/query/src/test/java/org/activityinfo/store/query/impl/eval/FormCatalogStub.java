@@ -93,7 +93,7 @@ class FormCatalogStub implements FormCatalog {
         }
 
         @Override
-        public List<FormHistoryEntryBuilder> getHistory(ResourceId resourceId) {
+        public List<FormHistoryEntryBuilder> getVersions(ResourceId resourceId) {
             throw new UnsupportedOperationException();
         }
 
