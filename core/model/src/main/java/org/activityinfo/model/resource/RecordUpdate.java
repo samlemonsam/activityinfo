@@ -10,17 +10,26 @@ import java.util.Map;
  */
 public class RecordUpdate {
     
-    private ResourceId resourceId;
+    private long userId;
+    private ResourceId recordId;
     private ResourceId parentId;
     private boolean deleted = false;
     private Map<ResourceId, FieldValue> changedFieldValues = new HashMap<>();
-    
-    public void setResourceId(ResourceId resourceId) {
-        this.resourceId = resourceId;
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public void setRecordId(ResourceId recordId) {
+        this.recordId = recordId;
     }
     
-    public ResourceId getResourceId() {
-        return resourceId;
+    public ResourceId getRecordId() {
+        return recordId;
     }
 
     public ResourceId getParentId() {

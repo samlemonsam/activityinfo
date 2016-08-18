@@ -405,7 +405,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 //
 //                    eventBus.fireEvent(new NavigationEvent(
 //                            NavigationHandler.NAVIGATION_REQUESTED,
-//                            new ResourcePlace(newActivity.getResourceId(), ResourcePage.DESIGN_PAGE_ID)));
+//                            new ResourcePlace(newActivity.getRecordId(), ResourcePage.DESIGN_PAGE_ID)));
 //                }
 //            });
 //

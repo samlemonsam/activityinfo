@@ -31,6 +31,8 @@ public class HrdCatalogTest {
     
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    
+    private int userId = 1;
 
     @Before
     public void setUp() {
@@ -75,12 +77,12 @@ public class HrdCatalogTest {
         assertTrue(collection.isPresent());
 
         RecordUpdate village1 = new RecordUpdate();
-        village1.setResourceId(ResourceId.generateSubmissionId(formClass));
+        village1.setRecordId(ResourceId.generateSubmissionId(formClass));
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
 
         RecordUpdate village2 = new RecordUpdate();
-        village2.setResourceId(ResourceId.generateSubmissionId(formClass));
+        village2.setRecordId(ResourceId.generateSubmissionId(formClass));
         village2.set(villageField, TextValue.valueOf("Beni"));
         village2.set(countField, new Quantity(230));
 
@@ -114,7 +116,7 @@ public class HrdCatalogTest {
                 .setType(TextType.INSTANCE);
 
         HrdCatalog catalog = new HrdCatalog();
-        Updater updater = new Updater(catalog);
+        Updater updater = new Updater(catalog, userId);
 
         HrdFormAccessor collection = catalog.create(formClass);
         
@@ -122,7 +124,7 @@ public class HrdCatalogTest {
 
         for (String villageName : villageNames) {
             RecordUpdate update = new RecordUpdate();
-            update.setResourceId(ResourceId.generateSubmissionId(formClass));
+            update.setRecordId(ResourceId.generateSubmissionId(formClass));
             update.set(nameField.getId(), TextValue.valueOf(villageName));
         
             updater.execute(update);
@@ -178,22 +180,22 @@ public class HrdCatalogTest {
 
 
         RecordUpdate hh1 = new RecordUpdate();
-        hh1.setResourceId(ResourceId.generateSubmissionId(hhForm));
+        hh1.setRecordId(ResourceId.generateSubmissionId(hhForm));
         hh1.set(hhIdField.getId(), TextValue.valueOf("HH1"));
 
         RecordUpdate hh2 = new RecordUpdate();
-        hh2.setResourceId(ResourceId.generateSubmissionId(hhForm));
+        hh2.setRecordId(ResourceId.generateSubmissionId(hhForm));
         hh2.set(hhIdField.getId(), TextValue.valueOf("HH2"));
         
         RecordUpdate father1 = new RecordUpdate();
-        father1.setResourceId(ResourceId.generateSubmissionId(memberForm));
-        father1.setParentId(hh1.getResourceId());
+        father1.setRecordId(ResourceId.generateSubmissionId(memberForm));
+        father1.setParentId(hh1.getRecordId());
         father1.set(nameField.getId(), TextValue.valueOf("Homer"));
         father1.set(ageField.getId(), new Quantity(40, "years"));
         
         RecordUpdate father2 = new RecordUpdate();
-        father2.setResourceId(ResourceId.generateSubmissionId(memberForm));
-        father2.setParentId(hh2.getResourceId());
+        father2.setRecordId(ResourceId.generateSubmissionId(memberForm));
+        father2.setParentId(hh2.getRecordId());
         father2.set(nameField.getId(), TextValue.valueOf("Ned"));
         father2.set(ageField.getId(), new Quantity(41, "years"));
         

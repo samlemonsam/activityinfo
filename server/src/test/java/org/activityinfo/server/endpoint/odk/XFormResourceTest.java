@@ -72,7 +72,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         
 
         
-        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class));
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authenticatedUser);
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);

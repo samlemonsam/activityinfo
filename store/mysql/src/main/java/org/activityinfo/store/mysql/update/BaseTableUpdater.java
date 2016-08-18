@@ -70,10 +70,10 @@ public class BaseTableUpdater {
 
 
     public void update(QueryExecutor executor, RecordUpdate update) {
-        Preconditions.checkArgument(update.getResourceId().getDomain() == mapping.getPrimaryKey().getDomain(),
+        Preconditions.checkArgument(update.getRecordId().getDomain() == mapping.getPrimaryKey().getDomain(),
                 "Resource Id mismatch, expected domain '%c', got id '%s'",
                 mapping.getPrimaryKey().getDomain(),
-                update.getResourceId().asString());
+                update.getRecordId().asString());
 
         // Update delete flag
         if(update.isDeleted()) {

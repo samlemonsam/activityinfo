@@ -187,7 +187,7 @@ public class FormResource {
         
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId());
         updater.create(formId, jsonObject.getAsJsonObject());
         
         return Response.ok().build();
@@ -203,7 +203,7 @@ public class FormResource {
 
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId());
         updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
 
         return Response.ok().build();

@@ -26,11 +26,12 @@ import static org.junit.Assert.assertTrue;
 public class UpdaterTest {
 
     private Updater updater;
+    private int userId = 1;
 
     @Before
     public void setUp() {
         MockFormCatalog catalog = new MockFormCatalog();
-        updater = new Updater(catalog);
+        updater = new Updater(catalog, userId);
     }
 
     @Test(expected = InvalidUpdateException.class)
@@ -48,8 +49,6 @@ public class UpdaterTest {
     
     @Test(expected = InvalidUpdateException.class)
     public void newResourceWithoutClass() {
-        Updater updater = new Updater(emptyCatalog());
-        
         JsonObject change = new JsonObject();
         change.addProperty("@id", "XYZ123-new-id");
         
@@ -63,8 +62,6 @@ public class UpdaterTest {
 
     @Test(expected = InvalidUpdateException.class)
     public void newResourceWithInvalidClass() {
-        Updater updater = new Updater(emptyCatalog());
-
         JsonObject change = new JsonObject();
         change.addProperty("@id", "XYZ123");
         change.add("@class", new JsonObject());
@@ -79,7 +76,6 @@ public class UpdaterTest {
 
     @Test(expected = InvalidUpdateException.class)
     public void newResourceWithMissingCollection() {
-        Updater updater = new Updater(emptyCatalog());
 
         JsonObject change = new JsonObject();
         change.addProperty("@id", "XYZ123");

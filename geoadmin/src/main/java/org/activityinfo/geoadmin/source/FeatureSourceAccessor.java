@@ -10,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.RecordVersion;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.PropertyDescriptor;
@@ -41,7 +42,12 @@ public class FeatureSourceAccessor implements FormAccessor {
     }
 
     @Override
-    public List<FormHistoryEntryBuilder> getVersions(ResourceId resourceId) {
+    public List<FormHistoryEntryBuilder> getVersions(ResourceId recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 

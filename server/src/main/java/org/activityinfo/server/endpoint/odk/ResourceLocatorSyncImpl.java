@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.query.ColumnSet;
@@ -25,10 +26,12 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     private static final Logger LOGGER = Logger.getLogger(ResourceLocatorSyncImpl.class.getName());
 
     private Provider<FormCatalog> catalog;
+    private Provider<AuthenticatedUser> authenticatedUser;
 
     @Inject
-    public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog) {
+    public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> authenticatedUser) {
         this.catalog = catalog;
+        this.authenticatedUser = authenticatedUser;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public void persist(FormInstance formInstance) {
-        Updater updater = new Updater(catalog.get());
+        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId());
         updater.execute(formInstance);
     }
 }

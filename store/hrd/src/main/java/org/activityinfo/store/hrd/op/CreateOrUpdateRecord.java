@@ -10,10 +10,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
-import org.activityinfo.store.hrd.entity.Datastore;
-import org.activityinfo.store.hrd.entity.FormRecordEntity;
-import org.activityinfo.store.hrd.entity.FormRecordKey;
-import org.activityinfo.store.hrd.entity.FormSchemaKey;
+import org.activityinfo.store.hrd.entity.*;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 
 import java.util.Map;
@@ -21,23 +18,29 @@ import java.util.Map;
 
 public class CreateOrUpdateRecord implements Operation {
 
-    private ResourceId collectionId;
+    private ResourceId formId;
     private RecordUpdate update;
 
-    public CreateOrUpdateRecord(ResourceId collectionId, RecordUpdate update) {
-        this.collectionId = collectionId;
+    public CreateOrUpdateRecord(ResourceId formId, RecordUpdate update) {
+        this.formId = formId;
         this.update = update;
     }
 
     @Override
     public void execute(Datastore datastore) throws EntityNotFoundException {
 
-        FormClass formClass = datastore.load(new FormSchemaKey(collectionId)).readFormClass();
-        FormRecordKey key = new FormRecordKey(update.getResourceId());
-        if(!key.getCollectionId().equals(collectionId)) {
+        FormClass formClass = datastore.load(new FormSchemaKey(formId)).readFormClass();
+        FormRecordKey key = new FormRecordKey(update.getRecordId());
+        if(!key.getCollectionId().equals(formId)) {
             throw new IllegalStateException();
         }
 
+        FormVersionEntity versionEntity = datastore.load(new FormVersionKey(formClass.getId()));
+        long currentVersion = versionEntity.getVersion();
+        long newVersion = currentVersion + 1;
+
+        versionEntity.setVersion(newVersion);
+        
         Optional<FormRecordEntity> existingEntity = datastore.loadIfPresent(key);
         FormRecordEntity updated;
         
@@ -55,24 +58,28 @@ public class CreateOrUpdateRecord implements Operation {
                 updated.setParentId(parentId);
             }
         }
-
+        updated.setVersion(newVersion);
+        updated.setSchemaVersion(versionEntity.getSchemaVersion());
         updated.setDeleted(update.isDeleted());
 
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
             // workaround for current UI
             if(entry.getKey().equals(ResourceId.valueOf("keyId"))) {
                 TextValue keyText = (TextValue)entry.getValue(); 
-                updated.setProperty(entry.getKey().asString(), keyText.asString());
+                updated.setFieldValue(entry.getKey().asString(), keyText.asString());
                 
             } else {
                 FormField field = formClass.getField(entry.getKey());
                 FieldConverter converter = FieldConverters.forType(field.getType());
                 if (entry.getValue() != null) {
-                    updated.setProperty(field.getName(), converter.toHrdProperty(entry.getValue()));
+                    updated.setFieldValue(field.getName(), converter.toHrdProperty(entry.getValue()));
                 }
             }
         }
         
-        datastore.put(updated);
+        // Store a copy as a snapshot
+        FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), updated);
+        
+        datastore.put(updated, versionEntity, snapshotEntity);
     }
 }

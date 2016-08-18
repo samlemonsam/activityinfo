@@ -1,7 +1,6 @@
 package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -56,7 +55,12 @@ public class HrdFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<RecordVersion> getVersions(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -89,13 +93,6 @@ public class HrdFormAccessor implements FormAccessor {
     @Override
     public long cacheVersion() {
         return 0;
-    }
-
-    public FormRecord getSubmission(ResourceId resourceId) throws EntityNotFoundException {
-        FormRecordKey key = new FormRecordKey(resourceId);
-        FormRecordEntity submission = datastore.load(key);
-        
-        return submission.toFormRecord(formClass);
     }
 
     public Iterable<FormRecord> getSubmissionsOfParent(ResourceId parentId) {

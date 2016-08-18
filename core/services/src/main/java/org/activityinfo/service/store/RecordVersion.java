@@ -15,6 +15,8 @@ public class RecordVersion {
     private long userId;
     private long time;
     private long version;
+    private long formVersion;
+    
     private RecordChangeType type;
     
     private final Map<ResourceId, FieldValue> values = new HashMap<>();
@@ -62,6 +64,14 @@ public class RecordVersion {
 
     public void setVersion(long version) {
         this.version = version;
+    }
+
+    public long getFormVersion() {
+        return formVersion;
+    }
+
+    public void setFormVersion(long formVersion) {
+        this.formVersion = formVersion;
     }
 
     /**

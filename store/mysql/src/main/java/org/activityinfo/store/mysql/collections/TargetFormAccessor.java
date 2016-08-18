@@ -40,7 +40,12 @@ public class TargetFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<RecordVersion> getVersions(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 

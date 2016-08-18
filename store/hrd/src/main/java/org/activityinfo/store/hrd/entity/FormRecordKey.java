@@ -7,18 +7,20 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
- * Key for FormRecords
+ * Key for {@link FormRecordEntity}s.
+ * 
+ * <p>The Key for FormRecord entities has a hierarchy Form{formId} -> FormRecord{recordId}</p>
  */
 public class FormRecordKey implements TypedKey<FormRecordEntity> {
     
     private Key key;
     
-    public FormRecordKey(ResourceId submissionId) {
-        ResourceId.checkSubmissionId(submissionId);
+    public FormRecordKey(ResourceId recordId) {
+        ResourceId.checkSubmissionId(recordId);
 
-        String[] parts = submissionId.asString().split("-");
+        String[] parts = recordId.asString().split("-");
         Key parent = FormRootKey.key(ResourceId.valueOf(parts[0]));
-        String name = submissionId.asString().substring(submissionId.asString().indexOf("-") + 1);
+        String name = recordId.asString().substring(recordId.asString().indexOf("-") + 1);
         this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, name);
     }
 

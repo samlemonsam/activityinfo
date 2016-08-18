@@ -44,7 +44,7 @@ public class Updater {
     
     private final FormCatalog catalog;
 
-    public Updater(FormCatalog catalog) {
+    public Updater(FormCatalog catalog, int userId) {
         this.catalog = catalog;
     }
 
@@ -123,7 +123,7 @@ public class Updater {
         }
 
         RecordUpdate update = new RecordUpdate();
-        update.setResourceId(parseId(changeObject, "@id"));
+        update.setRecordId(parseId(changeObject, "@id"));
         update.setDeleted(parseDeletedFlag(changeObject));
 
         for(Map.Entry<String, JsonElement> change : changeObject.entrySet()) {
@@ -297,9 +297,9 @@ public class Updater {
     }
 
     public void execute(RecordUpdate update) {
-        Optional<FormAccessor> collection = catalog.lookupForm(update.getResourceId());
+        Optional<FormAccessor> collection = catalog.lookupForm(update.getRecordId());
         if(!collection.isPresent()) {
-            throw new InvalidUpdateException("No such resource: " + update.getResourceId());
+            throw new InvalidUpdateException("No such resource: " + update.getRecordId());
         }
 
         executeUpdate(collection.get(), update);
@@ -308,7 +308,7 @@ public class Updater {
     private void executeUpdate(FormAccessor collection, RecordUpdate update) {
         
         FormClass formClass = collection.getFormClass();
-        Optional<FormRecord> existingResource = collection.get(update.getResourceId());
+        Optional<FormRecord> existingResource = collection.get(update.getRecordId());
 
         validateUpdate(formClass, existingResource, update);
         
@@ -394,7 +394,7 @@ public class Updater {
         }
 
         RecordUpdate update = new RecordUpdate();
-        update.setResourceId(formInstance.getId());
+        update.setRecordId(formInstance.getId());
 
         for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
             if(!entry.getKey().asString().equals("classId")) {
@@ -421,7 +421,7 @@ public class Updater {
         }
 
         RecordUpdate update = new RecordUpdate();
-        update.setResourceId(recordId);
+        update.setRecordId(recordId);
 
         if(jsonObject.has("deleted") && !jsonObject.get("deleted").isJsonNull()) {
             update.setDeleted(jsonObject.get("deleted").getAsBoolean());

@@ -54,10 +54,10 @@ public class BaseTableInserter {
 
 
     public void insert(QueryExecutor executor, RecordUpdate update) {
-        Preconditions.checkArgument(update.getResourceId().getDomain() == mapping.getPrimaryKey().getDomain(),
+        Preconditions.checkArgument(update.getRecordId().getDomain() == mapping.getPrimaryKey().getDomain(),
                 "Resource Id mismatch, expected domain '%c', got id '%s'",
                 mapping.getPrimaryKey().getDomain(),
-                update.getResourceId().asString());
+                update.getRecordId().asString());
 
         // Add default values for inserts
         for (Map.Entry<String, Object> entry : mapping.getInsertDefaults().entrySet()) {

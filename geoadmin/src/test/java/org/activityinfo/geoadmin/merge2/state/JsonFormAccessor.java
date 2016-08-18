@@ -23,10 +23,7 @@ import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.service.store.FormAccessor;
-import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -90,7 +87,12 @@ public class JsonFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<FormHistoryEntryBuilder> getVersions(ResourceId resourceId) {
+    public List<FormHistoryEntryBuilder> getVersions(ResourceId recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 

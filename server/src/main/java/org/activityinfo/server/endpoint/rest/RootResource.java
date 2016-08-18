@@ -177,7 +177,7 @@ public class RootResource {
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
-        Updater updater = new Updater(catalog.get());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId());
         try {
             updater.execute(jsonElement.getAsJsonObject());
         } catch (InvalidUpdateException e) {

@@ -149,7 +149,12 @@ public class LocationFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<RecordVersion> getVersions(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -178,7 +183,7 @@ public class LocationFormAccessor implements FormAccessor {
     public void add(RecordUpdate update) {
         long newVersion = incrementVersion();
 
-        int locationId = CuidAdapter.getLegacyIdFromCuid(update.getResourceId());
+        int locationId = CuidAdapter.getLegacyIdFromCuid(update.getRecordId());
 
         SqlInsert insert = SqlInsert.insertInto("location");
         insert.value("locationTypeId", locationTypeId);
@@ -206,7 +211,7 @@ public class LocationFormAccessor implements FormAccessor {
     public void update(RecordUpdate update) {
         long newVersion = incrementVersion();
 
-        int locationId = CuidAdapter.getLegacyIdFromCuid(update.getResourceId());
+        int locationId = CuidAdapter.getLegacyIdFromCuid(update.getRecordId());
         
         SqlUpdate sql = SqlUpdate.update("location");
         sql.where("locationId", locationId);

@@ -12,9 +12,9 @@ import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
 
 /**
- * Stores the current version of a Form Submission.
+ * Stores the current version of a FormRecord.
  * 
- * <p>Member of the Collection entity group.</p>
+ * <p>Member of the Form entity group.</p>
  */
 public class FormRecordEntity implements TypedEntity {
     
@@ -26,6 +26,11 @@ public class FormRecordEntity implements TypedEntity {
     public static final String PARENT_PROPERTY = "@parent";
 
     public static final String DELETED = "@deleted";
+    
+    public static final String VERSION = "@version";
+
+    public static final String SCHEMA_VERSION = "@schemaVersion";
+
 
     private FormRecordKey key;
     private final Entity entity;
@@ -35,10 +40,6 @@ public class FormRecordEntity implements TypedEntity {
         this.entity = new Entity(key.raw());
     }
 
-    public FormRecordEntity(ResourceId submissionId) {
-        this(new FormRecordKey(submissionId));
-    }
-    
     public FormRecordEntity(Entity entity) {
         this.key = new FormRecordKey(entity.getKey());
         this.entity = entity;
@@ -84,6 +85,19 @@ public class FormRecordEntity implements TypedEntity {
             return deleted;
         }
     }
+    
+    public void setVersion(long version) {
+        entity.setProperty(VERSION, version);
+    }
+
+
+    public long getVersion() {
+        return (Long)entity.getProperty(VERSION);
+    }
+    
+    public void setSchemaVersion(long version) {
+        entity.setUnindexedProperty(SCHEMA_VERSION, version);
+    }
 
     public void setDeleted(boolean deleted) {
         entity.setProperty(DELETED, deleted);
@@ -98,7 +112,7 @@ public class FormRecordEntity implements TypedEntity {
         return KeyFactory.createKey(parentKey, KIND, resourceId.asString());
     }
 
-    public void setProperty(String propertyName, Object value) {
+    public void setFieldValue(String propertyName, Object value) {
         entity.setUnindexedProperty(propertyName, value);
     }
 

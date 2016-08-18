@@ -92,14 +92,19 @@ public class SiteFormAccessor implements FormAccessor {
     }
 
     @Override
-    public List<RecordVersion> getVersions(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId recordId) {
         SiteHistoryReader reader = new SiteHistoryReader(queryExecutor, activity, getFormClass(),
-                CuidAdapter.getLegacyIdFromCuid(resourceId));
+                CuidAdapter.getLegacyIdFromCuid(recordId));
         try {
             return reader.read();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -116,7 +121,7 @@ public class SiteFormAccessor implements FormAccessor {
     @Override
     public void add(RecordUpdate update) {
         ResourceId formClassId = getFormClass().getId();
-        BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getResourceId());
+        BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getRecordId());
         baseTable.addValue("ActivityId", activity.getId());
         baseTable.addValue("DateCreated", new Date());
         baseTable.addValue("DateEdited", new Date());
@@ -125,8 +130,8 @@ public class SiteFormAccessor implements FormAccessor {
             baseTable.addValue("locationId", activity.getNullaryLocationId());
         }
         
-        IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getResourceId());
-        AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getResourceId());
+        IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getRecordId());
+        AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getRecordId());
 
         for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
             if(change.getKey().getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
@@ -229,9 +234,9 @@ public class SiteFormAccessor implements FormAccessor {
 
     @Override
     public void update(RecordUpdate update) {
-        BaseTableUpdater baseTable = new BaseTableUpdater(baseMapping, update.getResourceId());
-        IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getResourceId());
-        AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getResourceId());
+        BaseTableUpdater baseTable = new BaseTableUpdater(baseMapping, update.getRecordId());
+        IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getRecordId());
+        AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getRecordId());
 
         
         if(update.isDeleted()) {

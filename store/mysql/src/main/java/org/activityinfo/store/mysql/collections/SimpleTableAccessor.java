@@ -42,7 +42,12 @@ public class SimpleTableAccessor implements FormAccessor {
     }
 
     @Override
-    public List<RecordVersion> getVersions(ResourceId resourceId) {
+    public List<RecordVersion> getVersions(ResourceId recordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -58,13 +63,13 @@ public class SimpleTableAccessor implements FormAccessor {
 
     @Override
     public void update(RecordUpdate update) {
-        BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getResourceId());
+        BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getRecordId());
         updater.update(executor, update);
     }
 
     @Override
     public void add(RecordUpdate update) {
-        BaseTableInserter inserter = new BaseTableInserter(mapping, update.getResourceId());
+        BaseTableInserter inserter = new BaseTableInserter(mapping, update.getRecordId());
         inserter.insert(executor, update);
     }
 

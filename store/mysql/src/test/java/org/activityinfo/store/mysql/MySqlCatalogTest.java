@@ -48,6 +48,8 @@ import static org.junit.Assert.*;
 public class MySqlCatalogTest extends AbstractMySqlTest {
 
     public static final int CATASTROPHE_NATURELLE_ID = 1;
+    
+    protected int userId = 1;
  
     @BeforeClass
     public static void initDatabase() throws Throwable {
@@ -211,12 +213,12 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void testSingleSiteResource() throws IOException {
         ResourceId formClass = CuidAdapter.activityFormClass(1);
         RecordUpdate update = new RecordUpdate();
-        update.setResourceId(cuid(SITE_DOMAIN, 1));
+        update.setRecordId(cuid(SITE_DOMAIN, 1));
         update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerInstanceId(2)));
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
-        Updater updater = new Updater(catalog);
+        Updater updater = new Updater(catalog, userId);
         updater.execute(update);
 
         query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
