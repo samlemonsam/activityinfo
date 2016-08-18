@@ -6,8 +6,9 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.NarrativeValue;
-import org.activityinfo.model.type.barcode.BarcodeValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
 
@@ -49,6 +50,8 @@ public class SimpleFieldBinding implements FieldBinding<EntityDTO> {
                 value = ((Quantity) value).getValue();
             } else if (value instanceof AttachmentValue) {
                 value = Resources.toJsonObject(((AttachmentValue) value).asRecord()).toString();
+            } else if (value instanceof ReferenceValue) {
+                value = Resources.toJsonObject(((ReferenceValue) value).asRecord()).toString();
             } else {
                 throw new UnsupportedOperationException(fieldId + " = " + value.getClass().getSimpleName());
             }

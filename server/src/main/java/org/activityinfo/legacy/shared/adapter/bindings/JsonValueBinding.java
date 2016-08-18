@@ -24,8 +24,13 @@ package org.activityinfo.legacy.shared.adapter.bindings;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 
 import java.util.Map;
@@ -33,12 +38,14 @@ import java.util.Map;
 /**
  * @author yuriyz on 11/18/2015.
  */
-public class AttachmentBinding implements FieldBinding<SiteDTO> {
+public class JsonValueBinding implements FieldBinding<SiteDTO> {
 
+    private final FieldTypeClass type;
     private final ResourceId fieldId;
     private final String propertyName;
 
-    public AttachmentBinding(ResourceId fieldId, String propertyName) {
+    public JsonValueBinding(FieldTypeClass type, ResourceId fieldId, String propertyName) {
+        this.type = type;
         this.fieldId = fieldId;
         this.propertyName = propertyName;
     }
@@ -48,7 +55,11 @@ public class AttachmentBinding implements FieldBinding<SiteDTO> {
         Object value = model.get(propertyName);
         if (value instanceof String) {
             try {
-                instance.set(fieldId, AttachmentValue.fromJson((String) value));
+                if (type == AttachmentType.TYPE_CLASS) {
+                    instance.set(fieldId, AttachmentValue.fromJson((String) value));
+                } else if (type == ReferenceType.TYPE_CLASS) {
+                    instance.set(fieldId, ReferenceValue.fromJson((String) value));
+                }
             } catch (Exception e) {
                 Log.error(e.getMessage(), e);
             }
@@ -59,8 +70,8 @@ public class AttachmentBinding implements FieldBinding<SiteDTO> {
     public void populateChangeMap(FormInstance instance, Map<String, Object> changeMap) {
         Object value = instance.get(fieldId);
         if (value != null) {
-            if (value instanceof AttachmentValue) {
-                value = Resources.toJsonObject(((AttachmentValue) value).asRecord()).toString();
+            if (value instanceof AttachmentValue || value instanceof ReferenceValue) {
+                value = Resources.toJsonObject(((IsRecord) value).asRecord()).toString();
             } else {
                 throw new UnsupportedOperationException("Unknown value type of attachments: " +
                         fieldId + " = " + value.getClass().getSimpleName());

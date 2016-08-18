@@ -7,11 +7,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
+import org.activityinfo.model.type.TypeRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -226,6 +225,13 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     private static List<FormElement> fromRecords(List<Record> elementArray) {
         List<FormElement> elements = Lists.newArrayList();
         for(Record elementRecord : elementArray) {
+            if (!TypeRegistry.isSubfromSupported()) {
+                Record typeRecord = elementRecord.isRecord("type");
+                if (typeRecord != null && typeRecord.isString("typeClass").equalsIgnoreCase("subform")) {
+                    continue;
+                }
+            }
+
             if("section".equals(elementRecord.isString("type"))) {
                 FormSection section = new FormSection(ResourceId.valueOf(elementRecord.getString("id")));
                 section.setLabel(elementRecord.getString("label"));
