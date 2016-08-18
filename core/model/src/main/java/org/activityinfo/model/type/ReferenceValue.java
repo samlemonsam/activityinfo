@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.Resources;
 
 import java.util.Collections;
 import java.util.List;
@@ -74,6 +75,10 @@ public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
             ids.add(ResourceId.valueOf(string));
         }
         return new ReferenceValue(ids);
+    }
+
+    public static ReferenceValue fromJson(String json) {
+        return fromRecord(Resources.recordFromJson(json));
     }
 
     @Override

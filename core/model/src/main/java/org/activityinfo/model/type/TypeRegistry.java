@@ -2,14 +2,13 @@ package org.activityinfo.model.type;
 
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
-import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -57,10 +56,15 @@ public class TypeRegistry {
 
     public FieldTypeClass getTypeClass(String typeId) {
         FieldTypeClass typeClass = typeMap.get(typeId.toUpperCase());
-        if(typeClass == null) {
-            throw new RuntimeException("Unknown type: " + typeId);
+        if (typeClass == null) {
+            return NullFieldType.INSTANCE;
         }
         return typeClass;
+    }
+
+    // TODO trick to make sure 2.11 works with formclasses of future 2.12. Must be removed after full move!
+    public static boolean isSubfromSupported() {
+        return false;
     }
 
     public Iterable<FieldTypeClass> getTypeClasses() {

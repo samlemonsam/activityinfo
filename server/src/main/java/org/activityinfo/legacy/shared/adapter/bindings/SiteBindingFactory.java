@@ -8,6 +8,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 
@@ -49,9 +51,12 @@ public class SiteBindingFactory implements Function<ActivityFormDTO, SiteBinding
         }
 
         for (IndicatorDTO indicator : activity.getIndicators()) {
+            if (!TypeRegistry.isSubfromSupported() && indicator.getTypeId().equalsIgnoreCase("subform")) {
+                continue;
+            }
             FieldTypeClass type = indicator.getType();
-            if (type == AttachmentType.TYPE_CLASS) {
-                binding.addField(new AttachmentBinding(indicatorField(indicator.getId()), IndicatorDTO.getPropertyName(indicator.getId())));
+            if (type == AttachmentType.TYPE_CLASS || type == ReferenceType.TYPE_CLASS) {
+                binding.addField(new JsonValueBinding(type, indicatorField(indicator.getId()), IndicatorDTO.getPropertyName(indicator.getId())));
             } else {
                 binding.addField(indicatorField(indicator.getId()), IndicatorDTO.getPropertyName(indicator.getId()));
             }
