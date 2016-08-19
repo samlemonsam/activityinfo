@@ -17,6 +17,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.service.DeploymentConfiguration;
@@ -69,11 +70,9 @@ public class XFormResourceTest extends CommandTestCase2 {
 
     @Before
     public void setUp() throws IOException {
-        
 
-        
-        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authenticatedUser);
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authProvider);
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);
 

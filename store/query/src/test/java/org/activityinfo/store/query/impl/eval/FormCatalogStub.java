@@ -2,7 +2,6 @@ package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -93,7 +92,7 @@ class FormCatalogStub implements FormCatalog {
         }
 
         @Override
-        public List<FormHistoryEntryBuilder> getVersions(ResourceId recordId) {
+        public List<RecordVersion> getVersions(ResourceId recordId) {
             throw new UnsupportedOperationException();
         }
 
