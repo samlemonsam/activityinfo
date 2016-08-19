@@ -12,6 +12,7 @@ import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 
@@ -48,6 +49,7 @@ public class TypeRegistry {
         register(BooleanType.TYPE_CLASS);
         register(BarcodeType.TYPE_CLASS);
         register(AttachmentType.TYPE_CLASS);
+        register(SubFormReferenceType.TYPE_CLASS);
     }
 
     private void register(FieldTypeClass typeClass) {
@@ -57,14 +59,9 @@ public class TypeRegistry {
     public FieldTypeClass getTypeClass(String typeId) {
         FieldTypeClass typeClass = typeMap.get(typeId.toUpperCase());
         if (typeClass == null) {
-            return NullFieldType.INSTANCE;
+            throw new RuntimeException("Unknown type: " + typeId);
         }
         return typeClass;
-    }
-
-    // TODO trick to make sure 2.11 works with formclasses of future 2.12. Must be removed after full move!
-    public static boolean isSubfromSupported() {
-        return false;
     }
 
     public Iterable<FieldTypeClass> getTypeClasses() {

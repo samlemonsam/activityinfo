@@ -1574,4 +1574,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("You do not have permission to edit the design of this database.")
     String noDbDesignPermissions();
+
+    @DefaultStringValue("Current form contains Sub-Form elements which are supported since 2.12 version. Please upgrade to 2.12 version to be able use it.")
+    String formIsNotSupported2_12();
 }

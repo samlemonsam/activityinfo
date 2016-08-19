@@ -53,7 +53,6 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.Quantity;
@@ -812,10 +811,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
             public void onSuccess(SqlTransaction tx, final SqlResultSet results) {
                 Multimap<Integer, FormField> fields = HashMultimap.create();
                 for(SqlResultSetRow row : results.getRows()) {
-                    FormField field = createField(row);
-                    if (field != null) {
-                        fields.put(row.getInt("activityId"), field);
-                    }
+                    fields.put(row.getInt("activityId"), createField(row));
                 }
                 // Have to resolve symbols on a per-form basis
                 for (Integer activityId : fields.keySet()) {
@@ -851,15 +847,10 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
     }
 
     private FormField createField(SqlResultSetRow rs) {
-        String type = rs.getString("type");
-        if (type.equalsIgnoreCase("subform") && !TypeRegistry.isSubfromSupported()) {
-            return null;
-        }
-
         IndicatorDTO indicator = new IndicatorDTO();
         indicator.setId(rs.getInt("indicatorId"));
         indicator.setName(rs.getString("indicatorName"));
-        indicator.setTypeId(type);
+        indicator.setTypeId(rs.getString("type"));
         indicator.setExpression(rs.getString("expression"));
         indicator.setRelevanceExpression(rs.getString("skipExpression"));
         indicator.setNameInExpression(rs.getString("code"));
