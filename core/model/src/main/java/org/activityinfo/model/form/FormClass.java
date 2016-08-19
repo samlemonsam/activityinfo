@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.*;
-import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -225,13 +225,6 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
     private static List<FormElement> fromRecords(List<Record> elementArray) {
         List<FormElement> elements = Lists.newArrayList();
         for(Record elementRecord : elementArray) {
-            if (!TypeRegistry.isSubfromSupported()) {
-                Record typeRecord = elementRecord.isRecord("type");
-                if (typeRecord != null && typeRecord.isString("typeClass").equalsIgnoreCase("subform")) {
-                    continue;
-                }
-            }
-
             if("section".equals(elementRecord.isString("type"))) {
                 FormSection section = new FormSection(ResourceId.valueOf(elementRecord.getString("id")));
                 section.setLabel(elementRecord.getString("label"));
@@ -254,6 +247,16 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         resource.set("elements", Resources.asRecordList(elements));
         resource.set("locks", Resources.asRecordList(locks));
         return resource;
+    }
+
+    // todo remove after users are completely moved to 2.12
+    public boolean hasSubformField() {
+        for (FormField field : getFields()) {
+            if (field.getType() instanceof SubFormReferenceType) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

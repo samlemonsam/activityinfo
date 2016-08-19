@@ -28,8 +28,6 @@ import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 
@@ -57,8 +55,6 @@ public class JsonValueBinding implements FieldBinding<SiteDTO> {
             try {
                 if (type == AttachmentType.TYPE_CLASS) {
                     instance.set(fieldId, AttachmentValue.fromJson((String) value));
-                } else if (type == ReferenceType.TYPE_CLASS) {
-                    instance.set(fieldId, ReferenceValue.fromJson((String) value));
                 }
             } catch (Exception e) {
                 Log.error(e.getMessage(), e);
@@ -70,7 +66,7 @@ public class JsonValueBinding implements FieldBinding<SiteDTO> {
     public void populateChangeMap(FormInstance instance, Map<String, Object> changeMap) {
         Object value = instance.get(fieldId);
         if (value != null) {
-            if (value instanceof AttachmentValue || value instanceof ReferenceValue) {
+            if (value instanceof AttachmentValue) {
                 value = Resources.toJsonObject(((IsRecord) value).asRecord()).toString();
             } else {
                 throw new UnsupportedOperationException("Unknown value type of attachments: " +

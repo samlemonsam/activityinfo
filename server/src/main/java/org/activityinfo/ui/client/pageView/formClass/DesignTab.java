@@ -32,7 +32,11 @@ public class DesignTab implements DisplayWidget<FormInstance> {
                     @Nullable
                     @Override
                     public Void apply(FormClass formClass) {
-                        panel.add(new FormDesignerPanel(resourceLocator, formClass));
+                        if (formClass.hasSubformField()) {
+                            panel.add(new NotSupportedFormClassPanel());
+                        } else {
+                            panel.add(new FormDesignerPanel(resourceLocator, formClass));
+                        }
                         return null;
                     }
                 });

@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.page.entry.form;
  */
 
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.google.common.base.Function;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
@@ -35,6 +36,7 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -121,7 +123,22 @@ public class SiteDialogLauncher {
         showModernFormDialog(formName, instance, callback, isNew, resourceLocator);
     }
 
-    public static void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew, ResourceLocator resourceLocator) {
+    public static void showModernFormDialog(final String formName, final FormInstance instance, final SiteDialogCallback callback,
+                                            final boolean isNew, final ResourceLocator resourceLocator) {
+        resourceLocator.getFormClass(instance.getClassId()).then(new Function<FormClass, Object>() {
+            @Override
+            public Object apply(FormClass input) {
+                if (input.hasSubformField()) {
+                    MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.formIsNotSupported2_12(), null);
+                    return null;
+                }
+                showModernFormDialogInternal(formName, instance, callback, isNew, resourceLocator);
+                return null;
+            }
+        });
+    }
+
+    private static void showModernFormDialogInternal(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew, ResourceLocator resourceLocator) {
         String subtitle = isNew ? I18N.CONSTANTS.newSubmission() : I18N.CONSTANTS.editSubmission();
         FormDialog dialog = new FormDialog(resourceLocator);
         dialog.setDialogTitle(formName, subtitle);

@@ -46,6 +46,11 @@ public class TableTab implements DisplayWidget<FormInstance> {
             @Override
             public Promise<Void> apply(FormTree input) {
                 formTree = input;
+
+                if (formTree.getRootFormClass().hasSubformField()) {
+                    return Promise.done();
+                }
+
                 enumerateColumns();
 
                 final Map<ResourceId, FormClass> rootFormClasses = formTree.getRootFormClasses();
@@ -61,7 +66,11 @@ public class TableTab implements DisplayWidget<FormInstance> {
 
     @Override
     public Widget asWidget() {
-        return tableView.asWidget();
+        if (formTree.getRootFormClass().hasSubformField()) {
+            return new NotSupportedFormClassPanel().asWidget();
+        } else {
+            return tableView.asWidget();
+        }
     }
 
     /**

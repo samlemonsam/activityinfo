@@ -228,7 +228,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     @JsonProperty("type")
     @JsonView(DTOViews.Schema.class)
-    public String getTypeId() {
+    private String getTypeId() {
         return get("type", QuantityType.TYPE_CLASS.getId());
     }
 
