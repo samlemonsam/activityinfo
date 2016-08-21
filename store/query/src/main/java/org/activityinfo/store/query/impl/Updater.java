@@ -43,9 +43,11 @@ public class Updater {
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
     
     private final FormCatalog catalog;
+    private int userId;
 
     public Updater(FormCatalog catalog, int userId) {
         this.catalog = catalog;
+        this.userId = userId;
     }
 
 
@@ -421,6 +423,7 @@ public class Updater {
         }
 
         RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
         update.setRecordId(recordId);
 
         if(jsonObject.has("deleted") && !jsonObject.get("deleted").isJsonNull()) {

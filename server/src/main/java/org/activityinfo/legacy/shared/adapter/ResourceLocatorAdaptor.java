@@ -2,7 +2,6 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
 import com.google.gwt.core.shared.GWT;
 import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.InstanceQuery;
@@ -10,7 +9,10 @@ import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.core.shared.criteria.ClassCriteria;
 import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.model.form.*;
+import org.activityinfo.model.form.CatalogEntry;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
@@ -81,7 +83,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
             @Nullable
             @Override
             public FormInstance apply(@Nullable Void input) {
-               return toFormInstance(formClass.get(), record.get());
+               return FormInstance.toFormInstance(formClass.get(), record.get());
             }
         });
     }
@@ -96,7 +98,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
             public List<FormInstance> apply(@Nullable Void aVoid) {
                 List<FormInstance> instances = new ArrayList<FormInstance>();
                 for (FormRecord record : records.get().getRecords()) {
-                    instances.add(toFormInstance(subFormClass.get(), record));
+                    instances.add(FormInstance.toFormInstance(subFormClass.get(), record));
                 }
                 return instances;
             }
@@ -106,22 +108,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<List<FormHistoryEntry>> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
         return client.getRecordHistory(formId.asString(), recordId.asString());
-    }
-
-    public FormInstance toFormInstance(FormClass formClass, FormRecord record) {
-        FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
-
-        if (record.getParentRecordId() != null) {
-            instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
-        }
-
-        for (FormField field : formClass.getFields()) {
-            JsonElement fieldValue = record.getFields().get(field.getName());
-            if(fieldValue != null && !fieldValue.isJsonNull()) {
-                instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
-            }
-        }
-        return instance;
     }
 
 

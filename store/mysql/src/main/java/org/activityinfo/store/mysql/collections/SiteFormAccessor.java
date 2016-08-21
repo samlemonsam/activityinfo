@@ -2,16 +2,16 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
-import org.activityinfo.service.store.FormPermissions;
-import org.activityinfo.service.store.RecordVersion;
+import org.activityinfo.service.store.*;
+import org.activityinfo.store.hrd.HrdVersionReader;
+import org.activityinfo.store.hrd.entity.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -22,9 +22,7 @@ import org.activityinfo.store.mysql.update.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Collection of Sites
@@ -93,13 +91,23 @@ public class SiteFormAccessor implements FormAccessor {
 
     @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
-        SiteHistoryReader reader = new SiteHistoryReader(queryExecutor, activity, getFormClass(),
+        
+        List<RecordVersion> versions = new ArrayList<>();
+        
+        // Read first from legacy sitehistory table
+        SiteHistoryReader tableReader = new SiteHistoryReader(queryExecutor, activity, getFormClass(),
                 CuidAdapter.getLegacyIdFromCuid(recordId));
         try {
-            return reader.read();
+            versions.addAll(tableReader.read());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        
+        // Now read additional entries from HRD
+        HrdVersionReader hrdReader = new HrdVersionReader(new Datastore(), getFormClass());
+        versions.addAll(hrdReader.read(recordId));
+        
+        return versions;
     }
 
     @Override
@@ -154,11 +162,32 @@ public class SiteFormAccessor implements FormAccessor {
                 indicatorValues.setDate2(change.getValue());
             }
         }
-        incrementSiteVersion();
+        long newVersion = incrementSiteVersion();
         baseTable.executeInsert(queryExecutor);
         attributeValues.executeUpdates(queryExecutor);
         indicatorValues.insert(queryExecutor);
+        
+        // Write the snapshot to HRD as a first step in the transition
+        dualWriteToHrd(RecordChangeType.CREATED, update, newVersion, update.getChangedFieldValues());
     }
+
+    private void dualWriteToHrd(RecordChangeType changeType, RecordUpdate update, long newVersion, Map<ResourceId, FieldValue> values) {
+
+        FormVersionEntity versionEntity = new FormVersionEntity(activity.getSiteFormClassId());
+        versionEntity.setVersion(activity.getVersion());
+        versionEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
+        
+        FormRecordEntity recordEntity = new FormRecordEntity(new FormRecordKey(activity.getSiteFormClassId(), update.getRecordId()));
+        recordEntity.setVersion(newVersion);
+        recordEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
+        recordEntity.setFieldValues(getFormClass(), values);
+
+        FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(update.getUserId(), changeType, recordEntity);
+
+        Datastore datastore = new Datastore();
+        datastore.put(versionEntity, recordEntity, snapshot);
+    }
+
 
     private FieldValue dummyLocationReference(ResourceId resourceId)  {
         if(activity.getAdminLevelId() == null) {
@@ -253,14 +282,24 @@ public class SiteFormAccessor implements FormAccessor {
                 }
             }
         }
+        long newVersion;
         try {
-            incrementSiteVersion();
+            newVersion = incrementSiteVersion();
             baseTable.executeUpdates(queryExecutor);
             indicatorValues.execute(queryExecutor);
             attributeValues.executeUpdates(queryExecutor);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        FormRecord formRecord = get(update.getRecordId()).get();
+        FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);
+
+        Map<ResourceId, FieldValue> fieldValues = new HashMap<>();
+        fieldValues.putAll(formInstance.getFieldValueMap());
+        fieldValues.putAll(update.getChangedFieldValues());
+        
+        dualWriteToHrd(RecordChangeType.UPDATED, update, newVersion, fieldValues);
     }
 
     @Override
@@ -268,13 +307,15 @@ public class SiteFormAccessor implements FormAccessor {
         return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
     }
     
-    public void incrementSiteVersion() {
+    public long incrementSiteVersion() {
         long newVersion = activity.getVersion() + 1;
         SqlUpdate.update("activity")
                 .set("version",  newVersion)
                 .set("siteVersion", newVersion)
                 .where("activityId", activity.getId())
                 .execute(queryExecutor);
+        
+        return newVersion;
     }
 
     @Override

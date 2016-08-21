@@ -23,6 +23,7 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -66,6 +67,22 @@ public class FormInstance implements IsResource {
         this.classId = classId;
         this.parentRecordId = classId;
         this.propertyBag = new PropertyBag();
+    }
+
+    public static FormInstance toFormInstance(FormClass formClass, FormRecord record) {
+        FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
+
+        if (record.getParentRecordId() != null) {
+            instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
+        }
+
+        for (FormField field : formClass.getFields()) {
+            JsonElement fieldValue = record.getFields().get(field.getName());
+            if(fieldValue != null && !fieldValue.isJsonNull()) {
+                instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+            }
+        }
+        return instance;
     }
 
     @Override

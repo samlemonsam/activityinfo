@@ -8,8 +8,12 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Stores the current version of a FormRecord.
@@ -63,6 +67,18 @@ public class FormRecordEntity implements TypedEntity {
         }
         return record.build();    
     }
+    
+    public Map<ResourceId, FieldValue> toFieldValueMap(FormClass formClass) {
+        Map<ResourceId, FieldValue> map = new HashMap<>();
+        for (FormField formField : formClass.getFields()) {
+            Object value = entity.getProperty(formField.getName());
+            if(value != null) {
+                FieldConverter<?> converter = FieldConverters.forType(formField.getType());
+                map.put(formField.getId(), converter.toFieldValue(value));
+            }
+        }
+        return map;
+    }
 
     public FormRecordKey getKey() {
         return key;
@@ -112,6 +128,16 @@ public class FormRecordEntity implements TypedEntity {
         return KeyFactory.createKey(parentKey, KIND, resourceId.asString());
     }
 
+    public void setFieldValues(FormClass formClass, Map<ResourceId, FieldValue> values) {
+        for (Map.Entry<ResourceId, FieldValue> entry : values.entrySet()) {
+            FormField field = formClass.getField(entry.getKey());
+            FieldConverter converter = FieldConverters.forType(field.getType());
+            if (entry.getValue() != null) {
+                setFieldValue(field.getName(), converter.toHrdProperty(entry.getValue()));
+            }         
+        }
+    }
+    
     public void setFieldValue(String propertyName, Object value) {
         entity.setUnindexedProperty(propertyName, value);
     }

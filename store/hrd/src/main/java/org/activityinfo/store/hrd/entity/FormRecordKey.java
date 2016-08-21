@@ -23,6 +23,12 @@ public class FormRecordKey implements TypedKey<FormRecordEntity> {
         String name = recordId.asString().substring(recordId.asString().indexOf("-") + 1);
         this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, name);
     }
+    
+    public FormRecordKey(ResourceId formId, ResourceId recordId) {
+
+        Key parent = FormRootKey.key(formId);
+        this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, recordId.asString());
+    }
 
     public FormRecordKey(Key key) {
         Preconditions.checkArgument(key.getParent().getKind().equals(FormRootKey.KIND));

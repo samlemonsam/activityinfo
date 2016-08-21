@@ -8,6 +8,7 @@ import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.service.store.RecordChangeType;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
 import org.activityinfo.store.hrd.entity.*;
@@ -43,12 +44,15 @@ public class CreateOrUpdateRecord implements Operation {
         
         Optional<FormRecordEntity> existingEntity = datastore.loadIfPresent(key);
         FormRecordEntity updated;
+        RecordChangeType changeType;
         
         if(existingEntity.isPresent()) {
             updated = existingEntity.get();
+            changeType = RecordChangeType.UPDATED;
             
         } else {
             updated = new FormRecordEntity(key);
+            changeType = RecordChangeType.CREATED;
 
             if (formClass.getParentFormId().isPresent()) {
                 ResourceId parentId = update.getParentId();
@@ -78,7 +82,7 @@ public class CreateOrUpdateRecord implements Operation {
         }
         
         // Store a copy as a snapshot
-        FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), updated);
+        FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
         
         datastore.put(updated, versionEntity, snapshotEntity);
     }
