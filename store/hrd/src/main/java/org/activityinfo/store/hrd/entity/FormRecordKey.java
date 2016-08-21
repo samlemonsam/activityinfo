@@ -25,7 +25,6 @@ public class FormRecordKey implements TypedKey<FormRecordEntity> {
     }
     
     public FormRecordKey(ResourceId formId, ResourceId recordId) {
-
         Key parent = FormRootKey.key(formId);
         this.key = KeyFactory.createKey(parent, FormRecordEntity.KIND, recordId.asString());
     }
@@ -37,12 +36,16 @@ public class FormRecordKey implements TypedKey<FormRecordEntity> {
         this.key = key;
     }
 
-    public ResourceId getCollectionId() {
+    public ResourceId getFormId() {
         return ResourceId.valueOf(key.getParent().getName());
     }
 
-    public ResourceId getResourceId() {
-        return ResourceId.valueOf(getCollectionId() + "-" + key.getName());
+    public ResourceId getRecordId() {
+        if(getFormId().getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+            return ResourceId.valueOf(getFormId() + "-" + key.getName());
+        } else {
+            return ResourceId.valueOf(key.getName());
+        }
     }
 
     @Override

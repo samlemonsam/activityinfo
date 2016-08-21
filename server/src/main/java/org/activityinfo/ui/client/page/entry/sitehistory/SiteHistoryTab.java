@@ -109,11 +109,24 @@ public class SiteHistoryTab extends TabItem {
         html.appendHtmlConstant("<p>");
         html.appendHtmlConstant("<span style='color: #15428B; font-weight: bold;'>");
         if(entry.getChangeType().equals("created")) {
-            appendItemSpan(html,
-                    I18N.MESSAGES.siteHistoryCreated(changeTime, entry.getUserName(), entry.getUserEmail()));
+            if(entry.getSubFieldLabel() == null) {
+
+                appendItemSpan(html, I18N.MESSAGES.siteHistoryCreated(
+                        changeTime, entry.getUserName(), entry.getUserEmail()));
+            } else {
+                appendItemSpan(html, I18N.MESSAGES.siteHistorySubFormCreated(
+                        changeTime, entry.getUserName(), entry.getUserEmail(),
+                        entry.getSubFieldLabel()));
+            }
         } else {
-            appendItemSpan(html, 
-                    I18N.MESSAGES.siteHistoryUpdated(changeTime, entry.getUserName(), entry.getUserEmail()));
+            if(entry.getSubFieldLabel() == null) {
+                appendItemSpan(html, I18N.MESSAGES.siteHistoryUpdated(
+                        changeTime, entry.getUserName(), entry.getUserEmail()));
+            } else {
+                appendItemSpan(html, I18N.MESSAGES.siteHistorySubFormUpdated(
+                        changeTime, entry.getUserName(), entry.getUserEmail(),
+                        entry.getSubFieldLabel()));                
+            }
         }
         html.appendHtmlConstant("<br>");
 

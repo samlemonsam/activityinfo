@@ -8,6 +8,8 @@ import com.squareup.javapoet.TypeName;
 
 public class PrimitiveDataType extends DataType {
 
+    private static final ClassName JSON_PARSING = ClassName.get("org.activityinfo.api.client", "JsonParsing");
+    
     private TypeName typeName;
 
     public PrimitiveDataType(TypeName typeName) {
@@ -48,7 +50,7 @@ public class PrimitiveDataType extends DataType {
         } else if(typeName.equals(TypeName.DOUBLE)) {
             return CodeBlock.of("$L.getAsDouble()", jsonElementExpr);
         } else if(typeName.equals(ClassName.get(String.class))) {
-            return CodeBlock.of("$L.getAsString()", jsonElementExpr);
+            return CodeBlock.of("$T.toNullableString($L)", JSON_PARSING, jsonElementExpr);
         } else {
             throw new UnsupportedOperationException("TODO: " + jsonElementExpr);
         }

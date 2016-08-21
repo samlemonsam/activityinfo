@@ -37,9 +37,17 @@ public class FormRecordSnapshotEntity implements TypedEntity {
         // Set the (indexed) for users so we can find all changes by a specific user
         entity.setProperty(USER_PROPERTY, userId);
     }
-
+    
     public FormRecordSnapshotEntity(Entity entity) {
         this.entity = entity;
+    }
+
+    public FormRecordKey getParentKey() {
+        return new FormRecordKey(entity.getKey().getParent());
+    }
+
+    public ResourceId getRecordId() {
+        return getParentKey().getRecordId();
     }
     
     public Date getTime() {
@@ -79,4 +87,5 @@ public class FormRecordSnapshotEntity implements TypedEntity {
     public Entity raw() {
         return entity;
     }
+
 }

@@ -442,6 +442,16 @@ definitions:
       time:
         type: integer
         description: the time, in seconds since 1970-01-01, that the change was made
+      subFieldId:
+        type: string
+        description: for sub records, the subForm field to which this sub record belongs
+      subFieldLabel:
+        type: string
+        description: for sub records, the label of the subForm field to which this sub record belongs
+      subRecordKey:
+        type: string
+        description: for keyed sub forms, such as monthly, weekly, or daily subForms, this is a human
+          readable label describing the key, for example '2016-06'
       changeType:
         type: string
         enum:

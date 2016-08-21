@@ -94,12 +94,18 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the entry.")
     String siteHistoryCreated(Date date, String userName, String userEmail);
 
+    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the entry in the {3} sub form.")
+    String siteHistorySubFormCreated(Date date, String userName, String userEmail, String subFormName);
+
     @DefaultMessage("Added on {0,date,dd-MM-yyyy}.")
     String siteHistoryDateCreated(Date date);
 
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated the entry:")
     String siteHistoryUpdated(Date date, String userName, String userEmail);
 
+    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated an entry in the {3} sub form.")
+    String siteHistorySubFormUpdated(Date date, String userName, String userEmail, String subFormName);
+    
     @DefaultMessage("No history is available for this form entry.")
     String siteHistoryNotAvailable();
 

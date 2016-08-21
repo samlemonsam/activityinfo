@@ -9,7 +9,6 @@ import org.activityinfo.api.client.FormValueChangeBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -21,19 +20,19 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.service.store.RecordVersion;
-import org.activityinfo.store.query.impl.Slot;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Assembles a history of 
+ * Assembles a history of a record and it's sub records.
  */
 public class RecordHistoryBuilder {
     
@@ -48,6 +47,7 @@ public class RecordHistoryBuilder {
     
     private static class RecordDelta {
         private RecordVersion version;
+        private FormField subFormField;
         private final List<FieldDelta> changes = new ArrayList<>();
     }
     
@@ -66,26 +66,19 @@ public class RecordHistoryBuilder {
         if(!form.isPresent()) {
             throw new FormNotFoundException(formId);    
         }
-        
-        // Build a map of fields that we need
-        Map<ResourceId, FormField> fieldMap = new HashMap<>();
+
         FormClass formClass = form.get().getFormClass();
+        List<RecordDelta> deltas = computeDeltas(formClass, null, form.get().getVersions(recordId));
+
+        // Now add deltas from sub forms...
         for (FormField field : formClass.getFields()) {
-            fieldMap.put(field.getId(), field);
+            if(field.getType() instanceof SubFormReferenceType) {
+                deltas.addAll(computeSubFormDeltas(recordId, field));
+            }
         }
-        
-        
-        List<RecordVersion> versions = form.get().getVersions(recordId);
-        if(versions.isEmpty()) {
-            throw new IllegalStateException("No versions for record " + recordId);
-        }
-        
+
         // Query users involved in the changes
-        Map<Long, User> userMap = queryUsers(versions);
-        
-        
-        // Build a list of deltas
-        List<RecordDelta> deltas = computeDeltas(formClass, versions);
+        Map<Long, User> userMap = queryUsers(deltas);
         
         // Now render the complete object for the user
         JsonArray array = new JsonArray();
@@ -101,6 +94,12 @@ public class RecordHistoryBuilder {
             FormHistoryEntryBuilder entry = new FormHistoryEntryBuilder();
             entry.setFormId(formId.asString());
             entry.setRecordId(recordId.asString());
+            
+            if(delta.subFormField != null) {
+                entry.setSubFieldId(delta.subFormField.getId().asString());
+                entry.setSubFieldLabel(delta.subFormField.getLabel());
+            }
+            
             entry.setTime((int)(delta.version.getTime() / 1000));
             entry.setChangeType(delta.version.getType().name().toLowerCase());
             entry.setUserName(user.name);
@@ -114,35 +113,55 @@ public class RecordHistoryBuilder {
         return array;
     }
 
-    
-    private List<RecordDelta> computeDeltas(FormClass formClass, List<RecordVersion> versions) {
-        List<RecordDelta> deltas = new ArrayList<>();
-        Map<ResourceId, FieldValue> currentState = new HashMap<>();
-        Iterator<RecordVersion> versionIt = versions.iterator();
+    private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField) {
+        SubFormReferenceType subFormType = (SubFormReferenceType) subFormField.getType();
+        Optional<FormAccessor> subForm = catalog.getForm(subFormType.getClassId());
+        FormClass subFormClass = subForm.get().getFormClass();
 
-        RecordDelta initial = new RecordDelta();
-        initial.version = versionIt.next();
-        deltas.add(initial);
+        List<RecordVersion> versions = subForm.get().getVersionsForParent(parentRecordId);
         
-        currentState.putAll(initial.version.getValues());
+        return computeDeltas(subFormClass, subFormField, versions);
+    }
 
-        while(versionIt.hasNext()) {
-            RecordVersion version = versionIt.next();
+
+    private List<RecordDelta> computeDeltas(FormClass formClass, 
+                                            FormField subFormField, 
+                                            List<RecordVersion> versions) {
+        
+        List<RecordDelta> deltas = new ArrayList<>();
+        
+        Map<ResourceId, Map<ResourceId, FieldValue>> currentStateMap = new HashMap<>();
+        
+        for (RecordVersion version : versions) {
             RecordDelta delta = new RecordDelta();
             delta.version = version;
+            delta.subFormField = subFormField;
+
+            Map<ResourceId, FieldValue> currentState = currentStateMap.get(version.getRecordId());
+
+            if(currentState == null) {
+
+                // Initialize our state map for this record
+                currentStateMap.put(version.getRecordId(), 
+                        new HashMap<>(delta.version.getValues()));
             
-            for (FormField field : formClass.getFields()) {
-                FieldValue oldValue = currentState.get(field.getId());
-                if(version.getValues().containsKey(field.getId())) {
-                    FieldValue newValue = version.getValues().get(field.getId());
-                    if (!Objects.equals(oldValue, newValue)) {
-                        FieldDelta fieldDelta = new FieldDelta();
-                        fieldDelta.field = field;
-                        fieldDelta.oldValue = oldValue;
-                        fieldDelta.newValue = newValue;
-                        delta.changes.add(fieldDelta);
+            } else {
+                
+                // Identify changes to the record values compared to the previous 
+                // version.
+                for (FormField field : formClass.getFields()) {
+                    FieldValue oldValue = currentState.get(field.getId());
+                    if(version.getValues().containsKey(field.getId())) {
+                        FieldValue newValue = version.getValues().get(field.getId());
+                        if (!Objects.equals(oldValue, newValue)) {
+                            FieldDelta fieldDelta = new FieldDelta();
+                            fieldDelta.field = field;
+                            fieldDelta.oldValue = oldValue;
+                            fieldDelta.newValue = newValue;
+                            delta.changes.add(fieldDelta);
+                        }
+                        currentState.put(field.getId(),  newValue);
                     }
-                    currentState.put(field.getId(),  newValue);
                 }
             }
             deltas.add(delta);
@@ -150,10 +169,10 @@ public class RecordHistoryBuilder {
         return deltas;
     }
 
-    private Map<Long, User> queryUsers(List<RecordVersion> versions) throws SQLException {
+    private Map<Long, User> queryUsers(List<RecordDelta> deltas) throws SQLException {
         Set<Long> userSet = new HashSet<>();
-        for (RecordVersion version : versions) {
-            userSet.add(version.getUserId());
+        for (RecordDelta delta : deltas) {
+            userSet.add(delta.version.getUserId());
         }
         
         Map<Long, User> userMap = new HashMap<>();

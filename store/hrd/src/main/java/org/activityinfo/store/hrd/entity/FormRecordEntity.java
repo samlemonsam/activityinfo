@@ -52,7 +52,7 @@ public class FormRecordEntity implements TypedEntity {
     public FormRecord toFormRecord(FormClass formClass) {
         FormRecord.Builder record = FormRecord.builder();
         record.setFormId(formClass.getId());
-        record.setRecordId(key.getResourceId());
+        record.setRecordId(key.getRecordId());
 
         if(formClass.getParentField().isPresent()) {
             record.setParentRecordId(getParentId());

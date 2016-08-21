@@ -56,15 +56,13 @@ public class HrdFormAccessor implements FormAccessor {
 
     @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
-        
-        
-        
         throw new UnsupportedOperationException();
     }
 
     @Override
     public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
-        throw new UnsupportedOperationException();
+        HrdVersionReader reader = new HrdVersionReader(datastore, getFormClass());
+        return reader.readChildren(parentRecordId);
     }
 
     @Override
@@ -87,7 +85,6 @@ public class HrdFormAccessor implements FormAccessor {
         datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
     }
     
-
     @Override
     public ColumnQueryBuilder newColumnQuery() {
         return new HrdQueryColumnBuilder(datastore.unwrap(), FormRootKey.key(formClass.getId()), formClass);

@@ -30,7 +30,7 @@ import org.activityinfo.model.type.FieldValue;
 
 import java.io.Serializable;
 
-/**
+/** 
  * @author yuriyz on 01/27/2015.
  */
 public class PeriodValue implements FieldValue, IsRecord, Serializable {

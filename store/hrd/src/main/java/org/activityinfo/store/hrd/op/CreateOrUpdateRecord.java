@@ -32,7 +32,7 @@ public class CreateOrUpdateRecord implements Operation {
 
         FormClass formClass = datastore.load(new FormSchemaKey(formId)).readFormClass();
         FormRecordKey key = new FormRecordKey(update.getRecordId());
-        if(!key.getCollectionId().equals(formId)) {
+        if(!key.getFormId().equals(formId)) {
             throw new IllegalStateException();
         }
 

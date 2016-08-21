@@ -11,6 +11,9 @@ import org.activityinfo.store.hrd.op.QueryOperation;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
+import static org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity.PARENT_PROPERTY;
+
 public class HrdVersionReader {
     
     private Datastore datastore;
@@ -24,7 +27,21 @@ public class HrdVersionReader {
     public List<RecordVersion> read(final ResourceId recordId) {
         FormRecordKey recordKey = new FormRecordKey(formClass.getId(), recordId);
         final Query query = new Query(FormRecordSnapshotKey.KIND, recordKey.raw());
-        
+
+        return query(query);
+    }
+    
+    public List<RecordVersion> readChildren(final ResourceId parentRecordId) {
+        FormRootKey formKey = new FormRootKey(formClass.getId());
+        final Query query = new Query(FormRecordSnapshotKey.KIND)
+                .setAncestor(formKey.raw())
+                .setFilter(new Query.FilterPredicate(PARENT_PROPERTY, EQUAL, parentRecordId.asString()));
+
+        return query(query);
+    }
+    
+
+    private List<RecordVersion> query(final Query query) {
         return datastore.execute(new QueryOperation<List<RecordVersion>>() {
             @Override
             public List<RecordVersion> execute(Datastore datastore) {
@@ -34,7 +51,7 @@ public class HrdVersionReader {
                     FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(entity);
                     FormRecordEntity record = snapshot.getFormRecord();
 
-                    version.setRecordId(recordId);
+                    version.setRecordId(snapshot.getRecordId());
                     version.setVersion(snapshot.getVersion());
                     version.setUserId(snapshot.getUserId());
                     version.setTime(snapshot.getTime().getTime());
@@ -46,5 +63,5 @@ public class HrdVersionReader {
             }
         });
     }
-    
+
 }
