@@ -46,7 +46,7 @@ public class ActivityUpdater {
     private void updateActivityRow(FormClass formClass) {
         SqlUpdate activityUpdate = SqlUpdate.update("activity");
         activityUpdate.where("activityId", activity.getId());
-        activityUpdate.setIfChanged("name", formClass.getLabel(), formClass.getLabel(), 255);
+        activityUpdate.setIfChanged("name", activity.getName(), formClass.getLabel(), 255);
         activityUpdate.set("formClass", formClass.toJsonString());
         activityUpdate.set("version", newVersion);
         activityUpdate.set("schemaVersion", newVersion);
