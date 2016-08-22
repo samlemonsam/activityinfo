@@ -28,8 +28,11 @@ public class FieldValues {
     }
 
     public static FieldValue readFieldValueIfType(Resource instance, String fieldName, FieldTypeClass typeClass) {
-        if(typeClass == TextType.TYPE_CLASS) {
+        if (typeClass == TextType.TYPE_CLASS) {
             return TextValue.valueOf(instance.isString(fieldName));
+
+        } if (typeClass == NarrativeType.TYPE_CLASS) {
+            return NarrativeValue.valueOf(instance.isString(fieldName));
 
         } else if(typeClass == BooleanType.TYPE_CLASS) {
             return BooleanFieldValue.valueOf(instance.isBoolean(fieldName));

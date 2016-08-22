@@ -8,10 +8,7 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -69,8 +66,9 @@ public class SideColumnBuilder {
         if(type instanceof QuantityType) {
             return new QuantityBuffer((QuantityType) type);
 
-        } else if(type instanceof TextType || 
-                  type instanceof BarcodeType) {
+        } else if(type instanceof TextType ||
+                type instanceof NarrativeType ||
+                type instanceof BarcodeType) {
             return new TextBuffer();
 
         } else if(type instanceof EnumType) {

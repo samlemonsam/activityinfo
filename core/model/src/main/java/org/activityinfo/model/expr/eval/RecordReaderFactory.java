@@ -2,10 +2,7 @@ package org.activityinfo.model.expr.eval;
 
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.RecordFieldTypeClass;
-import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -18,6 +15,9 @@ public class RecordReaderFactory implements FieldReaderFactory<Record> {
         final String fieldName = field.getName();
         if (field.getType() instanceof TextType) {
             return new TextReader(fieldName);
+
+        } else if (field.getType() instanceof NarrativeType) {
+            return new NarrativeReader(fieldName);
 
         } else if (field.getType() instanceof BooleanType) {
             return new BooleanReader(fieldName);
@@ -45,6 +45,24 @@ public class RecordReaderFactory implements FieldReaderFactory<Record> {
         @Override
         public FieldType getType() {
             return TextType.INSTANCE;
+        }
+    }
+
+    private static class NarrativeReader implements FieldReader<Record> {
+        private final String fieldName;
+
+        public NarrativeReader(String fieldName) {
+            this.fieldName = fieldName;
+        }
+
+        @Override
+        public FieldValue readField(Record record) {
+            return NarrativeValue.valueOf(record.isString(fieldName));
+        }
+
+        @Override
+        public FieldType getType() {
+            return NarrativeType.INSTANCE;
         }
     }
 
