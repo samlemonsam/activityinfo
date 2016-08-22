@@ -158,17 +158,22 @@ task downloadBuild {
 task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     description = "Deploys a build to the staging environment"
     
+    def appVersion;
+
     if(project.buildNumber != 'dev') {
         dependsOn downloadBuild
         explodedAppDirectory = project.file(downloadBuild.warDir)
+        appVersion = "b${project.buildNumber}"
+        
     } else {
         dependsOn 'appengineExplodeApp'
+        appVersion = 'qa'
     }
     
     dependsOn appengineDownloadSdk
 
 
-    extraOptions = ["--application=${environment.projectId}", '--version=qa']
+    extraOptions = ["--application=${environment.projectId}", "--version=${appVersion}"]
     oauth2 = true
     
     doFirst {

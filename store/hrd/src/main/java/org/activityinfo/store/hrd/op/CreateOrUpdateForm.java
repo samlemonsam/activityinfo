@@ -1,57 +1,61 @@
 package org.activityinfo.store.hrd.op;
 
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.common.base.Optional;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.store.hrd.entity.*;
+import org.activityinfo.store.hrd.entity.FormEntity;
+import org.activityinfo.store.hrd.entity.FormSchemaEntity;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 
-public class CreateOrUpdateForm implements Operation {
+public class CreateOrUpdateForm extends VoidWork {
     
     private FormClass formClass;
 
     public CreateOrUpdateForm(FormClass formClass) {
         this.formClass = formClass;
     }
-
+    
     @Override
-    public void execute(Datastore datastore) throws EntityNotFoundException {
+    public void vrun() {
 
-        FormRootKey rootKey = new FormRootKey(formClass.getId());
-
-        Optional<FormSchemaEntity> formClassEntity = datastore.loadIfPresent(rootKey.classKey());
+        Key<FormSchemaEntity> schemaKey = FormSchemaEntity.key(formClass.getId());
+        FormSchemaEntity schemaEntity = ofy().load().key(schemaKey).now();
         
-        if(formClassEntity.isPresent()) {
-            update(datastore, formClassEntity.get());
+        if(schemaEntity == null) {
+            create();
         } else {
-            create(datastore);
+            update(schemaEntity);
         }
     }
 
-    private void create(Datastore datastore) {
-        FormVersionEntity versionEntity = new FormVersionEntity(formClass.getId());
-        versionEntity.setVersion(1);
-        versionEntity.setSchemaVersion(1);
+    private void create() {
+        FormEntity rootEntity = new FormEntity();
+        rootEntity.setId(formClass.getId());
+        rootEntity.setVersion(1);
+        rootEntity.setSchemaVersion(1);
         
         FormSchemaEntity formClassEntity = new FormSchemaEntity(formClass);
-        formClassEntity.setSchemaVersion(1);
+        formClassEntity.setVersion(1);
         
-        datastore.put(versionEntity, formClassEntity);
+        ObjectifyService.ofy().save().entities(rootEntity, formClassEntity);
     }
 
-    private void update(Datastore datastore, FormSchemaEntity formClassEntity) throws EntityNotFoundException {
+    private void update(FormSchemaEntity formClassEntity) {
 
-        FormVersionEntity versionEntity = datastore.load(new FormVersionKey(formClass.getId()));
-
+        FormEntity rootEntity = ObjectifyService.ofy().load().key(FormEntity.key(formClass)).safe();
+        
         // Increment the version counter
-        long newVersion = versionEntity.getVersion() + 1;
-        versionEntity.setVersion(newVersion);
-        versionEntity.setSchemaVersion(newVersion);
+        long newVersion = rootEntity.getVersion() + 1;
+        rootEntity.setVersion(newVersion);
+        rootEntity.setSchemaVersion(newVersion);
         
         // Update the schema
-        formClassEntity.update(formClass);
-        formClassEntity.setSchemaVersion(newVersion);
+        formClassEntity.setSchema(formClass);
+        formClassEntity.setVersion(newVersion);
         
-        datastore.put(versionEntity, formClassEntity);
+        ofy().save().entities(rootEntity, formClassEntity);
     }
 }

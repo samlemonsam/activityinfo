@@ -1,7 +1,9 @@
 package org.activityinfo.store.hrd.entity;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.appengine.api.datastore.Entity;
+import com.google.common.base.Preconditions;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resource;
@@ -12,75 +14,76 @@ import org.activityinfo.store.hrd.FormConverter;
 /**
  * Entity stored 
  */
-public class FormSchemaEntity implements TypedEntity {
+@Entity(name = "FormSchema")
+public class FormSchemaEntity {
 
-    public static final String OWNER_PROPERTY = "owner";
-
-    public static final String SCHEMA_PROPERTY = "schema";
-    public static final String KIND = "FormSchema";
-
-    private FormSchemaKey key;
-    private Entity entity;
-
-    public FormSchemaEntity(Entity entity) {
-        this.key = new FormSchemaKey(entity.getKey());
-        this.entity = entity;
-    }
+    private static final long ENTITY_ID = 1L;
     
+    @Parent
+    private Key<FormEntity> formKey;
+    
+    @Id
+    private long id;
+    
+    @Index
+    private String owner;
+    
+    @Unindex
+    private long version;
+
+    @Unindex
+    private EmbeddedEntity schema;
+
+
+    public FormSchemaEntity() {
+    }
+
     public FormSchemaEntity(FormClass formClass) {
 
         if(formClass.getOwnerId() == null) {
             throw new IllegalArgumentException("FormClass " + formClass.getId() + " has no @owner");
         }
         
-        this.key = new FormSchemaKey(formClass.getId());
-        this.entity = new Entity(key.raw());
-        entity.setProperty(OWNER_PROPERTY, formClass.getOwnerId().asString());
-        entity.setProperty(SCHEMA_PROPERTY, FormConverter.toEmbeddedEntity(formClass.asResource()));
+        this.formKey = FormEntity.key(formClass);
+        this.id = ENTITY_ID;
+        this.owner = formClass.getOwnerId().asString();
+        this.schema = FormConverter.toEmbeddedEntity(formClass.asResource());
     }
     
-    public long getSchemaVersion() {
-        return (Long)entity.getProperty("version");
+    public static com.googlecode.objectify.Key<FormSchemaEntity> key(ResourceId formId) {
+        return com.googlecode.objectify.Key.create(FormEntity.key(formId), FormSchemaEntity.class, ENTITY_ID);
     }
-    
-    public void setSchemaVersion(long version) {
-        entity.setUnindexedProperty("version", version);
+
+    public ResourceId getFormId() {
+        return ResourceId.valueOf(formKey.getName());
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
+
+    public void setSchema(FormClass formClass) {
+        schema = FormConverter.toEmbeddedEntity(formClass.asResource());
+    }
+
+    public EmbeddedEntity getSchema() {
+        return schema;
     }
 
     public FormClass readFormClass() {
+        Preconditions.checkNotNull(owner, "owner");
+        Preconditions.checkNotNull(owner, "schema");
 
-        Object recordProperty = entity.getProperty(SCHEMA_PROPERTY);
-        if(recordProperty == null) {
-            throw new IllegalStateException(String.format("Entity %s is missing record property '%s'",
-                    entity.getKey(), SCHEMA_PROPERTY));
-        }
-        if(!(recordProperty instanceof EmbeddedEntity)) {
-            throw new IllegalArgumentException(String.format("Entity %s has record property '%s' of unexpected type '%s'.",
-                    entity.getKey(), SCHEMA_PROPERTY, recordProperty.getClass().getName()));
-        }
-
-        Object ownerValue = entity.getProperty(OWNER_PROPERTY);
-        if(!(ownerValue instanceof String)) {
-            throw new IllegalStateException(String.format("Entity %s has invalid %s property: %s",
-                    key, OWNER_PROPERTY, ownerValue));
-        }
-        
-        Record formClassRecord = FormConverter.fromEmbeddedEntity(((EmbeddedEntity) recordProperty));
-
+        Record formClassRecord = FormConverter.fromEmbeddedEntity(schema);
         Resource resource = Resources.createResource();
-        resource.setId(key.getCollectionId());
-        resource.setOwnerId(ResourceId.valueOf((String) ownerValue));
+        resource.setId(getFormId());
+        resource.setOwnerId(ResourceId.valueOf(owner));
         resource.getProperties().putAll(formClassRecord.getProperties());
 
         return FormClass.fromResource(resource);
-    }
-
-    @Override
-    public Entity raw() {
-        return entity;
-    }
-
-    public void update(FormClass formClass) {
-        entity.setProperty(SCHEMA_PROPERTY, FormConverter.toEmbeddedEntity(formClass.asResource()));
     }
 }

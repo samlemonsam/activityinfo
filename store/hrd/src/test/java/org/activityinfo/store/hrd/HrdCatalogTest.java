@@ -3,6 +3,8 @@ package org.activityinfo.store.hrd;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -16,6 +18,8 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.RecordChangeType;
+import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.After;
@@ -23,20 +27,26 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class HrdCatalogTest {
     
     private final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
     
     private int userId = 1;
+    private Closeable objectifyCloseable;
 
     @Before
     public void setUp() {
         helper.setUp();
+        objectifyCloseable = ObjectifyService.begin();
     }
     
     @BeforeClass
@@ -47,6 +57,7 @@ public class HrdCatalogTest {
     @After
     public void tearDown() {
         helper.tearDown();
+        objectifyCloseable.close();
     }
     
     @Test
@@ -77,11 +88,13 @@ public class HrdCatalogTest {
         assertTrue(collection.isPresent());
 
         RecordUpdate village1 = new RecordUpdate();
+        village1.setUserId(userId);
         village1.setRecordId(ResourceId.generateSubmissionId(formClass));
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
 
         RecordUpdate village2 = new RecordUpdate();
+        village2.setUserId(userId);
         village2.setRecordId(ResourceId.generateSubmissionId(formClass));
         village2.set(villageField, TextValue.valueOf("Beni"));
         village2.set(countField, new Quantity(230));
@@ -101,6 +114,15 @@ public class HrdCatalogTest {
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+
+        List<RecordVersion> versions1 = collection.get().getVersions(village1.getRecordId());
+        
+        assertThat(versions1, hasSize(1));
+
+        RecordVersion version = versions1.get(0);
+        assertThat(version.getRecordId(), equalTo(village1.getRecordId()));
+        assertThat(version.getUserId(), equalTo((long)userId));
+        assertThat(version.getType(), equalTo(RecordChangeType.CREATED));
     }
     
     @Test

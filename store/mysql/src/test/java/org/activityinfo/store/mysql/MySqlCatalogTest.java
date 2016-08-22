@@ -92,7 +92,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
-        assertThat(column("visible"), hasValues(true, true, true, true));
     }
     
     @Test
@@ -178,7 +177,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
-        assertThat(column("location.visible"), hasValues(true, true, true));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
         assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));

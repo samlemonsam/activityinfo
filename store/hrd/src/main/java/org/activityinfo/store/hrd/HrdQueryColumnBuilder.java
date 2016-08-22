@@ -1,32 +1,29 @@
 package org.activityinfo.store.hrd;
 
-import com.google.appengine.api.datastore.*;
 import com.google.common.collect.Lists;
+import com.googlecode.objectify.cmd.Query;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 
 class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
-    private DatastoreService datastoreService;
-    private Key collectionKey;
     private FormClass formClass;
     private List<CursorObserver<ResourceId>> idObservers = Lists.newArrayList();
     private List<FieldObserver> fieldObservers = Lists.newArrayList();
     private List<CursorObserver<?>> observers = Lists.newArrayList();
 
-    HrdQueryColumnBuilder(DatastoreService datastoreService, Key collectionKey, FormClass formClass) {
-        this.datastoreService = datastoreService;
-        this.collectionKey = collectionKey;
+    HrdQueryColumnBuilder(FormClass formClass) {
         this.formClass = formClass;
     }
 
@@ -63,30 +60,23 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     @Override
     public void execute() {
 
-        Query query = new Query(FormRecordEntity.KIND, collectionKey);
+        Query<FormRecordEntity> query = ofy()
+                .load()
+                .type(FormRecordEntity.class)
+                .ancestor(FormEntity.key(formClass));
 
-        Transaction tx = datastoreService.beginTransaction();
-        try {
+        for (FormRecordEntity entity : query.iterable()) {
 
-            PreparedQuery preparedQuery = datastoreService.prepare(tx, query);
-            Iterator<Entity> iterator = preparedQuery.asIterator();
-
-            while (iterator.hasNext()) {
-                Entity entity = iterator.next();
-                ResourceId id = ResourceId.valueOf(formClass.getId() + "-" + entity.getKey().getName());
-                for (CursorObserver<ResourceId> idObserver : idObservers) {
-                    idObserver.onNext(id);
-                }
-                for (FieldObserver fieldObserver : fieldObservers) {
-                    fieldObserver.onNext(entity);
-                }
+            for (CursorObserver<ResourceId> idObserver : idObservers) {
+                idObserver.onNext(entity.getRecordId());
             }
-
-            for (CursorObserver<?> observer : observers) {
-                observer.done();
+            for (FieldObserver fieldObserver : fieldObservers) {
+                fieldObserver.onNext(entity.getFieldValues());
             }
-        } finally {
-            tx.rollback();
+        }
+        
+        for (CursorObserver<?> observer : observers) {
+            observer.done();
         }
     }
 }

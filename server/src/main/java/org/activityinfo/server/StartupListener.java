@@ -44,6 +44,7 @@ import org.activityinfo.server.geo.GeometryModule;
 import org.activityinfo.server.login.LoginModule;
 import org.activityinfo.server.mail.MailModule;
 import org.activityinfo.server.report.ReportModule;
+import org.activityinfo.server.util.ObjectifyModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.jaxrs.JaxRsModule;
@@ -72,10 +73,12 @@ public class StartupListener extends GuiceServletContextListener {
     @Override
     protected Injector getInjector() {
 
-        return Guice.createInjector(new HibernateModule(),
+        return Guice.createInjector(
+                new HibernateModule(),
                 new ConfigModule(),
                 new TemplateModule(),
                 new MailModule(),
+                new ObjectifyModule(),
                 new ServerDatabaseModule(),
                 new ContentModule(),
                 new GeometryModule(),

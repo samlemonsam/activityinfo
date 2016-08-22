@@ -1,14 +1,17 @@
 package org.activityinfo.store.hrd;
 
 import com.google.common.base.Optional;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.store.hrd.entity.Datastore;
+import org.activityinfo.store.hrd.entity.FormEntity;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
-import org.activityinfo.store.hrd.entity.FormSchemaKey;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 
 import java.util.*;
@@ -17,27 +20,31 @@ import java.util.*;
  * Catalog of Collection hosted in the AppEngine High Replication Datastore
  */
 public class HrdCatalog implements FormCatalog {
-    
-    private Datastore datastore = new Datastore();
 
+    static {
+        ObjectifyService.register(FormEntity.class);
+        ObjectifyService.register(FormRecordEntity.class);
+        ObjectifyService.register(FormRecordSnapshotEntity.class);
+        ObjectifyService.register(FormSchemaEntity.class);
+    }
+    
     public HrdFormAccessor create(FormClass formClass) {
-        datastore.execute(new CreateOrUpdateForm(formClass));
+        ObjectifyService.ofy().transact(new CreateOrUpdateForm(formClass));
         
-        return new HrdFormAccessor(datastore, formClass);
+        return new HrdFormAccessor(formClass);
     }
     
     @Override
     public Optional<FormAccessor> getForm(ResourceId formId) {
 
-        Optional<FormSchemaEntity> formClassEntity = datastore.loadIfPresent(new FormSchemaKey(formId));
-        
-        if(!formClassEntity.isPresent()) {
+        FormSchemaEntity schemaEntity = ObjectifyService.ofy().load().key(FormSchemaEntity.key(formId)).now();
+        if(schemaEntity == null) {
             return Optional.absent();
         }
 
-        HrdFormAccessor collection = new HrdFormAccessor(datastore, formClassEntity.get().readFormClass());
+        HrdFormAccessor accessor = new HrdFormAccessor(schemaEntity.readFormClass());
         
-        return Optional.<FormAccessor>of(collection);
+        return Optional.<FormAccessor>of(accessor);
     }
 
     @Override
@@ -56,15 +63,15 @@ public class HrdCatalog implements FormCatalog {
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         
-        Set<FormSchemaKey> toLoad = new HashSet<>();
-        for (ResourceId collectionId : formIds) {
-            toLoad.add(new FormSchemaKey(collectionId));
+        Set<Key<FormSchemaEntity>> toLoad = new HashSet<>();
+        for (ResourceId formId : formIds) {
+            toLoad.add(FormSchemaEntity.key(formId));
         }
-        Map<FormSchemaKey, FormSchemaEntity> entityMap = datastore.get(toLoad);
+        Map<Key<FormSchemaEntity>, FormSchemaEntity> entityMap = ObjectifyService.ofy().load().keys(toLoad);
+        
         Map<ResourceId, FormClass> formClassMap = new HashMap<>();
-
-        for (Map.Entry<FormSchemaKey, FormSchemaEntity> entry : entityMap.entrySet()) {
-            formClassMap.put(entry.getKey().getCollectionId(), entry.getValue().readFormClass());
+        for (FormSchemaEntity formSchema : entityMap.values()) {
+            formClassMap.put(formSchema.getFormId(), formSchema.readFormClass());
         }
         
         return formClassMap;

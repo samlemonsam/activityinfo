@@ -1,9 +1,6 @@
 package org.activityinfo.store.hrd;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -12,26 +9,24 @@ import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.service.store.RecordVersion;
-import org.activityinfo.store.hrd.entity.Datastore;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
-import org.activityinfo.store.hrd.entity.FormRecordKey;
-import org.activityinfo.store.hrd.entity.FormRootKey;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
-import org.activityinfo.store.hrd.op.QueryOperation;
+import org.activityinfo.store.hrd.op.QuerySubRecords;
+import org.activityinfo.store.hrd.op.QueryVersions;
 
 import java.util.List;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
  * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)
  */
 public class HrdFormAccessor implements FormAccessor {
 
-    private Datastore datastore;
     private FormClass formClass;
 
-    public HrdFormAccessor(Datastore datastore, FormClass formClass) {
-        this.datastore = datastore;
+    public HrdFormAccessor(FormClass formClass) {
         this.formClass = formClass;
     }
 
@@ -41,12 +36,12 @@ public class HrdFormAccessor implements FormAccessor {
     }
 
     @Override
-    public Optional<FormRecord> get(ResourceId resourceId) {
-        FormRecordKey key = new FormRecordKey(resourceId);
-        Optional<FormRecordEntity> submission = datastore.loadIfPresent(key);
+    public Optional<FormRecord> get(ResourceId recordId) {
 
-        if(submission.isPresent()) {
-            FormRecord record = submission.get().toFormRecord(formClass);
+        FormRecordEntity entity = ofy().load().key(FormRecordEntity.key(formClass, recordId)).now();
+
+        if(entity != null) {
+            FormRecord record = entity.toFormRecord(formClass);
             return Optional.of(record);
         
         } else {
@@ -56,13 +51,12 @@ public class HrdFormAccessor implements FormAccessor {
 
     @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
-        throw new UnsupportedOperationException();
+        return ofy().transact(QueryVersions.of(formClass, recordId));
     }
 
     @Override
     public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
-        HrdVersionReader reader = new HrdVersionReader(datastore, getFormClass());
-        return reader.readChildren(parentRecordId);
+        return ofy().transact(QueryVersions.subRecords(formClass, parentRecordId));
     }
 
     @Override
@@ -72,22 +66,22 @@ public class HrdFormAccessor implements FormAccessor {
 
     @Override
     public void updateFormClass(FormClass formClass) {
-        datastore.execute(new CreateOrUpdateForm(formClass));
+        ofy().transact(new CreateOrUpdateForm(formClass));
     }
 
     @Override
     public void add(RecordUpdate update) {
-        datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
+        ofy().transact(new CreateOrUpdateRecord(formClass.getId(), update));
     }
 
     @Override
     public void update(final RecordUpdate update) {
-        datastore.execute(new CreateOrUpdateRecord(formClass.getId(), update));
+        ofy().transact(new CreateOrUpdateRecord(formClass.getId(), update));
     }
     
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new HrdQueryColumnBuilder(datastore.unwrap(), FormRootKey.key(formClass.getId()), formClass);
+        return new HrdQueryColumnBuilder(formClass);
     }
 
     @Override
@@ -95,38 +89,7 @@ public class HrdFormAccessor implements FormAccessor {
         return 0;
     }
 
-    public Iterable<FormRecord> getSubmissionsOfParent(ResourceId parentId) {
-        return getSubmissions(parentId);
-    }
-
-    public Iterable<FormRecord> getSubmissions(ResourceId parentId) {
-        List<Query.Filter> filters = Lists.newArrayList();
-        filters.add(FormRecordEntity.deletedFilter(false));
-
-        if (parentId != null) {
-            filters.add(FormRecordEntity.parentFilter(parentId));
-        }
-        if (filters.size() == 1) {
-            return query(filters.get(0));
-        }
-        return query(new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters));
-    }
-
-    private Iterable<FormRecord> query(Query.Filter filter) {
-        FormRootKey rootKey = new FormRootKey(formClass.getId());
-        final Query query = new Query(FormRecordEntity.KIND, rootKey.raw());
-        query.setFilter(filter);
-
-        return datastore.execute(new QueryOperation<List<FormRecord>>() {
-            @Override
-            public List<FormRecord> execute(Datastore datastore) {
-                List<FormRecord> instances = Lists.newArrayList();
-                for (Entity entity : datastore.prepare(query).asIterable()) {
-                    FormRecordEntity submission = new FormRecordEntity(entity);
-                    instances.add(submission.toFormRecord(formClass));
-                }
-                return instances;
-            }
-        });
+    public Iterable<FormRecord> getSubRecords(ResourceId parentId) {
+        return ofy().transact(new QuerySubRecords(formClass, parentId));
     }
 }
