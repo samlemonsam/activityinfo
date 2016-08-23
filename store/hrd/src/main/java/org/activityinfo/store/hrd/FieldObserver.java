@@ -1,6 +1,6 @@
 package org.activityinfo.store.hrd;
 
-import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EmbeddedEntity;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.service.store.CursorObserver;
 
@@ -16,7 +16,7 @@ public class FieldObserver {
         this.observer = observer;
     }
 
-    public void onNext(Entity entity) {
+    public void onNext(EmbeddedEntity entity) {
         Object value = entity.getProperty(name);
         if(value == null) {
             observer.onNext(null);

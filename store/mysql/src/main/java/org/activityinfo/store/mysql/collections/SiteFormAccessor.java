@@ -1,6 +1,8 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
@@ -10,8 +12,10 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.*;
-import org.activityinfo.store.hrd.HrdVersionReader;
-import org.activityinfo.store.hrd.entity.*;
+import org.activityinfo.store.hrd.entity.FormEntity;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
+import org.activityinfo.store.hrd.op.QueryVersions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -91,7 +95,7 @@ public class SiteFormAccessor implements FormAccessor {
 
     @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
-        
+
         List<RecordVersion> versions = new ArrayList<>();
         
         // Read first from legacy sitehistory table
@@ -104,8 +108,7 @@ public class SiteFormAccessor implements FormAccessor {
         }
         
         // Now read additional entries from HRD
-        HrdVersionReader hrdReader = new HrdVersionReader(new Datastore(), getFormClass());
-        versions.addAll(hrdReader.read(recordId));
+        versions.addAll(ObjectifyService.ofy().transact(QueryVersions.of(getFormClass(), recordId)));
         
         return versions;
     }
@@ -171,21 +174,27 @@ public class SiteFormAccessor implements FormAccessor {
         dualWriteToHrd(RecordChangeType.CREATED, update, newVersion, update.getChangedFieldValues());
     }
 
-    private void dualWriteToHrd(RecordChangeType changeType, RecordUpdate update, long newVersion, Map<ResourceId, FieldValue> values) {
+    private void dualWriteToHrd(final RecordChangeType changeType, final RecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
 
-        FormVersionEntity versionEntity = new FormVersionEntity(activity.getSiteFormClassId());
-        versionEntity.setVersion(activity.getVersion());
-        versionEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
-        
-        FormRecordEntity recordEntity = new FormRecordEntity(new FormRecordKey(activity.getSiteFormClassId(), update.getRecordId()));
-        recordEntity.setVersion(newVersion);
-        recordEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
-        recordEntity.setFieldValues(getFormClass(), values);
+        ObjectifyService.ofy().transact(new VoidWork() {
+            @Override
+            public void vrun() {
 
-        FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(update.getUserId(), changeType, recordEntity);
+                FormEntity rootEntity = new FormEntity();
+                rootEntity.setId(activity.getSiteFormClassId());
+                rootEntity.setVersion(activity.getVersion());
+                rootEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
 
-        Datastore datastore = new Datastore();
-        datastore.put(versionEntity, recordEntity, snapshot);
+                FormRecordEntity recordEntity = new FormRecordEntity(activity.getSiteFormClassId(), update.getRecordId());
+                recordEntity.setVersion(newVersion);
+                recordEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
+                recordEntity.setFieldValues(getFormClass(), values);
+
+                FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(update.getUserId(), changeType, recordEntity);
+
+                ObjectifyService.ofy().save().entities(rootEntity, recordEntity, snapshot);
+            }
+        });
     }
 
 

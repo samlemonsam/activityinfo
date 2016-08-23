@@ -4,6 +4,8 @@ package org.activityinfo.store.hrd;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -32,11 +34,14 @@ public class SubFormAggregationTest {
 
 
     private final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
+    private Closeable objectify;
 
     @Before
     public void setUp() {
         helper.setUp();
+        objectify = ObjectifyService.begin();
     }
 
     @BeforeClass
@@ -46,6 +51,7 @@ public class SubFormAggregationTest {
 
     @After
     public void tearDown() {
+        objectify.close();
         helper.tearDown();
     }
     

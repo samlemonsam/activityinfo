@@ -1,23 +1,20 @@
 package org.activityinfo.store.hrd.op;
 
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.common.base.Optional;
+import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.RecordChangeType;
-import org.activityinfo.store.hrd.FieldConverter;
-import org.activityinfo.store.hrd.FieldConverters;
-import org.activityinfo.store.hrd.entity.*;
+import org.activityinfo.store.hrd.entity.FormEntity;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
+import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 
-import java.util.Map;
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 
-public class CreateOrUpdateRecord implements Operation {
+public class CreateOrUpdateRecord extends VoidWork {
 
     private ResourceId formId;
     private RecordUpdate update;
@@ -27,31 +24,28 @@ public class CreateOrUpdateRecord implements Operation {
         this.update = update;
     }
 
+
     @Override
-    public void execute(Datastore datastore) throws EntityNotFoundException {
+    public void vrun() {
 
-        FormClass formClass = datastore.load(new FormSchemaKey(formId)).readFormClass();
-        FormRecordKey key = new FormRecordKey(update.getRecordId());
-        if(!key.getFormId().equals(formId)) {
-            throw new IllegalStateException();
-        }
+        FormEntity rootEntity = ofy().load().key(FormEntity.key(formId)).safe();
+        FormClass formClass = ofy().load().key(FormSchemaEntity.key(formId)).safe().readFormClass();
 
-        FormVersionEntity versionEntity = datastore.load(new FormVersionKey(formClass.getId()));
-        long currentVersion = versionEntity.getVersion();
+        long currentVersion = rootEntity.getVersion();
         long newVersion = currentVersion + 1;
 
-        versionEntity.setVersion(newVersion);
-        
-        Optional<FormRecordEntity> existingEntity = datastore.loadIfPresent(key);
+        rootEntity.setVersion(newVersion);
+
+        FormRecordEntity existingEntity = ofy().load().key(FormRecordEntity.key(formClass, update.getRecordId())).now();
         FormRecordEntity updated;
         RecordChangeType changeType;
         
-        if(existingEntity.isPresent()) {
-            updated = existingEntity.get();
+        if(existingEntity != null) {
+            updated = existingEntity;
             changeType = RecordChangeType.UPDATED;
             
         } else {
-            updated = new FormRecordEntity(key);
+            updated = new FormRecordEntity(formId, update.getRecordId());
             changeType = RecordChangeType.CREATED;
 
             if (formClass.getParentFormId().isPresent()) {
@@ -59,31 +53,18 @@ public class CreateOrUpdateRecord implements Operation {
                 if (parentId == null) {
                     throw new InvalidUpdateException("@parent is required for subform submissions");
                 }
-                updated.setParentId(parentId);
+                updated.setParentRecordId(parentId);
             }
         }
         updated.setVersion(newVersion);
-        updated.setSchemaVersion(versionEntity.getSchemaVersion());
+        updated.setSchemaVersion(rootEntity.getSchemaVersion());
         updated.setDeleted(update.isDeleted());
-
-        for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
-            // workaround for current UI
-            if(entry.getKey().equals(ResourceId.valueOf("keyId"))) {
-                TextValue keyText = (TextValue)entry.getValue(); 
-                updated.setFieldValue(entry.getKey().asString(), keyText.asString());
-                
-            } else {
-                FormField field = formClass.getField(entry.getKey());
-                FieldConverter converter = FieldConverters.forType(field.getType());
-                if (entry.getValue() != null) {
-                    updated.setFieldValue(field.getName(), converter.toHrdProperty(entry.getValue()));
-                }
-            }
-        }
+        updated.setFieldValues(formClass, update.getChangedFieldValues());
         
         // Store a copy as a snapshot
         FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
         
-        datastore.put(updated, versionEntity, snapshotEntity);
+        ofy().save().entities(rootEntity, updated, snapshotEntity);
     }
+
 }

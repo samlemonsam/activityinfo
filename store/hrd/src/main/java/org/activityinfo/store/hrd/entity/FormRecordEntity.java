@@ -1,9 +1,8 @@
 package org.activityinfo.store.hrd.entity;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -18,48 +17,126 @@ import java.util.Map;
 /**
  * Stores the current version of a FormRecord.
  * 
- * <p>Member of the Form entity group.</p>
+ * <p>Member of the Form Entity Group.</p>
  */
-public class FormRecordEntity implements TypedEntity {
-    
-    public static final String KIND = "FormRecord";
+@Entity(name = "FormRecord")
+public class FormRecordEntity {
 
+    @Parent
+    private Key<FormEntity> formKey;
+    
+    @Id
+    private String id;
+    
     /**
      * For sub form submissions, the parent form submission id. Indexed.
      */
-    public static final String PARENT_PROPERTY = "@parent";
-
-    public static final String DELETED = "@deleted";
+    @Index
+    private String parentRecordId;
     
-    public static final String VERSION = "@version";
+    private boolean deleted;
 
-    public static final String SCHEMA_VERSION = "@schemaVersion";
+    @Unindex
+    private long version;
+    
+    @Unindex
+    private long schemaVersion;
+    
+    private EmbeddedEntity fieldValues;
 
-
-    private FormRecordKey key;
-    private final Entity entity;
-
-    public FormRecordEntity(FormRecordKey key) {
-        this.key = key;
-        this.entity = new Entity(key.raw());
+    public FormRecordEntity() {
     }
 
-    public FormRecordEntity(Entity entity) {
-        this.key = new FormRecordKey(entity.getKey());
-        this.entity = entity;
+    public FormRecordEntity(ResourceId formId, ResourceId recordId) {
+        this.formKey = FormEntity.key(formId);
+        if(recordId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+            this.id = localId(formId, recordId);
+        } else {
+            this.id = recordId.asString();
+        }
+    }
+
+    private String localId(ResourceId formId, ResourceId recordId) {
+        String id = recordId.asString();
+        if(!id.startsWith(formId.asString())) {
+            throw new IllegalStateException("recordId does not start with " + formId);
+        }
+        return id.substring(formId.asString().length() + 1);
     }
     
+    public ResourceId getFormId() {
+        return ResourceId.valueOf(formKey.getName());
+    }
+
+    public ResourceId getRecordId() {
+        ResourceId formId = getFormId();
+        if(formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+            return ResourceId.valueOf(formKey.getName() + "-" + id);
+        } else {
+            return ResourceId.valueOf(id);
+        }
+    }
+    
+    public String getParentRecordId() {
+        return parentRecordId;
+    }
+
+    public void setParentRecordId(String parentRecordId) {
+        this.parentRecordId = parentRecordId;
+    }
+
+    public void setParentRecordId(ResourceId recordId) {
+        setParentRecordId(recordId.asString());
+    }
+
+    public long getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public void setSchemaVersion(long schemaVersion) {
+        this.schemaVersion = schemaVersion;
+    }
+
+    public EmbeddedEntity getFieldValues() {
+        return fieldValues;
+    }
+
+    public void setFieldValues(EmbeddedEntity fieldValues) {
+        this.fieldValues = fieldValues;
+    }
+
+    public void setFieldValues(FormClass formClass, Map<ResourceId, FieldValue> values) {
+        if(fieldValues == null) {
+            fieldValues = new EmbeddedEntity();
+        }
+        for (FormField field : formClass.getFields()) {
+            if(values.containsKey(field.getId())) {
+                FieldValue value = values.get(field.getId());
+                if(value == null) {
+                    fieldValues.removeProperty(field.getName());
+                } else {
+                    FieldConverter converter = FieldConverters.forType(field.getType());
+                    fieldValues.setUnindexedProperty(field.getName(), converter.toHrdProperty(value));
+                }
+            }
+        }
+    }
+
     public FormRecord toFormRecord(FormClass formClass) {
         FormRecord.Builder record = FormRecord.builder();
         record.setFormId(formClass.getId());
-        record.setRecordId(key.getRecordId());
+        record.setRecordId(ResourceId.valueOf(id));
 
         if(formClass.getParentField().isPresent()) {
-            record.setParentRecordId(getParentId());
+            record.setParentRecordId(ResourceId.valueOf(getParentRecordId()));
         }
 
         for (FormField formField : formClass.getFields()) {
-            Object value = entity.getProperty(formField.getName());
+            Object value = fieldValues.getProperty(formField.getName());
             if(value != null) {
                 FieldConverter<?> converter = FieldConverters.forType(formField.getType());
                 record.setFieldValue(formField.getId(), converter.toFieldValue(value));
@@ -71,7 +148,7 @@ public class FormRecordEntity implements TypedEntity {
     public Map<ResourceId, FieldValue> toFieldValueMap(FormClass formClass) {
         Map<ResourceId, FieldValue> map = new HashMap<>();
         for (FormField formField : formClass.getFields()) {
-            Object value = entity.getProperty(formField.getName());
+            Object value = fieldValues.getProperty(formField.getName());
             if(value != null) {
                 FieldConverter<?> converter = FieldConverters.forType(formField.getType());
                 map.put(formField.getId(), converter.toFieldValue(value));
@@ -80,78 +157,42 @@ public class FormRecordEntity implements TypedEntity {
         return map;
     }
 
-    public FormRecordKey getKey() {
-        return key;
+    public boolean isDeleted() {
+        return deleted;
     }
-
-    public ResourceId getParentId() {
-        String parentId = (String) entity.getProperty(PARENT_PROPERTY);
-        if(parentId == null) {
-            return null;
-        } else {
-            return ResourceId.valueOf(parentId);
-        }
-    }
-
-    public boolean getDeleted() {
-        Boolean deleted = (Boolean) entity.getProperty(DELETED);
-        if(deleted == null) {
-            return false;
-        } else {
-            return deleted;
-        }
-    }
-    
-    public void setVersion(long version) {
-        entity.setProperty(VERSION, version);
-    }
-
 
     public long getVersion() {
-        return (Long)entity.getProperty(VERSION);
-    }
-    
-    public void setSchemaVersion(long version) {
-        entity.setUnindexedProperty(SCHEMA_VERSION, version);
+        return version;
     }
 
-    public void setDeleted(boolean deleted) {
-        entity.setProperty(DELETED, deleted);
+    public void setVersion(long version) {
+        this.version = version;
     }
 
-    public void setParentId(ResourceId parentId) {
-        entity.setProperty(PARENT_PROPERTY, parentId.asString());
+    public static Key<FormRecordEntity> key(ResourceId recordId) {
+        ResourceId.checkSubmissionId(recordId);
+
+
+        String[] parts = recordId.asString().split("-", 2);
+        String recordLocalId = recordId.asString().substring(recordId.asString().indexOf("-") + 1);
+
+        Key<FormEntity> formKey = Key.create(FormEntity.class, parts[0]);
+        Key<FormRecordEntity> recordKey = Key.create(formKey, FormRecordEntity.class, recordLocalId);
+
+        return recordKey;
     }
 
-    public static Key key(ResourceId collectionId, ResourceId resourceId) {
-        Key parentKey = FormRootKey.key(collectionId);
-        return KeyFactory.createKey(parentKey, KIND, resourceId.asString());
-    }
-
-    public void setFieldValues(FormClass formClass, Map<ResourceId, FieldValue> values) {
-        for (Map.Entry<ResourceId, FieldValue> entry : values.entrySet()) {
-            FormField field = formClass.getField(entry.getKey());
-            FieldConverter converter = FieldConverters.forType(field.getType());
-            if (entry.getValue() != null) {
-                setFieldValue(field.getName(), converter.toHrdProperty(entry.getValue()));
-            }         
+    public static Key<FormRecordEntity> key(ResourceId formId, ResourceId recordId) {
+        if(recordId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+            return key(recordId);
+        } else {
+            Key<FormEntity> formKey = Key.create(FormEntity.class, formId.asString());
+            Key<FormRecordEntity> recordKey = Key.create(formKey, FormRecordEntity.class, recordId.asString());
+            return recordKey;
         }
     }
     
-    public void setFieldValue(String propertyName, Object value) {
-        entity.setUnindexedProperty(propertyName, value);
+    public static Key<FormRecordEntity> key(FormClass formClass, ResourceId recordId) {
+        return key(formClass.getId(), recordId);
     }
-
-    public Entity raw() {
-        return entity;
-    }
-    
-    public static Query.FilterPredicate parentFilter(ResourceId parentId) {
-        return new Query.FilterPredicate(PARENT_PROPERTY, Query.FilterOperator.EQUAL, parentId.asString());
-    }
-
-    public static Query.FilterPredicate deletedFilter(boolean deleted) {
-        return new Query.FilterPredicate(DELETED, Query.FilterOperator.EQUAL, deleted);
-    }
-
 }

@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
-import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -156,7 +155,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         if(collection.isPresent()) {
             if(collection.get() instanceof HrdFormAccessor) {
                 HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
-                Iterable<FormRecord> records = hrdForm.getSubmissionsOfParent(ResourceId.valueOf(parentId));
+                Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
                 for (FormRecord record : records) {
                     recordArray.add(record.toJsonElement());
                 }

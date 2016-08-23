@@ -166,7 +166,7 @@ public class FormResource {
         }
 
         HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
-        Iterable<FormRecord> records = hrdForm.getSubmissions(ResourceId.valueOf(parentId));
+        Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
 
         FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
         recordSet.setFormId(formId.asString());
