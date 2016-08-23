@@ -98,6 +98,8 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     HTML paletteSpacer;
     @UiField
     ContainerPropertiesPanel containerPropertiesPanel;
+    @UiField
+    HTMLPanel palettePanel;
 
     /**
      * Main FormDesigner panel. It must be created via FormDesigner only.
@@ -257,29 +259,32 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     int previousVerticalScrollPosition = 0;
     private void calcSpacerHeight() {
         int verticalScrollPosition = scrollAncestor.getVerticalScrollPosition();
+        int panelHeight = dropPanel.getOffsetHeight();
+
+        // properties spacer
         if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION) {
             int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION;
 
-            int panelHeight = dropPanel.getOffsetHeight();
             int propertiesColumnHeight = propertiesPanel.getOffsetHeight() + spacer.getOffsetHeight();
             if (propertiesColumnHeight > panelHeight && verticalScrollPosition > previousVerticalScrollPosition) {
-                // AI-924 : avoid never ending scrolls
-                return;
+                return; // AI-924 : avoid never ending scrolls
             }
 
-//            int selectedWidgetTop = 0;
-//            if (selectedWidgetContainer != null) {
-//                selectedWidgetTop = selectedWidgetContainer.asWidget().getAbsoluteTop();
-//            }
-//            if (selectedWidgetTop < 0) {
-//                height = height + selectedWidgetTop;
-//            }
-
-            //GWT.log("verticalPos = " + verticalScrollPosition + ", height = " + height + ", selectedWidgetTop = " + selectedWidgetTop);
             spacer.setHeight(height + "px");
-            paletteSpacer.setHeight(height + "px");
         } else {
             spacer.setHeight("0px");
+        }
+
+        // palette spacer
+        if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_PALETTE_SCROLL_POSITION) {
+            int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_PALETTE_SCROLL_POSITION;
+
+            int paletteHeight = palettePanel.getOffsetHeight() + paletteSpacer.getOffsetHeight();
+            if (paletteHeight > panelHeight && verticalScrollPosition > previousVerticalScrollPosition) {
+                return; // avoid never ending scrolls
+            }
+            paletteSpacer.setHeight(height + "px");
+        } else {
             paletteSpacer.setHeight("0px");
         }
         previousVerticalScrollPosition = verticalScrollPosition;

@@ -34,6 +34,7 @@ public class FormDesignerConstants {
     public static final int SOURCE_CONTROL_MARGIN_RIGHT = 10;
 
     public static final int MAX_VERTICAL_SCROLL_POSITION = 20;
+    public static final int MAX_VERTICAL_PALETTE_SCROLL_POSITION = 140;
 
     public static final String DEFAULT_STYLE_NAME = "btn btn-primary btn-xs";
     public static final String DATA_FIELD_ID = "data-field-id";
