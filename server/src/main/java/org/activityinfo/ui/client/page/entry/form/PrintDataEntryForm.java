@@ -42,6 +42,7 @@ import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 
 import java.util.List;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.gwt.safehtml.shared.SafeHtmlUtils.htmlEscape;
 
 public class PrintDataEntryForm extends Window {
@@ -226,9 +227,9 @@ public class PrintDataEntryForm extends Window {
 
     private void addIndicator(IndicatorDTO indicator, StringBuilder builder) {
         builder.append("<tr>");
-        builder.append("<td>" + htmlEscape(indicator.getName()) + "</td>");
+        builder.append("<td>" + htmlEscape(nullToEmpty(indicator.getName())) + "</td>");
         builder.append("<td>&nbsp;</td>");
-        builder.append("<td>" + htmlEscape(indicator.getUnits()) + "</td>");
+        builder.append("<td>" + htmlEscape(nullToEmpty(indicator.getUnits())) + "</td>");
         builder.append("</tr>");
     }
 
