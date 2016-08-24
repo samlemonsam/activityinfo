@@ -33,8 +33,6 @@ public class FormRecordEntity {
      */
     @Index
     private String parentRecordId;
-    
-    private boolean deleted;
 
     @Unindex
     private long version;
@@ -91,10 +89,6 @@ public class FormRecordEntity {
 
     public long getSchemaVersion() {
         return schemaVersion;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 
     public void setSchemaVersion(long schemaVersion) {
@@ -155,10 +149,6 @@ public class FormRecordEntity {
             }
         }
         return map;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
     }
 
     public long getVersion() {

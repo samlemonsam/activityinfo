@@ -48,7 +48,7 @@ public class CreateOrUpdateRecord extends VoidWork {
             updated = new FormRecordEntity(formId, update.getRecordId());
             changeType = RecordChangeType.CREATED;
 
-            if (updated.isDeleted()) {
+            if (update.isDeleted()) {
                 throw new InvalidUpdateException("Creation of entity with deleted flag is not allowed.");
             }
 
@@ -62,13 +62,12 @@ public class CreateOrUpdateRecord extends VoidWork {
         }
         updated.setVersion(newVersion);
         updated.setSchemaVersion(rootEntity.getSchemaVersion());
-        updated.setDeleted(update.isDeleted());
         updated.setFieldValues(formClass, update.getChangedFieldValues());
         
         // Store a copy as a snapshot
         FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
 
-        if (updated.isDeleted()) {
+        if (update.isDeleted()) {
             ofy().save().entities(rootEntity, snapshotEntity);
             ofy().delete().entities(updated);
         } else {
