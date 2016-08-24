@@ -12,25 +12,41 @@ import org.activityinfo.model.resource.Resources;
 import org.activityinfo.store.hrd.FormConverter;
 
 /**
- * Entity stored 
+ * Entity storing a Form's Schema.
  */
 @Entity(name = "FormSchema")
 public class FormSchemaEntity {
 
     private static final long ENTITY_ID = 1L;
-    
+
+    /**
+     * The {@link FormEntity} key, the root key of the Form Entity Group.
+     */
     @Parent
     private Key<FormEntity> formKey;
-    
+
+    /**
+     * Always {@code 1L} as there is one {@code FormSchema} per Form Entity Group.
+     */
     @Id
     private long id;
-    
+
+    /**
+     * The id of the owner of this form. Currently will be either the id of a database
+     * or an activity, in the case of subforms.
+     */
     @Index
     private String owner;
-    
-    @Unindex
-    private long version;
 
+    /**
+     * The current version of the schema for this Form.
+     */
+    @Unindex
+    private long schemaVersion;
+
+    /**
+     * The {@link FormClass} serialized as an {@link EmbeddedEntity} via {@link FormClass#asResource()}
+     */
     @Unindex
     private EmbeddedEntity schema;
 
@@ -58,12 +74,12 @@ public class FormSchemaEntity {
         return ResourceId.valueOf(formKey.getName());
     }
 
-    public long getVersion() {
-        return version;
+    public long getSchemaVersion() {
+        return schemaVersion;
     }
 
-    public void setVersion(long version) {
-        this.version = version;
+    public void setSchemaVersion(long schemaVersion) {
+        this.schemaVersion = schemaVersion;
     }
 
     public void setSchema(FormClass formClass) {
