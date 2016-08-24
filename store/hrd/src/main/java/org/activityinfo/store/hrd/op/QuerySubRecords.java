@@ -30,6 +30,7 @@ public class QuerySubRecords implements Work<List<FormRecord>> {
                 .type(FormRecordEntity.class)
                 .ancestor(FormEntity.key(formClass))
                 .filter("parentRecordId", this.parentRecordId.asString())
+                .filter("deleted !=", "true")
                 .iterable();
 
         List<FormRecord> records = Lists.newArrayList();

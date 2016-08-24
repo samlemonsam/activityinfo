@@ -42,11 +42,15 @@ public class CreateOrUpdateRecord extends VoidWork {
         
         if(existingEntity != null) {
             updated = existingEntity;
-            changeType = RecordChangeType.UPDATED;
-            
+            changeType = update.isDeleted() ? RecordChangeType.DELETED : RecordChangeType.UPDATED;
+
         } else {
             updated = new FormRecordEntity(formId, update.getRecordId());
             changeType = RecordChangeType.CREATED;
+
+            if (updated.isDeleted()) {
+                throw new InvalidUpdateException("Creation of entity with deleted flag is not allowed.");
+            }
 
             if (formClass.getParentFormId().isPresent()) {
                 ResourceId parentId = update.getParentId();

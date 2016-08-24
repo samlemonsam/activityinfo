@@ -165,34 +165,6 @@ paths:
           description: The authenticated user does not have permission to view this form or record
         404:
           description: No record with `formId` exists
-          
-  /form/{formId}/record/{recordId}/history:
-    get:
-      operationId: getRecordHistory
-      summary: Retrieves the history of changes to a single record.
-      parameters:
-        - name: formId
-          in: path
-          description: Id of the path
-          required: true
-          type: string
-        - name: recordId
-          in: path
-          description: Id of the record
-          type: string
-          required: true
-      responses:
-        200:
-          description: The requested record
-          schema:
-            type: array
-            items: 
-              $ref: '#/definitions/FormHistoryEntry'
-        401:
-          description: The authenticated user does not have permission to view this form or record
-        404:
-          description: No record with `formId` exists
-          
     put:
       operationId: updateRecord
       summary: Updates an individual record in this collection
@@ -219,7 +191,34 @@ paths:
           description: The authenticated user does not have permission to view this form or record
         404:
           description: No record with `formId` exists
-          
+
+  /form/{formId}/record/{recordId}/history:
+    get:
+      operationId: getRecordHistory
+      summary: Retrieves the history of changes to a single record.
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the path
+          required: true
+          type: string
+        - name: recordId
+          in: path
+          description: Id of the record
+          type: string
+          required: true
+      responses:
+        200:
+          description: The requested record
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/FormHistoryEntry'
+        401:
+          description: The authenticated user does not have permission to view this form or record
+        404:
+          description: No record with `formId` exists
+
   /query/columns:
     post:
       operationId: queryTableColumns
