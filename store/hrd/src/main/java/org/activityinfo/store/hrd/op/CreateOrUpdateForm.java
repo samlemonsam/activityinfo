@@ -1,7 +1,6 @@
 package org.activityinfo.store.hrd.op;
 
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -40,12 +39,12 @@ public class CreateOrUpdateForm extends VoidWork {
         FormSchemaEntity formClassEntity = new FormSchemaEntity(formClass);
         formClassEntity.setVersion(1);
         
-        ObjectifyService.ofy().save().entities(rootEntity, formClassEntity);
+        ofy().save().entities(rootEntity, formClassEntity);
     }
 
     private void update(FormSchemaEntity formClassEntity) {
 
-        FormEntity rootEntity = ObjectifyService.ofy().load().key(FormEntity.key(formClass)).safe();
+        FormEntity rootEntity = ofy().load().key(FormEntity.key(formClass)).safe();
         
         // Increment the version counter
         long newVersion = rootEntity.getVersion() + 1;

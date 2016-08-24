@@ -67,8 +67,14 @@ public class CreateOrUpdateRecord extends VoidWork {
         
         // Store a copy as a snapshot
         FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
-        
-        ofy().save().entities(rootEntity, updated, snapshotEntity);
+
+        if (updated.isDeleted()) {
+            ofy().save().entities(rootEntity, snapshotEntity);
+            ofy().delete().entities(updated);
+        } else {
+            ofy().save().entities(rootEntity, updated, snapshotEntity);
+        }
+
     }
 
 }
