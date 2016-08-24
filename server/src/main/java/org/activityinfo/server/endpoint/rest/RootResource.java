@@ -134,7 +134,7 @@ public class RootResource {
 
     @Path("/database/{id}")
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
-        return new DatabaseResource(dispatcher, id);
+        return new DatabaseResource(catalog, dispatcher, id);
     }
 
     @Path("/adminLevel/{id}")

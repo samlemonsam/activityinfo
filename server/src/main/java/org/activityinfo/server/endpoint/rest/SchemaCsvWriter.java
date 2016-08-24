@@ -8,18 +8,11 @@ import org.activityinfo.server.command.DispatcherSync;
 
 public class SchemaCsvWriter {
 
-    private final StringBuilder csv = new StringBuilder();
     private final DispatcherSync dispatcher;
+    private CsvWriter csv = new CsvWriter();
 
     public SchemaCsvWriter(DispatcherSync dispatcher) {
         this.dispatcher = dispatcher;
-    }
-
-    /**
-     * Writes a byte order mark that should help spreadsheet software detect the UTF-8 character set.
-     */
-    public void writeByteOrderMark() {
-        csv.append('\ufeff');
     }
 
     public void write(int databaseId) {
@@ -50,20 +43,8 @@ public class SchemaCsvWriter {
         }
     }
 
-    private String aggregationToString(IndicatorDTO indicator) {
-        switch (indicator.getAggregation()) {
-            case IndicatorDTO.AGGREGATE_SITE_COUNT:
-                return "Count of Sites";
-            case IndicatorDTO.AGGREGATE_AVG:
-                return "Average";
-            case IndicatorDTO.AGGREGATE_SUM:
-                return "Sum";
-        }
-        return "-";
-    }
-
     private void writeHeaders() {
-        writeLine("DatabaseId",
+        csv.writeLine("DatabaseId",
                 "DatabaseName",
                 "ActivityId",
                 "ActivityCategory",
@@ -81,7 +62,7 @@ public class SchemaCsvWriter {
     }
 
     private void writeElementLine(ActivityFormDTO activity, IndicatorDTO indicator) {
-        writeLine(activity.getDatabaseId(),
+        csv.writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
                 activity.getId(),
                 activity.getCategory(),
@@ -100,7 +81,7 @@ public class SchemaCsvWriter {
     }
 
     private void writeElementLine(ActivityFormDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) {
-        writeLine(activity.getDatabaseId(),
+        csv.writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
                 activity.getId(),
                 activity.getCategory(),
@@ -115,25 +96,6 @@ public class SchemaCsvWriter {
                 attrib.getName(),
                 null,
                 null);
-    }
-
-    private void writeLine(Object... columns) {
-
-        for (int i = 0; i != columns.length; ++i) {
-            if (i > 0) {
-                csv.append(",");
-            }
-            Object val = columns[i];
-            if (val != null) {
-                if (val instanceof String) {
-                    String escaped = ((String) val).replace("\"", "\"\"");
-                    csv.append("\"").append(escaped).append("\"");
-                } else {
-                    csv.append(val.toString());
-                }
-            }
-        }
-        csv.append("\n");
     }
 
     public String toString() {

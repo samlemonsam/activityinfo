@@ -81,6 +81,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     public static final PageId PAGE_ID = new PageId("design");
 
 
+
     @ImplementedBy(DesignView.class)
     public interface View extends TreeGridView<DesignPresenter, ModelData> {
         public void init(DesignPresenter presenter, UserDatabaseDTO db, TreeStore store);
@@ -254,6 +255,10 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
     }
 
+    public void exportFullDatabaseBeta() {
+        Window.open("/resources/database/" + db.getId() + "/schema-v3.csv", "_blank", null);
+    }
+    
     public void exportFormAsXlsForm() {
         Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
     }
