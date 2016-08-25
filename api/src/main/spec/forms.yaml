@@ -16,8 +16,9 @@ paths:
   /form/{formId}/schema:
     get:
       operationId: getFormSchema
-      summary: Retrieves the schema that describes this form's fields
+      summary: Get a Form's Schema
       description: |
+        Retrieves the schema that describes this form's fields.
         A form in ActivityInfo is a set of records that have a common set of fields, or schema. 
         A form can be a user-defined form created by a user, or it can be an application-defined like the set of
          countries, which has the id `_countries`.
@@ -40,13 +41,13 @@ paths:
           description: The form does not exist.
     put:
       operationId: updateFormSchema
-      summary: Updates a form's schema
+      summary: Updates a Form's Schema
       description: |
         Updates the form
       parameters:
         - name: formId
           in: path
-          description: Id of the path
+          description: Id of the Form
           required: true
           type: string
         - name: updatedSchema
@@ -69,9 +70,9 @@ paths:
     get:
       operationId: getSchemaTree
       x-gwt-client: false
-      summary: Retrieves this form's schema, together with
-       the schemas of all related forms.
+      summary: Get a Form's Schema Tree
       description: |
+        Retrieves this form's schema, together with the schemas of all related forms.
         The fields defined in a form's schema may reference other forms, which in turn may refer to yet others.
         As a convenience, this request returns the schemas of all forms reachable from this form.
       parameters:
@@ -98,11 +99,11 @@ paths:
   /form/{formId}/records:
     get:
       operationId: getRecords
-      summary: Retrieves records for this form
+      summary: Get All Records for a Form
       parameters:
         - name: formId
           in: path
-          description: Id of the path
+          description: Id of the Form containing the Record
           required: true
           type: string
         - name: parentId
@@ -121,7 +122,7 @@ paths:
           description: No form with `formId` exists
     post:
       operationId: createRecord
-      summary: Creates a new record for this form
+      summary: Create a New Record
       parameters:
         - name: formId
           in: path
@@ -144,7 +145,7 @@ paths:
   /form/{formId}/record/{recordId}:
     get:
       operationId: getRecord
-      summary: Retrieves a single record of this form
+      summary: Get a Single Form Record
       parameters:
         - name: formId
           in: path
@@ -167,7 +168,7 @@ paths:
           description: No record with `formId` exists
     put:
       operationId: updateRecord
-      summary: Updates an individual record in this collection
+      summary: Update a Form Record
       parameters:
         - name: formId
           in: path
@@ -195,7 +196,7 @@ paths:
   /form/{formId}/record/{recordId}/history:
     get:
       operationId: getRecordHistory
-      summary: Retrieves the history of changes to a single record.
+      summary: Get a Record's History
       parameters:
         - name: formId
           in: path
@@ -222,9 +223,9 @@ paths:
   /query/columns:
     post:
       operationId: queryTableColumns
-      summary: Flattens records from one or more forms into a two-dimensional table, 
+      summary: Query a Form as Columns
+      deescription: Flattens records from one or more forms into a two-dimensional table, 
         returning the results as a list of columns.
-      description: |
         Though forms can contain rich, nested and linked data,
         for the purposes of analysis a simple two-dimensional table is often required.
       parameters:
@@ -247,7 +248,9 @@ paths:
   /catalog:
     get:
       operationId: getFormCatalog
-      summary: Retrieves a tree of forms owned or shared with the current user.
+      summary: Get a List of Forms
+      description: This endpoint provides access to a hierarchy of Forms that are visible to the authenticated
+        user. 
       parameters:
         - name: parent
           in: query
