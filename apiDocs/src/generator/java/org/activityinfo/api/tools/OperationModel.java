@@ -5,34 +5,53 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
-import io.swagger.models.Path;
+import io.swagger.models.Response;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class OperationModel {
     private final String uri;
-    private final Path path;
     private final HttpMethod method;
     private final Operation operation;
     
     private String jsonOutput;
     private List<ExampleModel> examples = new ArrayList<>();
-
-    public OperationModel(String uri, Path path, HttpMethod method, Operation operation) {
+    private List<ResponseModel> responses = new ArrayList<>();
+    
+    private BodyParameter body = null;
+    
+    public OperationModel(String uri, HttpMethod method, Operation operation) {
         this.uri = uri;
-        this.path = path;
         this.method = method;
         this.operation = operation;
         
         this.jsonOutput = tryReadExample(".json");
         tryAddExample("shell", ".sh");
+
+        for (Parameter parameter : operation.getParameters()) {
+            if(parameter instanceof BodyParameter) {
+                body = (BodyParameter) parameter;
+            }
+        }
+        
+        for (Map.Entry<String, Response> entry : operation.getResponses().entrySet()) {
+            responses.add(new ResponseModel(Integer.parseInt(entry.getKey()), entry.getValue()));
+        }
     }
 
-
+    public List<String> getTags() {
+        if(operation.getTags() == null) {
+            return Collections.emptyList();
+        }
+        return operation.getTags();
+    }
 
     public String getId() {
         return operation.getOperationId();
@@ -50,6 +69,10 @@ public class OperationModel {
     public String getSummary() {
         return operation.getSummary();
     }
+    
+    public String getDescriptionHtml() {
+        return operation.getDescription();
+    }
 
     public String getJsonOutput() {
         return jsonOutput;
@@ -57,6 +80,10 @@ public class OperationModel {
 
     public List<ExampleModel> getExamples() {
         return examples;
+    }
+    
+    public List<ResponseModel> getResponses() {
+        return responses;
     }
 
     private void tryAddExample(String language, String extension) {

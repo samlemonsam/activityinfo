@@ -1,11 +1,8 @@
-# this is an example of the Uber API
-# as a demonstration of an API spec in YAML
 swagger: '2.0'
 info:
   title: ActivityInfo API 3.0
   description: ActivityInfo 3.0 AP
   version: "1.0.0"
-# the domain of the service
 host: www.activityinfo.org
 schemes:
   - https
@@ -17,6 +14,8 @@ paths:
     get:
       operationId: getFormSchema
       summary: Get a Form's Schema
+      tags:
+        - forms
       description: |
         Retrieves the schema that describes this form's fields.
         A form in ActivityInfo is a set of records that have a common set of fields, or schema. 
@@ -28,8 +27,6 @@ paths:
           description: Id of the form
           required: true
           type: string
-      tags:
-        - forms
       responses:
         200:
           description: The form's schema
@@ -42,6 +39,8 @@ paths:
     put:
       operationId: updateFormSchema
       summary: Updates a Form's Schema
+      tags:
+        - forms
       description: |
         Updates the form
       parameters:
@@ -70,6 +69,7 @@ paths:
     get:
       operationId: getSchemaTree
       x-gwt-client: false
+      x-doc: false
       summary: Get a Form's Schema Tree
       description: |
         Retrieves this form's schema, together with the schemas of all related forms.
@@ -81,8 +81,7 @@ paths:
           description: Id of the form
           required: true
           type: string
-      tags:
-        - forms
+
       responses:
         200:
           description: The form's class
@@ -99,7 +98,10 @@ paths:
   /form/{formId}/records:
     get:
       operationId: getRecords
-      summary: Get All Records for a Form
+      summary: Get All Records
+      tags: 
+        - records
+      description: Gets all records belonging to a Form.
       parameters:
         - name: formId
           in: path
@@ -123,10 +125,12 @@ paths:
     post:
       operationId: createRecord
       summary: Create a New Record
+      tags: 
+        - records
       parameters:
         - name: formId
           in: path
-          description: Id of the path
+          description: Id of the Form
           required: true
           type: string
         - name: newRecord
@@ -146,10 +150,12 @@ paths:
     get:
       operationId: getRecord
       summary: Get a Single Form Record
+      tags: 
+        - records
       parameters:
         - name: formId
           in: path
-          description: Id of the path
+          description: Id of the Form
           required: true
           type: string
         - name: recordId
@@ -169,10 +175,12 @@ paths:
     put:
       operationId: updateRecord
       summary: Update a Form Record
+      tags: 
+        - records
       parameters:
         - name: formId
           in: path
-          description: Id of the path
+          description: Id of the Form
           required: true
           type: string
         - name: recordId
@@ -196,11 +204,14 @@ paths:
   /form/{formId}/record/{recordId}/history:
     get:
       operationId: getRecordHistory
+      x-doc-section: records
       summary: Get a Record's History
+      tags:
+        - records
       parameters:
         - name: formId
           in: path
-          description: Id of the path
+          description: Id of the Form
           required: true
           type: string
         - name: recordId
@@ -223,7 +234,9 @@ paths:
   /query/columns:
     post:
       operationId: queryTableColumns
-      summary: Query a Form as Columns
+      summary: Query Table Columns
+      tags: 
+        - query
       deescription: Flattens records from one or more forms into a two-dimensional table, 
         returning the results as a list of columns.
         Though forms can contain rich, nested and linked data,
@@ -234,8 +247,6 @@ paths:
           description: The shape of the table to retrieve
           schema:
             $ref: '#/definitions/TableQuery'
-      tags:
-        - forms
       responses:
         200:
           description: The table as a list of column
@@ -249,6 +260,8 @@ paths:
     get:
       operationId: getFormCatalog
       summary: Get a List of Forms
+      tags: 
+        - catalog
       description: This endpoint provides access to a hierarchy of Forms that are visible to the authenticated
         user. 
       parameters:

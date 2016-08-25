@@ -15,19 +15,29 @@ import java.util.Map;
 public class SpecModel {
     
     private Swagger spec;
-
+    private List<ApiSectionModel> sections = new ArrayList<>();
+    
     public SpecModel(Swagger spec) {
         this.spec = spec;
-    }
-    
-    public List<OperationModel> getOperations() {
+
         List<OperationModel> operations = new ArrayList<>();
         for (Map.Entry<String, Path> path : spec.getPaths().entrySet()) {
             for (Map.Entry<HttpMethod, Operation> operation : path.getValue().getOperationMap().entrySet()) {
-                operations.add(new OperationModel(path.getKey(), path.getValue(), 
+                operations.add(new OperationModel(path.getKey(),
                         operation.getKey(), operation.getValue()));
             }
         }
-        return operations;
+        
+        sections.add(new ApiSectionModel("forms", "Forms API", operations));
+        sections.add(new ApiSectionModel("records", "Records API", operations));
+        sections.add(new ApiSectionModel("query", "Query API", operations));
+    }
+
+    public String getBaseUri() {
+        return "https://www.activityinfo.org";
+    }
+    
+    public List<ApiSectionModel> getSections() {
+        return sections;
     }
 }

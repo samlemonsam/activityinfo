@@ -42,9 +42,11 @@
         
         ${topics}
 
-        <h1 id="forms">Forms API</h1>
+        <#list spec.sections as section>
+            
+        <h1 id="${section.tag}">${section.title}</h1>
 
-        <#list spec.operations as op>
+        <#list section.operations?sort_by('summary') as op>
         
         <h2 id="${op.id}">${op.summary}</h2>
         
@@ -59,11 +61,13 @@
 <pre class="highlight json"><code>${op.jsonOutput}</code></pre>
         </#if>
         
-        <p>${op.summary}</p>
+        <#if op.descriptionHtml??>
+        <p>${op.descriptionHtml}</p>
+        </#if>
 
-        <h3 id="http-request">HTTP Request</h3>
+        <h3>HTTP Request</h3>
 
-        <p><code class="prettyprint">${op.method} http://example.com/${op.path}</code></p>
+        <p><code class="prettyprint">${op.method} ${spec.getBaseUri()}${op.path}</code></p>
 
         <h3>Parameters</h3>
 
@@ -82,10 +86,32 @@
         </tr>
         </#list>
         </tbody></table>
+        
+        <h3>Responses</h3>
+        
+        <table>
+            <thead>
+            <tr>
+                <th>Status</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list op.responses?sort_by('statusCode') as response>
+            <tr>
+                <td>${response.statusCode}</td>
+                <td>${response.description}</td>
+            </tr>
+            </#list>
+            </tbody>
+            
+        </table>
 
         <#--<aside class="success">-->
             <#--Remember — a happy kitten is an authenticated kitten!-->
         <#--</aside>-->
+
+        </#list>
         </#list>    
 
     </div>
