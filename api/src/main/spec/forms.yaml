@@ -64,6 +64,33 @@ paths:
           description: The authenticated user does not have permission to update this form
         404:
           description: The specified form does not exist
+
+  /form/{formId}/form.xls:
+    get:
+      operationId: getFormSchemaXls
+      x-gwt-client: false
+      summary: Get a Form's Schema as XLSForm
+      tags:
+        - forms
+      description: |
+        Retrieves a Form's Schema, formatted as an <a href="http://xlsform.org">XLSForm</a>. XLSForm are Excel
+        Workbooks that contain a tab called "survey" with the list of fields, and a tab called "choices" that contain
+        the options for single and multiple select fields.
+      parameters:
+        - name: formId
+          in: path
+          description: Id of the Form
+          required: true
+          type: string
+      produces:
+        - application/vnd.ms-excel
+      responses:
+        200:
+          description: The form's schema, converted to an XLSForm
+        401:
+          description: The authenticated user does not have permission to view this form
+        404:
+          description: The form does not exist.      
           
   /form/{formId}/tree:
     get:
