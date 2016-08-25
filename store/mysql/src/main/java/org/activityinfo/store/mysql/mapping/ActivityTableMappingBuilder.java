@@ -258,7 +258,7 @@ public class ActivityTableMappingBuilder {
 
     public TableMapping build() {
         return new TableMapping("site", baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass,
-                DeleteMethod.SOFT_BY_DATE, Collections.<String, Object>emptyMap(), 0L);
+                DeleteMethod.SOFT_BY_DATE_AND_BOOLEAN, Collections.<String, Object>emptyMap(), 0L);
     }
 
     public void addIndicatorOrAttributeField(ActivityField field) {

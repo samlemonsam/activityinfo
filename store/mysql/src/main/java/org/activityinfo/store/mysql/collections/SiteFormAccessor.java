@@ -1,7 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -27,6 +26,8 @@ import org.activityinfo.store.mysql.update.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
  * Collection of Sites
@@ -108,7 +109,7 @@ public class SiteFormAccessor implements FormAccessor {
         }
         
         // Now read additional entries from HRD
-        versions.addAll(ObjectifyService.ofy().transact(QueryVersions.of(getFormClass(), recordId)));
+        versions.addAll(ofy().transact(QueryVersions.of(getFormClass(), recordId)));
         
         return versions;
     }
@@ -176,7 +177,7 @@ public class SiteFormAccessor implements FormAccessor {
 
     private void dualWriteToHrd(final RecordChangeType changeType, final RecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
 
-        ObjectifyService.ofy().transact(new VoidWork() {
+        ofy().transact(new VoidWork() {
             @Override
             public void vrun() {
 
@@ -192,7 +193,12 @@ public class SiteFormAccessor implements FormAccessor {
 
                 FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(update.getUserId(), changeType, recordEntity);
 
-                ObjectifyService.ofy().save().entities(rootEntity, recordEntity, snapshot);
+                if (changeType == RecordChangeType.DELETED) {
+                    ofy().save().entities(rootEntity, snapshot);
+                    ofy().delete().entities(recordEntity);
+                } else {
+                    ofy().save().entities(rootEntity, recordEntity, snapshot);
+                }
             }
         });
     }
@@ -307,8 +313,10 @@ public class SiteFormAccessor implements FormAccessor {
         Map<ResourceId, FieldValue> fieldValues = new HashMap<>();
         fieldValues.putAll(formInstance.getFieldValueMap());
         fieldValues.putAll(update.getChangedFieldValues());
-        
-        dualWriteToHrd(RecordChangeType.UPDATED, update, newVersion, fieldValues);
+
+        RecordChangeType changeType = update.isDeleted() ? RecordChangeType.DELETED : RecordChangeType.UPDATED;
+
+        dualWriteToHrd(changeType, update, newVersion, fieldValues);
     }
 
     @Override

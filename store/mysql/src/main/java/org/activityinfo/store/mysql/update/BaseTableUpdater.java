@@ -112,6 +112,11 @@ public class BaseTableUpdater {
                 case SOFT_BY_BOOLEAN:
                     sql.append(" deleted = 1");
                     break;
+                case SOFT_BY_DATE_AND_BOOLEAN:
+                    sql.append(" dateDeleted = ?");
+                    parameters.add(new Date());
+                    sql.append(", deleted = 1");
+                    break;
             }
         } else {
             switch (mapping.getDeleteMethod()) {
@@ -120,6 +125,9 @@ public class BaseTableUpdater {
                     break;                    
                 case SOFT_BY_BOOLEAN:
                     sql.append(" deleted = 0");
+                    break;
+                case SOFT_BY_DATE_AND_BOOLEAN:
+                    sql.append(" dateDeleted = NULL, deleted = 0");
                     break;
             }
         }
