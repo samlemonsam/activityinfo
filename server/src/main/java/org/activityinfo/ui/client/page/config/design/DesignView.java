@@ -250,12 +250,20 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
         toolBar.addImportButton();
         
         Menu menu = new Menu();
-        menu.add(new MenuItem("Export complete database", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+        menu.add(new MenuItem("Export complete database (classic)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {
                 presenter.exportFullDatabase();
             }
         }));
+        menu.add(new MenuItem("Export complete database (beta)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+            @Override
+            public void componentSelected(MenuEvent menuEvent) {
+                presenter.exportFullDatabaseBeta();
+            }
+        }));
+        menu.add(new SeparatorMenuItem());
+
         menu.add(new MenuItem("Export selected form as XLSForm", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {

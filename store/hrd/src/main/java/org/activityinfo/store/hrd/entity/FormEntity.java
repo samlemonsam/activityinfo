@@ -19,10 +19,19 @@ public class FormEntity {
     
     @Id
     private String id;
-    
+
+    /**
+     * The current version of this Form. The {@code version} is incremented whenever the {@link FormSchemaEntity} is
+     * changed for this Form Entity Group, or if any changes are made to the {@link FormRecordEntity}s that belong
+     * to this Form Group.
+     */
     @Unindex
     private long version;
-    
+
+    /**
+     * The current version of this Form's {@link FormSchemaEntity}. The {@code schemaVersion} will always
+     * be less than or equal to the Form's overall {@code version}.
+     */
     @Unindex
     private long schemaVersion;
 
