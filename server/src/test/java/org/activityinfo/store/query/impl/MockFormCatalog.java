@@ -23,6 +23,9 @@ public class MockFormCatalog implements FormCatalog {
     
     @Override
     public Optional<FormAccessor> getForm(ResourceId formId) {
+        if (formId == null || formId.asString().equalsIgnoreCase("foobar")) {
+            return Optional.absent();
+        }
         return Optional.<FormAccessor>of(collection);
     }
 
