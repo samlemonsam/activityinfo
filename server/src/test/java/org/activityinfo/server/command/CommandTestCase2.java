@@ -27,6 +27,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.googlecode.objectify.ObjectifyService;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.fixtures.Modules;
@@ -46,10 +47,13 @@ import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import javax.persistence.EntityManager;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Test fixture for running hibernate-free commands.
@@ -67,11 +71,20 @@ import javax.persistence.EntityManager;
 public class CommandTestCase2 {
 
     private final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig().
+                    setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
+
+    private Closeable ofy;
 
     @Before
     public void setUpDatastore() {
         helper.setUp();
+        ofy = ObjectifyService.begin();
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        ofy.close();
     }
 
     @BeforeClass
