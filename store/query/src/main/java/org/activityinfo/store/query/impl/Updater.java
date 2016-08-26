@@ -397,6 +397,7 @@ public class Updater {
 
         RecordUpdate update = new RecordUpdate();
         update.setRecordId(formInstance.getId());
+        update.setUserId(userId);
 
         for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
             if(!entry.getKey().asString().equals("classId")) {
