@@ -123,7 +123,7 @@ public class FormRecordEntity {
     public FormRecord toFormRecord(FormClass formClass) {
         FormRecord.Builder record = FormRecord.builder();
         record.setFormId(formClass.getId());
-        record.setRecordId(ResourceId.valueOf(id));
+        record.setRecordId(getRecordId());
 
         if(formClass.getParentField().isPresent()) {
             record.setParentRecordId(ResourceId.valueOf(getParentRecordId()));
