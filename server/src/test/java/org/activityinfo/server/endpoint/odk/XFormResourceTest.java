@@ -7,21 +7,22 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.Closeable;
 import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.io.xform.form.XForm;
-import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.store.FormCatalog;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,12 +65,18 @@ public class XFormResourceTest extends CommandTestCase2 {
     public static final int ACTIVITY_ID = 11218;
     public static final int USER_ID = 9944;
 
+    private Closeable objectifyService;
+
     private XFormResources formResource;
     private XFormSubmissionResource formSubmissionResource;
     private ResourceLocatorSyncImpl resourceLocator;
+    
+    
 
     @Before
     public void setUp() throws IOException {
+
+        objectifyService = ObjectifyService.begin();
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
         resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authProvider);
@@ -86,6 +93,11 @@ public class XFormResourceTest extends CommandTestCase2 {
         formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService);
         formSubmissionResource = new XFormSubmissionResource(
                 getDispatcherSync(), resourceLocator, tokenService, null, null, blobstore, idService, backupService);
+    }
+    
+    @After
+    public void tearDown() {
+        objectifyService.close();
     }
 
     @Test
@@ -125,7 +137,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         field.setType(new QuantityType());
         field.setRelevanceConditionExpression("DELETED_FIELD=1");
         formClass.addElement(field);
-        execute(new UpdateFormClass(formClass));
+        resourceLocator.persist(formClass);
 
         Response form = this.formResource.form(ACTIVITY_ID);
         validate(form);

@@ -1,5 +1,6 @@
 package org.activityinfo.server.endpoint.odk;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -12,6 +13,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.lookup.ReferenceChoice;
+import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
@@ -61,6 +63,15 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
         }
 
         return choices;
+    }
+
+    @Override
+    public void persist(FormClass formClass) {
+        Optional<FormAccessor> form = catalog.get().getForm(formClass.getId());
+        if(!form.isPresent()) {
+            throw new IllegalArgumentException("no such formId:" + formClass.getId());
+        }
+        form.get().updateFormClass(formClass);
     }
 
     @Override

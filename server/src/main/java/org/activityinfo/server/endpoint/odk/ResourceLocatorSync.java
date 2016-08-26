@@ -18,4 +18,6 @@ public interface ResourceLocatorSync extends FormClassProvider {
     FormClass getFormClass(ResourceId resourceId);
 
     List<ReferenceChoice> getReferenceChoices(Set<ResourceId> range);
+
+    void persist(FormClass formClass);
 }

@@ -396,6 +396,7 @@ public class Updater {
         }
 
         RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
         update.setRecordId(formInstance.getId());
         update.setUserId(userId);
 

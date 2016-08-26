@@ -6,13 +6,13 @@ import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.ws.rs.*;
@@ -106,8 +106,9 @@ public class DatabaseResource {
         formClass.setId(CuidAdapter.activityFormClass(activityId));
         formClass.setOwnerId(CuidAdapter.databaseId(databaseId));
 
-        dispatcher.execute(new UpdateFormClass(formClass));
-
+        MySqlCatalog formCatalog = (MySqlCatalog) catalog.get();
+        formCatalog.createOrUpdateFormSchema(formClass);
+        
         return Response.created(uri.getAbsolutePathBuilder()
                 .path(RootResource.class).path("forms").path(formClass.getId().asString())
                 .build())
