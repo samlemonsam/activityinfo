@@ -85,6 +85,7 @@ public class CommandTestCase2 {
     @After
     public void tearDown() throws IOException {
         ofy.close();
+        helper.tearDown();
     }
 
     @BeforeClass

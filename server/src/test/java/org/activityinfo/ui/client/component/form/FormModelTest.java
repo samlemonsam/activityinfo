@@ -21,10 +21,7 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.client.state.GxtStateProvider;
 import org.activityinfo.model.date.Month;
@@ -42,7 +39,8 @@ import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
-import org.junit.*;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Map;
@@ -59,32 +57,10 @@ import static org.junit.Assert.assertNotNull;
 @OnDataSet("/dbunit/schema1.db.xml")
 public class FormModelTest extends CommandTestCase2 {
 
-
-    private final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-    
-
     private FormClass masterFormClass;
     private FormClass subFormClass;
     private FormField subFormChildField;
     private FormField subFormField;
-
-
-    @BeforeClass
-    public static void setUpLocale() {
-        LocaleProxy.initialize();
-    }
-
-
-    @Before
-    public final void setup() {
-        helper.setUp();
-    }
-
-    @After
-    public final void tearDown() {
-        helper.tearDown();
-    }
 
     @Test
     public void modelState() {
