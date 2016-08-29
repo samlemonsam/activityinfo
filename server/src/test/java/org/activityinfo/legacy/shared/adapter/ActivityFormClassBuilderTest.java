@@ -9,6 +9,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
@@ -25,8 +26,6 @@ import static org.junit.Assert.assertThat;
 public class ActivityFormClassBuilderTest extends CommandTestCase2 {
 
     public static final int BAVON_USER_ID = 2;
-
-
 
     @Test @OnDataSet("/dbunit/sites-simple1.db.xml")
     public void partnersFieldIsAlwaysVisible() {
@@ -46,6 +45,7 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
                 new ReferenceValue(CuidAdapter.locationInstanceId(1)));
+        instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), CuidAdapter.partnerInstanceId(1));
 
         assertResolves(locator.persist(instance));
     }
@@ -65,6 +65,8 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
         FormInstance instance = new FormInstance(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
+        instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), CuidAdapter.partnerInstanceId(1734));
+        instance.set(ResourceId.valueOf("Q0000031845"), new EnumValue(CuidAdapter.attributeField(166617)));
 
         assertResolves(locator.persist(instance));
 
