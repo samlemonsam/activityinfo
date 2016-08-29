@@ -153,7 +153,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         final ResourceId firstRecordId = ResourceId.valueOf(columnSet.getColumnView("id").getString(0));
 
-        assertResolves(locator.remove(VILLAGE_CLASS, firstRecordId));
+        assertResolves(locator.remove(NFI_DIST_FORM_CLASS, firstRecordId));
 
         columnSet = assertResolves(locator.queryTable(query));
         assertThat(columnSet.getNumRows(), equalTo(2)); // size is reduced
