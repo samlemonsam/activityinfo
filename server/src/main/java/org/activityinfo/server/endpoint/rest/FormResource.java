@@ -15,7 +15,6 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -84,7 +83,7 @@ public class FormResource {
 
         FormClass formClass = catalog.get().getFormClass(formId);
 
-        JsonObject object = Resources.toJsonObject(formClass.asResource());
+        JsonObject object = formClass.toJsonObject();
 
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }

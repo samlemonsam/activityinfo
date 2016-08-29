@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
@@ -60,6 +61,7 @@ public class AttachmentType implements ParametrizedFieldType {
             return AttachmentValue.fromRecord(record);
         }
 
+
         @Override
         public AttachmentType deserializeType(Record typeParameters) {
             EnumValue cardinalityValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("cardinality"));
@@ -67,6 +69,13 @@ public class AttachmentType implements ParametrizedFieldType {
             return new AttachmentType(
                     Cardinality.valueOf(cardinalityValue.getValueId().asString()),
                     Kind.valueOf(kindValue.getValueId().asString()));
+        }
+
+        @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            Cardinality cardinality = Cardinality.valueOf(parametersObject.get("cardinality"));
+            Kind kind = Kind.valueOf(JsonParsing.fromEnumValue(parametersObject.get("kind")));
+            return new AttachmentType(cardinality, kind);
         }
 
         @Override
@@ -146,6 +155,14 @@ public class AttachmentType implements ParametrizedFieldType {
                 .set("classId", getTypeClass().getParameterFormClass().getId())
                 .set("cardinality", new EnumValue(ResourceId.valueOf(cardinality.name())).asRecord())
                 .set("kind", new EnumValue(ResourceId.valueOf(kind.name())).asRecord());
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.addProperty("cardinality", cardinality.name().toLowerCase());
+        object.addProperty("kind", kind.name().toLowerCase());
+        return object;
     }
 
     @Override

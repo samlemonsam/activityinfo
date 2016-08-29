@@ -85,7 +85,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     private FormClass defensiveCopy(FormClass formClass) {
-        return FormClass.fromResource(formClass.asResource());
+        return FormClass.fromJson(formClass.toJsonObject());
     }
 
 

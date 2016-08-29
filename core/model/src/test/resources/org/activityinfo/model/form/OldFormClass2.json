@@ -1,0 +1,268 @@
+{
+  "@id": "a0000001076",
+  "@owner": "d0000000507",
+  "classId": "_class",
+  "_class_label": "Water Point Construction",
+  "elements": [
+    {
+      "id": "a00000010760000000007",
+      "label": "Partenaire",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "P0000000507"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "a00000010760000000008",
+      "label": "Projet",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "R0000000507"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": false,
+      "visible": false
+    },
+    {
+      "id": "a00000010760000000012",
+      "label": "Date de début",
+      "type": {
+        "typeClass": "LOCAL_DATE"
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "a00000010760000000013",
+      "label": "Date de fin",
+      "type": {
+        "typeClass": "LOCAL_DATE"
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "a00000010760000000011",
+      "label": "Localité",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "L0000000001"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "Q0000000671",
+      "label": "Status",
+      "type": {
+        "typeClass": "enumerated",
+        "parameters": {
+          "classId": "_type:enum",
+          "cardinality": "SINGLE",
+          "values": [
+            {
+              "label": "Planned",
+              "id": "t0000001554"
+            },
+            {
+              "label": "In progress",
+              "id": "t0000001555"
+            },
+            {
+              "label": "Complete",
+              "id": "t0000001556"
+            }
+          ]
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "Q0000000672",
+      "label": "Cause of Intervention",
+      "type": {
+        "typeClass": "enumerated",
+        "parameters": {
+          "classId": "_type:enum",
+          "cardinality": "MULTIPLE",
+          "values": [
+            {
+              "label": "Displacement",
+              "id": "t0000001557"
+            },
+            {
+              "label": "Return",
+              "id": "t0000001558"
+            },
+            {
+              "label": "Natural Catastrophe",
+              "id": "t0000001559"
+            },
+            {
+              "label": "Epidemic",
+              "id": "t0000001560"
+            }
+          ]
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "Q0000000673",
+      "label": "Donor",
+      "type": {
+        "typeClass": "enumerated",
+        "parameters": {
+          "classId": "_type:enum",
+          "cardinality": "MULTIPLE",
+          "values": [
+            {
+              "label": "ECHO",
+              "id": "t0000001561"
+            },
+            {
+              "label": "USAID",
+              "id": "t0000001562"
+            },
+            {
+              "label": "DFID",
+              "id": "t0000156950"
+            }
+          ]
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i0000006090",
+      "label": "Number of water points constructed",
+      "type": {
+        "typeClass": "QUANTITY",
+        "parameters": {
+          "units": "Waterpoints",
+          "classId": "_type:quantity"
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i0000005335",
+      "description": "Number of households within the village.",
+      "label": "Number of beneficiaries",
+      "type": {
+        "typeClass": "QUANTITY",
+        "parameters": {
+          "units": "households",
+          "classId": "_type:quantity"
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i0000035136",
+      "label": "number of mechanics involved",
+      "type": {
+        "typeClass": "QUANTITY",
+        "parameters": {
+          "units": "mechanics",
+          "classId": "_type:quantity"
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i0000082525",
+      "code": "a1",
+      "label": "Number of female participants in the training",
+      "type": {
+        "typeClass": "QUANTITY",
+        "parameters": {
+          "units": "persons",
+          "classId": "_type:quantity"
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i2144628677",
+      "code": "a2",
+      "label": "Number of male participants in the training",
+      "type": {
+        "typeClass": "QUANTITY",
+        "parameters": {
+          "units": "persons",
+          "classId": "_type:quantity"
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i1631223545",
+      "label": "sum",
+      "type": {
+        "typeClass": "calculated",
+        "parameters": {
+          "classId": "_type:calculated",
+          "expression": {
+            "@type": "expr",
+            "value": "a1+a2"
+          }
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "i0116425141",
+      "label": "Calculated",
+      "type": {
+        "typeClass": "calculated",
+        "parameters": {
+          "classId": "_type:calculated",
+          "expression": {
+            "@type": "expr",
+            "value": "a1+a2+a1-a1"
+          }
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "a00000010760000000014",
+      "label": "Commentaires",
+      "type": {
+        "typeClass": "NARRATIVE"
+      },
+      "required": false,
+      "visible": true
+    }
+  ]
+}

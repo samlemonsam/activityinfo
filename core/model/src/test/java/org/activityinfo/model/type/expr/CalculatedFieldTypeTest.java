@@ -1,5 +1,6 @@
 package org.activityinfo.model.type.expr;
 
+import com.google.gson.JsonObject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.Record;
@@ -23,10 +24,10 @@ public class CalculatedFieldTypeTest {
         FormField field = new FormField(ResourceId.generateId());
         field.setType(new CalculatedFieldType("A+B"));
 
-        Record record = field.asRecord();
+        JsonObject record = field.toJsonObject();
         System.out.println(record);
 
-        FormField read = FormField.fromRecord(record);
+        FormField read = FormField.fromJson(record);
         assertThat(read.getType(), instanceOf(CalculatedFieldType.class));
 
         CalculatedFieldType readType = (CalculatedFieldType) read.getType();

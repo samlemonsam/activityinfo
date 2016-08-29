@@ -31,6 +31,7 @@ public class BarcodeType implements FieldType {
         public FieldValue deserialize(Record record) {
             return BarcodeValue.fromRecord(record);
         }
+
     };
 
     public static final BarcodeType INSTANCE = new BarcodeType();

@@ -1,16 +1,16 @@
 package org.activityinfo.model.type.number;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ParametrizedFieldTypeClass;
-import org.activityinfo.model.type.RecordFieldTypeClass;
+import org.activityinfo.model.type.*;
 
 import java.io.Serializable;
 
@@ -42,6 +42,11 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
         }
 
         @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            return new QuantityType(JsonParsing.toNullableString(parametersObject.get("units")));
+        }
+
+        @Override
         public FormClass getParameterFormClass() {
             FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("quantity"));
             formClass.addElement(new FormField(ResourceId.valueOf("units"))
@@ -56,6 +61,7 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
         public FieldValue deserialize(Record record) {
             return Quantity.fromRecord(record);
         }
+
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
@@ -93,6 +99,13 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
         return new Record()
                 .set("units", units)
                 .set("classId", getTypeClass().getParameterFormClass().getId());
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.addProperty("units", Strings.nullToEmpty(units));
+        return object;
     }
 
     @Override

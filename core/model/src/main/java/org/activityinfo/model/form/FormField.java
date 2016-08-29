@@ -2,13 +2,16 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -210,6 +213,75 @@ public class FormField extends FormElement implements Serializable {
         return record;
     }
 
+    @Override
+    public JsonObject toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id.asString());
+        object.addProperty("code", code);
+        object.addProperty("label", label);
+        object.addProperty("description", description);
+        object.addProperty("relevanceCondition", relevanceConditionExpression);
+        object.addProperty("visible", visible);
+        object.addProperty("required", required);
+        
+        object.addProperty("type", type.getTypeClass().getId());
+
+        JsonArray superPropertiesArray = new JsonArray();
+        for (ResourceId superProperty : superProperties) {
+            superPropertiesArray.add(new JsonPrimitive(superProperty.asString()));
+        }
+
+        if(type instanceof ParametrizedFieldType) {
+            object.add("typeParameters", ((ParametrizedFieldType) type).getParametersAsJson());
+        }
+        
+        return object;
+    }
+
+
+    public static FormField fromJson(JsonObject jsonObject) {
+        FormField field = new FormField(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        field.setLabel(Strings.nullToEmpty(JsonParsing.toNullableString(jsonObject.get("label"))));
+        field.setCode(JsonParsing.toNullableString(jsonObject.get("code")));
+        field.setDescription(JsonParsing.toNullableString(jsonObject.get("description")));
+        
+        if(jsonObject.has("relevanceCondition")) {
+            field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceCondition")));
+        } else if(jsonObject.has("relevanceConditionExpression")) {
+            field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceConditionExpression")));
+        }
+        
+        if(jsonObject.has("visible")) {
+            field.setVisible(jsonObject.get("visible").getAsBoolean());
+        }
+        if(jsonObject.has("required")) {
+            field.setVisible(jsonObject.get("required").getAsBoolean());
+        }
+        
+        String type;
+        JsonElement typeParameters ;
+        JsonElement typeElement = jsonObject.get("type");
+        
+        if(typeElement.isJsonPrimitive()) {
+            type = typeElement.getAsString();
+            typeParameters = jsonObject.get("typeParameters").getAsJsonObject();
+        } else {
+            JsonObject typeObject = typeElement.getAsJsonObject();
+            type = typeObject.get("typeClass").getAsString();
+            typeParameters = typeObject.get("parameters");
+        }
+        
+        FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(type);
+        if(typeClass instanceof ParametrizedFieldTypeClass && typeParameters != null) {
+            field.setType(((ParametrizedFieldTypeClass) typeClass).deserializeType(typeParameters.getAsJsonObject()));
+        } else {
+            field.setType(typeClass.createType());
+        }
+
+        return field;
+    }
+
+
     private Record toRecord(FieldType type) {
         Record record = new Record();
         record.set("typeClass", type.getTypeClass().getId());
@@ -218,16 +290,6 @@ public class FormField extends FormElement implements Serializable {
         }
         return record;
     }
-
-    @Nullable
-    public static FormField fromNullableRecord(@Nullable Record record) {
-        if (record == null) {
-            return null;
-        }
-
-        return fromRecord(record);
-    }
-
 
     public static FormField fromRecord(@Nonnull Record record) {
         FormField formField = new FormField(ResourceId.valueOf(record.getString("id")))
@@ -260,4 +322,5 @@ public class FormField extends FormElement implements Serializable {
             return typeClass.createType();
         }
     }
+
 }

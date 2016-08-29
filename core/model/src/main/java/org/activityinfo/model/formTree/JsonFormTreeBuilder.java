@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,7 @@ public class JsonFormTreeBuilder {
         JsonObject forms = object.getAsJsonObject("forms");
         final Map<ResourceId, FormClass> formMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> entry : forms.entrySet()) {
-            FormClass formClass = FormClass.fromResource(Resources.resourceFromJson(entry.getValue().getAsJsonObject()));
+            FormClass formClass = FormClass.fromJson(entry.getValue().getAsJsonObject());
             formMap.put(formClass.getId(), formClass);
         }
 
@@ -58,7 +57,7 @@ public class JsonFormTreeBuilder {
         for (FormTree.Node node : nodes) {
             FormClass formClass = node.getDefiningFormClass();
             if(!forms.has(formClass.getId().asString())) {
-                forms.add(formClass.getId().asString(), Resources.toJsonObject(formClass.asResource()));
+                forms.add(formClass.getId().asString(), formClass.toJsonObject());
             }
             if(node.hasChildren()) {
                 collectForms(forms, node.getChildren());

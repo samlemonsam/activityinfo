@@ -12,7 +12,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
@@ -47,8 +46,7 @@ public class JsonFormAccessor implements FormAccessor {
 
     private FormClass loadFormClass(String resourceName) throws IOException {
         String json = getJson(resourceName + "/form.json").read();
-        Resource resource = org.activityinfo.model.resource.Resources.resourceFromJson(json);
-        return FormClass.fromResource(resource);
+        return FormClass.fromJson(json);
     }
 
     private JsonArray loadInstances(String resourceName) throws IOException {

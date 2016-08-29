@@ -126,6 +126,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
+    @Override
+    public Promise<Void> persist(FormClass formClass) {
+        return client.updateFormSchema(formClass.getId().asString(), formClass);
+    }
+
     private NewFormRecordBuilder buildUpdate(FormInstance instance) {
         NewFormRecordBuilder update = new NewFormRecordBuilder();
         update.setId(instance.getId().asString());

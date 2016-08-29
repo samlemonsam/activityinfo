@@ -2,6 +2,8 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.Resources;
@@ -66,10 +68,30 @@ public class FormSection extends FormElement implements FormElementContainer {
     }
 
     @Override
+    public JsonElement toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id.asString());
+        object.addProperty("label", label);
+        object.addProperty("type", "section");
+        object.add("elements", FormClass.toJsonArray(elements));
+        return object;
+    }
+
+    public static FormSection fromJson(JsonObject jsonObject) {
+        FormSection section = new FormSection(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        section.setLabel(jsonObject.get("label").getAsString());
+        if(jsonObject.has("elements")) {
+            section.getElements().addAll(FormClass.fromJsonArray(jsonObject.get("elements").getAsJsonArray()));
+        }
+        return section;
+    }
+    
+    @Override
     public String toString() {
         return "FormSection{" +
                 "id=" + id +
                 ", label=" + label +
                 '}';
     }
+
 }

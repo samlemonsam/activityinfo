@@ -8,7 +8,7 @@ import com.squareup.javapoet.TypeName;
 
 public class PrimitiveDataType extends DataType {
 
-    private static final ClassName JSON_PARSING = ClassName.get("org.activityinfo.api.client", "JsonParsing");
+    private static final ClassName JSON_PARSING = ClassName.get("org.activityinfo.model.form", "JsonParsing");
     
     private TypeName typeName;
 

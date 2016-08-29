@@ -23,14 +23,12 @@ package org.activityinfo.model.type.subform;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ParametrizedFieldTypeClass;
-import org.activityinfo.model.type.RecordFieldTypeClass;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.number.Quantity;
 
 /**
@@ -58,6 +56,17 @@ public class SubFormReferenceType implements ParametrizedFieldType {
             String classId = typeParameters.isString("classReference");
             return new SubFormReferenceType()
                     .setClassId(Strings.isNullOrEmpty(classId) ? null : ResourceId.valueOf(classId));
+        }
+
+        @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            ResourceId formId;
+            if(parametersObject.has("classReference")) {
+                formId = ResourceId.valueOf(parametersObject.get("classReference").getAsString());
+            } else {
+                formId = ResourceId.valueOf(parametersObject.get("formId").getAsString());
+            }
+            return new SubFormReferenceType(formId);
         }
 
         @Override
@@ -114,6 +123,13 @@ public class SubFormReferenceType implements ParametrizedFieldType {
         return new Record()
                 .set("classId", getTypeClass().getParameterFormClass().getId())
                 .set("classReference", classId != null ? classId.asString() : "");
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.addProperty("formId", classId.asString());
+        return object;
     }
 
     @Override

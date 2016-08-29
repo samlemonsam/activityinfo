@@ -1,5 +1,8 @@
 package org.activityinfo.model.type.enumerated;
 
+import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.IsRecord;
@@ -13,6 +16,9 @@ public class EnumItem implements IsRecord, Serializable {
     private String label;
     private String code;
 
+    private EnumItem() {
+    }
+    
     public EnumItem(ResourceId id, String label) {
         this.id = id;
         this.label = label;
@@ -34,6 +40,29 @@ public class EnumItem implements IsRecord, Serializable {
         this.label = label;
     }
 
+
+    public JsonElement toJsonObject() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", id.asString());
+        jsonObject.addProperty("label", label);
+        if(!Strings.isNullOrEmpty(code)) {
+            jsonObject.addProperty("code", code);
+        }
+        return jsonObject;
+    }
+    
+    public static EnumItem fromJsonObject(JsonObject jsonObject) {
+        EnumItem enumItem = new EnumItem();
+        enumItem.setId(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        if(jsonObject.has("label")) {
+            enumItem.setLabel(jsonObject.get("label").getAsString());
+        }
+        if(jsonObject.has("code")) {
+            enumItem.setCode(jsonObject.get("code").getAsString());
+        }
+        return enumItem;
+    }
+    
     public static EnumItem fromRecord(Record record) {
         return new EnumItem(ResourceId.valueOf(record.getString("id")), record.getString("label"))
                 .setCode(record.isString("code"));
@@ -82,4 +111,5 @@ public class EnumItem implements IsRecord, Serializable {
         KeyGenerator generator = new KeyGenerator();
         return CuidAdapter.attributeField(generator.generateInt());
     }
+
 }

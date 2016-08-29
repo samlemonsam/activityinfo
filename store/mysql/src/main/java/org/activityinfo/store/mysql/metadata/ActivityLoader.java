@@ -12,7 +12,6 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -347,7 +346,7 @@ public class ActivityLoader {
 
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(reader, JsonObject.class);
-            return FormClass.fromResource(Resources.resourceFromJson(object));
+            return FormClass.fromJson(object);
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }

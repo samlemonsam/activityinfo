@@ -1,9 +1,11 @@
 package org.activityinfo.model.type.expr;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
@@ -40,6 +42,17 @@ public class CalculatedFieldType implements ParametrizedFieldType {
                 type.setExpression(ExprValue.fromRecord(expr));
             }
             return type;
+        }
+
+        @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            JsonElement exprElement = parametersObject.get("expression");
+            if(exprElement.isJsonObject()) {
+                JsonObject exprObject = exprElement.getAsJsonObject();
+                return new CalculatedFieldType(JsonParsing.toNullableString(exprObject.get("value")));
+            } else {
+                return new CalculatedFieldType(JsonParsing.toNullableString(exprElement));
+            }
         }
 
         @Override
@@ -113,6 +126,15 @@ public class CalculatedFieldType implements ParametrizedFieldType {
             record.set("expression", expression.asRecord());
         }
         return record;
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        if (expression != null) {
+            object.addProperty("expression", expression.getExpression());
+        }
+        return object;
     }
 
     @Override

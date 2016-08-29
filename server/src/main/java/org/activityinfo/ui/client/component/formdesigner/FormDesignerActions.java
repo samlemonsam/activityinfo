@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.promise.Promise;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -101,7 +102,11 @@ public class FormDesignerActions {
     }
 
     private Promise<Void> persist(List<FormClass> formClasses) {
-        return formDesigner.getResourceLocator().persist(formClasses);
+        List<Promise<Void>> promises = new ArrayList<>();
+        for (FormClass formClass : formClasses) {
+            promises.add(formDesigner.getResourceLocator().persist(formClass));
+        }
+        return Promise.waitAll(promises);
     }
 
     private void showFailureDelayed(final Throwable caught) {

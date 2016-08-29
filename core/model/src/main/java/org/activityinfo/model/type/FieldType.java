@@ -15,5 +15,4 @@ public interface FieldType extends Serializable {
 
 
     FieldValue parseJsonValue(JsonElement value);
-    
 }

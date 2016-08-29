@@ -333,7 +333,7 @@ definitions:
     properties:
       id:
         type: string
-        description: Unique, immutable identifier of this field. (Are field identifiers globally unique?)
+        description: Unique, immutable identifier of this field.
       code:
         type: string
         description: Short identifier

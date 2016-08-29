@@ -6,13 +6,18 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.lock.ResourceLock;
-import org.activityinfo.model.resource.*;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +27,7 @@ import java.util.Set;
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
  */
-public class FormClass implements IsResource, FormElementContainer, Serializable {
+public class FormClass implements FormElementContainer, Serializable {
 
 
     /**
@@ -309,60 +314,89 @@ public class FormClass implements IsResource, FormElementContainer, Serializable
         return "<FormClass: " + getLabel() + ">";
     }
 
-    public static FormClass fromResource(Resource resource) {
-        FormClass formClass = new FormClass(resource.getId());
-
-        formClass.setOwnerId(resource.getOwnerId());
-        formClass.setLabel(Strings.nullToEmpty(resource.isString(LABEL_FIELD_ID)));
-        formClass.elements.addAll(fromRecords(resource.getRecordList("elements")));
-        formClass.locks.addAll(ResourceLock.fromRecords(resource.getRecordList("locks")));
+    public JsonObject toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id.asString());
+        object.addProperty("label", label);
         
-        String subFormKind = resource.isString("subFormKind");
-        if(subFormKind != null) {
-            formClass.subFormKind = SubFormKind.valueOf(subFormKind.toUpperCase());
+        
+        if(!Strings.isNullOrEmpty(description)) {
+            object.addProperty("description", description);
         }
-        formClass.parentFormId = resource.isResourceId("parentFormId");
+        
+        if(subFormKind != null) {
+            object.addProperty("parentFormId", parentFormId.asString());
+            object.addProperty("subFormKind", subFormKind.name().toLowerCase());
+        }
+        object.add("elements",  toJsonArray(elements));
+        return object;
+    }
 
+    static JsonArray toJsonArray(Iterable<FormElement> elements) {
+        JsonArray elementsArray = new JsonArray();
+        for (FormElement element : elements) {
+            elementsArray.add(element.toJsonObject());
+        }
+        return elementsArray;
+    }
+
+    public String toJsonString() {
+        return toJsonObject().toString();
+    }
+
+    public static FormClass fromJson(JsonObject object) {
+        // Deal with previous encoding
+
+        ResourceId id;
+        if(object.has("@id")) {
+            id = ResourceId.valueOf(object.get("@id").getAsString());
+        } else {
+            id = ResourceId.valueOf(object.get("id").getAsString());
+        }
+        
+        FormClass formClass = new FormClass(id);
+        
+        if(object.has("_class_label")) {
+            formClass.setLabel(JsonParsing.toNullableString(object.get("_class_label")));
+        } else {
+            formClass.setLabel(JsonParsing.toNullableString(object.get("label")));
+        }
+        
+        if(object.has("subFormKind")) {
+            formClass.setSubFormKind(SubFormKind.valueOf(object.get("subFormKind").getAsString().toUpperCase()));
+            formClass.setParentFormId(ResourceId.valueOf(object.get("parentFormId").getAsString()));
+        }
+        
+        if(object.has("elements")) {
+            JsonArray elementsArray = object.get("elements").getAsJsonArray();
+            formClass.elements.addAll(fromJsonArray(elementsArray));
+        }
         return formClass;
     }
 
-    private static List<FormElement> fromRecords(List<Record> elementArray) {
-        List<FormElement> elements = Lists.newArrayList();
-        for (Record elementRecord : elementArray) {
-            if ("section".equals(elementRecord.isString("type"))) {
-                FormSection section = new FormSection(ResourceId.valueOf(elementRecord.getString("id")));
-                section.setLabel(elementRecord.getString("label"));
-                section.getElements().addAll(fromRecords(elementRecord.getRecordList("elements")));
-                elements.add(section);
-            } else if ("label".equals(elementRecord.isString("type"))) {
-                elements.add(FormLabel.fromRecord(elementRecord));
+    static List<FormElement> fromJsonArray(JsonArray elementsArray) {
+        List<FormElement> elements = new ArrayList<>();
+        for (int i = 0; i < elementsArray.size(); i++) {
+            JsonObject elementObject = elementsArray.get(i).getAsJsonObject();
+            JsonElement typeElement = elementObject.get("type");
+            if(typeElement.isJsonPrimitive()) {
+                String type = typeElement.getAsString();
+                if ("section".equals(type)) {
+                    elements.add(FormSection.fromJson(elementObject));
+                } else if ("label".equals(type)) {
+                    elements.add(FormLabel.fromJson(elementObject));
+                } else {
+                    throw new IllegalArgumentException("type: " + type);
+                }
             } else {
-                elements.add(FormField.fromRecord(elementRecord));
+                elements.add(FormField.fromJson(elementObject));
             }
         }
         return elements;
     }
     
-    public String toJsonString() {
-        return Resources.toJson(asResource());
-    }
-
-    @Override
-    public Resource asResource() {
-        Resource resource = Resources.createResource();
-        resource.setId(id);
-        resource.setOwnerId(ownerId);
-        resource.set("classId", CLASS_ID);
-        resource.set(LABEL_FIELD_ID, label);
-        resource.set("elements", Resources.asRecordList(elements));
-        resource.set("locks", Resources.asRecordList(locks));
-        resource.set("subFormKind", subFormKind == null ? null : subFormKind.name().toLowerCase());
-        resource.set("parentFormId", parentFormId);
-        return resource;
-    }
-    
     public static FormClass fromJson(String json) {
-        return fromResource(Resources.resourceFromJson(json));
+        return fromJson(new JsonParser().parse(json).getAsJsonObject());
     }
     
     public List<FormElement> getBuiltInElements() {

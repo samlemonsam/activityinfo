@@ -25,7 +25,6 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -278,17 +277,11 @@ public class ActivityInfoClient implements FormClassProvider {
             }, points);
     }
 
-    public ObjectMapper getObjectMapper() {
-        return new ObjectMapperProvider().getContext(ObjectMapper.class);
-    }
-    
-    
+
     public FormClass getFormClass(int adminLevelId) {
         
         String json = formResource(CuidAdapter.adminLevelFormClass(adminLevelId)).path("class").get(String.class);
-
-
-        return FormClass.fromResource(Resources.resourceFromJson(json));
+        return FormClass.fromJson(json);
     }
 
     public FormTree getFormTree(ResourceId resourceId) {

@@ -26,8 +26,6 @@ public interface ResourceLocator extends AsyncFormClassProvider {
     /**
      * Fetches the schema of a user's forms. 
      * 
-     * <p>Convenience method for {@code FormClass.fromResource(fetchResource(formId))}</p>
-     *
      * @param formId
      * @return
      */
@@ -59,6 +57,8 @@ public interface ResourceLocator extends AsyncFormClassProvider {
      */
     Promise<Void> persist(IsResource resource);
 
+    Promise<Void> persist(FormClass formClass);
+    
     Promise<Void> persist(List<? extends IsResource> resources);
 
     Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor);

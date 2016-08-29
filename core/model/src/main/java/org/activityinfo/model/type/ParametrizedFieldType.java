@@ -1,5 +1,6 @@
 package org.activityinfo.model.type;
 
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.Record;
 
 /**
@@ -14,6 +15,8 @@ public interface ParametrizedFieldType extends FieldType {
      */
     Record getParameters();
 
+    JsonObject getParametersAsJson();
+    
     /**
      *
      * @return true if this is a valid type, false if its parameters make it invalid

@@ -23,10 +23,11 @@ package org.activityinfo.server.command.handler.crud;
  */
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
@@ -159,10 +160,12 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
     private void updateFormClass(Activity activity, String name, String json) {
         if (!Strings.isNullOrEmpty(json)) {
-            FormClass formClass = FormClass.fromResource(Resources.resourceFromJson(json));
+            JsonParser parser = new JsonParser();
+            JsonObject jsonObject = parser.parse(json).getAsJsonObject();
+            FormClass formClass = FormClass.fromJson(jsonObject);
             formClass.setLabel(name);
 
-            String updatedJson = Resources.toJson(formClass.asResource());
+            String updatedJson = formClass.toJsonString();
 
             JsonHelper.updateWithJson(activity, updatedJson);
         }

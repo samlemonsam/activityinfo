@@ -1,11 +1,10 @@
 package org.activityinfo.model.form;
 
-import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-
-import javax.annotation.Nonnull;
 
 /**
  * Created by yuriyz on 4/15/2016.
@@ -59,10 +58,23 @@ public class FormLabel extends FormElement {
         return record;
     }
 
-    public static FormLabel fromRecord(@Nonnull Record record) {
-        return new FormLabel(ResourceId.valueOf(record.getString("id")))
-                .setLabel(Strings.nullToEmpty(record.isString("label")))
-                .setVisible(record.getBoolean("visible", true));
+    @Override
+    public JsonElement toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id.asString());
+        object.addProperty("label", label);
+        object.addProperty("type", "label");
+        object.addProperty("visible", visible);
+        return object;
+    }
+
+    public static FormElement fromJson(JsonObject jsonObject) {
+        FormLabel label = new FormLabel(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        label.setLabel(jsonObject.get("label").getAsString());
+        if(jsonObject.has("visible")) {
+            label.setVisible(jsonObject.get("visible").getAsBoolean());
+        }
+        return label;
     }
 
     public enum TextStyle {

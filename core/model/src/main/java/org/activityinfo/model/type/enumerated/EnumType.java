@@ -3,6 +3,7 @@ package org.activityinfo.model.type.enumerated;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.Record;
@@ -39,6 +40,21 @@ public class EnumType implements ParametrizedFieldType {
             return new EnumType(cardinality, enumItems);
         }
 
+
+        @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            Cardinality cardinality = Cardinality.valueOf(
+                    parametersObject.get("cardinality").getAsString().toUpperCase());
+
+            List<EnumItem> enumItems = Lists.newArrayList();
+            JsonArray enumItemArray = parametersObject.get("values").getAsJsonArray();
+            for(JsonElement record : enumItemArray) {
+                enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+            }
+            return new EnumType(cardinality, enumItems);
+        
+        }
+
         @Override
         public EnumType createType() {
             return new EnumType();
@@ -53,6 +69,7 @@ public class EnumType implements ParametrizedFieldType {
         public EnumValue deserialize(Record record) {
             return EnumValue.fromRecord(record);
         }
+
     };
 
     private final Cardinality cardinality;
@@ -116,6 +133,20 @@ public class EnumType implements ParametrizedFieldType {
                 .set("classId", getTypeClass().getParameterFormClass().getId())
                 .set("cardinality", cardinality.name())
                 .set("values", enumValueRecords);
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        
+        JsonArray enumValueArray = new JsonArray();
+        for (EnumItem enumItem : getValues()) {
+            enumValueArray.add(enumItem.toJsonObject());
+        }
+        
+        JsonObject object = new JsonObject();
+        object.addProperty("cardinality", cardinality.name().toLowerCase());
+        object.add("values", enumValueArray);
+        return object;
     }
 
     @Override

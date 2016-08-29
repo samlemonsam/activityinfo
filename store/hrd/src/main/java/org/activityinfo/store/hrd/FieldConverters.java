@@ -1,10 +1,8 @@
 package org.activityinfo.store.hrd;
 
-import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Text;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -42,10 +40,8 @@ public class FieldConverters {
             return GEO_POINT;
         } else if(type instanceof LocalDate) {
             return LOCAL_DATE;
-        } else if(type.getTypeClass() instanceof RecordFieldTypeClass) {
-            return recordType((RecordFieldTypeClass) type.getTypeClass());
         } else {
-            throw new UnsupportedOperationException("Type: " + type);
+            return recordType(type);
         }
     }
     
@@ -183,19 +179,17 @@ public class FieldConverters {
         }
     };
     
-    public static final FieldConverter<FieldValue> recordType(final RecordFieldTypeClass typeClass) {
+    public static final FieldConverter<FieldValue> recordType(final FieldType type) {
         return new FieldConverter<FieldValue>() {
             @Override
             public Object toHrdProperty(FieldValue value) {
-                Record recordValue = ((IsRecord) value).asRecord();
-                return FormConverter.toEmbeddedEntity(recordValue);
+                return FormConverter.toPropertyValue(value.toJsonElement());
             }
 
             @Override
             public FieldValue toFieldValue(Object hrdValue) {
-                EmbeddedEntity embeddedEntity = (EmbeddedEntity) hrdValue;
-                Record record = FormConverter.fromEmbeddedEntity(embeddedEntity);
-                return typeClass.deserialize(record);
+                JsonElement element = FormConverter.fromPropertyValue(hrdValue);
+                return type.parseJsonValue(element);
             }
         };
     }

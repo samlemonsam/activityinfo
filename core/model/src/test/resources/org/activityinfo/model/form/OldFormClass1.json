@@ -1,0 +1,99 @@
+{
+  "@id": "a0000000728",
+  "@owner": "C00000003260085616307",
+  "classId": "_class",
+  "_class_label": "Youth Group Formation",
+  "elements": [
+    {
+      "id": "a00000007280000000007",
+      "label": "Partner",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "P0000000326"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "a00000007280000000008",
+      "label": "Project",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "R0000000326"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "a00000007280000000012",
+      "label": "Start Date",
+      "type": {
+        "typeClass": "LOCAL_DATE"
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "a00000007280000000013",
+      "label": "End Date",
+      "type": {
+        "typeClass": "LOCAL_DATE"
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "a00000007280000000011",
+      "label": "Village",
+      "type": {
+        "typeClass": "REFERENCE",
+        "parameters": {
+          "classId": "_type:ref",
+          "range": [
+            "L0000001285"
+          ],
+          "cardinality": "SINGLE"
+        }
+      },
+      "required": true,
+      "visible": true
+    },
+    {
+      "id": "i0000089206",
+      "label": "Number of attendees",
+      "type": {
+        "typeClass": "calculated",
+        "parameters": {
+          "classId": "_type:calculated",
+          "expression": {
+            "@type": "expr",
+            "value": "3250+3249"
+          }
+        }
+      },
+      "required": false,
+      "visible": true
+    },
+    {
+      "id": "a00000007280000000014",
+      "label": "Comments",
+      "type": {
+        "typeClass": "NARRATIVE"
+      },
+      "required": false,
+      "visible": true
+    }
+  ]
+}

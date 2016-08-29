@@ -5,10 +5,7 @@ import com.google.common.base.Preconditions;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.*;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.store.hrd.FormConverter;
 
 /**
@@ -45,7 +42,7 @@ public class FormSchemaEntity {
     private long schemaVersion;
 
     /**
-     * The {@link FormClass} serialized as an {@link EmbeddedEntity} via {@link FormClass#asResource()}
+     * The {@link FormClass} serialized as an {@link EmbeddedEntity} via {@link FormClass#toJsonObject()} ()}
      */
     @Unindex
     private EmbeddedEntity schema;
@@ -63,7 +60,7 @@ public class FormSchemaEntity {
         this.formKey = FormEntity.key(formClass);
         this.id = ENTITY_ID;
         this.owner = formClass.getOwnerId().asString();
-        this.schema = FormConverter.toEmbeddedEntity(formClass.asResource());
+        this.schema = FormConverter.toEmbeddedEntity(formClass.toJsonObject());
     }
     
     public static com.googlecode.objectify.Key<FormSchemaEntity> key(ResourceId formId) {
@@ -83,7 +80,7 @@ public class FormSchemaEntity {
     }
 
     public void setSchema(FormClass formClass) {
-        schema = FormConverter.toEmbeddedEntity(formClass.asResource());
+        schema = FormConverter.toEmbeddedEntity(formClass.toJsonObject());
     }
 
     public EmbeddedEntity getSchema() {
@@ -94,12 +91,6 @@ public class FormSchemaEntity {
         Preconditions.checkNotNull(owner, "owner");
         Preconditions.checkNotNull(owner, "schema");
 
-        Record formClassRecord = FormConverter.fromEmbeddedEntity(schema);
-        Resource resource = Resources.createResource();
-        resource.setId(getFormId());
-        resource.setOwnerId(ResourceId.valueOf(owner));
-        resource.getProperties().putAll(formClassRecord.getProperties());
-
-        return FormClass.fromResource(resource);
+        return FormClass.fromJson(FormConverter.fromEmbeddedEntity(schema));
     }
 }
