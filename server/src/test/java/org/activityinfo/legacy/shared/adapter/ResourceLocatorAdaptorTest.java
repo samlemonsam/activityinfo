@@ -201,8 +201,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getLocationTypeId(), equalTo(1));
         assertThat(location.getLatitude(), equalTo(27.323));
         assertThat(location.getLongitude(), equalTo(1.532));
-        assertThat(location.getAdminEntity(1).getId(), equalTo(2));
-        assertThat(location.getAdminEntity(2).getId(), equalTo(12));
+        assertThat(location.getAdminEntity(1).getId(), equalTo(2)); // 12 admin level is not returned because we eliminate redundant information org.activityinfo.store.mysql.side.AdminColumnBuilder.emit(int[])
     }
 
     @Test

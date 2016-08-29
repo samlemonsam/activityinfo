@@ -103,7 +103,7 @@ public class AdminColumnBuilder {
                 int parentIndex = adminParentMap[i];
                 if(parentIndex != -1) {
                     // remove the parent from the result -- it is redundant information
-                    adminEntity[parentIndex] = 0;
+                    adminEntity[i] = 0;
                 }
             }
         }
